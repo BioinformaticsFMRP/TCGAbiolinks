@@ -1,0 +1,627 @@
+#' @title TCGA Download
+#'
+#' @description  
+#'   Download data of samples from TCGA specified by tumor,type,
+#'   species and platform type.
+#'
+#' @details
+#'   TCGA download retrieves and stores data of samples belonging 
+#'   to the specified cancer type and measured by the specified assay platform.      
+#'
+#' @author 
+#' Antonio Colaprico \email{antonio.colaprico@@gmail.com},
+#' Luciano Garofano \email{lucianogarofano88@@gmail.com}, 
+#' Claudia Cava \email{claud.cava@@gmail.com},
+#' Gianluca Bontempi,
+#' Michele Ceccarelli
+#'
+#' Maintainer: Antonio Colaprico \email{antonio.colaprico@@gmail.com}
+#'
+#' @param Tumor  a character string indicating the cancer type for 
+#'        which to download data. Options include ACC, BLCA, BRCA, 
+#'        CESC, COAD, DLBC, ESCA, GBM, HNSC, KICH, KIRC, KIRP, LAML, 
+#'        LGG, LIHC, LUAD, LUSC, OV, PAAD, PRAD, READ, SARC, SKCM, STAD, 
+#'        THCA, UCEC, UCS. Look at https://tcga-data.nci.nih.gov/tcga/ 
+#'        for Available Cancer Types. 
+#' @param Type 
+#' @param Species
+#' @param PlatformAndAssociatedData data frame 615 observations of 12 variables,
+#'        indicating the different characteristics of the data
+#'        e.g. tumour, type, species.  
+#' @param downloadFolder = ""
+#' @param PlatformType
+#' @param nsample number of samples to be analyzed, default all samples
+#' @param listSample  a character that indicates TCGA barcodes of the patients/samples to analyze
+#' @return
+#' TCGADownload returns a matrix with Samples in columns with barcode and probeID in rows.
+#' ProbeID and values changes with platforms.
+#' \describe{
+#' \item{humanmethylation27}{If platform is humanmethylation27 returns values as Hybridization.RE}
+#' \item{illuminahiseq_rnaseq}{If platform is illuminahiseq_rnaseq returns values as raw_counts}
+#' \item{agilentg4502a_07_3}{If platform is agilentg4502a_07_3 returns values as Hybridization.REF}
+#' \item{illuminahiseq_rnaseqv2}{If platform is illuminahiseq_rnaseqv2 returns values as raw_counts}
+#' \item{humanmethylation450}{If platform is humanmethylation450 returns values as Hybridization.REF}
+#' \item{illuminaga_mirnaseq}{If platform is illuminaga_mirnaseq returns values as read_count}
+#' \item{illuminahiseq_mirnaseq}{If platform is illuminahiseq_mirnaseq returns values as read_count}
+#' \item{genome_wide_snp_6}{If platform is genome_wide_snp_6 returns values as Segment_Mean}
+#' \item{mda_rppa_core}{If platform is mda_rppa_core returns values as Protein Expression}
+#' }
+#' @example inst/examples/example_TCGADownload.R
+#' @import RCurl httr bitops
+#' @export
+TCGADownload <- function(Tumor, Type, Species, PlatformAndAssociatedData, downloadFolder = "",PlatformType,nsample=0, listSample=0){
+  downloadFolder<-paste(downloadFolder,PlatformType,"/",sep="")
+  createDirectory(PlatformType)
+  siteTCGA <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"
+  tmp <- PlatformAndAssociatedData[toupper(PlatformAndAssociatedData$Tumor) == toupper(Tumor)
+                                   & toupper(PlatformAndAssociatedData$Type) == toupper(Type) 
+                                   & toupper(PlatformAndAssociatedData$Species) == toupper(Species)
+                                   & toupper(PlatformAndAssociatedData$Platform) == toupper(PlatformType), ]
+  
+  key1a <- paste(unique(tmp$CenterType), unique(tmp$Center), unique(tmp$Platform), sep="/")
+  Description <- paste(siteTCGA, tolower(tmp$Tumor), "/",key1a, sep="")
+  key2a <- paste("/",tmp$Folder,"/",sep="")
+  
+  if(PlatformType == "illuminaga_dnaseq"){
+    toDdl <- DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_2", KeyGrep2 = "somatic.maf")
+    toDdl <- paste(Description, key2a, toDdl, sep = "")
+    
+    x <- DownloadURL(toDdl)
+    x <- strsplit(x, "\t")
+    x <- x[-1]
+    x <- matrix(unlist(x), nrow = length(x), byrow = T)
+    colnames(x) <- x[1, ]
+    x <- x[-1, ]
+    
+    return(x)
+  }
+  
+  
+  
+  toDdl <- DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_3", KeyGrep2 = "MANIFEST.txt") 
+  toDdl <- paste(Description, key2a, toDdl, sep = "")
+  
+  
+  x <- DownloadURL(toDdl)
+  x <- sapply(strsplit(x, "  "), function(y) y[2])
+  
+  if(PlatformType == "illuminahiseq_rnaseq"){  x <- x[grep("gene.quantification", x)] }
+  if(PlatformType == "agilentg4502a_07_3"){    x <- x[grep("tcga_level3", x)]}
+  if(PlatformType == "illuminahiseq_rnaseqv2"){ x <- x[grep("rsem.genes.results", x)] }
+  if(PlatformType == "humanmethylation27"){ x <- x[grep("HumanMethylation27", x)] }
+  if(PlatformType == "humanmethylation450"){ x <- x[grep("HumanMethylation450", x)] }
+  if(PlatformType == "illuminaga_mirnaseq"){ x <- x[grep("mirna.quantification", x)] }
+  if(PlatformType == "illuminahiseq_mirnaseq"){ x <- x[grep("mirna.quantification", x)] }
+  
+  
+  if(PlatformType == "genome_wide_snp_6"){ x <- x[grep("hg19.seg", x)]
+                                           x <- x[-grep("nocnv", x)]}
+  
+  if(PlatformType == "mda_rppa_core"){  x <- x[grep("protein_expression", x)] }
+  
+  
+  
+  
+  plt <- PlatformAndAssociatedData
+  plt2 <- plt[toupper(plt$Tumor) == toupper(Tumor) & plt$Platform == PlatformType,]
+  
+  version <- gsub(Description,"",toDdl)
+  version <- gsub(key2a,"",version)
+  version <- gsub("MANIFEST.txt","",version)
+  
+  print(paste("Found ", length(x), " samples of ",Tumor, "version: ", version, "..." ))
+  samplesList <- paste(gsub("MANIFEST.txt", "", toDdl), x, sep = "")
+  
+  if (nsample!=0){
+    samplesList <- samplesList[1:nsample]
+  }
+  
+  if( listSample!=0){
+    samplesList <- samplesList[ grep(listSample,samplesList)]
+  }
+  
+  for(i in 1:length(samplesList)){
+    tmp2 <- DownloadURL(samplesList[i])
+    filename <- paste(downloadFolder, x[i], sep = "")
+    writeLines(tmp2, filename)
+    print(paste(x[i], " ... sample n. ", i, " of ", length(samplesList), sep = ""))
+  }
+  
+  lf <- list.files(downloadFolder)
+  lf1<-lf
+  lf <- paste(downloadFolder, lf, sep = "")
+  
+  tmpData <- read.delim(lf[1], stringsAsFactors = FALSE)
+  geData <- matrix(0, nrow = nrow(tmpData), ncol = length(lf))
+  
+  
+  if(PlatformType == "agilentg4502a_07_3"){
+    tmpData <- tmpData[-1, ]
+    geData <- matrix(0, nrow = nrow(tmpData), ncol = length(lf))
+    rownames(geData) <- tmpData$Hybridization.REF
+    colNames <- rep("", length(lf))
+    for(i in 1:length(lf)){
+      tmpData <- read.delim(lf[i], stringsAsFactors = FALSE)
+      colNames[i] <- colnames(tmpData)[2]
+      tmpData <- tmpData[-1, 2]
+      tmpData[which(tmpData == "null")] <- NA
+      geData[, i] <- as.numeric(tmpData)
+      print(i)
+    }
+    colnames(geData) <- substr(gsub("\\.", "-", colNames),1,16)
+  }
+  
+  if(PlatformType == "illuminahiseq_rnaseq"){
+    rownames(geData) <- tmpData$gene
+    colnames(geData) <- substr(paste("TCGA", sapply(strsplit(lf, "TCGA"), function(y) y[2]), sep = ""), 1, 28)
+    for(i in 1:length(lf)){
+      tmpData <- read.delim(lf[i], stringsAsFactors = FALSE)
+      expr <- tmpData$raw_counts
+      geData[, i] <- expr
+      print(i)
+    }
+  }
+  
+  if(PlatformType == "illuminahiseq_rnaseqv2"){
+    rownames(geData) <- tmpData$gene_id
+    path2 <- paste(Description, key2a,plt2$FileName,sep="")
+    xpath <- DownloadURL(path2)
+    nc<-length(unlist(strsplit(xpath[1], "\t")))
+    xmat <- matrix( unlist(strsplit(xpath, "\t") ), ncol=nc,byrow=T)
+    colnames(xmat)<-gsub(" ","_",xmat[1,])
+    
+    xmat<-xmat[-1,]
+    xmat <- as.data.frame(xmat,stringsAsFactors=F)
+    xmat2 <- xmat[grep("rsem.genes.results",xmat$Derived_Data_File),]
+    xmat2 <- xmat[sapply(lf1,function(y) grep(y, xmat$Derived_Data_File)),]
+    
+    colnames(geData)<-xmat2$'Comment_[TCGA_Barcode]'
+    
+    for(i in 1:length(lf)){
+      tmpData <- read.delim(lf[i], stringsAsFactors = FALSE)
+      expr <- tmpData$raw_count 
+      geData[, i] <- expr
+      print(i)
+    }
+  }
+  
+  
+  
+  if(PlatformType == "humanmethylation27" || PlatformType == "humanmethylation450" ){
+    tmpData <- tmpData[-1, ]
+    geData <- matrix(0, nrow = nrow(tmpData), ncol = length(lf))
+    rownames(geData) <- tmpData$Hybridization.REF
+    colNames <- rep("", length(lf))
+    for(i in 1:length(lf)){
+      tmpData <- read.delim(lf[i], stringsAsFactors = FALSE)
+      colNames[i] <- colnames(tmpData)[2]
+      tmpData <- tmpData[-1, 2]
+      tmpData[which(tmpData == "null")] <- NA
+      geData[, i] <- as.numeric(tmpData)
+      print(i)
+    }
+    colnames(geData) <- substr(gsub("\\.", "-", colNames),1,28)
+  }
+  
+  
+  
+  if(PlatformType == "illuminaga_mirnaseq" || PlatformType == "illuminahiseq_mirnaseq"){
+    rownames(geData) <- tmpData$miRNA_ID
+    colnames(geData) <- substr(paste("TCGA", sapply(strsplit(lf, "TCGA"), function(y) y[2]), sep = ""), 1, 28)
+    for(i in 1:length(lf)){
+      tmpData <- read.delim(lf[i], stringsAsFactors = FALSE)
+      expr <- tmpData$read_count
+      geData[, i] <- expr
+      print(i)
+    }
+  }
+  
+  if(PlatformType == "mda_rppa_core"){
+    tmpData <- tmpData[-1, ]
+    geData <- matrix(0, nrow = nrow(tmpData), ncol = length(lf))
+    rownames(geData) <- tmpData$Sample.REF
+    for(i in 1:length(lf)){
+      tmpData <- read.delim(lf[i], stringsAsFactors = FALSE)
+      tmpData <- tmpData[-1, 2]
+      tmpData[which(tmpData == "null")] <- NA
+      geData[, i] <- as.numeric(tmpData)
+      print(i)
+    }
+    colNames <- gsub(".txt", "", sapply(strsplit(lf1, "Level_3."), function(x) x[2]))
+    
+    toDdl <- DownloaDmageTAB_sdrf(Description, key2a, KeyGrep1 = "mage-tab", KeyGrep2 = "array_design.txt")
+    toDdl <- paste(Description, key2a, toDdl, sep = "")
+    x <- DownloadURL(toDdl)
+    x <- strsplit(x, "\t")
+    x <- matrix(unlist(x), nrow = length(x), byrow = T)
+    x <- gsub("\r", "", x)
+    colnames(x) <- x[1, ]
+    x <- x[-1, ]
+    rownames(x) <- x[, "UUID"]
+    
+    colnames(geData) <- x[colNames, "Sample.barcode"]
+  }
+  
+  
+  if(PlatformType == "genome_wide_snp_6"){
+    
+    path2 <- paste(Description, key2a,plt2$FileName,sep="")
+    xpath <- DownloadURL(path2)
+    nc<-length(unlist(strsplit(xpath[1], "\t")))
+    xmat <- matrix( unlist(strsplit(xpath, "\t") ), ncol=nc,byrow=T)
+    colnames(xmat)<-gsub(" ","_",xmat[1,])
+    
+    xmat<-xmat[-1,]
+    xmat <- as.data.frame(xmat,stringsAsFactors=F)
+    lf2<-gsub("hg19","hg18",lf1)
+    lf3 <- intersect(lf2, xmat$Derived_Array_Data_File)
+    
+    xmat2 <- xmat[sapply(lf3,function(y) grep(y, xmat$Derived_Array_Data_File)),]
+    #grep(lf2[5], xmat$Derived_Array_Data_File)
+    
+    geData <- matrix(0, nrow = nrow(tmpData), ncol = length(lf3))
+    colnames(geData)<-xmat2$'Comment_[TCGA_Barcode]'
+    
+    # rownames(geData) <- tmpData$gene
+    # colnames(geData) <- substr(paste("TCGA", sapply(strsplit(lf, "TCGA"), function(y) y[2]), sep = ""), 1, 16)
+    for(i in 1:length(lf)){
+      tmpData <- read.delim(lf[i], stringsAsFactors = FALSE)
+      expr <- tmpData$Segment_Mean
+      geData[, i] <- expr
+      print(i)
+    }
+  }
+  
+  
+  
+  return(geData)
+  
+}
+
+#' @title TCGA Download
+#'
+#' @description  TCGA Download
+#'
+#' @param Tumor
+#' @param PlatformType
+#' @param PlatformAndAssociatedData
+#' @import RCurl httr bitops
+#' @export
+TCGAVersion <- function(Tumor, PlatformType,PlatformAndAssociatedData){
+  #downloadFolder<-paste(downloadFolder,PlatformType,"/",sep="")
+  #createDirectory(PlatformType)
+  siteTCGA <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"
+  tmp <- PlatformAndAssociatedData[toupper(PlatformAndAssociatedData$Tumor) == toupper(Tumor)
+                                   & toupper(PlatformAndAssociatedData$Platform) == toupper(PlatformType), ]
+  
+  key1a <- paste(unique(tmp$CenterType), unique(tmp$Center), unique(tmp$Platform), sep="/")
+  Description <- paste(siteTCGA, tolower(tmp$Tumor), "/",key1a, sep="")
+  key2a <- paste("/",tmp$Folder,"/",sep="")
+  
+  #toDdl <- DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_3", KeyGrep2 = "MANIFEST.txt") 
+  #toDdl <- paste(Description, key2a, toDdl, sep = "")
+  #x <- DownloadURL(toDdl)
+  #x <- sapply(strsplit(x, "  "), function(y) y[2])
+  
+  toDdl <- paste(Description, key2a, sep = "")
+  x <- DownloadURL(toDdl)
+  xver <- x[grep("Level_3",x)]
+  xver <- as.matrix(xver[-grep("tar.gz",xver)])
+  xverMat <- as.data.frame(matrix(0,nrow(xver),2))
+  colnames(xverMat)<-c("Version","Date")
+  
+  for( i in 1: nrow(xverMat)){
+    xtmp1 <- xver[i] 
+    xver2 <- as.matrix(unlist(strsplit(xtmp1, "  ")))
+    timeVer <- xver2[grep(":",xver2)]
+    Vers <- xver2[grep("Level_3",xver2)]
+    Vers  <- as.matrix(sapply(strsplit(Vers, ">"), function(y) y[2]))
+    Vers  <- as.matrix(sapply(strsplit(Vers, "<"), function(y) y[1]))
+    xverMat$Version[i]<- Vers
+    xverMat$Date[i]<-timeVer
+  }
+  
+  
+  xverMat <- cbind(xverMat, Samples = matrix(0, nrow(xverMat),1), SizeMbyte = matrix(0, nrow(xverMat),1))
+  print(paste("Found ", nrow(xverMat), " Version of ", PlatformType,sep=""))
+  
+  for( i in 1: nrow(xverMat)){
+    
+    todown1<- paste(Description,key2a,xverMat$Version[i],sep="")
+    print(paste("Version ", i , " of ", nrow(xverMat), " ", xverMat$Version[i], " ...done",sep=""))
+    x <- DownloadURL(todown1)
+    
+    if(PlatformType == "illuminahiseq_rnaseq"){  x <- x[grep("gene.quantification", x)] }
+    if(PlatformType == "agilentg4502a_07_3"){    x <- x[grep("tcga_level3", x)]}
+    if(PlatformType == "illuminahiseq_rnaseqv2"){ x <- x[grep("rsem.genes.results", x)] }
+    if(PlatformType == "humanmethylation27"){ x <- x[grep("HumanMethylation27", x)] }
+    if(PlatformType == "humanmethylation450"){ x <- x[grep("HumanMethylation450", x)] }
+    if(PlatformType == "illuminaga_mirnaseq"){ x <- x[grep("mirna.quantification", x)] }
+    if(PlatformType == "genome_wide_snp_6"){ x <- x[grep("hg19.seg", x)]}
+    
+    x2<- sapply(strsplit(x, ":"), function(y) y[2])
+    x3<- sapply(strsplit(x2, " "), function(y) y[3])
+    sizeK <- x3[grep("K",x3)]
+    sizeM <- x3[grep("M",x3)]
+    sizeK_1 <- as.numeric(gsub("K","",sizeK))
+    sizeM_1 <- as.numeric(gsub("M","",sizeM))
+    sizeK_2<- round(sum(sizeK_1)/1000)
+    sizeM_2<- sum(sizeM_1)
+    sizeTot<- sizeK_2+sizeM_2
+    xverMat$SizeMbyte[i]<-sizeTot
+    xverMat$Samples[i]<-length(x3)
+    
+  }
+  return(xverMat)
+}
+
+#' @title TCGA Query
+#'
+#' @description  TCGA Query
+#'
+#' @param Tumor -  tumor code
+#' @param siteTCGA - Plataform
+#' @export
+TCGAQuery <- function(Tumor,siteTCGA){
+  
+  TumorData <- matrix(0, 1, 8)
+  colnames(TumorData) <- c("Total", "Exome", "SNP", "Methylation", "mRNA", "miRNA", "Clinical","Protein")
+  rownames(TumorData) <- Tumor
+  LevelsPlatforms <- c("Level_1", "Level_2", "Level_3")
+  
+  #for ( i in 2: ncol(TumorData)){
+  
+  
+  i<-5
+  Type <-  colnames(TumorData)[i]
+  tmp <- PlatformAndAssociatedData[PlatformAndAssociatedData$Type%in% Type,]
+  
+  tmp2a <- tmp[ grep(tolower(Tumor),tmp$Tumor),]
+  
+  if( nrow(tmp2a)!=0){
+    
+    Species <- unique(tmp2a$Species)
+    
+    
+    
+    for( j in 1:length(Species)){
+      SpecieCurr <- Species[j]
+      tmp3 <- tmp2a[tmp2a$Species %in% SpecieCurr, ]
+      Centers <- unique(tmp3$Center)
+      
+      for( k in 1:length(Centers)){
+        CenterCurr <- Centers[k]
+        tmp3b <- tmp3[tmp3$Center %in% CenterCurr,]
+        
+        Platforms <- unique(tmp3b$Platform)
+        
+        for( q in 1:length(Platforms)){
+          
+          PlatformCurr <- Platforms[q]
+          tmp4 <- tmp3b[tmp3b$Platform %in% PlatformCurr, ]
+          
+          key1<- paste(unique(tmp4$CenterType), unique(tmp4$Center), unique(tmp4$Platform), sep="/")
+          Description <- paste(siteTCGA, tolower(Tumor), "/",key1, sep="")
+          
+          if( length(grep("agilentg4502a_07",unique(tmp4$Platform))) > 0   || unique(tmp4$Platform) ==  "ht_hg-u133a" || unique(tmp4$Platform) ==  "hg-u133_plus_2" || unique(tmp4$Platform) ==  "illuminaga_mrna_dge" ){
+            Description <- paste(Description, "/transcriptome/", sep = "")
+            Description_i_ord <- paste(Description, "?C=M;O=D", sep = "")
+            x <- DownloadURL(Description_i_ord)
+            
+            
+            
+            for( w in 1:length(LevelsPlatforms)){
+              
+              siteNewLevel <- FindGrepSite(x,Key=LevelsPlatforms[w],Description)
+              tmp2 <- DownloadManifest(siteNewLevel)
+              
+              
+              if(length(grep("agilentg4502a_07",unique(tmp4$Platform))) > 0){
+                NumberSample <- length(unique(substr(tmp2, 1, 23)))
+              }
+              
+              if(unique(tmp4$Platform) ==  "ht_hg-u133a"){
+                NumberSample <- length(unique(substr(tmp2, 44, 58)))
+              }
+              
+              if(unique(tmp4$Platform) ==  "hg-u133_plus_2" || unique(tmp4$Platform) ==  "illuminaga_mrna_dge"){
+                NumberSample <- length(unique(substr(tmp2, 1, 16)))
+              }
+              
+              message <- paste(Type, " ", SpecieCurr, " ",   CenterCurr, " ", unique(tmp4$Platform) , " " ,LevelsPlatforms[w] ,  " .n samples ", NumberSample, sep="")
+              print(message)
+              
+            } #end for LevelsPlatform
+          } #end platform Exp-Gene
+          
+          
+          if(unique(tmp4$Platform) ==  "huex-1_0-st-v2"){
+            Description <- paste(Description, "/exon/", sep = "")
+            Description_i_ord <- paste(Description, "?C=M;O=D", sep = "")
+            x <- DownloadURL(Description_i_ord)
+            siteNewLevel <- FindGrepSite(x,Key="mage-tab",Description)
+            siteNewLevelSdrf <- DownloadSdrf(siteNewLevel)
+            tmp2 <-  siteNewLevelSdrf$Comment..TCGA.Barcode.
+            tmp2 <- tmp2[grep("TCGA",tmp2)]
+            NumberSample <- length(unique(substr(tmp2, 1, 16)))
+            message <- paste(Type, " ", SpecieCurr, " ",   CenterCurr, " ", unique(tmp4$Platform) , " " , " .n samples ", NumberSample, sep="")
+            print(message)
+          }
+          
+          
+          
+          if(unique(tmp4$Platform) ==  "illuminahiseq_rnaseq" || unique(tmp4$Platform) ==  "illuminaga_rnaseq"){
+            Description <- paste(Description, "/rnaseq/", sep = "")
+            Description_i_ord <- paste(Description, "?C=M;O=D", sep = "")
+            x <- DownloadURL(Description_i_ord)
+            siteNewLevel <- FindGrepSite(x,Key=LevelsPlatforms[3],Description)
+            tmp2 <- DownloadManifest(siteNewLevel)
+            NumberSample <- length(unique(substr(tmp2, 13, 29)))
+            message <- paste(Type, " ", SpecieCurr, " ",   CenterCurr, " ", unique(tmp4$Platform) , " " ,LevelsPlatforms[3] ,  " .n samples ", NumberSample, sep="")
+            print(message)
+          }
+          
+          
+          
+          if(unique(tmp4$Platform) ==  "illuminahiseq_rnaseqv2" || unique(tmp4$Platform) ==  "illuminaga_rnaseqv2" ){
+            Description <- paste(Description, "/rnaseqv2/", sep = "")
+            Description_i_ord <- paste(Description, "?C=M;O=D", sep = "")
+            x <- DownloadURL(Description_i_ord)
+            siteNewLevel <- FindGrepSite(x,Key=LevelsPlatforms[3],Description)
+            tmp2 <- DownloadManifest(siteNewLevel)
+            
+            NumberSample <- length(unique(substr(tmp2, 13, 29)))
+            message <- paste(Type, " ", SpecieCurr, " ",   CenterCurr, " ", unique(tmp4$Platform) , " " ,LevelsPlatforms[3] ,  " .n samples ", NumberSample, sep="")
+            print(message)
+          }
+          
+          
+          if(unique(tmp4$Platform) ==  "illuminahiseq_totalrnaseqv2"){
+            Description <- paste(Description, "/totalrnaseqv2/", sep = "")
+            Description_i_ord <- paste(Description, "?C=M;O=D", sep = "")
+            x <- DownloadURL(Description_i_ord)
+            siteNewLevel <- FindGrepSite(x,Key=LevelsPlatforms[3],Description)
+            tmp2 <- DownloadManifest(siteNewLevel)
+            
+            NumberSample <- length(unique(substr(tmp2, 9, 44)))
+            message <- paste(Type, " ", SpecieCurr, " ",   CenterCurr, " ", unique(tmp4$Platform) , " " ,LevelsPlatforms[3] ,  " .n samples ", NumberSample, sep="")
+            print(message)
+          }
+          
+          
+          
+        } # end platform
+      } #end for Centers
+    } # end for species
+    
+    
+    
+    #}
+  }
+  
+}
+
+FindGrepSite <- function(x,Key,Description){
+  x2 <- x[grep(Key, x)]
+  
+  if( Key != "sdrf"){ x2 <- x2 [- grep("tar.gz", x2)][1] }
+  
+  
+  x2  <- as.matrix(sapply(strsplit(x2, ">"), function(y) y[2]))
+  x2  <- as.matrix(sapply(strsplit(x2, "<"), function(y) y[1]))
+  site2 <- paste(Description, x2,sep="" )
+  return(site2)
+}
+
+DownloadURL <- function(Site){
+  Site <- URLencode(Site)
+  
+  if(interactive() && ("ssl" %in% names(curlVersion()$features)) && url.exists(Site)) {
+    x = tryCatch(getURL(Site, verbose = F, ftp.use.epsv = TRUE, dirlistonly = TRUE,ssl.verifypeer = FALSE ), error = function(e) { 
+      getURL(Site, verbose = F, ftp.use.epsv = TRUE, dirlistonly = TRUE,ssl.verifypeer = FALSE) })
+  }
+  x <- unlist(strsplit(x,"\n"))
+  return(x)
+}
+
+DownloadManifest <- function(siteNewLevel){
+  site3 <- paste(siteNewLevel, "MANIFEST.txt",sep="")
+  x <- DownloadURL(site3)
+  writeLines(x, "x2.txt" )
+  tmp2 <- read.table("x2.txt", quote="\"", stringsAsFactors = F)[,2]
+  tmp2 <- tmp2[ nchar(tmp2) > 20 ]
+  return(tmp2)
+}
+
+DownloadSdrf <- function(siteNewLevel){
+  x <- DownloadURL(siteNewLevel)
+  x2 <- x[grep("sdrf",x)]
+  x2  <- as.matrix(sapply(strsplit(x2, ">"), function(y) y[2]))
+  x2  <- as.matrix(sapply(strsplit(x2, "<"), function(y) y[1]))
+  site3 <- paste(siteNewLevel, x2,sep="" )
+  
+  x <- DownloadURL(site3)
+  writeLines(x, "x2.txt" )
+  tmp2 <- as.data.frame(read.delim("x2.txt",stringsAsFactors = F))
+  return(tmp2)
+}
+
+DownloadTypeFile <- function(siteNewLevel,keyDown){
+  x <- DownloadURL(siteNewLevel)
+  x2 <- x[grep(keyDown,x)]
+  x2  <- as.matrix(sapply(strsplit(x2, ">"), function(y) y[2]))
+  x2  <- as.matrix(sapply(strsplit(x2, "<"), function(y) y[1]))
+  site3 <- paste(siteNewLevel, x2,sep="" )
+  
+  x <- DownloadURL(site3)
+  writeLines(x, "x2.txt" )
+  tmp2 <- as.data.frame(read.delim("x2.txt",stringsAsFactors = F))
+  return(tmp2)
+}
+
+DownloaDmageTAB <- function(Description,TumorDataList, keySpecies,startK, stopK, typeProtein = F ){
+  Description2 <- paste(Description, keySpecies, sep = "")
+  Description_i_ord <- paste(Description2, "?C=M;O=D", sep = "")
+  x <- DownloadURL(Description_i_ord)
+  if(length(x)!=10){
+    siteNewLevel <- FindGrepSite(x,Key="mage-tab",Description2)
+    siteNewLevelSdrf <- DownloadSdrf(siteNewLevel)
+    tmp2 <-  siteNewLevelSdrf$Comment..TCGA.Barcode.
+    
+    if(typeProtein==T){
+      siteNewLevelDesign <- DownloadTypeFile(siteNewLevel,"design")
+      tmp2 <- siteNewLevelDesign$Sample.description
+    }
+    
+    tmp2 <- tmp2[grep("TCGA",tmp2)]
+    NumberSample <- length(unique(substr(tmp2, startK, stopK)))
+    msgOUT <-  paste(Type, " ", SpecieCurr, " ",   CenterCurr, " ", unique(tmp4$Platform) , " " ,  " .n samples ", NumberSample, sep="")
+    print(msgOUT)
+    SampleTmp <- unique(substr(tmp2, startK, stopK))
+    idx<- which(names(TumorDataList) == unique(tmp4$Platform))
+    TumorDataList[[idx]] <- SampleTmp
+  }
+  return(TumorDataList)
+}
+
+DownloaDmageTAB_sdrf <- function(Description,keySpecies,KeyGrep1 = "mage-tab", KeyGrep2 = "sdrf"){
+  Description2 <- paste(Description, keySpecies, sep = "")
+  Description_i_ord <- paste(Description2, "?C=M;O=D", sep = "")
+  x <- DownloadURL(Description_i_ord)
+  if(length(x)!=10){
+    siteNewLevel <- FindGrepSite(x,Key=KeyGrep1,Description2)
+    x <- DownloadURL(siteNewLevel)
+    x2 <- x[grep(KeyGrep2,x)]
+    
+    x2  <- as.matrix(sapply(strsplit(x2, ">"), function(y) y[2]))
+    x2  <- as.matrix(sapply(strsplit(x2, "<"), function(y) y[1]))
+    site3 <- paste(siteNewLevel, x2,sep="" )
+    #site4 <- paste(keySpecies,unlist(strsplit(site3,keySpecies))[2],sep="")
+    site4 <- unlist(strsplit(site3,keySpecies))[2]
+    
+    print(site4)
+    return(site4)
+  } else{return("")}
+  
+}
+
+#' @title Creates a directory
+#'
+#' @description Internal use only.
+#'
+#' @param base directory path
+#' @keywords internal
+createDirectory <- function(base){
+  i="";
+  while(file.exists(paste0(base, i))){
+    if(i==""){
+      i=1;
+    }else{
+      i=i+1;
+    }
+  }
+  toDir = paste0(base, i)
+  dir.create(toDir)
+  
+  toDir
+}

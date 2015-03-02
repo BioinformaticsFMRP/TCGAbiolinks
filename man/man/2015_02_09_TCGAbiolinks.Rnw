@@ -1,0 +1,652 @@
+\documentclass[a4paper]{article}
+\title{Network inference TCGA biolinks}
+\author{A. Colaprico - L. Garofano}
+\usepackage{longtable}
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\maketitle
+In this document we report some preliminary results in TCGA biolinks project.
+
+<<STEP 0 Platform TCGA , eval=FALSE, echo = FALSE >>=
+
+siteDataPortal <- "https://tcga-data.nci.nih.gov/tcga/dataAccessMatrix.htm"
+x <- getURL(siteDataPortal)
+x <- unlist(strsplit(x,"\n"))
+
+# tumor
+pos1 <- grep("Select a disease:",x)
+pos2 <- grep("Data Type:",x)
+x2 <- x[pos1:pos2]
+tmp<- grep("<option value",x2)
+x2<-x2[tmp+1]
+tumor <- as.matrix(sapply(strsplit(x2, ">"), function(y) y[2]))
+
+# Data Type:
+pos1 <- grep("Data Type:",x)
+pos2 <- grep("Batch Number:",x)
+x2 <- x[pos1:pos2]
+x2 <- x2[grep("<option value",x2)]
+x2 <- x2[-1]
+DataType <- as.matrix(sapply(strsplit(x2, ">"), function(y) y[2]))
+
+# Platforms
+pos1 <- grep("Center/Platform",x)
+pos2 <- grep("Sample:",x)
+x2 <- x[pos1:pos2]
+x2 <- x2[grep("<option value",x2)]
+x2 <- x2[-1]
+Platforms<- as.matrix(sapply( strsplit(x2, ">"), function(y) y[2]))
+
+tmp1 <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/gbm/bcr/intgen.org/"
+x <- getURL(tmp1)
+
+for( i in 1: nrow(tumor)){
+  currentTumor <- tumor[i]
+  url <- paste( tolower( ))
+  
+}
+
+
+
+@
+<<STEP 1 Table TCGA part 1, eval=FALSE, echo = FALSE>>=
+ProjectFolder <- "/storage/ocfs2_vol1/PUBLIC/TCGAportal"
+setwd(ProjectFolder)
+#searchResult <- as.data.frame(read.delim("/storage/ocfs2_vol1/PUBLIC/TCGAportal/searchResult01_05.txt",stringsAsFactors =F))
+#searchResultBRCA <- searchResult[searchResult$Disease %in% "BRCA",]
+
+setwd("./SearchFile")
+tmp <- list.files()
+CompleteSearch <- NULL
+
+for( i in 1:length(tmp)){
+  tmp1 <- as.data.frame(read.delim(tmp[i],stringsAsFactors =F))
+CompleteSearch <- rbind(CompleteSearch, tmp1)
+}
+
+save(CompleteSearch, file = "TCGA_CompleteSearch.RData")
+@
+<<STEP temp 1 RNASeq , eval=FALSE, echo = FALSE>>=
+Tumor <- "UCEC"
+setwd("/storage/ocfs2_vol1/PUBLIC/TCGAportal")
+
+siteTCGA <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"
+
+#CenterCode <- as.data.frame(read.xlsx2("centerCode.xlsx",1,stringsAsFactors =F))
+
+#TumorData <- matrix(0, 1, 7)
+#colnames(TumorData) <- c("Total", "Exome", "SNP", "Methylation", "mRNA", "miRNA", "Clinical")
+#rownames(TumorData) <- Tumor 
+
+#TumorTableSamples <- CompleteSearch[CompleteSearch$Disease %in%  Tumor,]
+#TumorTableSamples <- TumorTableSamples[TumorTableSamples$Access.Tier %in%  "Open-Access",]
+# mRNA --> 
+# RNASeq
+# UNC
+
+key1<- "/cgcc/unc.edu/illuminaga_rnaseq/rnaseq/"
+Description <- paste(siteTCGA, tolower(Tumor), key1, sep="")
+Description_i_ord <- paste(Description, "?C=M;O=D", sep = "")
+
+if(interactive() && ("ssl" %in% names(curlVersion()$features)) && url.exists(Description_i_ord)) {
+      x = tryCatch(getURL(Description_i_ord, verbose = F, ftp.use.epsv = TRUE, dirlistonly = TRUE,ssl.verifypeer = FALSE ), error = function(e) { 
+        getURL(Description_i_ord, verbose = F, ftp.use.epsv = TRUE, dirlistonly = TRUE,ssl.verifypeer = FALSE) })
+    }
+x <- unlist(strsplit(x,"\n"))
+
+x2 <- x[grep("Level", x)]
+x2 <- x2 [- grep("tar.gz", x2)][1]
+x2  <- as.matrix(sapply(strsplit(x2, ">"), function(y) y[2]))
+x2  <- as.matrix(sapply(strsplit(x2, "<"), function(y) y[1]))
+site2 <- paste(Description, x2,sep="" )
+
+site3 <- paste(site2, "MANIFEST.txt",sep="")
+if(interactive() && ("ssl" %in% names(curlVersion()$features)) && url.exists(site3)) {
+      x = tryCatch(getURL(site3, verbose = F, ftp.use.epsv = TRUE, dirlistonly = TRUE,ssl.verifypeer = FALSE ), error = function(e) { 
+        getURL(site3, verbose = F, ftp.use.epsv = TRUE, dirlistonly = TRUE,ssl.verifypeer = FALSE) })
+    }
+writeLines(x, "x2.txt" )
+tmp2 <- read.table("x2.txt", quote="\"", stringsAsFactors = F)
+tmp2 <- tmp2 [grep("UNCID", tmp2[,2]),2]
+tmp2 <- as.matrix(sapply(strsplit(tmp2, ".",fixed=T), function(y) y[2]))
+
+NumberSample <- length(unique(substr(tmp2, 1, 12)))
+
+
+@
+<<STEP temp 2 BI Mutation Calling , eval=FALSE, echo = FALSE>>=
+Tumor <- "LUSC"
+siteTCGA <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"
+
+CenterCode <- as.data.frame(read.xlsx2("centerCode.xlsx",1,stringsAsFactors =F))
+
+TumorData <- matrix(0, 1, 7)
+colnames(TumorData) <- c("Total", "Exome", "SNP", "Methylation", "mRNA", "miRNA", "Clinical")
+rownames(TumorData) <- Tumor 
+
+
+TumorTableSamples <- CompleteSearch[CompleteSearch$Disease %in%  Tumor,]
+TumorTableSamples <- TumorTableSamples[TumorTableSamples$Access.Tier %in%  "Open-Access",]
+# Exome --> 
+# BI Mutation Calling
+# UNC
+
+key1<- "/gsc/broad.mit.edu/illuminaga_dnaseq/mutations/"
+Description <- paste(siteTCGA, tolower(Tumor), key1, sep="")
+Description_i_ord <- paste(Description, "?C=M;O=D", sep = "")
+
+if(interactive() && ("ssl" %in% names(curlVersion()$features)) && url.exists(Description_i_ord)) {
+      x = tryCatch(getURL(Description_i_ord, verbose = F, ftp.use.epsv = TRUE, dirlistonly = TRUE,ssl.verifypeer = FALSE ), error = function(e) { 
+        getURL(Description_i_ord, verbose = F, ftp.use.epsv = TRUE, dirlistonly = TRUE,ssl.verifypeer = FALSE) })
+    }
+x <- unlist(strsplit(x,"\n"))
+
+x2 <- x[grep("IlluminaGA_DNASeq", x)]
+x2 <- x2 [- grep("tar.gz", x2)][1]
+x2  <- as.matrix(sapply(strsplit(x2, ">"), function(y) y[2]))
+x2  <- as.matrix(sapply(strsplit(x2, "<"), function(y) y[1]))
+site2 <- paste(Description, x2,sep="" )
+
+
+if(interactive() && ("ssl" %in% names(curlVersion()$features)) && url.exists(site2)) {
+      x = tryCatch(getURL(site2, verbose = F, ftp.use.epsv = TRUE, dirlistonly = TRUE,ssl.verifypeer = FALSE ), error = function(e) { 
+        getURL(site2, verbose = F, ftp.use.epsv = TRUE, dirlistonly = TRUE,ssl.verifypeer = FALSE) })
+    }
+x <- unlist(strsplit(x,"\n"))
+x2 <- x[grep("maf",x)]
+x2  <- as.matrix(sapply(strsplit(x2, ">"), function(y) y[2]))
+x2  <- as.matrix(sapply(strsplit(x2, "<"), function(y) y[1]))
+
+site3 <- paste(site2, x2,sep="" )
+
+if(interactive() && ("ssl" %in% names(curlVersion()$features)) && url.exists(site3)) {
+      x = tryCatch(getURL(site3, verbose = F, ftp.use.epsv = TRUE, dirlistonly = TRUE,ssl.verifypeer = FALSE ), error = function(e) { 
+        getURL(site3, verbose = F, ftp.use.epsv = TRUE, dirlistonly = TRUE,ssl.verifypeer = FALSE) })
+    }
+writeLines(x, paste(x2,".txt",sep="") )
+tmp2 <- read.delim(paste(x2,".txt",sep=""),  skip = 4, stringsAsFactors = F)
+length(unique(substr(tmp2$Tumor_Sample_Barcode, 1, 12)))
+
+tmp <- TumorTableSamples[TumorTableSamples$Data.Category %in% "DNA Mutation","Center"]
+CenterCodeTmp <- CenterCode[CenterCode$Short.Name %in% tmp,]
+key <- "gsc/broad.mit.edu/illuminaga_dnaseq/mutations"
+
+@
+<<STEP temp 3 Platforms, eval=FALSE, echo = FALSE >>=
+if( length(grep("agilentg4502a_07",unique(tmp4$Platform))) > 0   || unique(tmp4$Platform) ==  "ht_hg-u133a" || unique(tmp4$Platform) ==  "hg-u133_plus_2" || unique(tmp4$Platform) ==  "illuminaga_mrna_dge"  )
+{  TumorDataList <- DownloaDmageTAB(Description,TumorDataList, "/transcriptome/",1, 16) } #end platform Exp-Gene
+if(unique(tmp4$Platform) ==  "huex-1_0-st-v2"){   TumorDataList <- DownloaDmageTAB(Description,TumorDataList, "/exon/",1, 16) }
+if(unique(tmp4$Platform) ==  "illuminahiseq_rnaseq" || unique(tmp4$Platform) ==  "illuminaga_rnaseq"){    TumorDataList <- DownloaDmageTAB(Description,TumorDataList, "/rnaseq/",1, 16) }
+if(unique(tmp4$Platform) ==  "illuminahiseq_rnaseqv2" || unique(tmp4$Platform) ==  "illuminaga_rnaseqv2" ){   TumorDataList <- DownloaDmageTAB(Description,TumorDataList, "/rnaseqv2/",1, 16) }
+if(unique(tmp4$Platform) ==  "illuminahiseq_totalrnaseqv2"){   TumorDataList <- DownloaDmageTAB(Description,TumorDataList, "/totalrnaseqv2/",1, 16) }
+if(unique(tmp4$Platform) ==  "illuminahiseq_mirnaseq" || unique(tmp4$Platform) ==  "illuminaga_mirnaseq"){   TumorDataList <- DownloaDmageTAB(Description,TumorDataList, "/mirnaseq/",1, 16) }
+if(unique(tmp4$Platform) ==  "h-mirna_8x15k" || unique(tmp4$Platform) ==  "h-mirna_8x15kv2"){   TumorDataList <- DownloaDmageTAB(Description,TumorDataList, "/mirna/",1, 16) }
+if(unique(tmp4$Platform) ==  "humanmethylation450" || unique(tmp4$Platform) ==  "humanmethylation27"  || unique(tmp4$Platform) ==  "illuminadnamethylation_oma002_cpi"  || unique(tmp4$Platform) ==  "illuminadnamethylation_oma003_cpi" )
+{   TumorDataList <- DownloaDmageTAB(Description,TumorDataList, "/methylation/",1, 16) }
+if(unique(tmp4$Platform) ==  "illuminahiseq_wgbs"){   TumorDataList <- DownloaDmageTAB(Description,TumorDataList, "/bisulfiteseq/",1, 16) }
+if(unique(tmp4$Platform) ==  "human1mduo" || unique(tmp4$Platform) ==  "genome_wide_snp_6" || unique(tmp4$Platform) ==  "humanhap550" )
+{   TumorDataList <- DownloaDmageTAB(Description,TumorDataList, "/snp/",1, 16) }
+if(unique(tmp4$Platform) ==  "hg-cgh-244a" || unique(tmp4$Platform) ==  "hg-cgh-415k_g4124a" || unique(tmp4$Platform) ==  "cgh-1x1m_g4447a"  || unique(tmp4$Platform) ==  "illuminahiseq_dnaseqc" )
+{   TumorDataList <- DownloaDmageTAB(c,TumorDataList, "/cna/",1, 16) }
+if(unique(tmp4$Platform) ==  "mda_rppa_core"){   TumorDataList <- DownloaDmageTAB(Description,TumorDataList, "/protein_exp/",1, 16,typeProtein=T) }
+
+@
+<<STEP 2 Complete Download TCGA, echo=F, eval=T >>=
+library(xlsx)
+source('/storage/ocfs2_vol1/PUBLIC/LA_functions/DIFF_network_functions25.R')
+setwd("/storage/ocfs2_vol1/PUBLIC/TCGAportal")
+PlatformAndAssociatedData <- as.data.frame(read.xlsx2("PlatformMatUpdated.xlsx",1,stringsAsFactors =F))
+
+PlatformAndAssociatedData[PlatformAndAssociatedData$Tumor %in% c("brca","gbm"),]
+
+PlatformAndAssociatedData <- cbind(PlatformAndAssociatedData, Folder="", Key1="", Key2="", FileName = "",stringsAsFactors =F)
+#tmp <- PlatformAndAssociatedData
+#tmp <-  tmp[!duplicated(tmp$Platform),]
+#tmp <- tmp[order(tmp$Type,decreasing=F),]
+
+
+
+selectedSpecies <- c("mRNA", "miRNA", "Protein", "SNP", "Methylation", "Exome")
+#selectedSpecies <- "Clinical"
+
+
+PlatformAndAssociatedData <- PlatformAndAssociatedData[PlatformAndAssociatedData$Type %in% selectedSpecies,]
+PlatformAndAssociatedData <-  PlatformAndAssociatedData[-which(PlatformAndAssociatedData$Platform %in% "abi"),]
+PlatformAndAssociatedData <-  PlatformAndAssociatedData[-which(PlatformAndAssociatedData$Platform %in% "RNASeq"),]
+PlatformAndAssociatedData <-  PlatformAndAssociatedData[-which(PlatformAndAssociatedData$Platform %in% "miRNASeq"),]
+
+
+
+
+
+#TCGAQuery("BRCA",PlatformAndAssociatedData)
+
+
+
+@
+<<STEP 3 Download all species TCGA, echo=F, eval =F >>=
+source('/storage/ocfs2_vol1/PUBLIC/LA_functions/DIFF_network_functions25.R')
+setwd("/storage/ocfs2_vol1/PUBLIC/TCGAportal")
+PlatformAndAssociatedData <- as.data.frame(read.xlsx2("PlatformMatUpdated.xlsx",1,stringsAsFactors =F))
+PlatformAndAssociatedData <- cbind(PlatformAndAssociatedData, Folder="", Key1="", Key2="",KeySkip = 0, nameCol = "", FileName = "",stringsAsFactors =F)
+
+tmp <- PlatformAndAssociatedData_Clinical
+tmp <-  tmp[!duplicated(tmp$Platform),]
+tmp <- tmp[order(tmp$Center,decreasing=F),]
+
+#selectedSpecies <- c("mRNA", "miRNA", "Protein", "SNP", "Methylation", "Exome")
+selectedSpecies <- "Clinical"
+
+PlatformAndAssociatedData <- PlatformAndAssociatedData[PlatformAndAssociatedData$Type %in% selectedSpecies,]
+# PlatformAndAssociatedData <-  PlatformAndAssociatedData[-which(PlatformAndAssociatedData$Platform %in% "abi"),]
+# PlatformAndAssociatedData <-  PlatformAndAssociatedData[-which(PlatformAndAssociatedData$Platform %in% "miRNASeq"),]
+# PlatformAndAssociatedData <-  PlatformAndAssociatedData[-which(PlatformAndAssociatedData$Platform %in% "RNASeq"),]
+
+
+PlatformAndAssociatedData$Key1<-"mage-tab"
+PlatformAndAssociatedData$Key2<-"sdrf"
+
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "clin","Folder"]<-"clin"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "clin","Key1"]<-"follow"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "clin","nameCol"]<-"bcr_followup_barcode"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "bio","Folder"]<-"clin"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "bio","Key1"]<-"bio.Level"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "bio","Key2"]<-"MANIFEST"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "diagnostic_images","Folder"]<-"slide_images"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "diagnostic_images","Key1"]<-"images.Level"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "diagnostic_images","Key2"]<-"MANIFEST"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "pathology_reports","Folder"]<-"reports"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "pathology_reports","Key1"]<-"reports.Level"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "pathology_reports","Key2"]<-"MANIFEST"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "tissue_images","Folder"]<-"slide_images"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "tissue_images","Key1"]<-"images.Level"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "tissue_images","Key2"]<-"MANIFEST"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "microsat_i","Folder"]<-"fragment_analysis"
+
+
+
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "agilentg4502a_07_1","Folder"]<-"transcriptome"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "agilentg4502a_07_2","Folder"]<-"transcriptome"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "agilentg4502a_07_3","Folder"]<-"transcriptome"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "ht_hg-u133a","Folder"]<-"transcriptome"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "hg-u133_plus_2","Folder"]<-"transcriptome"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_mrna_dge","Folder"]<-"transcriptome"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "huex-1_0-st-v2","Folder"]<-"exon"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminahiseq_rnaseq","Folder"]<-"rnaseq"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_rnaseq","Folder"]<-"rnaseq"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminahiseq_rnaseqv2","Folder"]<-"rnaseqv2"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_rnaseqv2","Folder"]<-"rnaseqv2"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminahiseq_totalrnaseqv2","Folder"]<-"totalrnaseqv2"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminahiseq_mirnaseq","Folder"]<-"mirnaseq"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_mirnaseq","Folder"]<-"mirnaseq"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "h-mirna_8x15k","Folder"]<-"mirna"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "h-mirna_8x15kv2","Folder"]<-"mirna"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "humanmethylation27","Folder"]<-"methylation"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "humanmethylation450","Folder"]<-"methylation"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminadnamethylation_oma002_cpi","Folder"]<-"methylation"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminadnamethylation_oma003_cpi","Folder"]<-"methylation"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminahiseq_wgbs","Folder"]<-"bisulfiteseq"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "human1mduo","Folder"]<-"snp"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "genome_wide_snp_6","Folder"]<-"snp"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "humanhap550","Folder"]<-"snp"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "hg-cgh-244a","Folder"]<-"cna"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "hg-cgh-415k_g4124a","Folder"]<-"cna"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "cgh-1x1m_g4447a","Folder"]<-"cna"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminahiseq_dnaseqc","Folder"]<-"cna"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "mda_rppa_core","Folder"]<-"protein_exp"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_curated","Folder"]<-"mutations"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_automated","Folder"]<-"mutations"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "mixed_dnaseq_curated","Folder"]<-"mutations"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminahiseq_dnaseq_automated","Folder"]<-"mutations"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "solid_dnaseq","Folder"]<-"mutations"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "solid_dnaseq_curated","Folder"]<-"mutations"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_cont_automated","Folder"]<-"mutations_protected"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq","Folder"]<-"mutations"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "mixed_dnaseq","Folder"]<-"mutations"
+
+
+
+
+#https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/acc/bcr/biotab/clin/nationwidechildrens.org_clinical_follow_up_v4.0_acc.txt
+#https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/acc/bcr/nationwidechildrens.org/bio/clin/nationwidechildrens.org_ACC.bio.Level_1.304.30.0/MANIFEST.txt
+#https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/acc/bcr/nationwidechildrens.org/diagnostic_images/slide_images/nationwidechildrens.org_ACC.diagnostic_images.Level_1.304.4.0/MANIFEST.txt
+#https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/acc/bcr/nationwidechildrens.org/pathology_reports/reports/nationwidechildrens.org_ACC.pathology_reports.Level_1.313.0.0/MANIFEST.txt
+#https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/acc/bcr/nationwidechildrens.org/tissue_images/slide_images/nationwidechildrens.org_ACC.tissue_images.Level_1.313.0.0/MANIFEST.txt
+#https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/coad/cgcc/nationwidechildrens.org/microsat_i/fragment_analysis/nationwidechildrens.org_COAD.microsat_i.mage-tab.1.6.0/nationwidechildrens.org_COAD.microsat_i.sdrf.txt
+
+
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_curated","Key1"]<-"curated.Level"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_automated","Key1"]<-"automated.Level"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "mixed_dnaseq_curated","Key1"]<-"curated.Level"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminahiseq_dnaseq_automated","Key1"]<-"automated.Level"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "solid_dnaseq","Key1"]<-"DNASeq.Level"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "solid_dnaseq_curated","Key1"]<-"curated.Level"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_cont_automated","Key1"]<-"automated.mage"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_curated","Key2"]<-"somatic.maf"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_automated","Key2"]<-"somatic.maf"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "mixed_dnaseq_curated","Key2"]<-"somatic.maf"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminahiseq_dnaseq_automated","Key2"]<-"somatic.maf"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "solid_dnaseq","Key2"]<-"somatic.maf"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "solid_dnaseq_curated","Key2"]<-"somatic.maf"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "mixed_dnaseq","Key1"]<-"DNASeq.Level"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "mixed_dnaseq","Key2"]<-"somatic.maf"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq","Key1"]<-"DNASeq.Level"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq","Key2"]<-"somatic.maf"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "mda_rppa_core","Key2"]<-"design"
+
+
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminahiseq_mirnaseq","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_mirnaseq","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminahiseq_dnaseq_automated","nameCol"]<-"Tumor_Sample_Barcode"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "genome_wide_snp_6","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_curated","nameCol"]<-"Tumor_Sample_Barcode"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq","nameCol"]<-"Tumor_Sample_Barcode"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "ht_hg-u133a","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_cont_automated","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "hg-u133_plus_2","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_automated","nameCol"]<-"Tumor_Sample_Barcode"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "mixed_dnaseq_curated","nameCol"]<-"Tumor_Sample_Barcode"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "solid_dnaseq","nameCol"]<-"Tumor_Sample_Barcode"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "mixed_dnaseq","nameCol"]<-"Tumor_Sample_Barcode"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "solid_dnaseq_curated","nameCol"]<-"Tumor_Sample_Barcode"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminahiseq_dnaseqc","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "hg-cgh-244a","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "hg-cgh-415k_g4124a","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_mrna_dge","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "humanhap550","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "human1mduo","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "humanmethylation450","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminahiseq_wgbs","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "humanmethylation27","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminadnamethylation_oma002_cpi","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminadnamethylation_oma003_cpi","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "huex-1_0-st-v2","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "mda_rppa_core","nameCol"]<-"Sample.barcode"
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "cgh-1x1m_g4447a","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminahiseq_rnaseqv2","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminahiseq_rnaseq","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminahiseq_totalrnaseqv2","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "agilentg4502a_07_3","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_rnaseq","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_rnaseqv2","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "agilentg4502a_07_2","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "agilentg4502a_07_1","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "h-mirna_8x15k","nameCol"]<-"Comment..TCGA.Barcode."
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "h-mirna_8x15kv2","nameCol"]<-"Comment..TCGA.Barcode."
+
+
+
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq","KeySkip"]<- 4
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_curated","KeySkip"]<- 4
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_automated","KeySkip"]<- 1
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "solid_dnaseq","KeySkip"]<- 1
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "mixed_dnaseq","KeySkip"]<- 1
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "mixed_dnaseq_curated","KeySkip"]<-1
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "solid_dnaseq_curated","KeySkip"]<-1
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_cont_automated","KeySkip"]<-1
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminahiseq_dnaseq_automated","KeySkip"]<-1
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_curated" & PlatformAndAssociatedData$Center == "hgsc.bcm.edu"  ,"KeySkip"]<- 1
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq" & PlatformAndAssociatedData$Center == "hgsc.bcm.edu"  ,"KeySkip"]<- 1
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_curated" & PlatformAndAssociatedData$Center == "genome.wustl.edu"  ,"KeySkip"]<- 1
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq" & PlatformAndAssociatedData$Center == "genome.wustl.edu"  ,"KeySkip"]<- 1
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_automated" & PlatformAndAssociatedData$Center == "broad.mit.edu"  ,"KeySkip"]<- 4
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_curated" & PlatformAndAssociatedData$Center == "broad.mit.edu"  ,"KeySkip"]<- 3
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_curated" & PlatformAndAssociatedData$Center == "broad.mit.edu" & PlatformAndAssociatedData$Tumor == "kirp" ,"KeySkip"]<- 4
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_curated" & PlatformAndAssociatedData$Center == "broad.mit.edu" & PlatformAndAssociatedData$Tumor == "acc"  ,"KeySkip"]<- 4
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_curated" & PlatformAndAssociatedData$Center == "broad.mit.edu" & PlatformAndAssociatedData$Tumor == "lgg"  ,"KeySkip"]<- 4
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_curated" & PlatformAndAssociatedData$Center == "broad.mit.edu" & PlatformAndAssociatedData$CenterType == "gsc"  ,"KeySkip"]<- 4
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq" & PlatformAndAssociatedData$Center == "broad.mit.edu" & PlatformAndAssociatedData$Tumor == "hnsc" ,"KeySkip"]<- 2
+
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform == "illuminaga_dnaseq_curated" & PlatformAndAssociatedData$Center == "broad.mit.edu" & PlatformAndAssociatedData$Tumor == "blca" ,"KeySkip"]<- 3
+
+setwd("/storage/ocfs2_vol1/PUBLIC/TCGAportal")
+save(PlatformAndAssociatedData, file ="PlatformAndAssociatedData_WebSites3.RData")
+
+
+PlatformAndAssociatedData_Clinical<- PlatformAndAssociatedData
+
+PlatformAndAssociatedData <- PlatformAndAssociatedData_new2
+
+
+#tmp2 <- read.delim("/storage/ocfs2_vol1/PUBLIC/TCGAportal/TCGA_sdrf/unc.edu_GBM.H-miRNA_8x15K.mage-tab.1.12.0_unc.edu_GBM.H-miRNA_8x15K.sdrf.txt")
+                   
+load("/storage/ocfs2_vol1/PUBLIC/TCGAportal/PlatformAndAssociatedData_WebSites.RData")
+
+#PlatformAndAssociatedData <-  PlatformAndAssociatedData[PlatformAndAssociatedData$Platform %in% "solid_dnaseq",]
+siteTCGA <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"  
+
+PlatformAndAssociatedData <-  PlatformAndAssociatedData[-which(PlatformAndAssociatedData$Platform %in% "clin"),]
+
+
+
+token <- 40
+for( w in token: nrow(PlatformAndAssociatedData)){
+  tmp <- PlatformAndAssociatedData[w,]
+  key1a<- paste(unique(tmp$CenterType), unique(tmp$Center), unique(tmp$Platform), sep="/")
+  Description <- paste(siteTCGA, tolower(tmp$Tumor), "/",key1a, sep="")
+  key2a <- paste("/",tmp$Folder,"/",sep="")
+  print( paste( w , " of ", nrow(PlatformAndAssociatedData)," ",Description, sep=""))
+  PlatformAndAssociatedData[w,"FileName"] <-  DownloaDmageTAB_sdrf(Description,key2a,tmp$Key1, tmp$Key2) 
+}
+
+
+PlatformAndAssociatedDataNew <- PlatformAndAssociatedData
+load("/storage/ocfs2_vol1/PUBLIC/TCGAportal/PlatformAndAssociatedData_WebSites.RData")
+PlatformAndAssociatedData[PlatformAndAssociatedData$Platform %in% "solid_dnaseq",] <- PlatformAndAssociatedDataNew
+
+PlatformAndAssociatedDataClinical <- PlatformAndAssociatedData
+
+setwd("/storage/ocfs2_vol1/PUBLIC/TCGAportal")
+save(PlatformAndAssociatedData, file ="PlatformAndAssociatedData_WebSites2.RData")
+
+@
+<<STEP 4 Download file sdrf from PlatformData, echo=F, eval =F >>=
+source('/storage/ocfs2_vol1/PUBLIC/LA_functions/DIFF_network_functions25.R')
+library(RCurl)
+siteTCGA <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"   
+setwd("/storage/ocfs2_vol1/PUBLIC/TCGAportal/TCGA_sdrf")
+load("/storage/ocfs2_vol1/PUBLIC/TCGAportal/PlatformAndAssociatedData_WebSites2.RData")
+
+
+
+#PlatformAndAssociatedData_today <- PlatformAndAssociatedData
+
+#PlatformAndAssociatedData[rownames(PlatformAndAssociatedData_today),  c("Folder","Key1","Key2","FileName")]<- PlatformAndAssociatedData_today[, c("Folder","Key1","Key2","FileName")]
+#PlatformAndAssociatedData[rownames(PlatformAndAssociatedDataClinical),  c("Folder","Key1","Key2","FileName")]<- PlatformAndAssociatedDataClinical[, c("Folder","Key1","Key2","FileName")]
+
+selectedSpecies <- "Clinical"
+PlatformAndAssociatedData <- PlatformAndAssociatedData[PlatformAndAssociatedData$Type %in% selectedSpecies,]
+
+token <- 57
+for ( w in token: nrow( PlatformAndAssociatedData)){
+  tmp <- PlatformAndAssociatedData[w,]
+  
+  if(tmp["FileName"] == "") next
+  
+  key1a<- paste(unique(tmp$CenterType), unique(tmp$Center), unique(tmp$Platform), sep="/")
+  Description <- paste(siteTCGA, tolower(tmp$Tumor), "/",key1a, sep="")
+  DescriptionSite <- paste(Description, tmp$Folder, PlatformAndAssociatedData[w,"FileName"], sep="/")
+  setwd("/storage/ocfs2_vol1/PUBLIC/TCGAportal/TCGA_sdrf")
+  x <- DownloadURL(DescriptionSite)
+  writeLines(x, gsub("/","_",PlatformAndAssociatedData[w,"FileName"]))
+  print(paste(w, " of ", nrow(PlatformAndAssociatedData )),sep="")
+}
+
+setwd("/storage/ocfs2_vol1/PUBLIC/TCGAportal")
+save(PlatformAndAssociatedData, file ="PlatformAndAssociatedData_WebSites3.RData")
+
+@
+<<STEP 5 Find sample TCGA, echo=F, eval =T  >>=
+ProjectFolder <- "/storage/ocfs2_vol1/PUBLIC/TCGAportal"
+setwd(ProjectFolder)
+
+#lf <- list.files()
+#lf <- lf[grep(toupper(Tumor), toupper(lf))]
+
+load("PlatformAndAssociatedData_WebSites3.RData")
+#PlatformAndAssociatedData <- PlatformAndAssociatedData[! (PlatformAndAssociatedData$Platform %in% "illuminaga_dnaseq_automated"),]
+#PlatformAndAssociatedData <- PlatformAndAssociatedData[! (PlatformAndAssociatedData$Platform %in% "illuminaga_dnaseq_curated"),]
+PlatformAndAssociatedData<-PlatformAndAssociatedData[PlatformAndAssociatedData$Tumor %in% c("brca","gbm"),]
+
+
+Tumor_completeLIST<-vector("list",length(unique(PlatformAndAssociatedData$Tumor)))
+names(Tumor_completeLIST)<-unique(PlatformAndAssociatedData$Tumor)
+
+token <- 1
+for ( k in token: length(names(Tumor_completeLIST))){
+  
+  Tumor <- names(Tumor_completeLIST)[k]
+  message(Tumor)
+  tmplf <- PlatformAndAssociatedData[PlatformAndAssociatedData$Tumor %in% tolower(Tumor),]
+  #setwd("/storage/ocfs2_vol1/PUBLIC/TCGAportal/TCGA_sdrf")
+  
+  TumorDataList <- vector("list", length(unique(tmplf$Platform)))
+  names(TumorDataList) <- unique(tmplf$Platform)
+  
+  for( i in 1: nrow(tmplf)){
+    startK <- 1
+    stopK <- 16
+    if(tmplf[i,"FileName"] == "") next
+    currentTFile <- gsub("/","_",tmplf[i,"FileName"])
+    
+    sdrfFolder<-"/storage/ocfs2_vol1/PUBLIC/TCGAportal/TCGA_sdrf/"
+    currentTFile<-paste(sdrfFolder,currentTFile,sep="")
+    tmp2 <- read.delim(currentTFile,stringsAsFactors = F,skip =  tmplf[i,"KeySkip"], header =T )
+    
+    if( length(intersect(colnames(tmp2), tmplf[i,"nameCol"]))==1){ tmp2 <- tmp2[, tmplf[i,"nameCol"]  ] }
+    if( length(intersect(colnames(tmp2), "Sample.description"))==1){ tmp2 <- tmp2[, "Sample.description"] }
+    if( length(intersect(colnames(tmp2), "Biospecimen.Barcode"))==1){ tmp2 <- tmp2[, "Biospecimen.Barcode"] }
+    if( length(intersect(colnames(tmp2), "Comment..TCGA.Barcode."))==1){ tmp2 <- tmp2[, "Comment..TCGA.Barcode."] }
+    
+    if( length( grep("nationwidechildrens", tmplf[i,"FileName"]))==1 || length( grep("biospecimen", tmplf[i,"FileName"]))==1 || length( grep("bio.Level", tmplf[i,"FileName"]))==1   ){ 
+         tmp2 <- read.table(currentTFile, quote="\"",stringsAsFactors = F )[,2] 
+         tmp2 <- tmp2[grep("TCGA",tmp2)]
+                if( length( grep("nationwidechildrens",tmp2 ))==1 || length( grep("biospecimen", tmp2))==1 ){
+                      if ( length(tmp2)!=0){ tmp2 <- as.matrix(unlist(strsplit(tmp2, ".",fixed = T))) }
+                            }     
+                              }
+    tmp2 <- tmp2[grep("TCGA",tmp2)]
+    SampleTmp <- unique(substr(tmp2, startK, stopK))
+    SampleTmp <- SampleTmp[grep("TCGA",SampleTmp)]
+    msgOUT <-  paste(i," ", Tumor," ", tmplf[i,"Type"], " ", tmplf[i,"Species"], " ",   tmplf[i,"Center"], " ", tmplf[i,"Platform"] , " " ,  " .n samples ", length(SampleTmp), sep="")
+    print(msgOUT)
+    
+    if ( length(SampleTmp) < 2) { message("Maybe.....ERROR....Check IT")}
+    
+    idx<- which(names(TumorDataList) == tmplf[i,"Platform"])
+    TumorDataList[[idx]] <- SampleTmp
+    
+  }
+  Tumor_completeLIST[[k]]<-TumorDataList
+}
+str(Tumor_completeLIST)
+
+
+@
+
+<<STEP 7 Create Data Matrix after download,  echo=F, eval =F   >>=
+setwd("~/Downloads")
+source('~/Downloads/DIFF_network_functions31.R')
+load("PlatformAndAssociatedData_WebSites3.RData")
+setwd("~/Desktop/TCGAbiolinks/data")
+save(PlatformAndAssociatedData, file ="PlatformAndAssociatedData.RData")
+
+
+#View(PlatformAndAssociatedData[PlatformAndAssociatedData$Tumor == "brca",])
+# before run change these parameters
+# . downloadFolder
+# . nsample = 0, to downlaod all samples, or a number to test function
+
+
+library(TCGAbiolinks)
+Tumor <- "BRCA"
+downloadFolder <- "~/Documents/brca/"
+setwd(downloadFolder)
+Type = "mRNA"
+Species <- "RNASeq"   
+PlatformType <- "illuminahiseq_rnaseq"  # work
+
+BRCA_rnaseq <- TCGADownload(Tumor, Type, Species, PlatformAndAssociatedData, downloadFolder,PlatformType,nsample = 3)
+
+BRCA_rnaseqv2_version <- TCGAVersion(Tumor, PlatformType,PlatformAndAssociatedData)
+
+Species <- "RNASeqV2" 
+PlatformType <- "illuminahiseq_rnaseqv2" # work 
+BRCA_rnaseqv2 <- TCGADownload(Tumor, Type, Species, PlatformAndAssociatedData, downloadFolder,PlatformType, nsample = 2)
+
+Species <- "Exp-Gene" 
+PlatformType <- "agilentg4502a_07_3" # work
+BRCA_agilent <- TCGADownload(Tumor, Type, Species, PlatformAndAssociatedData, downloadFolder,PlatformType, nsample = 5)
+
+
+# new data type 
+Type = "Methylation"
+
+Species <- "Methyl"
+PlatformType <- "humanmethylation27" # work 
+
+BRCA_methylation27 <- TCGADownload(Tumor, Type, Species, PlatformAndAssociatedData, downloadFolder,PlatformType, nsample = 3)
+
+PlatformType <- "humanmethylation450" # work
+BRCA_methylation450 <- TCGADownload(Tumor, Type, Species, PlatformAndAssociatedData, downloadFolder,PlatformType, nsample = 3)
+
+# ..... to check some parameters and then work
+Type = "miRNA"
+
+Species <- "miRNASeq"
+PlatformType <- "illuminaga_mirnaseq" # work
+
+BRCA_ga_mirnaseq <- TCGADownload(Tumor, Type, Species, PlatformAndAssociatedData, downloadFolder,PlatformType, nsample = 5)
+
+PlatformType <- "illuminahiseq_mirnaseq"  #work
+BRCA_hiseq_mirnaseq <- TCGADownload(Tumor, Type, Species, PlatformAndAssociatedData, downloadFolder,PlatformType, nsample = 3)
+
+# ..... 
+Type = "SNP"
+Species <- "CNV (SNP Array)"
+PlatformType <- "genome_wide_snp_6"  # to check
+
+BRCA_genome_wide_snp_6 <- TCGADownload(Tumor, Type, Species, PlatformAndAssociatedData, downloadFolder,PlatformType, nsample = 3)
+
+Species <- "CNV (Low Pass DNASeq)"
+PlatformType <- "illuminahiseq_dnaseqc"  # to check
+BRCA_hiseq_dnaseqc <- TCGADownload(Tumor, Type, Species, PlatformAndAssociatedData, downloadFolder,PlatformType, nsample = 3)
+
+# ..... 
+Type = "Protein"
+
+Species <- "Exp-Protein"
+PlatformType <- "mda_rppa_core"  # work
+
+BRCA_protein <- TCGADownload(Tumor, Type, Species, PlatformAndAssociatedData, downloadFolder,PlatformType, nsample = 3)
+
+BRCA_protein_version <- TCGAVersion(Tumor, PlatformType,PlatformAndAssociatedData)
+
+
+# ..... 
+Type = "Exome"
+
+Species <- "Somatic Mutation" # work
+PlatformType <- "illuminaga_dnaseq"
+
+BRCA_mutation <- TCGADownload(Tumor, Type, Species, PlatformAndAssociatedData, downloadFolder,PlatformType, nsample = 3)
+
+
+@
+<<STEP 8 Create Data info for platforms ,  echo=F, eval =F >>=
+setwd("~/Downloads")
+source('~/Downloads/DIFF_network_functions29.R')
+load("PlatformAndAssociatedData_WebSites3.RData")
+
+humanmethylation27_platform <- read.delim("~/Downloads/brca/jhu-usc.edu_BRCA.HumanMethylation27.4.lvl-3.TCGA-AR-A1AH-01A-11D-A12E-05.txt", header=FALSE,stringsAsFactors = FALSE)
+colnames(humanmethylation27_platform)<-humanmethylation27_platform[2,]
+humanmethylation27_platform<-humanmethylation27_platform[-1,]
+humanmethylation27_platform<-humanmethylation27_platform[-1,]
+rownames(humanmethylation27_platform)<-humanmethylation27_platform[,1]
+humanmethylation27_platform<-humanmethylation27_platform[,-1]
+humanmethylation27_platform<-humanmethylation27_platform[,-1]
+save(humanmethylation27_platform, file ="humanmethylation27_platform.RData")
+@
+
+\end{document}
