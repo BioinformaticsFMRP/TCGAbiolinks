@@ -23,13 +23,13 @@
 #'        LGG, LIHC, LUAD, LUSC, OV, PAAD, PRAD, READ, SARC, SKCM, STAD, 
 #'        THCA, UCEC, UCS. Look at https://tcga-data.nci.nih.gov/tcga/ 
 #'        for Available Cancer Types. 
-#' @param Type 
-#' @param Species
+#' @param Type "mRNA"
+#' @param Species "RNASeq" 
 #' @param PlatformAndAssociatedData data frame 615 observations of 12 variables,
 #'        indicating the different characteristics of the data
 #'        e.g. tumour, type, species.  
 #' @param downloadFolder = ""
-#' @param PlatformType
+#' @param PlatformType "illuminahiseq_rnaseq"
 #' @param nsample number of samples to be analyzed, default all samples
 #' @param listSample  a character that indicates TCGA barcodes of the patients/samples to analyze
 #' @return
@@ -282,9 +282,16 @@ TCGADownload <- function(Tumor, Type, Species, PlatformAndAssociatedData, downlo
 #'
 #' @description  TCGA Download
 #'
-#' @param Tumor
-#' @param PlatformType
-#' @param PlatformAndAssociatedData
+#' @param Tumor  a character string indicating the cancer type for 
+#'        which to download data. Options include ACC, BLCA, BRCA, 
+#'        CESC, COAD, DLBC, ESCA, GBM, HNSC, KICH, KIRC, KIRP, LAML, 
+#'        LGG, LIHC, LUAD, LUSC, OV, PAAD, PRAD, READ, SARC, SKCM, STAD, 
+#'        THCA, UCEC, UCS. Look at https://tcga-data.nci.nih.gov/tcga/ 
+#'        for Available Cancer Types. 
+#' @param PlatformType "illuminahiseq_rnaseq"
+#' @param PlatformAndAssociatedData data frame 615 observations of 12 variables,
+#'        indicating the different characteristics of the data
+#'        e.g. tumour, type, species.  
 #' @import RCurl httr bitops
 #' @export
 TCGAVersion <- function(Tumor, PlatformType,PlatformAndAssociatedData){

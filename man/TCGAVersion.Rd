@@ -7,11 +7,18 @@
 TCGAVersion(Tumor, PlatformType, PlatformAndAssociatedData)
 }
 \arguments{
-\item{Tumor}{}
+\item{Tumor}{a character string indicating the cancer type for
+which to download data. Options include ACC, BLCA, BRCA,
+CESC, COAD, DLBC, ESCA, GBM, HNSC, KICH, KIRC, KIRP, LAML,
+LGG, LIHC, LUAD, LUSC, OV, PAAD, PRAD, READ, SARC, SKCM, STAD,
+THCA, UCEC, UCS. Look at https://tcga-data.nci.nih.gov/tcga/
+for Available Cancer Types.}
 
-\item{PlatformType}{}
+\item{PlatformType}{"illuminahiseq_rnaseq"}
 
-\item{PlatformAndAssociatedData}{}
+\item{PlatformAndAssociatedData}{data frame 615 observations of 12 variables,
+indicating the different characteristics of the data
+e.g. tumour, type, species.}
 }
 \description{
 TCGA Download
