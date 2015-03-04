@@ -57,6 +57,9 @@ TCGADownload <- function(Tumor, Type, Species, PlatformAndAssociatedData, downlo
                                    & toupper(PlatformAndAssociatedData$Type) == toupper(Type) 
                                    & toupper(PlatformAndAssociatedData$Species) == toupper(Species)
                                    & toupper(PlatformAndAssociatedData$Platform) == toupper(PlatformType), ]
+  # test added by antonio
+  key1a <- tmp # test2 by anto
+  
   
   key1a <- paste(unique(tmp$CenterType), unique(tmp$Center), unique(tmp$Platform), sep="/")
   Description <- paste(siteTCGA, tolower(tmp$Tumor), "/",key1a, sep="")
