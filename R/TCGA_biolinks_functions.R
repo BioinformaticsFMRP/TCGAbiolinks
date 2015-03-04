@@ -79,8 +79,6 @@ TCGADownload <- function(Tumor, Type, Species, PlatformAndAssociatedData, downlo
     return(x)
   }
   
-  tmp <- tmp #test to check gitHub
-  
   
   toDdl <- DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_3", KeyGrep2 = "MANIFEST.txt") 
   toDdl <- paste(Description, key2a, toDdl, sep = "")
