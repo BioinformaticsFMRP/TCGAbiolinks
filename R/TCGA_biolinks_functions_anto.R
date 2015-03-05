@@ -17,7 +17,7 @@ TCGADownload <- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", down
     toDdl <- .DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_2", KeyGrep2 = "somatic.maf")
     toDdl <- paste(Description, key2a, toDdl, sep = "")
     
-    x <- .DownloadURL(toDdl) #test aggiornamenti uff
+    x <- .DownloadURL(toDdl)
     x <- strsplit(x, "\t")
     x <- x[-1]
     x <- matrix(unlist(x), nrow = length(x), byrow = T)
@@ -49,6 +49,7 @@ TCGADownload <- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", down
   
   if(PlatformType == "genome_wide_snp_6"){ x <- x[grep("hg19.seg", x)]
                                            x <- x[-grep("nocnv", x)]}
+  if(PlatformType == "illuminahiseq_dnaseqc"){ x <- x[grep("Segment", x)] }
   
   if(PlatformType == "mda_rppa_core"){  x <- x[grep("protein_expression", x)] }
   
@@ -158,7 +159,7 @@ for(i in 1:length(samplesList)){
     }
   }
   
-  if(PlatformType == "illuminahiseq_rnaseqv2" || PlatformType == "illuminahiseq_totalrnaseqv2")){
+  if(PlatformType == "illuminahiseq_rnaseqv2" || PlatformType == "illuminahiseq_totalrnaseqv2"){
     rownames(geData) <- tmpData$gene_id
     path2 <- paste(Description, key2a,plt2$FileName,sep="")
     xpath <- .DownloadURL(path2)
@@ -238,7 +239,12 @@ for(i in 1:length(samplesList)){
     colnames(geData) <- x[colNames, "Sample.barcode"]
   }
   
-  
+  if(PlatformType == "illuminahiseq_dnaseqc"){
+    geData <- vector("list", length(x))
+    for(i in 1:length(lf)) geData[[i]] <- read.csv(lf[i], sep = ",", stringsAsFactors = FALSE)
+    names(geData) <- substr(x, 1, 28)
+  }
+
   if(PlatformType == "genome_wide_snp_6"){
     
     path2 <- paste(Description, key2a,plt2$FileName,sep="")
@@ -267,12 +273,15 @@ for(i in 1:length(samplesList)){
       print(i)
     }
   }
-  
-  
+
+
+
   setwd(FolderWd)
   return(geData)
   
 }
+
+
 
 TCGAVersion <- function(Tumor, PlatformType,PlatformAndAssociatedData){
   
