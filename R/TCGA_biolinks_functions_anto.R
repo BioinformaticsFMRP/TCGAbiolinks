@@ -17,7 +17,7 @@ TCGADownload <- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", down
     toDdl <- .DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_2", KeyGrep2 = "somatic.maf")
     toDdl <- paste(Description, key2a, toDdl, sep = "")
     
-    x <- .DownloadURL(toDdl)
+    x <- .DownloadURL(toDdl) #test aggiornamenti uff
     x <- strsplit(x, "\t")
     x <- x[-1]
     x <- matrix(unlist(x), nrow = length(x), byrow = T)
@@ -41,12 +41,11 @@ TCGADownload <- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", down
   
   if(PlatformType == "illuminahiseq_rnaseq"){  x <- x[grep("gene.quantification", x)] }
   if(PlatformType == "agilentg4502a_07_3"){    x <- x[grep("tcga_level3", x)]}
-  if(PlatformType == "illuminahiseq_rnaseqv2"){ x <- x[grep("rsem.genes.results", x)] }
+  if(PlatformType == "illuminahiseq_rnaseqv2" || PlatformType == "illuminahiseq_totalrnaseqv2"){ x <- x[grep("rsem.genes.results", x)] }
   if(PlatformType == "humanmethylation27"){ x <- x[grep("HumanMethylation27", x)] }
   if(PlatformType == "humanmethylation450"){ x <- x[grep("HumanMethylation450", x)] }
   if(PlatformType == "illuminaga_mirnaseq"){ x <- x[grep("mirna.quantification", x)] }
   if(PlatformType == "illuminahiseq_mirnaseq"){ x <- x[grep("mirna.quantification", x)] }
-  
   
   if(PlatformType == "genome_wide_snp_6"){ x <- x[grep("hg19.seg", x)]
                                            x <- x[-grep("nocnv", x)]}
@@ -56,7 +55,7 @@ TCGADownload <- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", down
   
   
   if(length(listSample)!=0){
-  if(PlatformType == "illuminahiseq_rnaseqv2"){
+  if(PlatformType == "illuminahiseq_rnaseqv2" || PlatformType == "illuminahiseq_totalrnaseqv2"){
     xSplit <- gsub(".rsem.genes.results", "", sapply(strsplit(x, "unc.edu"), function(x) x[2]))
     xSplit2 <- substr(xSplit, 2,37)
     xuuid <- as.data.frame(cbind( list = as.character(x), uuid = as.character(xSplit2), barcode = as.character(xSplit2)))
@@ -116,7 +115,7 @@ for(i in 1:length(samplesList)){
   #filename <- paste(downloadFolder, x[i], sep = "")
   filename <- x[i]
   write.csv(tmp2, filename)
-  print(paste(x[i], " ... sample n. ", i, " of ", length(samplesList), sep = ""))
+  print(paste(x[i], " ... sample n. ", i, " of ", length(samplesList), sep = "")) 
 }
 
   
@@ -159,7 +158,7 @@ for(i in 1:length(samplesList)){
     }
   }
   
-  if(PlatformType == "illuminahiseq_rnaseqv2"){
+  if(PlatformType == "illuminahiseq_rnaseqv2" || PlatformType == "illuminahiseq_totalrnaseqv2")){
     rownames(geData) <- tmpData$gene_id
     path2 <- paste(Description, key2a,plt2$FileName,sep="")
     xpath <- .DownloadURL(path2)
