@@ -582,13 +582,47 @@ TCGAQuery <- function(Tumor,sdrfFolder,PlatformAndAssociatedData){
 }
 
 .DownloadURL <- function(Site){
-  # setInternet2(use = TRUE)
+  opts = curlOptions(ftp.use.epsv = T,
+                     dirlistonly = T,
+                     ssl.verifypeer = F,
+                     timeout = 5)
+  handle = getCurlHandle(.opts = opts)
   Site <- URLencode(Site)
-  if(interactive() && ("ssl" %in% names(curlVersion()$features)) && url.exists(Site)) {
-    x = tryCatch(getURL(Site, verbose = F, ftp.use.epsv = TRUE, dirlistonly = TRUE,ssl.verifypeer = FALSE, connecttimeout=60 ), error = function(e) { 
-      getURL(Site, verbose = F, ftp.use.epsv = TRUE, dirlistonly = TRUE,ssl.verifypeer = FALSE,connecttimeout=60) })
-    x <- unlist(strsplit(x,"\n"))
+
+  bo1 = T
+  count1 = 0
+  while(bo1){
+    bo1 = !url.exists(Site, .opts = opts)
+    count1 = count1 + 1
+    if(count1>1) {
+      print(paste("Reonnection to the url #",count1,sep=""))
+      Sys.sleep(1)
+    }
+    if(count1 == 20) stop(paste("The url (",Site,") is not existing or not available.
+                          Please check your internet connection or contact the mantainers for an update.",sep=""))
   }
+
+  if(interactive() && ("ssl" %in% names(curlVersion()$features))) {
+    bo2 = T
+    count <- 0
+    while(bo2){
+      x = try(getURLContent(Site, verbose = F, curl = handle))
+      if( class(x) == "try-error"){
+        Sys.sleep(1)
+        bo2 = T
+        count = count + 1
+        if(count>=1) print(paste("Reconnection attempt #",count,sep=""))
+      }else if(count==20){
+        stop("Connetion limit exceded. Check your internet connection and your proxy settings.")
+      }else{
+        bo2 = F
+      }
+  }
+  }else{
+    stop("Curl is not configured for ssl.")
+  }
+
+  x <- unlist(strsplit(x, "\n"))
   return(x)
 }
 
@@ -684,6 +718,7 @@ TCGAQuery <- function(Tumor,sdrfFolder,PlatformAndAssociatedData){
   }
   toDir = paste(base, i, sep="")
   dir.create(toDir)
+  #dir.create(base, showWarnings = FALSE, recursive = FALSE, mode = "0777")
   
   toDir
 }
