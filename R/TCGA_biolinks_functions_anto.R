@@ -595,7 +595,7 @@ TCGAQuery <- function(Tumor,sdrfFolder,PlatformAndAssociatedData){
     bo1 = !url.exists(Site, .opts = opts)
     count1 = count1 + 1
     if(count1>1) {
-      print(paste("Reonnection to the url #",count1,sep=""))
+      print(paste("Reconnection to the url #",count1,sep=""))
       Sys.sleep(1)
     }
     if(count1 == 20) stop(paste("The url (",Site,") is not existing or not available.
@@ -606,7 +606,7 @@ TCGAQuery <- function(Tumor,sdrfFolder,PlatformAndAssociatedData){
     bo2 = T
     count <- 0
     while(bo2){
-      x = try(getURLContent(Site, verbose = F, curl = handle))
+      x = try(getURLContent(Site, verbose = F, curl = handle),silent = T)
       if( class(x) == "try-error"){
         Sys.sleep(1)
         bo2 = T
