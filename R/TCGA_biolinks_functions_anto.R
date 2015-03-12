@@ -12,14 +12,10 @@ TCGADownload <- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", down
   key1a <- paste(unique(tmp$CenterType), unique(tmp$Center), unique(tmp$Platform), sep="/")
   Description <- paste(siteTCGA, tolower(tmp$Tumor), "/",key1a, sep="")
   key2a <- paste("/",tmp$Folder,"/",sep="")
-<<<<<<< HEAD
   
   if(PlatformType == "illuminaga_dnaseq" | PlatformType == "solid_dnaseq" | PlatformType == "solid_dnaseq_curated" | PlatformType == "mixed_dnaseq_curated" | PlatformType == "mixed_dnaseq" | 
        PlatformType == "illuminahiseq_dnaseq_automated" | PlatformType == "illuminaga_dnaseq_curated" | PlatformType == "illuminaga_dnaseq_automated" | PlatformType == "illuminaga_dnaseq"){
-=======
 
-  if(PlatformType == "illuminaga_dnaseq" | PlatformType == "solid_dnaseq" | PlatformType == "solid_dnaseq_curated" | PlatformType == "mixed_dnaseq_curated" | PlatformType == "mixed_dnaseq"){ #aggiunta qui
->>>>>>> origin/master
     toDdl <- .DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_2", KeyGrep2 = "somatic.maf")
     toDdl <- paste(Description, key2a, toDdl, sep = "")
 
@@ -37,7 +33,7 @@ TCGADownload <- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", down
   lstFileSdrf <- list.files(file.path(sdrfFolder))
   lstFileSdrf_plt <- lstFileSdrf[grep(tolower(PlatformType), tolower(lstFileSdrf))]
   listSample_fromSdrf <- read.delim(paste( sdrfFolder,  lstFileSdrf_plt,sep=""))
-<<<<<<< HEAD
+
   
   #if(PlatformType == "illuminadnamethylation_oma003_cpi" | PlatformType == "illuminadnamethylation_oma002_cpi"){
   #  toDdl <- .DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_2", KeyGrep2 = "MANIFEST.txt") 
@@ -47,13 +43,7 @@ TCGADownload <- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", down
     toDdl <- paste(Description, key2a, toDdl, sep = "")
   #}
   
-=======
 
-
-  toDdl <- .DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_3", KeyGrep2 = "MANIFEST.txt")
-  toDdl <- paste(Description, key2a, toDdl, sep = "")
-
->>>>>>> origin/master
   x <- .DownloadURL(toDdl)
   x <- sapply(strsplit(x, "  "), function(y) y[2])
 
@@ -69,13 +59,11 @@ TCGADownload <- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", down
   if(PlatformType == "genome_wide_snp_6"){ x <- x[grep("hg19.seg", x)]
                                            x <- x[-grep("nocnv", x)]}
   if(PlatformType == "illuminahiseq_dnaseqc"){ x <- x[grep("Segment", x)] }
-<<<<<<< HEAD
+
   #if(PlatformType == "humanhap550"){ x <- x[grep("seg.txt", x)] }
   #if(PlatformType == "human1mduo"){ x <- x[grep("seg.txt", x)] }
   
-=======
 
->>>>>>> origin/master
   if(PlatformType == "mda_rppa_core"){  x <- x[grep("protein_expression", x)] }
 
 
