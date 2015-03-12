@@ -66,7 +66,8 @@ TCGADownload <- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", down
   Description <- paste(siteTCGA, tolower(tmp$Tumor), "/",key1a, sep="")
   key2a <- paste("/",tmp$Folder,"/",sep="")
   
-  if(PlatformType == "illuminaga_dnaseq" | PlatformType == "solid_dnaseq" | PlatformType == "solid_dnaseq_curated" | PlatformType == "mixed_dnaseq_curated" | PlatformType == "mixed_dnaseq"){ #aggiunta qui
+  if(PlatformType == "illuminaga_dnaseq" | PlatformType == "solid_dnaseq" | PlatformType == "solid_dnaseq_curated" | PlatformType == "mixed_dnaseq_curated" | PlatformType == "mixed_dnaseq" | 
+       PlatformType == "illuminahiseq_dnaseq_automated" | PlatformType == "illuminaga_dnaseq_curated" | PlatformType == "illuminaga_dnaseq_automated" | PlatformType == "illuminaga_dnaseq"){
     toDdl <- .DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_2", KeyGrep2 = "somatic.maf")
     toDdl <- paste(Description, key2a, toDdl, sep = "")
     
@@ -86,23 +87,36 @@ TCGADownload <- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", down
   listSample_fromSdrf <- read.delim(paste( sdrfFolder,  lstFileSdrf_plt,sep=""))
   
   
-  toDdl <- .DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_3", KeyGrep2 = "MANIFEST.txt")
-  toDdl <- paste(Description, key2a, toDdl, sep = "")
+  if(PlatformType == "illuminadnamethylation_oma003_cpi" | PlatformType == "illuminadnamethylation_oma002_cpi"){
+    toDdl <- .DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_2", KeyGrep2 = "MANIFEST.txt") 
+    toDdl <- paste(Description, key2a, toDdl, sep = "")
+  }else{
+    toDdl <- .DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_3", KeyGrep2 = "MANIFEST.txt")
+    toDdl <- paste(Description, key2a, toDdl, sep = "")
+  }
   
   x <- .DownloadURL(toDdl)
   x <- sapply(strsplit(x, "  "), function(y) y[2])
   
   if(PlatformType == "illuminahiseq_rnaseq"){  x <- x[grep("gene.quantification", x)] }
-  if(PlatformType == "agilentg4502a_07_3"){    x <- x[grep("tcga_level3", x)]}
+  if(PlatformType == "agilentg4502a_07_3" | PlatformType == "agilentg4502a_07_2" | PlatformType == "agilentg4502a_07_1"){    x <- x[grep("tcga_level3", x)]}
+  if(PlatformType == "ht_hg-u133a" | PlatformType == "h-mirna_8x15kv2" | PlatformType == "h-mirna_8x15k"){    x <- x[grep("level3", x)]}
+  if(PlatformType == "hg-u133_plus_2"){    x <- x[grep("pergene", x)]}
   if(PlatformType == "illuminahiseq_rnaseqv2" || PlatformType == "illuminahiseq_totalrnaseqv2"){ x <- x[grep("rsem.genes.results", x)] }
   if(PlatformType == "humanmethylation27"){ x <- x[grep("HumanMethylation27", x)] }
   if(PlatformType == "humanmethylation450"){ x <- x[grep("HumanMethylation450", x)] }
+  if(PlatformType == "illuminadnamethylation_oma003_cpi"){ x <- x[grep("IlluminaDNAMethylation_OMA003_CPI", x)] }
+  if(PlatformType == "illuminadnamethylation_oma002_cpi"){ x <- x[grep("IlluminaDNAMethylation_OMA002_CPI", x)] }
   if(PlatformType == "illuminaga_mirnaseq"){ x <- x[grep("mirna.quantification", x)] }
   if(PlatformType == "illuminahiseq_mirnaseq"){ x <- x[grep("mirna.quantification", x)] }
   
   if(PlatformType == "genome_wide_snp_6"){ x <- x[grep("hg19.seg", x)]
                                            x <- x[-grep("nocnv", x)]}
-  if(PlatformType == "illuminahiseq_dnaseqc"){ x <- x[grep("Segment", x)] }
+  if(PlatformType == "illuminahiseq_dnaseqc" | PlatformType == "hg-cgh-415k_g4124a" | PlatformType == "hg-cgh-244a"){ x <- x[grep("Segment", x)] }
+  if(PlatformType == "humanhap550"){ x <- x[grep("seg.txt", x)] }
+  if(PlatformType == "human1mduo"){ x <- x[grep("seg.txt", x)] }
+  
+  if(PlatformType == "huex-1_0-st-v2"){  x <- x[grep("gene", x)] }
   
   if(PlatformType == "mda_rppa_core"){  x <- x[grep("protein_expression", x)] }
   
@@ -165,7 +179,12 @@ TCGADownload <- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", down
   
   
   for(i in 1:length(samplesList)){
-    tmp2 <- .DownloadData_fromURL(url =samplesList[i] ,sep="", header = T)
+    if(PlatformType == "huex-1_0-st-v2" | PlatformType == "ht_hg-u133a" | PlatformType == "hg-u133_plus_2" | PlatformType == "h-mirna_8x15kv2" | PlatformType == "h-mirna_8x15k" |
+         PlatformType == "human1mduo" | PlatformType == "humanhap550" | PlatformType == "illuminadnamethylation_oma003_cpi" | PlatformType == "illuminadnamethylation_oma002_cpi"){
+      tmp2 <- .DownloadData_fromURL(url =samplesList[i] ,sep="\t", header = T)
+    }else{
+      tmp2 <- .DownloadData_fromURL(url =samplesList[i] ,sep="", header = T)
+    }
     #filename <- paste(downloadFolder, x[i], sep = "")
     filename <- x[i]
     write.csv(tmp2, filename)
