@@ -66,7 +66,8 @@ TCGADownload <- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", down
   Description <- paste(siteTCGA, tolower(tmp$Tumor), "/",key1a, sep="")
   key2a <- paste("/",tmp$Folder,"/",sep="")
   
-  if(PlatformType == "illuminaga_dnaseq" | PlatformType == "solid_dnaseq" | PlatformType == "solid_dnaseq_curated" | PlatformType == "mixed_dnaseq_curated" | PlatformType == "mixed_dnaseq"){ #aggiunta qui
+  if(PlatformType == "illuminaga_dnaseq" | PlatformType == "solid_dnaseq" | PlatformType == "solid_dnaseq_curated" | PlatformType == "mixed_dnaseq_curated" | PlatformType == "mixed_dnaseq" | 
+       PlatformType == "illuminahiseq_dnaseq_automated" | PlatformType == "illuminaga_dnaseq_curated" | PlatformType == "illuminaga_dnaseq_automated" | PlatformType == "illuminaga_dnaseq"){
     toDdl <- .DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_2", KeyGrep2 = "somatic.maf")
     toDdl <- paste(Description, key2a, toDdl, sep = "")
     
@@ -86,8 +87,13 @@ TCGADownload <- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", down
   listSample_fromSdrf <- read.delim(paste( sdrfFolder,  lstFileSdrf_plt,sep=""))
   
   
-  toDdl <- .DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_3", KeyGrep2 = "MANIFEST.txt")
+  #if(PlatformType == "illuminadnamethylation_oma003_cpi" | PlatformType == "illuminadnamethylation_oma002_cpi"){
+  #  toDdl <- .DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_2", KeyGrep2 = "MANIFEST.txt") 
+  #  toDdl <- paste(Description, key2a, toDdl, sep = "")
+  #}else{
+  toDdl <- .DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_3", KeyGrep2 = "MANIFEST.txt") 
   toDdl <- paste(Description, key2a, toDdl, sep = "")
+  #}
   
   x <- .DownloadURL(toDdl)
   x <- sapply(strsplit(x, "  "), function(y) y[2])
@@ -97,12 +103,16 @@ TCGADownload <- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", down
   if(PlatformType == "illuminahiseq_rnaseqv2" || PlatformType == "illuminahiseq_totalrnaseqv2"){ x <- x[grep("rsem.genes.results", x)] }
   if(PlatformType == "humanmethylation27"){ x <- x[grep("HumanMethylation27", x)] }
   if(PlatformType == "humanmethylation450"){ x <- x[grep("HumanMethylation450", x)] }
+  if(PlatformType == "illuminadnamethylation_oma003_cpi"){ x <- x[grep("IlluminaDNAMethylation_OMA003_CPI", x)] }
+  if(PlatformType == "illuminadnamethylation_oma002_cpi"){ x <- x[grep("IlluminaDNAMethylation_OMA002_CPI", x)] }
   if(PlatformType == "illuminaga_mirnaseq"){ x <- x[grep("mirna.quantification", x)] }
   if(PlatformType == "illuminahiseq_mirnaseq"){ x <- x[grep("mirna.quantification", x)] }
   
   if(PlatformType == "genome_wide_snp_6"){ x <- x[grep("hg19.seg", x)]
                                            x <- x[-grep("nocnv", x)]}
   if(PlatformType == "illuminahiseq_dnaseqc"){ x <- x[grep("Segment", x)] }
+  #if(PlatformType == "humanhap550"){ x <- x[grep("seg.txt", x)] }
+  #if(PlatformType == "human1mduo"){ x <- x[grep("seg.txt", x)] }
   
   if(PlatformType == "mda_rppa_core"){  x <- x[grep("protein_expression", x)] }
   
