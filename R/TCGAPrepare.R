@@ -11,7 +11,7 @@ TCGAPrepare<- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", downlo
   geData <- matrix(0, nrow = nrow(tmpData), ncol = length(lf))
   tmpData <- tmpData[,-1]
   
-  if(PlatformType == "agilentg4502a_07_3"){
+  if(PlatformType == "agilentg4502a_07_3" | PlatformType == "agilentg4502a_07_2" | PlatformType == "agilentg4502a_07_1"){
     tmpData <- tmpData[-1, ]
     geData <- matrix(0, nrow = nrow(tmpData), ncol = length(lf))
     rownames(geData) <- tmpData$Hybridization.REF
@@ -120,10 +120,10 @@ TCGAPrepare<- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", downlo
     colnames(geData) <- x[colNames, "Sample.barcode"]
   }
   
-  if(PlatformType == "illuminahiseq_dnaseqc"){
+  if(PlatformType == "illuminahiseq_dnaseqc" | PlatformType == "hg-cgh-415k_g4124a" | PlatformType == "hg-cgh-244a"){
     geData <- vector("list", length(x))
     for(i in 1:length(lf)) geData[[i]] <- read.csv(lf[i], sep = ",", stringsAsFactors = FALSE)
-    names(geData) <- substr(x, 1, 28)
+    names(geData) <- substr(paste("TCGA", sapply(strsplit(lf, "TCGA"), function(y) y[2]), sep = ""), 1, 28)
   }
   
   if(PlatformType == "genome_wide_snp_6"){
@@ -155,6 +155,84 @@ TCGAPrepare<- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", downlo
     }
   }
   
+  if(PlatformType == "huex-1_0-st-v2"){
+    tmpData <- tmpData[-1, ]
+    rownames(tmpData) <- tmpData$Hybridization.REF
+    tmpData <- tmpData[, -1]
+    geData <- apply(tmpData, 2, as.numeric)
+    rownames(geData) <- rownames(tmpData)
+    colNames <- sub("X", "", colnames(geData))
+    
+    
+    toDdl <- .DownloaDmageTAB_sdrf(Description, key2a, KeyGrep1 = "mage-tab", KeyGrep2 = "sdrf.txt")
+    toDdl <- paste(Description, key2a, toDdl, sep = "")
+    
+    x <- .DownloadURL(toDdl)
+    x <- strsplit(x, "\t")
+    x <- matrix(unlist(x), nrow = length(x), byrow = T)
+    x <- gsub("\r", "", x)
+    colnames(x) <- x[1, ]
+    x <- x[-1, ]
+    rownames(x) <- x[, "Hybridization Name"]
+    
+    colnames(geData) <- sub("_LE", "", x[colNames, "Labeled Extract Name"])
+  }
+  
+  if(PlatformType == "human1mduo" | PlatformType == "humanhap550"){
+    geData <- tmpData
+  }
+  
+  if(PlatformType == "ht_hg-u133a"){
+    tmpData <- tmpData[-1, ]
+    
+    geData <- matrix(0, nrow = nrow(tmpData), ncol = length(lf))
+    rownames(geData) <- tmpData$Hybridization.REF
+    colNames <- rep("", ncol(geData))
+    for(i in 1:length(lf)){
+      tmpData <- read.csv(lf[i], stringsAsFactors = FALSE, sep = ",")
+      tmpData <- tmpData[-1, -1]
+      expr <- tmpData[, 2]
+      expr[expr == "N/A"] <- NA
+      geData[, i] <- as.numeric(expr)
+      colNames[i] <- gsub(".", "-", colnames(tmpData)[2], fixed = T)
+      print(i)
+    }
+    
+    toDdl <- .DownloaDmageTAB_sdrf(Description, key2a, KeyGrep1 = "mage-tab", KeyGrep2 = "sdrf.txt")
+    toDdl <- paste(Description, key2a, toDdl, sep = "")
+    
+    x <- .DownloadURL(toDdl)
+    x <- strsplit(x, "\t")
+    x <- matrix(unlist(x), nrow = length(x), byrow = T)
+    x <- gsub("\r", "", x)
+    colnames(x) <- x[1, ]
+    x <- x[-1, ]
+    rownames(x) <- x[, "Hybridization Name"]
+    
+    colnames(geData) <- x[colNames, "Comment [TCGA Barcode]"]
+  }
+  
+  if(PlatformType == "human1mduo" | PlatformType == "humanhap550"){
+    geData <- tmpData
+  }
+  
+  
+  if(PlatformType == "illuminadnamethylation_oma003_cpi" | PlatformType == "illuminadnamethylation_oma002_cpi" | PlatformType == "hg-u133_plus_2" | PlatformType == "h-mirna_8x15kv2" | PlatformType == "h-mirna_8x15k){
+    tmpData <- tmpData[-1, ]
+    geData <- matrix(0, nrow = nrow(tmpData), ncol = length(lf))
+    rownames(geData) <- tmpData$Hybridization.REF
+    colNames <- rep("", ncol(geData))
+    for(i in 1:length(lf)){
+      tmpData <- read.csv(lf[i], stringsAsFactors = FALSE, sep = ",")
+      tmpData <- tmpData[-1, -1]
+      expr <- tmpData[, 2]
+      expr[expr == "N/A"] <- NA
+      geData[, i] <- as.numeric(expr)
+      colNames[i] <- gsub(".", "-", colnames(tmpData)[2], fixed = T)
+      print(i)
+    }
+    colnames(geData) <- colNames
+  }
   
   
   setwd(FolderWd)
