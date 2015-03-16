@@ -7,52 +7,31 @@
   x2  <- as.matrix(sapply(strsplit(x2, ">"), function(y) y[2]))
   x2  <- as.matrix(sapply(strsplit(x2, "<"), function(y) y[1]))
   site2 <- paste(Description, x2,sep="" )
+  if(length(grep("lost",x))!=0) x <- x[-grep("lost", x)] 
   return(site2)
 }
 
 .DownloadURL <- function(Site){
-  opts = curlOptions(ftp.use.epsv = T,
-                     dirlistonly = T,
-                     ssl.verifypeer = F,
-                     timeout = 50)
-  handle = getCurlHandle(.opts = opts)
-  Site <- URLencode(Site)
-  
-  bo1 = T
-  count1 = 0
-  while(bo1){
-    bo1 = !url.exists(Site, .opts = opts)
-    count1 = count1 + 1
-    if(count1>1) {
-      print(paste("Reonnection to the url #",count1,sep=""))
-      Sys.sleep(1)
+  bo2 = T
+  count <- 0
+  handle_find(url)
+  while(bo2){
+    request = try(GET(url), silent = T)
+    if( class(request) == "try-error"){
+      Sys.sleep(2)
+      bo2 = T
+      count = count + 1
+      handle_find(url)
+      if(count%%10==0) print(paste("Reconnection attempt #",count,sep=""))
+    }else if(count==200){
+      stop("Connetion limit exceded. Check your internet connection and your proxy settings.")
+    }else{
+      bo2 = F
     }
-    if(count1 == 20) stop(paste("The url (",Site,") is not existing or not available.
-                                Please check your internet connection or contact the mantainers for an update.",sep=""))
   }
+  u<-read.table(textConnection(content(request, as = 'text')), sep = ",", header = T)
   
-  if(interactive() && ("ssl" %in% names(curlVersion()$features))) {
-    bo2 = T
-    count <- 0
-    while(bo2){
-      x = try(getURLContent(Site, verbose = F, curl = handle))
-      if( class(x) == "try-error"){
-        Sys.sleep(1)
-        bo2 = T
-        count = count + 1
-        if(count>=1) print(paste("Reconnection attempt #",count,sep=""))
-      }else if(count==20){
-        stop("Connetion limit exceded. Check your internet connection and your proxy settings.")
-      }else{
-        bo2 = F
-      }
-    }
-  }else{
-    stop("Curl is not configured for ssl.")
-  }
-  
-  x <- unlist(strsplit(x, "\n"))
-  return(x)
+  return(deparse(u)) 
   }
 
 .DownloadManifest <- function(siteNewLevel){
