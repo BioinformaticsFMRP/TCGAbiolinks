@@ -11,7 +11,7 @@
   return(site2)
 }
 
-.DownloadURL <- function(Site){
+.DownloadURL <- function(url){
   bo2 = T
   count <- 0
   handle_find(url)

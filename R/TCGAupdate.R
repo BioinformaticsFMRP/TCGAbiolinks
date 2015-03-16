@@ -3,9 +3,9 @@
 #setwd(wdpath)
 #load("PlatformAndAssociatedData_2015_03_11.Rdata")
 
-TCGAupdate <- function(token=1, wdpath,PlatformAndAssociatedData){
+TCGAupdate <- function(PlatformAndAssociatedData, wdpath = getwd()){
 #token means that you can restart from row where it stopped, problem with 76,78,86,94, 104, 106, 131
-
+token <- 1
 for( w in token: nrow(PlatformAndAssociatedData)){
   tmp <- PlatformAndAssociatedData[w,]
   key1a<- paste(unique(tmp$CenterType), unique(tmp$Center), unique(tmp$Platform), sep="/")
