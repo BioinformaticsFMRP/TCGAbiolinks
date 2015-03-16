@@ -217,7 +217,7 @@ TCGAPrepare<- function(Tumor, PlatformAndAssociatedData, sdrfFolder = "", downlo
   }
   
   
-  if(PlatformType == "illuminadnamethylation_oma003_cpi" | PlatformType == "illuminadnamethylation_oma002_cpi" | PlatformType == "hg-u133_plus_2" | PlatformType == "h-mirna_8x15kv2" | PlatformType == "h-mirna_8x15k){
+  if(PlatformType == "illuminadnamethylation_oma003_cpi" | PlatformType == "illuminadnamethylation_oma002_cpi" | PlatformType == "hg-u133_plus_2" | PlatformType == "h-mirna_8x15kv2" | PlatformType == "h-mirna_8x15k"){
     tmpData <- tmpData[-1, ]
     geData <- matrix(0, nrow = nrow(tmpData), ncol = length(lf))
     rownames(geData) <- tmpData$Hybridization.REF
