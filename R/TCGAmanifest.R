@@ -1,21 +1,33 @@
 TCGAmanifest <- function(Tumor){
   FolderWd <- getwd()
-  siteTCGA <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"
   .createDirectory("TCGAsdrf")
   setwd("./TCGAsdrf")
+  on.exit(setwd(FolderWd))
+
+  siteTCGA <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"
   tmplf <- PlatformAndAssociatedData[PlatformAndAssociatedData$Tumor %in% tolower(Tumor),]
-  token <- 1
-  for ( w in token: nrow( tmplf)){
+  for (w in 1:nrow(tmplf)){
     tmp <- tmplf[w,]
     if(tmp["FileName"] == "") next
-    key1a<- paste(unique(tmp$CenterType), unique(tmp$Center), unique(tmp$Platform), sep="/")
-    Description <- paste(siteTCGA, tolower(tmp$Tumor), "/",key1a, sep="")
-    DescriptionSite <- paste(Description, tmp$Folder, tmplf[w,"FileName"], sep="/")
-    x <- .DownloadURL(DescriptionSite)
-    #x <- .DownloadData_fromURL(DescriptionSite)
-    writeLines(x, gsub("/","_",tmplf[w,"FileName"]))
-    
-    print(paste(w, " of ", nrow(tmplf ), " ", tmplf[w,"FileName"]),sep="")
+    key1a <- paste(unique(tmp$CenterType),
+                   unique(tmp$Center),
+                   unique(tmp$Platform),
+                   sep="/"
+                   )
+    Description <- paste0(siteTCGA,
+                          tolower(tmp$Tumor),
+                          "/",
+                          key1a)
+    DescriptionSite <- paste(Description,
+                             tmp$Folder,
+                             tmplf[w,"FileName"],
+                             sep="/"
+                             )
+
+    file <- gsub("/","_",tmplf[w,"FileName"])
+    # shoul see if the file was updated
+    if (!file.exists(file))
+      downloader::download(DescriptionSite, file )
+    print(paste0(w, " of ", nrow(tmplf)," ", file))
   }
-  setwd(FolderWd)
 }
