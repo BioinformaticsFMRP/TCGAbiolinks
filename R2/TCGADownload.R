@@ -1,6 +1,6 @@
 #' @title TCGA Download
-#' 
-#' 
+#'
+#'
 
 TCGADownload <-function(fileLocation, earlyStop = 0){
   mainDir <- createDir("data/final")
@@ -13,7 +13,7 @@ TCGADownload <-function(fileLocation, earlyStop = 0){
                                    strsplit(fileLocation[k], split='/', fixed=TRUE)[[1]][15],
                                    sep="/"),
                   mode="w",
-                  quiet = 1) 
-      print(paste("Downloaded ",k," out of ",length(fileLocation),sep=""))
+                  quiet = 1)
+      print(paste("Downloaded",k,"out of",length(fileLocation),sep=" "))
   }
 }
