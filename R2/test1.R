@@ -1,3 +1,6 @@
+
+#setwd(the place in which you have R2 and data)
+
 source("R2/TCGADownload.R")
 source("R2/TCGAQuery.R")
 source("R2/TCGAInternal.R")
@@ -17,4 +20,3 @@ if(require(downloader) == F) install.packages("downloader")
 x <- TCGAQuery(tumor = "acc", platform = "genome_wide_snp_6",centerType = "cgcc",level=3)
 
 TCGADownload(x,20) #earlyStop provided. Something about the stability of the connection and the ongoing situation must be done
-
