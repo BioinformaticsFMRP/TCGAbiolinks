@@ -59,23 +59,22 @@ TCGAQuery <- function(tumor = "all",
     ret = NULL
     dataDir<-createDir("data/query")
     if(is.null(nrow(x))){
-      download.file(x["Manifest"],
+      download(x["Manifest"],
                     destfile = paste(dataDir,"/filenames.txt",sep=""),
-                    mode="rw",
-                    method = "curl",
-                    quiet = 1)
+                    mode="a",
+                    quiet = 0)
       ret <- paste(unlist(strsplit(x["Manifest"], split='MANIFEST.txt', fixed=TRUE)),
                    as.character(read.table(file = paste(dataDir,"/filenames.txt",sep=""))[2]$V2),sep="")
       print("Donwloaded.")
     }else{
       for(j in 1:length(x[,"Tumor"])){
-        download.file(x[,"Manifest"][j],
+        download(x[,"Manifest"][j],
                       destfile = paste(dataDir,"/filenames.txt",sep=""),
                       mode="a",
-                      method = "curl",
                       quiet = 1) #character. The mode with which to write the file. 
                                  #Useful values are "w", "wb" (binary), "a" (append) and "ab". 
                                  #Only used for the "internal" method.
+                      #APPEND IS NOT WORKING
         if(as.integer(j*100/(length(x[,"Tumor"])))%%5 == 0) 
                       print(paste("Downloaded: ",as.integer(j*100/(length(x[,"Tumor"]))),"%",sep=""))
         
