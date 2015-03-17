@@ -132,8 +132,7 @@
     }
   }
   toDir = paste(base, i, sep="")
-  dir.create(toDir)
-  #dir.create(base, showWarnings = FALSE, recursive = FALSE, mode = "0777")
+  dir.create(toDir, showWarnings = FALSE, recursive = FALSE, mode = "0777")
   
   toDir
 }
