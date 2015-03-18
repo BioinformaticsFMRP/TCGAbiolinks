@@ -36,9 +36,11 @@ TCGAVersionDetailed <- function(Tumor,
   for (i in 1: nrow(versionMat)){
 
     linkToVersion <- paste0(Description,key2a,versionMat$Version[i])
+
+    # For each folder, get children info
     samplesInfo   <- findSampleVersions(listSample,
                                         linkToVersion,
-                                        versionMat$Version[i]
+                                        sdrfFolder
                                         )
 
     print(paste("Version", i , "of", nrow(versionMat),
@@ -65,7 +67,7 @@ TCGAVersionDetailed <- function(Tumor,
 
     versionMat$SizeMbyte[i] <- getTotalSize(sizeList)
     versionMat$Samples[i]   <- length(sizeList)
-    versionMat$Version[i]   <- findSampleVersions(listSample,)
+    versionMat$Version[i]   <- samplesInfo
 
   }
   return(versionMat)
@@ -78,12 +80,14 @@ TCGAVersionDetailed <- function(Tumor,
 #        sdrfFolder: folder created by TCGAmanifest
 findSampleVersions <- function (listSample,
                                 linkToVersion,
-                                sdrfFolder="/Users/tiago/Downloads/trash/TCGAsdrf/"){
+                                sdrfFolder){
 
-  lstFileSdrf <- list.files(file.path(sdrfFolder))
-  lstFileSdrf_plt <- lstFileSdrf[grep(tolower(PlatformType), tolower(lstFileSdrf))]
-  listSample_fromSdrf <- read.delim(paste( sdrfFolder,  lstFileSdrf_plt,sep=""))
+  # From manifest files - get samples info
+  lstFileSdrf     <- list.files(file.path(sdrfFolder))
+  lstFileSdrfPlat <- lstFileSdrf[grep(tolower(PlatformType), tolower(lstFileSdrf))]
+  listSampleSdrf  <- read.delim(paste0( sdrfFolder, lstFileSdrfPlat))
 
+  # Get hhtp page content and filter to get only sample files
   ftpContent <- .DownloadURL(linkToVersion)
   files <-  ftpContent[grep("[a-z0-9]{8}-[a-z0-9]{4}", ftpContent)]
 
@@ -91,7 +95,7 @@ findSampleVersions <- function (listSample,
   versionMat  <- as.data.frame(matrix(0,length(files),5))
   colnames(versionMat) <- c("file","uuid","barcode","Date","Size")
 
-  # inserting data into matrix (uuid, data, size, barcode)
+  # inserting data into matrix (version, uuid, data, size, barcode)
   aux  <- as.matrix(unlist(strsplit(files, "  ")))
   filesName <- aux[grep("[a-z0-9]{8}-[a-z0-9]{4}",aux)]
   fileAux <- unlist(strsplit(unlist(strsplit(filesName,">")),"="))
@@ -105,7 +109,7 @@ findSampleVersions <- function (listSample,
       print(paste("Finding uuid for", length(listSample), "samples with TCGA barcode selected",sep=" "))
 
       for( g in 1:length(files) ){
-        tmpsdrf <-  listSample_fromSdrf[ as.character(listSample_fromSdrf$Extract.Name) ==  as.character(versionMat$uuid[g]),]
+        tmpsdrf <-  listSampleSdrf[ as.character(listSampleSdrf$Extract.Name) ==  as.character(versionMat$uuid[g]),]
         tmpbarcode <- as.character(tmpsdrf$Comment..TCGA.Barcode.)[1]
         if(length(tmpbarcode) == 0 ) next
         versionMat$barcode[g] <- as.character(tmpsdrf$Comment..TCGA.Barcode.)[1]
