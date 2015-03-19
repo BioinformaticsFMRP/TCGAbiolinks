@@ -6,7 +6,7 @@
 \usage{
 
   TCGAUpdate(siteTCGA = "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/",
-  tableLocation = "inst/extdata/")
+  tableLocation = "data/")
 }
 \arguments{
 \item{siteTCGA}{The starting ftp URI}
@@ -14,9 +14,10 @@
 \item{tableLocation}{The place in which you keep the data matrix}
 }
 \description{
-replace the dataMatrix.rda matrix with the new matrix from "The Cancer Genome Atlas" ftp
-TCGAUpdate(siteTCGA="https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"
-,tableLocation="inst/extdata/")
+replace the dataFolders.rda matrix with the new matrix from "The Cancer Genome Atlas" ftp
+TCGAUpdate(
+siteTCGA
+,tableLocation="data/")
 }
 \author{
 Davide

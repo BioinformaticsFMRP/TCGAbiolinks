@@ -4,16 +4,19 @@
 \alias{TCGADownload}
 \title{TCGA Download}
 \usage{
-TCGADownload(fileURL, earlyStop = 0)
+TCGADownload(dirURL = "data/query/", finalDir = "data/final",
+  earlyStop = 0)
 }
 \arguments{
-\item{fileURL}{The character list of URLs referring to the exact location of the data queried}
+\item{dirURL}{the location of the query saved URL links.}
+
+\item{finalDir}{location of the final data saving}
 
 \item{earlyStop}{If the number of file is too large for you need you can choose a subset}
 }
 \description{
 Download data previously selected using the TCGAQuery function
-TCGADownload(fileURL, earlyStop = 0)
+TCGADownload(dirURL="data/query/", finalDir = "data/final", earlyStop = 0)
 }
 \author{
 Davide
