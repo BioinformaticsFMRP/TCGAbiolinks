@@ -3,6 +3,13 @@
 
 #I don't know how to make that data internal, that's the cause of the first constriction. Any help?
 
+if(TRUE %in% grepl("TCGADownloader", installed.packages())){
+  pkg <- c("package:TCGADownloader")
+  lapply(pkg, detach, character.only = TRUE, unload = TRUE)
+  remove.packages("TCGADownloader")
+  rm(pkg)
+}
+
 
 #setwd("whatever works")
 setwd("Documents/MasterThesis/proj1 - TCGAbiolinks/")
@@ -15,6 +22,6 @@ library(TCGADownloader)
 #you are ready to go. 
 
 
-x <- TCGAQuery(tumor = "acc", platform = "genome_wide_snp_6",centerType = "cgcc",level=3)
+TCGAQuery(tumor = "acc", platform = "genome_wide_snp_6",centerType = "cgcc",level=3)
 
-TCGADownload(x,20) #earlyStop provided
+TCGADownload(earlyStop = 150) #earlyStop provided

@@ -2,7 +2,8 @@
 #'
 #' @description  Crossfinding of file locations for downloading (TCGADownload)
 #' TCGAQuery(tumor = "all",centerType = "all",center = "all",
-#' platform = "all",level = "all",version = "all",i = F,file = "data/dataFolders.rda")
+#' platform = "all",level = "all",version = "all",i = F,file = "data/dataFolders.rda",
+#' qOutput = "data/query/")
 #' @param tumor tumor code
 #' @param centerType type code
 #' @param center center code
@@ -11,6 +12,8 @@
 #' @param version version code -TO DO-
 #' @param i - interactive -TO DO-
 #' @param file - link reference data matrix
+#' @param qOutput place where the query is saved to be downloaded automatically. 
+#'        The folder can be specified in both TCGAQuery and TCGADownload
 #' 
 #' @author Davide
 #' 
@@ -25,7 +28,8 @@ TCGAQuery <- function(tumor = "all",
                       level = "all",
                       version = "all",
                       i = F,
-                      file = "data/dataFolders.rda"){
+                      file = "data/dataFolders.rda",
+                      qOutput = "data/query/"){
   load(file = file) #please add a way to access the package data storing
   if(!i){
     ifelse(tumor != "all",x<-subset(dataFolders, dataFolders[,"Tumor"] == tolower(tumor)),x<-dataFolders)
@@ -65,20 +69,20 @@ TCGAQuery <- function(tumor = "all",
       print(paste("Found:", length(x[,1]), "folders. Start downloading filenames:",sep=" "))
     }
 
-    ret = NULL
-    dataDir<-createDir("data/query")
+    queryURI = NULL
+    dir.create(path = qOutput, showWarnings = F)
     if(is.null(nrow(x))){
       download(x["Manifest"],
-                    destfile = paste(dataDir,"/filenames.txt",sep=""),
+                    destfile = paste(qOutput,"/filenames.txt",sep=""),
                     mode="w",
                     quiet = 1)
-      ret <- paste(unlist(strsplit(x["Manifest"], split='MANIFEST.txt', fixed=TRUE)),
-                   as.character(read.table(file = paste(dataDir,"/filenames.txt",sep=""))[2]$V2),sep="")
+      queryURI <- paste(unlist(strsplit(x["Manifest"], split='MANIFEST.txt', fixed=TRUE)),
+                   as.character(read.table(file = paste(qOutput,"/filenames.txt",sep=""))[2]$V2),sep="")
       print("Donwloaded.")
     }else{
       for(j in 1:length(x[,"Tumor"])){
         download(x[,"Manifest"][j],
-                      destfile = paste(dataDir,"/filenames.txt",sep=""),
+                      destfile = paste(qOutput,"/filenames.txt",sep=""),
                       mode="w",
                       quiet = 1) #character. The mode with which to write the file.
                                  #Useful values are "w", "wb" (binary), "a" (append) and "ab".
@@ -86,12 +90,15 @@ TCGAQuery <- function(tumor = "all",
                       #APPEND IS NOT WORKING
 
         print(paste("Downloaded:",j,"out of",length(x[,"Tumor"]),sep=" "))
-        ret<-c(ret,paste(unlist(strsplit(x[,"Manifest"][j], split='MANIFEST.txt', fixed=TRUE)),
-              as.character(read.table(file = paste(dataDir,"/filenames.txt",sep=""))[2]$V2),sep=""))
+        queryURI<-c(queryURI,paste(unlist(strsplit(x[,"Manifest"][j], split='MANIFEST.txt', fixed=TRUE)),
+              as.character(read.table(file = paste(qOutput,"/filenames.txt",sep=""))[2]$V2),sep=""))
+        unlink(paste(qOutput,"/filenames.txt",sep=""))
       }
     }
   }
-  print(paste("We found",length(ret),"files",sep=" "))
-  return(ret)
+  print(paste("We found",length(queryURI),"files",sep=" "))
+  save(queryURI, file = paste(qOutput,"/fileURLs.rda",sep=""))
+  #todo - add the showing of the result in a human readable way
+  #return(queryURI)
 }
 

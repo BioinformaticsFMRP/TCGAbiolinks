@@ -24,13 +24,6 @@ Davide
 Maintainer: Who to complain to <yourfault@somewhere.net>
 
 }
-\references{
 
-}
 
 \keyword{ package }
-\seealso{
-}
-\examples{
-
-}
