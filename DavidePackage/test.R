@@ -21,7 +21,9 @@ library(TCGADownloader)
 #
 #you are ready to go. 
 
+TCGAQuery(tumor = "lihc", platform = "mixed_dnaseq_curated",centerType = "gsc",level=2)
 
-TCGAQuery(tumor = "acc", platform = "genome_wide_snp_6",centerType = "cgcc",level=3)
+
+#TCGAQuery(tumor = "acc", platform = "genome_wide_snp_6",centerType = "cgcc",level=3)
 
 TCGADownload(earlyStop = 150) #earlyStop provided

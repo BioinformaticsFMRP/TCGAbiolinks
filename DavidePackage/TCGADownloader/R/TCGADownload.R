@@ -23,7 +23,7 @@ TCGADownload <-function(dirURL="data/query/", finalDir = "data/final", earlyStop
   load(paste(dirURL,"fileURLs.rda",sep=""))
   finalDir <- createDir(finalDir)
   t1 = Sys.time()
-  if(earlyStop==0) earlyStop <- length(queryURI)
+  if(earlyStop==0 || earlyStop > length(queryURI)) earlyStop <- length(queryURI)
   for(k in 1:earlyStop){
     dir<-paste(finalDir, strsplit(queryURI[k], split='/', fixed=TRUE)[[1]][14],sep="/")
     dir.create(dir, showWarnings = F)
@@ -35,7 +35,8 @@ TCGADownload <-function(dirURL="data/query/", finalDir = "data/final", earlyStop
                   quiet = 1)
       print(paste("Downloaded",k,"out of",length(queryURI),sep=" "))
     if(k%%10==0) print(paste("Estimated time for the end of the process:",
-                             (as.numeric(difftime(Sys.time(), t1, units="min"))/k)*earlyStop, "minutes", sep=" "))
+                             (as.numeric(difftime(Sys.time(), t1, units="min"))/k)*earlyStop - 
+                               as.numeric(difftime(Sys.time(), t1, units="min")), "minutes", sep=" "))
   }
   rm(t1)
 }
