@@ -6,7 +6,7 @@
 \usage{
 TCGAQuery(tumor = "all", centerType = "all", center = "all",
   platform = "all", level = "all", version = "all", i = F,
-  file = "inst/extdata/dataMatrix.rda")
+  file = "data/dataFolders.rda", qOutput = "data/query/")
 }
 \arguments{
 \item{tumor}{tumor code}
@@ -24,11 +24,15 @@ TCGAQuery(tumor = "all", centerType = "all", center = "all",
 \item{i}{- interactive -TO DO-}
 
 \item{file}{- link reference data matrix}
+
+\item{qOutput}{place where the query is saved to be downloaded automatically.
+       The folder can be specified in both TCGAQuery and TCGADownload}
 }
 \description{
 Crossfinding of file locations for downloading (TCGADownload)
 TCGAQuery(tumor = "all",centerType = "all",center = "all",
-platform = "all",level = "all",version = "all",i = F,file = "inst/extdata/dataMatrix.rda")
+platform = "all",level = "all",version = "all",i = F,file = "data/dataFolders.rda",
+qOutput = "data/query/")
 }
 \author{
 Davide

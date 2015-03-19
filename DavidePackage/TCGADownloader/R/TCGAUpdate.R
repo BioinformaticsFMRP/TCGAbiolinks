@@ -1,8 +1,8 @@
 #'@title TCGAUpdate
 #'
 #'@description replace the dataFolders.rda matrix with the new matrix from "The Cancer Genome Atlas" ftp
-#'TCGAUpdate(siteTCGA="https://tcga-data.nci.nih.gov/tcgafiles/
-#'ftp_auth/distro_ftpusers/anonymous/tumor/"
+#'TCGAUpdate(
+#'siteTCGA
 #',tableLocation="data/")
 #'
 #'@param siteTCGA The starting ftp URI
