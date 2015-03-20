@@ -1,10 +1,15 @@
+
+#setwd(the place in which you have R2 and data)
+
 source("R2/TCGADownload.R")
 source("R2/TCGAQuery.R")
 source("R2/TCGAInternal.R")
 source("R2/TCGAUpdate.R")
 
 if(require(httr) == F) install.packages("httr")
+if(require(downloader) == F) install.packages("downloader")
 
+#TCGAUpdate()
 
 #after having updated the platform names matrix using:
 #TCGAUpdate()
