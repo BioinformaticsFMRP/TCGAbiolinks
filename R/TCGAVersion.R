@@ -30,44 +30,32 @@ TCGAVersionDetailed <- function(Tumor,
   versionMat <- cbind(versionMat,
                       Samples = matrix(0, nrow(versionMat),1),
                       SizeMbyte = matrix(0, nrow(versionMat),1)
-                      )
+  )
   print(paste("Found", nrow(versionMat), "Version of", PlatformType, sep = " "))
 
   for (i in 1: nrow(versionMat)){
 
-    linkToVersion <- paste0(Description,key2a,versionMat$Version[i])
-
-    # For each folder, get children info
-    samplesInfo   <- findSampleVersions(listSample,
-                                        linkToVersion,
-                                        sdrfFolder
-                                        )
-
     print(paste("Version", i , "of", nrow(versionMat),
                 versionMat$Version[i], "...done",
                 sep=" ")
-          )
-    x <- .DownloadURL(linkToVersion)
+    )
+    linkToVersion <- paste0(Description,key2a,versionMat$Version[i])
+    ftpContent <- .DownloadURL(linkToVersion)
+    ftpContent <- as.matrix(unlist(strsplit(ftpContent, "  ")))
+    filesName <-  ftpContent[grep("[a-z0-9]{8}-[a-z0-9]{4}", ftpContent)]
+    uuid <- substr(filesName, 17,52)
 
-    if(PlatformType == "illuminahiseq_rnaseq"  ){ x <- x[grep("gene.quantification" , x)]}
-    if(PlatformType == "agilentg4502a_07_3"    ){ x <- x[grep("tcga_level3"         , x)]}
-    if(PlatformType == "illuminahiseq_rnaseqv2"){ x <- x[grep("rsem.genes.results"  , x)]}
-    if(PlatformType == "humanmethylation27"    ){ x <- x[grep("HumanMethylation27"  , x)]}
-    if(PlatformType == "humanmethylation450"   ){ x <- x[grep("HumanMethylation450" , x)]}
-    if(PlatformType == "illuminaga_mirnaseq"   ){ x <- x[grep("mirna.quantification", x)]}
-    if(PlatformType == "genome_wide_snp_6"     ){ x <- x[grep("hg19.seg"            , x)]}
+    # For each folder, get children info
+    samplesInfo   <- findSampleVersions(listSample,
+                                        uuid,
+                                        sdrfFolder
+    )
 
-    sizeList <- sapply(strsplit(x, ":"),
-                    function(y) {
-                      sapply(strsplit(y[2], " "),
-                             function(z) z[3])
-                    }
-
-             )
+    sizeList <- ftpContent[grep("[0-9][K]{1}|[0-9][M]{1}", ftpContent)]
 
     versionMat$SizeMbyte[i] <- getTotalSize(sizeList)
     versionMat$Samples[i]   <- length(sizeList)
-    versionMat$Version[i]   <- samplesInfo
+    versionMat$Barcodes[i]   <- list(samplesInfo)
 
   }
   return(versionMat)
@@ -78,47 +66,28 @@ TCGAVersionDetailed <- function(Tumor,
 #        linkToVersion link to version
 #        version: father folder?
 #        sdrfFolder: folder created by TCGAmanifest
-findSampleVersions <- function (listSample,
-                                linkToVersion,
+findSampleVersions <- function (listSample=NULL,
+                                uuid,
                                 sdrfFolder){
-
-  # From manifest files - get samples info
-  lstFileSdrf     <- list.files(file.path(sdrfFolder))
-  lstFileSdrfPlat <- lstFileSdrf[grep(tolower(PlatformType), tolower(lstFileSdrf))]
-  listSampleSdrf  <- read.delim(paste0( sdrfFolder, lstFileSdrfPlat))
-
-  # Get hhtp page content and filter to get only sample files
-  ftpContent <- .DownloadURL(linkToVersion)
-  files <-  ftpContent[grep("[a-z0-9]{8}-[a-z0-9]{4}", ftpContent)]
-
-  # creating output matrix
-  versionMat  <- as.data.frame(matrix(0,length(files),5))
-  colnames(versionMat) <- c("file","uuid","barcode","Date","Size")
-
-  # inserting data into matrix (version, uuid, data, size, barcode)
-  aux  <- as.matrix(unlist(strsplit(files, "  ")))
-  filesName <- aux[grep("[a-z0-9]{8}-[a-z0-9]{4}",aux)]
-  fileAux <- unlist(strsplit(unlist(strsplit(filesName,">")),"="))
-  versionMat$file <- fileAux[-grep("<",fileAux)]
-  versionMat$uuid <- substr(filesName, 17,52)
-  versionMat$Date <- aux[grep(":",aux)]
-  versionMat$Size <- aux[grep("[0-9]K|[0-9]M",aux)]
-
+  barcode <- c()
+  #look for a listsample inside version
   if(length(listSample)!=0){
+    # From manifest files - get samples info uuid and barcode
+    lstFileSdrf     <- list.files(file.path(sdrfFolder))
+    lstFileSdrfPlat <- lstFileSdrf[grep(tolower(PlatformType), tolower(lstFileSdrf))]
+    listSampleSdrf  <- read.delim(paste0( sdrfFolder, lstFileSdrfPlat))
+
+    # search if the barcode is in the version
     if(PlatformType == "illuminahiseq_rnaseqv2" || PlatformType == "illuminahiseq_totalrnaseqv2"){
       print(paste("Finding uuid for", length(listSample), "samples with TCGA barcode selected",sep=" "))
-
-      for( g in 1:length(files) ){
-        tmpsdrf <-  listSampleSdrf[ as.character(listSampleSdrf$Extract.Name) ==  as.character(versionMat$uuid[g]),]
-        tmpbarcode <- as.character(tmpsdrf$Comment..TCGA.Barcode.)[1]
-        if(length(tmpbarcode) == 0 ) next
-        versionMat$barcode[g] <- as.character(tmpsdrf$Comment..TCGA.Barcode.)[1]
-      }
-      versionMat <- versionMat[!(is.na(versionMat$barcode)),]
-      versionMat <- versionMat[substr(versionMat$barcode,1,nchar(listSample[1])) %in% listSample,]
+        fileBarcode <- substr(as.character(listSampleSdrf$Comment..TCGA.Barcode.) ,1,nchar(listSample[1]))
+        tmpsdrf <-  listSampleSdrf[ fileBarcode %in%  as.character(listSample),]
+        tmpbarcode <- unique(as.character(tmpsdrf$Comment..TCGA.Barcode.))
+        if(length(tmpbarcode) != 0 ) barcode <- tmpbarcode
     }
   }
-  return (versionMat)
+
+  return (barcode)
 }
 # param sizeList - list of sizes in KB, MB
 # output total size in MB
