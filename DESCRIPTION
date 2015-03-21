@@ -3,8 +3,18 @@ Type: Package
 Title: Download data from TCGA
 Version: 1.0
 Date: 2015-02-09
-Author: Antonio Colaprico, Luciano Garofano, Claudia Cava, Gianluca Bontempi, Michele Ceccarelli
+Author: Antonio Colaprico,
+        Luciano Garofano,
+        Claudia Cava,
+        Gianluca Bontempi,
+        Michele Ceccarelli,
+        Davide,
+        Tiago Chedraoui Silva
 Maintainer: Antonio Colaprico <antonio.colaprico@ulb.ac.be>
-Depends: R (>= 3.1.1), RCurl, bitops, httr
+Depends: R (>= 3.1.1)
+Imports:  downloader,
+          RCurl,
+          bitops,
+          httr,
 Description: Query Download and Preprocess data from TCGA portal
 License: GPL (>= 3)
