@@ -1,25 +1,37 @@
-# @title .onAttach
-# @description  Load required data into gloval enviroment
-# @keywords internal
+#' @title .onAttach
+#' @description  Load required data into gloval enviroment
+#' @keywords internal
 .onAttach <- function (libname, pkgname){
   load(file = system.file("extdata/PlatformMat.rda",
                           package="TCGAbiolinks"),
        .GlobalEnv)
 }
 
+#' @title Creates a directory
+#'
+#' @description Internal use only.
+#'
+#' @param base directory path
+#' @keywords internal
 createDir <- function(base){
   i="";
-  while(file.exists(paste(base, i, sep=""))){
+  while(file.exists(paste0(base, i))){
     if(i==""){
       i=1;
     }else{
       i=i+1;
     }
   }
-  toDir = paste(base, i, sep="")
+  toDir = paste0(base, i)
   dir.create(toDir, showWarnings = F, recursive = T, mode = "0777")
   toDir
 }
+
+#' @title DownloadHTML
+#' @description DownloadHTML content.
+#' @param url url path
+#' @keywords internal
+#' @import RCurl httr
 DownloadHTML <- function(url){
   bo2 = T
   count <- 0
@@ -44,6 +56,7 @@ DownloadHTML <- function(url){
 
   return(deparse(u))
 }
+
 GrepSite <- function(x,Key){
   x <- x[grep(Key, x)]
   x = sapply(strsplit(x, ">"), function(y) y[2])
@@ -52,42 +65,6 @@ GrepSite <- function(x,Key){
   if(length(grep("lost",x))!=0) x <- x[-grep("lost", x)]
   return(x)
 }
-
-.FindGrepSite <- function(x,Key,Description){
-  x2 <- x[grep(Key, x)]
-
-  if( Key != "sdrf"){ x2 <- x2 [- grep("tar.gz", x2)][1] }
-
-
-  x2  <- as.matrix(sapply(strsplit(x2, ">"), function(y) y[2]))
-  x2  <- as.matrix(sapply(strsplit(x2, "<"), function(y) y[1]))
-  site2 <- paste(Description, x2,sep="" )
-  if(length(grep("lost",x))!=0) x <- x[-grep("lost", x)]
-  return(site2)
-}
-
-.DownloadURL <- function(url){
-  bo2 = T
-  count <- 0
-  handle_find(url)
-  while(bo2){
-    request = try(GET(url), silent = T)
-    if( class(request) == "try-error"){
-      Sys.sleep(2)
-      bo2 = T
-      count = count + 1
-      handle_find(url)
-      if(count%%10==0) print(paste("Reconnection attempt #",count,sep=""))
-    }else if(count==200){
-      stop("Connetion limit exceded. Check your internet connection and your proxy settings.")
-    }else{
-      bo2 = F
-    }
-  }
-  u<-read.table(textConnection(content(request, as = 'text')), sep = ",", header = T)
-
-  return(deparse(u))
-  }
 
 .DownloadManifest <- function(siteNewLevel){
   site3 <- paste(siteNewLevel, "MANIFEST.txt",sep="")
@@ -176,30 +153,12 @@ GrepSite <- function(x,Key){
 
 }
 
-#' @title Creates a directory
-#'
-#' @description Internal use only.
-#'
-#' @param base directory path
+#' @title DownloadData_fromURL
+#' @description Download HTML content.
+#' @param url url path
 #' @keywords internal
-
-.createDirectory <- function(base){
-  i="";
-  while(file.exists(paste(base, i, sep=""))){
-    if(i==""){
-      i=1;
-    }else{
-      i=i+1;
-    }
-  }
-  toDir = paste(base, i, sep="")
-  dir.create(toDir, showWarnings = FALSE, recursive = FALSE, mode = "0777")
-
-  toDir
-}
-
+#' @import httr
 .DownloadData_fromURL <- function(url, sep = ",", header = TRUE){
-  require(httr)
   handle_find(url)
   handle_reset(url)
   request <- GET(url)
