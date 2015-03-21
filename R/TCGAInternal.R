@@ -2,11 +2,10 @@
 # @description  Load required data into gloval enviroment
 # @keywords internal
 .onAttach <- function (libname, pkgname){
-  load(file = system.file("extdata/PlatformAndAssociatedData_WebSites3.RData",
+  load(file = system.file("extdata/PlatformMat.rda",
                           package="TCGAbiolinks"),
        .GlobalEnv)
 }
-
 
 createDir <- function(base){
   i="";
