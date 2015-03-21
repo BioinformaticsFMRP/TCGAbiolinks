@@ -2,7 +2,9 @@
 
 export(TCGADownload)
 export(TCGAQuery)
+export(TCGAUpdate)
 export(TCGAVersion)
 import(RCurl)
 import(bitops)
+import(downloader)
 import(httr)
