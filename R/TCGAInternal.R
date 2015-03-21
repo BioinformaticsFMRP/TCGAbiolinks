@@ -1,13 +1,69 @@
+# @title .onAttach
+# @description  Load required data into gloval enviroment
+# @keywords internal
+.onAttach <- function (libname, pkgname){
+  load(file = system.file("extdata/PlatformAndAssociatedData_WebSites3.RData",
+                          package="TCGAbiolinks"),
+       .GlobalEnv)
+}
+
+
+createDir <- function(base){
+  i="";
+  while(file.exists(paste(base, i, sep=""))){
+    if(i==""){
+      i=1;
+    }else{
+      i=i+1;
+    }
+  }
+  toDir = paste(base, i, sep="")
+  dir.create(toDir, showWarnings = F, recursive = T, mode = "0777")
+  toDir
+}
+DownloadHTML <- function(url){
+  bo2 = T
+  count <- 0
+  handle_find(url)
+  while(bo2){
+    request = try(GET(url, timeout(100)), silent = T)
+    if( class(request) == "try-error"){
+      Sys.sleep(1)
+      bo2 = T
+      count = count + 1
+      handle_find(url)
+      if(count%%10==0) print(paste("Reconnection attempt #",count,sep=""))
+    }else if(count>=200){
+      stop("Connetion limit exceded. Check your internet connection and your proxy settings.
+           If you are downloading very big files (proteins for example) you should add the proper variable.
+           Take a look to the documentation. If the problem persists please contact the mantainers.")
+    }else{
+      bo2 = F
+    }
+  }
+  u<-read.table(textConnection(content(request, as = 'text')), sep = ",", header = T)
+
+  return(deparse(u))
+}
+GrepSite <- function(x,Key){
+  x <- x[grep(Key, x)]
+  x = sapply(strsplit(x, ">"), function(y) y[2])
+  x = sapply(strsplit(x, "<"), function(y) y[1])
+  x <- x[grep("/", x)]
+  if(length(grep("lost",x))!=0) x <- x[-grep("lost", x)]
+  return(x)
+}
+
 .FindGrepSite <- function(x,Key,Description){
   x2 <- x[grep(Key, x)]
-  
+
   if( Key != "sdrf"){ x2 <- x2 [- grep("tar.gz", x2)][1] }
-  
-  
+
+
   x2  <- as.matrix(sapply(strsplit(x2, ">"), function(y) y[2]))
   x2  <- as.matrix(sapply(strsplit(x2, "<"), function(y) y[1]))
   site2 <- paste(Description, x2,sep="" )
-  if(length(grep("lost",x))!=0) x <- x[-grep("lost", x)] 
+  if(length(grep("lost",x))!=0) x <- x[-grep("lost", x)]
   return(site2)
 }
 
@@ -30,8 +86,8 @@
     }
   }
   u<-read.table(textConnection(content(request, as = 'text')), sep = ",", header = T)
-  
-  return(deparse(u)) 
+
+  return(deparse(u))
   }
 
 .DownloadManifest <- function(siteNewLevel){
@@ -49,7 +105,7 @@
   x2  <- as.matrix(sapply(strsplit(x2, ">"), function(y) y[2]))
   x2  <- as.matrix(sapply(strsplit(x2, "<"), function(y) y[1]))
   site3 <- paste(siteNewLevel, x2,sep="" )
-  
+
   x <- .DownloadURL(site3)
   writeLines(x, "x2.txt" )
   tmp2 <- as.data.frame(read.delim("x2.txt",stringsAsFactors = F))
@@ -62,7 +118,7 @@
   x2  <- as.matrix(sapply(strsplit(x2, ">"), function(y) y[2]))
   x2  <- as.matrix(sapply(strsplit(x2, "<"), function(y) y[1]))
   site3 <- paste(siteNewLevel, x2,sep="" )
-  
+
   x <- .DownloadURL(site3)
   writeLines(x, "x2.txt" )
   tmp2 <- as.data.frame(read.delim("x2.txt",stringsAsFactors = F))
@@ -77,15 +133,15 @@
     siteNewLevel <- .FindGrepSite(x,Key="mage-tab",Description2)
     siteNewLevelSdrf <- DownloadSdrf(siteNewLevel)
     tmp2 <-  siteNewLevelSdrf$Comment..TCGA.Barcode.
-    
+
     if(typeProtein==T){
       siteNewLevelDesign <- DownloadTypeFile(siteNewLevel,"design")
       tmp2 <- siteNewLevelDesign$Sample.description
     }
-    
+
     tmp2 <- tmp2[grep("TCGA",tmp2)]
     NumberSample <- length(unique(substr(tmp2, startK, stopK)))
-    msgOUT <-  paste(Type, " ", SpecieCurr, " ",   CenterCurr, " ", unique(tmp4$Platform) , " " ,  " .n samples ", NumberSample, sep="")
+    msgOUT <-  paste(Type, SpecieCurr, CenterCurr, unique(tmp4$Platform) , ".n samples", NumberSample, sep=" ")
     print(msgOUT)
     SampleTmp <- unique(substr(tmp2, startK, stopK))
     idx<- which(names(TumorDataList) == unique(tmp4$Platform))
@@ -95,24 +151,30 @@
 }
 
 .DownloaDmageTAB_sdrf <- function(Description,keySpecies,KeyGrep1 = "mage-tab", KeyGrep2 = "sdrf"){
-  Description2 <- paste(Description, keySpecies, sep = "")
-  Description_i_ord <- paste(Description2, "?C=M;O=D", sep = "")
+  #Description2 <- paste(Description, keySpecies, sep = "")
+  Description_i_ord <- paste(Description, "?C=M;O=D", sep = "")
   x <- .DownloadURL(Description_i_ord)
+  print(keySpecies)
+  print(Description)
+
   if(length(x)!=10){
-    siteNewLevel <- .FindGrepSite(x,Key=KeyGrep1,Description2)
-    x <- .DownloadURL(siteNewLevel)
+    siteNewLevel <- .FindGrepSite(x,Key=KeyGrep1,Description)
+    print(siteNewLevel)
+    x <- .DownloadURL(x)
+    #print(x)
+    #print(KeyGrep2)
     x2 <- x[grep(KeyGrep2,x)]
-    
+    #print(x2)
     x2  <- as.matrix(sapply(strsplit(x2, ">"), function(y) y[2]))
     x2  <- as.matrix(sapply(strsplit(x2, "<"), function(y) y[1]))
     site3 <- paste(siteNewLevel, x2,sep="" )
     #site4 <- paste(keySpecies,unlist(strsplit(site3,keySpecies))[2],sep="")
     site4 <- unlist(strsplit(site3,keySpecies))[2]
-    
+
     print(site4)
     return(site4)
   } else{return("")}
-  
+
 }
 
 #' @title Creates a directory
@@ -133,7 +195,7 @@
   }
   toDir = paste(base, i, sep="")
   dir.create(toDir, showWarnings = FALSE, recursive = FALSE, mode = "0777")
-  
+
   toDir
 }
 
