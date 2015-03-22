@@ -14,7 +14,7 @@
 #' }
 #' @export
 #' @import downloader
-TCGADownload <-function(dirURL="data/query/", finalDir = "data/final", earlyStop = 0){
+TCGADownload <- function(dirURL="data/query/", finalDir="data/final", earlyStop = 0){
 
   # load query files if not yet done
   if(!exists(queryURI)) load(paste0(dirURL,"fileURLs.rda"))
@@ -24,11 +24,11 @@ TCGADownload <-function(dirURL="data/query/", finalDir = "data/final", earlyStop
   t1 = Sys.time()
   if(earlyStop==0 || earlyStop > length(queryURI)) earlyStop <- length(queryURI)
   for(k in 1:earlyStop){
-    dir<-paste(finalDir, strsplit(queryURI[k], split='/', fixed=TRUE)[[1]][14],sep="/")
+    dir <- paste(finalDir, basename(dirname(queryURI[k])),sep="/")
     dir.create(dir, showWarnings = F)
     download(queryURI[k],
              destfile = paste(dir,
-                              strsplit(queryURI[k], split='/', fixed=TRUE)[[1]][15],
+                              basename(queryURI[k]),
                               sep="/"),
              mode="w",
              quiet = 1)
