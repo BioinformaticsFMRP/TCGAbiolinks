@@ -1,185 +1,197 @@
-TCGAVersionDetailed <- function(Tumor,
-                                PlatformType,
-                                listSample=0,
-                                sdrfFolder,
-                                PlatformAndAssociatedData){
-  #downloadFolder<-paste(downloadFolder,PlatformType,"/",sep="")
-  #.createDirectory(PlatformType)
-  siteTCGA <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"
-  tmp <- PlatformAndAssociatedData[toupper(PlatformAndAssociatedData$Tumor) == toupper(Tumor)
-                                   & toupper(PlatformAndAssociatedData$Platform) == toupper(PlatformType), ]
+#' @title TCGA Version Detailed
+#'
+#' @description  TCGA Version Detailed
+#'
+#' @param tumor tumor code between "acc"  "blca" "brca" "cesc" "chol" "cntl" "coad" "dlbc" "esca" "fppp" "gbm"
+#'                                 "hnsc" "kich" "kirc" "kirp" "laml" "lcml" "lgg"  "lihc" "lnnh" "luad" "lusc"
+#'                                 "meso" "misc" "ov"   "paad" "pcpg" "prad" "read" "sarc" "skcm" "stad" "tgct"
+#'                                 "thca" "thym" "ucec" "ucs"  "uvm"
+#'
+#' @param centerType type code between "bcr"  "cgcc" "gsc"
+#'
+#' @param center center code between "biotab"                  "nationwidechildrens.org"
+#'                                   "bcgsc.ca"                "broad.mit.edu"
+#'                                   "jhu-usc.edu"             "mdanderson.org"
+#'                                   "unc.edu"                 "hgsc.bcm.edu"
+#'                                   "hms.harvard.edu"         "genome.wustl.edu"
+#'                                   "ucsc.edu"                "intgen.org"
+#'                                   "hudsonalpha.org"         "lbl.gov"
+#'                                   "mskcc.org"               "supplemental"
+#'
+#' @param platform platform code between  "clin"                                "bio"
+#'                                        "biotab"                              "diagnostic_images"
+#'                                        "pathology_reports"                   "tissue_images"
+#'                                        "illuminahiseq_mirnaseq"              "genome_wide_snp_6"
+#'                                        "humanmethylation450"                 "mda_rppa_core"
+#'                                        "illuminahiseq_rnaseqv2"              "illuminaga_dnaseq_curated"
+#'                                        "illuminaga_dnaseq_automated"         "illuminaga_dnaseq_cont_automated"
+#'                                        "mixed_dnaseq_curated"                "illuminaga_mirnaseq"
+#'                                        "illuminahiseq_dnaseqc"               "illuminahiseq_wgbs"
+#'                                        "illuminahiseq_rnaseq"                "illuminahiseq_totalrnaseqv2"
+#'                                        "illuminaga_dnaseq"                   "humanmethylation27"
+#'                                        "agilentg4502a_07_3"                  "illuminahiseq_dnaseq_automated"
+#'                                        "illuminahiseq_dnaseq_cont_automated" "miRNASeq"
+#'                                        "microsat_i"                          "illuminaga_rnaseq"
+#'                                        "illuminaga_rnaseqv2"                 "RNASeq"
+#'                                        "solid_dnaseq"                        "mixed_dnaseq_automated"
+#'                                        "minbio"                              "abi"
+#'                                        "ht_hg-u133a"                         "hg-cgh-244a"
+#'                                        "hg-cgh-415k_g4124a"                  "humanhap550"
+#'                                        "illuminadnamethylation_oma002_cpi"   "illuminadnamethylation_oma003_cpi"
+#'                                        "huex-1_0-st-v2"                      "agilentg4502a_07_1"
+#'                                        "agilentg4502a_07_2"                  "h-mirna_8x15k"
+#'                                        "h-mirna_8x15kv2"                     "mixed_dnaseq_cont"
+#'                                        "mixed_dnaseq"                        "mixed_dnaseq_cont_curated"
+#'                                        "hg-u133_plus_2"                      " "
+#'                                        "human1mduo"                          "cgh-1x1m_g4447a"
+#'                                        "illuminaga_mrna_dge"                 "solid_dnaseq_curated"
+#'
+#' @param level level 1 2 3
+#'
+#'@param barcode Get for each version all barcodes?
+#'               Default FALSE
+#'               Takes a lot of time to get barcode
+#' @param version version code -TO DO-
+#'
+#' @param file - link reference data matrix
+#'
+#' @param qOutput place where the query is saved to be downloaded automatically.
+#'        The folder can be specified in both TCGAQuery and TCGADownload
+#'
+#' @author Tiago
+#' @import stringr
+#' @export
+TCGAVersion <- function(tumor = "all",
+                        centerType = "all",
+                        center = "all",
+                        platform = "all",
+                        level = "all",
+                        version = "all",
+                        barcode=F,
+                        file = system.file("data/dataFolders.rda",
+                                           package="TCGAbiolinks"),
+                        qOutput = "data/version/"){
 
-  key1a       <- paste(unique(tmp$CenterType), unique(tmp$Center), unique(tmp$Platform), sep="/")
-  Description <- paste(siteTCGA, tolower(tmp$Tumor), "/",key1a, sep="")
-  key2a       <- paste0("/",tmp$Folder,"/")
-  link        <- paste0(Description, key2a)
-  linkInfo    <- .DownloadURL(link)
-  version     <- linkInfo[grep("Level_3",linkInfo)]
-  version     <- as.matrix(version[-grep("tar.gz",version)])
-  versionMat  <- as.data.frame(matrix(0,nrow(version),2))
-  colnames(versionMat) <- c("Version","Date")
+  info.tcga <- get.data.folder(tumor,centerType,center,platform)
 
-  aux  <- as.matrix(unlist(strsplit(version, "  ")))
-  time <- aux[grep(":",aux)]
-  vers <- aux[grep("Level_3",aux)]
-  vers <- as.matrix(sapply(strsplit(vers, ">"), function(y) y[2]))
-  vers <- as.matrix(sapply(strsplit(vers, "<"), function(y) y[1]))
-  versionMat$Version <- vers
-  versionMat$Date    <- time
+  magetab <- info.tcga[grep("mage-tab", info.tcga[,"Folder"]),]
+  data    <- info.tcga[grep("Level_",   info.tcga[,"Folder"]),]
 
-  versionMat <- cbind(versionMat,
-                      Samples = matrix(0, nrow(versionMat),1),
-                      SizeMbyte = matrix(0, nrow(versionMat),1)
-  )
-  print(paste("Found", nrow(versionMat), "Version of", PlatformType, sep = " "))
-
-  for (i in 1: nrow(versionMat)){
-
-    print(paste("Version", i , "of", nrow(versionMat),
-                versionMat$Version[i], "...done",
-                sep=" ")
-    )
-    linkToVersion <- paste0(Description,key2a,versionMat$Version[i])
-    ftpContent <- .DownloadURL(linkToVersion)
-    ftpContent <- as.matrix(unlist(strsplit(ftpContent, "  ")))
-    filesName <-  ftpContent[grep("[a-z0-9]{8}-[a-z0-9]{4}", ftpContent)]
-    uuid <- substr(filesName, 17,52)
-
-    # For each folder, get children info
-    samplesInfo   <- findSampleVersions(listSample,
-                                        uuid,
-                                        sdrfFolder
-    )
-
-    sizeList <- ftpContent[grep("[0-9][K]{1}|[0-9][M]{1}", ftpContent)]
-
-    versionMat$SizeMbyte[i] <- getTotalSize(sizeList)
-    versionMat$Samples[i]   <- length(sizeList)
-    versionMat$Barcodes[i]   <- list(samplesInfo)
-
+  # Search resulted in only one result
+  if(is.null(nrow(data))){
+    platform.url <- dirname(data["Manifest"])
+    magetab.url <- dirname(magetab["Manifest"])
+  } else {
+    # Search resulted in more than one result
+    platform.url <- unique(dirname(data[,"Manifest"]))
+    magetab.url <- unique(dirname(magetab[,"Manifest"]))
   }
-  return(versionMat)
-}
 
-# get a detail matrix file, uuid, barcode, size, date
-# input: listSample list of bar code to filter output
-#        linkToVersion link to version
-#        version: father folder?
-#        sdrfFolder: folder created by TCGAmanifest
-findSampleVersions <- function (listSample=NULL,
-                                uuid,
-                                sdrfFolder){
-  barcode <- c()
-  #look for a listsample inside version
-  if(length(listSample)!=0){
-    # From manifest files - get samples info uuid and barcode
-    lstFileSdrf     <- list.files(file.path(sdrfFolder))
-    lstFileSdrfPlat <- lstFileSdrf[grep(tolower(PlatformType), tolower(lstFileSdrf))]
-    listSampleSdrf  <- read.delim(paste0( sdrfFolder, lstFileSdrfPlat))
+  message(paste("Found", length(platform.url), "Version of", platform, sep = " "))
 
-    # search if the barcode is in the version
-    if(PlatformType == "illuminahiseq_rnaseqv2" || PlatformType == "illuminahiseq_totalrnaseqv2"){
-      print(paste("Finding uuid for", length(listSample), "samples with TCGA barcode selected",sep=" "))
-        fileBarcode <- substr(as.character(listSampleSdrf$Comment..TCGA.Barcode.) ,1,nchar(listSample[1]))
-        tmpsdrf <-  listSampleSdrf[ fileBarcode %in%  as.character(listSample),]
-        tmpbarcode <- unique(as.character(tmpsdrf$Comment..TCGA.Barcode.))
-        if(length(tmpbarcode) != 0 ) barcode <- tmpbarcode
+  version  <- as.data.frame(matrix(0,length(platform.url),8))
+  colnames(version) <- c("Version","Disease","Platform","Level",
+                         "Batch","Date","Samples","SizeMB")
+
+
+  for(j in 1:length(platform.url)){
+
+    message(paste("Version", j , "of", length(platform.url),
+                  basename(platform.url[j]), "...done",
+                  sep=" ")
+    )
+
+    content <- DownloadHTML(platform.url[j])
+    content <- as.matrix(unlist(strsplit(content, "  ")))
+    content <- str_trim(content[content != ""])
+
+    time  <- unique(content[grep(":",content)])
+    # handle difference in minutes
+    if(length(time)>1) time <- time[1]
+    # TODO: size should be filtered - not all files are relevant
+    regex <- "^[0-9]+\\.?[0-9]*([K]{1}|[M]{1}|[G]{1})"
+    sizes <- content[grep(regex,content)]
+    info  <- rev(unlist(strsplit(basename(platform.url[j]), "\\.")))
+
+    version$Disease[j]  <- unlist(strsplit(info[6], "_"))[2]
+    version$Platform[j] <- info[5]
+    version$Level[j]    <- info[4]
+    version$Batch[j]    <- info[3]
+    version$Date[j]     <- time
+    version$Version[j]  <- basename(platform.url[j])
+    version$SizeMB[j]   <- getTotalSize(sizes)
+    version$Samples[j]  <- length(sizes)
+    if(barcode){
+      version$Barcodes[j] <- get.barcodes(magetab.url,platform.url[j],qOutput)
     }
   }
+  return(version)
+}
 
-  return (barcode)
+#' @title Get bar code info
+#'
+#' @description  Get bar code info using sdrf files
+#'               Obs1: it takes a lot of time, is there a better way
+#'               than downloading sdrf?
+#'               Obs2: Not all folders has mage-tab file
+#'               Solution 1: search for barcode pattern in the filenames
+#'               Solution 2: maf files has it inside. Should use downloaded files.
+#'
+#' @param magetab.url path to mage-tab folder
+#' @keywords internal
+get.barcodes <- function(magetabs,platform.url,qOutput){
+
+  # Does exists a mage-tab folder?
+  file <- unlist(strsplit(basename(platform.url),"Level"))[1]
+  magetab.url <- magetabs[grep(file,magetabs)]
+
+  # if mage-tab exists get barcode from there
+  if(length(magetab.url)>0){
+    mage.content <- DownloadHTML(magetab.url)
+    mage.content <- as.matrix(unlist(strsplit(mage.content, "  ")))
+    mage.content <- mage.content[mage.content != ""]
+    sdrf.file <- mage.content[grep("sdrf",mage.content)]
+    sdrf.file <- sapply(strsplit(sdrf.file, ">"), function(y) y[2])
+    sdrf.file <- sapply(strsplit(sdrf.file, "<"), function(y) y[1])
+
+    downloader::download(paste(magetab.url[j],sdrf.file,sep="/"),
+                         destfile = paste0(qOutput,"filenames.txt"),
+                         mode="w",
+                         quiet = 1)
+    sdrf <- read.delim(file = paste0(qOutput,"filenames.txt"))
+    return (list(unique(as.vector(sdrf$Comment..TCGA.Barcode.))))
+  }
+  return (c())
+
+}
+
+get.data.folder <- function(tumor,centerType,center,platform){
+
+  if(!exists("dataFolders")) load(file)
+  dataFolders <- get("dataFolders", envir=environment())
+
+  ifelse(tumor != "all",x <- subset(dataFolders, dataFolders[,"Tumor"] == tolower(tumor)),x<-dataFolders)
+
+  if(centerType != "all" && is.null(nrow(x))) x <- subset(x, x["CenterType"] == tolower(centerType))
+  if(centerType != "all" && !is.null(nrow(x))) x <- subset(x, x[,"CenterType"] == tolower(centerType))
+
+  if(center != "all" && is.null(nrow(x)))  x <- subset(x, x["Center"] == tolower(center))
+  if(center != "all" && !is.null(nrow(x)))  x <- subset(x, x[,"Center"] == tolower(center))
+
+  if(platform != "all" && is.null(nrow(x)))  x <- subset(x, x["Platform"] == tolower(platform))
+  if(platform != "all" && !is.null(nrow(x))) x <- subset(x, x[,"Platform"] == tolower(platform))
+
+  return (x)
 }
 # param sizeList - list of sizes in KB, MB
 # output total size in MB
 getTotalSize <- function(sizeList){
   sizeK  <- sizeList[grep("K",sizeList)]
   sizeM  <- sizeList[grep("M",sizeList)]
-  totalK <- round(sum(as.numeric(gsub("K","",sizeK)))/1000)
+  sizeG  <- sizeList[grep("G",sizeList)]
+  totalK <- round(sum(as.numeric(gsub("K","",sizeK))) / 1000)
   totalM <- sum(as.numeric(gsub("M","",sizeM)))
-  return (totalM + totalK)
-}
+  totalG <- sum(as.numeric(gsub("G","",sizeG))) * 1000
 
-#' @title TCGA Version
-#'
-#' @description  TCGA Version
-#'
-#' @param Tumor  a character string indicating the cancer type for
-#'        which to download data. Options include ACC, BLCA, BRCA,
-#'        CESC, COAD, DLBC, ESCA, GBM, HNSC, KICH, KIRC, KIRP, LAML,
-#'        LGG, LIHC, LUAD, LUSC, OV, PAAD, PRAD, READ, SARC, SKCM, STAD,
-#'        THCA, UCEC, UCS. Look at https://tcga-data.nci.nih.gov/tcga/
-#'        for Available Cancer Types.
-#' @param PlatformType "illuminahiseq_rnaseq"
-#' @param PlatformAndAssociatedData data frame 615 observations of 12 variables,
-#'        indicating the different characteristics of the data
-#'        e.g. tumour, type, species.
-#' @import RCurl httr bitops
-#' @export
-
-TCGAVersion <- function(Tumor, PlatformType,PlatformAndAssociatedData){
-  #downloadFolder<-paste(downloadFolder,PlatformType,"/",sep="")
-  #.createDirectory(PlatformType)
-  siteTCGA <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"
-  tmp <- PlatformAndAssociatedData[toupper(PlatformAndAssociatedData$Tumor) == toupper(Tumor)
-                                   & toupper(PlatformAndAssociatedData$Platform) == toupper(PlatformType), ]
-
-  key1a <- paste(unique(tmp$CenterType), unique(tmp$Center), unique(tmp$Platform), sep="/")
-  Description <- paste(siteTCGA, tolower(tmp$Tumor), "/",key1a, sep="")
-  key2a <- paste("/",tmp$Folder,"/",sep="")
-
-  #toDdl <- .DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_3", KeyGrep2 = "MANIFEST.txt")
-  #toDdl <- paste(Description, key2a, toDdl, sep = "")
-  #x <- .DownloadURL(toDdl)
-  #x <- sapply(strsplit(x, "  "), function(y) y[2])
-
-  toDdl <- paste(Description, key2a, sep = "")
-  x <- .DownloadURL(toDdl)
-  xver <- x[grep("Level_3",x)]
-  xver <- as.matrix(xver[-grep("tar.gz",xver)])
-  xverMat <- as.data.frame(matrix(0,nrow(xver),2))
-  colnames(xverMat)<-c("Version","Date")
-
-  for( i in 1: nrow(xverMat)){
-    xtmp1 <- xver[i]
-    xver2 <- as.matrix(unlist(strsplit(xtmp1, "  ")))
-    timeVer <- xver2[grep(":",xver2)]
-    Vers <- xver2[grep("Level_3",xver2)]
-    Vers  <- as.matrix(sapply(strsplit(Vers, ">"), function(y) y[2]))
-    Vers  <- as.matrix(sapply(strsplit(Vers, "<"), function(y) y[1]))
-    xverMat$Version[i]<- Vers
-    xverMat$Date[i]<-timeVer
-  }
-
-
-  xverMat <- cbind(xverMat, Samples = matrix(0, nrow(xverMat),1), SizeMbyte = matrix(0, nrow(xverMat),1))
-  print(paste("Found ", nrow(xverMat), " Version of ", PlatformType,sep=""))
-
-  for( i in 1: nrow(xverMat)){
-
-    todown1<- paste(Description,key2a,xverMat$Version[i],sep="")
-    print(paste("Version ", i , " of ", nrow(xverMat), " ", xverMat$Version[i], " ...done",sep=""))
-    x <- .DownloadURL(todown1)
-
-    if(PlatformType == "illuminahiseq_rnaseq"){  x <- x[grep("gene.quantification", x)] }
-    if(PlatformType == "agilentg4502a_07_3"){    x <- x[grep("tcga_level3", x)]}
-    if(PlatformType == "illuminahiseq_rnaseqv2"){ x <- x[grep("rsem.genes.results", x)] }
-    if(PlatformType == "humanmethylation27"){ x <- x[grep("HumanMethylation27", x)] }
-    if(PlatformType == "humanmethylation450"){ x <- x[grep("HumanMethylation450", x)] }
-    if(PlatformType == "illuminaga_mirnaseq"){ x <- x[grep("mirna.quantification", x)] }
-    if(PlatformType == "genome_wide_snp_6"){ x <- x[grep("hg19.seg", x)]}
-
-    x2<- sapply(strsplit(x, ":"), function(y) y[2])
-    x3<- sapply(strsplit(x2, " "), function(y) y[3])
-    sizeK <- x3[grep("K",x3)]
-    sizeM <- x3[grep("M",x3)]
-    sizeK_1 <- as.numeric(gsub("K","",sizeK))
-    sizeM_1 <- as.numeric(gsub("M","",sizeM))
-    sizeK_2<- round(sum(sizeK_1)/1000)
-    sizeM_2<- sum(sizeM_1)
-    sizeTot<- sizeK_2+sizeM_2
-    xverMat$SizeMbyte[i]<-sizeTot
-    xverMat$Samples[i]<-length(x3)
-
-  }
-  return(xverMat)
+  return (totalM + totalK + totalG)
 }
