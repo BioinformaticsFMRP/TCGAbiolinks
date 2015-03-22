@@ -1,6 +1,6 @@
 TCGAmanifest <- function(Tumor){
   FolderWd <- getwd()
-  .createDirectory("TCGAsdrf")
+  createDir("TCGAsdrf")
   setwd("./TCGAsdrf")
   on.exit(setwd(FolderWd))
 
