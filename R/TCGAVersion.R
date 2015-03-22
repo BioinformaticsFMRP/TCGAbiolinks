@@ -89,9 +89,9 @@ TCGAVersion <- function(tumor = "all",
 
   message(paste("Found", length(platform.url), "Version of", platform, sep = " "))
 
-  version  <- as.data.frame(matrix(0,length(platform.url),8))
+  version  <- as.data.frame(matrix(0,length(platform.url),9))
   colnames(version) <- c("Version","Disease","Platform","Level",
-                         "Batch","Date","Samples","SizeMB")
+                         "Batch","Date","Samples","SizeMB","Barcodes")
 
 
   for(j in 1:length(platform.url)){
@@ -122,7 +122,9 @@ TCGAVersion <- function(tumor = "all",
     version$SizeMB[j]   <- getTotalSize(sizes)
     version$Samples[j]  <- length(sizes)
     if(barcode){
-      version$Barcodes[j] <- get.barcodes(magetab.url,platform.url[j],qOutput)
+      code <- get.barcodes(magetab.url,platform.url[j],qOutput)
+      if(length(code)>0)
+      version$Barcodes[j] <- code
     }
   }
   return(version)
