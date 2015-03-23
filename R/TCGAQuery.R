@@ -132,8 +132,11 @@ TCGAQuery <- function(tumor = "all",
                         as.character(read.table(file = paste0(qOutput,"/filenames.txt"))[2]$V2),sep="")
       print("Donwloaded.")
     }else{
+      fails <- 0
       for(j in 1:length(x[,"Tumor"])){
-        download(x[,"Manifest"][j],
+
+        if(RCurl::url.exists(x[,"Manifest"][j])){
+          download(x[,"Manifest"][j],
                  destfile = paste(qOutput,"/filenames.txt",sep=""),
                  mode="w",
                  quiet = 1) #character. The mode with which to write the file.
@@ -142,13 +145,20 @@ TCGAQuery <- function(tumor = "all",
         #APPEND IS NOT WORKING, I USED ANOTHER WAY
 
         print(paste("Downloaded:",j,"out of",length(x[,"Tumor"]),sep=" "))
+        print(paste("Next:",j,x[,"Manifest"][j],sep=" "))
+
         queryURI<-c(queryURI,paste(unlist(strsplit(x[,"Manifest"][j], split='MANIFEST.txt', fixed=TRUE)),
                                    as.character(read.table(file = paste(qOutput,"/filenames.txt",sep=""))[2]$V2),sep=""))
         unlink(paste0(qOutput,"/filenames.txt"))
+        }
+        else{
+          message(paste0("ERROR: ", x[,"Manifest"][j] ," not found"))
+          fails <- fails + 1
+        }
       }
     }
   }
-  print(paste("We found",length(queryURI),"files",sep=" "))
+  print(paste("We found",length(queryURI) - fails ,"files",sep=" "))
   save(queryURI, file = paste0(qOutput,"/fileURLs.rda"))
   #todo - add the showing of the result in a human readable way
 }
