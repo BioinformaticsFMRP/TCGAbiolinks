@@ -68,36 +68,39 @@ TCGAVersion <- function(tumor = "all",
                         level = "all",
                         version = "all",
                         barcode=F,
-                        file = system.file("data/dataFolders.rda",
+                        file = system.file("extdata/dataFolders.rda",
                                            package="TCGAbiolinks"),
                         qOutput = "data/version/"){
 
   info.tcga <- get.data.folder(tumor,centerType,center,platform)
-
   magetab <- info.tcga[grep("mage-tab", info.tcga[,"Folder"]),]
   data    <- info.tcga[grep("Level_",   info.tcga[,"Folder"]),]
 
   # Search resulted in only one result
   if(is.null(nrow(data))){
     platform.url <- dirname(data["Manifest"])
-    magetab.url <- dirname(magetab["Manifest"])
   } else {
     # Search resulted in more than one result
     platform.url <- unique(dirname(data[,"Manifest"]))
+  }
+  if(is.null(nrow(magetab))){
+    magetab.url <- dirname(magetab["Manifest"])
+  } else {
+    # Search resulted in more than one result
     magetab.url <- unique(dirname(magetab[,"Manifest"]))
   }
 
   if(length(platform.url) == 0) {
     message("No results found")
     return (NULL)
-  }
-  else{
+  } else{
     message(paste("Found", length(platform.url), "Version of", platform, sep = " "))
   }
 
-  version  <- as.data.frame(matrix(0,length(platform.url),9))
+  if(!file.exists(qOutput)) dir.create(qOutput)
+  version  <- as.data.frame(matrix(0,length(platform.url),8))
   colnames(version) <- c("Version","Disease","Platform","Level",
-                         "Batch","Date","Samples","SizeMB","Barcodes")
+                         "Batch","Date","Samples","SizeMB")
 
 
   for(j in 1:length(platform.url)){
@@ -127,11 +130,11 @@ TCGAVersion <- function(tumor = "all",
     version$Version[j]  <- basename(platform.url[j])
     version$SizeMB[j]   <- getTotalSize(sizes)
     version$Samples[j]  <- length(sizes)
+
     if(barcode){
-      code <- get.barcodes(magetab.url,platform.url[j],qOutput)
-      if(length(code)>0)
-      version$Barcodes[j] <- code
+        version$Barcodes[j] <-  get.barcodes(magetab.url,platform.url[j],qOutput)
     }
+
   }
   return(version)
 }
@@ -152,7 +155,6 @@ get.barcodes <- function(magetabs,platform.url,qOutput){
   # Does exists a mage-tab folder?
   file <- unlist(strsplit(basename(platform.url),"Level"))[1]
   magetab.url <- magetabs[grep(file,magetabs)]
-
   # if mage-tab exists get barcode from there
   if(length(magetab.url)>0){
     mage.content <- DownloadHTML(magetab.url)
@@ -169,13 +171,13 @@ get.barcodes <- function(magetabs,platform.url,qOutput){
     sdrf <- read.delim(file = paste0(qOutput,"filenames.txt"))
     return (list(unique(as.vector(sdrf$Comment..TCGA.Barcode.))))
   }
-  return (c())
+  return (c(""))
 
 }
 
 get.data.folder <- function(tumor,centerType,center,platform){
 
-  if(!exists("dataFolders")) load(file)
+  #if(!exists("dataFolders")) load(file)
   dataFolders <- get("dataFolders", envir=environment())
 
   ifelse(tumor != "all",x <- subset(dataFolders, dataFolders[,"Tumor"] == tolower(tumor)),x<-dataFolders)
