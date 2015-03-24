@@ -2,9 +2,13 @@
 #' @description  Load required data into gloval enviroment
 #' @keywords internal
 .onAttach <- function (libname, pkgname){
-  load(file = system.file("extdata/PlatformMat.rda",
-                          package="TCGAbiolinks"),
-       .GlobalEnv)
+  file = system.file("extdata/dataFolders.rda",package="TCGAbiolinks")
+  if(file.exists(file)) {
+    load(file,.GlobalEnv)
+  }
+  else{
+    message("Please run TCGAUpdate() to obtain the TCGA table")
+  }
 }
 
 #' @title Creates a directory
