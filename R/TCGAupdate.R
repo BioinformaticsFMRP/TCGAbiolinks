@@ -8,7 +8,7 @@
 TCGAUpdate <-function(){
   siteTCGA <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"
   dataFolders <- NULL
-  tableLocation <- "data"
+
 
   x <- DownloadHTML(siteTCGA)
   x <- GrepSite(x, "href")
@@ -65,9 +65,9 @@ TCGAUpdate <-function(){
       }
     }
   }
-  dir.create(tableLocation, showWarnings = F, recursive = T, mode = "0777")
+
   save(dataFolders,
-       file = paste(system.file(tableLocation, package="TCGAbiolinks"),
+       file = paste(system.file("extdata", package="TCGAbiolinks"),
                     "dataFolders.rda",sep="/")
   )
 }

@@ -75,7 +75,7 @@ TCGAQuery <- function(tumor = "all",
                       level = "all",
                       version = "all",
                       i = F,
-                      file = system.file("data/dataFolders.rda",
+                      file = system.file("extdata/dataFolders.rda",
                                          package="TCGAbiolinks"),
                       qOutput = "data/query/"){
 
