@@ -87,7 +87,13 @@ TCGAVersion <- function(tumor = "all",
     magetab.url <- unique(dirname(magetab[,"Manifest"]))
   }
 
-  message(paste("Found", length(platform.url), "Version of", platform, sep = " "))
+  if(length(platform.url) == 0) {
+    message("No results found")
+    return (NULL)
+  }
+  else{
+    message(paste("Found", length(platform.url), "Version of", platform, sep = " "))
+  }
 
   version  <- as.data.frame(matrix(0,length(platform.url),9))
   colnames(version) <- c("Version","Disease","Platform","Level",
