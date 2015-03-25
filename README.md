@@ -2,14 +2,23 @@
 
 ### How do I get set up? ###
 
+* Installing dependencies
+```R
+install.package(c("downloader","RCurl","httr","devtools"))
+```
+
+* Creating roxygen documentation
+```r
+devtools::document()
+```
+* Building the package
+```r
+devtools::build()
+```
+ 
 * Summary of set up
 ```r
 install.packages(path_to_package, repos = NULL, type="source")
-```
-* Installing dependencies
-```R
-install.package(c("downloader","RCurl","httr"))
-
 ```
 
 ### Main strcuture of the repo ###
