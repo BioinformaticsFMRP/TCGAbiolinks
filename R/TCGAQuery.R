@@ -145,7 +145,6 @@ TCGAQuery <- function(tumor = "all",
         #APPEND IS NOT WORKING, I USED ANOTHER WAY
 
         print(paste("Downloaded:",j,"out of",length(x[,"Tumor"]),sep=" "))
-        print(paste("Next:",j,x[,"Manifest"][j],sep=" "))
 
         queryURI<-c(queryURI,paste(unlist(strsplit(x[,"Manifest"][j], split='MANIFEST.txt', fixed=TRUE)),
                                    as.character(read.table(file = paste(qOutput,"/filenames.txt",sep=""))[2]$V2),sep=""))
