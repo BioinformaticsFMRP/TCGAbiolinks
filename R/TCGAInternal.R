@@ -9,7 +9,7 @@
   else{
     message("Please run TCGAUpdate() to obtain the TCGA table")
   }
-  metadata = system.file("extdata/barcodes.rda",package="TCGAbiolinks")
+  metadata = system.file("extdata/barcodes.rdata",package="TCGAbiolinks")
   if(file.exists(metadata)) load(metadata,.GlobalEnv)
 
 }
