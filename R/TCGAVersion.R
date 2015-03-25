@@ -98,9 +98,9 @@ TCGAVersion <- function(tumor = "all",
   }
 
   if(!file.exists(qOutput)) dir.create(qOutput)
-  version  <- as.data.frame(matrix(0,length(platform.url),8))
+  version  <- as.data.frame(matrix(0,length(platform.url),9))
   colnames(version) <- c("Version","Disease","Platform","Level",
-                         "Batch","Date","Samples","SizeMB")
+                         "Batch","Date","Samples","SizeMB","Files")
 
 
   for(j in 1:length(platform.url)){
@@ -129,14 +129,31 @@ TCGAVersion <- function(tumor = "all",
     version$Date[j]     <- time
     version$Version[j]  <- basename(platform.url[j])
     version$SizeMB[j]   <- getTotalSize(sizes)
+    version$Files[j]  <-   get.manifest.files(platform.url[j],qOutput)
     version$Samples[j]  <- length(sizes)
 
     if(barcode){
-        version$Barcodes[j] <-  get.barcodes(magetab.url,platform.url[j],qOutput)
+      version$Barcodes[j] <- get.barcodes(platform=version$Platform[j],
+                                          disease=version$Disease[j],
+                                          center=unlist(strsplit(info[6], "_"))[1]
+      )
     }
-
   }
   return(version)
+}
+
+get.manifest.files <- function(platform.url,qOutput){
+  manifest <- paste0(platform.url,"/MANIFEST.txt")
+  if(RCurl::url.exists(manifest)){
+    download(manifest,
+             destfile = paste0(qOutput,"filenames.txt"),
+             mode="w",
+             quiet = 1)
+    manifest.content <- read.table(file = paste0(qOutput,"filenames.txt"),sep="")
+    manifest.files <- paste(platform.url,as.character(manifest.content$V2),sep="/")
+    unlink(paste0(qOutput,"filenames.txt"))
+    return (list(manifest.files))
+  }
 }
 
 #' @title Get bar code info
@@ -150,29 +167,14 @@ TCGAVersion <- function(tumor = "all",
 #'
 #' @param magetab.url path to mage-tab folder
 #' @keywords internal
-get.barcodes <- function(magetabs,platform.url,qOutput){
+#'
+get.barcodes <- function(platform,disease,center){
 
-  # Does exists a mage-tab folder?
-  file <- unlist(strsplit(basename(platform.url),"Level"))[1]
-  magetab.url <- magetabs[grep(file,magetabs)]
-  # if mage-tab exists get barcode from there
-  if(length(magetab.url)>0){
-    mage.content <- DownloadHTML(magetab.url)
-    mage.content <- as.matrix(unlist(strsplit(mage.content, "  ")))
-    mage.content <- mage.content[mage.content != ""]
-    sdrf.file <- mage.content[grep("sdrf",mage.content)]
-    sdrf.file <- sapply(strsplit(sdrf.file, ">"), function(y) y[2])
-    sdrf.file <- sapply(strsplit(sdrf.file, "<"), function(y) y[1])
-
-    downloader::download(paste(magetab.url[j],sdrf.file,sep="/"),
-                         destfile = paste0(qOutput,"filenames.txt"),
-                         mode="w",
-                         quiet = 1)
-    sdrf <- read.delim(file = paste0(qOutput,"filenames.txt"))
-    return (list(unique(as.vector(sdrf$Comment..TCGA.Barcode.))))
-  }
-  return (c(""))
-
+  idx <- which(grepl(platform,tcga.barccodes$Platform) &
+                 tcga.barccodes$Disease == disease &
+                 grepl(center,tcga.barccodes$Receiving.Center)
+  )
+  return (list(unique(as.character(tcga.barccodes[idx,]$Barcode))))
 }
 
 get.data.folder <- function(tumor,centerType,center,platform){
