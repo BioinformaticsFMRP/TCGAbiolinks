@@ -17,7 +17,7 @@
 TCGADownload <- function(dirURL="data/query/", finalDir="data/final", earlyStop = 0){
 
   # load query files if not yet done
-  if(!exists(queryURI)) load(paste0(dirURL,"fileURLs.rda"))
+  if(!exists("queryURI")) load(paste0(dirURL,"fileURLs.rda"))
   queryURI <- get("queryURI", envir=environment())
 
   finalDir <- createDir(finalDir)
