@@ -9,6 +9,9 @@
   else{
     message("Please run TCGAUpdate() to obtain the TCGA table")
   }
+  metadata = system.file("extdata/barcodes.rda",package="TCGAbiolinks")
+  if(file.exists(metadata)) load(metadata,.GlobalEnv)
+
 }
 
 #' @title Creates a directory
