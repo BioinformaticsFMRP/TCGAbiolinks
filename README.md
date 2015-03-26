@@ -4,7 +4,7 @@
 
 * Installing dependencies
 ```R
-install.package(c("downloader","RCurl","httr","devtools"))
+install.packages(c("downloader","RCurl","httr","devtools","stringr"))
 ```
 
 * Creating roxygen documentation
