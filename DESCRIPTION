@@ -16,5 +16,6 @@ Imports:  downloader,
           RCurl,
           bitops,
           httr,
+	  stringr
 Description: Query Download and Preprocess data from TCGA portal
 License: GPL (>= 3)
