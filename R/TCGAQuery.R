@@ -122,7 +122,7 @@ TCGAQuery <- function(tumor = "all",
     }
 
     queryURI = NULL
-    dir.create(path = qOutput, showWarnings = F)
+    dir.create(path = qOutput, showWarnings = F, recursive = T)
     if(is.null(nrow(x))){
       download(x["Manifest"],
                destfile = paste0(qOutput,"/filenames.txt"),

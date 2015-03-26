@@ -34,8 +34,9 @@ TCGADownload <- function(dirURL="data/query/", finalDir="data/final", earlyStop 
              quiet = 1)
     print(paste("Downloaded",k,"out of",length(queryURI),sep=" "))
     if(k%%10==0) print(paste("Estimated time for the end of the process:",
-                             (as.numeric(difftime(Sys.time(), t1, units="min"))/k)*earlyStop -
+                             abs(as.numeric(difftime(Sys.time(), t1, units="min"))/k)*earlyStop -
                                as.numeric(difftime(Sys.time(), t1, units="min")), "minutes", sep=" "))
   }
   rm(t1)
+  message(paste0('Donwload completed. Files saved in "', finalDir,'"'))
 }

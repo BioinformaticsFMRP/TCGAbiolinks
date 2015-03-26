@@ -72,6 +72,9 @@ TCGAVersion <- function(tumor = "all",
                                            package="TCGAbiolinks"),
                         qOutput = "data/version/"){
 
+  if(!exists("dataFolders")) load(file)
+  dataFolders <- get("dataFolders", envir=environment())
+
   info.tcga <- get.data.folder(tumor,centerType,center,platform)
   magetab <- info.tcga[grep("mage-tab", info.tcga[,"Folder"]),]
   data    <- info.tcga[grep("Level_",   info.tcga[,"Folder"]),]
@@ -95,20 +98,20 @@ TCGAVersion <- function(tumor = "all",
     return (NULL)
   } else{
     message(paste("Found", length(platform.url), "Version of", platform, sep = " "))
+    message("Looking for metadata...")
   }
 
-  if(!file.exists(qOutput)) dir.create(qOutput)
+  dir.create(qOutput, showWarnings = F)
   version  <- as.data.frame(matrix(0,length(platform.url),9))
   colnames(version) <- c("Version","Disease","Platform","Level",
-                         "Batch","Date","Samples","SizeMB","Files")
+                         "Batch","Date","Samples","Total Size","Files")
 
 
   for(j in 1:length(platform.url)){
 
     message(paste("Version", j , "of", length(platform.url),
-                  basename(platform.url[j]), "...done",
-                  sep=" ")
-    )
+                  basename(platform.url[j]),
+                  sep=" "))
 
     content <- DownloadHTML(platform.url[j])
     content <- as.matrix(unlist(strsplit(content, "  ")))
@@ -117,7 +120,10 @@ TCGAVersion <- function(tumor = "all",
     time  <- unique(content[grep(":",content)])
     # handle difference in minutes
     if(length(time)>1) time <- time[1]
+
     # TODO: size should be filtered - not all files are relevant
+    # DONE: filtering happens in the getTotalSize function
+
     regex <- "^[0-9]+\\.?[0-9]*([K]{1}|[M]{1}|[G]{1})"
     sizes <- content[grep(regex,content)]
     info  <- rev(unlist(strsplit(basename(platform.url[j]), "\\.")))
@@ -136,8 +142,9 @@ TCGAVersion <- function(tumor = "all",
       version$Barcodes[j] <- get.barcodes(platform=version$Platform[j],
                                           disease=version$Disease[j],
                                           center=unlist(strsplit(info[6], "_"))[1]
-      )
+                                          )
     }
+    message('...done')
   }
   return(version)
 }
@@ -150,7 +157,7 @@ get.manifest.files <- function(platform.url,qOutput){
              mode="w",
              quiet = 1)
     manifest.content <- read.table(file = paste0(qOutput,"filenames.txt"),sep="")
-    manifest.files <- paste(platform.url,as.character(manifest.content$V2),sep="/")
+    manifest.files <- as.character(manifest.content$V2)
     unlink(paste0(qOutput,"filenames.txt"))
     return (list(manifest.files))
   }
@@ -172,15 +179,12 @@ get.barcodes <- function(platform,disease,center){
 
   idx <- which(grepl(platform,tcga.barccodes$Platform) &
                  tcga.barccodes$Disease == disease &
-                 grepl(center,tcga.barccodes$Receiving.Center)
-  )
+                 grepl(center,tcga.barccodes$Receiving.Center))
+
   return (list(unique(as.character(tcga.barccodes[idx,]$Barcode))))
 }
 
 get.data.folder <- function(tumor,centerType,center,platform){
-
-  #if(!exists("dataFolders")) load(file)
-  dataFolders <- get("dataFolders", envir=environment())
 
   ifelse(tumor != "all",x <- subset(dataFolders, dataFolders[,"Tumor"] == tolower(tumor)),x<-dataFolders)
 
@@ -199,11 +203,12 @@ get.data.folder <- function(tumor,centerType,center,platform){
 # output total size in MB
 getTotalSize <- function(sizeList){
   sizeK  <- sizeList[grep("K",sizeList)]
+  sizeK  <- sizeK[as.numeric(gsub("K","",sizeK))>5] #choose a proper limit
   sizeM  <- sizeList[grep("M",sizeList)]
   sizeG  <- sizeList[grep("G",sizeList)]
   totalK <- round(sum(as.numeric(gsub("K","",sizeK))) / 1000)
   totalM <- sum(as.numeric(gsub("M","",sizeM)))
   totalG <- sum(as.numeric(gsub("G","",sizeG))) * 1000
 
-  return (totalM + totalK + totalG)
+  return(paste0((totalM + totalK + totalG), "Mb"))
 }
