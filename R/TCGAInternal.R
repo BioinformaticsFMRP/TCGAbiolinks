@@ -39,30 +39,77 @@ createDir <- function(base){
 #' @param url url path
 #' @keywords internal
 #' @import RCurl httr
-DownloadHTML <- function(url){
-  bo2 = T
-  count <- 0
-  handle_find(url)
-  while(bo2){
-    request = try(GET(url, timeout(100)), silent = T)
-    if( class(request) == "try-error"){
-      Sys.sleep(1)
-      bo2 = T
-      count = count + 1
-      handle_find(url)
-      if(count%%10==0) print(paste("Reconnection attempt #",count,sep=""))
-    }else if(count>=200){
-      stop("Connetion limit exceded. Check your internet connection and your proxy settings.
-           If you are downloading very big files (proteins for example) you should add the proper variable.
-           Take a look to the documentation. If the problem persists please contact the mantainers.")
-    }else{
-      bo2 = F
-    }
-  }
-  u<-read.table(textConnection(content(request, as = 'text')), sep = ",", header = T)
+#'
+#'
 
-  return(deparse(u))
+
+
+#httr STILL WORKING BADLY -----> LOOKING FOR NEW SOLUTIONS
+DownloadHTML<- function(url){
+    bo2 = T
+    count <- 0
+    handle_find(url)
+    while(bo2){
+      request = try(GET(url, timeout(100)), silent = T)
+      if( class(request) == "try-error"){
+        Sys.sleep(1)
+        bo2 = T
+        count = count + 1
+        handle_find(url)
+        if(count%%10==0) print(paste("Reconnection attempt #",count,sep=""))
+      }else{
+        bo2 = F
+      }
+      if(count>=100){
+        stop("Connetion limit exceded. Check your internet connection and your proxy settings.
+             If you are downloading very big files (proteins for example) you should add the proper variable.
+             Take a look to the documentation. If the problem persists please contact the mantainers.")
+      }
+    }
+    u<-read.table(textConnection(content(request, as = 'text')), sep = ",", header = T)
+
+    return(deparse(u))
 }
+
+#Slow but working --- less code
+# DownloadHTML<- function(url){
+#   if(RCurl::url.exists(url)){
+#     download(url,
+#              "temp.html",
+#              mode="wb",
+#              quiet = 1)
+#     tmp <- htmlTreeParse("temp.html")
+#     return(capture.output(tmp))
+#   }else{
+#     stop("Can't find URL. Please check the web site or the internet connection.")
+#   }
+# }
+
+
+#NEW SOLUTION --- TOO SLOW --- cleaner --- modification needed everywhere
+# DownloadHTML<- function(url){
+#   if(RCurl::url.exists(url)){
+#       download(url,
+#                "temp.html",
+#                mode="wb",
+#                quiet = 1)
+#       tmp <- htmlTreeParse("temp.html")
+#       tmp <- xmlChildren(xmlChildren(xmlChildren(xmlRoot(tmp))$body)$pre)
+#       u <- NULL
+#       for(i in 1:length(tmp)){
+#         if(!is.na(xmlValue(tmp[i]$a)) &&
+#              xmlValue(tmp[i]$a) !="Name" &&
+#              xmlValue(tmp[i]$a) !="Last modified" &&
+#              xmlValue(tmp[i]$a) !="Size" &&
+#              xmlValue(tmp[i]$a) !="Parent Directory") u<-c(u, xmlValue(tmp[i]$a))
+#       }
+#       rm(tmp)
+#       unlink("temp.html")
+#       return(u)
+#   }else{
+#     stop("Can't find URL. Please check the web site or the internet connection.")
+#   }
+# }
 
 GrepSite <- function(x,Key){
   x <- x[grep(Key, x)]
