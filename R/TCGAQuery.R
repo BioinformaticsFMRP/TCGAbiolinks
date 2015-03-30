@@ -75,6 +75,7 @@ TCGAQuery <- function(tumor = "all",
                       level = "all",
                       version = "all",
                       i = F,
+                      metadata = F,
                       file = system.file("extdata/dataFolders.rda",
                                          package="TCGAbiolinks"),
                       qOutput = "data/query/"){
@@ -82,6 +83,8 @@ TCGAQuery <- function(tumor = "all",
   # laod tcga info if not done
   if(!exists("dataFolders")) load(file)
   dataFolders <- get("dataFolders", envir=environment())
+
+  dir.create(path = qOutput, showWarnings = F, recursive = T)
 
   if(!i){
     ifelse(tumor != "all",x <- subset(dataFolders, dataFolders[,"Tumor"] == tolower(tumor)),x<-dataFolders)
@@ -95,6 +98,14 @@ TCGAQuery <- function(tumor = "all",
 
     if(platform != "all" && is.null(nrow(x)))  x <- subset(x, x["Platform"] == tolower(platform))
     if(platform != "all" && !is.null(nrow(x))) x <- subset(x, x[,"Platform"] == tolower(platform))
+
+    if(metadata){
+      if(!is.null(nrow(x))) magetab <- x[grep("mage-tab", x[,"Folder"]),]
+      else  magetab <- x[grep("mage-tab", x["Folder"]),]
+    }
+
+    if(!is.null(nrow(x))) x <- x[grep("Level_",   x[,"Folder"]),]
+    else x <- x[grep("Level_",   x["Folder"]),]
 
 
     if(level != "all"){
@@ -118,31 +129,76 @@ TCGAQuery <- function(tumor = "all",
     }else if(is.null(nrow(x))) {
       print("Found: 1 folder. Start downloading filenames:")
     }else{
-      print(paste("Found:", length(x[,1]), "folders. Start downloading filenames:",sep=" "))
+      print(paste("Found:", length(x[,1]), "folders. Preparing filenames:",sep=" "))
     }
 
+
+
+    if(metadata && length(magetab)!=0 ) {
+      print("Found magetab metadata. Downloading..")
+      for(k in 1:length(magetab[,"Manifest"])){
+        if(RCurl::url.exists(dirname(magetab[,"Manifest"][k]))){
+          download(dirname(magetab[,"Manifest"][k]),
+                   "temp.html",
+                   mode="wb",
+                   quiet = 1)
+          tmp <- htmlTreeParse("temp.html")
+          mt <- capture.output(tmp)
+          unlink("temp.html")
+          rm(tmp)
+        }else{
+          stop("Can't find URL. Please check the web site or the internet connection.")
+        }
+        mt <- as.matrix(unlist(strsplit(mt, "  ")))
+        mt <- str_trim(mt[mt != ""])
+        mt <- mt[grep(".sdrf.txt",mt)]
+        mt <- sapply(strsplit(mt, ">"), function(y) y[1])
+        mt <- sapply(strsplit(mt, "="), function(y) y[2])
+        mt <- sub('\"','',mt)
+        mt <- sub('\"','',mt)
+        mt <- paste(dirname(magetab[,"Manifest"][k]),mt, sep = "/")
+        download(mt,
+                 destfile = paste0(qOutput,
+                                   paste0(unlist(strsplit(dirname(magetab[,"Manifest"][k]), split = '/', fixed = TRUE))[14],
+                                          ".sdrf.txt")),
+                 mode = "w",
+                 quiet = 1)
+        print(paste("Downloaded",k," metadata out of",length(magetab[,"Manifest"]), sep = " "))
+      }
+    }else if(metadata){
+      #.maf handling
+
+    }
+
+
+
+
     queryURI = NULL
-    dir.create(path = qOutput, showWarnings = F, recursive = T)
     if(is.null(nrow(x))){
-      download(x["Manifest"],
-               destfile = paste0(qOutput,"/filenames.txt"),
-               mode="w",
-               quiet = 1)
-      queryURI <- paste(unlist(strsplit(x["Manifest"], split='MANIFEST.txt', fixed=TRUE)),
-                        as.character(read.table(file = paste0(qOutput,"/filenames.txt"))[2]$V2),sep="")
-      print("Donwloaded.")
+      fails <- 0
+      if(RCurl::url.exists(x["Manifest"])){
+        download(x["Manifest"],
+                 destfile = paste0(qOutput,"/filenames.txt"),
+                 mode="w",
+                 quiet = 1)
+        queryURI <- paste(unlist(strsplit(x["Manifest"], split='MANIFEST.txt', fixed=TRUE)),
+                          as.character(read.table(file = paste0(qOutput,"/filenames.txt"))[2]$V2),sep="")
+        print("Donwloaded.")
+      }else{
+        message(paste0("ERROR: ", x["Manifest"]," not found"))
+        fails <- 1
+      }
     }else{
       fails <- 0
       for(j in 1:length(x[,"Tumor"])){
 
         if(RCurl::url.exists(x[,"Manifest"][j])){
           download(x[,"Manifest"][j],
-                 destfile = paste(qOutput,"/filenames.txt",sep=""),
+                 destfile = paste0(qOutput,"/filenames.txt"),
                  mode="w",
                  quiet = 1) #character. The mode with which to write the file.
-        #Useful values are "w", "wb" (binary), "a" (append) and "ab".
-        #Only used for the "internal" method.
-        #APPEND IS NOT WORKING, I USED ANOTHER WAY
+                            #Useful values are "w", "wb" (binary), "a" (append) and "ab".
+                            #Only used for the "internal" method.
 
         print(paste("Downloaded:",j,"out of",length(x[,"Tumor"]),sep=" "))
 
@@ -158,6 +214,21 @@ TCGAQuery <- function(tumor = "all",
     }
   }
   print(paste("We found",length(queryURI) - fails ,"files",sep=" "))
+
+  if(metadata && length(magetab)!=0){
+    print("Returning metadata from .sdrf files")
+    n<-list.files(path = qOutput)
+    n<-n[grep(".sdrf",n)]
+    u <- NULL
+    for(i in 1:length(n)){
+      u<-c(u,read.delim(paste(qOutput,n[i],sep= "/"),sep = "\t"))
+      unlink(paste(qOutput,n[i],sep= "/"))
+    }
+  }else if(metadata){
+    print("Returning metadata from .maf files")
+  }
   save(queryURI, file = paste0(qOutput,"/fileURLs.rda"))
+
   #todo - add the showing of the result in a human readable way
+  if(metadata) return(u)
 }
