@@ -46,44 +46,46 @@ createDir <- function(base){
 
 #httr STILL WORKING BADLY -----> LOOKING FOR NEW SOLUTIONS
 DownloadHTML<- function(url){
-    bo2 = T
-    count <- 0
-    handle_find(url)
-    while(bo2){
-      request = try(GET(url, timeout(100)), silent = T)
-      if( class(request) == "try-error"){
-        Sys.sleep(1)
-        bo2 = T
-        count = count + 1
-        handle_find(url)
-        if(count%%10==0) print(paste("Reconnection attempt #",count,sep=""))
-      }else{
-        bo2 = F
-      }
-      if(count>=100){
-        stop("Connetion limit exceded. Check your internet connection and your proxy settings.
-             If you are downloading very big files (proteins for example) you should add the proper variable.
-             Take a look to the documentation. If the problem persists please contact the mantainers.")
-      }
-    }
-    u<-read.table(textConnection(content(request, as = 'text')), sep = ",", header = T)
 
-    return(deparse(u))
+  bo2 = T
+  count <- 0
+  handle_find(url)
+  while(bo2){
+    request = try(GET(url, timeout(100)), silent = T)
+    if( class(request) == "try-error"){
+      Sys.sleep(1)
+      bo2 = T
+      count = count + 1
+      handle_find(url)
+      if(count%%3==0) print(paste("Reconnection attempt #",count,sep=""))
+    }else{
+      bo2 = F
+    }
+    if(count>=20){
+      message("Connetion limit exceded. httr failed connecting.
+              If you are downloading very big files (proteins for example) take a look to the documentation.
+              Trying in a more safe way...")
+      return(DownloadHTMLs(url))
+    }
+  }
+  u<-read.table(textConnection(content(request, as = 'text')), sep = ",", header = T)
+
+  return(deparse(u))
 }
 
-#Slow but working --- less code
-# DownloadHTML<- function(url){
-#   if(RCurl::url.exists(url)){
-#     download(url,
-#              "temp.html",
-#              mode="wb",
-#              quiet = 1)
-#     tmp <- htmlTreeParse("temp.html")
-#     return(capture.output(tmp))
-#   }else{
-#     stop("Can't find URL. Please check the web site or the internet connection.")
-#   }
-# }
+#Slow secure function
+DownloadHTMLs<- function(url){
+  if(RCurl::url.exists(url)){
+    download(url,
+             "temp.html",
+             mode="wb",
+             quiet = 1)
+    tmp <- htmlTreeParse("temp.html")
+    return(capture.output(tmp))
+  }else{
+    stop("Can't find URL. Please check the web site or the internet connection.")
+  }
+}
 
 
 #NEW SOLUTION --- TOO SLOW --- cleaner --- modification needed everywhere
