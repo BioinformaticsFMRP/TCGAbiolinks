@@ -59,7 +59,6 @@ tabCluster<-tabCluster[order(tabCluster$Cluster,decreasing=F),]
 tabCluster<-as.data.frame(tabCluster)
 tabCluster$Color<-as.character(tabCluster$Color)
 
-ColorGroups<-names(table(samples_color$Color))
 
 ccol <- palette()[1 + 1:3]
 
@@ -70,20 +69,34 @@ for( cc in 1:3){
 tabCluster <- tabCluster[sHc$labels, ]
 
 rug(which(tabCluster[sHc$order, "Color"] == "blue"), col = "blue", lwd = 3)
-rug(which(tabCluster[sHc$order, "Color"] == "green3"), col = "red", lwd = 3)
-rug(which(tabCluster[sHc$order, "Color"] == "red"), col = "green", lwd = 3)
+rug(which(tabCluster[sHc$order, "Color"] == "green3"), col = "green3", lwd = 3)
+rug(which(tabCluster[sHc$order, "Color"] == "red"), col = "red", lwd = 3)
+
+##### Differential Analisys
+GroupBlueData <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "blue", "Sample"])]
+GroupGreen3Data <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "green3", "Sample"])]
+GroupRedData <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "red", "Sample"])]
+
+DEGsBlue <- DEA_edge5(cbind(GroupGreen3Data, GroupRedData), GroupBlueData, "GroupOther", "GroupBlue")
+DEGsGreen3 <- DEA_edge5(cbind(GroupBlueData, GroupRedData), GroupGreen3Data, "GroupOther", "GroupGreen3")
+DEGsRed <- DEA_edge5(cbind(GroupBlueData, GroupGreen3Data), GroupRedData, "GroupOther", "GroupRed")
 
 
+blueDEGs <- DEGsBlue[DEGsBlue$FDR < 0.01 & DEGsBlue$logFC >= 1, ]
+blueDEGs <- blueDEGs[order(blueDEGs$FDR), ]
+green3DEGs <- DEGsGreen3[DEGsGreen3$FDR < 0.01 & DEGsGreen3$logFC >= 1, ]
+green3DEGs <- green3DEGs[order(green3DEGs$FDR), ]
+redDEGs <- DEGsRed[DEGsRed$FDR < 0.01 & DEGsRed$logFC >= 1, ]
+redDEGs <- redDEGs[order(redDEGs$FDR), ]
+
+blueDEGsSpec <- blueDEGs[setdiff(rownames(blueDEGs), union(rownames(green3DEGs), rownames(redDEGs))), ]
+green3DEGsSpec <- green3DEGs[setdiff(rownames(green3DEGs), union(rownames(blueDEGs), rownames(redDEGs))), ]
+redDEGsSpec <- redDEGs[setdiff(rownames(redDEGs), union(rownames(blueDEGs), rownames(green3DEGs))), ]
 
 
+tabCluster <- tabCluster[order(tabCluster$Color), ]
 
-groups <- as.factor(cutree(sHc, k = 3))
-names(groups) <- colnames(BRCArnaseqV2MostVar)
-levels(groups) <- palette()[1 + 1:3]
-
-groups <- sort(groups)
-
-MfiltQuantileOrdered <- BRCArnaseqV2MostVar[, names(groups)]
+MfiltQuantileOrdered <- BRCArnaseqV2[c(rownames(blueDEGsSpec), rownames(green3DEGsSpec), rownames(redDEGsSpec)), rownames(tabCluster)]
 MfiltQuantileOrdered <- (MfiltQuantileOrdered - rowMeans(MfiltQuantileOrdered))/apply(MfiltQuantileOrdered, 1, sd)
 
 
@@ -95,22 +108,17 @@ quantile(HMactivity, 0.15); quantile(HMactivity, 0.85)
 HMactivity[HMactivity <= quantile(HMactivity, 0.15)] <- quantile(HMactivity, 0.15)
 HMactivity[HMactivity >= quantile(HMactivity, 0.85)] <- quantile(HMactivity, 0.85)
 
-#column_annotation <- matrix(" ", nrow = nrow(HMactivity), ncol = 2)
-#column_annotation[, 1] <- groups
-#column_annotation[, 2] <- as.character(consClust)
-
-#row_annotation <- matrix(" ", nrow = 1, ncol = ncol(HMactivity))
-#row_annotation[1, ] <- LGrColors[genesClusters]
-
 column_annotation <- matrix(" ", nrow = nrow(HMactivity), ncol = 1)
-column_annotation[, 1] <- as.character(groups)
+column_annotation[, 1] <- tabCluster$Color
 
+row_annotation <- matrix(" ", nrow = 1, ncol = ncol(HMactivity))
+row_annotation[1, ] <- c(rep("blue", nrow(blueDEGsSpec)), rep("green3", nrow(green3DEGsSpec)), rep("red", nrow(redDEGsSpec)))
 
 
 png("tmp.png", width = 4096, height = 3200)
-heatmap.3(t(HMactivity), ColSideColors = column_annotation, #RowSideColors = row_annotation,
-          key = FALSE, Colv = NA, #Rowv = NA,
-          scale = "row", col = greenred(75), dendrogram = "row",
+heatmap.3(t(HMactivity), ColSideColors = column_annotation, RowSideColors = row_annotation,
+          key = FALSE, Colv = NA, Rowv = NA,
+          scale = "none", col = greenred(75), dendrogram = "none",
           labRow = NA, labCol = NA,
           margins = c(1, 6), side.height.fraction = 0.25, keysize = 0.4, cexRow = .6)
 dev.off()
