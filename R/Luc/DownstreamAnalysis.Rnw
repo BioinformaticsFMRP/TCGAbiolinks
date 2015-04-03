@@ -89,23 +89,29 @@ DEGsBlue <- DEA_edge5(cbind(GroupGreen3Data, GroupRedData), GroupBlueData, "Grou
 DEGsGreen3 <- DEA_edge5(cbind(GroupBlueData, GroupRedData), GroupGreen3Data, "GroupOther", "GroupGreen3")
 DEGsRed <- DEA_edge5(cbind(GroupBlueData, GroupGreen3Data), GroupRedData, "GroupOther", "GroupRed")
 
+DEGsBlueLevel <- CreateTabLevel( as.matrix(rownames(DEGsBlue)),DEGsBlue,"GroupBlue","GroupOther",GroupBlueData,cbind(GroupGreen3Data, GroupRedData),typeOrder=T)
+DEGsGreen3Level <- CreateTabLevel( as.matrix(rownames(DEGsGreen3)),DEGsGreen3,"GroupGreen3","GroupOther",GroupGreen3Data,cbind(GroupBlueData, GroupRedData),typeOrder=T)
+DEGsRedLevel <- CreateTabLevel( as.matrix(rownames(DEGsRed)),DEGsRed,"GroupRed","GroupOther",GroupRedData,cbind(GroupBlueData, GroupGreen3Data),typeOrder=T)
 
-blueDEGs <- DEGsBlue[DEGsBlue$FDR < 0.01 & DEGsBlue$logFC >= 1, ]
+blueDEGs <- DEGsBlueLevel[DEGsBlueLevel$FDR < 0.01 & DEGsBlueLevel$logFC >= 1, ]
 blueDEGs <- blueDEGs[order(blueDEGs$FDR), ]
-green3DEGs <- DEGsGreen3[DEGsGreen3$FDR < 0.01 & DEGsGreen3$logFC >= 1, ]
+green3DEGs <- DEGsGreen3Level[DEGsGreen3Level$FDR < 0.01 & DEGsGreen3Level$logFC >= 1, ]
 green3DEGs <- green3DEGs[order(green3DEGs$FDR), ]
-redDEGs <- DEGsRed[DEGsRed$FDR < 0.01 & DEGsRed$logFC >= 1, ]
+redDEGs <- DEGsRedLevel[DEGsRedLevel$FDR < 0.01 & DEGsRedLevel$logFC >= 1, ]
 redDEGs <- redDEGs[order(redDEGs$FDR), ]
 
 blueDEGsSpec <- blueDEGs[setdiff(rownames(blueDEGs), union(rownames(green3DEGs), rownames(redDEGs))), ]
 green3DEGsSpec <- green3DEGs[setdiff(rownames(green3DEGs), union(rownames(blueDEGs), rownames(redDEGs))), ]
 redDEGsSpec <- redDEGs[setdiff(rownames(redDEGs), union(rownames(blueDEGs), rownames(green3DEGs))), ]
 
+blueDEGsSpec <- blueDEGsSpec[1:50, ]
+green3DEGsSpec <- green3DEGsSpec[1:50, ]
+redDEGsSpec <- redDEGsSpec[1:50, ]
 
 tabCluster <- tabCluster[order(tabCluster$Color), ]
 
 MfiltQuantileOrdered <- BRCArnaseqV2[c(rownames(blueDEGsSpec), rownames(green3DEGsSpec), rownames(redDEGsSpec)), rownames(tabCluster)]
-MfiltQuantileOrdered <- (MfiltQuantileOrdered - rowMeans(MfiltQuantileOrdered))/apply(MfiltQuantileOrdered, 1, sd)
+#MfiltQuantileOrdered <- (MfiltQuantileOrdered - rowMeans(MfiltQuantileOrdered))/apply(MfiltQuantileOrdered, 1, sd)
 
 
 MRactivity <- t(MfiltQuantileOrdered)
@@ -124,13 +130,13 @@ row_annotation[1, ] <- c(rep("blue", nrow(blueDEGsSpec)), rep("green3", nrow(gre
 
 
 
-png("tmp.png", width = 4096, height = 3200)
+#png("tmp.png", width = 4096, height = 3200)
 heatmap.3(t(HMactivity), ColSideColors = column_annotation, RowSideColors = row_annotation,
           key = FALSE, Colv = NA, Rowv = NA,
           scale = "none", col = greenred(75), dendrogram = "none",
           labRow = NA, labCol = NA,
           margins = c(1, 6), side.height.fraction = 0.25, keysize = 0.4, cexRow = .6)
-dev.off()
+#dev.off()
 
 
 BRCAcnv <- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder, PlatformType = 'genome_wide_snp_6', listSample = toDown, newsample = F)
