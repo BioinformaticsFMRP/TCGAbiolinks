@@ -123,6 +123,7 @@ row_annotation <- matrix(" ", nrow = 1, ncol = ncol(HMactivity))
 row_annotation[1, ] <- c(rep("blue", nrow(blueDEGsSpec)), rep("green3", nrow(green3DEGsSpec)), rep("red", nrow(redDEGsSpec)))
 
 
+
 png("tmp.png", width = 4096, height = 3200)
 heatmap.3(t(HMactivity), ColSideColors = column_annotation, RowSideColors = row_annotation,
           key = FALSE, Colv = NA, Rowv = NA,
