@@ -6,7 +6,10 @@
 <<>>=
 detach("package:TCGAbiolinks", unload=TRUE)
 remove.packages("TCGAbiolinks")
+
 setwd("~/Dropbox/Dottorato/GitHub/TCGAbiolinks/R/Luc")
+#setwd("~/Desktop/gitTCGAbiolinks/TCGAbiolinks/R/Luc")
+
 install.packages('TCGAbiolinks_0.5.tar.gz', type='source', repos = NULL)
 
 library('TCGAbiolinks')
@@ -16,6 +19,8 @@ setwd(origDir)
 
 #Load info file
 load("~/Dropbox/Dottorato/GitHub/TCGAbiolinks/R/Luc/PlatformAndAssociatedData_2015_03_11.Rdata")
+#load("~/Desktop/gitTCGAbiolinks/TCGAbiolinks/R/Luc/PlatformAndAssociatedData_2015_03_11.Rdata")
+
 sdrfFolder <- "~/Downloads/Data/TCGAsdrf/"
 #Download sdrf
 TCGAmanifest('BRCA')
@@ -29,6 +34,9 @@ downloadFolder <- "~/Downloads/Data/Samples/"
 sdrfFolder <- "~/Downloads/Data/TCGAsdrf/"
 
 #BRCArnaseqV2 <- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder, PlatformType = 'illuminahiseq_rnaseqv2', listSample = toDown, newsample = T)
+
+BRCAsnp<- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder, PlatformType = 'genome_wide_snp_6', listSample = toDown, newsample = T)
+
 #Data_CANCER_normUQ <- RnaSeqNormalization(Data_CANCER,geneInfo)
 #print(paste("STEP2..Normalization for ", CancerName, " with n. ", nrow(Data_CANCER_normUQ), " genes and ", ncol(Data_CANCER_normUQ),"samples...OK" ))
 

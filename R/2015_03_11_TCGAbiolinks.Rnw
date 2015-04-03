@@ -432,18 +432,27 @@ load("./PlatformAndAssociatedData_WebSites3.RData")
 #PlatformAndAssociatedData <-  PlatformAndAssociatedData[PlatformAndAssociatedData$Platform %in% "solid_dnaseq",]
 siteTCGA <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"  
 
-#PlatformAndAssociatedData <-  PlatformAndAssociatedData[-which(PlatformAndAssociatedData$Platform %in% "clin"),]
+PlatformAndAssociatedData <-  PlatformAndAssociatedData[-which(PlatformAndAssociatedData$Platform %in% "clin"),]
+
+ source('~/Desktop/gitTCGAbiolinks/TCGAbiolinks/R/TCGA_biolinks_functions_anto.R')
 
 
+#PlatformAndAssociatedData$FileName <- ""
 
-token <- 1
+token <- w
+
+load("PlatformAndAssociatedData_2015_03_11.Rdata")
+
+
 for( w in token: nrow(PlatformAndAssociatedData)){
   tmp <- PlatformAndAssociatedData[w,]
   key1a<- paste(unique(tmp$CenterType), unique(tmp$Center), unique(tmp$Platform), sep="/")
   Description <- paste(siteTCGA, tolower(tmp$Tumor), "/",key1a, sep="")
   key2a <- paste("/",tmp$Folder,"/",sep="")
   print( paste( w , " of ", nrow(PlatformAndAssociatedData)," ",Description, sep=""))
-  PlatformAndAssociatedData[w,"FileName"] <-  DownloaDmageTAB_sdrf(Description,key2a,tmp$Key1, tmp$Key2) 
+  PlatformAndAssociatedData[w,"FileName"] <-  .DownloaDmageTAB_sdrf(Description,key2a,tmp$Key1, tmp$Key2) 
+
+save(PlatformAndAssociatedData, file = "PlatformAndAssociatedData_2015_03_11.Rdata")
 }
 
 
