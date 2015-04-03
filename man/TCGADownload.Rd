@@ -4,8 +4,14 @@
 \alias{TCGADownload}
 \title{TCGA Download}
 \usage{
+<<<<<<< Updated upstream
 TCGADownload(dirURL = "data/query/", finalDir = "data/final",
   earlyStop = 0)
+=======
+TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder = "",
+  downloadFolder = "", PlatformType, nsample = 0, listSample = 0,
+  newsample = FALSE)
+>>>>>>> Stashed changes
 }
 \arguments{
 \item{dirURL}{the location of the query saved URL links.}
