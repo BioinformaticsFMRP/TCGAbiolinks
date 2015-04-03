@@ -56,12 +56,20 @@ TCGAVersion(tumor = "all", centerType = "all", center = "all",
 
 \item{level}{level 1 2 3}
 
+<<<<<<< Updated upstream
 \item{version}{version code -TO DO-}
 
+=======
+>>>>>>> Stashed changes
 \item{barcode}{Get for each version all barcodes?
 Default FALSE
 Takes a lot of time to get barcode}
 
+<<<<<<< Updated upstream
+=======
+\item{version}{version code -TO DO-}
+
+>>>>>>> Stashed changes
 \item{file}{- link reference data matrix}
 
 \item{qOutput}{place where the query is saved to be downloaded automatically.
