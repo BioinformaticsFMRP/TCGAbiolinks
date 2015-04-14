@@ -64,10 +64,11 @@
 #'             qOutput = "data/query/")
 #' }
 #'
-#' @author Davide
+#' @author Davide Garolini
 #' @seealso TCGADownload
 #' @export
 #' @import downloader
+#' @import stringr
 TCGAQuery <- function(tumor = "all",
                       centerType = "all",
                       center = "all",
@@ -100,12 +101,18 @@ TCGAQuery <- function(tumor = "all",
     if(platform != "all" && !is.null(nrow(x))) x <- subset(x, x[,"Platform"] == tolower(platform))
 
     if(metadata){
-      if(!is.null(nrow(x))) magetab <- x[grep("mage-tab", x[,"Folder"]),]
-      else  magetab <- x[grep("mage-tab", x["Folder"]),]
+      if(!is.null(nrow(x))){
+        magetab <- x[grep("mage-tab", x[,"Folder"]),]
+      }else{
+        magetab <- x[grep("mage-tab", x["Folder"]),]
+      }
     }
 
-    if(!is.null(nrow(x))) x <- x[grep("Level_",   x[,"Folder"]),]
-    else x <- x[grep("Level_",   x["Folder"]),]
+    if(!is.null(nrow(x))){
+      x <- x[grep("Level_",   x[,"Folder"]),]
+    }else{
+      x <- x[grep("Level_",   x["Folder"]),]
+    }
 
 
     if(level != "all"){
@@ -221,14 +228,14 @@ TCGAQuery <- function(tumor = "all",
     n<-n[grep(".sdrf",n)]
     u <- NULL
     for(i in 1:length(n)){
-      u<-c(u,read.delim(paste(qOutput,n[i],sep= "/"),sep = "\t"))
-      unlink(paste(qOutput,n[i],sep= "/"))
+      if(!is.null(u)) u<-rbind(u,read.delim(paste(qOutput,n[i],sep= "/"),sep = "\t"))
+      else u<-read.delim(paste(qOutput,n[i],sep= "/"),sep = "\t")
+      #unlink(paste(qOutput,n[i],sep= "/"))
     }
   }else if(metadata){
     print("Returning metadata from .maf files")
   }
   save(queryURI, file = paste0(qOutput,"/fileURLs.rda"))
-
   #todo - add the showing of the result in a human readable way
-  if(metadata) return(u)
+  #if(metadata) return(u)
 }
