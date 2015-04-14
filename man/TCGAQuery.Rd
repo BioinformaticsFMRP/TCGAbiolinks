@@ -4,14 +4,10 @@
 \alias{TCGAQuery}
 \title{TCGA query}
 \usage{
-<<<<<<< Updated upstream
 TCGAQuery(tumor = "all", centerType = "all", center = "all",
   platform = "all", level = "all", version = "all", i = F,
-  file = system.file("extdata/dataFolders.rda", package = "TCGAbiolinks"),
-  qOutput = "data/query/")
-=======
-TCGAQuery(Tumor, sdrfFolder, PlatformAndAssociatedData)
->>>>>>> Stashed changes
+  metadata = F, file = system.file("extdata/dataFolders.rda", package =
+  "TCGAbiolinks"), qOutput = "data/query/")
 }
 \arguments{
 \item{tumor}{tumor code between "acc"  "blca" "brca" "cesc" "chol" "cntl" "coad" "dlbc" "esca" "fppp" "gbm"
@@ -81,7 +77,11 @@ Crossfinding of file locations for downloading (TCGADownload)
 }
 }
 \author{
+<<<<<<< HEAD
+Davide Garolini
+=======
 Davide
+>>>>>>> master
 }
 \seealso{
 TCGADownload

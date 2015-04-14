@@ -5,6 +5,7 @@
 #'@author Davide
 #'@seealso TCGAQuery
 #'@export
+#'@import downloader RCurl XML
 TCGAUpdate <-function(){
   siteTCGA <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"
   dataFolders <- NULL
@@ -32,24 +33,27 @@ TCGAUpdate <-function(){
         x <- DownloadHTML(siteCenter[cc])
         x <- GrepSite(x, "href")
         Platform <- sub("/", "", x)
+        if(length(Platform)==0) Platform = ""
 
         sitePlatform <- paste(siteCenter[cc],Platform, "/", sep = "")
         for(p in 1:length(sitePlatform)){
           x <- DownloadHTML(sitePlatform[p])
           x <- GrepSite(x, "href")
           kind <- sub("/", "", x)
+          if(length(kind)==0) kind = ""
 
           siteKind <- paste(sitePlatform[p],kind, "/", sep = "")
           for(k in 1:length(siteKind)){
             x <- DownloadHTML(siteKind[k])
             x <- GrepSite(x, "href")
             folder <- sub("/", "", x)
+            if(length(folder)==0) folder = ""
 
             siteFolder <- paste(siteKind[k],folder, "/", sep = "")
 
-            if(length(Platform)==0) Platform = " "
-            if(length(kind)==0) kind = " "
-            if(length(folder)==0) folder = " "
+
+
+
             dataFolders <- rbind(dataFolders,
                                  cbind(
                                    Tumor = rep(Tumor[tt], length(folder)),

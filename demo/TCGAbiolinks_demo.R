@@ -1,10 +1,3 @@
-
-# if(TRUE %in% grepl("TCGABiolinks", installed.packages())){
-#   pkg <- c("package:TCGABiolinks")
-#   lapply(pkg, detach, character.only = TRUE, unload = TRUE)
-#   remove.packages("TCGABiolinks")
-#   rm(pkg)
-# }
 lapply(c("package:TCGAbiolinks"), detach, character.only = TRUE, unload = TRUE)
 remove.packages("TCGAbiolinks")
 #set a working directory:
@@ -21,6 +14,7 @@ library("downloader")
 library("httr")
 library("devtools")
 library('TCGAbiolinks')
+library("XML")
 
 #update the dataFolders.rda
 #TCGAUpdate()
@@ -28,19 +22,29 @@ tumor = "acc"
 centerType = "cgcc"
 platform = "genome_wide_snp_6"
 level = 3
+metadata = F
+metadata = T
 
 # tumor = "lihc"
 # platform = "mixed_dnaseq_curated"
 # centerType = "gsc"
 # level=2
+# metadata = T
 
-# TCGAQuery(tumor = tumor,
-#           centerType = centerType,
-#           platform = platform,
-#           level = level)
-#
-# earlyStop <- 20
-# TCGADownload(earlyStop = earlyStop)
+
+
+ullala <- NULL
+
+
+ullala <- TCGAQuery(tumor = tumor,
+          centerType = centerType,
+          platform = platform,
+          level = level,
+          metadata = metadata)
+
+
+earlyStop <- 20
+TCGADownload(earlyStop = earlyStop)
 
 
 
