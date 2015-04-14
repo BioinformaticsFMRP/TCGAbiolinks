@@ -1,0 +1,155 @@
+\documentclass{article}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+<<>>=
+detach("package:TCGAbiolinks", unload=TRUE)
+remove.packages("TCGAbiolinks")
+
+setwd("~/Dropbox/Dottorato/GitHub/TCGAbiolinks/R/Luc")
+#setwd("~/Desktop/gitTCGAbiolinks/TCGAbiolinks/R/Luc")
+
+install.packages('TCGAbiolinks_0.5.tar.gz', type='source', repos = NULL)
+
+library('TCGAbiolinks')
+origDir <-"~/Downloads/Data"
+setwd(origDir)
+
+
+#Load info file
+load("~/Dropbox/Dottorato/GitHub/TCGAbiolinks/R/Luc/PlatformAndAssociatedData_2015_03_11.Rdata")
+#load("~/Desktop/gitTCGAbiolinks/TCGAbiolinks/R/Luc/PlatformAndAssociatedData_2015_03_11.Rdata")
+
+sdrfFolder <- "~/Downloads/Data/TCGAsdrf/"
+#Download sdrf
+TCGAmanifest('BRCA')
+#Query
+res <- TCGAQuery('BRCA', sdrfFolder, PlatformAndAssociatedData)
+
+toDown <- Reduce(intersect, list(res$illuminahiseq_rnaseqv2, res$genome_wide_snp_6, res$illuminaga_dnaseq))
+
+Tumor <- 'BRCA'
+downloadFolder <- "~/Downloads/Data/Samples/"
+sdrfFolder <- "~/Downloads/Data/TCGAsdrf/"
+
+#BRCArnaseqV2 <- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder, PlatformType = 'illuminahiseq_rnaseqv2', listSample = toDown, newsample = T)
+
+BRCAsnp<- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder, PlatformType = 'genome_wide_snp_6', listSample = toDown, newsample = T)
+
+#Data_CANCER_normUQ <- RnaSeqNormalization(Data_CANCER,geneInfo)
+#print(paste("STEP2..Normalization for ", CancerName, " with n. ", nrow(Data_CANCER_normUQ), " genes and ", ncol(Data_CANCER_normUQ),"samples...OK" ))
+
+#Data_CANCER_normUQ_filt <- RnaSeqFilt(Data_CANCER_normUQ,0.25)
+#print(paste("STEP3..Filter quantile for ", CancerName, " with n. ", nrow(Data_CANCER_normUQ_filt), " genes and ", ncol(Data_CANCER_normUQ_filt),"samples...OK" ))
+BRCArnaseqV2 <- Cancer_rnaseqv2[, toDown]
+
+library(genefilter)
+library(clue)
+library(consensus)
+BRCArnaseqV2MostVar <- varFilter(BRCArnaseqV2, var.func = IQR,  var.cutoff = 0.75, filterByQuantile = TRUE)
+
+wData <- t(BRCArnaseqV2MostVar)
+ddist <- dist(wData, method = "euclidean")
+sHc <- hclust(ddist, method = "ward.D")
+aCalinsky <- calinsky(sHc, gMax = 20)
+plot(aCalinsky, type = "l", col = "grey", main = "Calinsky & Harabasz curve")
+text(1:length(aCalinsky), aCalinsky, paste(1:length(aCalinsky)))
+
+plot(sHc, labels = F, main ="ALD cluster dendrogram all 173  samples", xlab = "Samples with relative group color",sub="")
+
+rect.hclust(sHc, k=3, border="red")
+tabCluster <- as.matrix(cutree(sHc, k = 3))
+colnames(tabCluster)<-"Cluster"
+tabCluster<-cbind(Sample = rownames(tabCluster),Color = rownames(tabCluster), tabCluster)
+tabCluster<-as.data.frame(tabCluster)
+tabCluster<-tabCluster[order(tabCluster$Cluster,decreasing=F),]
+tabCluster<-as.data.frame(tabCluster)
+tabCluster$Color<-as.character(tabCluster$Color)
+
+
+ccol <- palette()[1 + 1:3]
+
+for( cc in 1:3){
+  tabCluster[tabCluster[, "Cluster"] == cc, "Color"] <- ccol[cc]
+}
+
+tabCluster <- tabCluster[sHc$labels, ]
+
+rug(which(tabCluster[sHc$order, "Color"] == "blue"), col = "blue", lwd = 3)
+rug(which(tabCluster[sHc$order, "Color"] == "green3"), col = "green3", lwd = 3)
+rug(which(tabCluster[sHc$order, "Color"] == "red"), col = "red", lwd = 3)
+
+##### Differential Analisys
+GroupBlueData <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "blue", "Sample"])]
+GroupGreen3Data <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "green3", "Sample"])]
+GroupRedData <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "red", "Sample"])]
+
+DEGsBlue <- DEA_edge5(cbind(GroupGreen3Data, GroupRedData), GroupBlueData, "GroupOther", "GroupBlue")
+DEGsGreen3 <- DEA_edge5(cbind(GroupBlueData, GroupRedData), GroupGreen3Data, "GroupOther", "GroupGreen3")
+DEGsRed <- DEA_edge5(cbind(GroupBlueData, GroupGreen3Data), GroupRedData, "GroupOther", "GroupRed")
+
+DEGsBlueLevel <- CreateTabLevel( as.matrix(rownames(DEGsBlue)),DEGsBlue,"GroupBlue","GroupOther",GroupBlueData,cbind(GroupGreen3Data, GroupRedData),typeOrder=T)
+DEGsGreen3Level <- CreateTabLevel( as.matrix(rownames(DEGsGreen3)),DEGsGreen3,"GroupGreen3","GroupOther",GroupGreen3Data,cbind(GroupBlueData, GroupRedData),typeOrder=T)
+DEGsRedLevel <- CreateTabLevel( as.matrix(rownames(DEGsRed)),DEGsRed,"GroupRed","GroupOther",GroupRedData,cbind(GroupBlueData, GroupGreen3Data),typeOrder=T)
+
+blueDEGs <- DEGsBlueLevel[DEGsBlueLevel$FDR < 0.01 & DEGsBlueLevel$logFC >= 1, ]
+blueDEGs <- blueDEGs[order(blueDEGs$FDR), ]
+green3DEGs <- DEGsGreen3Level[DEGsGreen3Level$FDR < 0.01 & DEGsGreen3Level$logFC >= 1, ]
+green3DEGs <- green3DEGs[order(green3DEGs$FDR), ]
+redDEGs <- DEGsRedLevel[DEGsRedLevel$FDR < 0.01 & DEGsRedLevel$logFC >= 1, ]
+redDEGs <- redDEGs[order(redDEGs$FDR), ]
+
+blueDEGsSpec <- blueDEGs[setdiff(rownames(blueDEGs), union(rownames(green3DEGs), rownames(redDEGs))), ]
+green3DEGsSpec <- green3DEGs[setdiff(rownames(green3DEGs), union(rownames(blueDEGs), rownames(redDEGs))), ]
+redDEGsSpec <- redDEGs[setdiff(rownames(redDEGs), union(rownames(blueDEGs), rownames(green3DEGs))), ]
+
+blueDEGsSpec <- blueDEGsSpec[1:50, ]
+green3DEGsSpec <- green3DEGsSpec[1:50, ]
+redDEGsSpec <- redDEGsSpec[1:50, ]
+
+tabCluster <- tabCluster[order(tabCluster$Color), ]
+
+MfiltQuantileOrdered <- BRCArnaseqV2[c(rownames(blueDEGsSpec), rownames(green3DEGsSpec), rownames(redDEGsSpec)), rownames(tabCluster)]
+#MfiltQuantileOrdered <- (MfiltQuantileOrdered - rowMeans(MfiltQuantileOrdered))/apply(MfiltQuantileOrdered, 1, sd)
+
+
+MRactivity <- t(MfiltQuantileOrdered)
+HMactivity <- t(quantileNormalization(t(MRactivity)))
+
+summary(as.vector(HMactivity))
+quantile(HMactivity, 0.15); quantile(HMactivity, 0.85)
+HMactivity[HMactivity <= quantile(HMactivity, 0.15)] <- quantile(HMactivity, 0.15)
+HMactivity[HMactivity >= quantile(HMactivity, 0.85)] <- quantile(HMactivity, 0.85)
+
+column_annotation <- matrix(" ", nrow = nrow(HMactivity), ncol = 1)
+column_annotation[, 1] <- tabCluster$Color
+
+row_annotation <- matrix(" ", nrow = 1, ncol = ncol(HMactivity))
+row_annotation[1, ] <- c(rep("blue", nrow(blueDEGsSpec)), rep("green3", nrow(green3DEGsSpec)), rep("red", nrow(redDEGsSpec)))
+
+
+
+#png("tmp.png", width = 4096, height = 3200)
+heatmap.3(t(HMactivity), ColSideColors = column_annotation, RowSideColors = row_annotation,
+          key = FALSE, Colv = NA, Rowv = NA,
+          scale = "none", col = greenred(75), dendrogram = "none",
+          labRow = NA, labCol = NA,
+          margins = c(1, 6), side.height.fraction = 0.25, keysize = 0.4, cexRow = .6)
+#dev.off()
+
+
+BRCAcnv <- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder, PlatformType = 'genome_wide_snp_6', listSample = toDown, newsample = F)
+
+# Only to use after stopped first esecution with newsample = F
+#BRCA_rnaseqV2_common_Methylation <- TCGADownload(Tumor='BRCA', PlatformAndAssociatedData, downloadFolder="/Users/antoniocolaprico/Desktop/package", sdrfFolder = "/Users/antoniocolaprico/Desktop/package/TCGAsdrf/", PlatformType='illuminahiseq_rnaseqv2', listSample=toDown,newsample = T)
+
+BRCA_methylation450_version <- TCGAVersion(Tumor, PlatformType,PlatformAndAssociatedData)
+
+
+
+
+@
+
+
+\end{document}
