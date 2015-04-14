@@ -8,7 +8,7 @@ Author: Antonio Colaprico,
         Claudia Cava,
         Gianluca Bontempi,
         Michele Ceccarelli,
-        Davide,
+        Davide Garolini,
         Tiago Chedraoui Silva
 Maintainer: Antonio Colaprico <antonio.colaprico@ulb.ac.be>
 Depends: R (>= 3.1.1)
@@ -16,6 +16,7 @@ Imports:  downloader,
           RCurl,
           bitops,
           httr,
-	  stringr
+	  stringr,
+	  XML
 Description: Query Download and Preprocess data from TCGA portal
 License: GPL (>= 3)
