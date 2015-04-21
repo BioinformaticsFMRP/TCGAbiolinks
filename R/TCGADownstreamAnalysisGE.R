@@ -22,7 +22,7 @@
 #' @author Colaprico et al.
 #' @seealso TCGADownload
 #' @export
-#' @import Rcurl
+#' @import RCurl
 
 TCGADownstreamAnalysisGE <- function(PathFileTumor,CancerName,Platform_type,FileManifest,tumorPubmed,IPA_transcription_factors){
   library(RCurl)
