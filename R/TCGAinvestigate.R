@@ -17,7 +17,7 @@
 #' @author Colaprico et al
 #' @seealso TCGADownload
 #' @export
-#' @import Rcurl
+#' @import RCurl
 
 
 TCGAinvestigate<- function(tumor,CANCER_diff_normUQ_level_tf,topgenes){

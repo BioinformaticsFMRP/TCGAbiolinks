@@ -68,7 +68,7 @@
 #' @seealso TCGADownload
 #' @export
 #' @import downloader
-#' @import stringr
+#' @import stringr RCurl
 TCGAQuery <- function(tumor = "all",
                       centerType = "all",
                       center = "all",
@@ -239,3 +239,4 @@ TCGAQuery <- function(tumor = "all",
   #todo - add the showing of the result in a human readable way
   #if(metadata) return(u)
 }
+
