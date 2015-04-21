@@ -5,7 +5,7 @@
 #'@author Davide
 #'@seealso TCGAQuery
 #'@export
-#'@import downloader RCurl XML
+#'@import downloader XML
 TCGAUpdate <-function(){
   siteTCGA <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"
   dataFolders <- NULL

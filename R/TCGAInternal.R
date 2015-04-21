@@ -77,21 +77,18 @@ createDir <- function(base){
 #' @description DownloadHTML content.
 #' @param url url path
 #' @keywords internal
-#' @import RCurl XML downloader
+#' @import XML downloader
 
 
 #Slow secure function
 .DownloadHTML<- function(url){
-  if(RCurl::url.exists(url)){
     download(url,
              "temp.html",
              mode="wb",
              quiet = 1)
     tmp <- htmlTreeParse("temp.html")
+    unlink("temp.html")
     return(capture.output(tmp))
-  }else{
-    stop("Can't find URL. Please check the web site or the internet connection.")
-  }
 }
 
 
