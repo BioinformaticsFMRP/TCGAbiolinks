@@ -5,9 +5,9 @@
 \title{TCGA query}
 \usage{
 TCGAQuery(tumor = "all", centerType = "all", center = "all",
-  platform = "all", level = "all", version = "all", i = F,
-  metadata = F, file = system.file("extdata/dataFolders.rda", package =
-  "TCGAbiolinks"), qOutput = "data/query/")
+  platform = "all", level = "all", version = "all", metadata = F,
+  file = system.file("extdata/dataFolders.rda", package = "TCGAbiolinks"),
+  qOutput = "data/query/")
 }
 \arguments{
 \item{tumor}{tumor code between "acc"  "blca" "brca" "cesc" "chol" "cntl" "coad" "dlbc" "esca" "fppp" "gbm"
@@ -58,8 +58,6 @@ TCGAQuery(tumor = "all", centerType = "all", center = "all",
 
 \item{version}{version code -TO DO-}
 
-\item{i}{- interactive -TO DO-}
-
 \item{file}{- link reference data matrix}
 
 \item{qOutput}{place where the query is saved to be downloaded automatically.
@@ -77,11 +75,7 @@ Crossfinding of file locations for downloading (TCGADownload)
 }
 }
 \author{
-<<<<<<< HEAD
 Davide Garolini
-=======
-Davide
->>>>>>> master
 }
 \seealso{
 TCGADownload
