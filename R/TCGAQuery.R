@@ -49,8 +49,6 @@
 #'
 #' @param version version code -TO DO-
 #'
-#' @param i - interactive -TO DO-
-#'
 #' @param file - link reference data matrix
 #'
 #' @param qOutput place where the query is saved to be downloaded automatically.
@@ -75,7 +73,6 @@ TCGAQuery <- function(tumor = "all",
                       platform = "all",
                       level = "all",
                       version = "all",
-                      i = F,
                       metadata = F,
                       file = system.file("extdata/dataFolders.rda",
                                          package="TCGAbiolinks"),
@@ -87,7 +84,6 @@ TCGAQuery <- function(tumor = "all",
 
   dir.create(path = qOutput, showWarnings = F, recursive = T)
 
-  if(!i){
     ifelse(tumor != "all",x <- subset(dataFolders, dataFolders[,"Tumor"] == tolower(tumor)),x<-dataFolders)
 
     if(centerType != "all" && is.null(nrow(x))) x <- subset(x, x["CenterType"] == tolower(centerType))
@@ -134,7 +130,7 @@ TCGAQuery <- function(tumor = "all",
     if(length(x)==0){
       stop("Nothing found. Check the proper spelling in the documentation.")
     }else if(is.null(nrow(x))) {
-      print("Found: 1 folder. Start downloading filenames:")
+      print("Found: 1 folder. Start downloading filenames and preparing to download files...")
     }else{
       print(paste("Found:", length(x[,1]), "folders. Preparing filenames:",sep=" "))
     }
@@ -143,18 +139,11 @@ TCGAQuery <- function(tumor = "all",
 
     if(metadata && length(magetab)!=0 ) {
       print("Found magetab metadata. Downloading..")
-      for(k in 1:length(magetab[,"Manifest"])){
+      for(k in 1:length(magetab[,"Manifest"])){ #add the possibility of only one magetab
         if(RCurl::url.exists(dirname(magetab[,"Manifest"][k]))){
-          download(dirname(magetab[,"Manifest"][k]),
-                   "temp.html",
-                   mode="wb",
-                   quiet = 1)
-          tmp <- htmlTreeParse("temp.html")
-          mt <- capture.output(tmp)
-          unlink("temp.html")
-          rm(tmp)
+          mt <- DownloadHTML(dirname(magetab[,"Manifest"][k]))
         }else{
-          stop("Can't find URL. Please check the web site or the internet connection.")
+          message(paste0("ERROR: ", dirname(magetab[,"Manifest"][k])," not found"))
         }
         mt <- as.matrix(unlist(strsplit(mt, "  ")))
         mt <- str_trim(mt[mt != ""])
@@ -173,7 +162,9 @@ TCGAQuery <- function(tumor = "all",
         print(paste("Downloaded",k," metadata out of",length(magetab[,"Manifest"]), sep = " "))
       }
     }else if(metadata){
-      #.maf handling
+      
+     #if .maf exists take it
+     #else print no metadata found
 
     }
 
@@ -207,7 +198,7 @@ TCGAQuery <- function(tumor = "all",
                             #Useful values are "w", "wb" (binary), "a" (append) and "ab".
                             #Only used for the "internal" method.
 
-        print(paste("Downloaded:",j,"out of",length(x[,"Tumor"]),sep=" "))
+        print(paste("Downloaded file names from the folder",j,"out of",length(x[,"Tumor"]),sep=" "))
 
         queryURI<-c(queryURI,paste(unlist(strsplit(x[,"Manifest"][j], split='MANIFEST.txt', fixed=TRUE)),
                                    as.character(read.table(file = paste(qOutput,"/filenames.txt",sep=""))[2]$V2),sep=""))
@@ -219,11 +210,11 @@ TCGAQuery <- function(tumor = "all",
         }
       }
     }
-  }
+  
   print(paste("We found",length(queryURI) - fails ,"files",sep=" "))
 
   if(metadata && length(magetab)!=0){
-    print("Returning metadata from .sdrf files")
+    print("Returning metadata as .sdrf files")
     n<-list.files(path = qOutput)
     n<-n[grep(".sdrf",n)]
     u <- NULL
@@ -233,7 +224,7 @@ TCGAQuery <- function(tumor = "all",
       #unlink(paste(qOutput,n[i],sep= "/"))
     }
   }else if(metadata){
-    print("Returning metadata from .maf files")
+    print("Returning metadata as .maf files")
   }
   save(queryURI, file = paste0(qOutput,"/fileURLs.rda"))
   #todo - add the showing of the result in a human readable way
