@@ -14,48 +14,33 @@ library("downloader")
 library("httr")
 library("devtools")
 library('TCGAbiolinks')
+library('stringr')
 library("XML")
 
 #update the dataFolders.rda
 #TCGAUpdate()
+
+
+
 tumor = "acc"
 centerType = "cgcc"
 platform = "genome_wide_snp_6"
 level = 3
-metadata = F
 metadata = T
 
 # tumor = "lihc"
 # platform = "mixed_dnaseq_curated"
 # centerType = "gsc"
 # level=2
-# metadata = T
+# metadata = F
 
-
-
-ullala <- NULL
-
-
-ullala <- TCGAQuery(tumor = tumor,
+TCGAQuery(tumor = tumor,
           centerType = centerType,
-          platform = platform,
           level = level,
+          platform = platform,
           metadata = metadata)
 
 
 earlyStop <- 20
 TCGADownload(earlyStop = earlyStop)
-
-
-
-
-version <- TCGAVersion(tumor = tumor,
-                       centerType = centerType,
-                       platform = platform,
-                       level = level,
-                       barcode = T)
-
-
-
-
 
