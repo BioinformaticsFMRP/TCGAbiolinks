@@ -4,7 +4,10 @@
 
 * Installing dependencies
 ```R
-install.packages(c("downloader","RCurl","httr","devtools","stringr"))
+install.packages(c("downloader","RCurl","httr","devtools","stringr","exactRankTests",
+                   "XML","GGally","parallel","ggplot2","survival"))
+source("http://bioconductor.org/biocLite.R")
+biocLite("GenomicRanges")
 ```
 
 * Creating roxygen documentation
