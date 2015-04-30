@@ -16,7 +16,7 @@ TCGADownload <- function(data=NULL,path=".")
   for(i in 1:nrow(data)){
     file <- paste0(path,"/",basename(data[i,"deployLocation"]))
     message(paste0("Downloading:", basename(data[i,"deployLocation"])))
-    downloader::download(paste0(root,x[i,"deployLocation"]),file)
+    downloader::download(paste0(root,data[i,"deployLocation"]),file)
     untar(file, exdir = path)
   }
 }
