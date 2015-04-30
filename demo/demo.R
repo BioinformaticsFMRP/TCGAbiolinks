@@ -16,17 +16,9 @@ TCGADownload(query[1:2,],path="data")
 # TCGAQuery(tumor="ov", platform = "CGH-1x1M_G4447A", level = "3",
 # listSample = c("TCGA-57-1993-11A-01D-0649-04","TCGA-61-2002-01A-01D-0664-04") )
 
-# get methylation data from tcga
-#root <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/gbm/cgcc/jhu-usc.edu/humanmethylation450/methylation/"
-#plat <- "jhu-usc.edu_GBM.HumanMethylation450.Level_3."
-#end  <- ".6.0.tar.gz"
-
-#for(i in 1:2){
-#  download(paste0(root,plat,i,end),paste0(plat,i,end))
-#}
-
+# TBD query <- TCGAQuery(tumor="gbm", platform="bio")
 #get metadata to be done with query and download
-download("https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/gbm/bcr/biotab/clin/nationwidechildrens.org_clinical_patient_gbm.txt",
+downloader::download("https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/gbm/bcr/biotab/clin/nationwidechildrens.org_clinical_patient_gbm.txt",
          "data/nationwidechildrens.org_clinical_patient_gbm.txt")
 
 #for(i in 1:2){
