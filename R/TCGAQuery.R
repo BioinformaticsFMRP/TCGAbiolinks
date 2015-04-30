@@ -72,10 +72,10 @@ TCGAQuery <- function(tumor="all",
     x <- subset(x, grepl(paste0("Level_",level),name) )
   }
   if(!is.null(added.since)){
-    x <- subset(x, as.Date(addedDate,"%m/%d/%Y") > as.Date(added.since,"%m/%d/%Y"))
+    x <- subset(x, as.Date(addedDate) > as.Date(added.since,"%m/%d/%Y"))
   }
   if(!is.null(added.up.to)){
-    x <- subset(x, as.Date(addedDate,"%m/%d/%Y") < as.Date(added.up.to,"%m/%d/%Y"))
+    x <- subset(x, as.Date(addedDate) < as.Date(added.up.to,"%m/%d/%Y"))
   }
 
   # to be improved

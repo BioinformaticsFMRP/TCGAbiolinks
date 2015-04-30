@@ -6,77 +6,34 @@
 #'@seealso TCGAQuery
 #'@export
 TCGAUpdate <-function(){
-  siteTCGA <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"
-  dataFolders <- NULL
 
-
-  x <- DownloadHTML(siteTCGA)
-  x <- GrepSite(x, "href")
-
-  Tumor <- sub("/", "", x)
-
-  siteTumor <- paste(siteTCGA, Tumor, "/", sep = "")
-  for(tt in 1:length(siteTumor)){
-    x <- DownloadHTML(siteTumor[tt])
-    x <- GrepSite(x, "href")
-    CenterType <- sub("/", "", x)
-
-    siteCenterType <- paste(siteTumor[tt], CenterType, "/", sep = "")
-    for(ct in 1:length(siteCenterType)){
-      x <- DownloadHTML(siteCenterType[ct])
-      x <- GrepSite(x, "href")
-      Center <- sub("/", "", x)
-
-      siteCenter <- paste(siteCenterType[ct], Center, "/", sep = "")
-      for(cc in 1:length(siteCenter)){
-        x <- DownloadHTML(siteCenter[cc])
-        x <- GrepSite(x, "href")
-        Platform <- sub("/", "", x)
-
-        sitePlatform <- paste(siteCenter[cc],Platform, "/", sep = "")
-        for(p in 1:length(sitePlatform)){
-          x <- DownloadHTML(sitePlatform[p])
-          x <- GrepSite(x, "href")
-          kind <- sub("/", "", x)
-
-          siteKind <- paste(sitePlatform[p],kind, "/", sep = "")
-          for(k in 1:length(siteKind)){
-            x <- DownloadHTML(siteKind[k])
-            x <- GrepSite(x, "href")
-            folder <- sub("/", "", x)
-
-            siteFolder <- paste(siteKind[k],folder, "/", sep = "")
-
-            if(length(Platform)==0) Platform = " "
-            if(length(kind)==0) kind = " "
-            if(length(folder)==0) folder = " "
-            dataFolders <- rbind(dataFolders,
-                                 cbind(
-                                   Tumor = rep(Tumor[tt], length(folder)),
-                                   CenterType = rep(CenterType[ct], length(folder)),
-                                   Center = rep(Center[cc], length(folder)),
-                                   Platform = rep(Platform[p],length(folder)),
-                                   Kind = rep(kind[k],length(folder)),
-                                   Folder = folder,
-                                   Manifest = paste(siteFolder,"MANIFEST.txt",sep="")))
-          }
-        }
-        print(paste(Tumor[tt], CenterType[ct], Center[cc], ":", paste(Platform, collapse = " - "), "done!", sep = " "))
-      }
-    }
-  }
-
-  save(dataFolders,
-       file = paste(system.file("extdata", package="TCGAbiolinks"),
-                    "dataFolders.rda",sep="/")
-  )
 }
 
+tcga.check.updates <- function(){
+  message("Looking for updates in TCGA database")
+
+  table <- create.tcga.table ()
+
+  message("Verifying if there is any update")
+  compare <- sapply(table$name,function(x){is.element(x,tcga.db[,"name"])})
+
+  # get new rows
+  table <- table[as.integer(which(compare == F)),]
+
+  # get barcode for new rows
+  table <- tcga.get.barcode(table)
+  # add disease and platform to table
+  table <- tcga.db.addCol(table)
+
+  # add table to tcga.db
+  tcga.db <- rbind(tcga.db,table)
+
+}
 # This function created tcga.db
 # warning to create the db takes almost 3 days
 # to update it should take some minutes (function still needed to be done)
 #' @import downloader XML plyr stringr
-create.tcga.table <- function(env=as.environment("package:TCGAbiolinks")){
+create.tcga.table <- function(){
   # get all compressed archives
   tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
   regex <- '<table summary="Data Summary".*</a></td></tr></table>'
@@ -94,10 +51,10 @@ create.tcga.table <- function(env=as.environment("package:TCGAbiolinks")){
     colnames(table) <-table[1,]
     table <- table[-1,1:9]
 
-    if(exists("tcga.db")) {
-      tcga.db <- rbind(tcga.db,table)
+    if(exists("db")) {
+      db <- rbind(db,table)
     } else {
-      tcga.db <- table
+      db <- table
     }
     # get next table
     next.regex <-"http://tcga-data.nci.nih.gov/tcgadccws/GetHTML.*Next"
@@ -109,40 +66,64 @@ create.tcga.table <- function(env=as.environment("package:TCGAbiolinks")){
     setTxtProgressBar(pb, i)
   }
   close(pb)
-  env$tcga.db <- tcga.db
+  # remove protected data from the update
+  db <- db[-grep("tcga4yeo",db$deployLocation),]
+  db$addedDate <- as.Date(db$addedDate,"%m-%d-%Y")
+  return(db)
+}
+
+# Using the name create two collumns Platform and Disease
+tcga.db.addCol <- function(data){
+  data$Platform <- ""
+  data$Disease <- ""
+  diseases <- disease.table$abbreviation
+  for(i in seq_along(diseases)){
+    idx <- grep(diseases[i],data$baseName)
+    if(length(idx >0)){
+      data[idx,]$Disease <- diseases[i]
+    }
+  }
+
+  for(i in seq_along(platform.table$name)){
+    idx <- grep(platform.table[i,]$name,data$baseName)
+    if(length(idx)>0){
+      data[idx,]$Platform <- platform.table[i,]$name
+    }
+  }
+  return (data)
 }
 
 
-# save as: list (list(barcodes)) or collapse (paste0(barcode, collapse = ","))?
-load.tcga.barcode <- function(){
+
+tcga.get.barcode <- function(data){
   # todo considere next page =/
   # comparar com sdrf
   # for each tcga.db id get barcodes
   message("Downloading TCGA barcodes")
   start.time <- Sys.time()
-  pb <- txtProgressBar(min = 0, max = nrow(tcga.db), style = 3)
-  for(j in 1:nrow(tcga.db)){
+  pb <- txtProgressBar(min = 0, max = nrow(data), style = 3)
+  for(j in 1:nrow(data)){
     #for(j in c(5)){
     tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?query="
-    tcga.query <- paste0("FileInfo&Archive[@id=",tcga.db[j,'id'],"]&roleName=fileCollection")
+    tcga.query <- paste0("FileInfo&Archive[@id=",data[j,'id'],"]&roleName=fileCollection")
     # metadata files ignore barcodes
-    if(length(grep(".*(aux|mage-tab).*",tcga.db[j,'name']))>0){
+    if(length(grep(".*(aux|mage-tab).*",data[j,'name']))>0){
       print(paste("Continued for:",j))
       next
     }
     # search if a file with same serial index and revision have barcodes
     # if it has we should copy it!
-    rev <- tcga.db[j,"revision"]
-    index <- tcga.db[j,"serialIndex"]
-    bname<- tcga.db[j,"baseName"]
-    aux <- subset(tcga.db,
+    rev <- data[j,"revision"]
+    index <- data[j,"serialIndex"]
+    bname<- data[j,"baseName"]
+    aux <- subset(data,
                   revision == rev & serialIndex == index & baseName==bname & deployStatus!="Available",
                   select = c(deployLocation,deployStatus)
     )
 
     if(nrow(aux)>0){
       print("Found barcode before")
-      tcga.db[j,"deployStatus"] <- aux[1,"deployStatus"]
+      data[j,"deployStatus"] <- aux[1,"deployStatus"]
       next
     }
     next.url <- paste0(tcga.root,tcga.query)
@@ -156,7 +137,7 @@ load.tcga.barcode <- function(){
                              stringsAsFactors = FALSE)$'NULL'
       colnames(files) <- files[1,]
       files <- files[-1,1:5]
-      idx <- grep("(README|CHANGES|DESCRIPTION|MANIFEST).*",files$name)
+      idx <- grep("(README|CHANGES|DESCRIPTION|MANIFEST|DISCLAIMER).*",files$name)
       if(length(idx > 0)){files <- files[-idx,]}
       if(nrow(files) == 0) {
         next.url <- NA
@@ -165,11 +146,17 @@ load.tcga.barcode <- function(){
         }
         next
       }
-      pat <- "*(TCGA)-([A-Z0-9]{2})-([A-Z0-9]{4})-(0[1-9]|[1-2][0-9])([A-Z])-(0[1-9]|[1-9][0-9])([DGHRTWX])-([A-Z0-9]{4})-([A-Z0-9]{2})*"
+
+      #pat <- "*(TCGA)-([A-Z0-9]{2})-([A-Z0-9]{4})-(0[1-9]|[1-2][0-9])([A-Z])-(0[1-9]|[1-9][0-9])([DGHRTWX])-([A-Z0-9]{4})-([A-Z0-9]{2})*"
+      pat <- "TCGA-[A-Z0-9]{2}-[A-Z0-9]{4}-[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{4}-[A-Z0-9]{2}"
+      #pat <- "((((TCGA-[A-Z0-9]{2})-[A-Z0-9]{4})-[A-Z0-9]{3}-[A-Z0-9]{3})-[A-Z0-9]{4}-[A-Z0-9]{2})"
+
       barcode <- str_match(files$name,pat)[,1]
+      print(Sys.time()-start.time)
       #message("Found in name")
       #print(barcode)
       if(all(is.na(barcode))){
+        message("Not Found in name")
         for(i in 1:nrow( files )){
           tcga.query <- paste0("BiospecimenBarcode&FileInfo[@id=",files[i,"id"],"]&roleName=biospecimenBarcodeCollection")
           next.url <- paste0(tcga.root,tcga.query)
@@ -200,30 +187,11 @@ load.tcga.barcode <- function(){
         all.barcode <- barcode
       }
     }
-    #tcga.db[[j,"deployStatus"]] <- list(barcode)
-    tcga.db[j,"deployStatus"] <- paste0(all.barcode, collapse = ",")
+    data[j,"deployStatus"] <- paste0(all.barcode, collapse = ",")
     rm(all.barcode)
     setTxtProgressBar(pb, j)
     print(Sys.time()-start.time)
   }
   close(pb)
-}
-
-
-# Using the name create two collumns Platform and Disease
-tcga.db.addCol <- function(x){
-  tcga.db$Platform <- ""
-  tcga.db$Disease <- ""
-  diseases <- sapply(strsplit(biosample.tcga$biosample,split = " - "),function(x){x[1]})
-  for(i in seq_along(diseases)){
-    idx <- grep(diseases[i],tcga.db$baseName)
-    tcga.db[idx,]$Disease <- diseases[i]
-  }
-
-  for(i in seq_along(platform.table$name)){
-    idx <- grep(platform.table[i,]$name,tcga.db$baseName)
-    if(length(idx)>0){
-      tcga.db[idx,]$Platform <- platform.table[i,]$name
-    }
-  }
+  return (data)
 }
