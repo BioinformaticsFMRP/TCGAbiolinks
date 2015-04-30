@@ -5,10 +5,7 @@ library(ggplot2)
 library(coin)
 library(parallel)
 #------------------ Downloading tcga data ----------------------------
-#oldwd <- getwd()
 dir.create("data")
-#setwd("data")
-
 query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450",level="3")
 TCGADownload(query[1:2,],path="data")
 # other tcga query examples
@@ -17,14 +14,9 @@ TCGADownload(query[1:2,],path="data")
 # listSample = c("TCGA-57-1993-11A-01D-0649-04","TCGA-61-2002-01A-01D-0664-04") )
 
 # TBD query <- TCGAQuery(tumor="gbm", platform="bio")
-#get metadata to be done with query and download
+# get metadata to be done with query and download
 downloader::download("https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/gbm/bcr/biotab/clin/nationwidechildrens.org_clinical_patient_gbm.txt",
          "data/nationwidechildrens.org_clinical_patient_gbm.txt")
-
-#for(i in 1:2){
-#  untar(paste0(plat,i,end))
-#}
-#setwd(oldwd)
 
 #-------------------------- Preparing data and metadata
 met <- organizeMethylationDataFrame("data")
