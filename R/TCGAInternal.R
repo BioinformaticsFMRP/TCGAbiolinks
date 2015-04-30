@@ -3,14 +3,14 @@
 #' @keywords internal
 .onAttach <- function (libname, pkgname){
 
-    file = system.file("extdata/dataFolders.rda",package="TCGAbiolinks")
-    time <- file.info(file)$ctime
-    if(file.exists(file)){
+  file = system.file("extdata/dataFolders.rda",package="TCGAbiolinks")
+  time <- file.info(file)$ctime
+  if(file.exists(file)){
     load(file,envir = as.environment("package:TCGAbiolinks"))
-    } else {
+  } else {
     env <- as.environment("package:TCGAbiolinks")
     load.tcga(env)
-    save(tcga.db,platform.table,
+    save(tcga.db,platform.table,disease.table,
          file = paste0(system.file("extdata", package="TCGAbiolinks"),"/dataFolders.rda")
     )
   }
@@ -35,6 +35,7 @@
 load.tcga <- function(env){
   downloader::download(url = "https://docs.google.com/spreadsheets/d/10GwiiO8A4Ld1h4HTGO88oaP7y3sqJHNRiQ_wcnKfXyM/export?format=tsv&id=10GwiiO8A4Ld1h4HTGO88oaP7y3sqJHNRiQ_wcnKfXyM&gid=1340244739", destfile = 'tcga.tsv')
   tcga.db <- read.delim(file = 'tcga.tsv', sep = '\t' )
+  tcga.db <- tcga.db[,-1]
   env$tcga.db <- data.frame(lapply(tcga.db, as.character), stringsAsFactors=FALSE)
   if (file.exists('tcga.tsv')) {file.remove('tcga.tsv')}
 
@@ -49,6 +50,17 @@ load.tcga <- function(env){
                                   stringsAsFactors = FALSE)$'NULL'
   colnames(platform.table) <- platform.table[1,]
   env$platform.table <- platform.table[-1,1:4]
-  if (file.exists('tcga.html')) {file.remove('tcga.html')}
 
+  tcga.query <- "query=Disease"
+  next.url <- paste0(tcga.root,tcga.query)
+  downloader::download(next.url,"tcga.html",quiet =T)
+  regex <- '<table summary="Data Summary".*</a></td></tr></table>'
+  html <- readLines("tcga.html")
+  disease.table <- readHTMLTable(toString(str_match(html,regex)[6,]),
+                                  header = T,
+                                  stringsAsFactors = FALSE)$'NULL'
+  colnames(disease.table) <- disease.table[1,]
+  env$disease.table <- disease.table[-1,1:4]
+
+  if (file.exists('tcga.html')) {file.remove('tcga.html')}
 }
