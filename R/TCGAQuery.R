@@ -69,7 +69,8 @@ TCGAQuery <- function(tumor=NULL,
     for(i in seq_along(listSample)){
       # table with barcode id
       # example: query=BiospecimenBarcode[@barcode=TCGA-28-2499*]
-      print(listSample[i])
+      message("Searching for barcode files...")
+      message(paste("Barcode:",listSample[i]))
       db <- get.barcode.table(listSample[i])
       # get getBcrArchiveCollection table
       for(i in seq_along(db$id)){
@@ -83,10 +84,20 @@ TCGAQuery <- function(tumor=NULL,
     x <- subset(files, files$isLatest == 1)
     x <- x[!duplicated(x), ]
     x <- x[,order(names(x))]
+    if(!is.null(platform)){
+      x <- subset(x, tolower(Platform) == tolower(platform))
+    }
+    if(!is.null(platform)){
+      x <- subset(x, tolower(Disease) == tolower(tumor))
+    }
+    if(!is.null(level)){
+      x <- subset(x, grepl(paste0("Level_",level),name))
+    }
+
   }
   else{
     message("CREATING TABLE")
-   x <- create.tcga.table (platform=platform,type=level,disease=tumor)
+    x <- create.tcga.table (platform=platform,type=level,disease=tumor)
   }
   if(!is.null(added.since)){
     x <- subset(x, as.Date(addedDate) > as.Date(added.since,"%m/%d/%Y"))
