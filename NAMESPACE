@@ -2,9 +2,9 @@
 
 export(TCGADownload)
 export(TCGAQuery)
-export(TCGAUpdate)
 export(calculate.pvalues)
 export(diffmean.prim.rec)
+export(getArchive)
 export(met.mean.boxplot)
 export(organizeMethylationDataFrame)
 export(organizeMethylationMetaDataFrame)

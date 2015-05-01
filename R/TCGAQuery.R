@@ -54,22 +54,39 @@
 #' @seealso TCGADownload
 #' @export
 #' @import downloader
-TCGAQuery <- function(tumor="all",
-                       platform="all",
-                       added.since=NULL,
-                       added.up.to=NULL,
-                       listSample=NULL,
-                       level = "all"
+TCGAQuery <- function(tumor=NULL,
+                      platform=NULL,
+                      added.since=NULL,
+                      added.up.to=NULL,
+                      listSample=NULL,
+                      level=NULL
 ){
-  x <- tcga.db
-  if(tumor!="all"){
-    x <- subset(x, tolower(Disease) == tolower(tumor))
+
+  # to be improved
+  if(!is.null(listSample)){
+    #archives <- c()
+    files <- c()
+    for(i in seq_along(listSample)){
+      # table with barcode id
+      # example: query=BiospecimenBarcode[@barcode=TCGA-28-2499*]
+      print(listSample[i])
+      db <- get.barcode.table(listSample[i])
+      # get getBcrArchiveCollection table
+      for(i in seq_along(db$id)){
+        #aux <- getBcrArchiveCollection(db[i,"id"])
+        #archives <- rbind(archives,aux)
+        aux <- get.samples.files(db[i,"id"])
+        aux$barcode <- db[i,"barcode"]
+        files <- rbind(files,aux)
+      }
+    }
+    x <- subset(files, files$isLatest == 1)
+    x <- x[!duplicated(x), ]
+    x <- x[,order(names(x))]
   }
-  if(platform!="all"){
-    x <- subset(x, tolower(Platform) == tolower(platform))
-  }
-  if(level!="all"){
-    x <- subset(x, grepl(paste0("Level_",level),name) )
+  else{
+    message("CREATING TABLE")
+   x <- create.tcga.table (platform=platform,type=level,disease=tumor)
   }
   if(!is.null(added.since)){
     x <- subset(x, as.Date(addedDate) > as.Date(added.since,"%m/%d/%Y"))
@@ -78,17 +95,5 @@ TCGAQuery <- function(tumor="all",
     x <- subset(x, as.Date(addedDate) < as.Date(added.up.to,"%m/%d/%Y"))
   }
 
-  # to be improved
-  if(!is.null(listSample)){
-    for(i in seq_along(listSample)){
-      aux <- grep(listSample[i],tcga.db$deployStatus)
-      if(!exists("idx")){
-        idx <- aux
-      } else {
-        idx <- union(idx, aux)
-      }
-    }
-    x <- x[idx,]
-  }
   return(x)
 }
