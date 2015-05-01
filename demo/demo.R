@@ -15,6 +15,8 @@ TCGADownload(query[1:2,],path="data")
 
 # TBD query <- TCGAQuery(tumor="gbm", platform="bio")
 # get metadata to be done with query and download
+query <- TCGAQuery(tumor = "gbm", platform = "bio")
+
 downloader::download("https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/gbm/bcr/biotab/clin/nationwidechildrens.org_clinical_patient_gbm.txt",
          "data/nationwidechildrens.org_clinical_patient_gbm.txt")
 
