@@ -138,7 +138,7 @@ organizeMethylationMetaDataFrame <- function(wd = NULL){
   for(i in seq_along(dirs)){
     files <- c(files,paste0(dirs[i],"/",list.files(dirs[i])))
   }
-  files <- files[grep(".*clinical.*",files)]
+  files <- files[grep(".*clinical_patient.*",files)]
   header <- read.table(files[1], nrows = 1, header = FALSE, sep ="\t", stringsAsFactors = FALSE)
   metadata <- read.table(files[1], header=T, sep="\t", skip=2)
   colnames( metadata ) <- unlist(header)
