@@ -8,17 +8,9 @@ library(parallel)
 dir.create("data")
 query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450",level="3")
 TCGADownload(query[1:2,],path="data")
-# other tcga query examples
-# TCGAQuery(tumor="gbm",added.since="01/01/2013",added.up.to = "06/01/2013")
-# TCGAQuery(tumor="ov", platform = "CGH-1x1M_G4447A", level = "3",
-# listSample = c("TCGA-57-1993-11A-01D-0649-04","TCGA-61-2002-01A-01D-0664-04") )
 
-# TBD query <- TCGAQuery(tumor="gbm", platform="bio")
-# get metadata to be done with query and download
-query <- TCGAQuery(tumor = "gbm", platform = "bio")
-
-downloader::download("https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/gbm/bcr/biotab/clin/nationwidechildrens.org_clinical_patient_gbm.txt",
-         "data/nationwidechildrens.org_clinical_patient_gbm.txt")
+query <- TCGAQuery(tumor = "gbm", platform = "bio", level="2")
+TCGADownload(query,path="data")
 
 #-------------------------- Preparing data and metadata
 met <- organizeMethylationDataFrame("data")
