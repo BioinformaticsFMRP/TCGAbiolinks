@@ -9,10 +9,10 @@ TCGAUpdate <-function(){
 
 }
 
-tcga.check.updates <- function(){
+tcga.check.updates <- function(platform=NULL,type=NULL,disease=NULL){
   message("Looking for updates in TCGA database")
 
-  table <- create.tcga.table ()
+  table <- create.tcga.table (platform=platform,type=type,disease=disease)
 
   message("Verifying if there is any update")
   compare <- sapply(table$name,function(x){is.element(x,tcga.db[,"name"])})
@@ -22,53 +22,62 @@ tcga.check.updates <- function(){
 
   # get barcode for new rows
   table <- tcga.get.barcode(table)
-  # add disease and platform to table
-  table <- tcga.db.addCol(table)
 
   # add table to tcga.db
   tcga.db <- rbind(tcga.db,table)
 
+  # remove old values
+  # compare db name with the new ones, if not present it is old
+  aux <- tcga.db
+  if(!is.null(platform)){ aux <- subset(aux, Platform = platform)}
+  if(!is.null(disease)){ aux <- subset(aux, Disease = disease)}
+  if(!is.null(type)){ aux <- aux[ grepl(type,aux[,"name"]),]}
+  compare <- sapply(aux$name,function(x){is.element(x,table[,"name"])})
+  aux <- aux[as.integer(which(compare == F)),]
+  for(i in seq_along(aux$name)){
+    idx <- grep(aux[i,"name"], tcga.db$name)
+    tcga.db <- tcga.db[-idx,]
+  }
 }
 # This function created tcga.db
 # warning to create the db takes almost 3 days
 # to update it should take some minutes (function still needed to be done)
 #' @import downloader XML plyr stringr
-create.tcga.table <- function(){
+create.tcga.table <- function(disease=NULL, platform=NULL,type=NULL){
   # get all compressed archives
   tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
   regex <- '<table summary="Data Summary".*</a></td></tr></table>'
   message("Downloading TCGA database")
   tcga.query <- paste0("query=Archive[isLatest=1]")
-  next.url <- paste0(tcga.root,tcga.query)
-  pb <- txtProgressBar(min = 0, max = 32, style = 3)
-  i <- 0
-  while(!is.na(next.url)){
-    downloader::download(next.url,"tcga.html",quiet=T)
-    html <- readLines("tcga.html")
-    table <- readHTMLTable(toString(str_match(html,regex)[6,]),
-                           header = T,
-                           stringsAsFactors = FALSE)$'NULL'
-    colnames(table) <-table[1,]
-    table <- table[-1,1:9]
 
-    if(exists("db")) {
-      db <- rbind(db,table)
-    } else {
-      db <- table
-    }
-    # get next table
-    next.regex <-"http://tcga-data.nci.nih.gov/tcgadccws/GetHTML.*Next"
-    next.url <- str_match(html,next.regex)[6,]
-    next.url <- gsub("amp;","",gsub('\">Next',"",next.url))
-
-    # update progress bar
-    i <- i + 1
-    setTxtProgressBar(pb, i)
+  extra <- ""
+  pages <- 32
+  if(!is.null(platform)){
+    extra <- paste0(extra,"[Platform[@name=",platform,"]]")
+    pages <- pages/4
   }
-  close(pb)
+  if(!is.null(disease)){
+    extra <- paste0(extra,"[Disease[@abbreviation=",disease,"]]")
+    pages <- pages/4
+  }
+  if(!is.null(disease)){
+    extra <- paste0(extra,"[ArchiveType[@type=",type,"]]")
+    pages <- pages/4
+  }
+  url <- paste0(tcga.root,tcga.query,extra)
+  db <- tcga.get.table(url,pages)
+
+  # remove useless cols
+  db <- db[,1:9]
+
   # remove protected data from the update
-  db <- db[-grep("tcga4yeo",db$deployLocation),]
+  idx <- grep("tcga4yeo",db$deployLocation)
+  if(length(idx)>0){
+    db <- db[-idx,]
+  }
+  # transoform date into same format
   db$addedDate <- as.Date(db$addedDate,"%m-%d-%Y")
+  db <- tcga.db.addCol(db)
   return(db)
 }
 
@@ -93,6 +102,49 @@ tcga.db.addCol <- function(data){
   return (data)
 }
 
+# A function to get a tcga table from api
+# input: url (max for progress bar)
+# return: table
+tcga.get.table <- function(url,max){
+  next.url <- url
+  regex <- '<table summary="Data Summary".*</a></td></tr></table>'
+  next.regex <-"http://tcga-data.nci.nih.gov/tcgadccws/GetHTML.*Next"
+
+  if(max>0){
+    pb <- txtProgressBar(min = 0, max = max, style = 3)
+    i <- 0
+  }
+
+  while(!is.na(next.url)){
+    downloader::download(next.url,"tcga.html",quiet=T)
+    html <- readLines("tcga.html")
+    table <- readHTMLTable(toString(str_match(html,regex)[6,]),
+                           header = T,
+                           stringsAsFactors = FALSE)$'NULL'
+    colnames(table) <-table[1,]
+    table <- table[-1,]
+
+    if(exists("db")) {
+      db <- rbind(db,table)
+    } else {
+      db <- table
+    }
+    # get next table
+    next.url <- str_match(html,next.regex)[6,]
+    next.url <- gsub("amp;","",gsub('\">Next',"",next.url))
+
+    if(max>0){
+      # update progress bar
+      i <- i + 1
+      setTxtProgressBar(pb, i)
+    }
+  }
+  if(max>0){
+    setTxtProgressBar(pb, max)
+    close(pb)
+  }
+  return (db)
+}
 
 
 tcga.get.barcode <- function(data){
@@ -107,7 +159,7 @@ tcga.get.barcode <- function(data){
     tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?query="
     tcga.query <- paste0("FileInfo&Archive[@id=",data[j,'id'],"]&roleName=fileCollection")
     # metadata files ignore barcodes
-    if(length(grep(".*(aux|mage-tab).*",data[j,'name']))>0){
+    if(length(grep(".*(aux|mage-tab|diagnostic_images|pathology_reports|MDA_RPPA_Core|tissue_images).*",data[j,'name']))>0){
       print(paste("Continued for:",j))
       next
     }
@@ -126,6 +178,8 @@ tcga.get.barcode <- function(data){
       data[j,"deployStatus"] <- aux[1,"deployStatus"]
       next
     }
+
+
     next.url <- paste0(tcga.root,tcga.query)
     while(!is.na(next.url)){
       print(next.url)
@@ -144,15 +198,25 @@ tcga.get.barcode <- function(data){
         if(!exists("all.barcode")){
           all.barcode <- ""
         }
-        next
+        break
       }
 
+      # barcode in only one page (it happens only for bio plat level 1)
+      if(data[j,'Platform']=="bio"){
+        all.barcode <- ""
+        if(grepl("Level_1",data[j,"name"]))
+        {
+          tcga.query <- paste0("BiospecimenBarcode&Archive[@id=",data[j,'id'],"]&roleName=bcrBiospecimenBarcodeCollection")
+          aux <- tcga.get.table(paste0(tcga.root,tcga.query),0)
+          all.barcode <- aux[,1]
+        }
+        next.url <- NA
+        break
+      }
       #pat <- "*(TCGA)-([A-Z0-9]{2})-([A-Z0-9]{4})-(0[1-9]|[1-2][0-9])([A-Z])-(0[1-9]|[1-9][0-9])([DGHRTWX])-([A-Z0-9]{4})-([A-Z0-9]{2})*"
       pat <- "TCGA-[A-Z0-9]{2}-[A-Z0-9]{4}-[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{4}-[A-Z0-9]{2}"
       #pat <- "((((TCGA-[A-Z0-9]{2})-[A-Z0-9]{4})-[A-Z0-9]{3}-[A-Z0-9]{3})-[A-Z0-9]{4}-[A-Z0-9]{2})"
-
       barcode <- str_match(files$name,pat)[,1]
-      print(Sys.time()-start.time)
       #message("Found in name")
       #print(barcode)
       if(all(is.na(barcode))){
