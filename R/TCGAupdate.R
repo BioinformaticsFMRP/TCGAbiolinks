@@ -36,7 +36,10 @@ get.samples.files <- function(id){
       archives <- rbind(archives,aux)
     }
   }
-  return(archives[,-c(10:15)])
+  archives <- archives[,-c(10:15)]
+  archives$addedDate <- as.Date(archives$addedDate,"%m-%d-%Y")
+  archives <- tcga.db.addCol(archives)
+  return(archives)
 }
 
 getBcrArchiveCollection <- function (id){
@@ -128,7 +131,7 @@ tcga.get.table <- function(url,max=0){
     pb <- txtProgressBar(min = 0, max = max, style = 3)
     i <- 0
   }
-  print(url)
+  #print(url)
   while(!is.na(next.url)){
     downloader::download(next.url,"tcga.html",quiet=T)
     html <- readLines("tcga.html")
