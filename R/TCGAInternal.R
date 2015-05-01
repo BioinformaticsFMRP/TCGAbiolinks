@@ -10,7 +10,7 @@
   } else {
     env <- as.environment("package:TCGAbiolinks")
     load.tcga(env)
-    save(tcga.db,platform.table,disease.table,
+    save(platform.table,disease.table,
          file = paste0(system.file("extdata", package="TCGAbiolinks"),"/dataFolders.rda")
     )
   }
@@ -33,12 +33,6 @@
 
 #' @import XML stringr
 load.tcga <- function(env){
-  downloader::download(url = "https://docs.google.com/spreadsheets/d/10GwiiO8A4Ld1h4HTGO88oaP7y3sqJHNRiQ_wcnKfXyM/export?format=tsv&id=10GwiiO8A4Ld1h4HTGO88oaP7y3sqJHNRiQ_wcnKfXyM&gid=1340244739", destfile = 'tcga.tsv')
-  tcga.db <- read.delim(file = 'tcga.tsv', sep = '\t' )
-  tcga.db <- tcga.db[,-1]
-  env$tcga.db <- data.frame(lapply(tcga.db, as.character), stringsAsFactors=FALSE)
-  if (file.exists('tcga.tsv')) {file.remove('tcga.tsv')}
-
   tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
   tcga.query <- "query=Platform"
   next.url <- paste0(tcga.root,tcga.query)
