@@ -13,8 +13,8 @@ query <- TCGAQuery(tumor = "gbm", platform = "bio", level="2")
 TCGADownload(query,path="data")
 
 #-------------------------- Preparing data and metadata
-met <- organizeMethylationDataFrame("data")
-
+all.met <- organizeMethylationDataFrame("data")
+met <- all.met[,5:ncol(all.met)]
 met.md <- organizeMethylationMetaDataFrame("data")
 samples <- colnames(met)
 idx <- is.element(met.md$bcr_patient_barcode,strtrim(samples,12))
@@ -37,7 +37,11 @@ met.mean.boxplot(aux)
 
 #----------------------- calculate.pvalues (just an example)
 met.t <-  data.frame(t(met))
+#usuário   sistema decorrido
+#229.528    13.091   108.977
 pvalues <- calculate.pvalues(met.t,c(1,3,5,7,9,11),c(2,4,6,8,10,12))
+system.time(pvalues <- calculate.pvalues(met.t,c(1,3,5),c(2,4,6)))
+system.time(pvalues2 <- calculate.pvalues2(met.t,c(1,3,5),c(2,4,6)))
 
 #------------- volcano plot
 met$p.value <- pvalues[,1]

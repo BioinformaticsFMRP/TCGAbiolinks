@@ -184,7 +184,7 @@ organizeMethylationDataFrame <- function(wd = getwd()){
     data <- read.table(files[i], header=T, sep="\t", skip=1)
     colnames(data)[2] <- IDpatient
     if(!exists("methylation")) {
-      methylation <- data[, c(1,4,2)]
+      methylation <- data[, c(1,3:5,2)]
     }
     else{
       methylation <- merge(methylation, data[,c(1,2)], by="Composite.Element.REF")
@@ -193,13 +193,15 @@ organizeMethylationDataFrame <- function(wd = getwd()){
 
   # Use Composite.Element.REF as name, instead of column
   rownames(methylation) <- methylation$Composite.Element.REF
-  methylation$Composite.Element.REF <- NULL
+  #methylation$Composite.Element.REF <- NULL
 
   # remove X Y chromossomes
+  message("Removing X Y chromossomes")
   methylation <- methylation[methylation$Chromosome !="X" & methylation$Chromosome!="Y",]
-  methylation$Chromosome <- NULL
+  #methylation$Chromosome <- NULL
 
   # remove NA lines
+  message("Removing NA Lines")
   methylation <- na.omit(methylation)
 
   invisible (methylation)
@@ -305,11 +307,33 @@ calculate.pvalues <- function (values,idx1,idx2,paired=TRUE){
     return(z)
   }, mc.cores=detectCores()))
   ##Plot a histogram
-  print(w.p.values)
   png(filename="histogram_pvalues.png")
   hist(w.p.values)
   dev.off()
-  print(length(w.p.values))
+  ##Calculate the adjusted p-values by using the Benjamini-Hochberg (BH) method
+  w.p.values.adj <- p.adjust(w.p.values,method="BH")
+
+  png(filename="histogram_pvalues_adj.png")
+  ##Plot a histogram
+  hist(w.p.values.adj)
+  dev.off()
+
+  return(data.frame(w.p.values,w.p.values.adj))
+}
+calculate.pvalues2 <- function (values,idx1,idx2,paired=TRUE){
+  # Apply Wilcoxon test in order to calculate the p-values
+  w.p.values <- unlist(mclapply(values,function(probe) {
+    x <- coin::wilcoxsign_test(as.matrix(probe[idx1]) ~ as.matrix(probe[idx2]),
+                                  zero.method="Wilcoxon",
+                                  dist="exact")
+    z <- coin::pvalue(x)
+    return(z)
+  }, mc.cores=detectCores()))
+  print(w.p.values)
+  ##Plot a histogram
+  png(filename="histogram_pvalues.png")
+  hist(w.p.values)
+  dev.off()
   ##Calculate the adjusted p-values by using the Benjamini-Hochberg (BH) method
   w.p.values.adj <- p.adjust(w.p.values,method="BH")
   print(length(w.p.values.adj))
@@ -380,6 +404,25 @@ volcano.plot <- function(data,
   ggsave(p, filename=filename, width = 10, heigh = 5, dpi = 600)
 }
 
+
+#  Get latest Genome Reference Consortium Human Build
+#  And save it as Genomic Ranges
+#' @import biomaRt
+get.GRCh.bioMart <- function(){
+  ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+  chrom <- c(1:22,"X","Y")
+  gene.location <-getBM(attributes= c("ensembl_gene_id","ensembl_transcript_id","chromosome_name",
+                         "start_position","end_position", "strand","external_gene_name","external_transcript_name",
+                         "external_gene_source","external_transcript_source_name","hgnc_id","entrezgene"),
+           filters=c("chromosome_name"),
+           values=list(chrom), mart=ensembl)
+
+  gene.location <- gene.location[!is.na (gene.location$entrezgene),]
+  #the duplicates are different transcripts, not different coordinates
+  gene.location <- gene.location[!duplicated(gene.location$entrezgene),]
+
+  save(gene.location,file = "inst/extdata/GRCh.rda")
+}
 ##Starburst
 # Note: Received two files from Michele ('DEGs_agi_gcimp.txt' and 'DEGs_affy_gcimp.txt').
 # He performed a supervised analysis using gene expression platforms for the same samples.
@@ -405,36 +448,36 @@ volcano.plot <- function(data,
 #' @return Methylation table
 #' @import GenomicRanges
 #' @export
-starburstAnalysis <- function(wd = NULL){
+starburstAnalysis <- function(data){
 
-  gc.affy <- read.delim(file = "/dados/ResearchProjects/tathi//LGG.GBM_Tathi/DEGs_affy_gcimp.txt", sep = " ")
+  gc.affy <- read.delim(file = "/Users/tiago/Downloads/DEGs_affy_gcimp.txt", sep = " ")
   gc.affy$probeID <- rownames(gc.affy)
-  gc.agi <- read.delim(file = "/dados/ResearchProjects/tathi//LGG.GBM_Tathi/DEGs_agi_gcimp.txt", sep = " ")
+  gc.agi <- read.delim(file = "/Users/tiago/Downloads/DEGs_agi_gcimp.txt", sep = " ")
   gc.agi$probeID <- rownames(gc.agi)
 
   ####fix methylation gene names before merging.
   ### map gene ID to genomic coordinates
-  gene.location <- read.delim("/dados/ResearchProjects/thais/TCGA/Normals/mRNA_Brain/Galaxy1-[Homo_sapiens_genes_(GRCh37.p13)].tabular")
-  gene.location <- gene.location[gene.location$Chromosome.Name %in% c(1:22,"X","Y"),]
-  gene.location <- gene.location[!is.na (gene.location$EntrezGene.ID),]
-  gene.location <- gene.location[!duplicated(gene.location$EntrezGene.ID),] #the duplicates are different transcripts, not different coordinates
-
-  gene.GR <- GRanges(seqnames = paste0("chr",gene.location$Chromosome.Name),
-                     ranges   = IRanges(start = gene.location$Gene.Start..bp.,
-                                        end   = gene.location$Gene.End..bp.),
-                     strand   = gene.location$Strand,
-                     symbol   = gene.location$Associated.Gene.Name ,
-                     EntrezID = gene.location$EntrezGene.ID
+  gene.GR <- GRanges(seqnames = paste0("chr",gene.location$chromosome_name),
+                     ranges   = IRanges(start = gene.location$start_position,
+                                        end   = gene.location$end_position),
+                     strand   = gene.location$strand,
+                     symbol   = gene.location$external_gene_name,
+                     EntrezID = gene.location$entrezgene
   )
-  probe.info <- GRanges(seqnames = paste0("chr",LGG.GBM.250914$Chromosome), ranges = IRanges(start = LGG.GBM.250914$Genomic_Coor, end = LGG.GBM.250914$Genomic_Coor), probeID = LGG.GBM.250914$Composite.El)
-  distance <- as.data.frame(distanceToNearest(probe.info ,gene.GR)) #closest gene to each 450k probe ##your data
+
+  probe.info <- GRanges(seqnames = paste0("chr",data$Chromosome),
+                        ranges = IRanges(start = data$Genomic_Coordinate,
+                                         end = data$Genomic_Coordinate),
+                        probeID = data$Composite.Element.REF)
+
+  distance <- as.data.frame(distanceToNearest(probe.info,gene.GR)) #closest gene to each 450k probe ##your data
   rownames(gene.location) <- NULL
   gene.order.by.distance <- gene.location[distance$subjectHits,]
   gene.order.by.distance$distance <- as.matrix(distance$distance)
-  GBM.LGG.27.450k.nearest.gene <- cbind(LGG.GBM.250914, gene.order.by.distance[,c("Associated.Gene.Name ","EntrezGene.ID","distance")])
+  data.nearest.gene <- cbind(data, gene.order.by.distance[,c("external_gene_name","entrezgene","distance")])
 
-  all(rownames(volcano) == LGG.GBM.250914$Composite.Element.REF)
-  volcano$gene <- LGG.GBM.250914$Gene_Symbol
+  all(rownames(volcano) == data$Composite.Element.REF)
+  volcano$gene <- data$Gene_Symbol
   volcano$cgID <- rownames(volcano)
   volcano.m <- merge(volcano, gc.affy, by.x = "gene", by.y = "GeneSymbol", incomparables = NA)
   volcano.m$ID <- paste(volcano.m$gene, volcano.m$probeID, volcano.m$cgID, sep = ".")
