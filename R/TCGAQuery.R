@@ -38,19 +38,7 @@
 #' @param added.up.to Date to search for files (up.to)
 #' @param level level 1 2 3
 #' @param listSample list of barcodes to be considered in the search
-#'
-#' @param qOutput place where the query is saved to be downloaded automatically.
-#'        The folder can be specified in both TCGAQuery and TCGADownload
-#'
-#' @examples
-#' \dontrun{
-#'   TCGAQuery(tumor = "all",centerType = "all",center = "all",
-#'             platform = "all",level = "all",version = "all",
-#'             i = F,file = "data/dataFolders.rda",
-#'             qOutput = "data/query/")
-#' }
-#'
-#' @author Davide
+#' @example inst/examples/queryExamples.R
 #' @seealso TCGADownload
 #' @export
 #' @import downloader

@@ -10,9 +10,6 @@
   } else {
     env <- as.environment("package:TCGAbiolinks")
     load.tcga(env)
-    save(platform.table,disease.table,
-         file = paste0(system.file("extdata", package="TCGAbiolinks"),"/dataFolders.rda")
-    )
   }
   cat("\014")
   welcome.message <- paste0(
@@ -27,7 +24,7 @@
     " Last TCGAUpdate(): ",time,"\n",
     " ==============================================================\n"
   )
-  message(welcome.message)
+  packageStartupMessage(welcome.message)
 
 }
 
@@ -57,4 +54,7 @@ load.tcga <- function(env){
   env$disease.table <- disease.table[-1,1:4]
 
   if (file.exists('tcga.html')) {file.remove('tcga.html')}
+  save(platform.table,disease.table,
+       file = paste0(system.file("extdata", package="TCGAbiolinks"),"/dataFolders.rda")
+  )
 }

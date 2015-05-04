@@ -16,6 +16,15 @@ Imports:  downloader,
           RCurl,
           bitops,
           httr,
-	  stringr
+          GGally,
+          GenomicRanges,
+          XML,
+          biomaRt,
+          exactRankTests,
+          ggplot2,
+          plyr,
+          survival,
+          stringr,
+          matlab
 Description: Query Download and Preprocess data from TCGA portal
 License: GPL (>= 3)
