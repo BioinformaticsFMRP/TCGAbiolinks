@@ -66,7 +66,9 @@ TCGAQuery <- function(tumor=NULL,
         #archives <- rbind(archives,aux)
         aux <- get.samples.files(db[i,"id"])
         aux$barcode <- db[i,"barcode"]
-        files <- rbind(files,aux)
+        if(!is.null(aux)){
+          files <- rbind(files,aux)
+        }
       }
     }
     x <- subset(files, files$isLatest == 1)
