@@ -41,4 +41,4 @@ probe$p.value <- pvalues[,1]
 probe$p.value.adj <- pvalues[,2]
 prim.rec <- diffmean.prim.rec(beta)
 probe <- cbind(probe,prim.rec)
-hypo.hyper <- volcano.plot(probe,p.cut=0.05)
+hypo.hyper <- volcano.plot(probe,p.cut=0.05,diffmean.cut = 0.2)
