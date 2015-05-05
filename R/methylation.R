@@ -10,19 +10,28 @@ diffmean.prim.rec <- function(data){
   pat.rec <- "TCGA-[0-9a-z]{2}-[0-9a-z]{4}-02"
   rec <- data[,grep(pat.rec,colnames(data))]
   prim <- data[,grep(pat.prim,colnames(data))]
-  prim$mean.primary <- apply(prim,1,mean,na.rm=TRUE)
-  rec$mean.recurrence <- apply(rec,1,mean,na.rm=TRUE)
-  prim$probeID <- rownames(prim)
-  rec$probeID <- rownames(rec)
-  prim.rec <- merge(prim[,c("probeID","mean.primary")],rec[,c("probeID","mean.recurrence")],by="probeID")
-  rownames(prim.rec) <- prim.rec[,1]
-  prim.rec$diffmean <- prim.rec$mean.primary-prim.rec$mean.recurrence
+  prim.rec <- diffmean(prim,rec)
+  return(prim.rec)
+}
+
+diffmean <- function(group1,group2){
+  g1 <- group1
+  g1$mean.g1 <- apply(group1,1,mean,na.rm=TRUE)
+  g1$probeID <- rownames(group1)
+
+  g2 <- group2
+  g2$mean.g2 <- apply(group2,1,mean,na.rm=TRUE)
+  g2$probeID <- rownames(group2)
+
+  g1.g2 <- merge(g1[,c("probeID","mean.g1")],g2[,c("probeID","mean.g2")],by="probeID")
+  rownames(g1.g2) <- g1.g2[,1]
+  g1.g2$diffmean <- g1.g2$mean.g1-g1.g2$mean.g2
 
   png(filename="histogram_diffmean.png")
-  hist(prim.rec$diffmean)
+  hist(g1.g2$diffmean)
   dev.off()
 
-  return(prim.rec)
+  return(g1.g2)
 }
 
 #' @title creates survival analysis
