@@ -11,6 +11,16 @@
     env <- as.environment("package:TCGAbiolinks")
     load.tcga(env)
   }
+
+  file = system.file("extdata/plat.rda",package="TCGAbiolinks")
+  load(file,envir = as.environment("package:TCGAbiolinks"))
+
+  file = system.file("extdata/plat.center.rda",package="TCGAbiolinks")
+  load(file,envir = as.environment("package:TCGAbiolinks"))
+
+  file = system.file("extdata/GRCh.rda",package="TCGAbiolinks")
+  load(file,envir = as.environment("package:TCGAbiolinks"))
+
   cat("\014")
   welcome.message <- paste0(
     " =============================================================\n",
@@ -61,3 +71,20 @@ load.tcga <- function(env){
        file = paste0(system.file("extdata", package="TCGAbiolinks"),"/dataFolders.rda")
   )
 }
+
+#plat.center <- data.frame()
+#for(i in seq_along(platform.table$name)){
+#  message(platform.table[i,"name"])
+#  idx <- grep(platform.table[i,"name"],all$Platform)
+#  a <- unique(all[idx,]$center)
+#  print(a)
+#  if(length(a)>0){
+#    b <- platform.table[i,"name"]
+#    df <- data.frame(b,list(a))
+#    colnames(df) <- c("platform", "center")
+#    print(plat.center)
+#    plat.center <- rbind(plat.center,df)
+#    colnames(plat.center) <- c("platform", "center")
+#  }
+#}
+
