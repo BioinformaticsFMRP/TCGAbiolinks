@@ -47,12 +47,15 @@ load.tcga <- function(env){
   downloader::download(next.url,"tcga.html",quiet =T)
   regex <- '<table summary="Data Summary".*</a></td></tr></table>'
   html <- readLines("tcga.html")
-  disease.table <- readHTMLTable(toString(str_match(html,regex)[6,]),
-                                  header = T,
-                                  stringsAsFactors = FALSE)$'NULL'
-  colnames(disease.table) <- disease.table[1,]
-  env$disease.table <- disease.table[-1,1:4]
-
+  match <- str_match(html,regex)
+  idx <- which(!is.na(match))
+  if(length(idx)>0){
+    disease.table <- readHTMLTable(toString(match[idx,]),
+                                   header = T,
+                                   stringsAsFactors = FALSE)$'NULL'
+    colnames(disease.table) <- disease.table[1,]
+    env$disease.table <- disease.table[-1,1:4]
+  }
   if (file.exists('tcga.html')) {file.remove('tcga.html')}
   save(platform.table,disease.table,
        file = paste0(system.file("extdata", package="TCGAbiolinks"),"/dataFolders.rda")

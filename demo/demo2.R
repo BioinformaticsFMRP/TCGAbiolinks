@@ -36,3 +36,9 @@ rec <- grep(pat.rec,colnames(beta))
 prim <- grep(pat.prim,colnames(beta))
 beta.t <-  data.frame(t(beta))
 pvalues <- calculate.pvalues(beta.t,prim,rec)
+
+probe$p.value <- pvalues[,1]
+probe$p.value.adj <- pvalues[,2]
+prim.rec <- diffmean.prim.rec(beta)
+probe <- cbind(probe,prim.rec)
+hypo.hyper <- volcano.plot(probe,p.cut=0.05)
