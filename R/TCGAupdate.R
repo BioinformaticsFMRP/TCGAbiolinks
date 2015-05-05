@@ -14,31 +14,34 @@ getArchive <- function(id){
 }
 
 get.samples.files <- function(id){
+  archives <- NULL
   tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
   tcga.query <- paste0("query=FileInfo&BiospecimenBarcode[@id=",id,"]&roleName=fileCollection")
   url <- paste0(tcga.root,tcga.query)
   db <- tcga.get.table(url)
-  obsolete <- grep("-",db$md5sum)
+  if(!is.null(db)){
+    obsolete <- grep("-",db$md5sum)
 
-  if(length(obsolete)>0){db <- db[-obsolete,]}
-  files <- unique(db$name)
-  #for each file, get the highest ID
-  for(i in seq_along(files)){
-    same.files <- grep(files[i],db$name)
-    latest <- max(as.integer(db[same.files,]$id))
-    if(!exists("archives")){
-      archives  <- getArchive(latest)
-      archives$file <- files[i]
+    if(length(obsolete)>0){db <- db[-obsolete,]}
+    files <- unique(db$name)
+    #for each file, get the highest ID
+    for(i in seq_along(files)){
+      same.files <- grep(files[i],db$name)
+      latest <- max(as.integer(db[same.files,]$id))
+      if(!exists("archives")){
+        archives  <- getArchive(latest)
+        archives$file <- files[i]
 
-    } else {
-      aux  <- getArchive(latest)
-      aux$file <- files[i]
-      archives <- rbind(archives,aux)
+      } else {
+        aux  <- getArchive(latest)
+        aux$file <- files[i]
+        archives <- rbind(archives,aux)
+      }
     }
+    archives <- archives[,-c(10:15)]
+    archives$addedDate <- as.Date(archives$addedDate,"%m-%d-%Y")
+    archives <- tcga.db.addCol(archives)
   }
-  archives <- archives[,-c(10:15)]
-  archives$addedDate <- as.Date(archives$addedDate,"%m-%d-%Y")
-  archives <- tcga.db.addCol(archives)
   return(archives)
 }
 
@@ -52,7 +55,7 @@ getBcrArchiveCollection <- function (id){
 }
 get.barcode.table <- function(barcode){
   tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
-  tcga.query <- paste0("query=BiospecimenBarcode[@barcode=",barcode,"]")
+  tcga.query <- paste0("query=BiospecimenBarcode[@barcode=",barcode,"][@isValid=true]")
   url <- paste0(tcga.root,tcga.query)
   db <- tcga.get.table(url)
 }
@@ -123,6 +126,7 @@ tcga.db.addCol <- function(data){
 # input: url (max for progress bar)
 # return: table
 tcga.get.table <- function(url,max=0){
+  db <- NULL
   next.url <- url
   regex <- '<table summary="Data Summary".*</a></td></tr></table>'
   next.regex <-"http://tcga-data.nci.nih.gov/tcgadccws/GetHTML.*Next"
@@ -135,7 +139,13 @@ tcga.get.table <- function(url,max=0){
   while(!is.na(next.url)){
     downloader::download(next.url,"tcga.html",quiet=T)
     html <- readLines("tcga.html")
-    table <- readHTMLTable(toString(str_match(html,regex)[6,]),
+    match <- str_match(html,regex)
+    idx <- which(!is.na(match))
+    if(length(idx)==0){
+      next.url <- NA
+      break
+    }
+    table <- readHTMLTable(toString(match[idx,]),
                            header = T,
                            stringsAsFactors = FALSE)$'NULL'
     colnames(table) <-table[1,]
