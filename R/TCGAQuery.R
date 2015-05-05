@@ -49,6 +49,30 @@ TCGAQuery <- function(tumor=NULL,
                       listSample=NULL,
                       level=NULL
 ){
+  if(!(is.element(tumor,disease.table$abbreviation) | is.null(tumor))){
+    message("Disease not found. Chosse between:")
+    message(paste(disease.table$abbreviation, collapse = " "))
+    stop("Invalid tumor")
+  }
+  if(!(is.element(platform,platform.table$alias) | is.null(platform))){
+    message("Platform not found. Chosse between:")
+    message(paste(platform.table$alias, collapse = " "))
+    stop("Invalid platform")
+  }
+
+  if(!(is.element(level,c("1","2","3")) | is.null(level))){
+    message("Levelnot found. Chosse between:'1', '2' or '3'")
+    stop("Invalid platform")
+  }
+
+  if(!is.null(added.since)){
+    d <- try( as.Date( added.since, format= "%m/%d/%Y" ) )
+    if( class( d ) == "try-error" || is.na( d ) ) print( "Date format should be mm/dd/YYYY" )
+  }
+  if(!is.null(added.up.to)){
+    d <- try( as.Date( added.up.to, format= "%m/%d/%Y" ) )
+    if( class( d ) == "try-error" || is.na( d ) ) print( "Date format should be mm/dd/YYYY" )
+  }
 
   # to be improved
   if(!is.null(listSample)){
@@ -60,6 +84,53 @@ TCGAQuery <- function(tumor=NULL,
       message("Searching for barcode files...")
       message(paste("Barcode:",listSample[i]))
       db <- get.barcode.table(listSample[i])
+
+      # Improvement: using portion analyte in order to select platform
+      if(!is.null(platform)){
+        analyte <- c()
+        pat <- "TCGA-[[:alnum:]]{2}-[[:alnum:]]{4}-[[:alnum:]]{3}-[[:alnum:]]{2}"
+        if(is.element(tolower(platform),tolower(dna.plat))){
+          analyte = c(analyte,"D")
+        }
+        if(is.element(tolower(platform),tolower(rna.plat))){
+          analyte = c(analyte,"R")
+        }
+        if(is.element(tolower(platform),tolower(total.rna.plat))){
+          analyte = c(analyte,"T")
+        }
+        if(is.element(tolower(platform),tolower(wgarubcon.plat))){
+          analyte = c(analyte,"G")
+        }
+        if(is.element(tolower(platform),tolower(mirna.plat))){
+          analyte = c(analyte,"H")
+        }
+        if(is.element(tolower(platform),tolower(wgaqiagen2.plat))){
+          analyte = c(analyte,"X")
+        }
+        if(is.element(tolower(platform),tolower(wgaqiagen1.plat))){
+          analyte = c(analyte,"W")
+        }
+        idx <- c()
+        for(i in seq_along(analyte)){
+          aux <- grep(paste0(pat,"[",analyte[i],"]"),as.character(db$barcode))
+          idx <- union(idx,aux)
+        }
+        print(length(idx))
+        db <- db[idx,]
+      }
+      if(!is.null(platform)){
+        pat <- "TCGA-[[:alnum:]]{2}-[[:alnum:]]{4}-[[:alnum:]]{3}-[[:alnum:]]{3}-[[:alnum:]]{4}-"
+        idx <- grep(platform,plat.center$platform)
+        centers <- as.character(plat.center[idx,"center"])
+        idx <- c()
+        for(i in seq_along(centers)){
+          aux <- grep(paste0(pat,centers[i]),as.character(db$barcode))
+          idx <- union(idx,aux)
+        }
+        print(length(idx))
+        db <- db[idx,]
+      }
+
       # get getBcrArchiveCollection table
       for(i in seq_along(db$id)){
         #aux <- getBcrArchiveCollection(db[i,"id"])
@@ -75,7 +146,7 @@ TCGAQuery <- function(tumor=NULL,
     x <- x[!duplicated(x), ]
     x <- x[,order(names(x))]
     if(!is.null(platform)){
-      x <- subset(x, tolower(Platform) == tolower(platform))
+      x <- subset(x, grepl(tolower(platform),tolower(x$Platform)))
     }
     if(!is.null(platform)){
       x <- subset(x, tolower(Disease) == tolower(tumor))
