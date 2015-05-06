@@ -49,21 +49,28 @@ TCGAQuery <- function(tumor=NULL,
                       listSample=NULL,
                       level=NULL
 ){
-  if(!(is.element(tolower(tumor),tolower(disease.table$abbreviation)) | is.null(tumor))){
-    message("Disease not found. Chosse between:")
-    message(paste(disease.table$abbreviation, collapse = " "))
-    stop("Invalid tumor")
+ if(!is.null(tumor)){
+    if(!(is.element(tolower(tumor),tolower(disease.table$abbreviation)))){
+      message("Disease not found. Chosse between:")
+      message(paste(disease.table$abbreviation, collapse = " "))
+      stop("Invalid tumor")
+    }
   }
-  if(!(is.element(tolower(platform),tolower(platform.table$alias)) | is.null(platform))){
-    message("Platform not found. Chosse between:")
-    message(paste(platform.table$alias, collapse = " "))
-    stop("Invalid platform")
+  if(!is.null(platform)){
+    if(!(is.element(tolower(platform),tolower(platform.table$alias)))){
+      message("Platform not found. Chosse between:")
+      message(paste(platform.table$alias, collapse = " "))
+      stop("Invalid platform")
+    }
   }
 
-  if(!(is.element(level,c("1","2","3")) | is.null(level))){
-    message("Levelnot found. Chosse between:'1', '2' or '3'")
-    stop("Invalid platform")
+  if(!is.null(level)){
+    if(!(is.element(level,c("1","2","3")))){
+      message("Levelnot found. Chosse between:'1', '2' or '3'")
+      stop("Invalid platform")
+    }
   }
+
 
   if(!is.null(added.since)){
     d <- try( as.Date( added.since, format= "%m/%d/%Y" ) )
