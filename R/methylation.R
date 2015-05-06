@@ -308,13 +308,16 @@ met.mean.boxplot <- function (data,
 #' @return Methylation table
 #' @import exactRankTests parallel
 #' @export
-calculate.pvalues <- function (values,idx1,idx2,paired=TRUE){
+calculate.pvalues <- function (values,idx1,idx2,paired=TRUE,exact=TRUE,mc.cores=parallel::detectCores()){
   # Apply Wilcoxon test in order to calculate the p-values
+  #print(idx1)
+  #print(idx2)
   w.p.values <- unlist(mclapply(values,function(probe) {
-    zz <- wilcox.exact(as.matrix(probe[idx1]),as.matrix(probe[idx2]), exact=TRUE,paired=paired)
+    zz <- wilcox.exact(as.matrix(probe[idx1]),as.matrix(probe[idx2]), exact=exact,paired=paired)
     z <- zz$p.value
     return(z)
-  }, mc.cores=detectCores()))
+  }, mc.cores=mc.cores))
+  #print(w.p.values)
   ##Plot a histogram
   png(filename="histogram_pvalues.png")
   hist(w.p.values)
@@ -526,8 +529,8 @@ starburstplot <- function(data,
                           p.cut=0.05,
                           diffmean.cut = 0
 ){
-
-
+  .e <- environment()
+  volcano.m <- data
   volcano.m$threshold.starburst <- "1"
   volcano.m$threshold.size <- "1"
 
@@ -568,7 +571,7 @@ starburstplot <- function(data,
   }
 
   ##starburst plot
-  p <- ggplot(data=volcano.m,
+  p <- ggplot(data=volcano.m, environment = .e,
               aes(x=meFDR2, y=geFDR2, colour=threshold.starburst, size = threshold.size)
   ) + geom_point()
   if(!is.null(xlim)) {p <- p + xlim(xlim)}
@@ -589,7 +592,7 @@ starburstplot <- function(data,
   # return methylation < 0, expressao >0
 }
 
-#' @import matlab
+#' @import matlab gplots
 heatmap.plus.sm <- function (x, Rowv = NULL, Colv = if (symm) "Rowv" else NULL,
                              distfun = dist, hclustfun = hclust, reorderfun = function(d,
                                                                                        w) reorder(d, w), add.expr, symm = FALSE, revC = identical(Colv,
