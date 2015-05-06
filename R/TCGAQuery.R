@@ -49,12 +49,12 @@ TCGAQuery <- function(tumor=NULL,
                       listSample=NULL,
                       level=NULL
 ){
-  if(!(is.element(tumor,disease.table$abbreviation) | is.null(tumor))){
+  if(!(is.element(tolower(tumor),tolower(disease.table$abbreviation)) | is.null(tumor))){
     message("Disease not found. Chosse between:")
     message(paste(disease.table$abbreviation, collapse = " "))
     stop("Invalid tumor")
   }
-  if(!(is.element(platform,platform.table$alias) | is.null(platform))){
+  if(!(is.element(tolower(platform),tolower(platform.table$alias)) | is.null(platform))){
     message("Platform not found. Chosse between:")
     message(paste(platform.table$alias, collapse = " "))
     stop("Invalid platform")

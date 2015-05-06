@@ -44,8 +44,7 @@ met.mean.boxplot(aux)
 
 #----------------------- calculate.pvalues (just an example)
 beta.t <-  data.frame(t(beta))
-#usuário   sistema decorrido
-#229.528    13.091   108.977
+# TODO verify class of the object
 pvalues <- calculate.pvalues(beta.t,c(1,3,5,7,9,11),c(2,4,6,8,10,12))
 
 #------------- volcano plot
@@ -69,9 +68,7 @@ heatmap.2 (as.matrix(hypo.hyper.probe))
 dev.off()
 
 #----- starburst plot
-gc.affy <- read.delim(file = "/home/tiagochst/Downloads/DEGs_affy_gcimp.txt", sep = " ")
+gc.affy <- read.delim(file = "DEGs_affy_gcimp.txt", sep = " ")
 gc.affy$probeID <- rownames(gc.affy)
-gc.agi <- read.delim(file = "/home/tiagochst/Downloads/DEGs_agi_gcimp.txt", sep = " ")
-gc.agi$probeID <- rownames(gc.agi)
 gene.met <- starbursanalysis(probe,gc.affy)
 starburstplot(gene.met)
