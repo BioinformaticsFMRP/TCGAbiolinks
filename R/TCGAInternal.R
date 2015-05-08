@@ -1,6 +1,6 @@
-#' @title .onAttach
-#' @description  Load required data into gloval enviroment
-#' @keywords internal
+# @title .onAttach
+# @description  Load required data into gloval enviroment
+# @keywords internal
 .onAttach <- function (libname, pkgname){
 
   file = system.file("extdata/dataFolders.rda",package="TCGAbiolinks")
@@ -21,7 +21,7 @@
   file = system.file("extdata/GRCh.rda",package="TCGAbiolinks")
   load(file,envir = as.environment("package:TCGAbiolinks"))
 
-  cat("\014")
+ if (!interactive() || stats::runif(1) > 0.1) return()
   welcome.message <- paste0(
     " =============================================================\n",
     " ______  ___  ____   ___                                        \n",
@@ -30,7 +30,7 @@
     "   ||   |___ |____| |   | |__| | |__| |__ | | |_| | \\  __|       \n",
     " ------------------------------------------------------------\n",
     " Search, download & analyse - TCGA                  \n",
-    " Version:0.01 \n",
+    " Version:",utils::packageVersion("biOmics"),"\n",
     " Last TCGAUpdate(): ",time,"\n",
     " ==============================================================\n"
   )
