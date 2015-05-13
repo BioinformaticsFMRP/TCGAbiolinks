@@ -1,0 +1,17 @@
+{
+    "contents" : "knnNet <- function(TumorName, k, nboot = 100, nGenesPerm = 100, analysisPath = \"\", TFlistDefined = 0){\n  \n  toLoad <- paste(analysisPath, \"CancerPubmed_complete.RData\", sep = \"\")\n  load(toLoad)\n  toLoad <- list.files(path = analysisPath, pattern = \"Analysis\")\n  toLoad <- toLoad[sapply(strsplit(toLoad, \"_\"), function(x) x[1]) == TumorName]\n  toLoad <- paste(analysisPath, toLoad, sep = \"\")\n  load(toLoad)\n  \n  if (length(TFlistDefined)==0){\n    tfList <- as.vector(CancerPubmed_complete[CancerPubmed_complete$CancerTCGA == TumorName, \"mRNA\"])\n  } else{ tfList <- TFlistDefined}\n  \n  message(paste(\"Cancer \", TumorName, \" with n. sample \", ncol(Cancer_analysis$Data_CANCER_normUQ_filt), sep=\"\"))\n  \n  message(\"Estimating Mutual Information\")\n  MI_tfgenes <- CreateMatrixMI_tf_gene(tfList, Cancer_analysis$Data_CANCER_normUQ_filt, kNum = k)\n  \n  message(\"Calculating Mutual Information Threshold\")\n  TFthresh <- FindTFbootMIthresh(tfList, Cancer_analysis$Data_CANCER_normUQ_filt, nboot = nboot, nGenesPerm = nGenesPerm, Knum = k)\n  \n  message(\"Creating Network Matrix\")\n  cytNet <- ConvertMI_to_Cytoscape_onlyNet(MI_tfgenes, TFthresh)\n  cytNet <- as.data.frame(cytNet, stringsAsFactors = F)\n  cytNet$MI <- round(as.numeric(cytNet$MI), 3)\n  \n  ans <- list(MIAdjMat = MI_tfgenes, MITFThresh = TFthresh, Net = cytNet)\n  return(ans)\n}\n",
+    "created" : 1429880550183.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "634607767",
+    "id" : "29625C8A",
+    "lastKnownWriteTime" : 1429884052,
+    "path" : "~/Dropbox/OrganBiomarkers/knnNet.R",
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}

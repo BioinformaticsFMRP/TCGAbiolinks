@@ -1,0 +1,16 @@
+{
+    "contents" : "detach(\"package:TCGAbiolinks\", unload=TRUE)\nremove.packages(\"TCGAbiolinks\")\nsetwd(\"~/Desktop/package\")\ninstall.packages('TCGAbiolinks_1.0.tar.gz', type='source', repos = NULL)\n\nwd <- \"/Users/antoniocolaprico/Desktop/gitTCGAbiolinks_OLD2/\"\nlibrary('TCGAbiolinks')\norigDir <-\"~/Desktop/package/\"\nsetwd(origDir)\n\n\n#Load info file\nload('PlatformAndAssociatedData_WebSites3.RData')\nsdrfFolder <- \"~/Desktop/package/TCGAsdrf/\"\n#Download sdrf\nTCGAmanifest('BRCA')\n#Query\nres <- TCGAQuery('BRCA', sdrfFolder, PlatformAndAssociatedData)\ntoDown <- intersect(res$humanmethylation450, res$illuminahiseq_rnaseqv2)\n\n#Download\n#test 1 sample\n#~ TCGADownload(Tumor='BRCA', Type='mRNA', Species='RNASeqV2', PlatformAndAssociatedData, downloadFolder=paste(getwd(), 'Test_TCGAbiolinks/', sep='/'), PlatformType='illuminahiseq_rnaseqv2', nsample=1)\n#test All sample with Expression + Methylation\nTumor <- 'BRCA'\ndownloadFolder <- \"/Users/antoniocolaprico/Desktop/package\"\nsdrfFolder <- \"/Users/antoniocolaprico/Desktop/package/TCGAsdrf/\"\nPlatformType <- 'humanmethylation450'\ntoDown <- res$humanmethylation450\nlistSample <- toDown\n\nBRCA_rnaseqV2_common_Methylation <- TCGADownload(Tumor='BRCA', PlatformAndAssociatedData, downloadFolder=\"/Users/antoniocolaprico/Desktop/package\", sdrfFolder = \"/Users/antoniocolaprico/Desktop/package/TCGAsdrf/\", PlatformType='humanmethylation450', listSample=toDown,newsample = F)\n\n# Only to use after stopped first esecution with newsample = F\n#BRCA_rnaseqV2_common_Methylation <- TCGADownload(Tumor='BRCA', PlatformAndAssociatedData, downloadFolder=\"/Users/antoniocolaprico/Desktop/package\", sdrfFolder = \"/Users/antoniocolaprico/Desktop/package/TCGAsdrf/\", PlatformType='illuminahiseq_rnaseqv2', listSample=toDown,newsample = T)\n\nBRCA_rnaseqv2_version <- TCGAVersion(\"BRCA\", \"illuminahiseq_rnaseqv2\",PlatformAndAssociatedData)\n\n",
+    "created" : 1429718000562.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2731643513",
+    "id" : "EAE9C38",
+    "lastKnownWriteTime" : 1429718091,
+    "path" : "~/Desktop/gitTCGAbiolinks_OLD2/TCGAbiolinks/R/Luc/runTCGAbiolinks_modified.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}

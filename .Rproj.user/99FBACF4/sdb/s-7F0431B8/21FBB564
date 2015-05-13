@@ -1,0 +1,16 @@
+{
+    "contents" : "#' @title TCGA Query\n#'\n#' @description  TCGA Query\n#'\n#' @param Tumor -  tumor code\n#' @param siteTCGA - Plataform\n#' @export\n\n\nTCGAQuery <- function(Tumor,sdrfFolder,PlatformAndAssociatedData){\n  message(Tumor)\n  tmplf <- PlatformAndAssociatedData[PlatformAndAssociatedData$Tumor %in% tolower(Tumor),]\n  TumorDataList <- vector(\"list\", length(unique(tmplf$Platform)))\n  names(TumorDataList) <- unique(tmplf$Platform)\n  FolderWd <- getwd()\n  setwd(sdrfFolder)\n  \n  for( i in 1: nrow(tmplf)){\n    startK <- 1\n    stopK <- 16\n    if(tmplf[i,\"FileName\"] == \"\") next\n    currentTFile <- gsub(\"/\",\"_\",tmplf[i,\"FileName\"])\n    \n    \n    currentTFile<-paste(sdrfFolder,currentTFile,sep=\"\")\n    tmp2 <- read.delim(currentTFile,stringsAsFactors = F,skip =  tmplf[i,\"KeySkip\"], header =T )\n    \n    if( length(intersect(colnames(tmp2), tmplf[i,\"nameCol\"]))==1){ tmp2 <- tmp2[, tmplf[i,\"nameCol\"]  ] }\n    if( length(intersect(colnames(tmp2), \"Sample.description\"))==1){ tmp2 <- tmp2[, \"Sample.description\"] }\n    if( length(intersect(colnames(tmp2), \"Biospecimen.Barcode\"))==1){ tmp2 <- tmp2[, \"Biospecimen.Barcode\"] }\n    if( length(intersect(colnames(tmp2), \"Comment..TCGA.Barcode.\"))==1){ tmp2 <- tmp2[, \"Comment..TCGA.Barcode.\"] }\n    tmp2 <- as.matrix(tmp2)\n    if( ncol(tmp2)!=1){\n      if( length( grep(\"nationwidechildrens\", tmplf[i,\"FileName\"]))==1 || length( grep(\"biospecimen\", tmplf[i,\"FileName\"]))==1 || length( grep(\"bio.Level\", tmplf[i,\"FileName\"]))==1   ){\n        tmp2 <- read.table(currentTFile, quote=\"\\\"\",stringsAsFactors = F )[,2]\n        tmp2 <- tmp2[grep(\"TCGA\",tmp2)]\n        if( length( grep(\"nationwidechildrens\",tmp2 ))==1 || length( grep(\"biospecimen\", tmp2))==1 ){\n          if ( length(tmp2)!=0){ tmp2 <- as.matrix(unlist(strsplit(tmp2, \".\",fixed = T))) }\n        }\n      }\n    }\n    \n    tmp2 <- tmp2[grep(\"TCGA\",tmp2)]\n    SampleTmp <- unique(substr(tmp2, startK, stopK))\n    SampleTmp <- SampleTmp[grep(\"TCGA\",SampleTmp)]\n    msgOUT <-  paste(i,\" \", Tumor,\" \", tmplf[i,\"Type\"], \" \", tmplf[i,\"Species\"], \" \",   tmplf[i,\"Center\"], \" \", tmplf[i,\"Platform\"] , \" \" ,  \" .n samples \", length(SampleTmp), sep=\"\")\n    print(msgOUT)\n    \n    if ( length(SampleTmp) < 2) { message(\"Maybe.....ERROR....Check IT\")}\n    \n    idx<- which(names(TumorDataList) == tmplf[i,\"Platform\"])\n    TumorDataList[[idx]] <- SampleTmp\n    \n  }\n  #Tumor_completeLIST[[k]]<-TumorDataList\n  \n  setwd(FolderWd)\n  return(TumorDataList)\n  \n}\n",
+    "created" : 1429715270004.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "352802560",
+    "id" : "21FBB564",
+    "lastKnownWriteTime" : 1429715304,
+    "path" : "~/Desktop/gitTCGAbiolinksOLD/gitTCGAbiolinks/TCGAbiolinks/R/TCGAQuery_anto.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
