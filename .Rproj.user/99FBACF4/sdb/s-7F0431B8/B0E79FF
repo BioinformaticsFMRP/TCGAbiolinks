@@ -1,0 +1,16 @@
+{
+    "contents" : "load(\"/storage/ocfs2_vol1/PUBLIC/TCGA_panCancer/TCGA_Networks/BRCA_IPANet.RData\")\ntfList <- unique(Cancer_IPANet$complete$from)\n\nsource('~/Dropbox/OrganBiomarkers/RScripts/NetworkFunctions.R')\nload(\"/storage/ocfs2_vol1/PUBLIC/TCGA_panCancer/TCGA_Analysis/CancerPubmed_complete.RData\")\nload(\"/storage/ocfs2_vol1/PUBLIC/LA_functions/ListofTumor.RData\")\n\nsetwd(\"~/Desktop/tempTCGAdata/TCGA_Analysis\")\nsource('~/Dropbox/OrganBiomarkers/RScripts/NetworkFunctions.R')\n\nanalysisPath <- \"~/Desktop/tempTCGAdata/TCGA_Analysis/\"\n#ListofTumor <- as.matrix(c(\"LGG\",\"BLCA\",\"BRCA\",\"COAD\",\"READ\",\"GBM\",\"HNSC\",\"KIRC\",\"LUAD\",\"OV\",\"UCEC\",\"CESC\",\"DLBC\",\"KICH\",\"KIRP\", \"LAML\",\"LIHC\",\"LUSC\", \"PAAD\", \"PRAD\",\"SARC\",\"SKCM\", \"UCS\",\"LAML\",\"ACC\",\"CESC\",\"MESO\",\"PCPG\"))\nListofTumor <- as.matrix(c(\"KICH\",\"LIHC\",\"KIRP\", \"PRAD\",\"KIRC\",\"LUAD\",\"BRCA\",\"LUSC\",\"COAD\",\"HNSC\",\"BLCA\",\"UCEC\",\"READ\"))\nListofTumor <- as.vector(sort(ListofTumor))\n\nfor ( i in 1: length(ListofTumor)){\n  \n  TumorName <- ListofTumor[i]\n  toLoad <- paste(analysisPath,TumorName ,\"_Analysis.RData\", sep = \"\")\n  load(toLoad)\n  message(paste(\"Cancer \", TumorName, \" with n. sample \", ncol(Cancer_analysis$Data_CANCER_normUQ_filt), sep=\"\"))\n  \n  CANCER_diff_normUQ<- Cancer_analysis$CANCER_diff_normUQ\n  Data_CANCER_normUQ_filt<- Cancer_analysis$Data_CANCER_normUQ_filt\n  \n  Data_CANCER_normUQ_filt_tumor <- SelectedSample(Data_CANCER_normUQ_filt,\"tumor\")\n  \n  Data_CANCER_normUQ_filt_normal <- SelectedSample(Data_CANCER_normUQ_filt,\"normal\")\n  CANCER_diff_normUQ_level <- CreateTabLevel( as.matrix(rownames(CANCER_diff_normUQ)),CANCER_diff_normUQ,\"Tumor\",\"Normal\",Data_CANCER_normUQ_filt_tumor,Data_CANCER_normUQ_filt_normal,typeOrder=T)\n  \n  CANCER_diff_normUQ_level_cand <- CANCER_diff_normUQ_level[order(CANCER_diff_normUQ_level$Delta,decreasing=T),]\n  CANCER_diff_normUQ_level_cand <- CANCER_diff_normUQ_level_cand[abs(CANCER_diff_normUQ_level_cand$logFC) >= 1,]\n  \n  setwd(\"~/Desktop/tempTCGAdata/TCGA_DEA\") \n  save(CANCER_diff_normUQ_level, CANCER_diff_normUQ_level_cand, file = paste(ListofTumor[i],\"_DEA.RData\",sep=\"\"))\n  print( paste( \"----------- Tumor n. \", i, \" of \",length(ListofTumor), \" ... \",  ListofTumor[i], \" completed.\"))\n}\n\n\n",
+    "created" : 1429883301967.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "143424539",
+    "id" : "B0E79FF",
+    "lastKnownWriteTime" : 1429886217,
+    "path" : "~/Dropbox/OrganBiomarkers/CompleteDEA.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
