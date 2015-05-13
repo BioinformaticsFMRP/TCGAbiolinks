@@ -1,0 +1,22 @@
+{
+    "contents" : "",
+    "created" : 1429886796464.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "72CC7ABE",
+    "lastKnownWriteTime" : 7811887343730581760,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "caption" : "CANCER_diff_normUQ_level_cand",
+        "contentUrl" : "content?title=CANCER_diff_normUQ_level_cand&file=8bc3d85470c8447da9c138379c9cc3e5.htm",
+        "displayedObservations" : 1000,
+        "displayedVariables" : 7,
+        "totalObservations" : 3369,
+        "variables" : 6
+    },
+    "source_on_save" : false,
+    "type" : "r_dataframe"
+}

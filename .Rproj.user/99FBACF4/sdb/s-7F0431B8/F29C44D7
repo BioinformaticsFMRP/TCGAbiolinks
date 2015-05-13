@@ -1,0 +1,16 @@
+{
+    "contents" : "lapply(c(\"package:TCGAbiolinks\"), detach, character.only = TRUE, unload = TRUE)\nremove.packages(\"TCGAbiolinks\")\n#set a working directory:\nwd <-\"~/Applications/GitHub/\"\nwd <-\"~/Desktop/gitHubTCGA/\" #antonio folder\n#path of the package:\npathPkg <- \"TCGAbiolinks/\"\n\nsetwd(wd)\n\n#install.packages(c(\"downloader\",\"RCurl\",\"httr\",\"devtools\"))\ninstall.packages(pathPkg, type = 'source', repos =NULL)\n\nlibrary(\"downloader\")\nlibrary(\"httr\")\nlibrary(\"devtools\")\nlibrary('TCGAbiolinks')\nlibrary('stringr')\nlibrary(\"XML\")\n\n#update the dataFolders.rda\nTCGAUpdate()\n\n\n\ntumor = \"acc\"\ncenterType = \"cgcc\"\nplatform = \"genome_wide_snp_6\"\nlevel = 3\nmetadata = T\n\n# tumor = \"lihc\"\n# platform = \"mixed_dnaseq_curated\"\n# centerType = \"gsc\"\n# level=2\n# metadata = F\n\nTCGAQuery(tumor = tumor,\n          centerType = centerType,\n          level = level,\n          platform = platform,\n          metadata = metadata)\n\n\nearlyStop <- 20\nTCGADownload(earlyStop = earlyStop)\n\n",
+    "created" : 1429714558562.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2448800497",
+    "id" : "F29C44D7",
+    "lastKnownWriteTime" : 1429720175,
+    "path" : "~/Desktop/gitHubTCGA/TCGAbiolinks/demo/TCGAbiolinks_demo.R",
+    "project_path" : "demo/TCGAbiolinks_demo.R",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}

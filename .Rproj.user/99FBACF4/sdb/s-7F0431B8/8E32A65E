@@ -1,0 +1,16 @@
+{
+    "contents" : "TCGAmanifest <- function(Tumor){\n  FolderWd <- getwd()\n  createDir(\"TCGAsdrf\")\n  setwd(\"./TCGAsdrf\")\n  on.exit(setwd(FolderWd))\n\n  siteTCGA <- \"https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/\"\n  tmplf <- PlatformAndAssociatedData[PlatformAndAssociatedData$Tumor %in% tolower(Tumor),]\n  for (w in 1:nrow(tmplf)){\n    tmp <- tmplf[w,]\n    if(tmp[\"FileName\"] == \"\") next\n    key1a <- paste(unique(tmp$CenterType),\n                   unique(tmp$Center),\n                   unique(tmp$Platform),\n                   sep=\"/\"\n                   )\n    Description <- paste0(siteTCGA,\n                          tolower(tmp$Tumor),\n                          \"/\",\n                          key1a)\n    DescriptionSite <- paste(Description,\n                             tmp$Folder,\n                             tmplf[w,\"FileName\"],\n                             sep=\"/\"\n                             )\n\n    file <- gsub(\"/\",\"_\",tmplf[w,\"FileName\"])\n    # shoul see if the file was updated\n    if (!file.exists(file))\n      downloader::download(DescriptionSite, file )\n    print(paste0(w, \" of \", nrow(tmplf),\" \", file))\n  }\n}\n",
+    "created" : 1431527475901.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3779836058",
+    "id" : "8E32A65E",
+    "lastKnownWriteTime" : 1431529817,
+    "path" : "~/Desktop/gitHubTCGA/TCGAbiolinks/R/TCGAmanifest.R",
+    "project_path" : "R/TCGAmanifest.R",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
