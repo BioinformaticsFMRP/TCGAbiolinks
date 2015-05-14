@@ -246,17 +246,23 @@ tcgaQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
 
 
   if(!is.null(tumor)){
-    id <- sapply(tumor, function(x){db$Disease == x} )
+    id <- sapply(tumor, function(x){
+      grepl(x, db$Disease, ignore.case = TRUE)
+    })
     id <- apply(id, 1,any)
     db <-  db[id,]
   }
   if(!is.null(platform)){
-    id <- sapply(platform, function(x){db$Platform == x})
+    id <- sapply(platform, function(x){
+      grepl(x, db$Platform, ignore.case = TRUE)
+      })
     id <- apply(id, 1,any)
     db <-  db[id,]
   }
   if(!is.null(center)){
-    id <- sapply(center, function(x){db$Center == x})
+    id <- sapply(center, function(x){
+      grepl(x, db$Center, ignore.case = TRUE)
+    })
     id <- apply(id, 1,any)
     db <-  db[id,]
   }

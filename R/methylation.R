@@ -119,7 +119,9 @@ survivalPlot <- function(met.md, legend = "Legend", cutoff = 0,
 #'
 #' @param wd Directory with the files
 #' @examples
+#' \dontrun{
 #' met.md <- organizeMethylationMetaDataFrame("data")
+#' }
 #' @export
 #' @return \code{invisible (metadata)}
 organizeMethylationMetaDataFrame <- function(wd = NULL) {
@@ -153,7 +155,9 @@ organizeMethylationMetaDataFrame <- function(wd = NULL) {
 #'    Execution: read all files inside the directory and merge it by
 #'    probes (Composite.Element.REF)
 #' @examples
+#' \dontrun{
 #' met <- organizeMethylationDataFrame(wd = "data")
+#' }
 #' @param wd Directory with the files
 #' @return Methylation betavalues table
 #' @export
@@ -447,8 +451,10 @@ get.GRCh.bioMart <- function() {
 #' @examples
 #' # met Methylation data
 #' # experssion Expression data
+#' \dontrun{
 #' gene.met <- starbursAnalysis(met,expression)
 #' starburstplot(gene.met)
+#' }
 starbursAnalysis <- function(met, expression) {
   #### fix methylation gene names before merging.  map gene ID to
   #### genomic coordinates
@@ -524,10 +530,12 @@ starbursAnalysis <- function(met, expression) {
 #' @export
 #' @return Save a starburst plot
 #' @examples
+#'  \dontrun{
 #' # met Methylation data
 #' # experssion Expression data
 #' gene.met <- starbursAnalysis(met,expression)
 #' starburstplot(gene.met)
+#' }
 starburstPlot <- function(data,
                           filename = "volcano.pdf",
                           ylab = paste0("Gene Expression\nlog10 of the",

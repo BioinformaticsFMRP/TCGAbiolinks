@@ -1,8 +1,8 @@
 Package: TCGAbiolinks
 Type: Package
-Title: Download data from TCGA
+Title:  Download Search and Analyse Data from TCGA
 Version: 1.0
-Date: 2015-02-09
+Date: 2015-05-14
 Author:
   Antonio Colaprico,
   Luciano Garofano,
