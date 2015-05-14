@@ -103,3 +103,23 @@ load.tcga <- function(env) {
                      "/dataFolders.rda")
   )
 }
+
+# Get all files in the ftp directory @keywords internal
+getFileNames <- function(url) {
+
+  if (RCurl::url.exists(url)) {
+    download(url,
+             "temp.html",
+             mode = "wb",
+             quiet = 1)
+    x <- capture.output(XML::htmlTreeParse("temp.html"))
+    unlink("temp.html")
+  } else {
+    stop("Can't find URL. Please check the web site or the internet connection.")
+  }
+
+  x <- x[grep("href", x)]
+  x = sapply(strsplit(x, ">"), function(y) y[2])
+  x = sapply(strsplit(x, "<"), function(y) y[1])
+  return(x)
+}
