@@ -328,6 +328,7 @@ getBarcode <- function(table){
 #' @param level '1' '2' '3'
 #' @param added.since 04- 14-2010
 #' @param added.up.to 04- 14-2010
+#' @param center center name
 #' @param samples List of samples. Ex:c('TCGA-04-06-*','TCGA-04-08-*')
 #' @example inst/examples/tcgaSearch.R
 #' @export
@@ -342,6 +343,7 @@ tcgaQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
   disease.table   <- get("disease.table")
   platform.table  <- get("platform.table")
   center.table  <- get("center.table")
+  db <-  get("tcga.db")
 
   if (!is.null(tumor)) {
     sapply(tumor, function(x){
@@ -410,7 +412,7 @@ tcgaQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
     }
   }
 
-  db <- tcga.db
+
   if(!is.null(tumor)){
     id <- sapply(tumor, function(x){db$Disease == x} )
     id <- apply(id, 1,any)

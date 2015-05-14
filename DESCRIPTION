@@ -3,28 +3,29 @@ Type: Package
 Title: Download data from TCGA
 Version: 1.0
 Date: 2015-02-09
-Author: Antonio Colaprico,
-        Luciano Garofano,
-        Claudia Cava,
-        Gianluca Bontempi,
-        Michele Ceccarelli,
-        Davide,
-        Tiago Chedraoui Silva
+Author:
+  Antonio Colaprico,
+  Luciano Garofano,
+  Claudia Cava,
+  Gianluca Bontempi,
+  Michele Ceccarelli,
+  Davide,
+  Tiago Chedraoui Silva
 Maintainer: Antonio Colaprico <antonio.colaprico@ulb.ac.be>
 Depends: R (>= 3.1.1)
-Imports:  downloader,
-          RCurl,
-          bitops,
-          httr,
-          GGally,
-          GenomicRanges,
-          XML,
-          biomaRt,
-          exactRankTests,
-          ggplot2,
-          plyr,
-          survival,
-          stringr,
-          matlab
-Description: Query Download and Preprocess data from TCGA portal
+Imports:
+    downloader,
+    GGally,
+    GenomicRanges,
+    XML,
+    biomaRt,
+    exactRankTests,
+    ggplot2,
+    survival,
+    stringr,
+    knitr,
+    IRanges
+Description:
+  Query the latest version of files by tumer, center, date, barcode,
+  level and platform. Also Download and Preprocess data from TCGA portal.
 License: GPL (>= 3)
