@@ -22,6 +22,11 @@ Organize TCGA methylation metadata for the mean methylation analysis.
 # probe: data frame with only probe info(probe vs patient)
 # Conclusion: met = probe +d beta
 # met.md = patient metadata
+query <- tcgaQuery(tumor = "GBM", platform = "HumanMethylation450", level = 3)
+tcgaDownload(query[1,],path = "data")
+query <- tcgaQuery(tumor = "GBM", platform = "bio", level = 2)
+tcgaDownload(query,path = "data")
+
 met <- organizeMethylationDataFrame("data")
 probe <- met[,1:4]
 beta  <- met[,5:ncol(met)]
