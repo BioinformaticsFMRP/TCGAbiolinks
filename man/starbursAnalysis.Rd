@@ -20,7 +20,9 @@ Preparing methylation data and expression data
 \examples{
 # met Methylation data
 # experssion Expression data
+\dontrun{
 gene.met <- starbursAnalysis(met,expression)
 starburstplot(gene.met)
+}
 }
 

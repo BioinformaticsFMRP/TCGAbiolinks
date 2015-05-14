@@ -16,6 +16,8 @@ organizeMethylationMetaDataFrame(wd = NULL)
 Organize TCGA methylation metadata for the mean methylation analysis.
 }
 \examples{
+\dontrun{
 met.md <- organizeMethylationMetaDataFrame("data")
+}
 }
 

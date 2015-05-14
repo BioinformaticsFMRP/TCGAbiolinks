@@ -4,7 +4,9 @@
 #' @param path location of the final data saving
 #' @seealso TCGASearch
 #' @examples
-#'    TCGADownload(data,'folder')
+#' \dontrun{
+#'    tcgaDownload(data,'folder')
+#' }
 #' @export
 #' @importFrom downloader download
 #' @return Download tcga into path

@@ -52,9 +52,11 @@ Input: data with gene expression/methylation expression
    Output: starburst plot
 }
 \examples{
+\dontrun{
 # met Methylation data
 # experssion Expression data
 gene.met <- starbursAnalysis(met,expression)
 starburstplot(gene.met)
+}
 }
 
