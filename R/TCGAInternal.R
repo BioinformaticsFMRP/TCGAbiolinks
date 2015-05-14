@@ -96,7 +96,7 @@ load.tcga <- function(env) {
   tcga.db <-  createTcgaTable()
   env$tcga.db <- tcga.db
   tcga.db <- getBarcode(tcga.db)
-  colnames(tcga.db)[4] <- "barcode"
+
   env$tcga.db <- tcga.db
   save(platform.table, disease.table, tcga.db, center.table,
        file = paste0(system.file("extdata", package = "TCGAbiolinks"),
