@@ -15,8 +15,7 @@
     load.tcga(env)
   }
 
-
- if (!interactive() || stats::runif(1) > 0.1) return()
+  if (!interactive() || stats::runif(1) > 0.1) return()
   welcome.message <- paste0(
     " =============================================================\n",
     " ______  ___  ____   ___                                        \n",
@@ -56,6 +55,7 @@ load.tcga <- function(env) {
   platform.table <- platform.table[order(platform.table$name,
                                          decreasing = TRUE),]
   env$platform.table <- platform.table
+
   # Get disease table
   tcga.query <- "query=Disease"
   next.url <- paste0(tcga.root, tcga.query)
@@ -82,43 +82,24 @@ load.tcga <- function(env) {
   idx <- which(!is.na(match))
   if (length(idx) > 0) {
     center.table <- readHTMLTable(toString(match[idx, ]),
-                                   header = TRUE,
-                                   stringsAsFactors = FALSE)$"NULL"
+                                  header = TRUE,
+                                  stringsAsFactors = FALSE)$"NULL"
     colnames(center.table) <- center.table[1, ]
     center.table <- center.table[-1, 1:3]
     env$center.table <- center.table
-
-      }
+  }
 
   if (file.exists("tcga.html")) {
     file.remove("tcga.html")
   }
-  # Get tcga folder without private folders
+  # Get tcga folders with barcodes without private folders
   tcga.db <-  createTcgaTable()
   env$tcga.db <- tcga.db
   tcga.db <- getBarcode(tcga.db)
-  colnames(x)[tcga.db] <- "barcode"
+  colnames(tcga.db)[4] <- "barcode"
   env$tcga.db <- tcga.db
   save(platform.table, disease.table, tcga.db, center.table,
        file = paste0(system.file("extdata", package = "TCGAbiolinks"),
                      "/dataFolders.rda")
   )
-
 }
-
-#plat.center <- data.frame()
-#for(i in seq_along(platform.table$name)){
-#  message(platform.table[i,"name"])
-#  idx <- grep(platform.table[i,"name"],all$Platform)
-#  a <- unique(all[idx,]$center)
-#  print(a)
-#  if(length(a)>0){
-#    b <- platform.table[i,"name"]
-#    df <- data.frame(b,list(a))
-#    colnames(df) <- c("platform", "center")
-#    print(plat.center)
-#    plat.center <- rbind(plat.center,df)
-#    colnames(plat.center) <- c("platform", "center")
-#  }
-#}
-
