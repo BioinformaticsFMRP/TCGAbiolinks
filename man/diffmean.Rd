@@ -17,7 +17,4 @@ dataframe with diffmean values
 \description{
 calculate diffmean methylation between two groups
 }
-\examples{
-inst/examples/analysis.R
-}
 

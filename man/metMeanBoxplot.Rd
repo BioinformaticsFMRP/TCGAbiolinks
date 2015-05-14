@@ -45,6 +45,6 @@ Mean methylation boxplot.
   cluster <- c('Lgm1','Lgm2','Lgm3','Lgm4','Lgm5','Lgm6')
   cluster.vec <- sample(cluster, 500,replace = TRUE)
   data <- data.frame(mean,cluster.vec)
-  met.mean.boxplot(data)
+  metMeanBoxplot(data)
 }
 
