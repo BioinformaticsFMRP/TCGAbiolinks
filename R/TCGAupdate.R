@@ -203,17 +203,18 @@ tcgaGetTable <- function(url, max = 0) {
 
 tcgaUpdate <- function(){
   # get new version of files
-  new.db <- tcgaQuery()
+  new.db <- tcgaQueryApi()
 
   # copy not modified ones
   for (i in seq_along(new.db[,1])){
-    idx <- new.db[i,"name"] == tcga.db$name
-    new.db[i,"deployStatus"] <- tcga.db[idx, "deployStatus"]
+    db <- subset(tcga.db,new.db[i,"name"] == tcga.db$name)
+    new.db[i,"deployStatus"] <- db$barcode
   }
   new.db <- getBarcode(new.db)
-  tcga.db <- new.db
-  save(platform.table, disease.table, tcga.db, center.table,
-       file = paste0(system.file("extdata", package = "TCGAbiolinks"),
-                     "/dataFolders.rda")
-       )
+  return(new.db)
+  #tcga.db <- new.db
+  #save(platform.table, disease.table, tcga.db, center.table,
+  #     file = paste0(system.file("extdata", package = "TCGAbiolinks"),
+  #                   "/dataFolders.rda")
+  #     )
 }
