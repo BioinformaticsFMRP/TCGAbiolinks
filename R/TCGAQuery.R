@@ -17,8 +17,56 @@ getBarcode <- function(table){
                        mages$Center == table[i,]$Center)
 
       # if no mage file: not found (case PLatform:ABI)
-      if (dim(mage)[1] == 0){
-        table[i,]$deployStatus <- "Not found"
+      if (dim(mage)[1] == 0) {
+        # For IlluminaGA and ABI platforms
+        # Barcodes are in maf files
+        if ((grepl("DNASeq",table[i,]$Platform) &
+             grepl("Level",table[i,]$name)) | table[i,]$Platform == "ABI"
+        ) {
+          folder <- gsub(".tar.gz","",table[i,]$deployLocation)
+          print(paste0(root,folder))
+          files <- getFileNames(paste0(root,folder))
+          maf <- files[grep("maf",files)]
+          if ( !file.exists(maf)) {
+            download(paste0(root,folder,"/",maf), maf, quiet = TRUE)
+          }
+          df <- read.delim(file = maf,
+                           sep = "\t", comment.char = "#",
+                           stringsAsFactors = FALSE,
+                           fileEncoding = "latin1",
+                           row.names = NULL)
+          if (table[i,]$Platform == "ABI") {
+            barcode <- union(df$TUMOR_SAMPLE_ID,
+                             df$MATCH_NORM_SAMPLE_ID)
+            if (is.null(barcode)) {
+              barcode <- union(df$Tumor_Sample_Barcode,
+                               df$Matched_Norm_Sample_Barcode)
+            }
+          } else {
+            barcode <- union(df$Tumor_Sample_Barcode,
+                             df$Matched_Norm_Sample_Barcode)
+          }
+
+          table[i,]$deployStatus <- paste0(barcode,collapse = ",")
+          unlink(maf)
+          setTxtProgressBar(pb, i)
+        } else if (table[i,]$Platform == "diagnostic_images" |
+               table[i,]$Platform == "pathology_reports" |
+               table[i,]$Platform == "tissue_images"
+          ) {
+
+            folder <- gsub(".tar.gz","",table[i,]$deployLocation)
+            files <- getFileNames(paste0(root,folder))
+            files <- files[grepl("TCGA",files)]
+            if (table[i,]$Platform == "pathology_reports"){
+              barcode <- substr(files,1,12)
+            } else {
+              barcode <- substr(files,1,23)
+            }
+            table[i,]$deployStatus <- paste0(unique(barcode), collapse = ",")
+        } else {
+          table[i,]$deployStatus <- "Not found"
+        }
         next
       }
       # In case we have two files
@@ -47,7 +95,7 @@ getBarcode <- function(table){
       if (table[i,]$Platform == "MDA_RPPA_Core") {
         sdrf <- files[grep("array_design",files)]
         # case with 2 array_design BLCA
-        if(length(sdrf) > 1){
+        if (length(sdrf) > 1) {
           sdrf <- sdrf[1]
         }
         df <- read.delim(file = file.path(folder,sdrf),
@@ -55,12 +103,13 @@ getBarcode <- function(table){
                          stringsAsFactors = FALSE,
                          fileEncoding = "latin1")
 
-        if(is.element("Sample.description",colnames(df))){
+        if (is.element("Sample.description",colnames(df))) {
           barcode <- unique(as.character(df$Sample.description))
         } else {
           barcode <- unique(as.character(df$Biospecimen.Barcode))
         }
         table[i,]$deployStatus <- paste0(barcode, collapse = ",")
+
       } else {
         # Platform is not MDA_RPPA_Core
         sdrf <- files[grep("sdrf",files)]
@@ -75,8 +124,8 @@ getBarcode <- function(table){
         # To re-read the barcodes
         for (j in seq_along(table[,1])) {
           if (table[j,]$Disease == table[i,]$Disease &&
-                table[j,]$Platform == table[i,]$Platform &&
-                table[j,]$Center == table[i,]$Center) {
+              table[j,]$Platform == table[i,]$Platform &&
+              table[j,]$Center == table[i,]$Center) {
             aux <- grep("Comment..TCGA.Archive.Name",colnames(df))
 
             barcode <- data.frame()
