@@ -201,6 +201,7 @@ tcgaGetTable <- function(url, max = 0) {
   return(db)
 }
 
+
 tcgaUpdate <- function(){
 
   tcga.db <-  get("tcga.db")
