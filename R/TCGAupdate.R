@@ -213,6 +213,7 @@ tcgaUpdate <- function(){
     db <- subset(tcga.db,new.db[i,"name"] == tcga.db$name)
     new.db[i,"deployStatus"] <- db$barcode
   }
+
   new.db <- getBarcode(new.db)
   return(new.db)
   #tcga.db <- new.db

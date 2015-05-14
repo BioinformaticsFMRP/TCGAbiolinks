@@ -97,11 +97,13 @@ getBarcode <- function(table){
   }
   setTxtProgressBar(pb, max)
   close(pb)
+  colnames(table)[4] <- "barcode"
   # Removing the files mess
   # porbably this can be used up in the code
   unlink(allFiles)
   folders <- gsub(".tar.gz","",allFiles)
   unlink(folders, recursive = TRUE)
+
   return(table)
 }
 
