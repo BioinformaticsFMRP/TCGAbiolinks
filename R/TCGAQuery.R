@@ -4,25 +4,27 @@ getBarcode <- function(table){
   allFiles <- c()
   mages <-  tcga.db[grep("mage-tab",tcga.db$name),]
   #message(dim(mages))
-  for (i in seq_along(table[,1])){
-    #message(i)
-    if (table[i,]$deployStatus == "Available") {
-      #message(i,table[i,]$Platform)
-      #mage <- createTcgaTable(disease = table[i,]$Disease,
-      #                        platform = table[i,]$Platform,
-      #                        center =  table[i,]$Center,
-      #                        type = "mage-tab")
+  max <- length(table[,1])
+  pb <- txtProgressBar(min = 0, max = max , style = 3)
 
+  for (i in seq_along(table[,1])){
+
+    if (table[i,]$deployStatus == "Available") {
+
+      # get the mage file for the entry
       mage <- subset(mages, mages$Disease == table[i,]$Disease &
                        mages$Platform == table[i,]$Platform &
                        mages$Center == table[i,]$Center)
+
+      # if no mage file: not found (case PLatform:ABI)
       if (dim(mage)[1] == 0){
         table[i,]$deployStatus <- "Not found"
         next
       }
+      # In case we have two files
+      # This should not happen after filtering by center
+      # probably this code can be remove until next comment
       file <- basename(mage$deployLocation)
-      #print(file)
-      #print(table[i,]$baseName)
       x <- stringr::str_replace_all(file, "[^[:alnum:]]", "")
       y <- stringr::str_replace_all(table[i,]$baseName, "[^[:alnum:]]", "")
       idx <- grep(y,x)
@@ -31,7 +33,8 @@ getBarcode <- function(table){
         file <- file[idx]
         mage <- mage[idx,]
       }
-      print(file)
+
+      # get name of files to be deleted
       allFiles <- c(allFiles, file)
       if ( !file.exists(file)) {
         download(paste0(root,mage$deployLocation), file, quiet = TRUE)
@@ -39,33 +42,42 @@ getBarcode <- function(table){
       }
       folder <- gsub(".tar.gz","",file)
       files <- list.files(folder)
-      print(table[i,]$Platform)
+
+      # For this platform the barcodes are in array_design files
       if (table[i,]$Platform == "MDA_RPPA_Core") {
         sdrf <- files[grep("array_design",files)]
         # case with 2 array_design BLCA
         if(length(sdrf) > 1){
           sdrf <- sdrf[1]
         }
-        df <- read.delim(file = file.path(folder,sdrf), sep = "\t",
-                          stringsAsFactors = FALSE, fileEncoding="latin1")
+        df <- read.delim(file = file.path(folder,sdrf),
+                         sep = "\t",
+                         stringsAsFactors = FALSE,
+                         fileEncoding = "latin1")
+
         if(is.element("Sample.description",colnames(df))){
-        barcode <- unique(as.character(df$Sample.description))
+          barcode <- unique(as.character(df$Sample.description))
         } else {
           barcode <- unique(as.character(df$Biospecimen.Barcode))
         }
         table[i,]$deployStatus <- paste0(barcode, collapse = ",")
       } else {
+        # Platform is not MDA_RPPA_Core
         sdrf <- files[grep("sdrf",files)]
-        df <- read.delim(file = file.path(folder,sdrf) ,sep = "\t",
-                         stringsAsFactors = FALSE, fileEncoding="latin1")
+        df <- read.delim(file = file.path(folder,sdrf),
+                         sep = "\t",
+                         stringsAsFactors = FALSE,
+                         fileEncoding = "latin1")
+
+        # The mage file could is common to the same
+        # disease, center and platform.
+        # So we're going to fill them so we don't need
+        # To re-read the barcodes
         for (j in seq_along(table[,1])) {
           if (table[j,]$Disease == table[i,]$Disease &&
                 table[j,]$Platform == table[i,]$Platform &&
                 table[j,]$Center == table[i,]$Center) {
             aux <- grep("Comment..TCGA.Archive.Name",colnames(df))
-            #len <- length(grep("Comment..TCGA.Archive.Name",colnames(df)))
-            #print(len)
-            #print(file.path(folder,sdrf))
 
             barcode <- data.frame()
             x <- table[j,]$name
@@ -74,34 +86,6 @@ getBarcode <- function(table){
               barcode <- rbind(barcode,subset(df, x == df[,aux[z]]))
             }
 
-            #           if(len == 4){
-            #             x <- table[j,]$name
-            #             barcode <- subset(df,
-            #                               x == df$Comment..TCGA.Archive.Name..3 |
-            #                                 x == df$Comment..TCGA.Archive.Name..2 |
-            #                                 x == df$Comment..TCGA.Archive.Name. |
-            #                                 x == df$Comment..TCGA.Archive.Name..1
-            #             )
-            #           }
-            #
-            #           if(len == 3){
-            #             x <- table[j,]$name
-            #             barcode <- subset(df,
-            #                               x == df$Comment..TCGA.Archive.Name..2 |
-            #                                 x == df$Comment..TCGA.Archive.Name. |
-            #                                 x == df$Comment..TCGA.Archive.Name..1
-            #             )
-            #           }
-            #           if(len == 2){
-            #             x <- table[j,]$name
-            #             barcode <- subset(df, x == df$Comment..TCGA.Archive.Name. |
-            #                                 x == df$Comment..TCGA.Archive.Name..1
-            #             )
-            #           }
-            #           if(len == 1){
-            #             x <- table[j,]$name
-            #             barcode <- subset(df, x == df$Comment..TCGA.Archive.Name.)
-            #           }
             barcode <- unique(as.character(barcode$Comment..TCGA.Barcode.))
             barcode <- barcode[barcode != "->"]
             table[j,]$deployStatus <- paste0(barcode,collapse = ",")
@@ -109,8 +93,12 @@ getBarcode <- function(table){
         }
       }
     }
+    setTxtProgressBar(pb, i)
   }
-  # removing the mess
+  setTxtProgressBar(pb, max)
+  close(pb)
+  # Removing the files mess
+  # porbably this can be used up in the code
   unlink(allFiles)
   folders <- gsub(".tar.gz","",allFiles)
   unlink(folders, recursive = TRUE)
@@ -255,7 +243,7 @@ tcgaQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
   if(!is.null(platform)){
     id <- sapply(platform, function(x){
       grepl(x, db$Platform, ignore.case = TRUE)
-      })
+    })
     id <- apply(id, 1,any)
     db <-  db[id,]
   }
