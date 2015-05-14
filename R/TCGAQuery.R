@@ -169,11 +169,11 @@ getBarcode <- function(table){
   root <- "https://tcga-data.nci.nih.gov"
   allFiles <- c()
   mages <-  tcga.db[grep("mage-tab",tcga.db$name),]
-  message(dim(mages))
+  #message(dim(mages))
   for (i in seq_along(table[,1])){
-    message(i)
+    #message(i)
     if (table[i,]$deployStatus == "Available") {
-      message(i,table[i,]$Platform)
+      #message(i,table[i,]$Platform)
       #mage <- createTcgaTable(disease = table[i,]$Disease,
       #                        platform = table[i,]$Platform,
       #                        center =  table[i,]$Center,
@@ -188,11 +188,11 @@ getBarcode <- function(table){
       }
       file <- basename(mage$deployLocation)
       #print(file)
-      print(table[i,]$baseName)
+      #print(table[i,]$baseName)
       x <- stringr::str_replace_all(file, "[^[:alnum:]]", "")
       y <- stringr::str_replace_all(table[i,]$baseName, "[^[:alnum:]]", "")
       idx <- grep(y,x)
-      #print(idx)
+
       if (length(idx) > 0) {
         file <- file[idx]
         mage <- mage[idx,]
@@ -205,20 +205,25 @@ getBarcode <- function(table){
       }
       folder <- gsub(".tar.gz","",file)
       files <- list.files(folder)
+      print(table[i,]$Platform)
       if (table[i,]$Platform == "MDA_RPPA_Core") {
         sdrf <- files[grep("array_design",files)]
         # case with 2 array_design BLCA
         if(length(sdrf) > 1){
           sdrf <- sdrf[1]
         }
-        df <- read.delim2(file = file.path(folder,sdrf) ,sep = "\t",
-                          stringsAsFactors = FALSE)
+        df <- read.delim(file = file.path(folder,sdrf), sep = "\t",
+                          stringsAsFactors = FALSE, fileEncoding="latin1")
+        if(is.element("Sample.description",colnames(df))){
         barcode <- unique(as.character(df$Sample.description))
+        } else {
+          barcode <- unique(as.character(df$Biospecimen.Barcode))
+        }
         table[i,]$deployStatus <- paste0(barcode, collapse = ",")
       } else {
         sdrf <- files[grep("sdrf",files)]
         df <- read.delim(file = file.path(folder,sdrf) ,sep = "\t",
-                         stringsAsFactors = FALSE,fileEncoding="latin1")
+                         stringsAsFactors = FALSE, fileEncoding="latin1")
         for (j in seq_along(table[,1])) {
           if (table[j,]$Disease == table[i,]$Disease &&
                 table[j,]$Platform == table[i,]$Platform &&
