@@ -202,9 +202,11 @@ tcgaGetTable <- function(url, max = 0) {
 }
 
 tcgaUpdate <- function(){
+
+  tcga.db <-  get("tcga.db")
+
   # get new version of files
   new.db <- tcgaQueryApi()
-
   # copy not modified ones
   for (i in seq_along(new.db[,1])){
     db <- subset(tcga.db,new.db[i,"name"] == tcga.db$name)
