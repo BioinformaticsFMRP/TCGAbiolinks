@@ -3,12 +3,6 @@
 # @keywords internal
 .onAttach <- function (libname, pkgname){
 
-  file = system.file("extdata/plat.rda",package = "TCGAbiolinks")
-  load(file,envir = as.environment("package:TCGAbiolinks"))
-
-  file = system.file("extdata/plat.center.rda",package = "TCGAbiolinks")
-  load(file,envir = as.environment("package:TCGAbiolinks"))
-
   file = system.file("extdata/GRCh.rda",package = "TCGAbiolinks")
   load(file,envir = as.environment("package:TCGAbiolinks"))
 
