@@ -52,6 +52,8 @@ IlluminaHiSeq_RNASeqV2            \tab Mixed_DNASeq_Cont
 
 \item{samples}{List of samples. Ex:c('TCGA-04-06-*','TCGA-04-08-*')}
 
+\item{center}{center name}
+
 \item{level}{'1' '2' '3'}
 }
 \value{
