@@ -100,7 +100,7 @@ load.tcga <- function(env) {
     file.remove("tcga.html")
   }
   # Get tcga folder without private folders
-  tcga.db <- tcgaQuery()
+  tcga.db <-  createTcgaTable()
   env$tcga.db <- tcga.db
   tcga.db <- getBarcode(tcga.db)
   colnames(x)[tcga.db] <- "barcode"
