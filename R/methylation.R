@@ -223,10 +223,10 @@ organizeMethylationDataFrame <- function(wd = getwd()) {
 #'# -----------------
 #'# | mean.met|cluster|
 #'# -------------------
-#'   mean <- runif(500,0,1)
+#'   avg <- runif(500,0,1)
 #'   cluster <- c('Lgm1','Lgm2','Lgm3','Lgm4','Lgm5','Lgm6')
-#'   cluster.vec <- sample(cluster, 500,replace = TRUE)
-#'   data <- data.frame(mean,cluster.vec)
+#'   cluster <- sample(cluster, 500,replace = TRUE)
+#'   data <- data.frame(avg,cluster)
 #'   metMeanBoxplot(data)
 metMeanBoxplot <- function(data, sort = FALSE,
                            filename = "G-CIMP-mean.methylation.pdf",

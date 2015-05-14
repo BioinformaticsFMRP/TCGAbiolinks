@@ -10,10 +10,10 @@ samples <- c("TCGA-06-0125-01A-01D-A45W-05","TCGA-06-0152-01A-02D-A45W-05",
              "TCGA-06-0221-02A-11D-2004-05","TCGA-14-0736-02A-01D-2004-05",
              "TCGA-19-0957-02A-11D-2004-05","TCGA-19-1389-02A-21D-2004-05",
              "TCGA-14-1402-02A-01D-2004-05","TCGA-19-4065-02A-11D-2004-05")
-query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450",level="3",listSample = samples)
-TCGADownload(query,path="data")
-query <- TCGAQuery(tumor = "gbm", platform = "bio", level="2")
-TCGADownload(query,path="data")
+query <- tcgaQuery(tumor = "gbm", platform = "HumanMethylation450",level="3",listSample = samples)
+tcgaDownload(query,path="data")
+query <- tcgaQuery(tumor = "gbm", platform = "bio", level="2")
+tcgaDownload(query,path="data")
 
 #-------------------------- Preparing data and metadata
 # met: data frame with probe info (probe id, ge) and beta values
@@ -39,6 +39,6 @@ pvalues <- calculate.pvalues(beta.t,prim,rec)
 
 probe$p.value <- pvalues[,1]
 probe$p.value.adj <- pvalues[,2]
-prim.rec <- diffmean.prim.rec(beta)
+prim.rec <- diffmean(beta[1:2,], beta[3:4,])
 probe <- cbind(probe,prim.rec)
 hypo.hyper <- volcano.plot(probe,p.cut=0.05,diffmean.cut = 0.2)
