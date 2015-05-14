@@ -2,6 +2,9 @@ query <- tcgaSearch(tumor = "gbm",
                     added.since = "01/01/2013",
                     added.up.to = "06/01/2013")
 
+query <- tcgaSearch(tumor = c("gbm","lgg"),
+                    platform = c("HumanMethylation450","HumanMethylation27"))
+
 query <- tcgaSearch(tumor = "gbm", platform = "bio")
 
 query <- tcgaSearch(tumor = "gbm", platform = "HumanMethylation450",
