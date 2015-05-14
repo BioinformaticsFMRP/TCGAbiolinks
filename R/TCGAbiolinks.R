@@ -25,6 +25,14 @@ NULL
 #' @format A data frame with 79 rows and 4 variables
 NULL
 
+
+#' TCGA center table
+#' @docType data
+#' @keywords internal
+#' @name center.table
+#' @format A data frame with 36 rows and 3 variables
+NULL
+
 #' TCGA metadata database.
 #' The data set contains the following fields:
 #' \itemize{
