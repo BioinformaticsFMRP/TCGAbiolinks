@@ -23,6 +23,8 @@ Input: a directory with DNA methylation data,
    probes (Composite.Element.REF)
 }
 \examples{
+\dontrun{
 met <- organizeMethylationDataFrame(wd = "data")
+}
 }
 
