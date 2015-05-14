@@ -1,0 +1,62 @@
+---
+title: "Working with TCGA inside biOmics"
+author: "Tiago Chedraoui Silva"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+This document describes how to search/download tcga data using biOmics package.
+
+## TCGA search
+ You can easily search tcga samples using the `tcgaQuery` function.
+ Using a summary of roadmap datatabase, the function works with the following 
+ parameters:
+
+* tumor
+* platform
+* added.since
+* added.up.to
+* listSample
+* level
+* center
+
+Some examples of search are shown below
+```{r, eval = FALSE}
+query <- tcgaQuery(tumor = "gbm",
+                    added.since = "01/01/2013",
+                    added.up.to = "06/01/2013")
+
+query <- tcgaQuery(tumor = c("gbm","lgg"),
+                    platform = c("HumanMethylation450","HumanMethylation27"))
+
+query <- tcgaQuery(tumor = "gbm", platform = "bio")
+
+query <- tcgaQuery(tumor = "gbm", platform = "HumanMethylation450",
+                    level = "3")
+
+query <- tcgaQuery(samples = "TCGA-61-1743-01A-01D-*")
+
+query <- tcgaQuery(samples = "TCGA-61-1743-01A-01D-0649-04")
+
+query <- tcgaQuery(samples = "TCGA-61-1743-01A-01D-0649-04", level = 3)
+
+query <- tcgaQuery(samples = "TCGA-61-1743-01A-01D-0649-04",
+                    tumor = "OV", platform = "CGH-1x1M_G4447A")
+```
+
+Obs: As these terms needs to be exact we validate user input before searching.
+
+## Roadmap download
+You can easily download roadmap data using the `tcga.download` function.
+ 
+```{r, eval = FALSE}
+# get all sampples from the query and save into tcga folder
+tcgaDownload(query,path="tcgaData")
+```
+
+Obs: The function will structure the folders to save the data as:
+_Path given by the user/Experiment folder_
