@@ -262,7 +262,7 @@ tcgaQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
   }
   if(!is.null(level)){
     id <- grep(paste0("Level_", level), db$name)
-    if(length(idx) > 0){
+    if(length(id) > 0){
       db <-  db[id,]
     }
   }
