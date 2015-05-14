@@ -30,7 +30,7 @@ Input: a directory with DNA methylation data,
 # Conclusion: met = probe +d beta
 # met.md = patient metadata
 query <- tcgaQuery(tumor = "GBM", platform = "HumanMethylation450", level = 3)
-tcgaDownload(query[1,],path = "data")
+tcgaDownload(query[4,],path = "data")
 query <- tcgaQuery(tumor = "GBM", platform = "bio", level = 2)
 tcgaDownload(query,path = "data")
 
