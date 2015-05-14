@@ -1,27 +1,28 @@
-#' @title .onAttach
-#' @description  Load required data into gloval enviroment
-#' @keywords internal
+# @title .onAttach
+# @description  Load required data into gloval enviroment
+# @keywords internal
 .onAttach <- function (libname, pkgname){
 
-  file = system.file("extdata/dataFolders.rda",package="TCGAbiolinks")
+  file = system.file("extdata/plat.rda",package = "TCGAbiolinks")
+  load(file,envir = as.environment("package:TCGAbiolinks"))
+
+  file = system.file("extdata/plat.center.rda",package = "TCGAbiolinks")
+  load(file,envir = as.environment("package:TCGAbiolinks"))
+
+  file = system.file("extdata/GRCh.rda",package = "TCGAbiolinks")
+  load(file,envir = as.environment("package:TCGAbiolinks"))
+
+  file = system.file("extdata/dataFolders.rda",package = "TCGAbiolinks")
   time <- file.info(file)$ctime
-  if(file.exists(file)){
-    load(file,envir = as.environment("package:TCGAbiolinks"))
+  if (file.exists(file)) {
+    load(file, envir = as.environment("package:TCGAbiolinks"))
   } else {
     env <- as.environment("package:TCGAbiolinks")
     load.tcga(env)
   }
 
-  file = system.file("extdata/plat.rda",package="TCGAbiolinks")
-  load(file,envir = as.environment("package:TCGAbiolinks"))
 
-  file = system.file("extdata/plat.center.rda",package="TCGAbiolinks")
-  load(file,envir = as.environment("package:TCGAbiolinks"))
-
-  file = system.file("extdata/GRCh.rda",package="TCGAbiolinks")
-  load(file,envir = as.environment("package:TCGAbiolinks"))
-
-  cat("\014")
+ if (!interactive() || stats::runif(1) > 0.1) return()
   welcome.message <- paste0(
     " =============================================================\n",
     " ______  ___  ____   ___                                        \n",
@@ -30,7 +31,7 @@
     "   ||   |___ |____| |   | |__| | |__| |__ | | |_| | \\  __|       \n",
     " ------------------------------------------------------------\n",
     " Search, download & analyse - TCGA                  \n",
-    " Version:0.01 \n",
+    " Version:",utils::packageVersion("TCGAbiolinks"),"\n",
     " Last TCGAUpdate(): ",time,"\n",
     " ==============================================================\n"
   )
@@ -38,38 +39,77 @@
 
 }
 
-#' @import XML stringr
-load.tcga <- function(env){
+# Updates tcga platform and diseases
+# @param env package environment
+#' @importFrom stringr str_match
+#' @importFrom XML readHTMLTable
+#' @importFrom downloader download
+#' @keywords internal
+load.tcga <- function(env) {
   tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
-  tcga.query <- "query=Platform"
-  next.url <- paste0(tcga.root,tcga.query)
-  downloader::download(next.url,"tcga.html",quiet =T)
-  regex <- '<table summary="Data Summary".*</a></td></tr></table>'
-  html <- readLines("tcga.html")
-  platform.table <- readHTMLTable(toString(str_match(html,regex)[6,]),
-                                  header = T,
-                                  stringsAsFactors = FALSE)$'NULL'
-  colnames(platform.table) <- platform.table[1,]
-  env$platform.table <- platform.table[-1,1:4]
 
-  tcga.query <- "query=Disease"
-  next.url <- paste0(tcga.root,tcga.query)
-  downloader::download(next.url,"tcga.html",quiet =T)
-  regex <- '<table summary="Data Summary".*</a></td></tr></table>'
+  # Get platform table
+  tcga.query <- "query=Platform"
+  next.url <- paste0(tcga.root, tcga.query)
+  download(next.url, "tcga.html", quiet = TRUE)
+  regex <- "<table summary=\"Data Summary\".*</a></td></tr></table>"
   html <- readLines("tcga.html")
-  match <- str_match(html,regex)
+  platform.table <- readHTMLTable(toString(str_match(html,regex)[6, ]),
+                                  header = TRUE,
+                                  stringsAsFactors = FALSE)$"NULL"
+  colnames(platform.table) <- platform.table[1, ]
+  platform.table <- platform.table[-1, 1:4]
+  platform.table <- platform.table[order(platform.table$name,
+                                         decreasing = TRUE),]
+  env$platform.table <- platform.table
+  # Get disease table
+  tcga.query <- "query=Disease"
+  next.url <- paste0(tcga.root, tcga.query)
+  download(next.url, "tcga.html", quiet = TRUE)
+  regex <- "<table summary=\"Data Summary\".*</a></td></tr></table>"
+  html <- readLines("tcga.html")
+  match <- str_match(html, regex)
   idx <- which(!is.na(match))
-  if(length(idx)>0){
-    disease.table <- readHTMLTable(toString(match[idx,]),
-                                   header = T,
-                                   stringsAsFactors = FALSE)$'NULL'
-    colnames(disease.table) <- disease.table[1,]
-    env$disease.table <- disease.table[-1,1:4]
+  if (length(idx) > 0) {
+    disease.table <- readHTMLTable(toString(match[idx, ]),
+                                   header = TRUE,
+                                   stringsAsFactors = FALSE)$"NULL"
+    colnames(disease.table) <- disease.table[1, ]
+    disease.table <- disease.table[-1, 1:3]
+    env$disease.table <- disease.table
   }
-  if (file.exists('tcga.html')) {file.remove('tcga.html')}
-  save(platform.table,disease.table,
-       file = paste0(system.file("extdata", package="TCGAbiolinks"),"/dataFolders.rda")
+
+  # Get center table
+  tcga.query <- "query=Center"
+  next.url <- paste0(tcga.root, tcga.query)
+  download(next.url, "tcga.html", quiet = TRUE)
+  html <- readLines("tcga.html")
+  match <- str_match(html, regex)
+  idx <- which(!is.na(match))
+  if (length(idx) > 0) {
+    center.table <- readHTMLTable(toString(match[idx, ]),
+                                   header = TRUE,
+                                   stringsAsFactors = FALSE)$"NULL"
+    colnames(center.table) <- center.table[1, ]
+    center.table <- center.table[-1, 1:3]
+    env$center.table <- center.table
+
+      }
+
+  if (file.exists("tcga.html")) {
+    file.remove("tcga.html")
+  }
+  # Get tcga folder without private folders
+  tcga.db <- tcgaQuery()
+  env$tcga.db <- tcga.db
+  tcga.db <- getBarcode(tcga.db)
+  colnames(x)[tcga.db] <- "barcode"
+  env$tcga.db <- tcga.db
+  save(platform.table, disease.table, tcga.db, center.table,
+       file = paste0(system.file("extdata", package = "TCGAbiolinks"),
+                     "/dataFolders.rda")
   )
+
 }
 
 #plat.center <- data.frame()

@@ -1,36 +1,38 @@
 #' @title TCGA Download
-#' @description Download data previously selected using the TCGAQuery function
-#' @param data TCGAQUery output
+#' @description Download data previously selected using the TCGASeach
+#' @param data TCGASearch output
 #' @param path location of the final data saving
-#' @seealso TCGAQuery
+#' @seealso TCGASearch
 #' @examples
-#' \dontrun{
-#'          TCGADownload(data,"folder")
-#' }
+#'    TCGADownload(data,'folder')
 #' @export
-#' @import downloader
-TCGADownload <- function(data=NULL,path=".")
-{
-  dir.create(path,showWarnings = F)
+#' @importFrom downloader download
+#' @return Download tcga into path
+tcgaDownload <- function(data = NULL, path = ".") {
+  dir.create(path, showWarnings = FALSE)
   root <- "https://tcga-data.nci.nih.gov"
-  if(!("file" %in% colnames(data))){
+  if (!("file" %in% colnames(data))) {
     message("Downloading folders")
-    for(i in 1:nrow(data)){
-      file <- paste0(path,"/",basename(data[i,"deployLocation"]))
-      message(paste0("Downloading:", basename(data[i,"deployLocation"])))
-      if(!file.exists(file)){
-        downloader::download(paste0(root,data[i,"deployLocation"]),file)
+    for (i in 1:nrow(data)) {
+      file <- paste0(path, "/", basename(data[i, "deployLocation"]))
+      message(paste0("Downloading:",
+                     basename(data[i, "deployLocation"])))
+      if (!file.exists(file)) {
+        download(paste0(root, data[i, "deployLocation"]),
+                 file)
         untar(file, exdir = path)
       }
     }
-  }
-  else{
+  } else {
     message("Downloading files")
-    for(i in 1:nrow(data)){
-      file <- paste0(path,"/",basename(data[i,"file"]))
-      message(paste0("Downloading:", basename(data[i,"file"])))
-      if(!file.exists(file)){
-        downloader::download(paste0(root,gsub(".tar.gz","",data[i,"deployLocation"]),"/",data[i,"file"]),file)
+    for (i in 1:nrow(data)) {
+      file <- paste0(path, "/", basename(data[i, "file"]))
+      message(paste0("Downloading:", basename(data[i, "file"])))
+      if (!file.exists(file)) {
+        download(paste0(root, gsub(".tar.gz",
+                                   "",
+                                   data[i, "deployLocation"]),
+                        "/", data[i,"file"]), file)
       }
     }
   }
