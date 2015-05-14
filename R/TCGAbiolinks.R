@@ -3,8 +3,8 @@
 #' TCGAbiolinks allows you to Download data of samples from TCGA
 #'
 #' The functions you're likely to need from \pkg{TCGAbiolinks} is
-#' \code{\link{tcgaDownload}}, \code{\link{tcgaQuery}} and
-#' \code{\link{tcgaUpdate}}. Otherwise refer to the vignettes to see
+#' \code{\link{tcgaDownload}}, \code{\link{tcgaQuery}}.
+#'Otherwise refer to the vignettes to see
 #' how to format the documentation.
 #'
 #' @docType package
