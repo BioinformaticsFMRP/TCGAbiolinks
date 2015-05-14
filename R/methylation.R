@@ -43,7 +43,7 @@ diffmean <- function(group1, group2) {
 #' @param default.plot You can use ggplot or plot
 #' @param color not implemented yet
 #' @importFrom GGally ggsurv
-#' @importFrom survival survfit
+#' @importFrom survival survfit Surv
 #' @export
 #' @example inst/examples/analysis.R
 #' @return Survival plot
