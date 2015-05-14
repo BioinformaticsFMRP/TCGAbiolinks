@@ -1,4 +1,5 @@
 
+
 tcgaQueryApi <- function(tumor = NULL, platform = NULL, added.since = NULL,
                          added.up.to = NULL, samples = NULL, level = NULL) {
   disease.table   <- get("disease.table")
@@ -44,6 +45,7 @@ tcgaQueryApi <- function(tumor = NULL, platform = NULL, added.since = NULL,
       stop("Invalid platform")
     }
   }
+
 
   if (!is.null(added.since)) {
     d <- try(as.Date(added.since, format = "%m/%d/%Y"))
