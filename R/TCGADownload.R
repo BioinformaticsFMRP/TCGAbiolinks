@@ -2,20 +2,24 @@
 #' @description Download data previously selected using the TCGASeach
 #' @param data TCGASearch output
 #' @param path location of the final data saving
+#' @param type Get files with type pattern instead of downloading all the folder
 #' @seealso TCGASearch
 #' @examples
 #' \dontrun{
-#'    tcgaDownload(data,'folder')
+#'    tcgaDownload(data,path='folder',type="rsem.isoforms.results")
 #' }
 #' @export
 #' @importFrom downloader download
 #' @return Download tcga into path
-TCGADownload <- function(data = NULL, path = ".") {
+TCGADownload <- function(data = NULL, path = ".", type = NULL) {
+
   dir.create(path, showWarnings = FALSE)
   root <- "https://tcga-data.nci.nih.gov"
-  if (!("file" %in% colnames(data))) {
-    message("Downloading folders")
+
+
+  if (is.null(type)) {
     for (i in 1:nrow(data)) {
+
       file <- paste0(path, "/", basename(data[i, "deployLocation"]))
       message(paste0("Downloading:",
                      basename(data[i, "deployLocation"])))
@@ -26,15 +30,24 @@ TCGADownload <- function(data = NULL, path = ".") {
       }
     }
   } else {
-    message("Downloading files")
+
     for (i in 1:nrow(data)) {
-      file <- paste0(path, "/", basename(data[i, "file"]))
-      message(paste0("Downloading:", basename(data[i, "file"])))
-      if (!file.exists(file)) {
-        download(paste0(root, gsub(".tar.gz",
-                                   "",
-                                   data[i, "deployLocation"]),
-                        "/", data[i,"file"]), file)
+
+      folder <- gsub(".tar.gz","",basename(data[i,]$deployLocation))
+      dir.create(file.path(path,folder), showWarnings = FALSE)
+      url <- gsub(".tar.gz","",data[i,]$deployLocation)
+      files <- getFileNames(paste0(root,url))
+      files <- files[grepl(type,files)]
+      if (length(files) == 0) {
+        next
+      }
+      message(paste0("Downloading:", length(files), " files"))
+
+      for (i in seq_along(files)) {
+        if (!file.exists(files[i])) {
+          download(paste0(root,url,"/",files[i]),
+                   file.path(path,folder,files[i]))
+        }
       }
     }
   }
