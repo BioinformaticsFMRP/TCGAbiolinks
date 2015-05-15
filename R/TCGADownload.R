@@ -10,7 +10,7 @@
 #' @export
 #' @importFrom downloader download
 #' @return Download tcga into path
-tcgaDownload <- function(data = NULL, path = ".") {
+TCGADownload <- function(data = NULL, path = ".") {
   dir.create(path, showWarnings = FALSE)
   root <- "https://tcga-data.nci.nih.gov"
   if (!("file" %in% colnames(data))) {
