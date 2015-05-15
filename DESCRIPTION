@@ -5,12 +5,15 @@ Version: 1.0
 Date: 2015-05-14
 Author:
   Antonio Colaprico,
+  Catharina Olsen,
   Luciano Garofano,
+  Tiago Chedraoui Silva,
+  Davide Garolini,
   Claudia Cava,
+  Isabella Castiglioni,
+  Houtan Noushmehr,
   Gianluca Bontempi,
-  Michele Ceccarelli,
-  Davide,
-  Tiago Chedraoui Silva
+  Michele Ceccarelli
 Maintainer: Antonio Colaprico <antonio.colaprico@ulb.ac.be>
 Depends: R (>= 3.1.1)
 Imports:
@@ -26,6 +29,6 @@ Imports:
     knitr,
     IRanges
 Description:
-  Query the latest version of files by tumer, center, date, barcode,
+  Query the latest version of files by tumor, center, date, barcode,
   level and platform. Also Download and Preprocess data from TCGA portal.
 License: GPL (>= 3)

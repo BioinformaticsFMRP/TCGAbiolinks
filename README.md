@@ -8,6 +8,7 @@ install.packages(c("downloader","RCurl","httr","devtools","stringr","exactRankTe
                    "XML","GGally","parallel","ggplot2","survival"))
 source("http://bioconductor.org/biocLite.R")
 biocLite("GenomicRanges")
+biocLite("biomaRt")
 ```
 
 * Creating roxygen documentation
