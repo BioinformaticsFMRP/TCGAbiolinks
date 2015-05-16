@@ -4,12 +4,14 @@
 \alias{TCGADownload}
 \title{TCGA Download}
 \usage{
-TCGADownload(data = NULL, path = ".")
+TCGADownload(data = NULL, path = ".", type = NULL)
 }
 \arguments{
 \item{data}{TCGASearch output}
 
 \item{path}{location of the final data saving}
+
+\item{type}{Get files with type pattern instead of downloading all the folder}
 }
 \value{
 Download tcga into path
@@ -19,7 +21,7 @@ Download data previously selected using the TCGASeach
 }
 \examples{
 \dontrun{
-   tcgaDownload(data,'folder')
+   tcgaDownload(data,path='folder',type="rsem.isoforms.results")
 }
 }
 \seealso{

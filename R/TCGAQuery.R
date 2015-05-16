@@ -269,7 +269,7 @@ getBarcode <- function(table){
 #' @importFrom knitr kable
 #' @return A dataframe with the results of the query
 #'        (lastest version of the files)
-tcgaQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
+TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
                       added.up.to = NULL, samples = NULL, center = NULL,
                       level = NULL) {
 
