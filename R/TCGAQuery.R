@@ -121,6 +121,8 @@ getBarcode <- function(table){
 
         if (is.element("Sample.description",colnames(df))) {
           barcode <- unique(as.character(df$Sample.description))
+        } else if (is.element("Sample.barcode",colnames(df))){
+          barcode <- unique(as.character(df$Sample.barcode))
         } else {
           barcode <- unique(as.character(df$Biospecimen.Barcode))
         }
