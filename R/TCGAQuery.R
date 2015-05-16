@@ -73,15 +73,59 @@ getBarcode <- function(table){
           if (is.null(barcode)) {
             barcode <- union(df$Tumor_Sample_Barcode,
                              df$Matched_Norm_Sample_Barcode)
+          }
+          if (!is.null(barcode)) {
             table[i,]$deployStatus <- paste0(barcode, collapse = ",")
             unlink(maf)
           } else {
             table[i,]$deployStatus <- "Not found"
           }
+
+
+        } else if (table[i,]$Platform == "bio") {
+          print("bio")
+          if(grepl("Level_1",table[i,]$name)) {
+            folder <- gsub(".tar.gz","",table[i,]$deployLocation)
+            files <- getFileNames(paste0(root,folder))
+            if (is.null(files))
+              next
+            files <- files[grepl("TCGA",files)]
+
+            barcode <- unlist(strsplit(files,"\\."))
+            barcode <-  barcode[grep("TCGA",barcode)]
+            table[i,]$deployStatus <- paste0(unique(barcode), collapse = ",")
+          } else {
+            folder <- gsub(".tar.gz","",table[i,]$deployLocation)
+            files <- getFileNames(paste0(root,folder))
+            if (is.null(files))
+              next
+            idx <- grep("tumor_sample_|org_control|clinical_patient_|cqcf_",files)
+            if(length(idx)>1){
+              files <- files[idx[1]]
+            } else {
+              files <- files[idx]
+            }
+            if ( !file.exists(files)) {
+              download(paste0(root,folder,"/",files), files, quiet = TRUE)
+            }
+            df <- read.delim(file = files,
+                             sep = "\t", comment.char = "#",
+                             stringsAsFactors = FALSE,
+                             fileEncoding = "latin1",
+                             row.names = NULL)
+            # first line is not barcode
+            df <- df[-1,]
+            barcode <- unique(df$bcr_patient_barcode)
+            table[i,]$deployStatus <- paste0(barcode, collapse = ",")
+            unlink(files)
+          }
         }
         next
       }
-
+      if(grepl("mage-tab|aux",table[i,]$name)){
+        table[i,]$deployStatus <- ""
+        next
+      }
       # In case we have two files
       # This should not happen after filtering by center
       # probably this code can be remove until next comment
