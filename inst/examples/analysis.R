@@ -5,10 +5,10 @@
 # Conclusion: met = probe +d beta
 # met.md = patient metadata
 \dontrun{
-  query <- tcgaQuery(tumor = "GBM", platform = "HumanMethylation450", level = 3)
-  tcgaDownload(query[c(4,10),],path = "data")
-  query <- tcgaQuery(tumor = "GBM", platform = "bio", level = 2)
-  tcgaDownload(query,path = "data")
+  query <- TCGAQuery(tumor = "GBM", platform = "HumanMethylation450", level = 3)
+  TCGADownload(query[c(4,10),],path = "data")
+  query <- TCGAQuery(tumor = "GBM", platform = "bio", level = 2)
+  TCGADownload(query,path = "data")
 
   met <- organizeMethylationDataFrame(wd = "data")
   probe <- met[,1:4]
