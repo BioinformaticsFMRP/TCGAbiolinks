@@ -44,58 +44,43 @@ load.tcga <- function(env) {
   # Get platform table
   tcga.query <- "query=Platform"
   next.url <- paste0(tcga.root, tcga.query)
-  download(next.url, "tcga.html", quiet = TRUE)
-  regex <- "<table summary=\"Data Summary\".*</a></td></tr></table>"
-  html <- readLines("tcga.html")
-  platform.table <- readHTMLTable(toString(str_match(html,regex)[6, ]),
-                                  header = TRUE,
-                                  stringsAsFactors = FALSE)$"NULL"
-  colnames(platform.table) <- platform.table[1, ]
-  platform.table <- platform.table[-1, 1:4]
+  platform.table <- tcgaGetTable(next.url)
+  platform.table <- platform.table[, 1:4]
   platform.table <- platform.table[order(platform.table$name,
                                          decreasing = TRUE),]
-  env$platform.table <- platform.table
 
   # Get disease table
   tcga.query <- "query=Disease"
   next.url <- paste0(tcga.root, tcga.query)
-  download(next.url, "tcga.html", quiet = TRUE)
-  regex <- "<table summary=\"Data Summary\".*</a></td></tr></table>"
-  html <- readLines("tcga.html")
-  match <- str_match(html, regex)
-  idx <- which(!is.na(match))
-  if (length(idx) > 0) {
-    disease.table <- readHTMLTable(toString(match[idx, ]),
-                                   header = TRUE,
-                                   stringsAsFactors = FALSE)$"NULL"
-    colnames(disease.table) <- disease.table[1, ]
-    disease.table <- disease.table[-1, 1:3]
-    env$disease.table <- disease.table
-  }
+  disease.table <- tcgaGetTable(next.url)
+  disease.table <- disease.table[, 1:3]
 
   # Get center table
   tcga.query <- "query=Center"
   next.url <- paste0(tcga.root, tcga.query)
-  download(next.url, "tcga.html", quiet = TRUE)
-  html <- readLines("tcga.html")
-  match <- str_match(html, regex)
-  idx <- which(!is.na(match))
-  if (length(idx) > 0) {
-    center.table <- readHTMLTable(toString(match[idx, ]),
-                                  header = TRUE,
-                                  stringsAsFactors = FALSE)$"NULL"
-    colnames(center.table) <- center.table[1, ]
-    center.table <- center.table[-1, 1:3]
-    env$center.table <- center.table
-  }
+  center.table  <- tcgaGetTable(next.url)
+  center.table <- center.table[, 1:3]
 
-  if (file.exists("tcga.html")) {
-    file.remove("tcga.html")
-  }
+  env$platform.table <- platform.table
+  env$center.table <- center.table
+  env$disease.table <- disease.table
+
   # Get tcga folders with barcodes without private folders
-  tcga.db <-  createTcgaTable()
+  tcga.db <- createTcgaTable()
   env$tcga.db <- tcga.db
-  tcga.db <- getBarcode(tcga.db)
+  save(tcga.db, paste0(system.file("extdata", package = "TCGAbiolinks"),
+                      "/tcgadb.rda"))
+  step <- 200
+  for(i in seq(1, nrow(tcga.db) , by = step)){
+    print(i)
+    j <- i + step
+    if(j > nrow(tcga.db)){
+      j <-nrow(tcga.db)
+    }
+    tcga.db[i:j,]$deployStatus <- getBarcode(tcga.db[i:j,])$barcode
+    save(tcga.db, paste0(system.file("extdata", package = "TCGAbiolinks"),
+                         "/tcgadb.rda"))
+  }
 
   env$tcga.db <- tcga.db
   save(platform.table, disease.table, tcga.db, center.table,
@@ -107,19 +92,75 @@ load.tcga <- function(env) {
 # Get all files in the ftp directory @keywords internal
 getFileNames <- function(url) {
 
-  if (RCurl::url.exists(url)) {
-    download(url,
-             "temp.html",
-             mode = "wb",
-             quiet = 1)
-    x <- capture.output(XML::htmlTreeParse("temp.html"))
-    unlink("temp.html")
-  } else {
-    stop("Can't find URL. Please check the web site or the internet connection.")
-  }
-
+  download(url,
+           "temp.html",
+           mode = "wb",
+           quiet = 1)
+  x <- capture.output(XML::htmlTreeParse("temp.html"))
+  unlink("temp.html")
   x <- x[grep("href", x)]
+  if (is.null(x)){
+    return(NULL)
+  }
   x = sapply(strsplit(x, ">"), function(y) y[2])
+  if (is.null(x)){
+    return(NULL)
+  }
   x = sapply(strsplit(x, "<"), function(y) y[1])
   return(x)
+}
+
+tcga.get.barcode <- function(data){
+  # todo considere next page =/
+  # comparar com sdrf
+  # for each tcga.db id get barcodes
+  message("Downloading TCGA barcodes")
+  all.barcode <- c()
+
+  tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?query="
+  tcga.query <- paste0("FileInfo&Archive[@id=",data$id,"]&roleName=fileCollection")
+
+  next.url <- paste0(tcga.root,tcga.query)
+  files <- tcgaGetTable(next.url)
+  #print(files)
+  if(nrow(files) == 0){
+    return (NULL)
+  }
+  files <- files[,1:4]
+  idx <- grep("somatic.maf",files$name)
+  if (length(idx > 0)) {
+    files <- files[idx,]
+  }
+  else {
+    # no maf file
+    # try in the name
+    #pat <- "*(TCGA)-([A-Z0-9]{2})-([A-Z0-9]{4})-(0[1-9]|[1-2][0-9])([A-Z])-(0[1-9]|[1-9][0-9])([DGHRTWX])-([A-Z0-9]{4})-([A-Z0-9]{2})*"
+    #pat <- "TCGA-[A-Z0-9]{2}-[A-Z0-9]{4}-[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{4}-[A-Z0-9]{2}"
+    pat <- "((((TCGA-[A-Z0-9]{2})-[A-Z0-9]{4})-[A-Z0-9]{3}-[A-Z0-9]{3})-[A-Z0-9]{4}-[A-Z0-9]{2})"
+    barcode <- str_match(files$name,pat)[,1]
+    #message("Found in name")
+    if(!all(is.na(barcode))){
+      message("Found in name")
+      barcode <- barcode[!is.na(barcode)]
+      barcode <- paste0(unique(barcode), collapse = ",")
+      return (barcode)
+    }
+
+    return(NULL)
+  }
+
+  # maybe two maf files
+  for (i in  seq_along(files$name)) {
+    tcga.query <- paste0("BiospecimenBarcode&FileInfo[@id=",files[i,"id"],
+                         "]&roleName=biospecimenBarcodeCollection")
+    next.url <- paste0(tcga.root,tcga.query)
+    print(next.url)
+    barcode.table <- tcgaGetTable(next.url)
+    barcode.table <- barcode.table[,1:8]
+    all.barcode <- union(all.barcode, unique(barcode.table$barcode))
+  }
+
+  all.barcode <- paste0(unique(all.barcode), collapse = ",")
+
+  return(all.barcode)
 }

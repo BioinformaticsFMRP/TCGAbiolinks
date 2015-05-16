@@ -74,13 +74,11 @@ createTcgaTable <- function(disease = NULL, platform = NULL,
   extra <- ""
   pages <- 32
   if (!is.null(platform)) {
-    extra <- paste0(extra, "[Platform[@name=", platform,
-                    "]]")
+    extra <- paste0(extra, "[Platform[@name=", platform, "]]")
     pages <- pages / 4
   }
   if (!is.null(disease)) {
-    extra <- paste0(extra, "[Disease[@abbreviation=", disease,
-                    "]]")
+    extra <- paste0(extra, "[Disease[@abbreviation=", disease, "]]")
     pages <- pages / 4
   }
   if (!is.null(type)) {
@@ -89,10 +87,9 @@ createTcgaTable <- function(disease = NULL, platform = NULL,
     } else {
       extra <- paste0(extra, "[ArchiveType[@type=mage-tab]]")
     }
-    if (!is.null(center)) {
-      extra <- paste0(extra, "[Center[@name=", center, "]]")
-    }
-
+  }
+  if (!is.null(center)) {
+    extra <- paste0(extra, "[Center[@name=", center, "]]")
     pages <- pages / 4
   }
 
@@ -107,10 +104,12 @@ createTcgaTable <- function(disease = NULL, platform = NULL,
   if (length(idx) > 0) {
     db <- db[-idx, ]
   }
+
   if (!is.null(db)) {
     # transoform date into same format
     db$addedDate <- as.Date(db$addedDate, "%m-%d-%Y")
     db <- tcgaDbAddCol(db)
+    db <- db[order(db$Disease,db$Platform,db$Center),]
   }
   return(db)
 }
@@ -155,7 +154,10 @@ tcgaDbAddCol <- function(data) {
 #' @importFrom stringr str_match
 #' @importFrom downloader download
 tcgaGetTable <- function(url, max = 0) {
-  db <- NULL
+  db <- data.frame()
+  #nbcon <- get("con")
+  #firstCon <- get("timeStamp")
+
   next.url <- url
   regex <- "<table summary=\"Data Summary\".*</a></td></tr></table>"
   next.regex <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML.*Next"
@@ -166,6 +168,11 @@ tcgaGetTable <- function(url, max = 0) {
   }
   # print(url)
   while (!is.na(next.url)) {
+    # As we have a limitation of 1000 connections
+    # every 3 minutes, we need to verify it
+    #nbcon <- nbcon + 1
+    #if(-firstCon)
+
     download(next.url, "tcga.html", quiet = TRUE)
     html <- readLines("tcga.html")
     match <- str_match(html, regex)
@@ -179,13 +186,9 @@ tcgaGetTable <- function(url, max = 0) {
     colnames(table) <- table[1, ]
     table <- table[-1, ]
 
-    if (exists("db")) {
-      db <- rbind(db, table)
-    } else {
-      db <- table
-    }
+    db <- rbind(db, table)
     # get next table
-    next.url <- str_match(html, next.regex)[6, ]
+    next.url <- str_match(html, next.regex)[idx, ]
     next.url <- gsub("amp;", "", gsub("\">Next", "", next.url))
 
     if (max > 0) {
@@ -198,6 +201,7 @@ tcgaGetTable <- function(url, max = 0) {
     setTxtProgressBar(pb, max)
     close(pb)
   }
+  #assign(con, nbcon, envir=cacheEnv)
   return(db)
 }
 
@@ -217,6 +221,28 @@ tcgaUpdate <- function(){
   new.db <- getBarcode(new.db)
   return(new.db)
   #tcga.db <- new.db
+  tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
+
+  # Get platform table
+  tcga.query <- "query=Platform"
+  next.url <- paste0(tcga.root, tcga.query)
+  platform.table <- tcgaGetTable(next.url)
+  platform.table <- platform.table[, 1:4]
+  platform.table <- platform.table[order(platform.table$name,
+                                         decreasing = TRUE),]
+
+  # Get disease table
+  tcga.query <- "query=Disease"
+  next.url <- paste0(tcga.root, tcga.query)
+  disease.table <- tcgaGetTable(next.url)
+  disease.table <- disease.table[, 1:3]
+
+  # Get center table
+  tcga.query <- "query=Center"
+  next.url <- paste0(tcga.root, tcga.query)
+  center.table  <- tcgaGetTable(next.url)
+  center.table <- center.table[, 1:3]
+
   #save(platform.table, disease.table, tcga.db, center.table,
   #     file = paste0(system.file("extdata", package = "TCGAbiolinks"),
   #                   "/dataFolders.rda")
