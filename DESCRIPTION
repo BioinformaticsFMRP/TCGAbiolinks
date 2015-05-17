@@ -24,6 +24,8 @@ Imports:
     EDASeq,
     RCurl,
     edgeR,
+    RJSONIO,
+    plyr,
     ggbiplot,
     biomaRt,
     exactRankTests,
