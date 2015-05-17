@@ -5,7 +5,7 @@
 * Installing dependencies
 ```R
 install.packages(c("downloader","RCurl","httr","devtools","stringr","exactRankTests",
-                   "XML","GGally","parallel","ggplot2","survival"))
+                   "XML","GGally","parallel","ggplot2","survival","biomaRt","RJSONIO"))
 source("http://bioconductor.org/biocLite.R")
 biocLite("GenomicRanges")
 biocLite("biomaRt")
