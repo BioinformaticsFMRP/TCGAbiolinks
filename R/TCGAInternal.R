@@ -6,6 +6,9 @@
   file = system.file("extdata/GRCh.rda",package = "TCGAbiolinks")
   load(file,envir = as.environment("package:TCGAbiolinks"))
 
+  file = system.file("extdata/dataGeneExpression.rda",package = "TCGAbiolinks")
+  load(file,envir = as.environment("package:TCGAbiolinks"))
+
   file = system.file("extdata/dataFolders.rda",package = "TCGAbiolinks")
   time <- file.info(file)$ctime
   if (file.exists(file)) {
