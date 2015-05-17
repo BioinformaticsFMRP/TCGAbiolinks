@@ -48,6 +48,8 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL) {
           download(paste0(root,url,"/",files[i]),
                    file.path(path,folder,files[i]))
         }
+        #message(paste0("Downloading:", files[i], " of ", length(files), " files"))
+
       }
     }
   }
