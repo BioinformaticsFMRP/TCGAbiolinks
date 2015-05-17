@@ -2,7 +2,6 @@
 #' @description
 #'    Filtering sample output from TCGAQuery
 #' @param query metaData output from TCGAQuery
-#' @import
 #' @export
 #' @return list of samples for a tumor
 samplesfilter <- function(query) {
