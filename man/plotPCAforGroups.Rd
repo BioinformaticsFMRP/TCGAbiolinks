@@ -4,8 +4,7 @@
 \alias{plotPCAforGroups}
 \title{plotPCAforGroups}
 \usage{
-plotPCAforGroups(dataFilt, dataDEGsFiltLevel, color1, color2, nsample1,
-  nsample2, ntopgenes)
+plotPCAforGroups(dataFilt, dataDEGsFiltLevel, ntopgenes)
 }
 \arguments{
 \item{dataFilt}{dataFilt}

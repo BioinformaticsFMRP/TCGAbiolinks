@@ -42,7 +42,6 @@ RnaSeqFilt<- function(TableRnaseq,QuantileThresh ){
 #' @param TCGA_RnaseqTable TCGA_RnaseqTable
 #' @param geneInfo geneInfo
 #' @importFrom EDASeq newSeqExpressionSet withinLaneNormalization betweenLaneNormalization exprs
-#' @export
 #' @return table normalized
 RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
 
@@ -209,8 +208,6 @@ plotPCAforGroups<-function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #'   EAcomplete
 #' @param TFname TFname
 #' @param RegulonList RegulonList
-#' @import
-#' @import
 #' @return EAcomplete plot
 EAcomplete <- function (TFname, RegulonList){
 
@@ -238,8 +235,6 @@ EAcomplete <- function (TFname, RegulonList){
 #' @param RegulonList RegulonList
 #' @param GOtype GOtype
 #' @param FDRThresh FDRThresh
-#' @import
-#' @import
 #' @return EAcomplete plot
 EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,IPAGenes,GOtype,FDRThresh=0.01) {
   topPathways=nrow(TableEnrichment)
@@ -311,8 +306,6 @@ EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,IPAGenes,GOt
 #'   GeneSplitRegulon
 #' @param Genelist Genelist
 #' @param Sep Sep
-#' @import
-#' @import
 #' @return GeneSplitRegulon
 GeneSplitRegulon<-function(Genelist,Sep){
   RegSplitted<-as.matrix(unlist(strsplit(as.character(Genelist), Sep)))
@@ -330,8 +323,6 @@ GeneSplitRegulon<-function(Genelist,Sep){
 #' @param PathTab PathTab
 #' @param nBar nBar
 #' @param nRGTab nRGTab
-#' @import
-#' @import
 #' @return GeneSplitRegulon
 IPAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
   splitFun <- function(tf, Tab, nBar){
