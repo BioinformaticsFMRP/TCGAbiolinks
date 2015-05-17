@@ -9,6 +9,9 @@
   file = system.file("extdata/dataGeneExpression.rda",package = "TCGAbiolinks")
   load(file,envir = as.environment("package:TCGAbiolinks"))
 
+  file = system.file("extdata/dataEnrichmentAnalysis.rda",package = "TCGAbiolinks")
+  load(file,envir = as.environment("package:TCGAbiolinks"))
+
   file = system.file("extdata/dataFolders.rda",package = "TCGAbiolinks")
   time <- file.info(file)$ctime
   if (file.exists(file)) {
@@ -40,7 +43,10 @@
 #' @importFrom stringr str_match
 #' @importFrom XML readHTMLTable
 #' @importFrom downloader download
-#' @keywords internal
+#' @keywords i
+#'
+#'
+#'   nternal
 load.tcga <- function(env) {
   tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
 

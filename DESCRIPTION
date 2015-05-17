@@ -24,6 +24,7 @@ Imports:
     EDASeq,
     RCurl,
     edgeR,
+    ggbiplot,
     biomaRt,
     exactRankTests,
     ggplot2,
