@@ -52,25 +52,43 @@ Obs: The function will structure the folders to save the data as:
 _Path given by the user/Experiment folder_
 
 
-## TCGA analyze
-You can easily download roadmap data using the `tcga.download` function.
+## TCGA Downstream Analysis TCGAprepare, TCGAanalyze, TCGAvisualize
+You can easily prepare gene expression from TCGA data using the `tcga.prepare` function.
  
 ```{r, eval = FALSE}
 # Downstream analysis using gene expression data  
 # TCGA samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
+
+#save(DAVID_BP_matrix, DAVID_CC_matrix, DAVID_MF_matrix, IPAGenes, listIPA_pathways, file = "dataEnrichmentAnalysis.rda")
 # save(dataBRCA, geneInfo , file = "dataGeneExpression.rda")
+library(TCGAbiolinks)
 
 # normalization of genes
 dataNorm <- RnaSeqNormalization(dataBRCA,geneInfo)
 
 # quantile filter of genes
-dataFilt <- RnaSeqFilt(Data_CANCER_normUQ,0.25)
+dataFilt <- RnaSeqFilt(dataNorm,0.25)
 
 # selection of normal samples "NT"
-samplesNT <- MultiSampleTypes_test(colnames(Data_CANCER_normUQ_filt), typesample = c("NT"))
+samplesNT <- MultiSampleTypes_test(colnames(dataFilt), typesample = c("NT"))
 
 # selection of tumor samples "TP"
-samplesTP <- MultiSampleTypes_test(colnames(Data_CANCER_normUQ_filt), typesample = c("TP"))
+samplesTP <- MultiSampleTypes_test(colnames(dataFilt), typesample = c("TP"))
+
+
+```
+
+Obs: The function will structure the folders to save the data as:
+_Path given by the user/Experiment folder_
+
+## TCGA analyze
+You can easily analyze gene expression from TCGA data using the `tcga.analyze` function.
+ 
+```{r, eval = FALSE}
+# Downstream analysis using gene expression data  
+# TCGA samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
+# save(dataBRCA, geneInfo , file = "dataGeneExpression.rda")
+library(TCGAbiolinks)
 
 # Diff.expr.analysis (DEA) using edgeR package
 dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT],dataFilt[,samplesTP], "Normal", "Tumor")
@@ -78,8 +96,38 @@ dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT],dataFilt[,samplesTP], "Normal", "Tumo
 # DEGs filter by abs(logFC) >=1
 dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
 
+# DEGs table with expression values in normal and tumor samples
+dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",dataFilt[,samplesTP],dataFilt[,samplesNT])
+
+# Enrichment Analysis EA
+# Gene Ontology (GO) and Pathways enrichment by DEGs list
+Genelist <- rownames(dataDEGsFiltLevel)
+
+TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
+
+# Enrichment Analysis EA (TCGAVisualize)
+# Gene Ontology (GO) and Pathways enrichment IPA barPlot
+
+IPAbarplot(tf = rownames(ansEA$ResBP), 
+           GOBPTab = ansEA$ResBP,
+           GOCCTab = ansEA$ResCC,
+           GOMFTab = ansEA$ResMF,
+           PathTab = ansEA$ResPat,
+           nRGTab = Genelist, 
+           nBar = 10)
+
+# Principal Component Analysis Plot for ntop DEGs selected
+plotPCAforGroups(dataFilt,dataDEGsFiltLevel,color1 = "blue",color2= "red", nsample1 =length(samplesNT), nsample2 =length(samplesTP) , ntopgenes = 100)
+
+# boxplot of data normalized 
+#sampleGenes <- rownames(dataDEGsFilt[dataDEGsFilt$logFC >=1,])[1:20]
+#boxplot(log(dataBRCA[sampleGenes,]), las = 2)
+#boxplot(log(dataFilt[sampleGenes,]), las = 2)
+
+
 
 ```
 
 Obs: The function will structure the folders to save the data as:
 _Path given by the user/Experiment folder_
+
