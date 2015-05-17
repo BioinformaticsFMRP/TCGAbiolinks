@@ -78,9 +78,6 @@ samplesTP <- MultiSampleTypes_test(colnames(dataFilt), typesample = c("TP"))
 
 ```
 
-Obs: The function will structure the folders to save the data as:
-_Path given by the user/Experiment folder_
-
 ## TCGA analyze
 You can easily analyze gene expression from TCGA data using the `tcga.analyze` function.
  
@@ -128,6 +125,23 @@ plotPCAforGroups(dataFilt,dataDEGsFiltLevel,color1 = "blue",color2= "red", nsamp
 
 ```
 
-Obs: The function will structure the folders to save the data as:
-_Path given by the user/Experiment folder_
+## TCGA investigate
+Find most studied TF in pubmed related to a specific cancer, disease, or tissue
+ 
+```{r, eval = FALSE}
+# First perform DEGs with TCGAanalyze
+# See upper vignette
+
+# Select only transcription factors (tfs) from DEGs
+TFs <- IPAGenes[IPAGenes$Family =="transcription regulator",]
+TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
+dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
+
+# Ordering table DEGs TFs according Delta decreasing
+dataDEGsFiltLevelTFs <- dataDEGsFiltLevelTFs[order(dataDEGsFiltLevelTFs$Delta,decreasing=T),]
+
+# Find Pubmed of TF studied related to cancer
+tabDEGsTFPubmed <- TCGAinvestigate("breast", dataDEGsFiltLevelTFs, topgenes = 20)
+
+```
 
