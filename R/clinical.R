@@ -3,7 +3,6 @@
 #'   SampleTypes_test
 #' @param barcode barcode
 #' @param typesample typesample
-#' @import
 #' @export
 #' @return SampleTypes_test
 SampleTypes_test <- function(barcode,typesample){
@@ -23,7 +22,6 @@ SampleTypes_test <- function(barcode,typesample){
 #'   MultiSampleTypes_test
 #' @param barcode barcode
 #' @param typesample typesample
-#' @import
 #' @export
 #' @return MultiSampleTypes_test
 MultiSampleTypes_test <- function(barcode,typesample){
@@ -49,7 +47,6 @@ MultiSampleTypes_test <- function(barcode,typesample){
 #'   MatchedCoupledSampleTypes_test
 #' @param barcode barcode
 #' @param typesample typesample
-#' @import
 #' @export
 #' @return MultiSampleTypes_test
 MatchedCoupledSampleTypes_test <- function(barcode,typesample){
@@ -84,7 +81,6 @@ MatchedCoupledSampleTypes_test <- function(barcode,typesample){
 #' @param barcode barcode
 #' @param stage stage
 #' @param clinical_patient_data clinical_patient_data
-#' @import
 #' @export
 #' @return stage_BRCA_test
 stage_BRCA_test <- function(barcode, stage, clinical_patient_data){
@@ -111,7 +107,6 @@ stage_BRCA_test <- function(barcode, stage, clinical_patient_data){
 #' @param barcode barcode
 #' @param gender gender
 #' @param clinical_patient_data clinical_patient_data
-#' @import
 #' @export
 #' @return stage_BRCA_test
 gender_BRCA_test <- function(barcode, gender, clinical_patient_data){
@@ -135,7 +130,6 @@ gender_BRCA_test <- function(barcode, gender, clinical_patient_data){
 #' @param barcode barcode
 #' @param ER ER
 #' @param clinical_patient_data clinical_patient_data
-#' @import
 #' @export
 #' @return ER_status_BRCA_test
 ER_status_BRCA_test <- function(barcode,ER, clinical_patient_data){
@@ -158,7 +152,6 @@ ER_status_BRCA_test <- function(barcode,ER, clinical_patient_data){
 #' @param barcode barcode
 #' @param PR PR
 #' @param clinical_patient_data clinical_patient_data
-#' @import
 #' @export
 #' @return PR_status_BRCA_test
 PR_status_BRCA_test <- function(barcode,PR, clinical_patient_data){
@@ -184,7 +177,6 @@ PR_status_BRCA_test <- function(barcode,PR, clinical_patient_data){
 #' @param barcode barcode
 #' @param HER HER
 #' @param clinical_patient_data clinical_patient_data
-#' @import
 #' @export
 #' @return HER_status_BRCA_test
 HER_status_BRCA_test <- function(barcode, HER, clinical_patient_data){
@@ -207,7 +199,6 @@ HER_status_BRCA_test <- function(barcode, HER, clinical_patient_data){
 #' @description
 #'   clinical_data_site_cancer_test
 #' @param cancer cancer
-#' @import
 #' @export
 #' @return clinical_data_site_cancer_test
 clinical_data_site_cancer_test<-function(cancer){
@@ -222,9 +213,9 @@ clinical_data_site_cancer_test<-function(cancer){
 #' @importFrom RCurl getURL
 #' @export
 #' @return clinic
-clinic<-function(cancer,clinical_data_type){
+clinic <- function(cancer,clinical_data_type){
 
-  URL<- paste0(clinical_data_site_cancer_test(cancer), "nationwidechildrens.org_", clinical_data_type, "_", cancer, ".txt")
+  URL <- paste0(clinical_data_site_cancer_test(cancer), "nationwidechildrens.org_", clinical_data_type, "_", cancer, ".txt")
   writeLines(getURL(URL,ssl.verifypeer = FALSE), file(paste0(clinical_data_type,".txt")))
 
   return(file(paste0(clinical_data_type,".txt")))
