@@ -261,3 +261,27 @@ TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
 
 
 }
+
+#  Internal function
+#  Get a list of barcode from a list of uuid
+#  example mapuuidbarcode(c("011bb13f-e0e8-4f4b-b7a5-4867bbe3b30a",
+#                           "048615c7-c08c-4199-b394-c59160337d67"))
+#' @importFrom RCurl postForm
+#' @importFrom RJSONIO fromJSON
+#' @importFrom plyr rbind.fill
+mapuuidbarcode <- function(uuids){
+  # Using tcha api: https://goo.gl/M1uQLR
+  uuids <- paste0(uuids, collapse = ",")
+  ans <- fromJSON(postForm("https://tcga-data.nci.nih.gov/uuid/uuidws/mapping/json/uuid/batch",
+           .opts = list(postfields = uuids,
+                        httpheader = c('Content-Type' = 'text/plain'),
+                        ssl.verifypeer = FALSE)))
+
+  # transform to dataframe
+  x <- (do.call("rbind.fill", lapply(ans$uuidMapping, as.data.frame))[[1]])
+  barcodes<- seq (1,length(x),2)
+  uuid <- seq(2,length(x),2)
+  x <- data.frame(x[uuid],x[barcodes])
+  colnames(x) <- c("uuid","barcode")
+  return(x)
+}
