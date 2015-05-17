@@ -2,7 +2,6 @@
 #' @description
 #'   GenesCutID
 #' @param GeneList GeneList
-#' @import
 #' @export
 #' @return list of gene symbol without IDs
 GenesCutID <- function(GeneList){
@@ -14,7 +13,6 @@ GenesCutID <- function(GeneList){
 #' @description
 #'   TimeUse
 #' @param func func
-#' @import
 #' @export
 #' @return time execution of a function
 TimeUse <-function(func){
@@ -29,7 +27,6 @@ TimeUse <-function(func){
 #'   Filtering rnaseq by quantile
 #' @param TableRnaseq TableRnaseq
 #' @param QuantileThresh QuantileThresh
-#' @import
 #' @export
 #' @return table filtered
 RnaSeqFilt<- function(TableRnaseq,QuantileThresh ){
