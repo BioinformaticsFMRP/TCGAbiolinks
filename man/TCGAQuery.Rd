@@ -64,15 +64,6 @@ A dataframe with the results of the query
 Searches in the tcga database
 }
 \examples{
-library(TCGAbiolinks)
-query <- TCGAQuery(tumor = "brca",level = 3)
-
-querySamples <- samplesfilter(query)
-
-query <- TCGAQuery(tumor = "brca",level = 3, platform = "IlluminaHiSeq_RNASeqV2")
-
-TCGADownload(query,path = "data",type ="rsem.genes.results")
-
 query <- TCGAQuery(tumor = "gbm",
                     added.since = "01/01/2013",
                     added.up.to = "06/01/2013")
