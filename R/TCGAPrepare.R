@@ -11,8 +11,6 @@
 #' @export
 #' @importFrom downloader download
 #' @return Data matrix
-
-
 TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
 
   Description <- "To fix with new version of TCGAQuery"
@@ -273,9 +271,9 @@ mapuuidbarcode <- function(uuids){
   # Using tcha api: https://goo.gl/M1uQLR
   uuids <- paste0(uuids, collapse = ",")
   ans <- fromJSON(postForm("https://tcga-data.nci.nih.gov/uuid/uuidws/mapping/json/uuid/batch",
-           .opts = list(postfields = uuids,
-                        httpheader = c('Content-Type' = 'text/plain'),
-                        ssl.verifypeer = FALSE)))
+                           .opts = list(postfields = uuids,
+                                        httpheader = c('Content-Type' = 'text/plain'),
+                                        ssl.verifypeer = FALSE)))
 
   # transform to dataframe
   x <- (do.call("rbind.fill", lapply(ans$uuidMapping, as.data.frame))[[1]])
@@ -284,4 +282,48 @@ mapuuidbarcode <- function(uuids){
   x <- data.frame(x[uuid],x[barcodes])
   colnames(x) <- c("uuid","barcode")
   return(x)
+}
+
+# Get sdrf file/array_design of a line
+# example
+# query <- TCGAQuery(tumor = "BRCA")
+# getMagecontent(query[1,])
+# Obs: delete the file after reading
+#      is it better to save it?
+getMage <- function(line){
+  tcga.db <- get("tcga.db")
+  root <- "https://tcga-data.nci.nih.gov"
+  mages <-  tcga.db[grep("mage-tab",tcga.db$name),]
+  # get the mage file for the entry
+  mage <- subset(mages, mages$Disease == line$Disease &
+                   mages$Platform == line$Platform &
+                   mages$Center == line$Center)
+
+  if (dim(mage)[1] != 0) {
+    file <- basename(mage$deployLocation)
+    if ( !file.exists(file)) {
+      download(paste0(root,mage$deployLocation), file, quiet = TRUE)
+    }
+    folder <- gsub(".tar.gz","",file)
+    if ( !file.exists(folder)) {
+      untar(file)
+    }
+    files <- list.files(folder)
+    if (line$Platform == "MDA_RPPA_Core") {
+      sdrf <- files[grep("array_design",files)]
+    } else {
+      # Platform is not MDA_RPPA_Core
+      sdrf <- files[grep("sdrf",files)]
+    }
+    if (length(sdrf) > 1) {
+      sdrf <- sdrf[1]
+    }
+    df <- read.delim(file = file.path(folder,sdrf),
+                     sep = "\t",
+                     stringsAsFactors = FALSE,
+                     fileEncoding = "latin1")
+  }
+  unlink(file)
+  unlink(folder, recursive = TRUE)
+  return(df)
 }
