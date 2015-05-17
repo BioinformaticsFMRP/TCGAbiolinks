@@ -1,0 +1,52 @@
+---
+title: "Working with TCGAbiolinks package"
+author: " Antonio Colaprico, Catharina Olsen, Luciano Garofano, Tiago Chedraoui Silva, Davide Garolini, Claudia Cava, Isabella Castiglioni, Houtan Noushmehr, Gianluca Bontempi, Michele Ceccarelli"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+This document describes how to search/download analyze tcga data using TCGAbiolinks package.
+
+## TCGA query
+ You can easily search tcga samples using the `tcgaQuery` function.
+ Using a summary of filters as in TCGA portal, the function works with the following 
+ parameters:
+
+* tumor
+* platform
+* added.since
+* added.up.to
+* listSample
+* level
+* center
+
+Some examples of search are shown below
+```{r, eval = FALSE}
+
+library(TCGAbiolinks)
+query <- TCGAQuery(tumor = "brca",level = 3)
+
+querySamples <- samplesfilter(query)
+
+query <- TCGAQuery(tumor = "brca",level = 3, platform = "IlluminaHiSeq_RNASeqV2")
+
+```
+
+Obs: As these terms needs to be exact we validate user input before searching.
+
+## TCGA download
+You can easily download roadmap data using the `tcga.download` function.
+ 
+```{r, eval = FALSE}
+# get all samples from the query and save into tcga folder
+# samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
+# samples to normalize later
+TCGADownload(query,path = "data",type ="rsem.genes.results")
+```
+
+Obs: The function will structure the folders to save the data as:
+_Path given by the user/Experiment folder_
