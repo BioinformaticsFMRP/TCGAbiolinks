@@ -210,7 +210,6 @@ clinical_data_site_cancer_test<-function(cancer){
 #'   clinic
 #' @param cancer cancer
 #' @param clinical_data_type clinical_data_type
-#' @importFrom RCurl getURL
 #' @export
 #' @return clinic
 clinic <- function(cancer,clinical_data_type){

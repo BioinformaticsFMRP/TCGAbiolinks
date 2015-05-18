@@ -264,7 +264,6 @@ TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
 #  Get a list of barcode from a list of uuid
 #  example mapuuidbarcode(c("011bb13f-e0e8-4f4b-b7a5-4867bbe3b30a",
 #                           "048615c7-c08c-4199-b394-c59160337d67"))
-#' @importFrom RCurl postForm
 #' @importFrom RJSONIO fromJSON
 #' @importFrom plyr rbind.fill
 mapuuidbarcode <- function(uuids){
