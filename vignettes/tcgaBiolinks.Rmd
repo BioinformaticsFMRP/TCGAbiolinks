@@ -9,11 +9,11 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-This document describes how to search/download analyze tcga data using TCGAbiolinks package.
+This document describes how to search, download and analyze TCGA data using the TCGAbiolinks package.
 
 ## TCGA query
- You can easily search tcga samples using the `tcgaQuery` function.
- Using a summary of filters as in TCGA portal, the function works with the following 
+ You can easily search TCGA samples using the `tcgaQuery` function.
+ Using a summary of filters as used in the TCGA portal, the function works with the following 
  parameters:
 
 * tumor
@@ -24,7 +24,7 @@ This document describes how to search/download analyze tcga data using TCGAbioli
 * level
 * center
 
-Some examples of search are shown below
+Some search examples are shown below
 ```{r, eval = FALSE}
 
 library(TCGAbiolinks)
@@ -36,7 +36,7 @@ query <- TCGAQuery(tumor = "brca",level = 3, platform = "IlluminaHiSeq_RNASeqV2"
 
 ```
 
-Obs: As these terms needs to be exact we validate user input before searching.
+Obs: As these terms needs to be exact, we validate the user input before searching.
 
 ## TCGA download
 You can easily download roadmap data using the `tcga.download` function.
@@ -45,7 +45,7 @@ You can easily download roadmap data using the `tcga.download` function.
 # get all samples from the query and save into tcga folder
 # samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
 # samples to normalize later
-TCGADownload(query,path = "data",type ="rsem.genes.results")
+TCGADownload(query, path = "data", type = "rsem.genes.results")
 ```
 
 Obs: The function will structure the folders to save the data as:
@@ -53,7 +53,7 @@ _Path given by the user/Experiment folder_
 
 
 ## TCGA Downstream Analysis TCGAprepare, TCGAanalyze, TCGAvisualize
-You can easily prepare gene expression from TCGA data using the `tcga.prepare` function.
+You can prepare gene expression from TCGA data using the `tcga.prepare` function.
  
 ```{r, eval = FALSE}
 # Downstream analysis using gene expression data  
@@ -64,10 +64,10 @@ You can easily prepare gene expression from TCGA data using the `tcga.prepare` f
 library(TCGAbiolinks)
 
 # normalization of genes
-dataNorm <- RnaSeqNormalization(dataBRCA,geneInfo)
+dataNorm <- RnaSeqNormalization(dataBRCA, geneInfo)
 
 # quantile filter of genes
-dataFilt <- RnaSeqFilt(dataNorm,0.25)
+dataFilt <- RnaSeqFilt(dataNorm, 0.25)
 
 # selection of normal samples "NT"
 samplesNT <- MultiSampleTypes_test(colnames(dataFilt), typesample = c("NT"))
@@ -79,7 +79,7 @@ samplesTP <- MultiSampleTypes_test(colnames(dataFilt), typesample = c("TP"))
 ```
 
 ## TCGA analyze
-You can easily analyze gene expression from TCGA data using the `tcga.analyze` function.
+You can analyze gene expression from TCGA data using the `tcga.analyze` function.
  
 ```{r, eval = FALSE}
 # Downstream analysis using gene expression data  
@@ -88,7 +88,7 @@ You can easily analyze gene expression from TCGA data using the `tcga.analyze` f
 library(TCGAbiolinks)
 
 # Diff.expr.analysis (DEA) using edgeR package
-dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT],dataFilt[,samplesTP], "Normal", "Tumor")
+dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP], "Normal", "Tumor")
 
 # DEGs filter by abs(logFC) >=1
 dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
