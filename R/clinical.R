@@ -1,11 +1,11 @@
-#' @title SampleTypes_test
+#' @title SampleTypes
 #' @description
-#'   SampleTypes_test
+#'   SampleTypes
 #' @param barcode barcode
 #' @param typesample typesample
 #' @export
-#' @return SampleTypes_test
-SampleTypes_test <- function(barcode,typesample){
+#' @return SampleTypes 
+SampleTypes <- function(barcode, typesample){
   table.code <- c('01','02','03','04','05','06','07','08','09','10','11','12','13','14','20','40','50','60','61')
   names(table.code) <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC","TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB","CELL","XP","XCL")
 
@@ -17,14 +17,14 @@ SampleTypes_test <- function(barcode,typesample){
   return(barcode)
 }
 
-#' @title MultiSampleTypes_test
+#' @title MultiSampleTypes
 #' @description
-#'   MultiSampleTypes_test
+#'   MultiSampleTypes
 #' @param barcode barcode
 #' @param typesample typesample
 #' @export
-#' @return MultiSampleTypes_test
-MultiSampleTypes_test <- function(barcode,typesample){
+#' @return MultiSampleTypes 
+MultiSampleTypes <- function(barcode,typesample){
   # Tumor AND Solid Tissue Normal NOT FROM THE SAME PATIENTS
   table.code <- c('01','02','03','04','05','06','07','08','09','10','11','12','13','14','20','40','50','60','61')
   names(table.code) <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC","TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB","CELL","XP","XCL")
@@ -42,14 +42,14 @@ MultiSampleTypes_test <- function(barcode,typesample){
   }
 }
 
-#' @title MatchedCoupledSampleTypes_test
+#' @title MatchedCoupledSampleTypes
 #' @description
-#'   MatchedCoupledSampleTypes_test
+#'   MatchedCoupledSampleTypes
 #' @param barcode barcode
 #' @param typesample typesample
 #' @export
-#' @return MultiSampleTypes_test
-MatchedCoupledSampleTypes_test <- function(barcode,typesample){
+#' @return MultiSampleTypes
+MatchedCoupledSampleTypes <- function(barcode,typesample){
   # Tumor AND Solid Tissue Normal FROM THE SAME PATIENTS
   table.code <- c('01','02','03','04','05','06','07','08','09','10','11','12','13','14','20','40','50','60','61')
   names(table.code) <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC","TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB","CELL","XP","XCL")
@@ -75,15 +75,15 @@ MatchedCoupledSampleTypes_test <- function(barcode,typesample){
   }
 }
 
-#' @title stage_BRCA_test
+#' @title stage_BRCA
 #' @description
-#'   stage_BRCA_test
+#'   stage_BRCA
 #' @param barcode barcode
 #' @param stage stage
 #' @param clinical_patient_data clinical_patient_data
 #' @export
-#' @return stage_BRCA_test
-stage_BRCA_test <- function(barcode, stage, clinical_patient_data){
+#' @return stage_BRCA
+stage_BRCA <- function(barcode, stage, clinical_patient_data){
   table.stages <- c("Stage I$|Stage IA$|Stage IB$", "Stage I$", "Stage IA$", "Stage IB$", "Stage II$|Stage IIA$|Stage IIB$", "Stage II$",
                     "Stage IIA$", "Stage IIB$", "Stage III$|Stage IIIA$|Stage IIIB$|Stage IIIC$", "Stage III$", "Stage IIIA$", "Stage IIIB$", "Stage IIIC$", "Stage IV$")
   names(table.stages) <- c("stage_IX", "stage_I", "stage_IA", "stage_IB", "stage_IIX", "stage_IIA", "stage_IIB", "stage_IIIX", "stage_IIIA",
@@ -101,21 +101,21 @@ stage_BRCA_test <- function(barcode, stage, clinical_patient_data){
   return(barcode)
 }
 
-#' @title gender_BRCA_test
+#' @title gender_BRCA
 #' @description
-#'   gender_BRCA_test
+#'   gender_BRCA
 #' @param barcode barcode
 #' @param gender gender
 #' @param clinical_patient_data clinical_patient_data
 #' @export
-#' @return stage_BRCA_test
-gender_BRCA_test <- function(barcode, gender, clinical_patient_data){
+#' @return stage_BRCA
+gender_BRCA <- function(barcode, gender, clinical_patient_data){
 
   if(is.element(gender,c("MALE", "FEMALE"))){
     clinical_patient_data<-as.data.frame(clinical_patient_data)
     s.gender <- as.data.frame(clinical_patient_data)[grep(paste0("^", gender,"$"), clinical_patient_data$gender), ][,"bcr_patient_barcode"]
     samples<-substr(barcode, 1, 12)
-    #find common patients between FEMALE e barcode data
+    #find common patients between FEMALE and barcode data
     barcode<-intersect(samples,s.gender)
   }else{
     return("Error message gender doesn't exist")
@@ -124,15 +124,15 @@ gender_BRCA_test <- function(barcode, gender, clinical_patient_data){
   return(barcode)
 }
 
-#' @title ER_status_BRCA_test
+#' @title ER_status_BRCA 
 #' @description
-#'   ER_status_BRCA_test
+#'   ER_status_BRCA 
 #' @param barcode barcode
 #' @param ER ER
 #' @param clinical_patient_data clinical_patient_data
 #' @export
-#' @return ER_status_BRCA_test
-ER_status_BRCA_test <- function(barcode,ER, clinical_patient_data){
+#' @return ER_status_BRCA 
+ER_status_BRCA <- function(barcode,ER, clinical_patient_data){
   ## ER should be "Positive" or "Negative"
   # consider only barcode and ER status
   if(is.element(ER, c("Positive", "Negative"))){
@@ -146,15 +146,15 @@ ER_status_BRCA_test <- function(barcode,ER, clinical_patient_data){
   }
 }
 
-#' @title PR_status_BRCA_test
+#' @title PR_status_BRCA 
 #' @description
-#'   PR_status_BRCA_test
+#'   PR_status_BRCA 
 #' @param barcode barcode
 #' @param PR PR
 #' @param clinical_patient_data clinical_patient_data
 #' @export
-#' @return PR_status_BRCA_test
-PR_status_BRCA_test <- function(barcode,PR, clinical_patient_data){
+#' @return PR_status_BRCA 
+PR_status_BRCA  <- function(barcode,PR, clinical_patient_data){
   ## PR should be "Positive" or "Negative"
 
   if(is.element(PR, c("Positive", "Negative"))){
@@ -171,15 +171,15 @@ PR_status_BRCA_test <- function(barcode,PR, clinical_patient_data){
 
 }
 
-#' @title HER_status_BRCA_test
+#' @title HER_status_BRCA 
 #' @description
-#'   HER_status_BRCA_test
+#'   HER_status_BRCA 
 #' @param barcode barcode
 #' @param HER HER
 #' @param clinical_patient_data clinical_patient_data
 #' @export
-#' @return HER_status_BRCA_test
-HER_status_BRCA_test <- function(barcode, HER, clinical_patient_data){
+#' @return HER_status_BRCA 
+HER_status_BRCA  <- function(barcode, HER, clinical_patient_data){
   if(is.element(HER, c("Positive", "Negative"))){
     clinical_patient_data<-as.data.frame(clinical_patient_data)
     #for breast cancer HER+
@@ -195,13 +195,13 @@ HER_status_BRCA_test <- function(barcode, HER, clinical_patient_data){
 
 }
 
-#' @title clinical_data_site_cancer_test
+#' @title clinical_data_site_cancer 
 #' @description
-#'   clinical_data_site_cancer_test
+#'   clinical_data_site_cancer 
 #' @param cancer cancer
 #' @export
-#' @return clinical_data_site_cancer_test
-clinical_data_site_cancer_test<-function(cancer){
+#' @return clinical_data_site_cancer 
+clinical_data_site_cancer <-function(cancer){
   return(paste0("https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/", cancer,"/bcr/biotab/clin/"))
 }
 
@@ -214,7 +214,7 @@ clinical_data_site_cancer_test<-function(cancer){
 #' @return clinic
 clinic <- function(cancer,clinical_data_type){
 
-  URL <- paste0(clinical_data_site_cancer_test(cancer), "nationwidechildrens.org_", clinical_data_type, "_", cancer, ".txt")
+  URL <- paste0(clinical_data_site_cancer (cancer), "nationwidechildrens.org_", clinical_data_type, "_", cancer, ".txt")
   writeLines(getURL(URL,ssl.verifypeer = FALSE), file(paste0(clinical_data_type,".txt")))
 
   return(file(paste0(clinical_data_type,".txt")))
