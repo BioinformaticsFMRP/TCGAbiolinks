@@ -266,6 +266,7 @@ TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
 #                           "048615c7-c08c-4199-b394-c59160337d67"))
 #' @importFrom RJSONIO fromJSON
 #' @importFrom plyr rbind.fill
+#' @importFrom RCurl postForm
 mapuuidbarcode <- function(uuids){
   # Using tcha api: https://goo.gl/M1uQLR
   uuids <- paste0(uuids, collapse = ",")
