@@ -52,15 +52,14 @@
 TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
                       added.up.to = NULL, samples = NULL, center = NULL,
                       level = NULL) {
-
   disease.table   <- get("disease.table")
   platform.table  <- get("platform.table")
   center.table  <- get("center.table")
   db <-  get("tcga.db")
 
   if (!is.null(tumor)) {
-    sapply(tumor, function(x){
-      if (!(is.element(tolower(x),
+    for (j in seq_along(tumor)) {
+      if (!(is.element(tolower(tumor[j]),
                        tolower(disease.table$abbreviation)))) {
         suppressWarnings(
           df <- as.data.frame(matrix(sort(unique(disease.table$abbreviation)),
@@ -71,13 +70,14 @@ TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
         cat("=======================================================\n")
         cat("ERROR: Disease not found. Select from the table above.\n")
         cat("=======================================================\n")
+        return(NULL)
       }
-      return(NULL)
-    })
+    }
   }
-  if (!is.null(platform)) {
-    sapply(platform, function(x){
-      if (!(is.element(tolower(x), tolower(platform.table$name)))) {
+
+    if (!is.null(platform)) {
+    for (j in seq_along(platform)) {
+      if (!(is.element(tolower(platform[j]), tolower(platform.table$name)))) {
         suppressWarnings(
           df <- as.data.frame(matrix(sort(unique(platform.table$name)),
                                      ncol = 3))
@@ -89,7 +89,8 @@ TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
         cat("=======================================================\n")
         return(NULL)
       }
-    })}
+    }
+  }
 
   if (!is.null(center)) {
     if (!(is.element(tolower(center), tolower(center.table$name)))) {
@@ -124,7 +125,6 @@ TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
       print("Date format should be YYYY-mm-dd")
     }
   }
-
 
   if(!is.null(tumor)){
     id <- sapply(tumor, function(x){
@@ -197,7 +197,7 @@ getBarcode <- function(table){
         # For IlluminaGA and ABI platforms
         # Barcodes are in maf files
         if ((grepl("DNASeq",table[i,]$Platform) &
-               grepl("Level",table[i,]$name))
+             grepl("Level",table[i,]$name))
         ) {
           barcodes <- tcga.get.barcode(table[i,])
 
@@ -208,8 +208,8 @@ getBarcode <- function(table){
           table[i,]$deployStatus <- barcodes
           setTxtProgressBar(pb, i)
         } else if (table[i,]$Platform == "diagnostic_images" |
-                     table[i,]$Platform == "pathology_reports" |
-                     table[i,]$Platform == "tissue_images"
+                   table[i,]$Platform == "pathology_reports" |
+                   table[i,]$Platform == "tissue_images"
         ) {
           print("image or report")
 
@@ -363,8 +363,8 @@ getBarcode <- function(table){
         # To re-read the barcodes
         for (j in seq_along(table[,1])) {
           if (table[j,]$Disease == table[i,]$Disease &&
-                table[j,]$Platform == table[i,]$Platform &&
-                table[j,]$Center == table[i,]$Center) {
+              table[j,]$Platform == table[i,]$Platform &&
+              table[j,]$Center == table[i,]$Center) {
             aux <- grep("Comment..TCGA.Archive.Name",colnames(df))
 
             barcode <- data.frame()
