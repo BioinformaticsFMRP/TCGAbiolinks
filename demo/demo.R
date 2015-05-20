@@ -1,13 +1,7 @@
-library(downloader)
-library(survival)
-library(GGally)
-library(ggplot2)
-library(coin)
-library(parallel)
 #------------------ Downloading tcga data ----------------------------
 dir.create("data")
-query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450",level="3")
-TCGADownload(query[1:2,],path="data")
+query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450",level = "3")
+TCGADownload(query[1:2,],path = "data")
 
 query <- TCGAQuery(tumor = "gbm", platform = "bio", level="2")
 TCGADownload(query,path="data")
