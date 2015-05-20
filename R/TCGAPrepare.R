@@ -99,8 +99,6 @@ TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
     colnames(geData) <- substr(gsub("\\.", "-", colNames),1,28)
   }
 
-
-
   if(PlatformType == "illuminaga_mirnaseq" || PlatformType == "illuminahiseq_mirnaseq"){
     rownames(geData) <- tmpData$miRNA_ID
     colnames(geData) <- substr(paste("TCGA", sapply(strsplit(lf, "TCGA"), function(y) y[2]), sep = ""), 1, 28)
@@ -359,7 +357,7 @@ TCGAPrepare2 <- function(query, dir = NULL, type = NULL){
     aux <- list.files(file.path(dir,dirs[i]), full.names = T, recursive = T)
     files <- c(files, aux )
   }
-  files <- files[-grep("MANIFEST|README|CHANGES|DESCRIPTION",files)]
+  files <- files[-grep("MANIFEST|README|CHANGES|DESCRIPTION|DATA_USE",files)]
 
   df <- NULL
   if (grepl("humanmethylation",tolower(platform))) {
@@ -421,6 +419,20 @@ TCGAPrepare2 <- function(query, dir = NULL, type = NULL){
     for (i in seq_along(files)) {
       data <- read.table(files[i], header = TRUE, sep = "\t",
                          stringsAsFactors = FALSE, check.names = FALSE)
+      data <- data[-1,] # removing Composite Element REF
+      if (i == 1) {
+        df <- data
+      } else {
+        df <- merge(df, data,by = "Hybridization REF")
+      }
+    }
+  }
+
+  if (grepl("illuminaga",tolower(platform))) {
+    for (i in seq_along(files)) {
+      data <- read.table(files[i], header = TRUE, sep = "\t",
+                         stringsAsFactors = FALSE, check.names = FALSE,
+                         comment.char = "#",fill = TRUE)
       data <- data[-1,] # removing Composite Element REF
       if (i == 1) {
         df <- data
