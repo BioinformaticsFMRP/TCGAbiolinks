@@ -209,18 +209,24 @@ plotPCAforGroups<-function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #' @param TFname TFname
 #' @param RegulonList RegulonList
 #' @return EAcomplete plot
-EAcomplete <- function (TFname, RegulonList){
+EAcomplete <- function(TFname, RegulonList){
+  IPAGenes <- get("IPAGenes")
+  DAVID_BP_matrix <- get("DAVID_BP_matrix")
+  DAVID_BP_matrix <- get("DAVID_BP_matrix")
+  DAVID_MF_matrix <- get("DAVID_MF_matrix")
+  DAVID_CC_matrix <- get("DAVID_CC_matrix")
+  listIPA_pathways <- get("listIPA_pathways")
 
   print(paste("I need about ", "1 minute to finish complete Enrichment analysis GO[BP,MF,CC] and Pathways... "))
 
   #load("EnrichmentAnalyis.RData")
-  ResBP <- EnrichmentAnalysis(TFname,RegulonList,DAVID_BP_matrix,IPAGenes,GOtype= "DavidBP")
+  ResBP <- EnrichmentAnalysis(TFname,RegulonList,DAVID_BP_matrix,IPAGenes,GOtype = "DavidBP")
   print("GO Enrichment Analysis BP completed....done")
-  ResMF <- EnrichmentAnalysis(TFname,RegulonList,DAVID_MF_matrix,IPAGenes,GOtype= "DavidMF")
+  ResMF <- EnrichmentAnalysis(TFname,RegulonList,DAVID_MF_matrix,IPAGenes,GOtype = "DavidMF")
   print("GO Enrichment Analysis MF completed....done")
-  ResCC <- EnrichmentAnalysis(TFname,RegulonList,DAVID_CC_matrix,IPAGenes,GOtype= "DavidCC")
+  ResCC <- EnrichmentAnalysis(TFname,RegulonList,DAVID_CC_matrix,IPAGenes,GOtype = "DavidCC")
   print("GO Enrichment Analysis CC completed....done")
-  ResPat <- EnrichmentAnalysis(TFname,RegulonList,listIPA_pathways,IPAGenes,GOtype= "Pathway")
+  ResPat <- EnrichmentAnalysis(TFname,RegulonList,listIPA_pathways,IPAGenes,GOtype = "Pathway")
   print("Pathway Enrichment Analysis completed....done")
 
   ans <- list(ResBP = ResBP, ResMF = ResMF, ResCC = ResCC, ResPat = ResPat)
@@ -235,20 +241,21 @@ EAcomplete <- function (TFname, RegulonList){
 #' @param RegulonList RegulonList
 #' @param GOtype GOtype
 #' @param FDRThresh FDRThresh
+#' @param IPAGenes IPAGenes
 #' @return EAcomplete plot
 EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,IPAGenes,GOtype,FDRThresh=0.01) {
-  topPathways=nrow(TableEnrichment)
+  topPathways <- nrow(TableEnrichment)
   topPathways_tab <- matrix(0,1,topPathways)
-  topPathways_tab<-as.matrix(topPathways_tab)
-  rownames(topPathways_tab)<-GeneName
+  topPathways_tab <- as.matrix(topPathways_tab)
+  rownames(topPathways_tab) <- GeneName
 
   rownames(IPAGenes) <- toupper(rownames(IPAGenes) )
-  IPAGenes<-IPAGenes[!duplicated(IPAGenes[,"ID"]),]
+  IPAGenes <- IPAGenes[!duplicated(IPAGenes[,"ID"]),]
   rownames(IPAGenes) <- IPAGenes[,"ID"]
-  allgene<-IPAGenes[,"ID"]
-  current_pathway_from_IPA<- as.matrix(TableEnrichment[,GOtype]) # genes from IPA pathways
+  allgene <- IPAGenes[,"ID"]
+  current_pathway_from_IPA <- as.matrix(TableEnrichment[,GOtype]) # genes from IPA pathways
 
-  TableNames <- gsub("David","",paste("Top ", GOtype, " n. ", 1:topPathways," of ", topPathways, sep=""))
+  TableNames <- gsub("David","",paste("Top ", GOtype, " n. ", 1:topPathways," of ", topPathways, sep = ""))
   colnames(topPathways_tab) <- TableNames
   topPathways_tab <- as.data.frame(topPathways_tab)
 
@@ -278,23 +285,23 @@ EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,IPAGenes,GOt
       FisherpvalueTF<-ft$p.value
       table_pathway_enriched[i,"Pvalue"] <- as.numeric(FisherpvalueTF)
       if(FisherpvalueTF < 0.01){
-        current_pathway_commongenes_percent<-paste("(",format( (current_pathway_commongenes_num/length(genes_from_current_pathway_from_IPA)) *100,digits=2),"%)")
-        current_pathway_commongenes_num_with_percent<-gsub(" ","",paste(current_pathway_commongenes_num, current_pathway_commongenes_percent,"pv=",format(FisherpvalueTF,digits=2)))
-        table_pathway_enriched[i,"CommonGenesPathway"]<- length(genes_common_pathway_TFregulon)
-        table_pathway_enriched[i,"GenesInPathway"]<- length(genes_from_current_pathway_from_IPA)
-        table_pathway_enriched[i,"PercentPathway"]<-  as.numeric(table_pathway_enriched[i,"CommonGenesPathway"]) / as.numeric(table_pathway_enriched[i,"GenesInPathway"])  *100
-        table_pathway_enriched[i,"PercentRegulon"]<-  as.numeric(table_pathway_enriched[i,"CommonGenesPathway"]) / length(RegulonList)  *100
+        current_pathway_commongenes_percent <-paste("(",format( (current_pathway_commongenes_num/length(genes_from_current_pathway_from_IPA)) *100,digits=2),"%)")
+        current_pathway_commongenes_num_with_percent <-gsub(" ","",paste(current_pathway_commongenes_num, current_pathway_commongenes_percent,"pv=",format(FisherpvalueTF,digits=2)))
+        table_pathway_enriched[i,"CommonGenesPathway"] <- length(genes_common_pathway_TFregulon)
+        table_pathway_enriched[i,"GenesInPathway"] <- length(genes_from_current_pathway_from_IPA)
+        table_pathway_enriched[i,"PercentPathway"] <-  as.numeric(table_pathway_enriched[i,"CommonGenesPathway"]) / as.numeric(table_pathway_enriched[i,"GenesInPathway"])  *100
+        table_pathway_enriched[i,"PercentRegulon"] <-  as.numeric(table_pathway_enriched[i,"CommonGenesPathway"]) / length(RegulonList)  *100
       } }
   }
   table_pathway_enriched <- table_pathway_enriched[order(table_pathway_enriched[,"Pvalue"],decreasing=F),]
-  table_pathway_enriched <-table_pathway_enriched [table_pathway_enriched[,"Pvalue"] < 0.01 ,]
-  table_pathway_enriched[,"FDR"] <-p.adjust(table_pathway_enriched[,"Pvalue"],method="fdr")
-  table_pathway_enriched <- table_pathway_enriched [table_pathway_enriched[,"FDR"] < FDRThresh ,]
+  table_pathway_enriched <- table_pathway_enriched [table_pathway_enriched[,"Pvalue"] < 0.01 ,]
+  table_pathway_enriched[,"FDR"] <- p.adjust(table_pathway_enriched[,"Pvalue"],method="fdr")
+  table_pathway_enriched <- table_pathway_enriched[table_pathway_enriched[,"FDR"] < FDRThresh ,]
   table_pathway_enriched <- table_pathway_enriched[order(table_pathway_enriched[,"FDR"],decreasing=F),]
 
   tmp <- table_pathway_enriched[1:topPathways,]
   tmp <- paste(tmp[,"Pathway"],"; FDR= ", format(tmp[,"FDR"],digits=3),"; (ng="   ,round(tmp[,"GenesInPathway"]),"); (ncommon=", format(tmp[,"CommonGenesPathway"],digits=2), ")" ,sep="")
-  tmp <-as.matrix(tmp)
+  tmp <- as.matrix(tmp)
   topPathways_tab[1,] <- tmp
   rm(tmp)
 
@@ -307,8 +314,8 @@ EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,IPAGenes,GOt
 #' @param Genelist Genelist
 #' @param Sep Sep
 #' @return GeneSplitRegulon
-GeneSplitRegulon<-function(Genelist,Sep){
-  RegSplitted<-as.matrix(unlist(strsplit(as.character(Genelist), Sep)))
+GeneSplitRegulon <- function(Genelist,Sep){
+  RegSplitted <- as.matrix(unlist(strsplit(as.character(Genelist), Sep)))
 
   return(RegSplitted)
 }
@@ -390,11 +397,11 @@ IPAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
   #axis(side = 1, at = pretty(range(toPlot[, 3])), col = "red", line=2.5)
   #axis(side = 3, at = pretty(range(toPlot[, 3])), col = "red")
 
-  if( is.character( nRGTab)){
-    nRG<-length(nRGTab)
-  } else {    nRG <- nRGTab[tf, "RegSizeTF"] }
-
-
+  if ( is.character( nRGTab)){
+    nRG <- length(nRGTab)
+  } else {
+    nRG <- nRGTab[tf, "RegSizeTF"]
+  }
 
   mainLab <- paste(tf, " (nRG = ", nRG, ")", sep = "")
   mtext(mainLab, side = 3, line = -1, outer = TRUE, font = 2)
