@@ -14,6 +14,8 @@ EnrichmentAnalysis(GeneName, RegulonList, TableEnrichment, IPAGenes, GOtype,
 
 \item{TableEnrichment}{TableEnrichment}
 
+\item{IPAGenes}{IPAGenes}
+
 \item{GOtype}{GOtype}
 
 \item{FDRThresh}{FDRThresh}
