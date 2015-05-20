@@ -277,9 +277,10 @@ mapuuidbarcode <- function(uuids){
 
   # transform to dataframe
   x <- (do.call("rbind.fill", lapply(ans$uuidMapping, as.data.frame))[[1]])
-  barcodes<- seq (1,length(x),2)
+  barcodes <- seq(1,length(x),2)
   uuid <- seq(2,length(x),2)
-  x <- data.frame(x[uuid],x[barcodes])
+  x <- data.frame(x[uuid],as.character(x[barcodes]),
+                  stringsAsFactors = FALSE)
   colnames(x) <- c("uuid","barcode")
   return(x)
 }
@@ -325,5 +326,108 @@ getMage <- function(line){
   }
   unlink(file)
   unlink(folder, recursive = TRUE)
+  return(df)
+}
+
+#' @title TCGA TCGAPrepare
+#' @description
+#'  Prepare data matrices for downstream analysis,
+#'  ready to use also with other R packages
+#'  DNA Methylation
+#'   Row: matrix with genes/loci
+#'   Cols: samples in columns
+#'
+#' @export
+TCGAPrepare2 <- function(query, dir = NULL, type = NULL){
+
+  if (is.null(dir)) {
+    message("Argument dir is NULL. Plese provide the directory
+            with the folders to be prepared. ")
+    return(NULL)
+  }
+  if (length(unique(query$Platform)) > 1 | length(unique(query$Center)) > 2) {
+    message("Sorry! But, for the moment, we can only prepare on type of
+            platform per call")
+    return(NULL)
+  } else {
+    platform <- unique(query$Platform)
+  }
+
+  files <- NULL
+  dirs <- gsub(".tar.gz","",basename(query$deployLocation))
+  for (i in seq_along(dirs)) {
+    aux <- list.files(file.path(dir,dirs[i]), full.names = T, recursive = T)
+    files <- c(files, aux )
+  }
+  files <- files[-grep("MANIFEST|README|CHANGES|DESCRIPTION",files)]
+
+  df <- NULL
+  if (grepl("humanmethylation",tolower(platform))) {
+    for (i in seq_along(files)) {
+      data <- read.table(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+      sample <- gsub("\\.", "-", colnames(data)[2])
+      colnames(data) <- data[1,]
+      data <- data[-1,] # removing Composite Element REF
+      colnames(data)[2] <- sample
+      if (i == 1) {
+        df <- data[, c(1, 3:5, 2)]
+      } else {
+        df <- merge(df, data[, c(1, 2)],
+                    by = "Composite Element REF")
+      }
+    }
+    rownames(df) <- df$Composite.Element.REF
+    message("Removing X Y chromossomes")
+    df <- df[df$Chromosome != "X" & df$Chromosome != "Y", ]
+    # methylation$Chromosome <- NULL
+
+    # remove NA lines
+    message("Removing NA Lines")
+    df <- na.omit(df)
+
+  }
+
+  if (grepl("mda_rppa_core",tolower(platform))) {
+    for (i in seq_along(files)) {
+      data <- read.table(files[i], header = TRUE, sep = "\t",
+                         stringsAsFactors = FALSE, check.names = FALSE)
+      sample <- gsub("\\.", "-", colnames(data)[2])
+      colnames(data) <- data[1,]
+      data <- data[-1,] # removing Composite Element REF
+      colnames(data)[2] <- sample
+      print(files[i])
+
+      print(sample)
+      if (i == 1) {
+        df <- data
+      } else {
+        df <- merge(df, data,by = "Composite Element REF")
+      }
+    }
+
+    # get array_design.txt from mage folder
+    # and change uuid by Barcode
+    uuid <- colnames(df)
+    idx <- grep("Sample|Control",uuid)
+    uuid <- uuid[-idx]
+    map <- mapuuidbarcode(uuid)
+    idx <- which(colnames(df) %in% map$uuid)
+    colnames(df)[idx] <- map$barcode
+
+  }
+  # case: header has barcode
+  # Line 2 is useless
+  if (grepl("agilent",tolower(platform))) {
+    for (i in seq_along(files)) {
+      data <- read.table(files[i], header = TRUE, sep = "\t",
+                         stringsAsFactors = FALSE, check.names = FALSE)
+      data <- data[-1,] # removing Composite Element REF
+      if (i == 1) {
+        df <- data
+      } else {
+        df <- merge(df, data,by = "Hybridization REF")
+      }
+    }
+  }
   return(df)
 }
