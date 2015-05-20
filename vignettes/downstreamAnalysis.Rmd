@@ -168,9 +168,7 @@ BRCAcnv <- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFo
 
 Some downstream analysis from methylation data can be done with TCGAbiolinks.
 An example is shown below. We search, download and prepare data from the 
-HumanMethylation450 platform. After we divided the data into two groups (primary and recurrent) in order to analyse the data. The final example is a volcano plot that compares the two groups.
-
-
+HumanMethylation450 platform.
 
 ```{r, eval = FALSE}
 library(TCGAbiolinks)samples <- c("TCGA-06-0125-01A-01D-A45W-05","TCGA-06-0152-01A-02D-A45W-05",
@@ -205,19 +203,64 @@ met.md <- organizeMethylationMetaDataFrame("dataDemo2")
 samples <- colnames(beta)
 idx <- is.element(met.md$bcr_patient_barcode,strtrim(samples,12))
 met.md <- met.md[idx,]
+```
 
-pat.prim <- "TCGA-[0-9a-z]{2}-[0-9a-z]{4}-01"
-pat.rec <- "TCGA-[0-9a-z]{2}-[0-9a-z]{4}-02"
-rec <- grep(pat.rec,colnames(beta))
-prim <- grep(pat.prim,colnames(beta))
+
+After we divided the data in groups 
+in order to analyse the data. Using the metadata, it is possible to create an
+survival plot with the function survivalPlot as follows:
+
+```{r, eval = FALSE}
+# random split of pacients into groups
+met.md$cluster <- c(rep("group1",nrow(met.md)/4),rep("group2",nrow(met.md)/4),
+                    rep("group3",nrow(met.md)/4),rep("group4",nrow(met.md)-3*(floor(nrow(met.md)/4))))
+rownames(met.md) <- met.md$bcr_patient_barcode
+
+#---------------------- survival
+survivalPlot(met.md)
+```
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("survival.png")
+grid.raster(img)
+```
+
+Using the data and calculating the mean methylation per groups it is possible to create an
+mean methylation boxplot with the function met.mean.boxplot as follows:
+
+```{r, eval = FALSE}
+#----------------------mean methylation
+met.mean <- data.frame(apply(beta,2,mean,na.rm=TRUE))
+colnames(met.mean) <- "avg"
+met.mean$patient <-  strtrim(rownames(met.mean),12)
+aux <- merge(met.mean,met.md, by.x="patient",by.y="bcr_patient_barcode")
+met.mean.boxplot(aux)
+```
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("meanmet.png")
+grid.raster(img)
+```
+
+The final example is a volcano plot 
+that compares the methylation data between the two groups.
+
+```{r, eval = FALSE}
+#----------------------- calculate.pvalues (just an example)
 beta.t <-  data.frame(t(beta))
-pvalues <- calculate.pvalues(beta.t,prim,rec)
+# TODO verify class of the object
+pvalues <- calculate.pvalues(beta.t,c(1,3,5,7,9,11),c(2,4,6,8,10,12))
 
+#------------- volcano plot
 probe$p.value <- pvalues[,1]
 probe$p.value.adj <- pvalues[,2]
-prim.rec <- diffmean(beta[1:2,], beta[3:4,])
+prim.rec <- diffmean.prim.rec(beta)
 probe <- cbind(probe,prim.rec)
-hypo.hyper <- volcanoPlot(probe,p.cut = 0.05,diffmean.cut = 0.2)
+hypo.hyper <- volcano.plot(probe,p.cut=0.619)
 ```
 
 The ouptup will be an graph as the figure below. The function will 
