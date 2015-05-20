@@ -4,7 +4,7 @@
 #' @param barcode barcode
 #' @param typesample typesample
 #' @export
-#' @return SampleTypes 
+#' @return SampleTypes
 SampleTypes <- function(barcode, typesample){
   table.code <- c('01','02','03','04','05','06','07','08','09','10','11','12','13','14','20','40','50','60','61')
   names(table.code) <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC","TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB","CELL","XP","XCL")
@@ -23,7 +23,7 @@ SampleTypes <- function(barcode, typesample){
 #' @param barcode barcode
 #' @param typesample typesample
 #' @export
-#' @return MultiSampleTypes 
+#' @return MultiSampleTypes
 MultiSampleTypes <- function(barcode,typesample){
   # Tumor AND Solid Tissue Normal NOT FROM THE SAME PATIENTS
   table.code <- c('01','02','03','04','05','06','07','08','09','10','11','12','13','14','20','40','50','60','61')
@@ -124,14 +124,14 @@ gender_BRCA <- function(barcode, gender, clinical_patient_data){
   return(barcode)
 }
 
-#' @title ER_status_BRCA 
+#' @title ER_status_BRCA
 #' @description
-#'   ER_status_BRCA 
+#'   ER_status_BRCA
 #' @param barcode barcode
 #' @param ER ER
 #' @param clinical_patient_data clinical_patient_data
 #' @export
-#' @return ER_status_BRCA 
+#' @return ER_status_BRCA
 ER_status_BRCA <- function(barcode,ER, clinical_patient_data){
   ## ER should be "Positive" or "Negative"
   # consider only barcode and ER status
@@ -146,14 +146,14 @@ ER_status_BRCA <- function(barcode,ER, clinical_patient_data){
   }
 }
 
-#' @title PR_status_BRCA 
+#' @title PR_status_BRCA
 #' @description
-#'   PR_status_BRCA 
+#'   PR_status_BRCA
 #' @param barcode barcode
 #' @param PR PR
 #' @param clinical_patient_data clinical_patient_data
 #' @export
-#' @return PR_status_BRCA 
+#' @return PR_status_BRCA
 PR_status_BRCA  <- function(barcode,PR, clinical_patient_data){
   ## PR should be "Positive" or "Negative"
 
@@ -171,14 +171,14 @@ PR_status_BRCA  <- function(barcode,PR, clinical_patient_data){
 
 }
 
-#' @title HER_status_BRCA 
+#' @title HER_status_BRCA
 #' @description
-#'   HER_status_BRCA 
+#'   HER_status_BRCA
 #' @param barcode barcode
 #' @param HER HER
 #' @param clinical_patient_data clinical_patient_data
 #' @export
-#' @return HER_status_BRCA 
+#' @return HER_status_BRCA
 HER_status_BRCA  <- function(barcode, HER, clinical_patient_data){
   if(is.element(HER, c("Positive", "Negative"))){
     clinical_patient_data<-as.data.frame(clinical_patient_data)
@@ -195,12 +195,12 @@ HER_status_BRCA  <- function(barcode, HER, clinical_patient_data){
 
 }
 
-#' @title clinical_data_site_cancer 
+#' @title clinical_data_site_cancer
 #' @description
-#'   clinical_data_site_cancer 
+#'   clinical_data_site_cancer
 #' @param cancer cancer
 #' @export
-#' @return clinical_data_site_cancer 
+#' @return clinical_data_site_cancer
 clinical_data_site_cancer <-function(cancer){
   return(paste0("https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/", cancer,"/bcr/biotab/clin/"))
 }
@@ -211,6 +211,7 @@ clinical_data_site_cancer <-function(cancer){
 #' @param cancer cancer
 #' @param clinical_data_type clinical_data_type
 #' @export
+#' @importFrom RCurl getURL
 #' @return clinic
 clinic <- function(cancer,clinical_data_type){
 
