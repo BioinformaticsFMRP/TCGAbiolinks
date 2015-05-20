@@ -1,6 +1,6 @@
 Package: TCGAbiolinks
 Type: Package
-Title:  Download Search and Analyse Data from TCGA
+Title: Download Search and Analyse Data from TCGA
 Version: 1.0
 Date: 2015-05-14
 Author:
@@ -38,3 +38,13 @@ Description:
   Query the latest version of files by tumor, center, date, barcode,
   level and platform. Also Download and Preprocess data from TCGA portal.
 License: GPL (>= 3)
+biocViews:
+    DNAMethylation,
+    DifferentialMethylation,
+    GeneRegulation,
+    GeneExpression,
+    MethylationArray,
+    DifferentialExpression,
+    Pathways,
+    Network
+Suggests: testthat
