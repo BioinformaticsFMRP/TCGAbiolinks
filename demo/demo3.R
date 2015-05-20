@@ -23,10 +23,14 @@ samples <- c( "TCGA-02-0010*","TCGA-02-0014*", "TCGA-02-0058*", "TCGA-02-0114*",
               "TCGA-P5-A5EY*", "TCGA-P5-A5F6*", "TCGA-QH-A6CS*", "TCGA-S9-A6UA*", "TCGA-S9-A89V*", "TCGA-TM-A84C*",
               "TCGA-TM-A84J*", "TCGA-VM-A8C9*")
 
-query <- TCGAQuery(tumor = "LGG", platform = "HumanMethylation450",level="3",listSample = samples)
-query <- TCGAQuery(tumor = "LGG", platform = "HumanMethylation27",level="3",listSample = samples)
-query <- TCGAQuery(tumor = "GBM", platform = "HumanMethylation450",level="3",listSample = samples)
-query <- TCGAQuery(tumor = "GBM", platform = "HumanMethylation27",level="3",listSample = samples)
+query <- TCGAQuery(tumor = "LGG", platform = "HumanMethylation450",
+                   level = "3",samples = samples)
+query <- TCGAQuery(tumor = "LGG", platform = "HumanMethylation27",
+                   level = "3",listSample = samples)
+query <- TCGAQuery(tumor = "GBM", platform = "HumanMethylation450",
+                   level = "3",listSample = samples)
+query <- TCGAQuery(tumor = "GBM", platform = "HumanMethylation27",
+                   level = "3",listSample = samples)
 
-TCGADownload(query,path="dataDemo3")
+TCGADownload(query,path = "dataDemo3")
 
