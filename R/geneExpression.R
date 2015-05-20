@@ -5,7 +5,7 @@
 #' @export
 #' @return list of gene symbol without IDs
 GenesCutID <- function(GeneList){
-  GeneListCutID<- as.matrix(matrix(unlist(strsplit(as.character(GeneList),"|",fixed=T)),nrow(GeneList),2,byrow=T))[,1]
+  GeneListCutID <- as.matrix(matrix(unlist(strsplit(as.character(GeneList),"|",fixed = TRUE)),nrow(GeneList),2,byrow = TRUE))[,1]
   return(as.matrix(GeneListCutID))
 }
 
@@ -15,11 +15,11 @@ GenesCutID <- function(GeneList){
 #' @param func func
 #' @export
 #' @return time execution of a function
-TimeUse <-function(func){
+TimeUse <- function(func){
   time1 <- proc.time() # mod1 to determine time calculation
-  result <-func
+  result <- func
   time2 <- proc.time()
-  show(timeelapsed <- time2-time1)
+  show(timeelapsed <- time2 - time1)
 }
 
 #' @title Filtering rnaseq by quantile
@@ -29,7 +29,7 @@ TimeUse <-function(func){
 #' @param QuantileThresh QuantileThresh
 #' @export
 #' @return table filtered
-RnaSeqFilt<- function(TableRnaseq,QuantileThresh ){
+RnaSeqFilt <- function(TableRnaseq,QuantileThresh ){
   GeneThresh <- as.numeric(quantile(rowMeans(TableRnaseq), QuantileThresh))
   geneFiltered <- names(which(rowMeans(TableRnaseq) > GeneThresh))
   Table_Rnaseq_Rawcount_Filt <- TableRnaseq[geneFiltered, ]
@@ -47,7 +47,7 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
 
   rownames(TCGA_RnaseqTable) <- GenesCutID(as.matrix(rownames(TCGA_RnaseqTable)))
   TCGA_RnaseqTable <- TCGA_RnaseqTable[rownames(TCGA_RnaseqTable) != "?", ]
-  TCGA_RnaseqTable<-TCGA_RnaseqTable[!duplicated(rownames(TCGA_RnaseqTable)), !duplicated(colnames(TCGA_RnaseqTable))]
+  TCGA_RnaseqTable <- TCGA_RnaseqTable[!duplicated(rownames(TCGA_RnaseqTable)), !duplicated(colnames(TCGA_RnaseqTable))]
   TCGA_RnaseqTable <- TCGA_RnaseqTable[, which(substr(colnames(TCGA_RnaseqTable), 14, 15) != "02")]
   geneInfo <- geneInfo[rownames(geneInfo) %in% rownames(TCGA_RnaseqTable), ]
   geneInfo <- geneInfo[!duplicated(rownames(geneInfo)), ]
@@ -55,10 +55,10 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
   geneInfo <- geneInfo[toKeep, ]
   TCGA_RnaseqTable <- TCGA_RnaseqTable[toKeep, ]
   geneInfo <- as.data.frame(geneInfo)
-  TCGA_RnaseqTable<-round(TCGA_RnaseqTable)
+  TCGA_RnaseqTable <- round(TCGA_RnaseqTable)
 
-  timeEstimated<-format(ncol(TCGA_RnaseqTable)*nrow(TCGA_RnaseqTable)/80000,digits=2)
-  print(messageEstimation<-paste("I Need about ", timeEstimated, "seconds for this Complete Normalization Upper Quantile [Processing 80k elements /s]  "))
+  timeEstimated <- format(ncol(TCGA_RnaseqTable)*nrow(TCGA_RnaseqTable)/80000,digits = 2)
+  print(messageEstimation <- paste("I Need about ", timeEstimated, "seconds for this Complete Normalization Upper Quantile [Processing 80k elements /s]  "))
 
   print("Step 1 of 4: newSeqExpressionSet ...")
   TimeUse(TCGA_RnaseqTable_norm <- EDASeq::newSeqExpressionSet(TCGA_RnaseqTable, featureData = geneInfo))
@@ -90,26 +90,26 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
   Cond1num <- ncol(mat1)
   Cond2num <- ncol(mat2)
 
-  print(message1<-paste( "there are Cond1 type", Cond1type ,"in ", Cond1num, "samples"))
-  print(message2<-paste( "there are Cond2 type", Cond2type ,"in ", Cond2num, "samples"))
-  print(message3<-paste( "there are ", nrow(TOC) ,"features as miRNA or genes "))
+  print(message1 <- paste( "there are Cond1 type", Cond1type ,"in ", Cond1num, "samples"))
+  print(message2 <- paste( "there are Cond2 type", Cond2type ,"in ", Cond2num, "samples"))
+  print(message3 <- paste( "there are ", nrow(TOC) ,"features as miRNA or genes "))
 
-  timeEstimated<-format(ncol(TOC)*nrow(TOC)/30000,digits=2)
-  print(messageEstimation<-paste("I Need about ", timeEstimated, "seconds for this DEA. [Processing 30k elements /s]  "))
+  timeEstimated <- format(ncol(TOC)*nrow(TOC)/30000,digits = 2)
+  print(messageEstimation <- paste("I Need about ", timeEstimated, "seconds for this DEA. [Processing 30k elements /s]  "))
 
   # Reading in the data and creating a DGEList object
-  colnames(TOC) <- paste('s',1:ncol(TOC),sep="")
+  colnames(TOC) <- paste0('s',1:ncol(TOC))
   #DGE <- DGEList(TOC,group=rep(c("Normal","Tumor"),c(NormalSample,TumorSample)))
-  DGE <- edgeR::DGEList(TOC,group=rep(c(Cond1type,Cond2type),c(Cond1num,Cond2num)))
+  DGE <- edgeR::DGEList(TOC,group = rep(c(Cond1type,Cond2type),c(Cond1num,Cond2num)))
 
   # Analysis using common dispersion
   disp <- edgeR::estimateCommonDisp(DGE) # Estimating the common dispersion
   #tested <- exactTest(disp,pair=c("Normal","Tumor")) # Testing
-  tested <- edgeR::exactTest(disp,pair=c(Cond1type,Cond2type)) # Testing
+  tested <- edgeR::exactTest(disp,pair = c(Cond1type,Cond2type)) # Testing
 
   # Results visualization
   logFC_table <- tested$table
-  logFC_FDR_table <- edgeR::topTags(tested,n=nrow(tested$table))$table
+  logFC_FDR_table <- edgeR::topTags(tested,n = nrow(tested$table))$table
   return(logFC_FDR_table)
 
 }
@@ -126,39 +126,37 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 #' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags
 #' @export
 #' @return table with DEGs (diff.expr. genes)
-CreateTabLevel<-function(FC_FDR_table_mRNA,typeCond1,typeCond2,TableCond1,TableCond2,typeOrder = T) {
+CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,TableCond1,TableCond2,typeOrder = T) {
 
   TF_enriched <- as.matrix(rownames(FC_FDR_table_mRNA))
-  TableLevel<-matrix(0,nrow(TF_enriched),6)
+  TableLevel <- matrix(0,nrow(TF_enriched),6)
   TableLevel <- as.data.frame(TableLevel)
 
-  colnames(TableLevel)<-c("mRNA","logFC","FDR",typeCond1,typeCond2,"Delta")
+  colnames(TableLevel) <- c("mRNA","logFC","FDR",typeCond1,typeCond2,"Delta")
 
 
-  TableLevel[,"mRNA"]<-TF_enriched
-  Tabfilt<-FC_FDR_table_mRNA[which( rownames(FC_FDR_table_mRNA) %in% TF_enriched),]
-  TableLevel[,"logFC"]<- as.numeric(Tabfilt[TF_enriched,][,"logFC"])
-  TableLevel[,"FDR"]<- as.numeric(Tabfilt[TF_enriched,][,"FDR"])
+  TableLevel[,"mRNA"] <- TF_enriched
+  Tabfilt <- FC_FDR_table_mRNA[which( rownames(FC_FDR_table_mRNA) %in% TF_enriched),]
+  TableLevel[,"logFC"] <- as.numeric(Tabfilt[TF_enriched,][,"logFC"])
+  TableLevel[,"FDR"] <- as.numeric(Tabfilt[TF_enriched,][,"FDR"])
 
 
-  MeanTumor<-matrix(0,nrow(TF_enriched),1)
-  MeanDiffTumorNormal<-matrix(0,nrow(TF_enriched),1)
+  MeanTumor <- matrix(0,nrow(TF_enriched),1)
+  MeanDiffTumorNormal <- matrix(0,nrow(TF_enriched),1)
 
 
-  for( i in 1:nrow(TF_enriched)) {
+  for (i in 1:nrow(TF_enriched)) {
     #print(paste(i, "of", nrow(TF_enriched),TF_enriched[i]))
-    TableLevel[i,typeCond1]<- mean(TableCond1[rownames(TableCond1) %in%  TF_enriched[i] , ])
-    TableLevel[i,typeCond2]<- mean(TableCond2[rownames(TableCond2) %in%  TF_enriched[i] , ])
+    TableLevel[i,typeCond1] <- mean(TableCond1[rownames(TableCond1) %in%  TF_enriched[i] , ])
+    TableLevel[i,typeCond2] <- mean(TableCond2[rownames(TableCond2) %in%  TF_enriched[i] , ])
   }
 
 
   TableLevel[,"Delta"] <- as.numeric(abs(TableLevel[,"logFC"]) * TableLevel[,typeCond1]  )
 
-  TableLevel<-TableLevel[order( as.numeric(TableLevel[,"Delta"]),decreasing=typeOrder),]
+  TableLevel <- TableLevel[order( as.numeric(TableLevel[,"Delta"]),decreasing = typeOrder),]
 
   rownames(TableLevel) <-  TableLevel[,"mRNA"]
-
-
   return(TableLevel)
 }
 
@@ -171,33 +169,35 @@ CreateTabLevel<-function(FC_FDR_table_mRNA,typeCond1,typeCond2,TableCond1,TableC
 #' @import ggplot2
 #' @import ggbiplot
 #' @return PCA plot
-plotPCAforGroups<-function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
+plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
   ComparisonSelected <- "Normal vs Tumor"
-  TitlePlot <- paste("PCA ", "top ", ntopgenes, " Up and down diff.expr genes between ",  ComparisonSelected, sep="")
+  TitlePlot <- paste0("PCA ", "top ", ntopgenes,
+                     " Up and down diff.expr genes between ",
+                     ComparisonSelected)
 
   Genelist <- rownames(dataDEGsFiltLevel)[1:ntopgenes]
   commonGenes <- intersect(Genelist, rownames(dataFilt) )
-  expr2<-dataFilt[commonGenes,]
+  expr2 <- dataFilt[commonGenes,]
   color1 <- "blue"
   color2 <- "red"
 
   # selection of normal samples "NT"
-  samplesNT <- MultiSampleTypes_test(colnames(dataFilt), typesample = c("NT"))
+  samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
   # selection of tumor samples "TP"
-  samplesTP <- MultiSampleTypes_test(colnames(dataFilt), typesample = c("TP"))
+  samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
 
   nsample1 <- length(samplesNT)
   nsample2 <- length(samplesTP)
 
-  sample.colors<-rep(c(color1,color2), c(nsample1, nsample2))
+  sample.colors <- rep(c(color1,color2), c(nsample1, nsample2))
   names(sample.colors) <- colnames(expr2)
 
-  cancer.pca<- stats::prcomp(t(expr2),cor=TRUE)
+  cancer.pca <- stats::prcomp(t(expr2),cor = TRUE)
 
  # print(sample.colors)
   g <- ggbiplot(cancer.pca, obs.scale = 1, var.scale = 1, groups = sample.colors, ellipse = TRUE, circle = FALSE)
-  g <- g + scale_colour_manual(name="",values = c("blue"="blue","red"="red"))
-  g <- g + geom_point(aes(colour= sample.colors), size = 3) #shape = tabClusterNew$Study)
+  g <- g + scale_colour_manual(name = "",values = c("blue" = "blue","red" = "red"))
+  g <- g + geom_point(aes(colour = sample.colors), size = 3) #shape = tabClusterNew$Study)
   g <- g + theme(legend.direction = 'horizontal',  legend.position = 'top')
   g <- g + ggtitle(TitlePlot)
   print(g)
@@ -260,47 +260,47 @@ EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,IPAGenes,GOt
   topPathways_tab <- as.data.frame(topPathways_tab)
 
   table_pathway_enriched <- matrix(1, nrow(current_pathway_from_IPA),7)
-  colnames(table_pathway_enriched)<-c("Pathway","GenesInPathway","Pvalue","FDR","CommonGenesPathway","PercentPathway","PercentRegulon")
+  colnames(table_pathway_enriched) <- c("Pathway","GenesInPathway","Pvalue","FDR","CommonGenesPathway","PercentPathway","PercentRegulon")
   table_pathway_enriched <- as.data.frame(table_pathway_enriched)
 
-  for( i in 1: nrow(current_pathway_from_IPA)) {
-    table_pathway_enriched[i,"Pathway"]<- as.character(current_pathway_from_IPA[i,])
+  for (i in 1:nrow(current_pathway_from_IPA)) {
+    table_pathway_enriched[i,"Pathway"] <- as.character(current_pathway_from_IPA[i,])
 
-    if( nrow(TableEnrichment) == 589){
-      genes_from_current_pathway_from_IPA<-GeneSplitRegulon(TableEnrichment[ TableEnrichment[GOtype] == as.character(current_pathway_from_IPA[i,]) ,][,"Molecules"], ",")
+    if (nrow(TableEnrichment) == 589) {
+      genes_from_current_pathway_from_IPA <- GeneSplitRegulon(TableEnrichment[ TableEnrichment[GOtype] == as.character(current_pathway_from_IPA[i,]) ,][,"Molecules"], ",")
     }
     else {
-      genes_from_current_pathway_from_IPA<-GeneSplitRegulon(TableEnrichment[ TableEnrichment[GOtype] == as.character(current_pathway_from_IPA[i,]) ,][,"Molecules"], ", ")
+      genes_from_current_pathway_from_IPA <- GeneSplitRegulon(TableEnrichment[ TableEnrichment[GOtype] == as.character(current_pathway_from_IPA[i,]) ,][,"Molecules"], ", ")
     }
 
-    genes_common_pathway_TFregulon<-as.matrix(intersect(toupper(RegulonList),toupper(genes_from_current_pathway_from_IPA)))
+    genes_common_pathway_TFregulon <- as.matrix(intersect(toupper(RegulonList),toupper(genes_from_current_pathway_from_IPA)))
 
 
 
-    if(length(genes_common_pathway_TFregulon)!=0) {
-      current_pathway_commongenes_num<- length(genes_common_pathway_TFregulon)
-      seta<-  allgene %in% RegulonList
-      setb<-  allgene %in% genes_from_current_pathway_from_IPA
+    if (length(genes_common_pathway_TFregulon) != 0) {
+      current_pathway_commongenes_num <- length(genes_common_pathway_TFregulon)
+      seta <-  allgene %in% RegulonList
+      setb <-  allgene %in% genes_from_current_pathway_from_IPA
       ft <- fisher.test(seta,setb)
-      FisherpvalueTF<-ft$p.value
+      FisherpvalueTF <- ft$p.value
       table_pathway_enriched[i,"Pvalue"] <- as.numeric(FisherpvalueTF)
-      if(FisherpvalueTF < 0.01){
-        current_pathway_commongenes_percent <-paste("(",format( (current_pathway_commongenes_num/length(genes_from_current_pathway_from_IPA)) *100,digits=2),"%)")
-        current_pathway_commongenes_num_with_percent <-gsub(" ","",paste(current_pathway_commongenes_num, current_pathway_commongenes_percent,"pv=",format(FisherpvalueTF,digits=2)))
+      if (FisherpvalueTF < 0.01) {
+        current_pathway_commongenes_percent <- paste("(",format( (current_pathway_commongenes_num/length(genes_from_current_pathway_from_IPA)) * 100,digits = 2),"%)")
+        current_pathway_commongenes_num_with_percent <- gsub(" ","",paste(current_pathway_commongenes_num, current_pathway_commongenes_percent,"pv=",format(FisherpvalueTF,digits=2)))
         table_pathway_enriched[i,"CommonGenesPathway"] <- length(genes_common_pathway_TFregulon)
         table_pathway_enriched[i,"GenesInPathway"] <- length(genes_from_current_pathway_from_IPA)
         table_pathway_enriched[i,"PercentPathway"] <-  as.numeric(table_pathway_enriched[i,"CommonGenesPathway"]) / as.numeric(table_pathway_enriched[i,"GenesInPathway"])  *100
         table_pathway_enriched[i,"PercentRegulon"] <-  as.numeric(table_pathway_enriched[i,"CommonGenesPathway"]) / length(RegulonList)  *100
       } }
   }
-  table_pathway_enriched <- table_pathway_enriched[order(table_pathway_enriched[,"Pvalue"],decreasing=F),]
-  table_pathway_enriched <- table_pathway_enriched [table_pathway_enriched[,"Pvalue"] < 0.01 ,]
-  table_pathway_enriched[,"FDR"] <- p.adjust(table_pathway_enriched[,"Pvalue"],method="fdr")
+  table_pathway_enriched <- table_pathway_enriched[order(table_pathway_enriched[,"Pvalue"],decreasing = F),]
+  table_pathway_enriched <- table_pathway_enriched[table_pathway_enriched[,"Pvalue"] < 0.01 ,]
+  table_pathway_enriched[,"FDR"] <- p.adjust(table_pathway_enriched[,"Pvalue"],method = "fdr")
   table_pathway_enriched <- table_pathway_enriched[table_pathway_enriched[,"FDR"] < FDRThresh ,]
-  table_pathway_enriched <- table_pathway_enriched[order(table_pathway_enriched[,"FDR"],decreasing=F),]
+  table_pathway_enriched <- table_pathway_enriched[order(table_pathway_enriched[,"FDR"],decreasing = F),]
 
   tmp <- table_pathway_enriched[1:topPathways,]
-  tmp <- paste(tmp[,"Pathway"],"; FDR= ", format(tmp[,"FDR"],digits=3),"; (ng="   ,round(tmp[,"GenesInPathway"]),"); (ncommon=", format(tmp[,"CommonGenesPathway"],digits=2), ")" ,sep="")
+  tmp <- paste(tmp[,"Pathway"],"; FDR= ", format(tmp[,"FDR"],digits = 3),"; (ng="   ,round(tmp[,"GenesInPathway"]),"); (ncommon=", format(tmp[,"CommonGenesPathway"],digits = 2), ")" ,sep = "")
   tmp <- as.matrix(tmp)
   topPathways_tab[1,] <- tmp
   rm(tmp)
@@ -336,25 +336,25 @@ IPAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
     tmp <- lapply(Tab[tf, ], function(x) strsplit(x, ";"))
     names(tmp) <- NULL
     tmp <- matrix(unlist(tmp), ncol = 4, byrow = T)
-    if(nrow(tmp) == 0 | tmp[1, 1] == "NA") return(matrix(0, ncol = 2))
+    if (nrow(tmp) == 0 | tmp[1, 1] == "NA") return(matrix(0, ncol = 2))
     tmp <- tmp[tmp[, 1] != "NA", , drop = F]
     tmp <- as.data.frame(tmp, stringsAsFactors = F)
     tmp[, 2] <- as.numeric(sub(" FDR= ", "", tmp[, 2]))
     tmp[, 3] <- as.numeric(unlist(strsplit(matrix(unlist(strsplit(tmp[, 3], "=")), nrow = 2)[2, ], ")")))
     tmp[, 4] <- as.numeric(unlist(strsplit(matrix(unlist(strsplit(tmp[, 4], "=")), nrow = 2)[2, ], ")")))
 
-    if(nrow(tmp) < nBar) nBar <- nrow(tmp)
+    if (nrow(tmp) < nBar) nBar <- nrow(tmp)
 
     tmp[, 2] <- -log10(tmp[, 2])
     o <- order(tmp[, 2], decreasing = T)
     toPlot <- tmp[o[nBar:1], 1:2]
-    toPlot[, 1] <- paste(toPlot[, 1], " (n=", tmp[o[nBar:1], 4], ")", sep ="")
+    toPlot[, 1] <- paste(toPlot[, 1], " (n=", tmp[o[nBar:1], 4], ")", sep = "")
     toPlot[, 3] <- tmp[o[nBar:1], 4]/tmp[o[nBar:1], 3]
 
     return(toPlot)
   }
 
-  par(mfrow=c(2, 2))
+  par(mfrow = c(2, 2))
 
   toPlot <- splitFun(tf, GOBPTab, nBar)
   xAxis <- barplot(toPlot[, 2], horiz = T, col = "orange", main = "GO:Biological Process", xlab = "-log10(FDR)")
@@ -397,7 +397,7 @@ IPAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
   #axis(side = 1, at = pretty(range(toPlot[, 3])), col = "red", line=2.5)
   #axis(side = 3, at = pretty(range(toPlot[, 3])), col = "red")
 
-  if ( is.character( nRGTab)){
+  if ( is.character( nRGTab)) {
     nRG <- length(nRGTab)
   } else {
     nRG <- nRGTab[tf, "RegSizeTF"]
