@@ -165,6 +165,13 @@ BRCAcnv <- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFo
 ```
 
 ## Methylation analysis
+
+Some downstream analysis from methylation data can be done with TCGAbiolinks.
+An example is shown below. We search, download and prepare data from the 
+HumanMethylation450 platform. After we divided the data into two groups (primary and recurrent) in order to analyse the data. The final example is a volcano plot that compares the two groups.
+
+
+
 ```{r, eval = FALSE}
 library(TCGAbiolinks)samples <- c("TCGA-06-0125-01A-01D-A45W-05","TCGA-06-0152-01A-02D-A45W-05",
              "TCGA-06-0171-01A-02D-A45W-05","TCGA-06-0190-01A-01D-A45W-05",
@@ -211,4 +218,14 @@ probe$p.value.adj <- pvalues[,2]
 prim.rec <- diffmean(beta[1:2,], beta[3:4,])
 probe <- cbind(probe,prim.rec)
 hypo.hyper <- volcanoPlot(probe,p.cut = 0.05,diffmean.cut = 0.2)
+```
+
+The ouptup will be an graph as the figure below. The function will 
+return the values that are more relevant.
+
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("volcano.png")
+grid.raster(img)
 ```
