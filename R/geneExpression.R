@@ -126,7 +126,7 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 #' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags
 #' @export
 #' @return table with DEGs (diff.expr. genes)
-CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,TableCond1,TableCond2,typeOrder = T) {
+CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,TableCond1,TableCond2,typeOrder = TRUE) {
 
   TF_enriched <- as.matrix(rownames(FC_FDR_table_mRNA))
   TableLevel <- matrix(0,nrow(TF_enriched),6)
@@ -293,11 +293,11 @@ EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,IPAGenes,GOt
         table_pathway_enriched[i,"PercentRegulon"] <-  as.numeric(table_pathway_enriched[i,"CommonGenesPathway"]) / length(RegulonList)  *100
       } }
   }
-  table_pathway_enriched <- table_pathway_enriched[order(table_pathway_enriched[,"Pvalue"],decreasing = F),]
+  table_pathway_enriched <- table_pathway_enriched[order(table_pathway_enriched[,"Pvalue"],decreasing = FALSE),]
   table_pathway_enriched <- table_pathway_enriched[table_pathway_enriched[,"Pvalue"] < 0.01 ,]
   table_pathway_enriched[,"FDR"] <- p.adjust(table_pathway_enriched[,"Pvalue"],method = "fdr")
   table_pathway_enriched <- table_pathway_enriched[table_pathway_enriched[,"FDR"] < FDRThresh ,]
-  table_pathway_enriched <- table_pathway_enriched[order(table_pathway_enriched[,"FDR"],decreasing = F),]
+  table_pathway_enriched <- table_pathway_enriched[order(table_pathway_enriched[,"FDR"],decreasing = FALSE),]
 
   tmp <- table_pathway_enriched[1:topPathways,]
   tmp <- paste(tmp[,"Pathway"],"; FDR= ", format(tmp[,"FDR"],digits = 3),"; (ng="   ,round(tmp[,"GenesInPathway"]),"); (ncommon=", format(tmp[,"CommonGenesPathway"],digits = 2), ")" ,sep = "")
@@ -335,10 +335,10 @@ IPAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
   splitFun <- function(tf, Tab, nBar){
     tmp <- lapply(Tab[tf, ], function(x) strsplit(x, ";"))
     names(tmp) <- NULL
-    tmp <- matrix(unlist(tmp), ncol = 4, byrow = T)
+    tmp <- matrix(unlist(tmp), ncol = 4, byrow = TRUE)
     if (nrow(tmp) == 0 | tmp[1, 1] == "NA") return(matrix(0, ncol = 2))
-    tmp <- tmp[tmp[, 1] != "NA", , drop = F]
-    tmp <- as.data.frame(tmp, stringsAsFactors = F)
+    tmp <- tmp[tmp[, 1] != "NA", , drop = FALSE]
+    tmp <- as.data.frame(tmp, stringsAsFactors = FALSE)
     tmp[, 2] <- as.numeric(sub(" FDR= ", "", tmp[, 2]))
     tmp[, 3] <- as.numeric(unlist(strsplit(matrix(unlist(strsplit(tmp[, 3], "=")), nrow = 2)[2, ], ")")))
     tmp[, 4] <- as.numeric(unlist(strsplit(matrix(unlist(strsplit(tmp[, 4], "=")), nrow = 2)[2, ], ")")))
@@ -346,7 +346,7 @@ IPAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
     if (nrow(tmp) < nBar) nBar <- nrow(tmp)
 
     tmp[, 2] <- -log10(tmp[, 2])
-    o <- order(tmp[, 2], decreasing = T)
+    o <- order(tmp[, 2], decreasing = TRUE)
     toPlot <- tmp[o[nBar:1], 1:2]
     toPlot[, 1] <- paste(toPlot[, 1], " (n=", tmp[o[nBar:1], 4], ")", sep = "")
     toPlot[, 3] <- tmp[o[nBar:1], 4]/tmp[o[nBar:1], 3]
@@ -357,7 +357,7 @@ IPAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
   par(mfrow = c(2, 2))
 
   toPlot <- splitFun(tf, GOBPTab, nBar)
-  xAxis <- barplot(toPlot[, 2], horiz = T, col = "orange", main = "GO:Biological Process", xlab = "-log10(FDR)")
+  xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "orange", main = "GO:Biological Process", xlab = "-log10(FDR)")
   labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
   text(x = 1, y = xAxis, labs, pos = 4)
   lines(x = toPlot[, 3], y = xAxis, col = "red")
@@ -365,7 +365,7 @@ IPAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
   axis(side = 3, at = pretty(range(0:1)), col = "red")
 
   toPlot <- splitFun(tf, GOCCTab, nBar)
-  xAxis <- barplot(toPlot[, 2], horiz = T, col = "cyan", main = "GO:Cellular Component", xlab = "-log10(FDR)")
+  xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "cyan", main = "GO:Cellular Component", xlab = "-log10(FDR)")
   labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
   text(x = 1, y = xAxis, labs, pos = 4)
   lines(x = toPlot[, 3], y = xAxis, col = "red")
@@ -373,7 +373,7 @@ IPAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
   axis(side = 3, at = pretty(range(0:1)), col = "red")
 
   toPlot <- splitFun(tf, GOMFTab, nBar)
-  xAxis <- barplot(toPlot[, 2], horiz = T, col = "green", main = "GO:Molecular Function", xlab = "-log10(FDR)")
+  xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "green", main = "GO:Molecular Function", xlab = "-log10(FDR)")
   labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
   text(x = 1, y = xAxis, labs, pos = 4)
   lines(x = toPlot[, 3], y = xAxis, col = "red")
@@ -381,7 +381,7 @@ IPAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
   axis(side = 3, at = pretty(range(0:1)), col = "red")
 
   toPlot <- splitFun(tf, PathTab, nBar)
-  xAxis <- barplot(toPlot[, 2], horiz = T, col = "yellow", main = "Pathways", xlab = "-log10(FDR)")
+  xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "yellow", main = "Pathways", xlab = "-log10(FDR)")
   labs <- toPlot[, 1]
   text(x = 1, y = xAxis, labs, pos = 4)
   lines(x = toPlot[, 3], y = xAxis, col = "red")

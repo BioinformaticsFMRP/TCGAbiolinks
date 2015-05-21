@@ -1,7 +1,7 @@
 Package: TCGAbiolinks
 Type: Package
 Title: Download Search and Analyse Data from TCGA
-Version: 1.0
+Version: 0.99.0
 Date: 2015-05-14
 Author:
   Antonio Colaprico,
@@ -15,7 +15,7 @@ Author:
   Gianluca Bontempi,
   Michele Ceccarelli
 Maintainer: Antonio Colaprico <antonio.colaprico@ulb.ac.be>
-Depends: R (>= 3.1.1)
+Depends: R (>= 3.2)
 Imports:
     downloader,
     GGally,
@@ -33,7 +33,9 @@ Imports:
     survival,
     stringr,
     knitr,
-    IRanges
+    IRanges,
+    parallel,
+    pbapply
 Description:
   Query the latest version of files by tumor, center, date, barcode,
   level and platform. Also Download and Preprocess data from TCGA portal.
@@ -47,4 +49,5 @@ biocViews:
     DifferentialExpression,
     Pathways,
     Network
-Suggests: testthat
+Suggests: testthat, BiocStyle, knitr
+VignetteBuilder: knitr

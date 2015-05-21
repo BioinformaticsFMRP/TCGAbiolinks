@@ -9,7 +9,7 @@ install.packages(c("downloader","RCurl","httr","devtools","stringr",
                     "survival","biomaRt","RJSONIO","ggbiplot"))
 source("http://bioconductor.org/biocLite.R")
 biocLite(c("GenomicRanges","edgeR","EDASeq","biomaRt"))
-devtools::install_github("ggbiplot", "vqv")
+devtools::install_github("vqv/ggbiplot")
 ```
 
 * Creating roxygen documentation
