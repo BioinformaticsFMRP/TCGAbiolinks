@@ -129,30 +129,35 @@ TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
         }
     }
 
-    if(!is.null(tumor)){
+    if (!is.null(tumor)) {
         id <- sapply(tumor, function(x){
             grepl(x, db$Disease, ignore.case = TRUE)
         })
         id <- apply(id, 1,any)
         db <-  db[id,]
     }
-    if(!is.null(platform)){
+    if (!is.null(platform)) {
         id <- sapply(platform, function(x){
             grepl(x, db$Platform, ignore.case = TRUE)
         })
         id <- apply(id, 1,any)
         db <-  db[id,]
     }
-    if(!is.null(center)){
+    if (!is.null(center)) {
         id <- sapply(center, function(x){
             grepl(x, db$Center, ignore.case = TRUE)
         })
         id <- apply(id, 1,any)
         db <-  db[id,]
     }
-    if(!is.null(level)){
+    if (!is.null(level)) {
+        if (nchar(level) == 1) {
         id <- grep(paste0("Level_", level), db$name)
-        if(length(id) > 0){
+        } else {
+            id <- grep("mage-tab", db$name)
+        }
+
+        if (length(id) > 0) {
             db <-  db[id,]
         }
     }
