@@ -34,8 +34,7 @@ Imports:
     stringr,
     knitr,
     IRanges,
-    parallel,
-    pbapply
+    parallel
 Description:
   Query the latest version of files by tumor, center, date, barcode,
   level and platform. Also Download and Preprocess data from TCGA portal.
@@ -48,6 +47,7 @@ biocViews:
     MethylationArray,
     DifferentialExpression,
     Pathways,
-    Network
+    Network,
+    Survival
 Suggests: testthat, BiocStyle, knitr
 VignetteBuilder: knitr

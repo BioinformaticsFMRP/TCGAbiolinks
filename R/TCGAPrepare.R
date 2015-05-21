@@ -8,7 +8,6 @@
 #' \dontrun{
 #'    TCGAPrepare(sdrfFolder = 'folder1', downloadFolder= 'folder2')
 #' }
-#' @export
 #' @importFrom downloader download
 #' @return Data matrix
 TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
@@ -351,7 +350,9 @@ getMage <- function(line){
 #'  DNA Methylation
 #'   Row: matrix with genes/loci
 #'   Cols: samples in columns
-#'
+#' @return Data frame with data read
+#' @examples
+#'  TCGAPrepare2(query,dir="path")
 #' @export
 TCGAPrepare2 <- function(query, dir = NULL, type = NULL){
 

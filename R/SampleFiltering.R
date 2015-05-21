@@ -2,6 +2,9 @@
 #' @description
 #'    Filtering sample output from TCGAQuery
 #' @param query metaData output from TCGAQuery
+#' @examples
+#' query <- TCGAQuery(tumor = "brca",level = 3)
+#' querySamples <- samplesfilter(query)
 #' @export
 #' @return list of samples for a tumor
 samplesfilter <- function(query) {
