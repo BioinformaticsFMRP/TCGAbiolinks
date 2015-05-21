@@ -1,14 +1,15 @@
 ---
 title: "Working with TCGAbiolinks package"
-author: " Antonio Colaprico, Catharina Olsen, Luciano Garofano, 
-Tiago Chedraoui Silva, Davide Garolini, Claudia Cava, Isabella Castiglioni, 
-Houtan Noushmehr, Gianluca Bontempi, Michele Ceccarelli"
+authors: "Antonio Colaprico, Catharina Olsen, Luciano Garofano, 
+         Tiago Chedraoui Silva, Davide Garolini, Claudia Cava, 
+         Isabella Castiglioni, Houtan Noushmehr, Gianluca Bontempi,
+         Michele Ceccarelli"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-%\VignetteIndexEntry{Vignette Title}
-%\VignetteEngine{knitr::rmarkdown}
-\usepackage[utf8]{inputenc}
+   %\VignetteIndexEntry{Vignette Title}
+   %\VignetteEngine{knitr::rmarkdown}
+   \usepackage[utf8]{inputenc}
 ---
 
 This document describes how to search, download and analyze TCGA 
