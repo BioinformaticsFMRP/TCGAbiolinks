@@ -17,6 +17,7 @@ TCGAinvestigate(tumor, dataDEGsFiltLevelTF, topgenes)
 table with number of pubmed related to tfs.
 }
 \description{
-Find most studied TF in pubmed related to a specific cancer, disease, or tissue
+Find most studied TF in pubmed related to a specific cancer,
+ disease, or tissue
 }
 

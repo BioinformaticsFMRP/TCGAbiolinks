@@ -4,16 +4,16 @@ Title: Download Search and Analyse Data from TCGA
 Version: 0.99.0
 Date: 2015-05-14
 Author:
-  Antonio Colaprico,
-  Catharina Olsen,
-  Luciano Garofano,
-  Tiago Chedraoui Silva,
-  Davide Garolini,
-  Claudia Cava,
-  Isabella Castiglioni,
-  Houtan Noushmehr,
-  Gianluca Bontempi,
-  Michele Ceccarelli
+    Antonio Colaprico,
+    Catharina Olsen,
+    Luciano Garofano,
+    Tiago Chedraoui Silva,
+    Davide Garolini,
+    Claudia Cava,
+    Isabella Castiglioni,
+    Houtan Noushmehr,
+    Gianluca Bontempi,
+    Michele Ceccarelli
 Maintainer: Antonio Colaprico <antonio.colaprico@ulb.ac.be>
 Depends: R (>= 3.2)
 Imports:
@@ -36,8 +36,8 @@ Imports:
     IRanges,
     parallel
 Description:
-  Query the latest version of files by tumor, center, date, barcode,
-  level and platform. Also Download and Preprocess data from TCGA portal.
+    Query the latest version of files by tumor, center, date, barcode,
+    level and platform. Also Download and Preprocess data from TCGA portal.
 License: GPL (>= 3)
 biocViews:
     DNAMethylation,

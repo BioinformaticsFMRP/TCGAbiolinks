@@ -1,7 +1,7 @@
 #------------------ Downloading tcga data ----------------------------
-dir.create("data")
+dir.create("dataDemo")
 query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450",level = "3")
-TCGADownload(query[1:2,],path = "data")
+TCGADownload(query,path = "data")
 
 query <- TCGAQuery(tumor = "gbm", platform = "bio", level="2")
 TCGADownload(query,path="data")
