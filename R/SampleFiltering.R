@@ -13,7 +13,7 @@ samplesfilter <- function(query) {
 
   for( idx in 1: length(TumorDataList)){
      currPlatform <- query[query$Platform ==names(TumorDataList)[idx],]
-     currPlatform <- currPlatform[order(currPlatform$addedDate,decreasing=T),]
+     currPlatform <- currPlatform[order(currPlatform$addedDate,decreasing=TRUE),]
      # taking last version updated
      sampleUpdated <- currPlatform[1,]
      TumorDataList[[idx]] <-as.matrix(unlist(strsplit(sampleUpdated$barcode,",")))

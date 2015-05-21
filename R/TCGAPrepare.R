@@ -29,7 +29,9 @@ TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
   geData <- matrix(0, nrow = nrow(tmpData), ncol = length(lf))
   tmpData <- tmpData[,-1]
 
-  if(PlatformType == "agilentg4502a_07_3" | PlatformType == "agilentg4502a_07_2" | PlatformType == "agilentg4502a_07_1"){
+  if(PlatformType == "agilentg4502a_07_3" |
+       PlatformType == "agilentg4502a_07_2" |
+       PlatformType == "agilentg4502a_07_1"){
     tmpData <- tmpData[-1, ]
     geData <- matrix(0, nrow = nrow(tmpData), ncol = length(lf))
     rownames(geData) <- tmpData$Hybridization.REF
@@ -48,7 +50,9 @@ TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
 
   if(PlatformType == "illuminahiseq_rnaseq"){
     rownames(geData) <- tmpData$gene
-    colnames(geData) <- substr(paste("TCGA", sapply(strsplit(lf, "TCGA"), function(y) y[2]), sep = ""), 1, 28)
+    colnames(geData) <- substr(paste("TCGA",
+                                     sapply(strsplit(lf, "TCGA"),
+                                            function(y) y[2]), sep = ""), 1, 28)
     for(i in 1:length(lf)){
       tmpData <- read.csv(lf[i], stringsAsFactors = FALSE, sep = ",")
       tmpData <- tmpData[,-1]
@@ -58,16 +62,17 @@ TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
     }
   }
 
-  if(PlatformType == "illuminahiseq_rnaseqv2" || PlatformType == "illuminahiseq_totalrnaseqv2"){
+  if(PlatformType == "illuminahiseq_rnaseqv2" ||
+       PlatformType == "illuminahiseq_totalrnaseqv2"){
     rownames(geData) <- tmpData$gene_id
     path2 <- paste(Description, key2a,plt2$FileName,sep="")
     xpath <- DownloadHTML(path2)
     nc<-length(unlist(strsplit(xpath[1], "\t")))
-    xmat <- matrix( unlist(strsplit(xpath, "\t") ), ncol=nc,byrow=T)
+    xmat <- matrix( unlist(strsplit(xpath, "\t") ), ncol=nc,byrow=TRUE)
     colnames(xmat)<-gsub(" ","_",xmat[1,])
 
     xmat<-xmat[-1,]
-    xmat <- as.data.frame(xmat,stringsAsFactors=F)
+    xmat <- as.data.frame(xmat,stringsAsFactors=FALSE)
     xmat2 <- xmat[grep("rsem.genes.results",xmat$Derived_Data_File),]
     xmat2 <- xmat[sapply(lf1,function(y) grep(y, xmat$Derived_Data_File)),]
 
@@ -83,7 +88,8 @@ TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
 
 
 
-  if(PlatformType == "humanmethylation27" || PlatformType == "humanmethylation450" ){
+  if(PlatformType == "humanmethylation27" ||
+       PlatformType == "humanmethylation450" ){
     tmpData <- tmpData[-1, ]
     geData <- matrix(0, nrow = nrow(tmpData), ncol = length(lf))
     rownames(geData) <- tmpData$Hybridization.REF
@@ -99,9 +105,12 @@ TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
     colnames(geData) <- substr(gsub("\\.", "-", colNames),1,28)
   }
 
-  if(PlatformType == "illuminaga_mirnaseq" || PlatformType == "illuminahiseq_mirnaseq"){
+  if(PlatformType == "illuminaga_mirnaseq" ||
+       PlatformType == "illuminahiseq_mirnaseq"){
     rownames(geData) <- tmpData$miRNA_ID
-    colnames(geData) <- substr(paste("TCGA", sapply(strsplit(lf, "TCGA"), function(y) y[2]), sep = ""), 1, 28)
+    colnames(geData) <- substr(paste("TCGA",
+                                     sapply(strsplit(lf, "TCGA"),
+                                            function(y) y[2]), sep = ""), 1, 28)
     for(i in 1:length(lf)){
       tmpData <- read.csv(lf[i], stringsAsFactors = FALSE, sep = ",")
       expr <- tmpData$read_count
@@ -121,13 +130,16 @@ TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
       geData[, i] <- as.numeric(tmpData)
       print(i)
     }
-    colNames <- gsub(".txt", "", sapply(strsplit(lf1, "Level_3."), function(x) x[2]))
+    colNames <- gsub(".txt", "", sapply(strsplit(lf1, "Level_3."),
+                                        function(x) x[2]))
 
-    toDdl <- .DownloaDmageTAB_sdrf(Description, key2a, KeyGrep1 = "mage-tab", KeyGrep2 = "array_design.txt")
+    toDdl <- .DownloaDmageTAB_sdrf(Description, key2a,
+                                   KeyGrep1 = "mage-tab",
+                                   KeyGrep2 = "array_design.txt")
     toDdl <- paste(Description, key2a, toDdl, sep = "")
     x <- DownloadHTML(toDdl)
     x <- strsplit(x, "\t")
-    x <- matrix(unlist(x), nrow = length(x), byrow = T)
+    x <- matrix(unlist(x), nrow = length(x), byrow = TRUE)
     x <- gsub("\r", "", x)
     colnames(x) <- x[1, ]
     x <- x[-1, ]
@@ -136,10 +148,15 @@ TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
     colnames(geData) <- x[colNames, "Sample.barcode"]
   }
 
-  if(PlatformType == "illuminahiseq_dnaseqc" | PlatformType == "hg-cgh-415k_g4124a" | PlatformType == "hg-cgh-244a"){
+  if(PlatformType == "illuminahiseq_dnaseqc" |
+       PlatformType == "hg-cgh-415k_g4124a" |
+       PlatformType == "hg-cgh-244a"){
     geData <- vector("list", length(x))
-    for(i in 1:length(lf)) geData[[i]] <- read.csv(lf[i], sep = ",", stringsAsFactors = FALSE)
-    names(geData) <- substr(paste("TCGA", sapply(strsplit(lf, "TCGA"), function(y) y[2]), sep = ""), 1, 28)
+    for(i in 1:length(lf)) geData[[i]] <- read.csv(lf[i], sep = ",",
+                                                   stringsAsFactors = FALSE)
+    names(geData) <- substr(paste("TCGA",
+                                  sapply(strsplit(lf, "TCGA"),
+                                         function(y) y[2]), sep = ""), 1, 28)
   }
 
   if(PlatformType == "genome_wide_snp_6"){
@@ -147,11 +164,11 @@ TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
     path2 <- paste(Description, key2a,plt2$FileName,sep="")
     xpath <- DownloadHTML(path2)
     nc<-length(unlist(strsplit(xpath[1], "\t")))
-    xmat <- matrix( unlist(strsplit(xpath, "\t") ), ncol=nc,byrow=T)
+    xmat <- matrix( unlist(strsplit(xpath, "\t") ), ncol=nc,byrow=TRUE)
     colnames(xmat)<-gsub(" ","_",xmat[1,])
 
     xmat<-xmat[-1,]
-    xmat <- as.data.frame(xmat,stringsAsFactors=F)
+    xmat <- as.data.frame(xmat,stringsAsFactors=FALSE)
     lf2<-gsub("hg19","hg18",lf1)
     lf3 <- intersect(lf2, xmat$Derived_Array_Data_File)
 
@@ -185,7 +202,7 @@ TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
 
     x <- DownloadHTML(toDdl)
     x <- strsplit(x, "\t")
-    x <- matrix(unlist(x), nrow = length(x), byrow = T)
+    x <- matrix(unlist(x), nrow = length(x), byrow = TRUE)
     x <- gsub("\r", "", x)
     colnames(x) <- x[1, ]
     x <- x[-1, ]
@@ -210,7 +227,7 @@ TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
       expr <- tmpData[, 2]
       expr[expr == "N/A"] <- NA
       geData[, i] <- as.numeric(expr)
-      colNames[i] <- gsub(".", "-", colnames(tmpData)[2], fixed = T)
+      colNames[i] <- gsub(".", "-", colnames(tmpData)[2], fixed = TRUE)
       print(i)
     }
 
@@ -219,7 +236,7 @@ TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
 
     x <- DownloadHTML(toDdl)
     x <- strsplit(x, "\t")
-    x <- matrix(unlist(x), nrow = length(x), byrow = T)
+    x <- matrix(unlist(x), nrow = length(x), byrow = TRUE)
     x <- gsub("\r", "", x)
     colnames(x) <- x[1, ]
     x <- x[-1, ]
@@ -244,7 +261,7 @@ TCGAPrepare <- function(sdrfFolder = "", downloadFolder = "", PlatformType =""){
       expr <- tmpData[, 2]
       expr[expr == "N/A"] <- NA
       geData[, i] <- as.numeric(expr)
-      colNames[i] <- gsub(".", "-", colnames(tmpData)[2], fixed = T)
+      colNames[i] <- gsub(".", "-", colnames(tmpData)[2], fixed = TRUE)
       print(i)
     }
     colnames(geData) <- colNames
@@ -354,7 +371,7 @@ TCGAPrepare2 <- function(query, dir = NULL, type = NULL){
   files <- NULL
   dirs <- gsub(".tar.gz","",basename(query$deployLocation))
   for (i in seq_along(dirs)) {
-    aux <- list.files(file.path(dir,dirs[i]), full.names = T, recursive = T)
+    aux <- list.files(file.path(dir,dirs[i]), full.names = TRUE, recursive = TRUE)
     files <- c(files, aux )
   }
   files <- files[-grep("MANIFEST|README|CHANGES|DESCRIPTION|DATA_USE",files)]
