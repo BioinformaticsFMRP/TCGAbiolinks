@@ -84,14 +84,20 @@ MatchedCoupledSampleTypes <- function(barcode,typesample){
 #' @export
 #' @return stage_BRCA
 stage_BRCA <- function(barcode, stage, clinical_patient_data){
-  table.stages <- c("Stage I$|Stage IA$|Stage IB$", "Stage I$", "Stage IA$", "Stage IB$", "Stage II$|Stage IIA$|Stage IIB$", "Stage II$",
-                    "Stage IIA$", "Stage IIB$", "Stage III$|Stage IIIA$|Stage IIIB$|Stage IIIC$", "Stage III$", "Stage IIIA$", "Stage IIIB$", "Stage IIIC$", "Stage IV$")
-  names(table.stages) <- c("stage_IX", "stage_I", "stage_IA", "stage_IB", "stage_IIX", "stage_IIA", "stage_IIB", "stage_IIIX", "stage_IIIA",
-                           "stage_IIIB", "stage_IIIC", "stage_IV")
+  table.stages <- c("Stage I$|Stage IA$|Stage IB$", "Stage I$", "Stage IA$",
+                    "Stage IB$", "Stage II$|Stage IIA$|Stage IIB$",
+                    "Stage II$", "Stage IIA$", "Stage IIB$",
+                    "Stage III$|Stage IIIA$|Stage IIIB$|Stage IIIC$",
+                    "Stage III$", "Stage IIIA$", "Stage IIIB$",
+                    "Stage IIIC$", "Stage IV$")
+  names(table.stages) <- c("stage_IX", "stage_I", "stage_IA", "stage_IB",
+                           "stage_IIX", "stage_IIA", "stage_IIB", "stage_IIIX",
+                           "stage_IIIA", "stage_IIIB", "stage_IIIC", "stage_IV")
 
   if(is.element(stage, names(table.stages))) {
     clinical_patient_data<-as.data.frame(clinical_patient_data)
-    stage.i <- clinical_patient_data[grep(table.stages[stage], clinical_patient_data$ajcc_pathologic_tumor_stage), ]
+    stage.i <- clinical_patient_data[grep(table.stages[stage],
+               clinical_patient_data$ajcc_pathologic_tumor_stage), ]
     stage.i <- stage.i[,"bcr_patient_barcode"]
     samples <- substr(barcode, 1, 12)
     barcode <- intersect(samples,stage.i)
@@ -136,10 +142,11 @@ ER_status_BRCA <- function(barcode,ER, clinical_patient_data){
   ## ER should be "Positive" or "Negative"
   # consider only barcode and ER status
   if(is.element(ER, c("Positive", "Negative"))){
-    status <- as.data.frame(clinical_patient_data)[grep(paste0("^",ER,"$"), clinical_patient_data$er_status_by_ihc), ][,"bcr_patient_barcode"]
-    samples<-substr(barcode, 1, 12)
+    status <- as.data.frame(clinical_patient_data)[grep(paste0("^",ER,"$"),
+            clinical_patient_data$er_status_by_ihc), ][,"bcr_patient_barcode"]
+    samples <- substr(barcode, 1, 12)
     #find common patients between ER status and barcode data
-    barcode<-intersect(samples,status)
+    barcode <- intersect(samples,status)
     return(barcode)
   }else{
     return("Error message: ER status does not exist")
@@ -159,7 +166,8 @@ PR_status_BRCA  <- function(barcode,PR, clinical_patient_data){
 
   if(is.element(PR, c("Positive", "Negative"))){
     #for breast cancer
-    status <- as.data.frame(clinical_patient_data)[grep(paste0("^", PR, "$"), clinical_patient_data$pr_status_by_ihc), ][,"bcr_patient_barcode"]
+    status <- as.data.frame(clinical_patient_data)[grep(paste0("^", PR, "$"),
+            clinical_patient_data$pr_status_by_ihc), ][,"bcr_patient_barcode"]
     samples<-substr(barcode, 1, 12)
     #find common patients between PR status and barcode data
     barcode<-intersect(samples,status)
@@ -183,7 +191,8 @@ HER_status_BRCA  <- function(barcode, HER, clinical_patient_data){
   if(is.element(HER, c("Positive", "Negative"))){
     clinical_patient_data<-as.data.frame(clinical_patient_data)
     #for breast cancer HER+
-    status <- as.data.frame(clinical_patient_data)[grep(paste0("^",HER,"$"), clinical_patient_data$her2_status_by_ihc), ][,"bcr_patient_barcode"]
+    status <- as.data.frame(clinical_patient_data)[grep(paste0("^",HER,"$"),
+          clinical_patient_data$her2_status_by_ihc), ][,"bcr_patient_barcode"]
     samples<-substr(barcode, 1, 12)
     #find common patients between HER+ e barcode data
     barcode<-intersect(samples,status)
@@ -215,8 +224,10 @@ clinical_data_site_cancer <-function(cancer){
 #' @return clinic
 clinic <- function(cancer,clinical_data_type){
 
-  URL <- paste0(clinical_data_site_cancer (cancer), "nationwidechildrens.org_", clinical_data_type, "_", cancer, ".txt")
-  writeLines(getURL(URL,ssl.verifypeer = FALSE), file(paste0(clinical_data_type,".txt")))
+  URL <- paste0(clinical_data_site_cancer (cancer), "nationwidechildrens.org_",
+                clinical_data_type, "_", cancer, ".txt")
+  writeLines(getURL(URL,ssl.verifypeer = FALSE),
+             file(paste0(clinical_data_type,".txt")))
 
   return(file(paste0(clinical_data_type,".txt")))
 }
