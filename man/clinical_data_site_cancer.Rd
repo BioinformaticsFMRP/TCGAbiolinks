@@ -15,4 +15,7 @@ clinical_data_site_cancer
 \description{
 clinical_data_site_cancer
 }
+\examples{
+clinical_data_site_cancer("gbm")
+}
 

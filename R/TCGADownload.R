@@ -5,9 +5,10 @@
 #' @param type Get files with type pattern instead of downloading all the folder
 #' @seealso TCGASearch
 #' @examples
-#' \dontrun{
-#'    tcgaDownload(data,path='folder',type="rsem.isoforms.results")
-#' }
+#'    samples <- c("TCGA-06-0125-01A-01D-A45W-05")
+#'    query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450",
+#'    level = "3", samples = samples)
+#'    TCGADownload(query,path = "dataDemo2")
 #' @export
 #' @importFrom downloader download
 #' @return Download tcga into path
