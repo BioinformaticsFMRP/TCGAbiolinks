@@ -82,7 +82,7 @@ TCGAinvestigate<- function(tumor,dataDEGsFiltLevelTF,topgenes){
 
   }
 
-  dataDEGsFiltLevelTF <- dataDEGsFiltLevelTF[order(dataDEGsFiltLevelTF$Pubmed,decreasing=T),]
+  dataDEGsFiltLevelTF <- dataDEGsFiltLevelTF[order(dataDEGsFiltLevelTF$Pubmed,decreasing=TRUE),]
 
   if( sum(dataDEGsFiltLevelTF$Pubmed ==1)!=0){
     dataDEGsFiltLevelTF[dataDEGsFiltLevelTF$Pubmed == 1,][ which( nchar(dataDEGsFiltLevelTF[dataDEGsFiltLevelTF$Pubmed == 1,]$PMID) > 8),"PMID"] <- substr(dataDEGsFiltLevelTF[dataDEGsFiltLevelTF$Pubmed == 1,][ which( nchar(dataDEGsFiltLevelTF[dataDEGsFiltLevelTF$Pubmed == 1,]$PMID) > 8),"PMID"],1,8)
