@@ -46,10 +46,10 @@ test_that("Results of query by center/platform/disease return only them", {
 
 test_that("Results of query by center/platform/disease does not exist
           return empty data frame", {
-    res <- TCGAQuery(tumor = "gbm", platform = "bio",
-                     center = "jhu-usc.edu")
-    expect_that(nrow(res), equals(0))
-})
+              res <- TCGAQuery(tumor = "gbm", platform = "bio",
+                               center = "jhu-usc.edu")
+              expect_that(nrow(res), equals(0))
+          })
 
 test_that("If platform argument is wrong, result is NULL ", {
     capture.output(res <- TCGAQuery( platform = "omg"))
