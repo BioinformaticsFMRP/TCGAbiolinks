@@ -1,0 +1,6 @@
+TCGAbiolinks 1.0.0
+----------------------------------------------------------------
+  FIRST VERSION - FEATURES
+
+* Searches/Download/Prepare TCGA
+* Create some methylation/expression analysis functions
