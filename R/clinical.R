@@ -6,8 +6,11 @@
 #' @export
 #' @return SampleTypes
 SampleTypes <- function(barcode, typesample){
-  table.code <- c('01','02','03','04','05','06','07','08','09','10','11','12','13','14','20','40','50','60','61')
-  names(table.code) <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC","TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB","CELL","XP","XCL")
+  table.code <- c('01','02','03','04','05','06','07','08','09','10','11',
+                  '12','13','14','20','40','50','60','61')
+  names(table.code) <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
+                         "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
+                         "CELL","XP","XCL")
 
   if(is.element(typesample,names(table.code))){
     barcode <- barcode[grep(table.code[typesample], substr(barcode, 14, 15))]
@@ -29,15 +32,19 @@ SampleTypes <- function(barcode, typesample){
 #' @return MultiSampleTypes
 MultiSampleTypes <- function(barcode,typesample){
   # Tumor AND Solid Tissue Normal NOT FROM THE SAME PATIENTS
-  table.code <- c('01','02','03','04','05','06','07','08','09','10','11','12','13','14','20','40','50','60','61')
-  names(table.code) <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC","TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB","CELL","XP","XCL")
+  table.code <- c('01','02','03','04','05','06','07','08','09','10',
+                  '11','12','13','14','20','40','50','60','61')
+  names(table.code) <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
+                         "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
+                         "CELL","XP","XCL")
 
   if(sum(is.element(typesample,names(table.code))) == length(typesample)) {
 
     string <- substr(barcode, 14, 15)
     barcode.all <- NULL
     for(sample.i in typesample){
-      barcode.all <- union(barcode.all, barcode[grep(table.code[sample.i], string)])
+      barcode.all <- union(barcode.all,
+                           barcode[grep(table.code[sample.i], string)])
     }
     return(barcode.all)
   }else{
@@ -54,8 +61,11 @@ MultiSampleTypes <- function(barcode,typesample){
 #' @return MultiSampleTypes
 MatchedCoupledSampleTypes <- function(barcode,typesample){
   # Tumor AND Solid Tissue Normal FROM THE SAME PATIENTS
-  table.code <- c('01','02','03','04','05','06','07','08','09','10','11','12','13','14','20','40','50','60','61')
-  names(table.code) <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC","TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB","CELL","XP","XCL")
+  table.code <- c('01','02','03','04','05','06','07','08','09','10',
+                  '11','12','13','14','20','40','50','60','61')
+  names(table.code) <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
+                         "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
+                         "CELL","XP","XCL")
   if(length(typesample)!=2){
     return("Error message: exactly two types need to be provided")
   }
@@ -69,7 +79,8 @@ MatchedCoupledSampleTypes <- function(barcode,typesample){
 
     barcode.common <- intersect(substr(barcode.1,1,13), substr(barcode.2,1,13))
     if(length(barcode.common) > 0){
-      return(union(barcode.1[grep(barcode.common,barcode.1)],barcode.2[grep(barcode.common,barcode.2)]))
+      return(union(barcode.1[grep(barcode.common,barcode.1)],
+                   barcode.2[grep(barcode.common,barcode.2)]))
     }else{
       return("Error message: there exist no matched samples")
     }
@@ -122,7 +133,9 @@ gender_BRCA <- function(barcode, gender, clinical_patient_data){
 
   if(is.element(gender,c("MALE", "FEMALE"))){
     clinical_patient_data<-as.data.frame(clinical_patient_data)
-    s.gender <- as.data.frame(clinical_patient_data)[grep(paste0("^", gender,"$"), clinical_patient_data$gender), ][,"bcr_patient_barcode"]
+    s.gender <- as.data.frame(clinical_patient_data)[
+        grep(paste0("^", gender,"$"), clinical_patient_data$gender),
+        ][,"bcr_patient_barcode"]
     samples<-substr(barcode, 1, 12)
     #find common patients between FEMALE and barcode data
     barcode<-intersect(samples,s.gender)
@@ -215,7 +228,9 @@ HER_status_BRCA  <- function(barcode, HER, clinical_patient_data){
 #' @examples clinical_data_site_cancer("gbm")
 #' @return clinical_data_site_cancer
 clinical_data_site_cancer <-function(cancer){
-  return(paste0("https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/", cancer,"/bcr/biotab/clin/"))
+  return(paste0("https://tcga-data.nci.nih.gov/tcgafiles/",
+                "ftp_auth/distro_ftpusers/anonymous/tumor/",
+                cancer,"/bcr/biotab/clin/"))
 }
 
 #' @title clinic
