@@ -6,6 +6,7 @@
 #' @import ggplot2
 #' @export
 #' @return dataframe with diffmean values
+#' @examples inst/examples/analysis.R
 diffmean <- function(group1, group2) {
   g1 <- group1
   g1$mean.g1 <- apply(group1, 1, mean, na.rm = TRUE)
@@ -45,6 +46,7 @@ diffmean <- function(group1, group2) {
 #' @importFrom survival survfit Surv
 #' @export
 #' @return Survival plot
+#' @example inst/examples/analysis.R
 survivalPlot <- function(met.md, legend = "Legend", cutoff = 0,
                          main = "Kaplan-Meier Overall Survival Curves",
                          ylab = "PROBABILITY OF SURVIVAL",
@@ -118,10 +120,7 @@ survivalPlot <- function(met.md, legend = "Legend", cutoff = 0,
 #'   Organize TCGA methylation metadata for the mean methylation analysis.
 #'
 #' @param wd Directory with the files
-#' @examples
-#' \dontrun{
-#' met.md <- organizeMethylationMetaDataFrame("data")
-#' }
+#' @example inst/examples/analysis.R
 #' @export
 #' @return \code{invisible (metadata)}
 organizeMethylationMetaDataFrame <- function(wd = NULL) {
@@ -154,10 +153,7 @@ organizeMethylationMetaDataFrame <- function(wd = NULL) {
 #'    where rows are the probes names and columns are paciente ID
 #'    Execution: read all files inside the directory and merge it by
 #'    probes (Composite.Element.REF)
-#' @examples
-#' \dontrun{
-#' met <- organizeMethylationDataFrame(wd = "data")
-#' }
+#' @example inst/examples/analysis.R
 #' @param wd Directory with the files
 #' @return Methylation betavalues table
 #' @export
@@ -298,6 +294,7 @@ metMeanBoxplot <- function(data, sort = FALSE,
 #' @export
 #' @return Data frame with two cols
 #'         p-values/p-values adjusted
+#' @example inst/examples/analysis.R
 calculate.pvalues <- function(values, idx1, idx2, paired = TRUE,
                               exact = TRUE, cores = NULL) {
   if (is.null(cores)) {
@@ -354,6 +351,7 @@ calculate.pvalues <- function(values, idx1, idx2, paired = TRUE,
 #'          group 1 = Not Significant
 #'          group 2 = Hypermethylated
 #'          group 3 = Hypomethylated
+#' @example inst/examples/analysis.R
 volcanoPlot <- function(data, filename = "volcano.pdf",
                         ylab = "- 1*log10 of the Significance",
                         xlab = "DNA Methylation",

@@ -17,4 +17,7 @@ clinic
 \description{
 clinic
 }
+\examples{
+clinic ("gbm","clinical_patient")
+}
 
