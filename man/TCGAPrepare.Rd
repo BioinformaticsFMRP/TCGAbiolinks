@@ -2,29 +2,21 @@
 % Please edit documentation in R/TCGAPrepare.R
 \name{TCGAPrepare}
 \alias{TCGAPrepare}
-\title{TCGA Prepare}
+\title{TCGA TCGAPrepare}
 \usage{
-TCGAPrepare(sdrfFolder = "", downloadFolder = "", PlatformType = "")
-}
-\arguments{
-\item{sdrfFolder}{TCGAQuery location of the output data saving}
-
-\item{downloadFolder}{TCGADownload location of the output data saving}
-
-\item{PlatformType}{Platform as output of TCGAQuery}
+TCGAPrepare(query, dir = NULL, type = NULL)
 }
 \value{
-Data matrix
+Data frame with data read
 }
 \description{
-Prepare data matrices for downstream analysis, ready to use also with other R packages using data previously downloaded using TCGAdownload
+Prepare data matrices for downstream analysis,
+ ready to use also with other R packages
+ DNA Methylation
+  Row: matrix with genes/loci
+  Cols: samples in columns
 }
 \examples{
-\dontrun{
-   TCGAPrepare(sdrfFolder = 'folder1', downloadFolder= 'folder2')
-}
-}
-\seealso{
-TCGAQuery
+TCGAPrepare2(query,dir="path")
 }
 
