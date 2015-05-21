@@ -63,13 +63,21 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL) {
 # Filter files by barcode
 filterFiles <- function(data,samples,files){
 
-    if(grep("IlluminaHiSeq",data$Platform)){
+    # case uuid in name
+    if(grep("IlluminaHiSeq_RNASeqV2",data$Platform)){
         mage <- getMage(data)
         idx <- unique(unlist(lapply(samples,
                     function(x) grep(x,mage$Comment..TCGA.Barcode.))))
         names <- mage[idx,]$Extract.Name
-        idx <- unique(unlist(lapply(names,function(x) grep(x,files))))
+        idx <- unique(unlist(lapply(names, function(x) grep(x,files))))
         files <- files[idx]
         return(files)
     }
+    # case barcode in name
+    if(grep("IlluminaHiSeq_RNASeq",data$Platform)){
+        idx <- unique(unlist(lapply(samples, function(x) grep(x,files))))
+        files <- files[idx]
+        return(files)
+    }
+
 }
