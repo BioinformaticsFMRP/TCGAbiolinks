@@ -30,7 +30,7 @@ test_that("Results of query by barcode return this barcode", {
     samples <- c("TCGA-06-0125-01A-01D-A45W-05","TCGA-06-0152-01A-02D-A45W-05")
     res <- TCGAQuery( sample = samples )
     expect_true(all(apply(sapply(samples,
-                                 function(x) grepl(x,res$barcode)),1,any))))
+                                 function(x) grepl(x,res$barcode)),1,any)))
 })
 
 test_that("Results of query by center/platform/disease return only them", {
