@@ -15,4 +15,8 @@ time execution of a function
 \description{
 TimeUse
 }
+\examples{
+TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",
+ Genelist))
+}
 

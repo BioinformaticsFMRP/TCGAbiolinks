@@ -5,7 +5,7 @@
 \title{CreateTabLevel for Differentially expression analysis (DEA)}
 \usage{
 CreateTabLevel(FC_FDR_table_mRNA, typeCond1, typeCond2, TableCond1, TableCond2,
-  typeOrder = T)
+  typeOrder = TRUE)
 }
 \arguments{
 \item{FC_FDR_table_mRNA}{FC_FDR_table_mRNA}
