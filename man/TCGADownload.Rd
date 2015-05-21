@@ -4,7 +4,7 @@
 \alias{TCGADownload}
 \title{TCGA Download}
 \usage{
-TCGADownload(data = NULL, path = ".", type = NULL)
+TCGADownload(data = NULL, path = ".", type = NULL, samples = NULL)
 }
 \arguments{
 \item{data}{TCGASearch output}
