@@ -25,7 +25,6 @@ NULL
 #' @format A data frame with 79 rows and 4 variables
 NULL
 
-
 #' TCGA center table
 #' @docType data
 #' @keywords internal
