@@ -12,12 +12,12 @@
 #' @export
 #' @importFrom downloader download
 #' @return Download tcga into path
-TCGADownload <- function(data = NULL, path = ".", type = NULL) {
+TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL) {
 
   dir.create(path, showWarnings = FALSE)
   root <- "https://tcga-data.nci.nih.gov"
 
-
+  # Downloading the folder
   if (is.null(type)) {
     for (i in 1:nrow(data)) {
 
@@ -31,7 +31,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL) {
       }
     }
   } else {
-
+    # Downloading files
     for (i in 1:nrow(data)) {
 
       folder <- gsub(".tar.gz","",basename(data[i,]$deployLocation))
@@ -41,6 +41,10 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL) {
       files <- files[grepl(type,files)]
       if (length(files) == 0) {
         next
+      }
+
+      if(!is.null(samples)){
+          files <- filterFiles(data[i,],samples,files)
       }
       message(paste0("Downloading:", length(files), " files"))
 
@@ -54,4 +58,18 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL) {
       }
     }
   }
+}
+
+# Filter files by barcode
+filterFiles <- function(data,samples,files){
+
+    if(grep("IlluminaHiSeq",data$Platform)){
+        mage <- getMage(data)
+        idx <- unique(unlist(lapply(samples,
+                    function(x) grep(x,mage$Comment..TCGA.Barcode.))))
+        names <- mage[idx,]$Extract.Name
+        idx <- unique(unlist(lapply(names,function(x) grep(x,files))))
+        files <- files[idx]
+        return(files)
+    }
 }
