@@ -3,8 +3,8 @@ dir.create("dataDemo")
 query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450",level = "3")
 TCGADownload(query,path = "data")
 
-query <- TCGAQuery(tumor = "gbm", platform = "bio", level="2")
-TCGADownload(query,path="data")
+query <- TCGAQuery(tumor = "gbm", platform = "bio", level = "2")
+TCGADownload(query,path = "data")
 
 #-------------------------- Preparing data and metadata
 # met: data frame with probe info (probe id, ge) and beta values
@@ -22,8 +22,10 @@ idx <- is.element(met.md$bcr_patient_barcode,strtrim(samples,12))
 met.md <- met.md[idx,]
 
 # random split of pacients into groups
-met.md$cluster <- c(rep("group1",nrow(met.md)/4),rep("group2",nrow(met.md)/4),
-                    rep("group3",nrow(met.md)/4),rep("group4",nrow(met.md)-3*(floor(nrow(met.md)/4))))
+met.md$cluster <- c(rep("group1",nrow(met.md)/4),
+                    rep("group2",nrow(met.md)/4),
+                    rep("group3",nrow(met.md)/4),
+                    rep("group4",nrow(met.md)-3*(floor(nrow(met.md)/4))))
 rownames(met.md) <- met.md$bcr_patient_barcode
 
 #---------------------- survival
@@ -46,7 +48,7 @@ probe$p.value <- pvalues[,1]
 probe$p.value.adj <- pvalues[,2]
 prim.rec <- diffmean.prim.rec(beta)
 probe <- cbind(probe,prim.rec)
-hypo.hyper <- volcano.plot(probe,p.cut=0.619)
+hypo.hyper <- volcano.plot(probe,p.cut = 0.619)
 
 #------------------- heatmap
 #get bvalues, for the probes hypo/hyper

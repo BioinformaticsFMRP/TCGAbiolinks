@@ -93,17 +93,23 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
     Cond1num <- ncol(mat1)
     Cond2num <- ncol(mat2)
 
-    print(message1 <- paste( "there are Cond1 type", Cond1type ,"in ", Cond1num, "samples"))
-    print(message2 <- paste( "there are Cond2 type", Cond2type ,"in ", Cond2num, "samples"))
-    print(message3 <- paste( "there are ", nrow(TOC) ,"features as miRNA or genes "))
+    print(message1 <- paste( "there are Cond1 type", Cond1type ,"in ",
+                             Cond1num, "samples"))
+    print(message2 <- paste( "there are Cond2 type", Cond2type ,"in ",
+                             Cond2num, "samples"))
+    print(message3 <- paste( "there are ", nrow(TOC) ,
+                             "features as miRNA or genes "))
 
     timeEstimated <- format(ncol(TOC)*nrow(TOC)/30000,digits = 2)
-    print(messageEstimation <- paste("I Need about ", timeEstimated, "seconds for this DEA. [Processing 30k elements /s]  "))
+    print(messageEstimation <- paste("I Need about ", timeEstimated,
+                    "seconds for this DEA. [Processing 30k elements /s]  "))
 
     # Reading in the data and creating a DGEList object
     colnames(TOC) <- paste0('s',1:ncol(TOC))
-    #DGE <- DGEList(TOC,group=rep(c("Normal","Tumor"),c(NormalSample,TumorSample)))
-    DGE <- edgeR::DGEList(TOC,group = rep(c(Cond1type,Cond2type),c(Cond1num,Cond2num)))
+    #DGE <- DGEList(TOC,group=rep(c("Normal","Tumor"),c(NormalSample,
+    #TumorSample)))
+    DGE <- edgeR::DGEList(TOC,group = rep(c(Cond1type,Cond2type),
+                                          c(Cond1num,Cond2num)))
 
     # Analysis using common dispersion
     disp <- edgeR::estimateCommonDisp(DGE) # Estimating the common dispersion
@@ -129,7 +135,8 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 #' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags
 #' @export
 #' @return table with DEGs (diff.expr. genes)
-CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,TableCond1,TableCond2,typeOrder = TRUE) {
+CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
+                           TableCond1,TableCond2,typeOrder = TRUE) {
 
     TF_enriched <- as.matrix(rownames(FC_FDR_table_mRNA))
     TableLevel <- matrix(0,nrow(TF_enriched),6)
@@ -139,7 +146,8 @@ CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,TableCond1,Tabl
 
 
     TableLevel[,"mRNA"] <- TF_enriched
-    Tabfilt <- FC_FDR_table_mRNA[which( rownames(FC_FDR_table_mRNA) %in% TF_enriched),]
+    Tabfilt <- FC_FDR_table_mRNA[which( rownames(FC_FDR_table_mRNA) %in%
+                                            TF_enriched),]
     TableLevel[,"logFC"] <- as.numeric(Tabfilt[TF_enriched,][,"logFC"])
     TableLevel[,"FDR"] <- as.numeric(Tabfilt[TF_enriched,][,"FDR"])
 
@@ -150,14 +158,18 @@ CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,TableCond1,Tabl
 
     for (i in 1:nrow(TF_enriched)) {
         #print(paste(i, "of", nrow(TF_enriched),TF_enriched[i]))
-        TableLevel[i,typeCond1] <- mean(TableCond1[rownames(TableCond1) %in%  TF_enriched[i] , ])
-        TableLevel[i,typeCond2] <- mean(TableCond2[rownames(TableCond2) %in%  TF_enriched[i] , ])
+        TableLevel[i,typeCond1] <- mean(TableCond1[rownames(TableCond1) %in%
+                                                       TF_enriched[i] , ])
+        TableLevel[i,typeCond2] <- mean(TableCond2[rownames(TableCond2) %in%
+                                                       TF_enriched[i] , ])
     }
 
 
-    TableLevel[,"Delta"] <- as.numeric(abs(TableLevel[,"logFC"]) * TableLevel[,typeCond1]  )
+    TableLevel[,"Delta"] <- as.numeric(abs(TableLevel[,"logFC"]) *
+                                           TableLevel[,typeCond1]  )
 
-    TableLevel <- TableLevel[order( as.numeric(TableLevel[,"Delta"]),decreasing = typeOrder),]
+    TableLevel <- TableLevel[order( as.numeric(TableLevel[,"Delta"]),
+                                    decreasing = typeOrder),]
 
     rownames(TableLevel) <-  TableLevel[,"mRNA"]
     return(TableLevel)
@@ -198,9 +210,12 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
     cancer.pca <- stats::prcomp(t(expr2),cor = TRUE)
 
     # print(sample.colors)
-    g <- ggbiplot(cancer.pca, obs.scale = 1, var.scale = 1, groups = sample.colors, ellipse = TRUE, circle = FALSE)
-    g <- g + scale_colour_manual(name = "",values = c("blue" = "blue","red" = "red"))
-    g <- g + geom_point(aes(colour = sample.colors), size = 3) #shape = tabClusterNew$Study)
+    g <- ggbiplot(cancer.pca, obs.scale = 1, var.scale = 1,
+                  groups = sample.colors, ellipse = TRUE, circle = FALSE)
+    g <- g + scale_colour_manual(name = "",
+                                 values = c("blue" = "blue","red" = "red"))
+    g <- g + geom_point(aes(colour = sample.colors), size = 3)
+    #shape = tabClusterNew$Study)
     g <- g + theme(legend.direction = 'horizontal',  legend.position = 'top')
     g <- g + ggtitle(TitlePlot)
     print(g)
@@ -220,16 +235,21 @@ EAcomplete <- function(TFname, RegulonList){
     DAVID_CC_matrix <- get("DAVID_CC_matrix")
     listIPA_pathways <- get("listIPA_pathways")
 
-    print(paste("I need about ", "1 minute to finish complete Enrichment analysis GO[BP,MF,CC] and Pathways... "))
+    print(paste("I need about ", "1 minute to finish complete ",
+                "Enrichment analysis GO[BP,MF,CC] and Pathways... "))
 
     #load("EnrichmentAnalyis.RData")
-    ResBP <- EnrichmentAnalysis(TFname,RegulonList,DAVID_BP_matrix,IPAGenes,GOtype = "DavidBP")
+    ResBP <- EnrichmentAnalysis(TFname,RegulonList,DAVID_BP_matrix,
+                                IPAGenes,GOtype = "DavidBP")
     print("GO Enrichment Analysis BP completed....done")
-    ResMF <- EnrichmentAnalysis(TFname,RegulonList,DAVID_MF_matrix,IPAGenes,GOtype = "DavidMF")
+    ResMF <- EnrichmentAnalysis(TFname,RegulonList,DAVID_MF_matrix,
+                                IPAGenes,GOtype = "DavidMF")
     print("GO Enrichment Analysis MF completed....done")
-    ResCC <- EnrichmentAnalysis(TFname,RegulonList,DAVID_CC_matrix,IPAGenes,GOtype = "DavidCC")
+    ResCC <- EnrichmentAnalysis(TFname,RegulonList,DAVID_CC_matrix,
+                                IPAGenes,GOtype = "DavidCC")
     print("GO Enrichment Analysis CC completed....done")
-    ResPat <- EnrichmentAnalysis(TFname,RegulonList,listIPA_pathways,IPAGenes,GOtype = "Pathway")
+    ResPat <- EnrichmentAnalysis(TFname,RegulonList,listIPA_pathways,
+                                 IPAGenes,GOtype = "Pathway")
     print("Pathway Enrichment Analysis completed....done")
 
     ans <- list(ResBP = ResBP, ResMF = ResMF, ResCC = ResCC, ResPat = ResPat)
@@ -246,7 +266,8 @@ EAcomplete <- function(TFname, RegulonList){
 #' @param FDRThresh FDRThresh
 #' @param IPAGenes IPAGenes
 #' @return EAcomplete plot
-EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,IPAGenes,GOtype,FDRThresh=0.01) {
+EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,
+                               IPAGenes,GOtype,FDRThresh=0.01) {
     topPathways <- nrow(TableEnrichment)
     topPathways_tab <- matrix(0,1,topPathways)
     topPathways_tab <- as.matrix(topPathways_tab)
@@ -258,12 +279,15 @@ EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,IPAGenes,GOt
     allgene <- IPAGenes[,"ID"]
     current_pathway_from_IPA <- as.matrix(TableEnrichment[,GOtype]) # genes from IPA pathways
 
-    TableNames <- gsub("David","",paste("Top ", GOtype, " n. ", 1:topPathways," of ", topPathways, sep = ""))
+    TableNames <- gsub("David","",paste("Top ", GOtype, " n. ", 1:topPathways,
+                                        " of ", topPathways, sep = ""))
     colnames(topPathways_tab) <- TableNames
     topPathways_tab <- as.data.frame(topPathways_tab)
 
     table_pathway_enriched <- matrix(1, nrow(current_pathway_from_IPA),7)
-    colnames(table_pathway_enriched) <- c("Pathway","GenesInPathway","Pvalue","FDR","CommonGenesPathway","PercentPathway","PercentRegulon")
+    colnames(table_pathway_enriched) <- c("Pathway","GenesInPathway","Pvalue",
+                                          "FDR","CommonGenesPathway",
+                                          "PercentPathway","PercentRegulon")
     table_pathway_enriched <- as.data.frame(table_pathway_enriched)
 
     for (i in 1:nrow(current_pathway_from_IPA)) {
@@ -360,7 +384,8 @@ IPAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
     par(mfrow = c(2, 2))
 
     toPlot <- splitFun(tf, GOBPTab, nBar)
-    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "orange", main = "GO:Biological Process", xlab = "-log10(FDR)")
+    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "orange",
+                     main = "GO:Biological Process", xlab = "-log10(FDR)")
     labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
     text(x = 1, y = xAxis, labs, pos = 4)
     lines(x = toPlot[, 3], y = xAxis, col = "red")
@@ -368,7 +393,8 @@ IPAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
     axis(side = 3, at = pretty(range(0:1)), col = "red")
 
     toPlot <- splitFun(tf, GOCCTab, nBar)
-    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "cyan", main = "GO:Cellular Component", xlab = "-log10(FDR)")
+    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "cyan",
+                     main = "GO:Cellular Component", xlab = "-log10(FDR)")
     labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
     text(x = 1, y = xAxis, labs, pos = 4)
     lines(x = toPlot[, 3], y = xAxis, col = "red")
@@ -376,7 +402,8 @@ IPAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
     axis(side = 3, at = pretty(range(0:1)), col = "red")
 
     toPlot <- splitFun(tf, GOMFTab, nBar)
-    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "green", main = "GO:Molecular Function", xlab = "-log10(FDR)")
+    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "green",
+                     main = "GO:Molecular Function", xlab = "-log10(FDR)")
     labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
     text(x = 1, y = xAxis, labs, pos = 4)
     lines(x = toPlot[, 3], y = xAxis, col = "red")
@@ -384,7 +411,8 @@ IPAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
     axis(side = 3, at = pretty(range(0:1)), col = "red")
 
     toPlot <- splitFun(tf, PathTab, nBar)
-    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "yellow", main = "Pathways", xlab = "-log10(FDR)")
+    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "yellow",
+                     main = "Pathways", xlab = "-log10(FDR)")
     labs <- toPlot[, 1]
     text(x = 1, y = xAxis, labs, pos = 4)
     lines(x = toPlot[, 3], y = xAxis, col = "red")
@@ -393,9 +421,11 @@ IPAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
     axis(side = 3, at = pretty(range(0:1)), col = "red")
 
     #par(new = TRUE)
-    #plot(toPlot[, 3], xAxis, axes = FALSE, bty = "n", xlab = "", ylab = "", col = "blue")
+    #plot(toPlot[, 3], xAxis, axes = FALSE, bty = "n", xlab = "",
+    # ylab = "", col = "blue")
     #par(new = TRUE)
-    #plot(toPlot[, 3], xAxis, type = "l", axes = FALSE, bty = "n", xlab = "", ylab = "", col = "blue")
+    #plot(toPlot[, 3], xAxis, type = "l", axes = FALSE, bty = "n", xlab = "",
+    # ylab = "", col = "blue")
     #axis(side = 2, at = pretty(range(xAxis)))
     #axis(side = 1, at = pretty(range(toPlot[, 3])), col = "red", line=2.5)
     #axis(side = 3, at = pretty(range(toPlot[, 3])), col = "red")
