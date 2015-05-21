@@ -3,6 +3,7 @@
 #' @param data TCGASearch output
 #' @param path location of the final data saving
 #' @param type Get files with type pattern instead of downloading all the folder
+#' @param quiet Should download supress output messages. Default: false
 #' @seealso TCGASearch
 #' @examples
 #'    samples <- c("TCGA-06-0125-01A-01D-A45W-05")
@@ -12,7 +13,8 @@
 #' @export
 #' @importFrom downloader download
 #' @return Download tcga into path
-TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL) {
+TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
+                         quiet = FALSE) {
 
     dir.create(path, showWarnings = FALSE)
     root <- "https://tcga-data.nci.nih.gov"
@@ -26,7 +28,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL) {
                            basename(data[i, "deployLocation"])))
             if (!file.exists(file)) {
                 download(paste0(root, data[i, "deployLocation"]),
-                         file)
+                         file, quiet)
                 untar(file, exdir = path)
             }
         }
@@ -51,7 +53,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL) {
             for (i in seq_along(files)) {
                 if (!file.exists(files[i])) {
                     download(paste0(root,url,"/",files[i]),
-                             file.path(path,folder,files[i]))
+                             file.path(path,folder,files[i]),quiet)
                 }
             }
         }
