@@ -15,4 +15,8 @@ list of samples for a tumor
 \description{
 Filtering sample output from TCGAQuery
 }
+\examples{
+query <- TCGAQuery(tumor = "brca",level = 3)
+querySamples <- samplesfilter(query)
+}
 
