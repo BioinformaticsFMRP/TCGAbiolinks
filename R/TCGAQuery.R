@@ -109,7 +109,7 @@ TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
   if (!is.null(level)) {
     if (!(is.element(level, c("1", "2", "3","mage-tab")))) {
       message("Level not found. Chosse between:'1', '2','3','mage-tab'")
-      stop("Invalid platform")
+      return(NULL)
     }
   }
 
