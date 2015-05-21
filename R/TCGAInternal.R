@@ -43,10 +43,7 @@
 #' @importFrom stringr str_match
 #' @importFrom XML readHTMLTable
 #' @importFrom downloader download
-#' @keywords i
-#'
-#'
-#'   nternal
+#' @keywords internal
 load.tcga <- function(env) {
   tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
 
