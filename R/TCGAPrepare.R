@@ -227,7 +227,6 @@ getMage <- function(line){
         }
         folder <- gsub(".tar.gz","",file)
         if ( !file.exists(folder)) {
-            print(file)
             untar(file,exdir = "mages")
         }
         files <- list.files(folder)
