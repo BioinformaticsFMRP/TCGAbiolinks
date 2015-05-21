@@ -1,0 +1,256 @@
+---
+title: "Working with TCGAbiolinks package"
+author: " Antonio Colaprico, Catharina Olsen, Luciano Garofano, Tiago Chedraoui Silva, Davide Garolini, Claudia Cava, Isabella Castiglioni, Houtan Noushmehr, Gianluca Bontempi, Michele Ceccarelli"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+This document describes how to search, download and analyze TCGA data using the TCGAbiolinks package.
+
+## TCGA query
+ You can easily search TCGA samples using the `tcgaQuery` function.
+ Using a summary of filters as used in the TCGA portal, the function works with the following 
+ parameters:
+
+* tumor
+* platform
+* added.since
+* added.up.to
+* listSample
+* level
+* center
+
+Some search examples are shown below
+```{r, eval = FALSE}
+
+library(TCGAbiolinks)
+query <- TCGAQuery(tumor = "brca",level = 3)
+
+querySamples <- samplesfilter(query)
+
+query <- TCGAQuery(tumor = "brca",level = 3, platform = "IlluminaHiSeq_RNASeqV2")
+
+```
+
+Obs: As these terms needs to be exact, we validate the user input before searching.
+
+## TCGA download
+You can easily download roadmap data using the `tcga.download` function.
+ 
+```{r, eval = FALSE}
+# get all samples from the query and save into tcga folder
+# samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
+# samples to normalize later
+TCGADownload(query, path = "data", type = "rsem.genes.results")
+```
+
+Obs: The function will structure the folders to save the data as:
+_Path given by the user/Experiment folder_
+
+
+## TCGA Downstream Analysis TCGAprepare, TCGAanalyze, TCGAvisualize
+You can prepare gene expression from TCGA data using the `tcga.prepare` function.
+ 
+```{r, eval = FALSE}
+# Downstream analysis using gene expression data  
+# TCGA samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
+
+#save(DAVID_BP_matrix, DAVID_CC_matrix, DAVID_MF_matrix, IPAGenes, listIPA_pathways, file = "dataEnrichmentAnalysis.rda")
+# save(dataBRCA, geneInfo , file = "dataGeneExpression.rda")
+library(TCGAbiolinks)
+
+# normalization of genes
+dataNorm <- RnaSeqNormalization(dataBRCA, geneInfo)
+
+# quantile filter of genes
+dataFilt <- RnaSeqFilt(dataNorm, 0.25)
+
+# selection of normal samples "NT"
+samplesNT <- MultiSampleTypes_test(colnames(dataFilt), typesample = c("NT"))
+
+# selection of tumor samples "TP"
+samplesTP <- MultiSampleTypes_test(colnames(dataFilt), typesample = c("TP"))
+
+
+```
+
+## TCGA analyze
+You can analyze gene expression from TCGA data using the `tcga.analyze` function.
+ 
+```{r, eval = FALSE}
+# Downstream analysis using gene expression data  
+# TCGA samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
+# save(dataBRCA, geneInfo , file = "dataGeneExpression.rda")
+library(TCGAbiolinks)
+
+# Diff.expr.analysis (DEA) using edgeR package
+dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP], "Normal", "Tumor")
+
+# DEGs filter by abs(logFC) >=1
+dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
+
+# DEGs table with expression values in normal and tumor samples
+dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",dataFilt[,samplesTP],dataFilt[,samplesNT])
+
+# Enrichment Analysis EA
+# Gene Ontology (GO) and Pathways enrichment by DEGs list
+Genelist <- rownames(dataDEGsFiltLevel)
+
+TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
+
+# Enrichment Analysis EA (TCGAVisualize)
+# Gene Ontology (GO) and Pathways enrichment IPA barPlot
+
+IPAbarplot(tf = rownames(ansEA$ResBP), 
+           GOBPTab = ansEA$ResBP,
+           GOCCTab = ansEA$ResCC,
+           GOMFTab = ansEA$ResMF,
+           PathTab = ansEA$ResPat,
+           nRGTab = Genelist, 
+           nBar = 10)
+
+# Principal Component Analysis Plot for ntop DEGs selected
+plotPCAforGroups(dataFilt,dataDEGsFiltLevel,color1 = "blue",color2= "red", nsample1 =length(samplesNT), nsample2 =length(samplesTP) , ntopgenes = 100)
+
+# boxplot of data normalized 
+#sampleGenes <- rownames(dataDEGsFilt[dataDEGsFilt$logFC >=1,])[1:20]
+#boxplot(log(dataBRCA[sampleGenes,]), las = 2)
+#boxplot(log(dataFilt[sampleGenes,]), las = 2)
+
+
+
+```
+
+## TCGA investigate
+Find most studied TF in pubmed related to a specific cancer, disease, or tissue
+ 
+```{r, eval = FALSE}
+# First perform DEGs with TCGAanalyze
+# See upper vignette
+
+# Select only transcription factors (tfs) from DEGs
+TFs <- IPAGenes[IPAGenes$Family =="transcription regulator",]
+TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
+dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
+
+# Ordering table DEGs TFs according Delta decreasing
+dataDEGsFiltLevelTFs <- dataDEGsFiltLevelTFs[order(dataDEGsFiltLevelTFs$Delta,decreasing=T),]
+
+# Find Pubmed of TF studied related to cancer
+tabDEGsTFPubmed <- TCGAinvestigate("breast", dataDEGsFiltLevelTFs, topgenes = 20)
+
+```
+
+
+## Methylation analysis
+
+Some downstream analysis from methylation data can be done with TCGAbiolinks.
+An example is shown below. We search, download and prepare data from the 
+HumanMethylation450 platform.
+
+```{r, eval = FALSE}
+library(TCGAbiolinks)samples <- c("TCGA-06-0125-01A-01D-A45W-05","TCGA-06-0152-01A-02D-A45W-05",
+             "TCGA-06-0171-01A-02D-A45W-05","TCGA-06-0190-01A-01D-A45W-05",
+             "TCGA-06-0210-01A-01D-A45W-05","TCGA-06-0211-01A-01D-A45W-05",
+             "TCGA-06-0221-01A-01D-A45W-05","TCGA-14-0736-01A-01D-A45W-05",
+             "TCGA-19-0957-01C-01D-A45W-05","TCGA-19-1389-01A-01D-A45W-05",
+             "TCGA-14-1402-01A-01D-A45W-05","TCGA-19-4065-01A-01D-2004-05",
+             "TCGA-06-0125-02A-11D-2004-05","TCGA-06-0152-02A-01D-2004-05",
+             "TCGA-06-0171-02A-11D-2004-05","TCGA-06-0190-02A-01D-2004-05",
+             "TCGA-06-0210-02A-01D-2004-05","TCGA-06-0211-02A-02D-2004-05",
+             "TCGA-06-0221-02A-11D-2004-05","TCGA-14-0736-02A-01D-2004-05",
+             "TCGA-19-0957-02A-11D-2004-05","TCGA-19-1389-02A-21D-2004-05",
+             "TCGA-14-1402-02A-01D-2004-05","TCGA-19-4065-02A-11D-2004-05")
+query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450",
+                   level = "3", samples = samples)
+TCGADownload(query,path = "dataDemo2")
+query <- TCGAQuery(tumor = "gbm", platform = "bio", level = "2")
+TCGADownload(query, path = "dataDemo2")
+
+#-------------------------- Preparing data and metadata
+# met: data frame with probe info (probe id, ge) and beta values
+# beta: data frame with only beta values (probe vs patient)
+# probe: data frame with only probe info(probe vs patient)
+# Conclusion: met = probe +d beta
+# met.md = patient metadata
+met <- organizeMethylationDataFrame("dataDemo2")
+probe  <- met[,1:4]
+beta   <- met[,5:ncol(met)]
+
+met.md <- organizeMethylationMetaDataFrame("dataDemo2")
+samples <- colnames(beta)
+idx <- is.element(met.md$bcr_patient_barcode,strtrim(samples,12))
+met.md <- met.md[idx,]
+```
+
+
+After we divided the data in groups 
+in order to analyse the data. Using the metadata, it is possible to create an
+survival plot with the function survivalPlot as follows:
+
+```{r, eval = FALSE}
+# random split of pacients into groups
+met.md$cluster <- c(rep("group1",nrow(met.md)/4),rep("group2",nrow(met.md)/4),
+                    rep("group3",nrow(met.md)/4),rep("group4",nrow(met.md)-3*(floor(nrow(met.md)/4))))
+rownames(met.md) <- met.md$bcr_patient_barcode
+
+#---------------------- survival
+survivalPlot(met.md)
+```
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("survival.png")
+grid.raster(img)
+```
+
+Using the data and calculating the mean methylation per groups it is possible to create an
+mean methylation boxplot with the function met.mean.boxplot as follows:
+
+```{r, eval = FALSE}
+#----------------------mean methylation
+met.mean <- data.frame(apply(beta,2,mean,na.rm=TRUE))
+colnames(met.mean) <- "avg"
+met.mean$patient <-  strtrim(rownames(met.mean),12)
+aux <- merge(met.mean,met.md, by.x="patient",by.y="bcr_patient_barcode")
+met.mean.boxplot(aux)
+```
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("meanmet.png")
+grid.raster(img)
+```
+
+The final example is a volcano plot 
+that compares the methylation data between the two groups.
+
+```{r, eval = FALSE}
+#----------------------- calculate.pvalues (just an example)
+beta.t <-  data.frame(t(beta))
+# TODO verify class of the object
+pvalues <- calculate.pvalues(beta.t,c(1,3,5,7,9,11),c(2,4,6,8,10,12))
+
+#------------- volcano plot
+probe$p.value <- pvalues[,1]
+probe$p.value.adj <- pvalues[,2]
+prim.rec <- diffmean.prim.rec(beta)
+probe <- cbind(probe,prim.rec)
+hypo.hyper <- volcano.plot(probe,p.cut=0.619)
+```
+
+The ouptup will be an graph as the figure below. The function will 
+return the values that are more relevant.
+
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("volcano.png")
+grid.raster(img)
+```
