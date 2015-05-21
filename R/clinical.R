@@ -23,6 +23,9 @@ SampleTypes <- function(barcode, typesample){
 #' @param barcode barcode
 #' @param typesample typesample
 #' @export
+#' @examples
+#' # selection of normal samples "NT"
+#' samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
 #' @return MultiSampleTypes
 MultiSampleTypes <- function(barcode,typesample){
   # Tumor AND Solid Tissue Normal NOT FROM THE SAME PATIENTS
@@ -209,6 +212,7 @@ HER_status_BRCA  <- function(barcode, HER, clinical_patient_data){
 #'   clinical_data_site_cancer
 #' @param cancer cancer
 #' @export
+#' @examples clinical_data_site_cancer("gbm")
 #' @return clinical_data_site_cancer
 clinical_data_site_cancer <-function(cancer){
   return(paste0("https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/", cancer,"/bcr/biotab/clin/"))
@@ -220,6 +224,7 @@ clinical_data_site_cancer <-function(cancer){
 #' @param cancer cancer
 #' @param clinical_data_type clinical_data_type
 #' @export
+#' @examples clinic ("gbm","clinical_patient")
 #' @importFrom RCurl getURL
 #' @return clinic
 clinic <- function(cancer,clinical_data_type){
