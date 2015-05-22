@@ -32,12 +32,10 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
                           recursive = TRUE)
         files <- c(files, aux )
     }
-    print(files)
     idx <- grep("MANIFEST|README|CHANGES|DESCRIPTION|DATA_USE",files)
     if(length(idx) > 0){
         files <- files[-idx]
     }
-    print(files)
     if(!is.null(type)){
         files <- files[grep(type,files)]
     }
