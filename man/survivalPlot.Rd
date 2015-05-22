@@ -44,11 +44,18 @@ Creates survival analysis
 # probe: data frame with only probe info(probe vs patient)
 # Conclusion: met = probe +d beta
 # met.md = patient metadata
-met <- organizeMethylationDataFrame("data")
+sample <- c("TCGA-06-0147-01A-01D-0218-05", "06-0145-01A-06D-0218-05")
+query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
+TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
+met <- TCGAPrepare(query, dir="exampleData")
 probe <- met[,1:4]
 beta  <- met[,5:ncol(met)]
 
-met.md <- organizeMethylationMetaDataFrame("data")
+query <- TCGAQuery(tumor = "GBM",platform = "bio",level = 2)
+TCGADownload(query,path = "exampleMetaData",type="clinical_patient",
+             quiet = TRUE)
+met.md <- TCGAPrepare(query,"exampleMetaData")
+met.md <- met.md[-(1:2),]
 samples <- colnames(beta)
 idx <- is.element(met.md$bcr_patient_barcode,strtrim(samples,12))
 met.md <- met.md[idx,]

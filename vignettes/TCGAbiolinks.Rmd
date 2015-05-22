@@ -239,10 +239,8 @@ met.mean.boxplot(aux)
 ```
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-library(png)
-library(grid)
-img <- readPNG("meanmet.png")
-grid.raster(img)
+img <- png::readPNG("meanmet.png")
+grid::grid.raster(img)
 ```
 
 The final example is a volcano plot 
