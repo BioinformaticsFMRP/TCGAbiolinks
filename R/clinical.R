@@ -29,7 +29,8 @@ SampleTypes <- function(barcode, typesample){
 #' @export
 #' @examples
 #' # selection of normal samples "NT"
-#' samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
+#' dataFilt <- "TCGA-06-0125-01A-01D-A45W-05"
+#' samplesNT <- MultiSampleTypes(dataFilt, typesample = c("NT"))
 #' @return MultiSampleTypes
 MultiSampleTypes <- function(barcode,typesample){
     # Tumor AND Solid Tissue Normal NOT FROM THE SAME PATIENTS
