@@ -19,6 +19,7 @@ MultiSampleTypes
 }
 \examples{
 # selection of normal samples "NT"
-samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
+dataFilt <- "TCGA-06-0125-01A-01D-A45W-05"
+samplesNT <- MultiSampleTypes(dataFilt, typesample = c("NT"))
 }
 

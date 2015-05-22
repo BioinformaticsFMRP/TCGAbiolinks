@@ -4,6 +4,7 @@
 #' @param path location of the final data saving
 #' @param type Get files with type pattern instead of downloading all the folder
 #' @param quiet Should download supress output messages. Default: false
+#' @param samples List of samples to download
 #' @seealso TCGASearch
 #' @examples
 #'    samples <- c("TCGA-06-0125-01A-01D-A45W-05")
