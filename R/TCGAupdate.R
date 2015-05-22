@@ -206,33 +206,15 @@ tcgaGetTable <- function(url, max = 0) {
 }
 
 
-tcgaUpdate <- function(){
+TCGAUpdate <- function(){
 
-    tcga.db <-  get("tcga.db")
-
-    # get new version of files
-    new.db <-  createTcgaTable()
-    print(dim(new.db))
-    # copy not modified ones
-    for (i in seq_along(new.db[,1])){
-        db <- subset(tcga.db,new.db[i,"name"] == tcga.db$name)
-        new.db[i,"deployStatus"] <- db$barcode
-    }
-
-    idx <- ((new.db$deployStatus == "" |  new.db$deployStatus == "Not found" |
-                 (new.db$deployStatus == "Available")) &
-                !grepl("aux|mage-tab", new.db$name)
-    )
-    new.db[idx,]$deployStatus <- "Available"
-    new.db[idx,]$deployStatus <- getBarcode(new.db[idx,])$barcode
-    colnames(new.db)[4] <- "barcode"
-    tcga.db <- new.db
     tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
 
     # Get platform table
     tcga.query <- "query=Platform"
     next.url <- paste0(tcga.root, tcga.query)
     platform.table <- tcgaGetTable(next.url)
+    print(dim(platform.table))
     platform.table <- platform.table[, 1:4]
     platform.table <- platform.table[order(platform.table$name,
                                            decreasing = TRUE),]
@@ -248,6 +230,28 @@ tcgaUpdate <- function(){
     next.url <- paste0(tcga.root, tcga.query)
     center.table  <- tcgaGetTable(next.url)
     center.table <- center.table[, 1:3]
+
+    tcga.db <-  get("tcga.db")
+
+    # get new version of files
+    new.db <-  createTcgaTable()
+    print(dim(new.db))
+    # copy not modified ones
+    for (i in seq_along(new.db[,1])){
+        db <- subset(tcga.db,new.db[i,"name"] == tcga.db$name)
+        if(nrow(db) == 1){
+            new.db[i,"deployStatus"] <- db$barcode
+        }
+    }
+
+    idx <- ((new.db$deployStatus == "" |  new.db$deployStatus == "Not found" |
+                 (new.db$deployStatus == "Available")) &
+                !grepl("aux|mage-tab", new.db$name)
+    )
+    new.db[idx,]$deployStatus <- "Available"
+    new.db[idx,]$deployStatus <- getBarcode(new.db[idx,])$barcode
+    colnames(new.db)[4] <- "barcode"
+    tcga.db <- new.db
 
     save(platform.table, disease.table, tcga.db, center.table,
          file = paste0(system.file("extdata", package = "TCGAbiolinks"),
