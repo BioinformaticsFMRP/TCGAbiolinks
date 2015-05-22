@@ -13,10 +13,10 @@ GenesCutID <- function(GeneList){
 #' @description
 #'   TimeUse
 #' @param func func
-#' @export
-#' @examples
-#'  TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",
-#'  Genelist))
+# @export
+# @examples
+#  TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",
+#  Genelist))
 #' @return time execution of a function
 TimeUse <- function(func){
     time1 <- proc.time() # mod1 to determine time calculation
