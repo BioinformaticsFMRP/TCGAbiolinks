@@ -6,8 +6,12 @@
 #'   Row: matrix with genes/loci
 #'   Cols: samples in columns
 #' @return Data frame with data read
+#' @param query Data frame as the one returned from TCGAQuery
+#' @param dir Directory with the files
+#' @param type File to prepare.
 #' @examples
-#'  TCGAPrepare2(query,dir="path")
+#'  query <- TCGAQuery(tumor = "gbm")
+#'  TCGAPrepare(query,dir="path")
 #' @export
 TCGAPrepare <- function(query, dir = NULL, type = NULL){
 
