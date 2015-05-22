@@ -97,107 +97,23 @@ survivalPlot <- function(met.md, legend = "Legend", cutoff = 0,
                            back.white = TRUE,
                            xlab = paste0(xlab, "(", time.reference,
                                          ")"), ylab = ylab, main = main)
-            if (cutoff != 0) {
-                surv <- surv + ggplot2::coord_cartesian(xlim = c(0, cutoff))
-            }
             label.add.n <- function(x) {
                 paste0(x, "(n=", nrow(met.md[met.md$cluster == x,]), ")")
             }
+
+            if (cutoff != 0) {
+                surv <- surv + ggplot2::coord_cartesian(xlim = c(0, cutoff))
+            }
             surv <- surv + scale_colour_discrete(
                 name = "legend",
-                labels = sapply(levels(met.md$type), label.add.n))
-            surv <- surv + geom_point(aes(colour = met.md$group), shape = 3,
-                                      size = 2)
-            surv <- surv + guides(linetype = FALSE) +
-                scale_y_continuous(formatter = 'percent')
+                labels = sapply(levels(met.md$type), label.add.n)) +
+                geom_point(aes(colour = met.md$group), shape = 3,
+                                      size = 2) +
+                guides(linetype = FALSE) +
+                scale_y_continuous(labels = percent)
             ggsave(surv, filename = filename)
         }
     })
-}
-#' @title organize TCGA Methylation MetaData
-#'
-#' @description
-#'   Organize TCGA methylation metadata for the mean methylation analysis.
-#'
-#' @param wd Directory with the files
-#' @example inst/examples/analysis.R
-#' @export
-#' @return \code{invisible (metadata)}
-organizeMethylationMetaDataFrame <- function(wd = NULL) {
-    oldwd <- getwd()
-    setwd(wd)
-    on.exit(setwd(oldwd))
-
-    dirs <- list.dirs()
-    files <- NULL
-    for (i in seq_along(dirs)) {
-        files <- c(files, paste0(dirs[i], "/", list.files(dirs[i])))
-    }
-    files <- files[grep(".*clinical_patient.*", files)]
-    header <- read.table(files[1], nrows = 1, header = FALSE,
-                         sep = "\t", stringsAsFactors = FALSE)
-    metadata <- read.table(files[1], header = TRUE, sep = "\t",
-                           skip = 2)
-    colnames(metadata) <- unlist(header)
-    invisible(metadata)
-}
-
-#' @title organize TCGA Methylation Data
-#'
-#' @description
-#'   Organize TCGA methylation data for the mean methylation analysis.
-#'
-#' @details
-#'    Input: a directory with DNA methylation data,
-#'    Output: a data frame with DNA methylation values
-#'    where rows are the probes names and columns are paciente ID
-#'    Execution: read all files inside the directory and merge it by
-#'    probes (Composite.Element.REF)
-#' @example inst/examples/analysis.R
-#' @param wd Directory with the files
-#' @return Methylation betavalues table
-#' @export
-organizeMethylationDataFrame <- function(wd = getwd()) {
-    oldwd <- getwd()
-    setwd(wd)
-    on.exit(setwd(oldwd))
-
-    dirs <- list.dirs()
-    files <- NULL
-    for (i in seq_along(dirs)) {
-        files <- c(files, paste0(dirs[i], "/", list.files(dirs[i])))
-    }
-    files <- files[grep("TCGA.*txt", files)]
-
-    for (i in seq_along(files)) {
-        header <- readLines(files[i], n = 1)
-        IDpatient <- substr(header, 19, 46)
-        data <- read.table(files[i], header = TRUE, sep = "\t",
-                           skip = 1)
-        colnames(data)[2] <- IDpatient
-        if (!exists("methylation")) {
-            methylation <- data[, c(1, 3:5, 2)]
-        } else {
-            methylation <- merge(methylation, data[, c(1, 2)],
-                                 by = "Composite.Element.REF")
-        }
-    }
-
-    # Use Composite.Element.REF as name, instead of column
-    rownames(methylation) <- methylation$Composite.Element.REF
-    # methylation$Composite.Element.REF <- NULL
-
-    # remove X Y chromossomes
-    message("Removing X Y chromossomes")
-    methylation <- methylation[methylation$Chromosome != "X" &
-                                   methylation$Chromosome != "Y", ]
-    # methylation$Chromosome <- NULL
-
-    # remove NA lines
-    message("Removing NA Lines")
-    methylation <- na.omit(methylation)
-
-    invisible(methylation)
 }
 #' @title Mean methylation boxplot
 #' @description
@@ -252,8 +168,8 @@ metMeanBoxplot <- function(data, sort = FALSE,
                                                       data$avg)),
                               name = legend)
     } else {
-        p <- ggplot(data, aes(factor(data$cluster), data$avg))
-        p <- p + geom_boxplot(aes(fill = factor(data$cluster)),
+        p <- ggplot(data, aes(factor(data$cluster), data$avg)) +
+          geom_boxplot(aes(fill = factor(data$cluster)),
                               notchwidth = 0.25) +
             geom_jitter(height = 0,
                         position = position_jitter(width = 0.1),
