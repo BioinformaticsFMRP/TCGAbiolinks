@@ -21,7 +21,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
     root <- "https://tcga-data.nci.nih.gov"
 
     # Downloading the folder
-    if (is.null(type)) {
+    if (is.null(type) && is.null(samples) ) {
         for (i in 1:nrow(data)) {
 
             file <- paste0(path, "/", basename(data[i, "deployLocation"]))
@@ -41,9 +41,12 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             dir.create(file.path(path,folder), showWarnings = FALSE)
             url <- gsub(".tar.gz","",data[i,]$deployLocation)
             files <- getFileNames(paste0(root,url))
-            files <- files[grepl(type,files)]
-            if (length(files) == 0) {
-                next
+
+            if(!is.null(type)){
+                files <- files[grepl(type,files)]
+                if (length(files) == 0) {
+                    next
+                }
             }
 
             if(!is.null(samples)){
@@ -65,10 +68,10 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 filterFiles <- function(data,samples,files){
 
     # case uuid in name
-    if(grep("IlluminaHiSeq_RNASeqV2",data$Platform)){
+    if(grepl("IlluminaHiSeq_RNASeqV2",data$Platform)){
         mage <- getMage(data)
         idx <- unlist(lapply(samples,
-                            function(x) grep(x,mage$Comment..TCGA.Barcode.)))
+                             function(x) grep(x,mage$Comment..TCGA.Barcode.)))
         idx <- unique(idx)
         names <- mage[idx,]$Extract.Name
         idx <- unique(unlist(lapply(names, function(x) grep(x,files))))
@@ -76,7 +79,8 @@ filterFiles <- function(data,samples,files){
         return(files)
     }
     # case barcode in name
-    if(grep("IlluminaHiSeq_RNASeq",data$Platform)){
+    if(grepl("IlluminaHiSeq_RNASeq|humanmethylation",data$Platform,
+            ignore.case = TRUE)){
         idx <- unique(unlist(lapply(samples, function(x) grep(x,files))))
         files <- files[idx]
         return(files)

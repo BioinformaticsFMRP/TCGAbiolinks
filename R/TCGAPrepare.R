@@ -10,8 +10,10 @@
 #' @param dir Directory with the files
 #' @param type File to prepare.
 #' @examples
-#'  query <- TCGAQuery(tumor = "gbm")
-#'  TCGAPrepare(query,dir="path")
+#' sample <- "TCGA-06-0939-01A-01D-1228-05"
+#' query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
+#' TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
+#' data <- TCGAPrepare(query, dir="exampleData")
 #' @export
 TCGAPrepare <- function(query, dir = NULL, type = NULL){
 
@@ -68,7 +70,8 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
         # remove NA lines
         message("Removing NA Lines")
         df <- na.omit(df)
-
+        df[,5:ncol(df)] <- sapply(df[,5:ncol(df)], as.numeric)
+        print(mode(df[,6]))
     }
 
     if (grepl("mda_rppa_core",tolower(platform))) {
@@ -145,6 +148,23 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
             }
 
         }
+    }
+
+    if(grepl("bio",platform,ignore.case = TRUE)){
+        if(!is.null(type)){
+            files <- files[grep(type,files)]
+        }
+        if(length(files) == 1){
+            df <- read.table(files, header = TRUE, sep = "\t",
+                               stringsAsFactors = FALSE, check.names = FALSE,
+                               comment.char = "#",fill = TRUE)
+            message("Please, remove useless info")
+            # removing CDE line and duplicated header
+        } else {
+            message("We're preaparing for the moment only one clinical file")
+            return(NULL)
+        }
+
     }
     return(df)
 }
