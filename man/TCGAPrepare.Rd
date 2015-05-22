@@ -6,6 +6,13 @@
 \usage{
 TCGAPrepare(query, dir = NULL, type = NULL)
 }
+\arguments{
+\item{query}{Data frame as the one returned from TCGAQuery}
+
+\item{dir}{Directory with the files}
+
+\item{type}{File to prepare.}
+}
 \value{
 Data frame with data read
 }
@@ -17,6 +24,7 @@ Prepare data matrices for downstream analysis,
   Cols: samples in columns
 }
 \examples{
-TCGAPrepare2(query,dir="path")
+query <- TCGAQuery(tumor = "gbm") <-
+ TCGAPrepare(query,dir="path")
 }
 

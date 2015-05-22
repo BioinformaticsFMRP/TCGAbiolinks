@@ -4,7 +4,8 @@
 \alias{TCGADownload}
 \title{TCGA Download}
 \usage{
-TCGADownload(data = NULL, path = ".", type = NULL, samples = NULL)
+TCGADownload(data = NULL, path = ".", type = NULL, samples = NULL,
+  quiet = FALSE)
 }
 \arguments{
 \item{data}{TCGASearch output}
@@ -12,6 +13,10 @@ TCGADownload(data = NULL, path = ".", type = NULL, samples = NULL)
 \item{path}{location of the final data saving}
 
 \item{type}{Get files with type pattern instead of downloading all the folder}
+
+\item{samples}{List of samples to download}
+
+\item{quiet}{Should download supress output messages. Default: false}
 }
 \value{
 Download tcga into path
