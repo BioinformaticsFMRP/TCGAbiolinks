@@ -65,16 +65,16 @@ Searches in the tcga database
 }
 \examples{
 query <- TCGAQuery(tumor = "gbm",
-                    added.since = "01/01/2013",
-                    added.up.to = "06/01/2013")
+                   added.since = "01/01/2013",
+                   added.up.to = "06/01/2013")
 
 query <- TCGAQuery(tumor = c("gbm","lgg"),
-                    platform = c("HumanMethylation450","HumanMethylation27"))
+                   platform = c("HumanMethylation450","HumanMethylation27"))
 
 query <- TCGAQuery(tumor = "gbm", platform = "bio")
 
 query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450",
-                    level = "3")
+                   level = "3")
 
 query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-*")
 
@@ -83,6 +83,6 @@ query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04")
 query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04", level = 3)
 
 query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04",
-                    tumor = "OV", platform = "CGH-1x1M_G4447A")
+                   tumor = "OV", platform = "CGH-1x1M_G4447A")
 }
 
