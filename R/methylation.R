@@ -6,20 +6,32 @@
 #' @import ggplot2
 #' @export
 #' @return dataframe with diffmean values
-#' @examples inst/examples/analysis.R
+#' @examples
+#' patient <- paste("patient",1:100)
+#' probes <- paste0("cg00",1:100)
+#' beta.values <- runif(10000,0,1)
+#' beta.values <- matrix(beta.values,ncol = 100,nrow = 100)
+#' values <- as.data.frame(beta.values)
+#' colnames(values) <- patient
+#' rownames(values) <- probes
+#' diff.group1xgroup2 <- diffmean(values[,1:50],values[,51:100])
 diffmean <- function(group1, group2) {
-    g1 <- group1
+    g1 <- as.data.frame(group1)
     g1$mean.g1 <- apply(group1, 1, mean, na.rm = TRUE)
     g1$probeID <- rownames(group1)
 
-    g2 <- group2
+    g2 <- as.data.frame(group2)
     g2$mean.g2 <- apply(group2, 1, mean, na.rm = TRUE)
     g2$probeID <- rownames(group2)
 
-    g1.g2 <- merge(g1[, c("probeID", "mean.g1")],
-                   g2[, c("probeID","mean.g2")],
-                   by = "probeID")
-    rownames(g1.g2) <- g1.g2[, 1]
+    g1.g2 <- merge(g1[, "mean.g1"],
+                   g2[, "mean.g2"],
+                   by = "row.names",
+                   all.x = TRUE
+    )
+    g1.g2 <- g1.g2[,-1]
+    rownames(g1.g2) <- rownames(g1)
+    colnames(g1.g2) <- c("mean.g1","mean.g2")
     g1.g2$diffmean <- g1.g2$mean.g1 - g1.g2$mean.g2
 
     png(filename = "histogram_diffmean.png")
@@ -44,9 +56,16 @@ diffmean <- function(group1, group2) {
 #' @param color not implemented yet
 #' @importFrom GGally ggsurv
 #' @importFrom survival survfit Surv
+#' @importFrom scales percent
 #' @export
 #' @return Survival plot
-#' @example inst/examples/analysis.R
+#' @examples
+#' death_days_to <- runif(100,10,200)
+#' vital_status <-sample (c("Alive","Dead"),100, replace = TRUE)
+#' cluster <- rep(c("group1","group2"),100)
+#' met.md <- data.frame(death_days_to,cluster,vital_status)
+#' survivalPlot(met.md,default.plot = "plot", filename = "surv.pdf")
+#' survivalPlot(met.md)
 survivalPlot <- function(met.md, legend = "Legend", cutoff = 0,
                          main = "Kaplan-Meier Overall Survival Curves",
                          ylab = "PROBABILITY OF SURVIVAL",
@@ -55,65 +74,74 @@ survivalPlot <- function(met.md, legend = "Legend", cutoff = 0,
                          filename = "survival.pdf",
                          color = c("green", "firebrick4", "orange3", "blue"),
                          default.plot = "ggplot") {
-    with(met.md,{
-        if (cutoff != 0) {
-            # Axis-x cut-off
-            aux <- subset(met.md, met.md$death_days_to > cutoff)
-            # 'cut' info bigger than cutoff
-            met.md[rownames(aux), "death_days_to"] <- cutoff
-            # Pacient is alive (0:alive,1:dead)
-            met.md[rownames(aux), "vital_status"] <- "Alive"
-        }
-        # create a column to be used with survival package, info need
-        # to be TRUE(DEAD)/FALSE (ALIVE)
-        met.md$s <- met.md$vital == "Dead"
+    .e <- environment()
+    if (cutoff != 0) {
+        # Axis-x cut-off
+        aux <- subset(met.md, met.md$death_days_to > cutoff)
+        # 'cut' info bigger than cutoff
+        met.md[rownames(aux), "death_days_to"] <- cutoff
+        # Pacient is alive (0:alive,1:dead)
+        met.md[rownames(aux), "vital_status"] <- "Alive"
+    }
+    # create a column to be used with survival package, info need
+    # to be TRUE(DEAD)/FALSE (ALIVE)
+    met.md$s <- met.md$vital == "Dead"
 
-        # Column with groups
-        met.md$type <- as.factor(met.md$cluster)
+    # Column with groups
+    met.md$type <- as.factor(met.md$cluster)
 
-        # create the formula for survival analysis
-        f.m <- formula(Surv(as.numeric(met.md$death_days_to), s) ~ type)
-        fit <- survfit(f.m, data = met.md)
+    # create the formula for survival analysis
+    f.m <- formula(Surv(as.numeric(met.md$death_days_to),
+                        met.md$s) ~ met.md$type)
+    fit <- survfit(f.m, data = met.md)
 
+    if (default.plot == "plot") {
         pdf(file = filename)
-        if (default.plot == "plot") {
-            plot(fit, lwd = 4, col = color, main = main,
-                 xlab = paste0(xlab,"(", time.reference, ")"),
-                 ylab = ylab, yscale = 100,
-                 bg = "black")
-            box(col = "black", lwd = 3)
-            par(xpd = TRUE)
-            legend("right", legend = sapply(seq_along(fit$n), function(x) {
-                paste0("group", x, " (n=", fit$n[x], ")")
-            }), col = color, lwd = 3, title = legend, box.lwd = 3,
-            bg = "white")
-            dev.off()
-        } else {
-            ## Using ggplot
-            surv <- ggsurv(fit, CI = "def", plot.cens = FALSE,
-                           surv.col = "gg.def",
-                           cens.col = "red", lty.est = 1,
-                           lty.ci = 2, cens.shape = 3,
-                           back.white = TRUE,
-                           xlab = paste0(xlab, "(", time.reference,
-                                         ")"), ylab = ylab, main = main)
-            label.add.n <- function(x) {
-                paste0(x, "(n=", nrow(met.md[met.md$cluster == x,]), ")")
-            }
-
-            if (cutoff != 0) {
-                surv <- surv + ggplot2::coord_cartesian(xlim = c(0, cutoff))
-            }
-            surv <- surv + scale_colour_discrete(
-                name = "legend",
-                labels = sapply(levels(met.md$type), label.add.n)) +
-                geom_point(aes(colour = met.md$group), shape = 3,
-                                      size = 2) +
-                guides(linetype = FALSE) +
-                scale_y_continuous(labels = percent)
-            ggsave(surv, filename = filename)
+        plot(fit, lwd = 4, col = color, main = main,
+             xlab = paste0(xlab,"(", time.reference, ")"),
+             ylab = ylab, yscale = 100,
+             bg = "black")
+        box(col = "black", lwd = 3)
+        par(xpd = TRUE)
+        legend("right", legend = sapply(seq_along(fit$n), function(x) {
+            paste0("group", x, " (n=", fit$n[x], ")")
+        }), col = color, lwd = 3, title = legend, box.lwd = 3,
+        bg = "white")
+        dev.off()
+    } else {
+        ## Using ggplot
+        label.add.n <- function(x) {
+            paste0(x, "(n=", nrow(met.md[met.md$cluster == x,]), ")")
         }
-    })
+
+        surv <- ggsurv(fit, CI = "def", plot.cens = FALSE,
+                       surv.col = "gg.def",
+                       cens.col = "red", lty.est = 1,
+                       lty.ci = 2, cens.shape = 3,
+                       back.white = TRUE,
+                       xlab = paste0(xlab, "(", time.reference,
+                                     ")"), ylab = ylab, main = main)
+        if (cutoff != 0) {
+            surv <- surv + ggplot2::coord_cartesian(xlim = c(0, cutoff))
+        }
+        label.add.n <- function(x){
+            paste0(x,"(n=",nrow(met.md[met.md$cluster == x,]),")")
+        }
+        with(met.md,{
+            surv <- surv + scale_colour_discrete(name = "legend",
+                            labels = sapply(levels(met.md$type),label.add.n)
+            )
+            with(surv,{
+
+                surv <- surv + geom_point(aes(colour = group),
+                                          shape = 3,size = 2)
+                surv <- surv + guides(linetype = FALSE) +
+                    scale_y_continuous(labels = scales::percent)
+                ggsave(surv, filename = filename)
+            })
+        })
+    }
+
 }
 #' @title Mean methylation boxplot
 #' @description
@@ -134,16 +162,11 @@ survivalPlot <- function(met.md, legend = "Legend", cutoff = 0,
 #' @return Save the survival plot
 #'
 #' @examples
-#'# -----------------
-#'# |      data       |
-#'# -----------------
-#'# | mean.met|cluster|
-#'# -------------------
-#'   avg <- runif(500,0,1)
-#'   cluster <- c('Lgm1','Lgm2','Lgm3','Lgm4','Lgm5','Lgm6')
-#'   cluster <- sample(cluster, 500,replace = TRUE)
-#'   data <- data.frame(avg,cluster)
-#'   metMeanBoxplot(data)
+#' avg <- runif(500,0,1)
+#' cluster <- c('Lgm1','Lgm2','Lgm3','Lgm4','Lgm5','Lgm6')
+#' cluster <- sample(cluster, 500,replace = TRUE)
+#' data <- data.frame(avg,cluster)
+#' metMeanBoxplot(data)
 metMeanBoxplot <- function(data, sort = FALSE,
                            filename = "G-CIMP-mean.methylation.pdf",
                            ylab = "Mean DNA methylation",
@@ -152,15 +175,15 @@ metMeanBoxplot <- function(data, sort = FALSE,
                            legend = "Legend",
                            color = c("green", "red", "purple",
                                      "orange", "salmon", "grey")) {
-
+    .e <- environment()
     # Plot for methylation analysis Axis x: LGm clusters Axis y:
     # mean methylation
     if (sort) {
         p <- ggplot(data, aes(reorder(factor(data$cluster), data$avg),
-                              data$avg))
-        p <- p + geom_boxplot(aes(fill = reorder(factor(data$cluster),
-                                                 data$avg)),
-                              notchwidth = 0.25) +
+                              data$avg),  environment = .e) +
+            geom_boxplot(aes(fill = reorder(factor(data$cluster),
+                                            data$avg)),
+                         notchwidth = 0.25) +
             geom_jitter(height = 0,position = position_jitter(width = 0.1),
                         size = 3) +
             scale_fill_manual(values = color,
@@ -168,9 +191,10 @@ metMeanBoxplot <- function(data, sort = FALSE,
                                                       data$avg)),
                               name = legend)
     } else {
-        p <- ggplot(data, aes(factor(data$cluster), data$avg)) +
-          geom_boxplot(aes(fill = factor(data$cluster)),
-                              notchwidth = 0.25) +
+        p <- ggplot(data, aes(factor(data$cluster), data$avg),
+                    environment = .e) +
+            geom_boxplot(aes(fill = factor(data$cluster)),
+                         notchwidth = 0.25) +
             geom_jitter(height = 0,
                         position = position_jitter(width = 0.1),
                         size = 3) +
@@ -190,7 +214,7 @@ metMeanBoxplot <- function(data, sort = FALSE,
 
     # saving box plot to analyse it
     ggsave(p, filename = filename, width = 10, height = 10, dpi = 600)
-
+    dev.off()
 }
 
 #' @title Calculate pvalues
@@ -210,14 +234,30 @@ metMeanBoxplot <- function(data, sort = FALSE,
 #' @export
 #' @return Data frame with two cols
 #'         p-values/p-values adjusted
-#' @example inst/examples/analysis.R
-calculate.pvalues <- function(values, idx1, idx2, paired = TRUE,
+#' @examples
+#' patient <- paste("patient",1:100)
+#' probes <- paste0("cg00",1:100)
+#' beta.values <- runif(10000,0,1)
+#' beta.values <- matrix(beta.values,ncol = 100,nrow = 100)
+#' values <- as.data.frame(beta.values)
+#' rownames(values) <- patient
+#' colnames(values) <- probes
+#' pvalues <- calculate.pvalues(values,1:50,51:100)
+calculate.pvalues <- function(values, idx1 = NULL, idx2 = NULL, paired = TRUE,
                               exact = TRUE, cores = NULL) {
+
+    if (is.null(idx1) | is.null(idx2) ) {
+        message("One of the groups are null")
+        message("Function call:")
+        message("calculate.pvalues(values, idx1, idx2, paired = TRUE,
+                                      exact = TRUE, cores = NULL)")
+        return(NULL)
+    }
     if (is.null(cores)) {
-        cores <- parallel::detectCores()
+        cores <- parallel::detectCores()/2
     }
     # Apply Wilcoxon test in order to calculate the p-values
-    w.p.values <- unlist(mclapply(values, function(probe) {
+    p.value <- unlist(mclapply(values, function(probe) {
         zz <- wilcox.exact(as.matrix(probe[idx1]), as.matrix(probe[idx2]),
                            exact = exact, paired = paired)
         z <- zz$p.value
@@ -226,20 +266,20 @@ calculate.pvalues <- function(values, idx1, idx2, paired = TRUE,
 
     ## Plot a histogram
     png(filename = "histogram_pvalues.png")
-    hist(w.p.values)
+    hist(p.value)
     dev.off()
 
     ## Calculate the adjusted p-values by using Benjamini-Hochberg
     ## (BH) method
-    w.p.values.adj <- p.adjust(w.p.values, method = "BH")
+    p.value.adj <- p.adjust(p.value, method = "BH")
 
     png(filename = "histogram_pvalues_adj.png")
 
     ## Plot a histogram
-    hist(w.p.values.adj)
+    hist(p.value.adj)
     dev.off()
 
-    return(data.frame(w.p.values, w.p.values.adj))
+    return(data.frame(p.value, p.value.adj))
 }
 
 #' @title Volcano plot
@@ -267,8 +307,20 @@ calculate.pvalues <- function(values, idx1, idx2, paired = TRUE,
 #'          group 1 = Not Significant
 #'          group 2 = Hypermethylated
 #'          group 3 = Hypomethylated
-#' @example inst/examples/analysis.R
-volcanoPlot <- function(data, filename = "volcano.pdf",
+#' @examples
+#' patient <- paste("patient",1:100)
+#' Composite.Element.REF <- paste0("cg00",1:100)
+#' beta.values <- runif(10000,0,1)
+#' beta.values <- matrix(beta.values,ncol = 100,nrow = 100)
+#' values <- as.data.frame(beta.values)
+#' colnames(values) <- patient
+#' rownames(values) <- Composite.Element.REF
+#' data <- calculate.pvalues(as.data.frame(t(values)),1:50,51:100)
+#' diffmean <- diffmean(values[,1:50],values[,51:100])
+#' data <-cbind(Composite.Element.REF,data,diffmean)
+#' hypo.hyper <- volcanoPlot(data, p.cut = 0.85)
+volcanoPlot <- function(data,
+                        filename = "volcano.pdf",
                         ylab = "- 1*log10 of the Significance",
                         xlab = "DNA Methylation",
                         title = "Volcano Plot TCGA GBM Tumors",
@@ -278,7 +330,9 @@ volcanoPlot <- function(data, filename = "volcano.pdf",
                         label = c("1" = "Not Significant",
                                   "2" = "Hypermethylated",
                                   "3" = "Hypomethylated"),
-                        xlim = NULL, ylim = NULL, p.cut = 0.05,
+                        xlim = NULL,
+                        ylim = NULL,
+                        p.cut = 0.05,
                         diffmean.cut = 0) {
     .e <- environment()
     data$threshold <- "1"
@@ -288,36 +342,29 @@ volcanoPlot <- function(data, filename = "volcano.pdf",
 
     # hypermethylated samples compared to old state
     hyper <- subset(data.s, data.s$diffmean < (-diffmean.cut))
-    data[rownames(hyper), "threshold"] <- "2"
-
+    if (nrow(hyper) > 0) {
+        data[rownames(hyper), "threshold"] <- "2"
+    }
     # hypomethylated samples compared to old state
-    hypo <- subset(data.s, data$diffmean > diffmean.cut)
-    data[rownames(hypo), "threshold"] <- "3"
-
+    hypo <- subset(data.s, data.s$diffmean > diffmean.cut)
+    if (nrow(hypo) > 0) {
+        data[rownames(hypo), "threshold"] <- "3"
+    }
     # Plot a volcano plot
-    p <- ggplot(data = data, aes(x = diffmean,
+    p <- ggplot(data = data, aes(x = data$diffmean,
                                  y = -1 * log10(data$p.value.adj),
                                  colour = data$threshold),
-                environment = .e) +
-        geom_point()
-    if (!is.null(xlim)) {
-        p <- p + xlim(xlim)
-    }
-    if (!is.null(ylim)) {
-        p <- p + ylim(ylim)
-    }
-    p <- p + labs(title = title) + ylab(ylab) + xlab(xlab)
-    p <- p + geom_vline(aes(xintercept = -diffmean.cut), colour = "black",
-                        linetype = "dashed") +
-        geom_vline(aes(xintercept = diffmean.cut),
-                   colour = "black", linetype = "dashed") +
+                environment = .e) + geom_point() +
+        labs(title = title) + ylab(ylab) + xlab(xlab) +
+        geom_vline(aes(xintercept = -diffmean.cut), colour = "black",
+                   linetype = "dashed") +
         geom_hline(aes(yintercept = -1 * log10(p.cut)),
                    colour = "black",
-                   linetype = "dashed")
-    p <- p + scale_color_manual(breaks = c("1", "2", "3"),
-                                values = color,
-                                labels = label,
-                                name = legend)
+                   linetype = "dashed") +
+        scale_color_manual(breaks = c("1", "2", "3"),
+                           values = color,
+                           labels = label,
+                           name = legend)
     # saving box plot to analyse it
     ggsave(p, filename = filename, width = 10, height = 5, dpi = 600)
     data <- subset(data, data$threshold == "2" | data$threshold == "3")
@@ -362,16 +409,10 @@ get.GRCh.bioMart <- function() {
 #' @importFrom GenomicRanges GRanges distanceToNearest
 #' @importFrom IRanges IRanges
 #' @export
-#' @examples
-#' # met Methylation data
-#' # experssion Expression data
-#' \dontrun{
-#' gene.met <- starbursAnalysis(met,expression)
-#' starburstplot(gene.met)
-#' }
 starbursAnalysis <- function(met, expression) {
     #### fix methylation gene names before merging.  map gene ID to
     #### genomic coordinates
+    gene.location <- get("gene.location")
     gene.GR <- GRanges(seqnames = paste0("chr", gene.location$chromosome_name),
                        ranges = IRanges(start = gene.location$start_position,
                                         end = gene.location$end_position),
@@ -443,13 +484,6 @@ starbursAnalysis <- function(met, expression) {
 #' @import ggplot2
 #' @export
 #' @return Save a starburst plot
-#' @examples
-#'  \dontrun{
-#' # met Methylation data
-#' # experssion Expression data
-#' gene.met <- starbursAnalysis(met,expression)
-#' starburstplot(gene.met)
-#' }
 starburstPlot <- function(data,
                           filename = "volcano.pdf",
                           ylab = paste0("Gene Expression\nlog10 of the",
