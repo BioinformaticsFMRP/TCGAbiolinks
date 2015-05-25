@@ -18,6 +18,13 @@ dataframe with diffmean values
 calculate diffmean methylation between two groups
 }
 \examples{
-inst/examples/analysis.R
+patient <- paste("patient",1:100)
+probes <- paste0("cg00",1:100)
+beta.values <- runif(10000,0,1)
+beta.values <- matrix(beta.values,ncol = 100,nrow = 100)
+values <- as.data.frame(beta.values)
+colnames(values) <- patient
+rownames(values) <- probes
+diff.group1xgroup2 <- diffmean(values[,1:50],values[,51:100])
 }
 
