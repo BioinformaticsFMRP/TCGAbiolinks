@@ -244,7 +244,6 @@ clinical_data_site_cancer <- function(cancer){
 #' @param cancer cancer
 #' @param clinical_data_type clinical_data_type
 #' @export
-#' @examples clinic ("gbm","clinical_patient")
 #' @importFrom RCurl getURL
 #' @return clinic
 clinic <- function(cancer,clinical_data_type){
