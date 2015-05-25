@@ -52,14 +52,14 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
             data <- read.table(files[i], header = TRUE, sep = "\t",
                                stringsAsFactors = FALSE)
             sample <- gsub("\\.", "-", colnames(data)[2])
-            colnames(data) <- data[1,]
+            colnames(data) <- gsub(" ", "\\.", data[1,])
             data <- data[-1,] # removing Composite Element REF
             colnames(data)[2] <- sample
             if (i == 1) {
                 df <- data[, c(1, 3:5, 2)]
             } else {
                 df <- merge(df, data[, c(1, 2)],
-                            by = "Composite Element REF")
+                            by = "Composite.Element.REF")
             }
         }
         rownames(df) <- df$Composite.Element.REF
@@ -70,7 +70,7 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
         # remove NA lines
         message("Removing NA Lines")
         df <- na.omit(df)
-        df[,5:ncol(df)] <- sapply(df[,5:ncol(df)], as.numeric)
+        df[,3:ncol(df)] <- sapply(df[,3:ncol(df)], as.numeric)
     }
 
     if (grepl("mda_rppa_core",tolower(platform))) {
