@@ -36,15 +36,10 @@ Mean methylation boxplot.
    2 - Groups it belongs
 }
 \examples{
-# -----------------
-# |      data       |
-# -----------------
-# | mean.met|cluster|
-# -------------------
-  avg <- runif(500,0,1)
-  cluster <- c('Lgm1','Lgm2','Lgm3','Lgm4','Lgm5','Lgm6')
-  cluster <- sample(cluster, 500,replace = TRUE)
-  data <- data.frame(avg,cluster)
-  metMeanBoxplot(data)
+avg <- runif(500,0,1)
+cluster <- c('Lgm1','Lgm2','Lgm3','Lgm4','Lgm5','Lgm6')
+cluster <- sample(cluster, 500,replace = TRUE)
+data <- data.frame(avg,cluster)
+metMeanBoxplot(data)
 }
 
