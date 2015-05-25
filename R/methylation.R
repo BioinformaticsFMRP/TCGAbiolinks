@@ -409,6 +409,18 @@ get.GRCh.bioMart <- function() {
 #' @importFrom GenomicRanges GRanges distanceToNearest
 #' @importFrom IRanges IRanges
 #' @export
+#' @examples
+#' sample <- "TCGA-06-0939-01A-01D-1228-05"
+#' query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
+#' TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
+#' met <- TCGAPrepare(query, dir="exampleData")
+#' met$diffmean <- runif(nrow(met),-3,3)
+#' FDR <- runif(nrow(met),0,1)
+#' p.value.adj <- runif(nrow(met),0,1)
+#' GeneSymbol <- met$Gene_Symbol
+#' dm <-  runif(nrow(met),-3,3)
+#' expression <- data.frame(GeneSymbol,FDR,p.value.adj,dm)
+#' gene.met <- starbursAnalysis(met,expression)
 starbursAnalysis <- function(met, expression) {
     #### fix methylation gene names before merging.  map gene ID to
     #### genomic coordinates
@@ -455,7 +467,7 @@ starbursAnalysis <- function(met, expression) {
     volcano$meFDR <- log10(volcano$p.value.adj)
     volcano$meFDR2 <- volcano$meFDR
     volcano[volcano$diffmean > 0, "meFDR2"] <-
-        - 1 * volcano[volcano$diffmean > 0, "meFDR"]
+        -1 * volcano[volcano$diffmean > 0, "meFDR"]
 
     return(volcano)
 }
@@ -484,6 +496,19 @@ starbursAnalysis <- function(met, expression) {
 #' @import ggplot2
 #' @export
 #' @return Save a starburst plot
+#' @examples
+#' sample <- "TCGA-06-0939-01A-01D-1228-05"
+#' query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
+#' TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
+#' met <- TCGAPrepare(query, dir="exampleData")
+#' met$diffmean <- runif(nrow(met),-3,3)
+#' FDR <- runif(nrow(met),0,1)
+#' p.value.adj <- runif(nrow(met),0,1)
+#' GeneSymbol <- met$Gene_Symbol
+#' dm <-  runif(nrow(met),-3,3)
+#' expression <- data.frame(GeneSymbol,FDR,p.value.adj,dm)
+#' gene.met <- starbursAnalysis(met,expression)
+#' starburstPlot(gene.met)
 starburstPlot <- function(data,
                           filename = "volcano.pdf",
                           ylab = paste0("Gene Expression\nlog10 of the",
@@ -559,18 +584,18 @@ starburstPlot <- function(data,
                     volcano.m$meFDR2 > lowerthr)
 
     # Group 8: upregulated and hypermethylated
-    f <- subset(volcano.m,
+    g <- subset(volcano.m,
                 volcano.m$geFDR2 > upperthr &
                     volcano.m$meFDR2 > upperthr)
 
     # Group 9: downregulated and hypermethylated
-    f <- subset(volcano.m,
+    h <- subset(volcano.m,
                 volcano.m$geFDR2 < lowerthr &
                     volcano.m$meFDR2 > upperthr)
 
     size <- c("3", "3", "2", "2", "2", "2", "2","2")
     groups <- c("2", "3", "4", "5", "6", "7","8","9")
-    s <- list(a, b, c, d, e, f)
+    s <- list(a, b, c, d, e, f,g,h)
     for (i in seq_along(s)) {
         idx <- rownames(s[[i]])
         if (length(idx) > 0) {
