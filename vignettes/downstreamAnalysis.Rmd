@@ -171,7 +171,8 @@ An example is shown below. We search, download and prepare data from the
 HumanMethylation450 platform.
 
 ```{r, eval = FALSE}
-library(TCGAbiolinks)samples <- c("TCGA-06-0125-01A-01D-A45W-05","TCGA-06-0152-01A-02D-A45W-05",
+library(TCGAbiolinks)
+samples <- c("TCGA-06-0125-01A-01D-A45W-05","TCGA-06-0152-01A-02D-A45W-05",
              "TCGA-06-0171-01A-02D-A45W-05","TCGA-06-0190-01A-01D-A45W-05",
              "TCGA-06-0210-01A-01D-A45W-05","TCGA-06-0211-01A-01D-A45W-05",
              "TCGA-06-0221-01A-01D-A45W-05","TCGA-14-0736-01A-01D-A45W-05",
@@ -183,11 +184,10 @@ library(TCGAbiolinks)samples <- c("TCGA-06-0125-01A-01D-A45W-05","TCGA-06-0152-0
              "TCGA-06-0221-02A-11D-2004-05","TCGA-14-0736-02A-01D-2004-05",
              "TCGA-19-0957-02A-11D-2004-05","TCGA-19-1389-02A-21D-2004-05",
              "TCGA-14-1402-02A-01D-2004-05","TCGA-19-4065-02A-11D-2004-05")
+
 query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450",
                    level = "3", samples = samples)
-TCGADownload(query,path = "dataDemo2")
-query <- TCGAQuery(tumor = "gbm", platform = "bio", level = "2")
-TCGADownload(query, path = "dataDemo2")
+TCGADownload(query,path = "exampleData")
 
 #-------------------------- Preparing data and metadata
 # met: data frame with probe info (probe id, ge) and beta values
@@ -195,16 +195,19 @@ TCGADownload(query, path = "dataDemo2")
 # probe: data frame with only probe info(probe vs patient)
 # Conclusion: met = probe +d beta
 # met.md = patient metadata
-met <- organizeMethylationDataFrame("dataDemo2")
+met <- TCGAPrepare(query, dir="exampleData")
 probe  <- met[,1:4]
 beta   <- met[,5:ncol(met)]
 
-met.md <- organizeMethylationMetaDataFrame("dataDemo2")
+
+query <- TCGAQuery(tumor = "gbm", platform = "bio", level = "2")
+TCGADownload(query, path = "exampleData")
+met.md <- TCGAPrepare(query, dir="exampleData")
+
 samples <- colnames(beta)
 idx <- is.element(met.md$bcr_patient_barcode,strtrim(samples,12))
 met.md <- met.md[idx,]
 ```
-
 
 After we divided the data in groups 
 in order to analyse the data. Using the metadata, it is possible to create an
@@ -212,8 +215,10 @@ survival plot with the function survivalPlot as follows:
 
 ```{r, eval = FALSE}
 # random split of pacients into groups
-met.md$cluster <- c(rep("group1",nrow(met.md)/4),rep("group2",nrow(met.md)/4),
-                    rep("group3",nrow(met.md)/4),rep("group4",nrow(met.md)-3*(floor(nrow(met.md)/4))))
+met.md$cluster <- c(rep("group1",nrow(met.md)/4),
+                    rep("group2",nrow(met.md)/4),
+                    rep("group3",nrow(met.md)/4),
+                    rep("group4",nrow(met.md)-3*(floor(nrow(met.md)/4))))
 rownames(met.md) <- met.md$bcr_patient_barcode
 
 #---------------------- survival
@@ -258,12 +263,12 @@ pvalues <- calculate.pvalues(beta.t,c(1,3,5,7,9,11),c(2,4,6,8,10,12))
 #------------- volcano plot
 probe$p.value <- pvalues[,1]
 probe$p.value.adj <- pvalues[,2]
-prim.rec <- diffmean.prim.rec(beta)
-probe <- cbind(probe,prim.rec)
-hypo.hyper <- volcano.plot(probe,p.cut=0.619)
+diffmean <- diffmean(beta[,c(1,3,5,7,9,11)],beta[,c(2,4,6,8,10,12)])
+probe <- cbind(probe,diffmean)
+hypo.hyper <- volcanoPlot(data, p.cut = 0.85)
 ```
 
-The ouptup will be an graph as the figure below. The function will 
+The output will be an graph as the figure below. The function will 
 return the values that are more relevant.
 
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
@@ -271,4 +276,16 @@ library(png)
 library(grid)
 img <- readPNG("volcano.png")
 grid.raster(img)
+```
+
+The next part, we will analyse rxpression data and methylation data with 
+starburst analysis.
+```{r, eval = FALSE}
+ FDR <- runif(nrow(met),0,1)
+ p.value.adj <- runif(nrow(met),0,1)
+ GeneSymbol <- met$Gene_Symbol
+ dm <-  runif(nrow(met),-3,3)
+ expression <- data.frame(GeneSymbol,FDR,p.value.adj,dm)
+ gene.met <- starbursAnalysis(met,expression)
+ starburstPlot(gene.met)
 ```
