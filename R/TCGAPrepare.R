@@ -133,22 +133,22 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
 
     if (grepl("illuminahiseq_rnaseqv2|illuminahiseq_totalrnaseqv2",
               tolower(platform))) {
+        regex <- paste0("[:alnum:]{8}-[:alnum:]{4}",
+                        "-[:alnum:]{4}-[:alnum:]{4}-[:alnum:]{12}")
+        uuid <- str_match(files,regex)
+        map <- mapuuidbarcode(uuid)
         for (i in seq_along(files)) {
             data <- read.table(files[i], header = TRUE, sep = "\t",
                                stringsAsFactors = FALSE, check.names = FALSE,
                                comment.char = "#",fill = TRUE)
             data <- data[-1,] # removing Composite Element REF
-            regex <- paste0("[:alnum:]{8}-[:alnum:]{4}",
-                            "-[:alnum:]{4}-[:alnum:]{4}-[:alnum:]{12}")
-            uuid <- str_match(files[i],regex)
-            map <- mapuuidbarcode(uuid)
-            colnames(data)[2] <- map$barcode
+            x <- subset(map, uuid ==uuid[i])
+            colnames(data)[2] <- as.character(x$barcode)
             if (i == 1) {
                 df <- data[,c(1,2)]
             } else {
                 df <- merge(df, data[,c(1,2)],by = "gene_id")
             }
-
         }
     }
 
