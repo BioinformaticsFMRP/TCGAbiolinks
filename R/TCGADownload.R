@@ -55,7 +55,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             message(paste0("Downloading:", length(files), " files"))
 
             for (i in seq_along(files)) {
-                if (!file.exists(files[i])) {
+                if (!file.exists(file.path(path,folder,files[i]))) {
                     download(paste0(root,url,"/",files[i]),
                              file.path(path,folder,files[i]),quiet)
                 }
