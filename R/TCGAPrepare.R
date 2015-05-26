@@ -15,6 +15,7 @@
 #' TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
 #' prepared <- TCGAPrepare(query, dir="exampleData")
 #' @export
+#' @importFrom stringr str_match
 TCGAPrepare <- function(query, dir = NULL, type = NULL){
 
     if (is.null(dir)) {
@@ -23,7 +24,7 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
         return(NULL)
     }
     if (length(unique(query$Platform)) > 1 |
-        length(unique(query$Center)) > 2) {
+            length(unique(query$Center)) > 2) {
         message("Sorry! But, for the moment, we can only prepare on type of
             platform per call")
         return(NULL)
@@ -131,14 +132,14 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
     }
 
     if (grepl("illuminahiseq_rnaseqv2|illuminahiseq_totalrnaseqv2",
-             tolower(platform))) {
+              tolower(platform))) {
         for (i in seq_along(files)) {
             data <- read.table(files[i], header = TRUE, sep = "\t",
                                stringsAsFactors = FALSE, check.names = FALSE,
                                comment.char = "#",fill = TRUE)
             data <- data[-1,] # removing Composite Element REF
             regex <- paste0("[:alnum:]{8}-[:alnum:]{4}",
-                                "-[:alnum:]{4}-[:alnum:]{4}-[:alnum:]{12}")
+                            "-[:alnum:]{4}-[:alnum:]{4}-[:alnum:]{12}")
             uuid <- str_match(files[i],regex)
             map <- mapuuidbarcode(uuid)
             colnames(data)[2] <- map$barcode
@@ -157,8 +158,8 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
         }
         if (length(files) == 1) {
             df <- read.table(files, header = TRUE, sep = "\t",
-                               stringsAsFactors = FALSE, check.names = FALSE,
-                               comment.char = "#",fill = TRUE)
+                             stringsAsFactors = FALSE, check.names = FALSE,
+                             comment.char = "#",fill = TRUE)
             message("Please, remove useless info")
             # removing CDE line and duplicated header
         } else {
@@ -178,22 +179,22 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
 #' @importFrom rjson fromJSON
 #' @importFrom plyr rbind.fill
 #' @importFrom RCurl postForm
-mapuuidbarcode <- function(uuids){
+mapuuidbarcode <- function(uuid){
     # Using tcga api: https://goo.gl/M1uQLR
     serv <- "https://tcga-data.nci.nih.gov/uuid/uuidws/mapping/json/uuid/batch"
     header <- c('Content-Type' = 'text/plain')
-    uuids <- paste0(uuids, collapse = ",")
-    ans <- rjson::fromJSON(RCurl::postForm(serv,
+    uuids <- paste0(uuid, collapse = ",")
+    ans <- fromJSON(postForm(serv,
                              .opts = list(postfields = uuids,
                                           httpheader = header,
                                           ssl.verifypeer = FALSE)))
-    if(length(uuids == 1)){
-       x <- data.frame(ans$uuidMapping$uuid,ans$uuidMapping$barcode,
-                       stringsAsFactors = FALSE)
-       colnames(x) <- c("uuid","barcode")
+    if(length(uuid) == 1){
+        x <- data.frame(ans$uuidMapping$barcode,ans$uuidMapping$uuid,
+                        stringsAsFactors = FALSE)
+        colnames(x) <- c("barcode","uuid")
     } else {
-       # Extract patient barcode from sample barcode.
-    x <- (do.call("rbind.fill", lapply(ans$uuidMapping, as.data.frame)))
+        # Extract patient barcode from sample barcode.
+        x <- (do.call("rbind.fill", lapply(ans$uuidMapping, as.data.frame)))
     }
     return(x)
 }
@@ -202,27 +203,28 @@ mapuuidbarcode <- function(uuids){
 #  Get a list of barcode from a list of uuid
 #  example mapuuidbarcode(c("011bb13f-e0e8-4f4b-b7a5-4867bbe3b30a",
 #                           "048615c7-c08c-4199-b394-c59160337d67"))
-#' @importFrom RJSONIO fromJSON
+#' @importFrom rjson fromJSON
 #' @importFrom plyr rbind.fill
 #' @importFrom RCurl postForm
 mapbarcodeuuid <- function(barcode){
     # Using tcga api: https://goo.gl/M1uQLR
-    barcode <- paste0(barcode, collapse = ",")
+    barcodes <- paste0(barcode, collapse = ",")
     serv <- paste0("https://tcga-data.nci.nih.gov/",
                    "uuid/uuidws/mapping/json/barcode/batch")
     header <- c('Content-Type' = 'text/plain')
     ans <- fromJSON(postForm(serv,
-                             .opts = list(postfields = barcode,
+                             .opts = list(postfields = barcodes,
                                           httpheader = header,
                                           ssl.verifypeer = FALSE)))
 
-    # transform to dataframe
-    x <- (do.call("rbind.fill", lapply(ans$uuidMapping, as.data.frame))[[1]])
-    barcodes <- seq(1,length(x),2)
-    uuid <- seq(2,length(x),2)
-    x <- data.frame(x[uuid],as.character(x[barcodes]),
-                    stringsAsFactors = FALSE)
-    colnames(x) <- c("uuid","barcode")
+    if(length(barcode) == 1){
+        x <- data.frame(ans$uuidMapping$barcode,ans$uuidMapping$uuid,
+                        stringsAsFactors = FALSE)
+        colnames(x) <- c("barcode","uuid")
+    } else {
+        # Extract patient barcode from sample barcode.
+        x <- (do.call("rbind.fill", lapply(ans$uuidMapping, as.data.frame)))
+    }
     return(x)
 }
 
