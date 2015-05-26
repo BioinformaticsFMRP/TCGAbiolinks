@@ -39,10 +39,10 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
         files <- c(files, aux )
     }
     idx <- grep("MANIFEST|README|CHANGES|DESCRIPTION|DATA_USE",files)
-    if(length(idx) > 0){
+    if (length(idx) > 0) {
         files <- files[-idx]
     }
-    if(!is.null(type)){
+    if (!is.null(type)) {
         files <- files[grep(type,files)]
     }
 
@@ -130,14 +130,16 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
         }
     }
 
-    if(grepl("illuminahiseq_rnaseqv2|illuminahiseq_totalrnaseqv2",
-             tolower(platform))){
+    if (grepl("illuminahiseq_rnaseqv2|illuminahiseq_totalrnaseqv2",
+             tolower(platform))) {
         for (i in seq_along(files)) {
             data <- read.table(files[i], header = TRUE, sep = "\t",
                                stringsAsFactors = FALSE, check.names = FALSE,
                                comment.char = "#",fill = TRUE)
             data <- data[-1,] # removing Composite Element REF
-            uuid <- unlist(strsplit(files[i],"\\."))[9]
+            regex <- paste0("[:alnum:]{8}-[:alnum:]{4}",
+                                "-[:alnum:]{4}-[:alnum:]{4}-[:alnum:]{12}")
+            uuid <- str_match(files[i],regex)
             map <- mapuuidbarcode(uuid)
             colnames(data)[2] <- map$barcode
             if (i == 1) {
@@ -149,11 +151,11 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
         }
     }
 
-    if(grepl("bio",platform,ignore.case = TRUE)){
-        if(!is.null(type)){
+    if (grepl("bio",platform,ignore.case = TRUE)) {
+        if (!is.null(type)) {
             files <- files[grep(type,files)]
         }
-        if(length(files) == 1){
+        if (length(files) == 1) {
             df <- read.table(files, header = TRUE, sep = "\t",
                                stringsAsFactors = FALSE, check.names = FALSE,
                                comment.char = "#",fill = TRUE)
@@ -173,7 +175,7 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
 #  Get a list of barcode from a list of uuid
 #  example mapuuidbarcode(c("011bb13f-e0e8-4f4b-b7a5-4867bbe3b30a",
 #                           "048615c7-c08c-4199-b394-c59160337d67"))
-#' @importFrom RJSONIO fromJSON
+#' @importFrom rjson fromJSON
 #' @importFrom plyr rbind.fill
 #' @importFrom RCurl postForm
 mapuuidbarcode <- function(uuids){
@@ -181,18 +183,18 @@ mapuuidbarcode <- function(uuids){
     serv <- "https://tcga-data.nci.nih.gov/uuid/uuidws/mapping/json/uuid/batch"
     header <- c('Content-Type' = 'text/plain')
     uuids <- paste0(uuids, collapse = ",")
-    ans <- fromJSON(postForm(serv,
+    ans <- rjson::fromJSON(RCurl::postForm(serv,
                              .opts = list(postfields = uuids,
                                           httpheader = header,
                                           ssl.verifypeer = FALSE)))
-
-    # transform to dataframe
-    x <- (do.call("rbind.fill", lapply(ans$uuidMapping, as.data.frame))[[1]])
-    barcodes <- seq(1,length(x),2)
-    uuid <- seq(2,length(x),2)
-    x <- data.frame(x[uuid],as.character(x[barcodes]),
-                    stringsAsFactors = FALSE)
-    colnames(x) <- c("uuid","barcode")
+    if(length(uuids == 1)){
+       x <- data.frame(ans$uuidMapping$uuid,ans$uuidMapping$barcode,
+                       stringsAsFactors = FALSE)
+       colnames(x) <- c("uuid","barcode")
+    } else {
+       # Extract patient barcode from sample barcode.
+    x <- (do.call("rbind.fill", lapply(ans$uuidMapping, as.data.frame)))
+    }
     return(x)
 }
 
