@@ -41,7 +41,7 @@ Obs: The function will structure the folders to save the data as:
 _Path given by the user/Experiment folder_
 
 
-## TCGA Downstream Analysis 
+## TCGA Downstream Analysis Integration 
 You can easily prepare gene expression from TCGA data using the `tcga.prepare` function.
  
 ```{r, eval = FALSE}
@@ -164,7 +164,7 @@ BRCAcnv <- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFo
 
 ```
 
-## Methylation analysis
+#### TCGA Downstream Methylation analysis
 
 Some downstream analysis from methylation data can be done with TCGAbiolinks.
 An example is shown below. We search, download and prepare data from the 
