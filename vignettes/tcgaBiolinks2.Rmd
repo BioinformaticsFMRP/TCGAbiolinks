@@ -97,21 +97,21 @@ You can prepare gene expression from TCGA data using the `tcga.prepare` function
 library(TCGAbiolinks)
 
 # normalization of genes
-dataNorm <- RnaSeqNormalization(dataBRCA, geneInfo)
+dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 
 # quantile filter of genes
 dataFilt <- RnaSeqFilt(dataNorm, 0.25)
 
 # selection of normal samples "NT"
-samplesNT <- MultiSampleTypes_test(colnames(dataFilt), typesample = c("NT"))
+samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
 
 # selection of tumor samples "TP"
-samplesTP <- MultiSampleTypes_test(colnames(dataFilt), typesample = c("TP"))
+samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
 
 
 ```
 
-## TCGA analyze
+## TCGA analyze (Diff.expr.analysis (DEA))
 You can analyze gene expression from TCGA data using the `tcga.analyze` function.
  
 ```{r, eval = FALSE}
@@ -120,7 +120,7 @@ You can analyze gene expression from TCGA data using the `tcga.analyze` function
 # save(dataBRCA, geneInfo , file = "dataGeneExpression.rda")
 library(TCGAbiolinks)
 
-# Diff.expr.analysis (DEA) using edgeR package
+# Diff.expr.analysis (DEA)
 dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP], "Normal", "Tumor")
 
 # DEGs filter by abs(logFC) >=1
@@ -128,6 +128,22 @@ dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
 
 # DEGs table with expression values in normal and tumor samples
 dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",dataFilt[,samplesTP],dataFilt[,samplesNT])
+
+knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2, caption = "A table produced by printr.")
+```
+The result is shown below:
+
+```{r, eval = TRUE}
+library(TCGAbiolinks)
+knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2, caption = "A table produced by printr.")
+```
+
+
+
+## TCGA analyze (Enrichment Analysis)
+You can analyze gene expression from TCGA data using the `tcga.analyze` function.
+ 
+```{r, eval = FALSE}
 
 # Enrichment Analysis EA
 # Gene Ontology (GO) and Pathways enrichment by DEGs list
@@ -147,7 +163,7 @@ IPAbarplot(tf = rownames(ansEA$ResBP),
            nBar = 10)
 
 # Principal Component Analysis Plot for ntop DEGs selected
-plotPCAforGroups(dataFilt,dataDEGsFiltLevel,color1 = "blue",color2= "red", nsample1 =length(samplesNT), nsample2 =length(samplesTP) , ntopgenes = 100)
+plotPCAforGroups(dataFilt,dataDEGsFiltLevel, ntopgenes = 100)
 
 # boxplot of data normalized 
 #sampleGenes <- rownames(dataDEGsFilt[dataDEGsFilt$logFC >=1,])[1:20]
@@ -157,6 +173,13 @@ plotPCAforGroups(dataFilt,dataDEGsFiltLevel,color1 = "blue",color2= "red", nsamp
 
 
 ```
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("EAplot.png")
+grid.raster(img)
+```
 
 ## TCGA investigate
 Find most studied TF in pubmed related to a specific cancer, disease, or tissue
@@ -164,6 +187,7 @@ Find most studied TF in pubmed related to a specific cancer, disease, or tissue
 ```{r, eval = FALSE}
 # First perform DEGs with TCGAanalyze
 # See upper vignette
+library(TCGAbiolinks)
 
 # Select only transcription factors (tfs) from DEGs
 TFs <- IPAGenes[IPAGenes$Family =="transcription regulator",]
@@ -174,11 +198,13 @@ dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
 dataDEGsFiltLevelTFs <- dataDEGsFiltLevelTFs[order(dataDEGsFiltLevelTFs$Delta,decreasing=T),]
 
 # Find Pubmed of TF studied related to cancer
-tabDEGsTFPubmed <- TCGAinvestigate("breast", dataDEGsFiltLevelTFs, topgenes = 20)
-
-
-                   
-                   
-
+tabDEGsTFPubmed <- TCGAinvestigate("breast", dataDEGsFiltLevelTFs, topgenes = 10)
+                 
 ```
 
+The result is shown below:
+
+```{r, eval = TRUE}
+library(TCGAbiolinks)
+knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF in pubmed related to a specific cancer",row.names = F)
+```
