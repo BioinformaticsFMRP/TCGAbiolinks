@@ -99,5 +99,11 @@ TCGAinvestigate<- function(tumor,dataDEGsFiltLevelTF,topgenes){
     if( sum(dataDEGsFiltLevelTF$Pubmed == 0) != 0){
         dataDEGsFiltLevelTF[dataDEGsFiltLevelTF$Pubmed == 0,"PMID"] <- 0
     }
+
+    tabDEGsTFPubmed$Tumor <- round(tabDEGsTFPubmed$Tumor)
+    tabDEGsTFPubmed$Normal <- round(tabDEGsTFPubmed$Normal)
+    tabDEGsTFPubmed$Delta <- round(tabDEGsTFPubmed$Delta)
+
+
     return(dataDEGsFiltLevelTF)
 }

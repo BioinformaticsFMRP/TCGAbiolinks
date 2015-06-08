@@ -13,7 +13,7 @@ GenesCutID <- function(GeneList){
 #' @description
 #'   TimeUse
 #' @param func func
-# @export
+#' @export
 # @examples
 #  TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",
 #  Genelist))
@@ -45,6 +45,7 @@ RnaSeqFilt <- function(TableRnaseq,QuantileThresh ){
 #' @param TCGA_RnaseqTable TCGA_RnaseqTable
 #' @param geneInfo geneInfo
 #' @importFrom EDASeq newSeqExpressionSet withinLaneNormalization betweenLaneNormalization exprs
+#' @export
 #' @return table normalized
 RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
 
@@ -183,6 +184,7 @@ CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
 #' @param ntopgenes ntopgenes
 #' @import ggplot2
 #' @import ggbiplot
+#' @export
 #' @return PCA plot
 plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
     ComparisonSelected <- "Normal vs Tumor"
@@ -197,25 +199,31 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
     color2 <- "red"
 
     # selection of normal samples "NT"
-    samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
+    samplesNT <- TCGAbiolinks::MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
     # selection of tumor samples "TP"
-    samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
+    samplesTP <- TCGAbiolinks::MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
 
     nsample1 <- length(samplesNT)
     nsample2 <- length(samplesTP)
 
-    sample.colors <- rep(c(color1,color2), c(nsample1, nsample2))
-    names(sample.colors) <- colnames(expr2)
+    #sampleColors <- rep(c(color1,color2), c(nsample1, nsample2))
+    #sampleColors <- rep(c("blue","red"), c(length(samplesNT), length(samplesTP)))
+    sampleColors <- c(rep("blue", length(samplesNT)), rep("red", length(samplesTP)))
 
+
+    print("done")
+    names(sampleColors) <- colnames(expr2)
+    print("later")
     cancer.pca <- stats::prcomp(t(expr2),cor = TRUE)
-
+    library(ggbiplot)
     # print(sample.colors)
     g <- ggbiplot(cancer.pca, obs.scale = 1, var.scale = 1,
-                  groups = sample.colors, ellipse = TRUE, circle = FALSE)
+                  groups = sampleColors, ellipse = TRUE, circle = FALSE)
     g <- g + scale_colour_manual(name = "",
                                  values = c("blue" = "blue","red" = "red"))
-    g <- g + geom_point(aes(colour = sample.colors), size = 3)
+    g <- g + geom_point(aes(colour = sampleColors), size = 3)
     #shape = tabClusterNew$Study)
+    print("here")
     g <- g + theme(legend.direction = 'horizontal',  legend.position = 'top')
     g <- g + ggtitle(TitlePlot)
     print(g)
@@ -226,6 +234,7 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #'   EAcomplete
 #' @param TFname TFname
 #' @param RegulonList RegulonList
+#' @export
 #' @return EAcomplete plot
 EAcomplete <- function(TFname, RegulonList){
     IPAGenes <- get("IPAGenes")
@@ -265,6 +274,7 @@ EAcomplete <- function(TFname, RegulonList){
 #' @param GOtype GOtype
 #' @param FDRThresh FDRThresh
 #' @param IPAGenes IPAGenes
+#' @export
 #' @return EAcomplete plot
 EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,
                                IPAGenes,GOtype,FDRThresh=0.01) {
@@ -340,6 +350,7 @@ EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,
 #'   GeneSplitRegulon
 #' @param Genelist Genelist
 #' @param Sep Sep
+#' @export
 #' @return GeneSplitRegulon
 GeneSplitRegulon <- function(Genelist,Sep){
     RegSplitted <- as.matrix(unlist(strsplit(as.character(Genelist), Sep)))
@@ -357,6 +368,7 @@ GeneSplitRegulon <- function(Genelist,Sep){
 #' @param PathTab PathTab
 #' @param nBar nBar
 #' @param nRGTab nRGTab
+#' @export
 #' @return GeneSplitRegulon
 IPAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
     splitFun <- function(tf, Tab, nBar){
