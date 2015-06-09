@@ -47,37 +47,37 @@ You can easily prepare gene expression from TCGA data using the `tcga.prepare` f
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 
-res <- querySamples
+#res <- querySamples
 
-toDown <- Reduce(intersect, list(res$Illuminahiseq_rnaseqv2, res$Genome_Wide_SNP_6, res$IlluminaGA_DNASeq))
-Tumor <- 'BRCA'
-downloadFolder <- "~/Downloads/Data/Samples/"
-sdrfFolder <- "~/Downloads/Data/TCGAsdrf/"
+#toDown <- Reduce(intersect, list(res$Illuminahiseq_rnaseqv2, res$Genome_Wide_SNP_6, res$IlluminaGA_DNASeq))
+#Tumor <- 'BRCA'
+#downloadFolder <- "~/Downloads/Data/Samples/"
+#sdrfFolder <- "~/Downloads/Data/TCGAsdrf/"
 
 #BRCArnaseqV2 <- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder, PlatformType = 'illuminahiseq_rnaseqv2', listSample = toDown, newsample = T)
 
-BRCAsnp<- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder, PlatformType = 'genome_wide_snp_6', listSample = toDown, newsample = T)
+#BRCAsnp<- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder, PlatformType = 'genome_wide_snp_6', listSample = toDown, newsample = T)
 
 #Data_CANCER_normUQ <- RnaSeqNormalization(Data_CANCER,geneInfo)
-#print(paste("STEP2..Normalization for ", CancerName, " with n. ", nrow(Data_CANCER_normUQ), " genes and ", ncol(Data_CANCER_normUQ),"samples...OK" ))
-
 #Data_CANCER_normUQ_filt <- RnaSeqFilt(Data_CANCER_normUQ,0.25)
-#print(paste("STEP3..Filter quantile for ", CancerName, " with n. ", nrow(Data_CANCER_normUQ_filt), " genes and ", ncol(Data_CANCER_normUQ_filt),"samples...OK" ))
-BRCArnaseqV2 <- Cancer_rnaseqv2[, toDown]
+
+#BRCArnaseqV2 <- Cancer_rnaseqv2[, toDown]
 
 library(genefilter)
 library(clue)
-library(consensus)
+#library(consensus)
+
+BRCArnaseqV2 <- dataBRCA
 BRCArnaseqV2MostVar <- varFilter(BRCArnaseqV2, var.func = IQR,  var.cutoff = 0.75, filterByQuantile = TRUE)
 
 wData <- t(BRCArnaseqV2MostVar)
 ddist <- dist(wData, method = "euclidean")
 sHc <- hclust(ddist, method = "ward.D")
-aCalinsky <- calinsky(sHc, gMax = 20)
-plot(aCalinsky, type = "l", col = "grey", main = "Calinsky & Harabasz curve")
-text(1:length(aCalinsky), aCalinsky, paste(1:length(aCalinsky)))
+#aCalinsky <- calinsky(sHc, gMax = 20)
+#plot(aCalinsky, type = "l", col = "grey", main = "Calinsky & Harabasz curve")
+#text(1:length(aCalinsky), aCalinsky, paste(1:length(aCalinsky)))
 
-plot(sHc, labels = F, main ="Cancer cluster dendrogram all samples", xlab = "Samples with relative group color",sub="")
+plot(sHc, labels = F, main ="BRCA Cancer cluster dendrogram all samples", xlab = "Samples with relative group color",sub="")
 
 rect.hclust(sHc, k=3, border="red")
 tabCluster <- as.matrix(cutree(sHc, k = 3))
@@ -100,19 +100,40 @@ tabCluster <- tabCluster[sHc$labels, ]
 rug(which(tabCluster[sHc$order, "Color"] == "blue"), col = "blue", lwd = 3)
 rug(which(tabCluster[sHc$order, "Color"] == "green3"), col = "green3", lwd = 3)
 rug(which(tabCluster[sHc$order, "Color"] == "red"), col = "red", lwd = 3)
+```
+
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("BRCA_cluster.png")
+grid.raster(img)
+```
+
+
+```{r, eval = FALSE}
+library(TCGAbiolinks)
 
 ##### Differential Analisys
 GroupBlueData <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "blue", "Sample"])]
 GroupGreen3Data <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "green3", "Sample"])]
 GroupRedData <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "red", "Sample"])]
 
-DEGsBlue <- DEA_edge5(cbind(GroupGreen3Data, GroupRedData), GroupBlueData, "GroupOther", "GroupBlue")
-DEGsGreen3 <- DEA_edge5(cbind(GroupBlueData, GroupRedData), GroupGreen3Data, "GroupOther", "GroupGreen3")
-DEGsRed <- DEA_edge5(cbind(GroupBlueData, GroupGreen3Data), GroupRedData, "GroupOther", "GroupRed")
+DEGsBlue <- DEArnaSEQ(cbind(GroupGreen3Data, GroupRedData), GroupBlueData, "GroupOther", "GroupBlue")
+DEGsGreen3 <- DEArnaSEQ(cbind(GroupBlueData, GroupRedData), GroupGreen3Data, "GroupOther", "GroupGreen3")
+DEGsRed <- DEArnaSEQ(cbind(GroupBlueData, GroupGreen3Data), GroupRedData, "GroupOther", "GroupRed")
 
-DEGsBlueLevel <- CreateTabLevel( as.matrix(rownames(DEGsBlue)),DEGsBlue,"GroupBlue","GroupOther",GroupBlueData,cbind(GroupGreen3Data, GroupRedData),typeOrder=T)
-DEGsGreen3Level <- CreateTabLevel( as.matrix(rownames(DEGsGreen3)),DEGsGreen3,"GroupGreen3","GroupOther",GroupGreen3Data,cbind(GroupBlueData, GroupRedData),typeOrder=T)
-DEGsRedLevel <- CreateTabLevel( as.matrix(rownames(DEGsRed)),DEGsRed,"GroupRed","GroupOther",GroupRedData,cbind(GroupBlueData, GroupGreen3Data),typeOrder=T)
+
+dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP], "Normal", "Tumor")
+
+# DEGs filter by abs(logFC) >=1
+dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
+
+dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",dataFilt[,samplesTP],dataFilt[,samplesNT])
+
+DEGsBlueLevel <- CreateTabLevel( DEGsBlue,"GroupBlue","GroupOther",GroupBlueData,cbind(GroupGreen3Data, GroupRedData),typeOrder=T)
+DEGsGreen3Level <- CreateTabLevel( DEGsGreen3,"GroupGreen3","GroupOther",GroupGreen3Data,cbind(GroupBlueData, GroupRedData),typeOrder=T)
+DEGsRedLevel <- CreateTabLevel( DEGsRed,"GroupRed","GroupOther",GroupRedData,cbind(GroupBlueData, GroupGreen3Data),typeOrder=T)
 
 blueDEGs <- DEGsBlueLevel[DEGsBlueLevel$FDR < 0.01 & DEGsBlueLevel$logFC >= 1, ]
 blueDEGs <- blueDEGs[order(blueDEGs$FDR), ]
@@ -136,7 +157,12 @@ MfiltQuantileOrdered <- BRCArnaseqV2[c(rownames(blueDEGsSpec), rownames(green3DE
 
 
 MRactivity <- t(MfiltQuantileOrdered)
-HMactivity <- t(quantileNormalization(t(MRactivity)))
+#HMactivity <- t(quantileNormalization(t(MRactivity)))
+
+HMactivity <- MRactivity
+thresholdquantile<-0.75
+HMactivity[ HMactivity >= quantile(HMactivity,thresholdquantile)]<- quantile(HMactivity,thresholdquantile)
+
 
 summary(as.vector(HMactivity))
 quantile(HMactivity, 0.15); quantile(HMactivity, 0.85)
@@ -148,21 +174,29 @@ column_annotation[, 1] <- tabCluster$Color
 
 row_annotation <- matrix(" ", nrow = 1, ncol = ncol(HMactivity))
 row_annotation[1, ] <- c(rep("blue", nrow(blueDEGsSpec)), rep("green3", nrow(green3DEGsSpec)), rep("red", nrow(redDEGsSpec)))
+library("GMD")
 
-
-
-#png("tmp.png", width = 4096, height = 3200)
+png("BRCA_heatmap.png", width = 1200, height = 800)
 heatmap.3(t(HMactivity), ColSideColors = column_annotation, RowSideColors = row_annotation,
           key = FALSE, Colv = NA, Rowv = NA,
-          scale = "none", col = greenred(75), dendrogram = "none",
-          labRow = NA, labCol = NA,
-          margins = c(1, 6), side.height.fraction = 0.25, keysize = 0.4, cexRow = .6)
-#dev.off()
+          scale = "none", 
+          #col = greenred(75), 
+          dendrogram = "none",
+          #labRow = NA, labCol = NA,
+          margins = c(1, 6), side.height.fraction = 0.25, keysize = 1.4, cexRow = 1.6)
+dev.off()
 
-
-BRCAcnv <- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder, PlatformType = 'genome_wide_snp_6', listSample = toDown, newsample = F)
+#BRCAcnv <- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder, PlatformType = 'genome_wide_snp_6', listSample = toDown, newsample = F)
 
 ```
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("BRCA_heatmap.png")
+grid.raster(img)
+```
+
 
 #### TCGA Downstream Methylation analysis
 
