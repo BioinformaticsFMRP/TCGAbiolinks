@@ -129,13 +129,13 @@ dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
 # DEGs table with expression values in normal and tumor samples
 dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",dataFilt[,samplesTP],dataFilt[,samplesNT])
 
-knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2, caption = "A table produced by printr.")
 ```
 The result is shown below:
 
-```{r, eval = TRUE}
+```{r, eval = TRUE, echo = FALSE}
 library(TCGAbiolinks)
-knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2, caption = "A table produced by printr.")
+dataDEGsFiltLevel$FDR <- format(dataDEGsFiltLevel$FDR, scientific = T)
+knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2, caption = "Table DEGs after DEA",row.names = F)
 ```
 
 
@@ -204,7 +204,7 @@ tabDEGsTFPubmed <- TCGAinvestigate("breast", dataDEGsFiltLevelTFs, topgenes = 10
 
 The result is shown below:
 
-```{r, eval = TRUE}
+```{r, eval = TRUE, echo = FALSE}
 library(TCGAbiolinks)
 knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF in pubmed related to a specific cancer",row.names = F)
 ```
