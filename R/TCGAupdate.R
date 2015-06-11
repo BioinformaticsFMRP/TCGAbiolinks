@@ -205,7 +205,12 @@ tcgaGetTable <- function(url, max = 0) {
     return(db)
 }
 
-
+#' @title TCGA TCGAUpdate
+#' @description Updates local TCGA database
+#' @return platform.table center.table disease.table tcga.db
+#' @examples
+#' TCGAUpdate()
+#' @export
 TCGAUpdate <- function(){
 
     tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
@@ -214,7 +219,6 @@ TCGAUpdate <- function(){
     tcga.query <- "query=Platform"
     next.url <- paste0(tcga.root, tcga.query)
     platform.table <- tcgaGetTable(next.url)
-    print(dim(platform.table))
     platform.table <- platform.table[, 1:4]
     platform.table <- platform.table[order(platform.table$name,
                                            decreasing = TRUE),]
@@ -235,7 +239,7 @@ TCGAUpdate <- function(){
 
     # get new version of files
     new.db <-  createTcgaTable()
-    print(dim(new.db))
+    #print(paste0("Number of new folder: ", dim(new.db)[1]-dim(tcga.db)[1]))
     # copy not modified ones
     for (i in seq_along(new.db[,1])){
         db <- subset(tcga.db,new.db[i,"name"] == tcga.db$name)
