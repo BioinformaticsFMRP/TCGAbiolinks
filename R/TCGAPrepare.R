@@ -64,13 +64,7 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
             }
         }
         rownames(df) <- df$Composite.Element.REF
-        message("Removing X Y chromossomes")
-        df <- df[df$Chromosome != "X" & df$Chromosome != "Y", ]
-        # methylation$Chromosome <- NULL
-
         # remove NA lines
-        message("Removing NA Lines")
-        df <- na.omit(df)
         df[,3:ncol(df)] <- sapply(df[,3:ncol(df)], as.numeric)
     }
 
