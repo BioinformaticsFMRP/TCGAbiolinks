@@ -214,7 +214,7 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 
     names(sampleColors) <- colnames(expr2)
     cancer.pca <- stats::prcomp(t(expr2),cor = TRUE)
-    library(ggbiplot)
+    #library(ggbiplot)
     # print(sample.colors)
     g <- ggbiplot(cancer.pca, obs.scale = 1, var.scale = 1,
                   groups = sampleColors, ellipse = TRUE, circle = FALSE)
