@@ -208,8 +208,8 @@ tcgaGetTable <- function(url, max = 0) {
 #' @title TCGA TCGAUpdate
 #' @description Updates local TCGA database
 #' @return platform.table center.table disease.table tcga.db
-#' @examples
-#' TCGAUpdate()
+# @examples
+# TCGAUpdate()
 #' @export
 TCGAUpdate <- function(){
 

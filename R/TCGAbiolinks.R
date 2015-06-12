@@ -11,6 +11,69 @@
 #' @name TCGAbiolinks
 NULL
 
+#' DAVID GO table (BP)
+#' @docType data
+#' @keywords internal
+#' @name DAVID_BP_matrix
+#' @format A data frame with 2423 rows and 2 variables
+NULL
+
+#' DAVID GO table (CC)
+#' @docType data
+#' @keywords internal
+#' @name DAVID_CC_matrix
+#' @format A data frame with 517 rows and 2 variables
+NULL
+
+#' DAVID GO table (MF)
+#' @docType data
+#' @keywords internal
+#' @name DAVID_MF_matrix
+#' @format A data frame with 1157 rows and 2 variables
+NULL
+
+#' IPAGenes
+#' @docType data
+#' @keywords internal
+#' @name IPAGenes
+#' @format A data frame with 20038 rows (genes) and 6 variables
+NULL
+
+#' TCGA data matrix BRCA
+#' @docType data
+#' @keywords internal
+#' @name dataBRCA
+#' @format A data frame with 20531 rows (genes) and 50 variables (samples)
+NULL
+
+#' TCGA data matrix BRCA DEGs
+#' @docType data
+#' @keywords internal
+#' @name dataDEGsFiltLevel
+#' @format A data frame with 3649 rows and 6 variables
+NULL
+
+#' geneInfo for normalization
+#' @docType data
+#' @keywords internal
+#' @name geneInfo
+#' @format A data frame with 20531 rows and 2 variables
+NULL
+
+#' list IPA pathways
+#' @docType data
+#' @keywords internal
+#' @name listIPA_pathways
+#' @format A data frame with 589 rows and 4 variables
+NULL
+
+#' TCGA data matrix BRCA DEGs Pubmed
+#' @docType data
+#' @keywords internal
+#' @name tabDEGsTFPubmed
+#' @format A data frame with 10 rows and 8 variables
+NULL
+
 #' TCGA disease table
 #' @docType data
 #' @keywords internal
