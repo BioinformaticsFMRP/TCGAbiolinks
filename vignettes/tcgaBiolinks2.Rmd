@@ -61,20 +61,22 @@ knitr::kable(matSamples, digits = 2, caption = "Table common samples among platf
 You can easily search TCGA samples, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
 
-# You can define a list of samples to query and download proving relative TCGA barcodes.
+# You can define a list of samples to query and download providing relative TCGA barcodes.
 listSamples <- c("TCGA-33-6737-01","TCGA-33-6737-11","TCGA-43-6143-01","TCGA-43-6143-11",
                  "TCGA-43-6647-01","TCGA-43-6647-11","TCGA-43-6771-01","TCGA-43-6771-11")
 
-# Query about all platform available with a list of barcode 
+# Query all available platforms with a list of barcode 
 query <- TCGAQuery(samples = listSamples)
 
-# Query about platform IlluminaHiSeq_RNASeqV2 available with a list of barcode 
-query <- TCGAQuery(tumor = "lusc", samples = listSamples, platform = "IlluminaHiSeq_RNASeqV2", level = "3")
+# Query platform IlluminaHiSeq_RNASeqV2 with a list of barcode 
+query <- TCGAQuery(tumor = "lusc", samples = listSamples, 
+  platform = "IlluminaHiSeq_RNASeqV2", level = "3")
 
-# Download a list of barcode with platform IlluminaHiSeq_RNASeqV2
-TCGADownload(query, path = "dataLusc", type = "rsem.genes.results",samples = listSamples)
+# Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
+TCGADownload(query, path = "dataLusc", type = "rsem.genes.results", samples = listSamples)
 
-# Prepare expression matrix with gene id in rows and samples (barcode) in columns and rsem.genes.results as values
+# Prepare expression matrix with gene id in rows and samples (barcode) in columns
+# rsem.genes.results as values
 LuscMatrix <- TCGAPrepare(query,"dataLusc")
 ```
 
@@ -92,14 +94,14 @@ knitr::kable(dataGE, digits = 2, caption = "Matrix Gene expression (genes in row
 You can easily download data using the `tcga.download` function.
  
 ```{r, eval = FALSE}
-# get all samples from the query and save into tcga folder
+# get all samples from the query and save them in the tcga folder
 # samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
 # samples to normalize later
 TCGADownload(query, path = "data", type = "rsem.genes.results")
 
 ```
 
-Obs: The function will structure the folders to save the data as:
+Comment: The function will structure the folders to save the data as:
 _Path given by the user/Experiment folder_
 
 ## TCGA download clinic data
@@ -142,7 +144,8 @@ You can prepare gene expression from TCGA data using the `tcga.prepare` function
 # Downstream analysis using gene expression data  
 # TCGA samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
 
-#save(DAVID_BP_matrix, DAVID_CC_matrix, DAVID_MF_matrix, IPAGenes, listIPA_pathways, file = "dataEnrichmentAnalysis.rda")
+# save(DAVID_BP_matrix, DAVID_CC_matrix, DAVID_MF_matrix, IPAGenes, listIPA_pathways,
+#   file = "dataEnrichmentAnalysis.rda")
 # save(dataBRCA, geneInfo , file = "dataGeneExpression.rda")
 library(TCGAbiolinks)
 
@@ -196,13 +199,13 @@ You can analyze gene expression from TCGA data using the `tcga.analyze` function
 ```{r, eval = FALSE}
 
 # Enrichment Analysis EA
-# Gene Ontology (GO) and Pathways enrichment by DEGs list
+# Gene Ontology (GO) and Pathway enrichment by DEGs list
 Genelist <- rownames(dataDEGsFiltLevel)
 
 TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
 
 # Enrichment Analysis EA (TCGAVisualize)
-# Gene Ontology (GO) and Pathways enrichment IPA barPlot
+# Gene Ontology (GO) and Pathway enrichment IPA barPlot
 
 IPAbarplot(tf = rownames(ansEA$ResBP), 
            GOBPTab = ansEA$ResBP,
@@ -236,10 +239,10 @@ dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 # quantile filter of genes
 dataFilt <- RnaSeqFilt(dataNorm, 0.25)
 
-# Principal Component Analysis Plot for ntop DEGs selected
+# Principal Component Analysis plot for ntop selected DEGs
 plotPCAforGroups(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
 
-# boxplot of data normalized 
+# boxplot of normalized data
 #sampleGenes <- rownames(dataDEGsFilt[dataDEGsFilt$logFC >=1,])[1:20]
 #boxplot(log(dataBRCA[sampleGenes,]), las = 2)
 #boxplot(log(dataFilt[sampleGenes,]), las = 2)
@@ -257,19 +260,19 @@ grid.raster(img)
 
 
 ## TCGA investigate
-Find most studied TF in pubmed related to a specific cancer, disease, or tissue
+Find most studied TFs in pubmed related to a specific cancer, disease, or tissue
  
 ```{r, eval = FALSE}
 # First perform DEGs with TCGAanalyze
-# See upper vignette
+# See previous section 
 library(TCGAbiolinks)
 
-# Select only transcription factors (tfs) from DEGs
+# Select only transcription factors (TFs) from DEGs
 TFs <- IPAGenes[IPAGenes$Family =="transcription regulator",]
 TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
 dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
 
-# Ordering table DEGs TFs according Delta decreasing
+# Order table DEGs TFs according to Delta decrease
 dataDEGsFiltLevelTFs <- dataDEGsFiltLevelTFs[order(dataDEGsFiltLevelTFs$Delta,decreasing=T),]
 
 # Find Pubmed of TF studied related to cancer
