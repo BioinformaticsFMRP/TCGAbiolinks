@@ -60,6 +60,22 @@ colnames(matSamples) <- substr( colnames(matSamples), 1,4)
 knitr::kable(matSamples, digits = 2, caption = "Table common samples among platforms from TCGAQuery", row.names = TRUE)
 ```
 
+Query version about a platform for example IlluminaHiSeq_RNASeqV2
+```{r, eval = FALSE}
+library(TCGAbiolinks)
+
+BRCA_RNASeqV2_version <- TCGAVersion("brca", "illuminahiseq_rnaseqv2")
+
+```
+
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+library(TCGAbiolinks)
+BRCA_RNASeqV2_version <- BRCA_RNASeqV2_version[order(BRCA_RNASeqV2_version$SizeMbyte,decreasing=T),]
+knitr::kable(BRCA_RNASeqV2_version, digits = 2, caption = "Table with version, number of samples and size (Mbyte) of BRCA IlluminaHiSeq_RNASeqV2 Level 3", row.names = FALSE)
+```
+
 ## TCGA query, download, prepare list of a barcode
 You can easily search TCGA samples, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
@@ -87,9 +103,9 @@ The result is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
 library(TCGAbiolinks)
-dataGE <- dataBRCA[sample(rownames(dataBRCA),5),sample(colnames(dataBRCA),3)]
+dataGE <- dataBRCA[sample(rownames(dataBRCA),10),sample(colnames(dataBRCA),7)]
 
-knitr::kable(dataGE, digits = 2, caption = "Matrix Gene expression (genes in rows and samples in columns)",row.names = FALSE)
+knitr::kable(dataGE, digits = 2, caption = "Example of a matrix of gene expression (10 genes in rows and 7 samples in columns)",row.names = TRUE)
 ```
 
 
