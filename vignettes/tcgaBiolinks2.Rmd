@@ -57,6 +57,37 @@ for ( i in 1: nrow(matSamples)){
 knitr::kable(matSamples, digits = 2, caption = "Table common samples among platforms from TCGAQuery",row.names = T)
 ```
 
+## TCGA query, download, prepare list of a barcode
+You can easily search TCGA samples, download and prepare a matrix of gene expression.
+```{r, eval = FALSE}
+
+# You can define a list of samples to query and download proving relative TCGA barcodes.
+listSamples <- c("TCGA-33-6737-01","TCGA-33-6737-11","TCGA-43-6143-01","TCGA-43-6143-11",
+                 "TCGA-43-6647-01","TCGA-43-6647-11","TCGA-43-6771-01","TCGA-43-6771-11")
+
+# Query about all platform available with a list of barcode 
+query <- TCGAQuery(samples = listSamples)
+
+# Query about platform IlluminaHiSeq_RNASeqV2 available with a list of barcode 
+query <- TCGAQuery(tumor = "lusc", samples = listSamples, platform = "IlluminaHiSeq_RNASeqV2", level = "3")
+
+# Download a list of barcode with platform IlluminaHiSeq_RNASeqV2
+TCGADownload(query, path = "dataLusc", type = "rsem.genes.results",samples = listSamples)
+
+# Prepare expression matrix with gene id in rows and samples (barcode) in columns and rsem.genes.results as values
+LuscMatrix <- TCGAPrepare(query,"dataLusc")
+```
+
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+library(TCGAbiolinks)
+dataGE <- dataBRCA[sample(rownames(dataBRCA),5),sample(colnames(dataBRCA),3)]
+
+knitr::kable(dataGE, digits = 2, caption = "Matrix Gene expression (genes in rows and samples in columns)",row.names = F)
+```
+
+
 ## TCGA download
 You can easily download data using the `tcga.download` function.
  
@@ -130,7 +161,7 @@ samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
 
 ```
 
-## TCGA analyze (Diff.expr.analysis (DEA))
+## TCGA analyze and visualize (Diff.expr.analysis (DEA))
 You can analyze gene expression from TCGA data using the `tcga.analyze` function.
  
 ```{r, eval = FALSE}
@@ -159,7 +190,7 @@ knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2, caption = "Table DEGs after D
 
 
 
-## TCGA analyze (Enrichment Analysis)
+## TCGA analyze and visualize (Enrichment Analysis)
 You can analyze gene expression from TCGA data using the `tcga.analyze` function.
  
 ```{r, eval = FALSE}
