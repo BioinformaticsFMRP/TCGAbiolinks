@@ -52,10 +52,14 @@
 TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
                       added.up.to = NULL, samples = NULL, center = NULL,
                       level = NULL) {
-    disease.table   <- get("disease.table")
-    platform.table  <- get("platform.table")
-    center.table  <- get("center.table")
-    db <-  get("tcga.db")
+    disease.table   <- get("disease.table",
+                           envir =  as.environment("package:TCGAbiolinks"))
+    platform.table  <- get("platform.table",
+                           envir =  as.environment("package:TCGAbiolinks"))
+    center.table  <- get("center.table",
+                         envir =  as.environment("package:TCGAbiolinks"))
+    db <-  get("tcga.db",
+               envir =  as.environment("package:TCGAbiolinks"))
 
     if (!is.null(tumor)) {
         for (j in seq_along(tumor)) {
@@ -184,7 +188,7 @@ TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
 }
 
 getBarcode <- function(table){
-    tcga.db <- get("tcga.db")
+    tcga.db <- get("tcga.db", envir =  as.environment("package:TCGAbiolinks"))
     root <- "https://tcga-data.nci.nih.gov"
     allFiles <- c()
     mages <-  tcga.db[grep("mage-tab",tcga.db$name),]
