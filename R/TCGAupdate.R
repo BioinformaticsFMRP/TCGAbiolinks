@@ -116,9 +116,12 @@ createTcgaTable <- function(disease = NULL, platform = NULL,
 
 # Using the name create two collumns Platform and Disease
 tcgaDbAddCol <- function(data) {
-    disease.table  <- get("disease.table")
-    platform.table  <- get("platform.table")
-    center.table  <- get("center.table")
+    disease.table  <- get("disease.table",
+                          envir =  as.environment("package:TCGAbiolinks"))
+    platform.table  <- get("platform.table",
+                           envir =  as.environment("package:TCGAbiolinks"))
+    center.table  <- get("center.table",
+                         envir =  as.environment("package:TCGAbiolinks"))
     data$Platform <- ""
     data$Disease <- ""
     data$Center <- ""
@@ -208,7 +211,7 @@ tcgaGetTable <- function(url, max = 0) {
 #' @title TCGA TCGAUpdate
 #' @description Updates local TCGA database
 #' @return platform.table center.table disease.table tcga.db
-# @examples
+##' examples
 # TCGAUpdate()
 #' @export
 TCGAUpdate <- function(){
@@ -235,7 +238,7 @@ TCGAUpdate <- function(){
     center.table  <- tcgaGetTable(next.url)
     center.table <- center.table[, 1:3]
 
-    tcga.db <-  get("tcga.db")
+    tcga.db <-  get("tcga.db", envir =  as.environment("package:TCGAbiolinks"))
 
     # get new version of files
     new.db <-  createTcgaTable()
