@@ -1,6 +1,6 @@
 ---
 title: "Working with TCGAbiolinks package"
-author: " Antonio Colaprico, Catharina Olsen, Luciano Garofano, Tiago Chedraoui Silva, Davide Garolini, Claudia Cava, Isabella Castiglioni, Houtan Noushmehr, Gianluca Bontempi, Michele Ceccarelli"
+author: " Antonio Colaprico, Tiago Chedraoui Silva, Luciano Garofano, Catharina Olsen, Davide Garolini, Claudia Cava, Isabella Castiglioni, Houtan Noushmehr, Gianluca Bontempi, Michele Ceccarelli"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -29,17 +29,36 @@ Some search examples are shown below
 
 library(TCGAbiolinks)
 query <- TCGAQuery(tumor = "brca",level = 3)
-
 querySamples <- samplesfilter(query)
-
 query <- TCGAQuery(tumor = "brca",level = 3, platform = "IlluminaHiSeq_RNASeqV2")
 
 ```
 
-Obs: As these terms needs to be exact, we validate the user input before searching.
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+library(TCGAbiolinks)
+
+query <- TCGAQuery(tumor = "brca",level = 3)
+querySamples <- samplesfilter(query)
+
+matSamples <- matrix(0,length(querySamples),length(querySamples))
+colnames(matSamples) <- names(querySamples)
+rownames(matSamples) <- names(querySamples)
+
+for ( i in 1: nrow(matSamples)){
+    for( j in 1: nrow(matSamples)){
+             matSamples[i,j] <- length(intersect(querySamples[[i]], querySamples[[j]]))
+    }
+    }
+
+ colnames(matSamples) <- substr( colnames(matSamples), 1,2)
+
+knitr::kable(matSamples, digits = 2, caption = "Table common samples among platforms from TCGAQuery",row.names = T)
+```
 
 ## TCGA download
-You can easily download roadmap data using the `tcga.download` function.
+You can easily download data using the `tcga.download` function.
  
 ```{r, eval = FALSE}
 # get all samples from the query and save into tcga folder
@@ -162,13 +181,6 @@ IPAbarplot(tf = rownames(ansEA$ResBP),
            nRGTab = Genelist, 
            nBar = 10)
 
-# Principal Component Analysis Plot for ntop DEGs selected
-plotPCAforGroups(dataFilt,dataDEGsFiltLevel, ntopgenes = 100)
-
-# boxplot of data normalized 
-#sampleGenes <- rownames(dataDEGsFilt[dataDEGsFilt$logFC >=1,])[1:20]
-#boxplot(log(dataBRCA[sampleGenes,]), las = 2)
-#boxplot(log(dataFilt[sampleGenes,]), las = 2)
 
 
 
@@ -180,6 +192,38 @@ library(grid)
 img <- readPNG("EAplot.png")
 grid.raster(img)
 ```
+
+## TCGA analyze (Enrichment Analysis)
+You can analyze gene expression from TCGA data using the `tcga.analyze` function.
+ 
+```{r, eval = FALSE}
+library(TCGAbiolinks)
+
+# normalization of genes
+dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
+
+# quantile filter of genes
+dataFilt <- RnaSeqFilt(dataNorm, 0.25)
+
+# Principal Component Analysis Plot for ntop DEGs selected
+plotPCAforGroups(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
+
+# boxplot of data normalized 
+#sampleGenes <- rownames(dataDEGsFilt[dataDEGsFilt$logFC >=1,])[1:20]
+#boxplot(log(dataBRCA[sampleGenes,]), las = 2)
+#boxplot(log(dataFilt[sampleGenes,]), las = 2)
+
+
+```
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("PCAtop200DEGs.png")
+grid.raster(img)
+```
+
+
 
 ## TCGA investigate
 Find most studied TF in pubmed related to a specific cancer, disease, or tissue
