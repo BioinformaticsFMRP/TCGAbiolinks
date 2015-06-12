@@ -141,9 +141,11 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
             if (i == 1) {
                 df <- data[,c(1,2)]
             } else {
-                df <- merge(df, data[,c(1,2)],by = "gene_id")
+                df <- merge(df, data[,c(1,2)],by = colnames(df)[1])
             }
         }
+        rownames(df) <- df[,1]
+        df[,1] <- NULL
     }
 
     if (grepl("bio",platform,ignore.case = TRUE)) {
