@@ -103,7 +103,7 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
     }
     # case: header has barcode
     # Line 2 is useless
-    if (grepl("agilent",tolower(platform))) {
+    if (grepl("agilent|H-miRNA_8x15K",platform, ignore.case = T)) {
         for (i in seq_along(files)) {
             data <- read.table(files[i], header = TRUE, sep = "\t",
                                stringsAsFactors = FALSE, check.names = FALSE)
@@ -111,12 +111,14 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
             if (i == 1) {
                 df <- data
             } else {
-                df <- merge(df, data,by = "Hybridization REF")
+                df <- merge(df, data,by = colnames(df)[1])
             }
         }
+        rownames(df) <- df[,1]
+        df[,1] <- NULL
     }
 
-    if (grepl("illuminaga",tolower(platform))) {
+    if (grepl("illuminaga",platform, ignore.case = T)) {
         for (i in seq_along(files)) {
             data <- read.table(files[i], header = TRUE, sep = "\t",
                                stringsAsFactors = FALSE, check.names = FALSE,
