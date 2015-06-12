@@ -85,6 +85,7 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
 #' @param mat2 datamatrix tumor
 #' @param Cond1type normal
 #' @param Cond2type tumor
+#' @import genefilter, clue, GMD, png, grid
 #' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags
 #' @export
 #' @return table with DEGs (diff.expr. genes)
