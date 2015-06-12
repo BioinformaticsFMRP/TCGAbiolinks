@@ -9,11 +9,11 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-This document describes how to search/download analyze tcga data using TCGAbiolinks package.
+This document describes how to search, download and analyze tcga data using the TCGAbiolinks package.
 
 ## TCGA downstream Analysis
  
-Some examples of integration of TCGA data are shown below
+Some examples for the integration of TCGA data are shown below
 ```{r, eval = FALSE}
 
 library(TCGAbiolinks)
@@ -25,7 +25,7 @@ query <- TCGAQuery(tumor = "brca",level = 3, platform = "IlluminaHiSeq_RNASeqV2"
 
 ```
 
-Obs: As these terms needs to be exact we validate user input before searching.
+Comment: As these terms need to be exact we validate user input before searching.
 
 ## TCGA download
 You can easily download roadmap data using the `tcga.download` function.
@@ -54,9 +54,11 @@ library(TCGAbiolinks)
 #downloadFolder <- "~/Downloads/Data/Samples/"
 #sdrfFolder <- "~/Downloads/Data/TCGAsdrf/"
 
-#BRCArnaseqV2 <- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder, PlatformType = 'illuminahiseq_rnaseqv2', listSample = toDown, newsample = T)
+#BRCArnaseqV2 <- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder,
+#   PlatformType = 'illuminahiseq_rnaseqv2', listSample = toDown, newsample = TRUE)
 
-#BRCAsnp<- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder, PlatformType = 'genome_wide_snp_6', listSample = toDown, newsample = T)
+#BRCAsnp<- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder,
+#   PlatformType = 'genome_wide_snp_6', listSample = toDown, newsample = TRUE)
 
 #Data_CANCER_normUQ <- RnaSeqNormalization(Data_CANCER,geneInfo)
 #Data_CANCER_normUQ_filt <- RnaSeqFilt(Data_CANCER_normUQ,0.25)
@@ -77,14 +79,15 @@ sHc <- hclust(ddist, method = "ward.D")
 #plot(aCalinsky, type = "l", col = "grey", main = "Calinsky & Harabasz curve")
 #text(1:length(aCalinsky), aCalinsky, paste(1:length(aCalinsky)))
 
-plot(sHc, labels = F, main ="BRCA Cancer cluster dendrogram all samples", xlab = "Samples with relative group color",sub="")
+plot(sHc, labels = FALSE, main ="BRCA Cancer cluster dendrogram all samples",
+   xlab = "Samples with relative group color",sub="")
 
 rect.hclust(sHc, k=3, border="red")
 tabCluster <- as.matrix(cutree(sHc, k = 3))
 colnames(tabCluster)<-"Cluster"
 tabCluster<-cbind(Sample = rownames(tabCluster),Color = rownames(tabCluster), tabCluster)
 tabCluster<-as.data.frame(tabCluster)
-tabCluster<-tabCluster[order(tabCluster$Cluster,decreasing=F),]
+tabCluster<-tabCluster[order(tabCluster$Cluster,decreasing = FALSE),]
 tabCluster<-as.data.frame(tabCluster)
 tabCluster$Color<-as.character(tabCluster$Color)
 
@@ -103,7 +106,7 @@ rug(which(tabCluster[sHc$order, "Color"] == "red"), col = "red", lwd = 3)
 ```
 
 The result is shown below:
-```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
 library(png)
 library(grid)
 img <- readPNG("BRCA_cluster.png")
@@ -131,9 +134,12 @@ dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
 
 dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",dataFilt[,samplesTP],dataFilt[,samplesNT])
 
-DEGsBlueLevel <- CreateTabLevel( DEGsBlue,"GroupBlue","GroupOther",GroupBlueData,cbind(GroupGreen3Data, GroupRedData),typeOrder=T)
-DEGsGreen3Level <- CreateTabLevel( DEGsGreen3,"GroupGreen3","GroupOther",GroupGreen3Data,cbind(GroupBlueData, GroupRedData),typeOrder=T)
-DEGsRedLevel <- CreateTabLevel( DEGsRed,"GroupRed","GroupOther",GroupRedData,cbind(GroupBlueData, GroupGreen3Data),typeOrder=T)
+DEGsBlueLevel <- CreateTabLevel(DEGsBlue, "GroupBlue", "GroupOther", 
+  GroupBlueData, cbind(GroupGreen3Data, GroupRedData), typeOrder = TRUE)
+DEGsGreen3Level <- CreateTabLevel(DEGsGreen3, "GroupGreen3", "GroupOther",
+  GroupGreen3Data, cbind(GroupBlueData, GroupRedData), typeOrder = TRUE)
+DEGsRedLevel <- CreateTabLevel(DEGsRed, "GroupRed", "GroupOther",
+  GroupRedData, cbind(GroupBlueData, GroupGreen3Data), typeOrder = TRUE)
 
 blueDEGs <- DEGsBlueLevel[DEGsBlueLevel$FDR < 0.01 & DEGsBlueLevel$logFC >= 1, ]
 blueDEGs <- blueDEGs[order(blueDEGs$FDR), ]
@@ -152,7 +158,8 @@ redDEGsSpec <- redDEGsSpec[1:50, ]
 
 tabCluster <- tabCluster[order(tabCluster$Color), ]
 
-MfiltQuantileOrdered <- BRCArnaseqV2[c(rownames(blueDEGsSpec), rownames(green3DEGsSpec), rownames(redDEGsSpec)), rownames(tabCluster)]
+MfiltQuantileOrdered <- BRCArnaseqV2[c(rownames(blueDEGsSpec), rownames(green3DEGsSpec), 
+  rownames(redDEGsSpec)), rownames(tabCluster)]
 #MfiltQuantileOrdered <- (MfiltQuantileOrdered - rowMeans(MfiltQuantileOrdered))/apply(MfiltQuantileOrdered, 1, sd)
 
 
@@ -173,7 +180,11 @@ column_annotation <- matrix(" ", nrow = nrow(HMactivity), ncol = 1)
 column_annotation[, 1] <- tabCluster$Color
 
 row_annotation <- matrix(" ", nrow = 1, ncol = ncol(HMactivity))
-row_annotation[1, ] <- c(rep("blue", nrow(blueDEGsSpec)), rep("green3", nrow(green3DEGsSpec)), rep("red", nrow(redDEGsSpec)))
+row_annotation[1, ] <- c(rep("blue", nrow(blueDEGsSpec)), rep("green3", nrow(green3DEGsSpec)), 
+  rep("red", nrow(redDEGsSpec)))
+
+
+
 library("GMD")
 
 png("BRCA_heatmap.png", width = 1200, height = 800)
@@ -186,11 +197,12 @@ heatmap.3(t(HMactivity), ColSideColors = column_annotation, RowSideColors = row_
           margins = c(1, 6), side.height.fraction = 0.25, keysize = 1.4, cexRow = 1.6)
 dev.off()
 
-#BRCAcnv <- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder, PlatformType = 'genome_wide_snp_6', listSample = toDown, newsample = F)
+#BRCAcnv <- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder,
+#   PlatformType = 'genome_wide_snp_6', listSample = toDown, newsample = FALSE)
 
 ```
 The result is shown below:
-```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
 library(png)
 library(grid)
 img <- readPNG("BRCA_heatmap.png")
@@ -198,7 +210,7 @@ grid.raster(img)
 ```
 
 
-#### TCGA Downstream Methylation analysis
+#### TCGA downstream methylation analysis
 
 Some downstream analysis from methylation data can be done with TCGAbiolinks.
 An example is shown below. We search, download and prepare data from the 
@@ -243,8 +255,8 @@ idx <- is.element(met.md$bcr_patient_barcode,strtrim(samples,12))
 met.md <- met.md[idx,]
 ```
 
-After we divided the data in groups 
-in order to analyse the data. Using the metadata, it is possible to create an
+We divided the data into groups 
+in order to analyze the data. Using the metadata, it is possible to create a
 survival plot with the function survivalPlot as follows:
 
 ```{r, eval = FALSE}
@@ -259,26 +271,26 @@ rownames(met.md) <- met.md$bcr_patient_barcode
 survivalPlot(met.md)
 ```
 The result is shown below:
-```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
 library(png)
 library(grid)
 img <- readPNG("survival.png")
 grid.raster(img)
 ```
 
-Using the data and calculating the mean methylation per groups it is possible to create an
+Using the data and calculating the mean methylation per group, it is possible to create a
 mean methylation boxplot with the function met.mean.boxplot as follows:
 
 ```{r, eval = FALSE}
 #----------------------mean methylation
-met.mean <- data.frame(apply(beta,2,mean,na.rm=TRUE))
+met.mean <- data.frame(apply(beta, 2, mean, na.rm = TRUE))
 colnames(met.mean) <- "avg"
-met.mean$patient <-  strtrim(rownames(met.mean),12)
-aux <- merge(met.mean,met.md, by.x="patient",by.y="bcr_patient_barcode")
+met.mean$patient <- strtrim(rownames(met.mean), 12)
+aux <- merge(met.mean, met.md, by.x = "patient", by.y = "bcr_patient_barcode")
 met.mean.boxplot(aux)
 ```
 The result is shown below:
-```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
 library(png)
 library(grid)
 img <- readPNG("meanmet.png")
@@ -302,24 +314,24 @@ probe <- cbind(probe,diffmean)
 hypo.hyper <- volcanoPlot(data, p.cut = 0.85)
 ```
 
-The output will be an graph as the figure below. The function will 
-return the values that are more relevant.
+The output will be an graph such as the figure below. The function will 
+return the most relevant values.
 
-```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
 library(png)
 library(grid)
 img <- readPNG("volcano.png")
 grid.raster(img)
 ```
 
-The next part, we will analyse rxpression data and methylation data with 
+In the next part, we will analyze expression data and methylation data with 
 starburst analysis.
 ```{r, eval = FALSE}
- FDR <- runif(nrow(met),0,1)
- p.value.adj <- runif(nrow(met),0,1)
+ FDR <- runif(nrow(met), 0, 1)
+ p.value.adj <- runif(nrow(met), 0, 1)
  GeneSymbol <- met$Gene_Symbol
- dm <-  runif(nrow(met),-3,3)
- expression <- data.frame(GeneSymbol,FDR,p.value.adj,dm)
- gene.met <- starbursAnalysis(met,expression)
+ dm <- runif(nrow(met), -3, 3)
+ expression <- data.frame(GeneSymbol, FDR, p.value.adj, dm)
+ gene.met <- starbursAnalysis(met, expression)
  starburstPlot(gene.met)
 ```
