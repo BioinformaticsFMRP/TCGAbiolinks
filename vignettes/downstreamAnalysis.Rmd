@@ -117,7 +117,7 @@ grid.raster(img)
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 
-##### Differential Analisys
+##### Differential analysis
 GroupBlueData <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "blue", "Sample"])]
 GroupGreen3Data <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "green3", "Sample"])]
 GroupRedData <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "red", "Sample"])]
@@ -160,7 +160,8 @@ tabCluster <- tabCluster[order(tabCluster$Color), ]
 
 MfiltQuantileOrdered <- BRCArnaseqV2[c(rownames(blueDEGsSpec), rownames(green3DEGsSpec), 
   rownames(redDEGsSpec)), rownames(tabCluster)]
-#MfiltQuantileOrdered <- (MfiltQuantileOrdered - rowMeans(MfiltQuantileOrdered))/apply(MfiltQuantileOrdered, 1, sd)
+#MfiltQuantileOrdered <- (MfiltQuantileOrdered - rowMeans(MfiltQuantileOrdered))/apply(MfiltQuantileOrdered,
+# 1, sd)
 
 
 MRactivity <- t(MfiltQuantileOrdered)
