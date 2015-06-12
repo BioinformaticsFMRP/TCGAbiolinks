@@ -54,7 +54,7 @@ for ( i in 1: nrow(matSamples)){
 
  colnames(matSamples) <- substr( colnames(matSamples), 1,2)
 
-knitr::kable(matSamples, digits = 2, caption = "Table common samples among platforms from TCGAQuery",row.names = T)
+knitr::kable(matSamples, digits = 2, caption = "Table common samples among platforms from TCGAQuery", row.names = TRUE)
 ```
 
 ## TCGA query, download, prepare list of a barcode
@@ -86,7 +86,7 @@ The result is shown below:
 library(TCGAbiolinks)
 dataGE <- dataBRCA[sample(rownames(dataBRCA),5),sample(colnames(dataBRCA),3)]
 
-knitr::kable(dataGE, digits = 2, caption = "Matrix Gene expression (genes in rows and samples in columns)",row.names = F)
+knitr::kable(dataGE, digits = 2, caption = "Matrix Gene expression (genes in rows and samples in columns)",row.names = FALSE)
 ```
 
 
@@ -187,8 +187,8 @@ The result is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
 library(TCGAbiolinks)
-dataDEGsFiltLevel$FDR <- format(dataDEGsFiltLevel$FDR, scientific = T)
-knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2, caption = "Table DEGs after DEA",row.names = F)
+dataDEGsFiltLevel$FDR <- format(dataDEGsFiltLevel$FDR, scientific = TRUE)
+knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2, caption = "Table DEGs after DEA",row.names = FALSE)
 ```
 
 
@@ -273,7 +273,7 @@ TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
 dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
 
 # Order table DEGs TFs according to Delta decrease
-dataDEGsFiltLevelTFs <- dataDEGsFiltLevelTFs[order(dataDEGsFiltLevelTFs$Delta,decreasing=T),]
+dataDEGsFiltLevelTFs <- dataDEGsFiltLevelTFs[order(dataDEGsFiltLevelTFs$Delta,decreasing = TRUE),]
 
 # Find Pubmed of TF studied related to cancer
 tabDEGsTFPubmed <- TCGAinvestigate("breast", dataDEGsFiltLevelTFs, topgenes = 10)
@@ -284,5 +284,5 @@ The result is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
 library(TCGAbiolinks)
-knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF in pubmed related to a specific cancer",row.names = F)
+knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF in pubmed related to a specific cancer",row.names = FALSE)
 ```
