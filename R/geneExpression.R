@@ -211,9 +211,7 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
     sampleColors <- c(rep("blue", length(samplesNT)), rep("red", length(samplesTP)))
 
 
-    print("done")
     names(sampleColors) <- colnames(expr2)
-    print("later")
     cancer.pca <- stats::prcomp(t(expr2),cor = TRUE)
     library(ggbiplot)
     # print(sample.colors)
@@ -223,7 +221,6 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
                                  values = c("blue" = "blue","red" = "red"))
     g <- g + geom_point(aes(colour = sampleColors), size = 3)
     #shape = tabClusterNew$Study)
-    print("here")
     g <- g + theme(legend.direction = 'horizontal',  legend.position = 'top')
     g <- g + ggtitle(TitlePlot)
     print(g)
