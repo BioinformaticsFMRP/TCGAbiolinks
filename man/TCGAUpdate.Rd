@@ -12,7 +12,4 @@ platform.table center.table disease.table tcga.db
 \description{
 Updates local TCGA database
 }
-\examples{
-TCGAUpdate()
-}
 
