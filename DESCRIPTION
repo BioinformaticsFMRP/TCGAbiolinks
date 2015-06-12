@@ -2,7 +2,7 @@ Package: TCGAbiolinks
 Type: Package
 Title: Download Search and Analyse Data from TCGA
 Version: 0.99.0
-Date: 2015-05-14
+Date: 2015-06-12
 Author:
     Antonio Colaprico,
     Tiago Chedraoui Silva,
@@ -24,7 +24,6 @@ Imports:
     EDASeq,
     genefilter,
     clue,
-    GMD,
     png,
     grid,
     RCurl,
