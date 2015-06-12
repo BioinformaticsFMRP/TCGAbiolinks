@@ -535,8 +535,8 @@ starburstPlot <- function(data,
                                     "7" = "Down",
                                     "8" = "Up & Hyper",
                                     "9" = "Down & Hyper"),
-                          xlim = NULL, ylim = NULL, p.cut = 0.05,
-                          diffmean.cut = 0)
+                          xlim = NULL, ylim = NULL, p.cut = 0.05
+                         )
 {
     .e <- environment()
     volcano.m <- data
@@ -546,7 +546,7 @@ starburstPlot <- function(data,
     # subseting by regulation (geFDR) and methylation level
     # (meFDR) down regulated up regulated lowerthr
     # |||||||||||||||| upperthr hypomethylated hipermethylated
-    lowerthr <- log10(0.05)  # - 1.30103
+    lowerthr <- log10(p.cut)  # - 1.30103
     upperthr <- (-lowerthr)  # +1.30103
 
     # Group 2:up regulated and hypomethylated
@@ -593,7 +593,7 @@ starburstPlot <- function(data,
                 volcano.m$geFDR2 < lowerthr &
                     volcano.m$meFDR2 > upperthr)
 
-    size <- c("3", "3", "2", "2", "2", "2", "2","2")
+    size <- c("1", "1", "1", "1", "1", "1", "1","1")
     groups <- c("2", "3", "4", "5", "6", "7","8","9")
     s <- list(a, b, c, d, e, f,g,h)
     for (i in seq_along(s)) {
