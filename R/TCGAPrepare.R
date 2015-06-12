@@ -45,7 +45,12 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
     }
     if (!is.null(type)) {
         files <- files[grep(type,files)]
+        if(length(files) == 0){
+            message("No files of that type found")
+            return(NULL)
+        }
     }
+
 
     df <- NULL
     if (grepl("humanmethylation",tolower(platform))) {
