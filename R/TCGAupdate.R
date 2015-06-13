@@ -211,8 +211,10 @@ tcgaGetTable <- function(url, max = 0) {
 #' @title TCGA TCGAUpdate
 #' @description Updates local TCGA database
 #' @return platform.table center.table disease.table tcga.db
-##' examples
-# TCGAUpdate()
+#' @examples
+#' \dontrun{
+#'   TCGAUpdate()
+#' }
 #' @export
 TCGAUpdate <- function(){
 
@@ -225,6 +227,10 @@ TCGAUpdate <- function(){
     platform.table <- platform.table[, 1:4]
     platform.table <- platform.table[order(platform.table$name,
                                            decreasing = TRUE),]
+    unlockBinding("platform.table",
+                  env =  as.environment("package:TCGAbiolinks"))
+    assign("platform.table", platform.table,
+           envir =  as.environment("package:TCGAbiolinks"))
 
     # Get disease table
     tcga.query <- "query=Disease"
@@ -232,11 +238,22 @@ TCGAUpdate <- function(){
     disease.table <- tcgaGetTable(next.url)
     disease.table <- disease.table[, 1:3]
 
+    unlockBinding("disease.table",
+                  env =  as.environment("package:TCGAbiolinks"))
+
+    assign("disease.table", disease.table,
+           envir =  as.environment("package:TCGAbiolinks"))
     # Get center table
     tcga.query <- "query=Center"
     next.url <- paste0(tcga.root, tcga.query)
     center.table  <- tcgaGetTable(next.url)
     center.table <- center.table[, 1:3]
+
+    unlockBinding("center.table",
+                  env =  as.environment("package:TCGAbiolinks"))
+
+    assign("center.table", center.table,
+           envir =  as.environment("package:TCGAbiolinks"))
 
     tcga.db <-  get("tcga.db", envir =  as.environment("package:TCGAbiolinks"))
 
@@ -260,10 +277,14 @@ TCGAUpdate <- function(){
     colnames(new.db)[4] <- "barcode"
     tcga.db <- new.db
 
+    unlockBinding("tcga.db",
+                  env =  as.environment("package:TCGAbiolinks"))
+
+    assign("tcga.db", tcga.db,
+           envir =  as.environment("package:TCGAbiolinks"))
+
     save(platform.table, disease.table, tcga.db, center.table,
          file = paste0(system.file("extdata", package = "TCGAbiolinks"),
                        "/dataFolders.rda")
     )
-    file = system.file("extdata/dataFolders.rda",package = "TCGAbiolinks")
-    load(file, envir = as.environment("package:TCGAbiolinks"))
 }
