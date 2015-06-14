@@ -7,9 +7,25 @@
 SampleTypes(barcode, typesample)
 }
 \arguments{
-\item{barcode}{barcode}
+\item{barcode}{barcode list}
 
-\item{typesample}{typesample}
+\item{typesample}{a character vector indicating tissue type to query. Example:
+\tabular{ll}{
+TP \tab   PRIMARY SOLID TUMOR \cr
+TR \tab   RECURRENT SOLID TUMOR \cr
+TB \tab   Primary Blood Derived Cancer-Peripheral Blood \cr
+TRBM \tab Recurrent Blood Derived Cancer-Bone Marrow \cr
+TAP \tab  Additional-New Primary \cr
+TM \tab   Metastatic \cr
+TAM \tab  Additional Metastatic \cr
+THOC \tab Human Tumor Original Cells \cr
+TBM \tab  Primary Blood Derived Cancer-Bone Marrow \cr
+NB \tab   Blood Derived Normal \cr
+NT \tab   Solid Tissue Normal \cr
+NBC \tab  Buccal Cell Normal \cr
+NEBV \tab EBV Immortalized Normal \cr
+NBM \tab  Bone Marrow Normal \cr
+}}
 }
 \value{
 SampleTypes

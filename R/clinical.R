@@ -1,8 +1,24 @@
 #' @title SampleTypes
 #' @description
 #'   SampleTypes
-#' @param barcode barcode
-#' @param typesample typesample
+#' @param barcode barcode list
+#' @param typesample a character vector indicating tissue type to query. Example:
+#' \tabular{ll}{
+#'TP \tab   PRIMARY SOLID TUMOR \cr
+#'TR \tab   RECURRENT SOLID TUMOR \cr
+#'TB \tab   Primary Blood Derived Cancer-Peripheral Blood \cr
+#'TRBM \tab Recurrent Blood Derived Cancer-Bone Marrow \cr
+#'TAP \tab  Additional-New Primary \cr
+#'TM \tab   Metastatic \cr
+#'TAM \tab  Additional Metastatic \cr
+#'THOC \tab Human Tumor Original Cells \cr
+#'TBM \tab  Primary Blood Derived Cancer-Bone Marrow \cr
+#'NB \tab   Blood Derived Normal \cr
+#'NT \tab   Solid Tissue Normal \cr
+#'NBC \tab  Buccal Cell Normal \cr
+#'NEBV \tab EBV Immortalized Normal \cr
+#'NBM \tab  Bone Marrow Normal \cr
+#'}
 #' @export
 #' @return SampleTypes
 SampleTypes <- function(barcode, typesample){
@@ -241,8 +257,34 @@ clinical_data_site_cancer <- function(cancer){
 #' @title clinic
 #' @description
 #'   clinic
-#' @param cancer cancer
-#' @param clinical_data_type clinical_data_type
+#' @param cancer a character vector indicating cancer type Examples:
+#' \tabular{lllll}{
+#'OV   \tab BRCA \tab CESC \tab ESCA \tab PCPG\cr
+#'LUSC \tab LGG  \tab SKCM \tab KICH \tab CHOL\cr
+#'GBM  \tab UCEC \tab PRAD \tab PAAD \tab THYM\cr
+#'KIRC \tab THCA \tab SARC \tab LAML \tab TGCT\cr
+#'COAD \tab KIRP \tab HNSC \tab ACC  \tab UVM \cr
+#'READ \tab BLCA \tab DLBC \tab UCS  \tab FPPP\cr
+#'LUAD \tab LIHC \tab STAD \tab MESO \tab CNTL
+#'}
+#' For information about cancer types: https://tcga-data.nci.nih.gov/tcga/
+#' @param clinical_data_type a character vector indicating the types of
+#' clinical data Example:
+#' \tabular{ll}{
+#' biospecimen_aliquot \tab biospecimen_analyte \cr
+#' biospecimen_cqcf \tab biospecimen_diagnostic_slides \cr
+#' biospecimen_normal_control \tab biospecimen_portion \cr
+#' biospecimen_protocol \tab biospecimen_sample \cr
+#' biospecimen_shipment_portion \tab biospecimen_slide \cr
+#' biospecimen_tumor_sample \tab clinical_cqcf \cr
+#' clinical_drug \tab clinical_follow_up_v1.5 \cr
+#' clinical_follow_up_v2.1 \tab clinical_follow_up_v4.0 \cr
+#' clinical_follow_up_v4.0_nte \tab clinical_nte \cr
+#' clinical_omf_v4.0 \tab clinical_patient \cr
+#' clinical_radiation
+#'}
+
+
 #' @export
 #' @importFrom RCurl getURL
 #' @return clinic
@@ -253,5 +295,9 @@ clinic <- function(cancer,clinical_data_type){
     writeLines(getURL(URL,ssl.verifypeer = FALSE),
                file(paste0(clinical_data_type,".txt")))
 
-    return(file(paste0(clinical_data_type,".txt")))
+    clinical_patient <- read.delim(file(paste0(clinical_data_type,".txt")), stringsAsFactors=FALSE)
+    clinical_patient <- clinical_patient[-c(1,2),]
+    #return(file(paste0(clinical_data_type,".txt")))
+
+    return(clinical_patient)
 }

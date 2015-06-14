@@ -14,7 +14,7 @@ starburstPlot(data, filename = "volcano.pdf",
   "green", `8` = "yellow", `9` = "orange"), label = c(`1` = "Not Significant",
   `2` = "Up & Hypo", `3` = "Down & Hypo", `4` = "hypo", `5` = "hyper", `6` =
   "Up", `7` = "Down", `8` = "Up & Hyper", `9` = "Down & Hyper"), xlim = NULL,
-  ylim = NULL, p.cut = 0.05, diffmean.cut = 0)
+  ylim = NULL, p.cut = 0.05)
 }
 \arguments{
 \item{data}{data frame columns: diffmean, p.value.adj}
