@@ -81,9 +81,7 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
             colnames(data) <- data[1,]
             data <- data[-1,] # removing Composite Element REF
             colnames(data)[2] <- sample
-            print(files[i])
 
-            print(sample)
             if (i == 1) {
                 df <- data
             } else {
@@ -105,9 +103,8 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
     # Line 2 is useless
     if (grepl("agilent|H-miRNA_8x15K",platform, ignore.case = T)) {
         for (i in seq_along(files)) {
-            data <- read.table(files[i], header = TRUE, sep = "\t",
-                               stringsAsFactors = FALSE, check.names = FALSE)
-            data <- data[-1,] # removing Composite Element REF
+            data <- read.table(files[i], skip=2,
+                               stringsAsFactors = FALSE)
             if (i == 1) {
                 df <- data
             } else {
@@ -116,6 +113,7 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
         }
         rownames(df) <- df[,1]
         df[,1] <- NULL
+        colnames(df) <- sapply(files, function(x) read.table(x, stringsAsFactors = FALSE,nrows=1)[3])
     }
 
     if (grepl("illuminaga",platform, ignore.case = T)) {
@@ -155,6 +153,31 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
         df[,1] <- NULL
     }
 
+    if (grepl("illuminahiseq_mirnaseq",platform, ignore.case = T)) {
+        files <- files[grep("mirna",files)]
+        if(length(files) == 0){
+            message("No mirna files of that type found")
+            return(NULL)
+        }
+
+        regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
+                        "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
+        barcode <- str_match(files,regex)
+
+        for (i in seq_along(files)) {
+            data <- read.table(files[i], header = TRUE, sep = "\t",
+                               stringsAsFactors = FALSE, check.names = FALSE,
+                               comment.char = "#",fill = TRUE)
+            if (i == 1) {
+                df <- data[,"read_count"]
+            } else {
+                df <- cbind(df, data[,"read_count"])
+            }
+        }
+        colnames(df) <- as.character(barcode)
+        rownames(df) <- data[,1]
+    }
+
     if (grepl("bio",platform,ignore.case = TRUE)) {
         if (!is.null(type)) {
             files <- files[grep(type,files)]
@@ -169,7 +192,6 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
             message("We're preaparing for the moment only one clinical file")
             return(NULL)
         }
-
     }
     return(df)
 }
