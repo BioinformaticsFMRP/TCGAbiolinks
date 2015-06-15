@@ -88,16 +88,19 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
                 df <- merge(df, data,by = "Composite Element REF")
             }
         }
-
+        rownames(df) <- df[,1]
+        df[,1] <- NULL
         # get array_design.txt from mage folder
         # and change uuid by Barcode
         uuid <- colnames(df)
+        print(uuid)
         idx <- grep("Sample|Control",uuid)
-        uuid <- uuid[-idx]
+        if(length(idx) > 0){
+            uuid <- uuid[-idx]
+        }
         map <- mapuuidbarcode(uuid)
         idx <- which(colnames(df) %in% map$uuid)
-        colnames(df)[idx] <- map$barcode
-
+        colnames(df)[idx] <- as.character(map$barcode)
     }
     # case: header has barcode
     # Line 2 is useless
@@ -116,7 +119,9 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
         colnames(df) <- sapply(files, function(x) read.table(x, stringsAsFactors = FALSE,nrows=1)[3])
     }
 
-    if (grepl("illuminaga",platform, ignore.case = T)) {
+    if (grepl("illuminaga|illuminadnamethylation_oma",
+              platform, ignore.case = T)) {
+
         for (i in seq_along(files)) {
             data <- read.table(files[i], header = TRUE, sep = "\t",
                                stringsAsFactors = FALSE, check.names = FALSE,
@@ -128,6 +133,8 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
                 df <- merge(df, data,by = "Hybridization REF")
             }
         }
+        rownames(df) <- df[,1]
+        df[,1] <- NULL
     }
 
     if (grepl("illuminahiseq_rnaseqv2|illuminahiseq_totalrnaseqv2",
