@@ -9,8 +9,10 @@
 TCGAinvestigate<- function(tumor,dataDEGsFiltLevelTF,topgenes){
     site <- "http://www.ncbi.nlm.nih.gov/pubmed/?term="
 
-    # GenesTofix <- c("JUN","HR","HOMEZ", "ANKAR", "REST", "BATF", "MAX", "ECD", "FOS")
-    # dataDEGsFiltLevelTF <- dataDEGsFiltLevelTF[setdiff(dataDEGsFiltLevelTFs$mRNA,GenesTofix),]
+    # GenesTofix <- c("JUN","HR","HOMEZ",
+    #                 "ANKAR", "REST", "BATF", "MAX", "ECD", "FOS")
+    # dataDEGsFiltLevelTF <- dataDEGsFiltLevelTF[
+    #                        setdiff(dataDEGsFiltLevelTFs$mRNA,GenesTofix),]
 
     dataDEGsFiltLevelTF <- dataDEGsFiltLevelTF[1:topgenes,]
     Pubmed <- matrix(0, nrow(dataDEGsFiltLevelTF), 1)
