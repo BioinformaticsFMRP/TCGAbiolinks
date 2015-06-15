@@ -237,6 +237,13 @@ d<-biospecimen("uvm","biospecimen_normal_control")
 
 d <- clinic("brca","biospecimen_normal_control")
 
+clinical_brca_data <- clinic("brca","clinical_patient")
+
+length([1])
+clinical_brca_data <- clinic("brca","clinical_patient")
+samples_with_clinical_data <- clinical_brca_data$bcr_patient_barcode
+
+clinical_brca_data_rnaseqv2 <- clinical_brca_data[clinical_brca_data$bcr_patient_barcode %in% substr(querySamples$IlluminaHiSeq_RNASeqV2,1,12),]
 ```
 
 ## TCGA Downstream Analysis TCGAprepare, TCGAanalyze, TCGAvisualize
@@ -394,6 +401,29 @@ library(TCGAbiolinks)
 knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF in pubmed related to a specific cancer",row.names = FALSE)
 ```
 
+
+## TCGA social
+Find most downloaded packages in CRAN or BioConductor
+ 
+```{r, eval = FALSE}
+library(TCGAbiolinks)
+
+# Define a list of package to find number of downloads
+listPackage <-c("limma","edgeR","survcomp")
+
+tabPackage <- TCGAsocial(listPackage)
+
+```
+
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+library(TCGAbiolinks)
+listPackage <-c("limma","edgeR","survcomp")
+tabPackage <- TCGAsocial(listPackage)
+
+knitr::kable(tabPackage, digits = 2, caption = "Table with number of downloads about a list of packages",row.names = FALSE)
+```
 
 ## TCGA downstream Analysis
  
