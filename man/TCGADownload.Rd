@@ -12,7 +12,7 @@ TCGADownload(data = NULL, path = ".", type = NULL, samples = NULL,
 
 \item{path}{location of the final data saving}
 
-\item{type}{Get files with type pattern instead of downloading all the folder}
+\item{type}{Get files with type pattern instead of downloading all the files}
 
 \item{samples}{List of samples to download}
 

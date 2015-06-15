@@ -3,12 +3,12 @@
 \docType{data}
 \name{PlatformAndAssociatedData}
 \alias{PlatformAndAssociatedData}
-\title{TCGA PlatformAndAssociatedData data frame indicating the different characteristics
-of the data e.g. tumour, type, species.}
+\title{TCGA PlatformAndAssociatedData data frame indicating the different
+characteristics of the data e.g. tumour, type, species.}
 \format{A data frame with 615 rows and 12 variables}
 \description{
-TCGA PlatformAndAssociatedData data frame indicating the different characteristics
-of the data e.g. tumour, type, species.
+TCGA PlatformAndAssociatedData data frame indicating the different
+characteristics of the data e.g. tumour, type, species.
 }
 \keyword{internal}
 
