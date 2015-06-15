@@ -2,7 +2,8 @@
 #' @description
 #'   SampleTypes
 #' @param barcode barcode list
-#' @param typesample a character vector indicating tissue type to query. Example:
+#' @param typesample a character vector indicating tissue type to query.
+#' Example:
 #' \tabular{ll}{
 #'TP \tab   PRIMARY SOLID TUMOR \cr
 #'TR \tab   RECURRENT SOLID TUMOR \cr
@@ -295,7 +296,8 @@ clinic <- function(cancer,clinical_data_type){
     writeLines(getURL(URL,ssl.verifypeer = FALSE),
                file(paste0(clinical_data_type,".txt")))
 
-    clinical_patient <- read.delim(file(paste0(clinical_data_type,".txt")), stringsAsFactors=FALSE)
+    clinical_patient <- read.delim(file(paste0(clinical_data_type,".txt")),
+                                   stringsAsFactors=FALSE)
     clinical_patient <- clinical_patient[-c(1,2),]
     #return(file(paste0(clinical_data_type,".txt")))
 

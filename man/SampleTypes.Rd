@@ -9,7 +9,8 @@ SampleTypes(barcode, typesample)
 \arguments{
 \item{barcode}{barcode list}
 
-\item{typesample}{a character vector indicating tissue type to query. Example:
+\item{typesample}{a character vector indicating tissue type to query.
+Example:
 \tabular{ll}{
 TP \tab   PRIMARY SOLID TUMOR \cr
 TR \tab   RECURRENT SOLID TUMOR \cr
