@@ -65,7 +65,6 @@ knitr::kable(matSamples, digits = 2,
 
 
 ```
-\newpage
 
 Some examples of TCGAQuery are shown below
 ```{r, eval = FALSE}
@@ -93,7 +92,7 @@ query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04",
 
 
 
-Query version about a platform for example IlluminaHiSeq_RNASeqV2
+Query version for a specific platform for example IlluminaHiSeq_RNASeqV2
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 
@@ -137,7 +136,7 @@ TCGADownload(query, path = "dataLusc", type = "rsem.genes.results",
 LuscMatrix <- TCGAPrepare(query,"dataLusc")
 ```
 
-\newpage
+
 
 The result is shown below:
 
@@ -187,10 +186,10 @@ bar <- c("TCGA-G9-6378-02A-11R-1789-07", "TCGA-CH-5767-04A-11R-1789-07",
 
 S<-SampleTypes(bar,"TP")
 
-# Retrieve multi tissue types  NOT FROM THE SAME PATIENTS
+# Retrieve multiple tissue types  NOT FROM THE SAME PATIENTS
 SS<-MultiSampleTypes(bar,c("TP","NB"))
 
-# Retrieve multi tissue types  FROM THE SAME PATIENTS
+# Retrieve multiple tissue types  FROM THE SAME PATIENTS
 SSS<-MatchedCoupledSampleTypes(bar,c("NT","TP"))
 
 clinic("gbm","clinical_patient")
@@ -439,7 +438,7 @@ query <- TCGAQuery(tumor = "brca",level = 3, platform = "IlluminaHiSeq_RNASeqV2"
 
 ```
 
-Comment: As these terms need to be exact we validate user input before searching.
+Comment: As these terms need to be exact, we validate user input before searching.
 
 ## TCGA download
 You can easily download roadmap data using the `tcga.download` function.
@@ -451,7 +450,7 @@ You can easily download roadmap data using the `tcga.download` function.
 TCGADownload(query,path = "data",type ="rsem.genes.results")
 ```
 
-Obs: The function will structure the folders to save the data as:
+Comment: The function will structure the folders to save the data as:
 _Path given by the user/Experiment folder_
 
 
