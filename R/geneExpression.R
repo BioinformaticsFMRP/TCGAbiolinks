@@ -200,16 +200,20 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
     color2 <- "red"
 
     # selection of normal samples "NT"
-    samplesNT <- TCGAbiolinks::MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
+    samplesNT <- TCGAbiolinks::MultiSampleTypes(colnames(dataFilt),
+                                                typesample = c("NT"))
     # selection of tumor samples "TP"
-    samplesTP <- TCGAbiolinks::MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
+    samplesTP <- TCGAbiolinks::MultiSampleTypes(colnames(dataFilt),
+                                                typesample = c("TP"))
 
     nsample1 <- length(samplesNT)
     nsample2 <- length(samplesTP)
 
     #sampleColors <- rep(c(color1,color2), c(nsample1, nsample2))
-    #sampleColors <- rep(c("blue","red"), c(length(samplesNT), length(samplesTP)))
-    sampleColors <- c(rep("blue", length(samplesNT)), rep("red", length(samplesTP)))
+    #sampleColors <- rep(c("blue","red"), c(length(samplesNT),
+    #                     length(samplesTP)))
+    sampleColors <- c(rep("blue", length(samplesNT)),
+                      rep("red", length(samplesTP)))
 
 
     names(sampleColors) <- colnames(expr2)

@@ -22,6 +22,8 @@ sample <- "TCGA-06-0939-01A-01D-1228-05"
 query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
 TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
 met <- TCGAPrepare(query, dir="exampleData")
+met <-  met[ met$Chromosome != "X" &  met$Chromosome != "Y", ]
+met <- na.omit(met)
 met$diffmean <- runif(nrow(met),-3,3)
 FDR <- runif(nrow(met),0,1)
 p.value.adj <- runif(nrow(met),0,1)

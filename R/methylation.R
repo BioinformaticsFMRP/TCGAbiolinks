@@ -129,7 +129,7 @@ survivalPlot <- function(met.md, legend = "Legend", cutoff = 0,
         }
         with(met.md,{
             surv <- surv + scale_colour_discrete(name = "legend",
-                            labels = sapply(levels(met.md$type),label.add.n)
+                                                 labels = sapply(levels(met.md$type),label.add.n)
             )
             with(surv,{
 
@@ -242,7 +242,7 @@ metMeanBoxplot <- function(data, sort = FALSE,
 #' values <- as.data.frame(beta.values)
 #' rownames(values) <- patient
 #' colnames(values) <- probes
-#' pvalues <- calculate.pvalues(values,1:50,51:100)
+#' pvalues <- calculate.pvalues(values,1:50,51:100, cores = 2)
 calculate.pvalues <- function(values, idx1 = NULL, idx2 = NULL, paired = TRUE,
                               exact = TRUE, cores = NULL) {
 
@@ -315,7 +315,7 @@ calculate.pvalues <- function(values, idx1 = NULL, idx2 = NULL, paired = TRUE,
 #' values <- as.data.frame(beta.values)
 #' colnames(values) <- patient
 #' rownames(values) <- Composite.Element.REF
-#' data <- calculate.pvalues(as.data.frame(t(values)),1:50,51:100)
+#' data <- calculate.pvalues(as.data.frame(t(values)),1:50,51:100, cores = 2)
 #' diffmean <- diffmean(values[,1:50],values[,51:100])
 #' data <-cbind(Composite.Element.REF,data,diffmean)
 #' hypo.hyper <- volcanoPlot(data, p.cut = 0.85)
@@ -414,6 +414,8 @@ get.GRCh.bioMart <- function() {
 #' query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
 #' TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
 #' met <- TCGAPrepare(query, dir="exampleData")
+#' met <-  met[ met$Chromosome != "X" &  met$Chromosome != "Y", ]
+#' met <- na.omit(met)
 #' met$diffmean <- runif(nrow(met),-3,3)
 #' FDR <- runif(nrow(met),0,1)
 #' p.value.adj <- runif(nrow(met),0,1)
@@ -442,13 +444,16 @@ starbursAnalysis <- function(met, expression) {
     rownames(gene.location) <- NULL
     gene.order.by.distance <- gene.location[distance$subjectHits,]
     gene.order.by.distance$distance <- as.matrix(distance$distance)
-    data.nearest.gene <- cbind(met,
+
+    data.nearest.gene <- merge(met,
                                gene.order.by.distance[, c("external_gene_name",
                                                           "entrezgene",
-                                                          "distance")])
+                                                          "distance")],
+                               by.x="Gene_Symbol", by.y="external_gene_name")
 
     # volcano$gene <- met$Gene_Symbol volcano$cgID <-
     # rownames(volcano)
+    print(head(expression))
     volcano <- merge(met, expression,
                      by.x = "Gene_Symbol",
                      by.y = "GeneSymbol",
@@ -492,7 +497,6 @@ starbursAnalysis <- function(met, expression) {
 #' @param xlim x limits to cut image
 #' @param ylim y limits to cut image
 #' @param p.cut p value cut-off
-#' @param diffmean.cut diffmean cut-off
 #' @import ggplot2
 #' @export
 #' @return Save a starburst plot
@@ -501,6 +505,8 @@ starbursAnalysis <- function(met, expression) {
 #' query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
 #' TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
 #' met <- TCGAPrepare(query, dir="exampleData")
+#' met <-  met[ met$Chromosome != "X" &  met$Chromosome != "Y", ]
+#' met <- na.omit(met)
 #' met$diffmean <- runif(nrow(met),-3,3)
 #' FDR <- runif(nrow(met),0,1)
 #' p.value.adj <- runif(nrow(met),0,1)
@@ -536,7 +542,7 @@ starburstPlot <- function(data,
                                     "8" = "Up & Hyper",
                                     "9" = "Down & Hyper"),
                           xlim = NULL, ylim = NULL, p.cut = 0.05
-                         )
+)
 {
     .e <- environment()
     volcano.m <- data

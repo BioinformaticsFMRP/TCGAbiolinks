@@ -15,7 +15,7 @@
 #' TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
 #' prepared <- TCGAPrepare(query, dir="exampleData")
 #' @export
-#' @importFrom stringr str_match
+#' @importFrom stringr str_match str_trim
 TCGAPrepare <- function(query, dir = NULL, type = NULL){
 
     if (is.null(dir)) {
@@ -24,7 +24,7 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
         return(NULL)
     }
     if (length(unique(query$Platform)) > 1 |
-            length(unique(query$Center)) > 2) {
+        length(unique(query$Center)) > 2) {
         message("Sorry! But, for the moment, we can only prepare on type of
             platform per call")
         return(NULL)
@@ -104,7 +104,7 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
     }
     # case: header has barcode
     # Line 2 is useless
-    if (grepl("agilent|H-miRNA_8x15K",platform, ignore.case = T)) {
+    if (grepl("agilent|H-miRNA_8x15K",platform, ignore.case = TRUE)) {
         for (i in seq_along(files)) {
             data <- read.table(files[i], skip=2,
                                stringsAsFactors = FALSE)
@@ -116,11 +116,16 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
         }
         rownames(df) <- df[,1]
         df[,1] <- NULL
-        colnames(df) <- sapply(files, function(x) read.table(x, stringsAsFactors = FALSE,nrows=1)[3])
+        colnames(df) <- sapply(files,
+                               function(x) {
+                                   read.table(x,
+                                              stringsAsFactors = FALSE,
+                                              nrows=1)[3]
+                               })
     }
 
     if (grepl("illuminaga|illuminadnamethylation_oma",
-              platform, ignore.case = T)) {
+              platform, ignore.case = TRUE)) {
 
         for (i in seq_along(files)) {
             data <- read.table(files[i], header = TRUE, sep = "\t",
@@ -160,7 +165,7 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
         df[,1] <- NULL
     }
 
-    if (grepl("illuminahiseq_mirnaseq",platform, ignore.case = T)) {
+    if (grepl("illuminahiseq_mirnaseq",platform, ignore.case = TRUE)) {
         files <- files[grep("mirna",files)]
         if(length(files) == 0){
             message("No mirna files of that type found")

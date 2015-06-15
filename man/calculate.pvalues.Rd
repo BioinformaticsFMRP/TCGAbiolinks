@@ -42,6 +42,6 @@ beta.values <- matrix(beta.values,ncol = 100,nrow = 100)
 values <- as.data.frame(beta.values)
 rownames(values) <- patient
 colnames(values) <- probes
-pvalues <- calculate.pvalues(values,1:50,51:100)
+pvalues <- calculate.pvalues(values,1:50,51:100, cores = 2)
 }
 

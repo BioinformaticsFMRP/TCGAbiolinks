@@ -2,7 +2,7 @@
 #' @description Download data previously selected using the TCGASeach
 #' @param data TCGASearch output
 #' @param path location of the final data saving
-#' @param type Get files with type pattern instead of downloading all the folder
+#' @param type Get files with type pattern instead of downloading all the files
 #' @param quiet Should download supress output messages. Default: false
 #' @param samples List of samples to download
 #' @seealso TCGASearch

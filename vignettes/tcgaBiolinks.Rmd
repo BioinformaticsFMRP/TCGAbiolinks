@@ -1,6 +1,8 @@
 ---
 title: "Working with TCGAbiolinks package"
-author: " Antonio Colaprico, Tiago Chedraoui Silva, Luciano Garofano, Catharina Olsen, Davide Garolini, Claudia Cava, Isabella Castiglioni, Houtan Noushmehr, Gianluca Bontempi, Michele Ceccarelli"
+author: " Antonio Colaprico, Tiago Chedraoui Silva, Luciano Garofano, 
+Catharina Olsen, Davide Garolini, Claudia Cava, Isabella Castiglioni,
+Houtan Noushmehr, Gianluca Bontempi, Michele Ceccarelli"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -9,11 +11,13 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-This document describes how to search, download and analyze TCGA data using the TCGAbiolinks package.
+This document describes how to search, download and analyze TCGA data using the
+TCGAbiolinks package.
 
 ## TCGA query
  You can easily search TCGA samples using the `tcgaQuery` function.
- Using a summary of filters as used in the TCGA portal, the function works with the following 
+ Using a summary of filters as used in the TCGA portal, the function works
+ with the following 
  parameters:
 
 * tumor
@@ -31,7 +35,9 @@ library(TCGAbiolinks)
 query <- TCGAQuery(tumor = "brca",level = 3)
 querySamples <- samplesfilter(query)
 
-query <- TCGAQuery(tumor = "brca",level = 3, platform = "IlluminaHiSeq_RNASeqV2")
+query <- TCGAQuery(tumor = "brca",
+                   level = 3,
+                   platform = "IlluminaHiSeq_RNASeqV2")
 
 matSamples <- TCGAintegrate(querySamples)
 
@@ -47,11 +53,15 @@ querySamples <- samplesfilter(query)
 
 matSamples <- TCGAintegrate(querySamples)
 
-colnames(matSamples) <- paste("p",1:length(names(querySamples)), names(querySamples),sep=".")
-rownames(matSamples) <- paste("p",1:length(names(querySamples)), names(querySamples),sep=".")
+colnames(matSamples) <- paste("p",1:length(names(querySamples)), 
+                              names(querySamples),sep=".")
+rownames(matSamples) <- paste("p",1:length(names(querySamples)),
+                              names(querySamples),sep=".")
 colnames(matSamples) <- substr( colnames(matSamples), 1,4)
 
-knitr::kable(matSamples, digits = 2, caption = "Table common samples among platforms from TCGAQuery", row.names = TRUE)
+knitr::kable(matSamples, digits = 2, 
+             caption = "Table common samples among platforms from TCGAQuery",
+             row.names = TRUE)
 
 
 ```
@@ -87,7 +97,8 @@ Query version about a platform for example IlluminaHiSeq_RNASeqV2
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 
-BRCA_RNASeqV2_version <- TCGAVersion(Tumor = "brca", PlatformType = "illuminahiseq_rnaseqv2")
+BRCA_RNASeqV2_version <- TCGAVersion(Tumor = "brca", 
+                                     PlatformType = "illuminahiseq_rnaseqv2")
 
 ```
 
@@ -95,8 +106,10 @@ The result is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
 library(TCGAbiolinks)
-BRCA_RNASeqV2_version <- BRCA_RNASeqV2_version[order(BRCA_RNASeqV2_version$SizeMbyte,decreasing=T),]
-knitr::kable(BRCA_RNASeqV2_version, digits = 2, caption = "Table with version, number of samples and size (Mbyte) of BRCA IlluminaHiSeq_RNASeqV2 Level 3", row.names = FALSE)
+BRCA_RNASeqV2_version <- BRCA_RNASeqV2_version[order(BRCA_RNASeqV2_version$SizeMbyte,decreasing=TRUE),]
+knitr::kable(BRCA_RNASeqV2_version, digits = 2, 
+             caption = "Table with version, number of samples and size (Mbyte) of BRCA IlluminaHiSeq_RNASeqV2 Level 3", 
+             row.names = FALSE)
 ```
 
 ## TCGA query, download, prepare list of a barcode
@@ -104,8 +117,9 @@ You can easily search TCGA samples, download and prepare a matrix of gene expres
 ```{r, eval = FALSE}
 
 # You can define a list of samples to query and download providing relative TCGA barcodes.
-listSamples <- c("TCGA-33-6737-01","TCGA-33-6737-11","TCGA-43-6143-01","TCGA-43-6143-11",
-                 "TCGA-43-6647-01","TCGA-43-6647-11","TCGA-43-6771-01","TCGA-43-6771-11")
+listSamples <- c("TCGA-33-6737-01","TCGA-33-6737-11","TCGA-43-6143-01",
+                 "TCGA-43-6143-11","TCGA-43-6647-01","TCGA-43-6647-11",
+                 "TCGA-43-6771-01","TCGA-43-6771-11")
 
 # Query all available platforms with a list of barcode 
 query <- TCGAQuery(samples = listSamples)
@@ -115,7 +129,8 @@ query <- TCGAQuery(tumor = "lusc", samples = listSamples,
   platform = "IlluminaHiSeq_RNASeqV2", level = "3")
 
 # Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
-TCGADownload(query, path = "dataLusc", type = "rsem.genes.results", samples = listSamples)
+TCGADownload(query, path = "dataLusc", type = "rsem.genes.results",
+             samples = listSamples)
 
 # Prepare expression matrix with gene id in rows and samples (barcode) in columns
 # rsem.genes.results as values
@@ -130,7 +145,9 @@ The result is shown below:
 library(TCGAbiolinks)
 dataGE <- dataBRCA[sample(rownames(dataBRCA),10),sample(colnames(dataBRCA),7)]
 
-knitr::kable(dataGE, digits = 2, caption = "Example of a matrix of gene expression (10 genes in rows and 7 samples in columns)",row.names = TRUE)
+knitr::kable(dataGE, digits = 2, 
+             caption = "Example of a matrix of gene expression (10 genes in rows and 7 samples in columns)",
+             row.names = TRUE)
 ```
 
 
@@ -151,17 +168,22 @@ _Path given by the user/Experiment folder_
 ## TCGA query clinic data
  
 ```{r, eval = FALSE}
-bar <- c("TCGA-G9-6378-02A-11R-1789-07",  "TCGA-CH-5767-04A-11R-1789-07",  
-              "TCGA-G9-6332-60A-11R-1789-07",  "TCGA-G9-6336-01A-11R-1789-07","TCGA-G9-6336-11A-11R-1789-07",
-              "TCGA-G9-7336-11A-11R-1789-07","TCGA-G9-7336-04A-11R-1789-07","TCGA-G9-7336-14A-11R-1789-07",
-              "TCGA-G9-7036-04A-11R-1789-07","TCGA-G9-7036-02A-11R-1789-07","TCGA-G9-7036-11A-11R-1789-07",
-              "TCGA-G9-7036-03A-11R-1789-07","TCGA-G9-7036-10A-11R-1789-07","TCGA-BH-A1ES-10A-11R-1789-07",
-              "TCGA-BH-A1F010A-11R-1789-07", "TCGA-BH-A0BZ-02A-11R-1789-07","TCGA-B6-A0WY-04A-11R-1789-07",
-              "TCGA-BH-A1FG-04A-11R-1789-08","TCGA-D8-A1JS-04A-11R-2089-08","TCGA-AN-A0FN-11A-11R-8789-08",
-              "TCGA-AR-A2LQ-12A-11R-8799-08","TCGA-AR-A2LH-03A-11R-1789-07","TCGA-BH-A1F8-04A-11R-5789-07",
-              "TCGA-AR-A24T-04A-55R-1789-07","TCGA-AO-A0J5-05A-11R-1789-07","TCGA-BH-A0B4-11A-12R-1789-07",
-              "TCGA-B6-A1KN-60A-13R-1789-07","TCGA-AO-A0J5-01A-11R-1789-07","TCGA-AO-A0J5-01A-11R-1789-07",
-              "TCGA-G9-6336-11A-11R-1789-07","TCGA-G9-6380-11A-11R-1789-07","TCGA-G9-6380-01A-11R-1789-07")
+bar <- c("TCGA-G9-6378-02A-11R-1789-07", "TCGA-CH-5767-04A-11R-1789-07",  
+         "TCGA-G9-6332-60A-11R-1789-07", "TCGA-G9-6336-01A-11R-1789-07",
+         "TCGA-G9-6336-11A-11R-1789-07", "TCGA-G9-7336-11A-11R-1789-07",
+         "TCGA-G9-7336-04A-11R-1789-07", "TCGA-G9-7336-14A-11R-1789-07",
+         "TCGA-G9-7036-04A-11R-1789-07", "TCGA-G9-7036-02A-11R-1789-07",
+         "TCGA-G9-7036-11A-11R-1789-07", "TCGA-G9-7036-03A-11R-1789-07",
+         "TCGA-G9-7036-10A-11R-1789-07", "TCGA-BH-A1ES-10A-11R-1789-07",
+         "TCGA-BH-A1F0-10A-11R-1789-07", "TCGA-BH-A0BZ-02A-11R-1789-07",
+         "TCGA-B6-A0WY-04A-11R-1789-07", "TCGA-BH-A1FG-04A-11R-1789-08",
+         "TCGA-D8-A1JS-04A-11R-2089-08", "TCGA-AN-A0FN-11A-11R-8789-08",
+         "TCGA-AR-A2LQ-12A-11R-8799-08", "TCGA-AR-A2LH-03A-11R-1789-07",
+         "TCGA-BH-A1F8-04A-11R-5789-07", "TCGA-AR-A24T-04A-55R-1789-07",
+         "TCGA-AO-A0J5-05A-11R-1789-07", "TCGA-BH-A0B4-11A-12R-1789-07",
+         "TCGA-B6-A1KN-60A-13R-1789-07", "TCGA-AO-A0J5-01A-11R-1789-07",
+         "TCGA-AO-A0J5-01A-11R-1789-07", "TCGA-G9-6336-11A-11R-1789-07",
+         "TCGA-G9-6380-11A-11R-1789-07", "TCGA-G9-6380-01A-11R-1789-07")
 
 S<-SampleTypes(bar,"TP")
 
@@ -218,7 +240,8 @@ d <- clinic("brca","biospecimen_normal_control")
 ```
 
 ## TCGA Downstream Analysis TCGAprepare, TCGAanalyze, TCGAvisualize
-You can prepare gene expression from TCGA data using the `tcga.prepare` function.
+You can prepare gene expression from TCGA data using the `tcga.prepare`
+function.
  
 ```{r, eval = FALSE}
 # Downstream analysis using gene expression data  
@@ -245,7 +268,8 @@ samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
 ```
 
 ## TCGA analyze and visualize (Diff.expr.analysis (DEA))
-You can analyze gene expression from TCGA data using the `tcga.analyze` function.
+You can analyze gene expression from TCGA data using the `tcga.analyze` 
+function.
  
 ```{r, eval = FALSE}
 # Downstream analysis using gene expression data  
@@ -254,13 +278,15 @@ You can analyze gene expression from TCGA data using the `tcga.analyze` function
 library(TCGAbiolinks)
 
 # Diff.expr.analysis (DEA)
-dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP], "Normal", "Tumor")
+dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP],
+                      "Normal", "Tumor")
 
 # DEGs filter by abs(logFC) >=1
 dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
 
 # DEGs table with expression values in normal and tumor samples
-dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",dataFilt[,samplesTP],dataFilt[,samplesNT])
+dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",
+                                    dataFilt[,samplesTP],dataFilt[,samplesNT])
 
 ```
 The result is shown below:
@@ -268,7 +294,8 @@ The result is shown below:
 ```{r, eval = TRUE, echo = FALSE}
 library(TCGAbiolinks)
 dataDEGsFiltLevel$FDR <- format(dataDEGsFiltLevel$FDR, scientific = TRUE)
-knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2, caption = "Table DEGs after DEA",row.names = FALSE)
+knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2,
+             caption = "Table DEGs after DEA",row.names = FALSE)
 ```
 
 
@@ -479,9 +506,12 @@ GroupBlueData <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "blu
 GroupGreen3Data <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "green3", "Sample"])]
 GroupRedData <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "red", "Sample"])]
 
-DEGsBlue <- DEArnaSEQ(cbind(GroupGreen3Data, GroupRedData), GroupBlueData, "GroupOther", "GroupBlue")
-DEGsGreen3 <- DEArnaSEQ(cbind(GroupBlueData, GroupRedData), GroupGreen3Data, "GroupOther", "GroupGreen3")
-DEGsRed <- DEArnaSEQ(cbind(GroupBlueData, GroupGreen3Data), GroupRedData, "GroupOther", "GroupRed")
+DEGsBlue <- DEArnaSEQ(cbind(GroupGreen3Data, GroupRedData),
+                      GroupBlueData, "GroupOther", "GroupBlue")
+DEGsGreen3 <- DEArnaSEQ(cbind(GroupBlueData, GroupRedData),
+                        GroupGreen3Data, "GroupOther", "GroupGreen3")
+DEGsRed <- DEArnaSEQ(cbind(GroupBlueData, GroupGreen3Data), 
+                     GroupRedData, "GroupOther", "GroupRed")
 
 
 dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP], "Normal", "Tumor")
@@ -489,7 +519,8 @@ dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP], "Normal", "Tum
 # DEGs filter by abs(logFC) >=1
 dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
 
-dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",dataFilt[,samplesTP],dataFilt[,samplesNT])
+dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",
+                                    [,samplesTP],dataFilt[,samplesNT])
 
 DEGsBlueLevel <- CreateTabLevel(DEGsBlue, "GroupBlue", "GroupOther", 
   GroupBlueData, cbind(GroupGreen3Data, GroupRedData), typeOrder = TRUE)
@@ -505,9 +536,12 @@ green3DEGs <- green3DEGs[order(green3DEGs$FDR), ]
 redDEGs <- DEGsRedLevel[DEGsRedLevel$FDR < 0.01 & DEGsRedLevel$logFC >= 1, ]
 redDEGs <- redDEGs[order(redDEGs$FDR), ]
 
-blueDEGsSpec <- blueDEGs[setdiff(rownames(blueDEGs), union(rownames(green3DEGs), rownames(redDEGs))), ]
-green3DEGsSpec <- green3DEGs[setdiff(rownames(green3DEGs), union(rownames(blueDEGs), rownames(redDEGs))), ]
-redDEGsSpec <- redDEGs[setdiff(rownames(redDEGs), union(rownames(blueDEGs), rownames(green3DEGs))), ]
+blueDEGsSpec <- blueDEGs[setdiff(rownames(blueDEGs), 
+                                 union(rownames(green3DEGs), rownames(redDEGs))), ]
+green3DEGsSpec <- green3DEGs[setdiff(rownames(green3DEGs), 
+                                     union(rownames(blueDEGs), rownames(redDEGs))), ]
+redDEGsSpec <- redDEGs[setdiff(rownames(redDEGs), 
+                               union(rownames(blueDEGs), rownames(green3DEGs))), ]
 
 blueDEGsSpec <- blueDEGsSpec[1:50, ]
 green3DEGsSpec <- green3DEGsSpec[1:50, ]
@@ -538,8 +572,9 @@ column_annotation <- matrix(" ", nrow = nrow(HMactivity), ncol = 1)
 column_annotation[, 1] <- tabCluster$Color
 
 row_annotation <- matrix(" ", nrow = 1, ncol = ncol(HMactivity))
-row_annotation[1, ] <- c(rep("blue", nrow(blueDEGsSpec)), rep("green3", nrow(green3DEGsSpec)), 
-  rep("red", nrow(redDEGsSpec)))
+row_annotation[1, ] <- c(rep("blue", nrow(blueDEGsSpec)),
+                         rep("green3", nrow(green3DEGsSpec)), 
+                         rep("red", nrow(redDEGsSpec)))
 
 
 
@@ -600,6 +635,8 @@ TCGADownload(query,path = "exampleData")
 # Conclusion: met = probe +d beta
 # met.md = patient metadata
 met <- TCGAPrepare(query, dir="exampleData")
+met <-  met[ met$Chromosome != "X" &  met$Chromosome != "Y", ]
+met <- na.omit(met)
 probe  <- met[,1:4]
 beta   <- met[,5:ncol(met)]
 
