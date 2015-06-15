@@ -32,8 +32,8 @@ NULL
 #' @format A data frame with 1157 rows and 2 variables
 NULL
 
-#' TCGA PlatformAndAssociatedData data frame indicating the different characteristics
-#' of the data e.g. tumour, type, species.
+#' TCGA PlatformAndAssociatedData data frame indicating the different
+#' characteristics of the data e.g. tumour, type, species.
 #' @docType data
 #' @keywords internal
 #' @name PlatformAndAssociatedData
