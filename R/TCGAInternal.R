@@ -172,3 +172,12 @@ tcga.get.barcode <- function(data){
 
     return(all.barcode)
 }
+
+.DownloadURL <-
+    function(Site){
+        # setInternet2(use = TRUE)
+        Site <- URLencode(Site)
+        x=  getURL(Site, ssl.verifypeer = FALSE)
+        x <- unlist(strsplit(x,"\n"))
+        return(x)
+    }
