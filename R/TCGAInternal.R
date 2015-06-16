@@ -31,7 +31,7 @@
         "   ||   |    | ___  |___| |__  | |  | |   | | | | |_/ |__         \n",
         "   ||   |___ |____| |   | |__| | |__| |__ | | |_| | \\  __|       \n",
         " ------------------------------------------------------------\n",
-        " Search, download & analyse - TCGA                  \n",
+        " Query, download & analyze - TCGA                  \n",
         " Version:",utils::packageVersion("TCGAbiolinks"),"\n",
         " Last TCGAUpdate(): ",time,"\n",
         " ==============================================================\n"
