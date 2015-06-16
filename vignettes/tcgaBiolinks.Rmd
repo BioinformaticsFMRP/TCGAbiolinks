@@ -318,9 +318,9 @@ Genelist <- rownames(dataDEGsFiltLevel)
 TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
 
 # Enrichment Analysis EA (TCGAVisualize)
-# Gene Ontology (GO) and Pathway enrichment IPA barPlot
+# Gene Ontology (GO) and Pathway enrichment barPlot
 
-IPAbarplot(tf = rownames(ansEA$ResBP), 
+EAbarplot(tf = rownames(ansEA$ResBP), 
            GOBPTab = ansEA$ResBP,
            GOCCTab = ansEA$ResCC,
            GOMFTab = ansEA$ResMF,
@@ -381,7 +381,7 @@ Find most studied TFs in pubmed related to a specific cancer, disease, or tissue
 library(TCGAbiolinks)
 
 # Select only transcription factors (TFs) from DEGs
-TFs <- IPAGenes[IPAGenes$Family =="transcription regulator",]
+TFs <- EAGenes[EAGenes$Family =="transcription regulator",]
 TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
 dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
 
