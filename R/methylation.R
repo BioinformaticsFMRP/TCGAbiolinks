@@ -503,6 +503,7 @@ starbursAnalysis <- function(met, expression) {
 #' @export
 #' @return Save a starburst plot
 #' @examples
+#' #\dontrun{
 #' sample <- "TCGA-06-0939-01A-01D-1228-05"
 #' query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
 #' TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
@@ -517,6 +518,7 @@ starbursAnalysis <- function(met, expression) {
 #' expression <- data.frame(GeneSymbol,FDR,p.value.adj,dm)
 #' gene.met <- starbursAnalysis(met,expression)
 #' starburstPlot(gene.met)
+#' }
 starburstPlot <- function(data,
                           filename = "volcano.pdf",
                           ylab = paste0("Gene Expression\nlog10 of the",
