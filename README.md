@@ -26,7 +26,7 @@ devtools::build()
 install.packages(path_to_package, repos = NULL, type="source")
 ```
 
-### Main strcuture of the repo ###
+### Main structure of the repository ###
 | Folder  | Description |
 | ------------- | ------------- |
 | R	  | main R files
