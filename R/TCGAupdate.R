@@ -218,8 +218,8 @@ tcgaGetTable <- function(url, max = 0) {
 #' @export
 TCGAUpdate <- function(){
 
-    tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
 
+    tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
     # Get platform table
     tcga.query <- "query=Platform"
     next.url <- paste0(tcga.root, tcga.query)
@@ -227,10 +227,6 @@ TCGAUpdate <- function(){
     platform.table <- platform.table[, 1:4]
     platform.table <- platform.table[order(platform.table$name,
                                            decreasing = TRUE),]
-    unlockBinding("platform.table",
-                  env =  as.environment("package:TCGAbiolinks"))
-    assign("platform.table", platform.table,
-           envir =  as.environment("package:TCGAbiolinks"))
 
     # Get disease table
     tcga.query <- "query=Disease"
@@ -238,28 +234,16 @@ TCGAUpdate <- function(){
     disease.table <- tcgaGetTable(next.url)
     disease.table <- disease.table[, 1:3]
 
-    unlockBinding("disease.table",
-                  env =  as.environment("package:TCGAbiolinks"))
-
-    assign("disease.table", disease.table,
-           envir =  as.environment("package:TCGAbiolinks"))
     # Get center table
     tcga.query <- "query=Center"
     next.url <- paste0(tcga.root, tcga.query)
     center.table  <- tcgaGetTable(next.url)
     center.table <- center.table[, 1:3]
 
-    unlockBinding("center.table",
-                  env =  as.environment("package:TCGAbiolinks"))
-
-    assign("center.table", center.table,
-           envir =  as.environment("package:TCGAbiolinks"))
-
     tcga.db <-  get("tcga.db", envir =  as.environment("package:TCGAbiolinks"))
 
     # get new version of files
     new.db <-  createTcgaTable()
-    #print(paste0("Number of new folder: ", dim(new.db)[1]-dim(tcga.db)[1]))
     # copy not modified ones
     for (i in seq_along(new.db[,1])){
         db <- subset(tcga.db,new.db[i,"name"] == tcga.db$name)
@@ -277,11 +261,11 @@ TCGAUpdate <- function(){
     colnames(new.db)[4] <- "barcode"
     tcga.db <- new.db
 
-    unlockBinding("tcga.db",
-                  env =  as.environment("package:TCGAbiolinks"))
-
-    assign("tcga.db", tcga.db,
-           envir =  as.environment("package:TCGAbiolinks"))
+    message('============================================')
+    message("     Please reload the package to update    ")
+    message('detach("package:TCGAbiolinks", unload=TRUE) ')
+    message("library(TCGAbiolinks)"                       )
+    message('============================================')
 
     save(platform.table, disease.table, tcga.db, center.table,
          file = paste0(system.file("extdata", package = "TCGAbiolinks"),
