@@ -86,15 +86,15 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
 
 #' @title Differentially expression analysis (DEA)
 #' @description
-#'    Differentially expression analysis (DEA) with gene expression
-#' @param mat1 datamatrix normal
-#' @param mat2 datamatrix tumor
-#' @param Cond1type normal
-#' @param Cond2type tumor
-#' @import genefilter clue png grid
+#'    Perform DEA to identify differentially expressed genes (DEGs). It is possible to do a two-class analysis.
+#' @param mat1 numeric matrix, each row represents a gene, each column represents a sample with Cond1type
+#' @param mat2 numeric matrix, each row represents a gene, each column represents a sample with Cond2type
+#' @param Cond1type a string containing the class label of the samples in mat1  (e.g., control group)
+#' @param Cond2type a string containing the class label of the samples in mat2  (e.g., case group)
 #' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags
 #' @export
-#' @return table with DEGs (diff.expr. genes)
+#' @examples dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT],dataFilt[,samplesTP], "Normal","Tumor")
+#' @return table containing for each gene logFC, logCPM, pValue,and    FDR
 DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 
     TOC <- cbind(mat1,mat2)
@@ -134,15 +134,16 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 #' @title CreateTabLevel for Differentially expression analysis (DEA)
 #' @description
 #'    CreateTabLevel for Differentially expression analysis (DEA)
-#' @param FC_FDR_table_mRNA FC_FDR_table_mRNA
-#' @param typeCond1 typeCond1
-#' @param typeCond2 typeCond2
-#' @param TableCond1 TableCond1
-#' @param TableCond2 TableCond2
+#' @param FC_FDR_table_mRNA Output of dataDEGs filter by abs(LogFC) >=1
+#' @param typeCond1 a string containing the class label of the samples in TableCond1  (e.g., control group)
+#' @param typeCond2 a string containing the class label of the samples in TableCond2  (e.g., case group)
+#' @param TableCond1 numeric matrix, each row represents a gene, each column represents a sample with Cond1type
+#' @param TableCond2 numeric matrix, each row represents a gene, each column represents a sample with Cond2type
 #' @param typeOrder typeOrder
 #' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags
 #' @export
-#' @return table with DEGs (diff.expr. genes)
+#' @examples DEGs filter by abs(logFC) >=1: dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]  dataDEGsFiltLevel<-CreateTabLevel(dataDEGsFilt,"Tumor","Normal",dataFilt[,samplesTP],dataFilt[,samplesNT])
+#' @return table with DEGs, log Fold Change (FC), false discovery rate (FDR), the gene expression level for samples in  Cond1type, and Cond2type, and Delta value (the difference of gene expression between the two conditions multiplied logFC)
 CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
                            TableCond1,TableCond2,typeOrder = TRUE) {
 
