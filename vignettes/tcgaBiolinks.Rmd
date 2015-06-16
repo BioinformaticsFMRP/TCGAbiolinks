@@ -137,6 +137,7 @@ LuscMatrix <- TCGAPrepare(query,"dataLusc")
 ```
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## [CNV] TCGA query, download, prepare list of a barcode
 You can easily search TCGA samples, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
@@ -160,6 +161,9 @@ GBM_CNV <- TCGAPrepare(query, dir = "samples", type = ".hg19.seg.txt")
 
 
 \newpage
+=======
+
+>>>>>>> origin/master
 =======
 
 >>>>>>> origin/master
