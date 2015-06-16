@@ -37,7 +37,9 @@ samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
 samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
 dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP],"Normal", "Tumor")
 dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
-dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",dataFilt[,samplesTP],dataFilt[,samplesNT])
+dataTP <- dataFilt[,samplesTP]
+dataTN <- dataFilt[,samplesNT]
+dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",dataTP,dataTN)
 }
 }
 
