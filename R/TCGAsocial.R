@@ -26,7 +26,7 @@ TCGAsocial<- function(listPackage){
         TablePackage[i,"NumberDownload"] <- tmp4
     }
 
-    TablePackage <- TablePackage[order(TablePackage$NumberDownload,decreasing=T),]
+    TablePackage <- TablePackage[order(TablePackage$NumberDownload,decreasing=TRUE),]
 
     return(TablePackage)
 

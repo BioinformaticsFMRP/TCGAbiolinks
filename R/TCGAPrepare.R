@@ -18,6 +18,9 @@
 #' @importFrom stringr str_match str_trim
 TCGAPrepare <- function(query, dir = NULL, type = NULL){
 
+    hg19genes   <- get("hg19genes",
+                       envir =  as.environment("package:TCGAbiolinks"))
+
     if (is.null(dir)) {
         message("Argument dir is NULL. Plese provide the directory
             with the folders to be prepared. ")
