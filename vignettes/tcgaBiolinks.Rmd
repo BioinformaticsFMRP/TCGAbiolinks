@@ -139,6 +139,17 @@ TCGADownload(query, path = "dataBrca", type = "rsem.genes.results",
 BRCAMatrix <- TCGAPrepare(query,"dataBrca")
 ```
 
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+library(TCGAbiolinks)
+dataGE <- dataBRCA[sample(rownames(dataBRCA),10),sample(colnames(dataBRCA),7)]
+
+knitr::kable(dataGE, digits = 2, 
+             caption = "Example of a matrix of gene expression (10 genes in rows and 7 samples in columns)",
+             row.names = TRUE)
+```
+
 ## [CNV] TCGA query, download, prepare list of a barcode
 You can easily search TCGA samples, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
@@ -158,21 +169,6 @@ TCGADownload(query, path = "samples")
 GBM_CNV <- TCGAPrepare(query, dir = "samples", type = ".hg19.seg.txt")
 ```
 
-
-
-
-\newpage
-
-The result is shown below:
-
-```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
-dataGE <- dataBRCA[sample(rownames(dataBRCA),10),sample(colnames(dataBRCA),7)]
-
-knitr::kable(dataGE, digits = 2, 
-             caption = "Example of a matrix of gene expression (10 genes in rows and 7 samples in columns)",
-             row.names = TRUE)
-```
 
 
 ## TCGA download
