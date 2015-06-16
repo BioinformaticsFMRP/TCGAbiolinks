@@ -24,9 +24,11 @@ Prepare data matrices for downstream analysis,
   Cols: samples in columns
 }
 \examples{
+\dontrun{
 sample <- "TCGA-06-0939-01A-01D-1228-05"
 query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
 TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
 prepared <- TCGAPrepare(query, dir="exampleData")
+}
 }
 
