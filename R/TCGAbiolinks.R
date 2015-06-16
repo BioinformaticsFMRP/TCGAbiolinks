@@ -48,10 +48,10 @@ NULL
 #' @format A data frame with 12 rows and 4 variables
 NULL
 
-#' IPAGenes
+#' EAGenes
 #' @docType data
 #' @keywords internal
-#' @name IPAGenes
+#' @name EAGenes
 #' @format A data frame with 20038 rows (genes) and 6 variables
 NULL
 
@@ -76,10 +76,10 @@ NULL
 #' @format A data frame with 20531 rows and 2 variables
 NULL
 
-#' list IPA pathways
+#' list EA pathways
 #' @docType data
 #' @keywords internal
-#' @name listIPA_pathways
+#' @name listEA_pathways
 #' @format A data frame with 589 rows and 4 variables
 NULL
 
