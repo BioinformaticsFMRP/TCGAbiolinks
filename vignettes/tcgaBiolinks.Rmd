@@ -397,7 +397,7 @@ knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF 
 ```
 
 
-## TCGA social
+## TCGA social with BioConductor
 Find most downloaded packages in CRAN or BioConductor
  
 ```{r, eval = FALSE}
@@ -406,7 +406,7 @@ library(TCGAbiolinks)
 # Define a list of package to find number of downloads
 listPackage <-c("limma","edgeR","survcomp")
 
-tabPackage <- TCGAsocial(listPackage)
+tabPackage <- TCGAsocial(siteToFind ="bioconductor.org",listPackage)
 
 ```
 
@@ -415,9 +415,35 @@ The result is shown below:
 ```{r, eval = TRUE, echo = FALSE}
 library(TCGAbiolinks)
 listPackage <-c("limma","edgeR","survcomp")
-tabPackage <- TCGAsocial(listPackage)
+tabPackage <- TCGAsocial(siteToFind="bioconductor.org", listPackage)
 
 knitr::kable(tabPackage, digits = 2, caption = "Table with number of downloads about a list of packages",row.names = FALSE)
+```
+
+## TCGA social with Biostar
+Find most downloaded packages in CRAN or BioConductor
+ 
+```{r, eval = FALSE}
+library(TCGAbiolinks)
+
+# Find most related question in biostar with TCGA
+tabPackage1 <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "TCGA")
+
+# Find most related question in biostar with package
+tabPackage2 <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "package")
+
+```
+
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+library(TCGAbiolinks)
+# Find most related question in biostar with TCGA
+#tabPackage <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "package")
+
+knitr::kable(tabPackage1, digits = 2, caption = "Find most related question in biostar with TCGA",row.names = FALSE)
+
+knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in biostar with package",row.names = FALSE)
 ```
 
 ## TCGA downstream Analysis
