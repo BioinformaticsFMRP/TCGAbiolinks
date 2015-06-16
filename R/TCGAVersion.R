@@ -1,7 +1,5 @@
 #' @title TCGA Version
-#'
 #' @description  TCGA Version
-#'
 #' @param Tumor  a character string indicating the cancer type for
 #'        which to download data. Options include ACC, BLCA, BRCA,
 #'        CESC, COAD, DLBC, ESCA, GBM, HNSC, KICH, KIRC, KIRP, LAML,
@@ -18,6 +16,9 @@
 #' @export
 
 TCGAVersion <- function(Tumor, PlatformType){
+
+    PlatformAndAssociatedData   <- get("PlatformAndAssociatedData",
+                                       envir =  as.environment("package:TCGAbiolinks"))
 
     #require(RCurl)
     #downloadFolder<-paste(downloadFolder,PlatformType,"/",sep="")
