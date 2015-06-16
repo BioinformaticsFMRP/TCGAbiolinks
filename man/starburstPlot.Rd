@@ -50,6 +50,7 @@ Input: data with gene expression/methylation expression
    Output: starburst plot
 }
 \examples{
+#\dontrun{
 sample <- "TCGA-06-0939-01A-01D-1228-05"
 query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
 TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
@@ -64,5 +65,6 @@ dm <-  runif(nrow(met),-3,3)
 expression <- data.frame(GeneSymbol,FDR,p.value.adj,dm)
 gene.met <- starbursAnalysis(met,expression)
 starburstPlot(gene.met)
+}
 }
 
