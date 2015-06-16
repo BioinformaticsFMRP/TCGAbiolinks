@@ -210,7 +210,18 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
     }
 
     if (grepl("genome_wide_snp_6",tolower(platform))) {
-        files <- files[-grep("nocnv", files)]
+
+        message("Preparing h19 files...")
+        idx <- grep("nocnv|hg18", files)
+        if(length(idx)>0){
+            files <- files[-idx]
+        }
+
+        if(is.vector(query)){
+            mage <- getMage(query)
+        } else {
+            mage <- getMage(query[1,])
+        }
 
         #load("hg19genes.RData")
         genes <- sort(unique(hg19genes$gene_name))
@@ -224,8 +235,8 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
                                stringsAsFactors = FALSE)
             ####Check barcodes
             colNames[i] <- data$Sample[1]
-            infofiles <- paste("n. ",i," of ", length(files), " done..",sep="" )
-            print(infofiles)
+            infofiles <- paste0("n. ",i," of ", length(files), " done..")
+            message(infofiles)
             for(j in 1:nrow(data)){
                 gg <- sort(unique(hg19genes[hg19genes$start >= data$Start[j] & hg19genes$end <= data$End[j], "gene_name"]))
                 df[gg, i] <- df[gg, i] + data$Segment_Mean[j]
@@ -233,12 +244,15 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
                 #print(j)
             }
         }
-        colnames(df) <- colNames
+        id <- data.frame(id=colNames)
+        #idx <- unlist(lapply(colNames,function(x){grep(x, mage$Derived.Array.Data.Matrix.File.2)}))
+        names <- merge(id,mage,by.x="id",by.y="Hybridization.Name")
+        colnames(df) <- names$Comment..TCGA.Barcode.
+
     }
 
     return(df)
 }
-
 
 #  Internal function
 #  Get a list of barcode from a list of uuid
