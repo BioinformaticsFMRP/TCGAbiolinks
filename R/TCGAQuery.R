@@ -163,6 +163,9 @@ TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
 
         if (length(id) > 0) {
             db <-  db[id,]
+        } else {
+            message("Sorry! No files with this level were found")
+            return(NULL)
         }
     }
 
