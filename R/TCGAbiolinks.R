@@ -55,6 +55,20 @@ NULL
 #' @format A data frame with 20038 rows (genes) and 6 variables
 NULL
 
+#' tabPackage1
+#' @docType data
+#' @keywords internal
+#' @name tabPackage1
+#' @format A data frame with 40 rows and 3 variables
+NULL
+
+#' tabPackage2
+#' @docType data
+#' @keywords internal
+#' @name tabPackage2
+#' @format A data frame with 40 rows and 3 variables
+NULL
+
 #' TCGA data matrix BRCA
 #' @docType data
 #' @keywords internal
