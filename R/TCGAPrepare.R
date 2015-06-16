@@ -205,6 +205,34 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
             return(NULL)
         }
     }
+
+    if (grepl("genome_wide_snp_6",tolower(platform))) {
+        files <- files[-grep("nocnv", files)]
+
+        #load("hg19genes.RData")
+        genes <- sort(unique(hg19genes$gene_name))
+
+        df <- matrix(0, nrow = length(genes), ncol = length(files))
+        rownames(df) <- genes
+
+        colNames <- rep("", ncol(df)) #check barcode
+        for (i in seq_along(files)) {
+            data <- read.table(files[i], header = TRUE, sep = "\t",
+                               stringsAsFactors = FALSE)
+            ####Check barcodes
+            colNames[i] <- data$Sample[1]
+            infofiles <- paste("n. ",i," of ", length(files), " done..",sep="" )
+            print(infofiles)
+            for(j in 1:nrow(data)){
+                gg <- sort(unique(hg19genes[hg19genes$start >= data$Start[j] & hg19genes$end <= data$End[j], "gene_name"]))
+                df[gg, i] <- df[gg, i] + data$Segment_Mean[j]
+
+                #print(j)
+            }
+        }
+        colnames(df) <- colNames
+    }
+
     return(df)
 }
 
