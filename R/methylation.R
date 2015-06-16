@@ -410,6 +410,7 @@ get.GRCh.bioMart <- function() {
 #' @importFrom IRanges IRanges
 #' @export
 #' @examples
+#' \dontrun{
 #' sample <- "TCGA-06-0939-01A-01D-1228-05"
 #' query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
 #' TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
@@ -423,6 +424,7 @@ get.GRCh.bioMart <- function() {
 #' dm <-  runif(nrow(met),-3,3)
 #' expression <- data.frame(GeneSymbol,FDR,p.value.adj,dm)
 #' gene.met <- starbursAnalysis(met,expression)
+#' }
 starbursAnalysis <- function(met, expression) {
     #### fix methylation gene names before merging.  map gene ID to
     #### genomic coordinates
