@@ -7,18 +7,28 @@
 DEArnaSEQ(mat1, mat2, Cond1type, Cond2type)
 }
 \arguments{
-\item{mat1}{datamatrix normal}
+\item{mat1}{numeric matrix, each row represents a gene, each column represents a sample with Cond1type}
 
-\item{mat2}{datamatrix tumor}
+\item{mat2}{numeric matrix, each row represents a gene, each column represents a sample with Cond2type}
 
-\item{Cond1type}{normal}
+\item{Cond1type}{a string containing the class label of the samples in mat1  (e.g., control group)}
 
-\item{Cond2type}{tumor}
+\item{Cond2type}{a string containing the class label of the samples in mat2  (e.g., case group)}
 }
 \value{
-table with DEGs (diff.expr. genes)
+table containing for each gene logFC, logCPM, pValue,and    FDR
 }
 \description{
-Differentially expression analysis (DEA) with gene expression
+Perform DEA to identify differentially expressed genes (DEGs). It is possible to do a two-class analysis.
+}
+\examples{
+\dontrun{
+library(TCGAbiolinks)
+dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
+dataFilt <- RnaSeqFilt(dataNorm, 0.25)
+samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
+samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
+dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP],"Normal", "Tumor")
+}
 }
 
