@@ -76,6 +76,14 @@ NULL
 #' @format A data frame with 20531 rows and 2 variables
 NULL
 
+#' hg19genes data frame from Human (hg19) genome indicating different
+#' characteristics of genes e.g. chr, region, start, end, gene_name
+#' @docType data
+#' @keywords internal
+#' @name hg19genes
+#' @format A data frame with 869204 rows and 5 variables
+NULL
+
 #' list EA pathways
 #' @docType data
 #' @keywords internal

@@ -455,28 +455,8 @@ You can easily prepare gene expression from TCGA data using the `TCGAprepare` fu
  
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
-
-#res <- querySamples
-
-#toDown <- Reduce(intersect, list(res$Illuminahiseq_rnaseqv2, res$Genome_Wide_SNP_6, res$IlluminaGA_DNASeq))
-#Tumor <- 'BRCA'
-#downloadFolder <- "~/Downloads/Data/Samples/"
-#sdrfFolder <- "~/Downloads/Data/TCGAsdrf/"
-
-#BRCArnaseqV2 <- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder,
-#   PlatformType = 'illuminahiseq_rnaseqv2', listSample = toDown, newsample = TRUE)
-
-#BRCAsnp<- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder,
-#   PlatformType = 'genome_wide_snp_6', listSample = toDown, newsample = TRUE)
-
-#Data_CANCER_normUQ <- RnaSeqNormalization(Data_CANCER,geneInfo)
-#Data_CANCER_normUQ_filt <- RnaSeqFilt(Data_CANCER_normUQ,0.25)
-
-#BRCArnaseqV2 <- Cancer_rnaseqv2[, toDown]
-
 library(genefilter)
 library(clue)
-#library(consensus)
 
 BRCArnaseqV2 <- dataBRCA
 BRCArnaseqV2MostVar <- varFilter(BRCArnaseqV2, var.func = IQR,  var.cutoff = 0.75, filterByQuantile = TRUE)
@@ -484,9 +464,6 @@ BRCArnaseqV2MostVar <- varFilter(BRCArnaseqV2, var.func = IQR,  var.cutoff = 0.7
 wData <- t(BRCArnaseqV2MostVar)
 ddist <- dist(wData, method = "euclidean")
 sHc <- hclust(ddist, method = "ward.D")
-#aCalinsky <- calinsky(sHc, gMax = 20)
-#plot(aCalinsky, type = "l", col = "grey", main = "Calinsky & Harabasz curve")
-#text(1:length(aCalinsky), aCalinsky, paste(1:length(aCalinsky)))
 
 plot(sHc, labels = FALSE, main ="BRCA Cancer cluster dendrogram all samples",
    xlab = "Samples with relative group color",sub="")
@@ -499,7 +476,6 @@ tabCluster<-as.data.frame(tabCluster)
 tabCluster<-tabCluster[order(tabCluster$Cluster,decreasing = FALSE),]
 tabCluster<-as.data.frame(tabCluster)
 tabCluster$Color<-as.character(tabCluster$Color)
-
 
 ccol <- palette()[1 + 1:3]
 
@@ -576,17 +552,12 @@ tabCluster <- tabCluster[order(tabCluster$Color), ]
 
 MfiltQuantileOrdered <- BRCArnaseqV2[c(rownames(blueDEGsSpec), rownames(green3DEGsSpec), 
   rownames(redDEGsSpec)), rownames(tabCluster)]
-#MfiltQuantileOrdered <- (MfiltQuantileOrdered - rowMeans(MfiltQuantileOrdered))/apply(MfiltQuantileOrdered,
-# 1, sd)
-
 
 MRactivity <- t(MfiltQuantileOrdered)
-#HMactivity <- t(quantileNormalization(t(MRactivity)))
 
 HMactivity <- MRactivity
 thresholdquantile<-0.75
 HMactivity[ HMactivity >= quantile(HMactivity,thresholdquantile)]<- quantile(HMactivity,thresholdquantile)
-
 
 summary(as.vector(HMactivity))
 quantile(HMactivity, 0.15); quantile(HMactivity, 0.85)
@@ -600,9 +571,6 @@ row_annotation <- matrix(" ", nrow = 1, ncol = ncol(HMactivity))
 row_annotation[1, ] <- c(rep("blue", nrow(blueDEGsSpec)),
                          rep("green3", nrow(green3DEGsSpec)), 
                          rep("red", nrow(redDEGsSpec)))
-
-
-
 library("GMD")
 
 png("BRCA_heatmap.png", width = 1200, height = 800)
@@ -614,10 +582,6 @@ heatmap.3(t(HMactivity), ColSideColors = column_annotation, RowSideColors = row_
           #labRow = NA, labCol = NA,
           margins = c(1, 6), side.height.fraction = 0.25, keysize = 1.4, cexRow = 1.6)
 dev.off()
-
-#BRCAcnv <- TCGADownload(Tumor, PlatformAndAssociatedData, sdrfFolder, downloadFolder,
-#   PlatformType = 'genome_wide_snp_6', listSample = toDown, newsample = FALSE)
-
 ```
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
