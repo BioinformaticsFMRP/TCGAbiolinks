@@ -503,7 +503,7 @@ starbursAnalysis <- function(met, expression) {
 #' @export
 #' @return Save a starburst plot
 #' @examples
-#' #\dontrun{
+#' \dontrun{
 #' sample <- "TCGA-06-0939-01A-01D-1228-05"
 #' query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
 #' TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
