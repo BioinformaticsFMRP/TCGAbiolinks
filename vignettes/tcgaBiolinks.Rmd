@@ -136,8 +136,6 @@ TCGADownload(query, path = "dataLusc", type = "rsem.genes.results",
 LuscMatrix <- TCGAPrepare(query,"dataLusc")
 ```
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 ## [CNV] TCGA query, download, prepare list of a barcode
 You can easily search TCGA samples, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
@@ -161,12 +159,6 @@ GBM_CNV <- TCGAPrepare(query, dir = "samples", type = ".hg19.seg.txt")
 
 
 \newpage
-=======
-
->>>>>>> origin/master
-=======
-
->>>>>>> origin/master
 
 The result is shown below:
 
@@ -222,24 +214,6 @@ SS<-MultiSampleTypes(bar,c("TP","NB"))
 # Retrieve multiple tissue types  FROM THE SAME PATIENTS
 SSS<-MatchedCoupledSampleTypes(bar,c("NT","TP"))
 
-clinic("gbm","clinical_patient")
-
-clinic("acc","clinical_patient")
-
-SampleTypes(bar,"TP")
-
-CouplesSampleTypes(bar,"xx")
-
-CouplesSampleTypes(bar,"TRBM_NBM")
-
-MatchedSampleTypes(bar,"matched_TP_NT")
-MatchedSampleTypes(bar,"matched_TR_NT")
-MatchedSampleTypes(bar,"matched_TB_NB")
-MatchedSampleTypes(bar,"matched_TRBM_NBM")
-MatchedSampleTypes(bar,"XX")
-
-stage_BRCA(bar,"xx")
-
 clinical_brca_data <- clinic("brca","clinical_patient")
 
 stage_BRCA(bar,"stage_IIIA",clinical_brca_data)
@@ -254,25 +228,17 @@ PR_status_BRCA(bar,"Positive",clinical_brca_data)
 
 PR_status_BRCA(bar,"Negative",clinical_brca_data)
 
-#PR_status_BRCA(bar,"Negfff")
-
 HER_status_BRCA(bar,"Positive",clinical_brca_data)
 
 HER_status_BRCA(bar,"Negative",clinical_brca_data)
 
-#HER_status_BRCA(bar,"Negfff")
-
-d<-biospecimen("uvm","biospecimen_normal_control")
-
-d <- clinic("brca","biospecimen_normal_control")
-
+clinical_uvm_data_bio<-clinic("uvm","biospecimen_normal_control")
+clinical_brca_data_bio <- clinic("brca","biospecimen_normal_control")
 clinical_brca_data <- clinic("brca","clinical_patient")
 
-length([1])
-clinical_brca_data <- clinic("brca","clinical_patient")
-samples_with_clinical_data <- clinical_brca_data$bcr_patient_barcode
+#samples_with_clinical_data <- clinical_brca_data$bcr_patient_barcode
 
-clinical_brca_data_rnaseqv2 <- clinical_brca_data[clinical_brca_data$bcr_patient_barcode %in% substr(querySamples$IlluminaHiSeq_RNASeqV2,1,12),]
+#clinical_brca_data_rnaseqv2 <- clinical_brca_data[clinical_brca_data$bcr_patient_barcode %in% substr(querySamples$IlluminaHiSeq_RNASeqV2,1,12),]
 ```
 
 ## TCGA Downstream Analysis TCGAprepare, TCGAanalyze, TCGAvisualize

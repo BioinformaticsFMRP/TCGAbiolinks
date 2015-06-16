@@ -293,13 +293,15 @@ clinic <- function(cancer,clinical_data_type){
 
     URL <- paste0(clinical_data_site_cancer(cancer), "nationwidechildrens.org_",
                   clinical_data_type, "_", cancer, ".txt")
-    writeLines(getURL(URL,ssl.verifypeer = FALSE),
-               file(paste0(clinical_data_type,".txt")))
+    fileconn<-file(paste0(clinical_data_type,".txt"),"wt")
+    #writeLines(getURL(URL,ssl.verifypeer = FALSE),
+     #          file(paste0(clinical_data_type,".txt")))
+    writeLines(getURL(URL,ssl.verifypeer = FALSE), fileconn)
 
     clinical_patient <- read.delim(file(paste0(clinical_data_type,".txt")),
                                    stringsAsFactors=FALSE)
     clinical_patient <- clinical_patient[-c(1,2),]
-    #return(file(paste0(clinical_data_type,".txt")))
+    #close(fileconn)
 
     return(clinical_patient)
 }
