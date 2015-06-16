@@ -8,22 +8,36 @@ CreateTabLevel(FC_FDR_table_mRNA, typeCond1, typeCond2, TableCond1, TableCond2,
   typeOrder = TRUE)
 }
 \arguments{
-\item{FC_FDR_table_mRNA}{FC_FDR_table_mRNA}
+\item{FC_FDR_table_mRNA}{Output of dataDEGs filter by abs(LogFC) >=1}
 
-\item{typeCond1}{typeCond1}
+\item{typeCond1}{a string containing the class label of the samples in TableCond1  (e.g., control group)}
 
-\item{typeCond2}{typeCond2}
+\item{typeCond2}{a string containing the class label of the samples in TableCond2  (e.g., case group)}
 
-\item{TableCond1}{TableCond1}
+\item{TableCond1}{numeric matrix, each row represents a gene, each column represents a sample with Cond1type}
 
-\item{TableCond2}{TableCond2}
+\item{TableCond2}{numeric matrix, each row represents a gene, each column represents a sample with Cond2type}
 
 \item{typeOrder}{typeOrder}
 }
 \value{
-table with DEGs (diff.expr. genes)
+table with DEGs, log Fold Change (FC), false discovery rate (FDR), the gene expression level
+for samples in  Cond1type, and Cond2type, and Delta value (the difference of gene expression between the two
+conditions multiplied logFC)
 }
 \description{
 CreateTabLevel for Differentially expression analysis (DEA)
+}
+\examples{
+\dontrun{
+library(TCGAbiolinks)
+dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
+dataFilt <- RnaSeqFilt(dataNorm, 0.25)
+samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
+samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
+dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP],"Normal", "Tumor")
+dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
+dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",dataFilt[,samplesTP],dataFilt[,samplesNT])
+}
 }
 

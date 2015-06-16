@@ -93,7 +93,15 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
 #' @param Cond2type a string containing the class label of the samples in mat2  (e.g., case group)
 #' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags
 #' @export
-#' @examples dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT],dataFilt[,samplesTP], "Normal","Tumor")
+#' @examples
+#' \dontrun{
+#' library(TCGAbiolinks)
+#' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
+#' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
+#' samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
+#' samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
+#' dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP],"Normal", "Tumor")
+#' }
 #' @return table containing for each gene logFC, logCPM, pValue,and    FDR
 DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 
@@ -142,8 +150,22 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 #' @param typeOrder typeOrder
 #' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags
 #' @export
-#' @examples DEGs filter by abs(logFC) >=1: dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]  dataDEGsFiltLevel<-CreateTabLevel(dataDEGsFilt,"Tumor","Normal",dataFilt[,samplesTP],dataFilt[,samplesNT])
-#' @return table with DEGs, log Fold Change (FC), false discovery rate (FDR), the gene expression level for samples in  Cond1type, and Cond2type, and Delta value (the difference of gene expression between the two conditions multiplied logFC)
+#' @return table with DEGs, log Fold Change (FC), false discovery rate (FDR), the gene expression level
+#' for samples in  Cond1type, and Cond2type, and Delta value (the difference of gene expression between the two
+#' conditions multiplied logFC)
+#' @examples
+#' \dontrun{
+#' library(TCGAbiolinks)
+#' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
+#' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
+#' samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
+#' samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
+#' dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP],"Normal", "Tumor")
+#' dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
+#' dataTP <- dataFilt[,samplesTP]
+#' dataTN <- dataFilt[,samplesNT]
+#' dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",dataTP,dataTN)
+#' }
 CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
                            TableCond1,TableCond2,typeOrder = TRUE) {
 
