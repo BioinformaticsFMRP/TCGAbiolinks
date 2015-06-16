@@ -116,24 +116,27 @@ You can easily search TCGA samples, download and prepare a matrix of gene expres
 ```{r, eval = FALSE}
 
 # You can define a list of samples to query and download providing relative TCGA barcodes.
-listSamples <- c("TCGA-33-6737-01","TCGA-33-6737-11","TCGA-43-6143-01",
-                 "TCGA-43-6143-11","TCGA-43-6647-01","TCGA-43-6647-11",
-                 "TCGA-43-6771-01","TCGA-43-6771-11")
+
+listSamples <- c("TCGA-E9-A1NG-11A-52R-A14M-07","TCGA-BH-A1FC-11A-32R-A13Q-07",
+                 "TCGA-A7-A13G-11A-51R-A13Q-07","TCGA-BH-A0DK-11A-13R-A089-07",
+                 "TCGA-E9-A1RH-11A-34R-A169-07","TCGA-BH-A0AU-01A-11R-A12P-07",
+                 "TCGA-C8-A1HJ-01A-11R-A13Q-07","TCGA-A7-A13D-01A-13R-A12P-07",
+                 "TCGA-A2-A0CV-01A-31R-A115-07","TCGA-AQ-A0Y5-01A-11R-A14M-07")
 
 # Query all available platforms with a list of barcode 
 query <- TCGAQuery(samples = listSamples)
 
 # Query platform IlluminaHiSeq_RNASeqV2 with a list of barcode 
-query <- TCGAQuery(tumor = "lusc", samples = listSamples, 
+query <- TCGAQuery(tumor = "brca", samples = listSamples, 
   platform = "IlluminaHiSeq_RNASeqV2", level = "3")
 
 # Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
-TCGADownload(query, path = "dataLusc", type = "rsem.genes.results",
+TCGADownload(query, path = "dataBrca", type = "rsem.genes.results",
              samples = listSamples)
 
 # Prepare expression matrix with gene id in rows and samples (barcode) in columns
 # rsem.genes.results as values
-LuscMatrix <- TCGAPrepare(query,"dataLusc")
+BRCAMatrix <- TCGAPrepare(query,"dataBrca")
 ```
 
 ## [CNV] TCGA query, download, prepare list of a barcode
@@ -173,10 +176,10 @@ knitr::kable(dataGE, digits = 2,
 
 
 ## TCGA download
-You can easily download data using the `tcga.download` function.
+You can easily download data using the `TCGAdownload` function.
  
 ```{r, eval = FALSE}
-# get all samples from the query and save them in the tcga folder
+# get all samples from the query and save them in the TCGA folder
 # samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
 # samples to normalize later
 TCGADownload(query, path = "data", type = "rsem.genes.results")
@@ -242,17 +245,18 @@ clinical_brca_data <- clinic("brca","clinical_patient")
 ```
 
 ## TCGA Downstream Analysis TCGAprepare, TCGAanalyze, TCGAvisualize
-You can prepare gene expression from TCGA data using the `tcga.prepare`
+You can prepare gene expression from TCGA data using the `TCGAprepare`
 function.
  
 ```{r, eval = FALSE}
 # Downstream analysis using gene expression data  
 # TCGA samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
 
-# save(DAVID_BP_matrix, DAVID_CC_matrix, DAVID_MF_matrix, IPAGenes, listIPA_pathways,
-#   file = "dataEnrichmentAnalysis.rda")
-# save(dataBRCA, geneInfo , file = "dataGeneExpression.rda")
 library(TCGAbiolinks)
+
+# dataBRCA in TCGAbiolinks package is a table from TCGA BRCA [10 samples] and comes from 
+# BRCAMatrix <- TCGAPrepare(query,"dataBrca") from above example
+# dataBRCA <- BRCAMatrix
 
 # normalization of genes
 dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
@@ -270,7 +274,7 @@ samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
 ```
 
 ## TCGA analyze and visualize (Diff.expr.analysis (DEA))
-You can analyze gene expression from TCGA data using the `tcga.analyze` 
+You can analyze gene expression from TCGA data using the `TCGAanalyze` 
 function.
  
 ```{r, eval = FALSE}
@@ -303,7 +307,7 @@ knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2,
 
 
 ## TCGA analyze and visualize (Enrichment Analysis)
-You can analyze gene expression from TCGA data using the `tcga.analyze` function.
+You can analyze gene expression from TCGA data using the `TCGAanalyze` function.
  
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
@@ -337,7 +341,7 @@ grid.raster(img)
 ```
 
 ## TCGA analyze (Enrichment Analysis)
-You can analyze gene expression from TCGA data using the `tcga.analyze` function.
+You can analyze gene expression from TCGA data using the `TCGAanalyze` function.
  
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
@@ -437,7 +441,7 @@ query <- TCGAQuery(tumor = "brca",level = 3, platform = "IlluminaHiSeq_RNASeqV2"
 Comment: As these terms need to be exact, we validate user input before searching.
 
 ## TCGA download
-You can easily download roadmap data using the `tcga.download` function.
+You can easily download roadmap data using the `TCGAdownload` function.
  
 ```{r, eval = FALSE}
 # get all samples from the query and save into tcga folder
@@ -451,7 +455,7 @@ _Path given by the user/Experiment folder_
 
 
 ## TCGA Downstream Analysis Integration 
-You can easily prepare gene expression from TCGA data using the `tcga.prepare` function.
+You can easily prepare gene expression from TCGA data using the `TCGAprepare` function.
  
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
