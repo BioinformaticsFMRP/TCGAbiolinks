@@ -49,10 +49,14 @@ RnaSeqFilt <- function(TableRnaseq,QuantileThresh ){
 #' @return table normalized
 RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
 
+    TCGA_RnaseqTable <- TCGA_RnaseqTable[ !(GenesCutID(as.matrix(rownames(TCGA_RnaseqTable))) == "?"),]
+    TCGA_RnaseqTable <- TCGA_RnaseqTable[ !(GenesCutID(as.matrix(rownames(TCGA_RnaseqTable))) == "SLC35E2"),]
     rownames(TCGA_RnaseqTable) <- GenesCutID(as.matrix(rownames(TCGA_RnaseqTable)))
     TCGA_RnaseqTable <- TCGA_RnaseqTable[rownames(TCGA_RnaseqTable) != "?", ]
     TCGA_RnaseqTable <- TCGA_RnaseqTable[!duplicated(rownames(TCGA_RnaseqTable)), !duplicated(colnames(TCGA_RnaseqTable))]
     TCGA_RnaseqTable <- TCGA_RnaseqTable[, which(substr(colnames(TCGA_RnaseqTable), 14, 15) != "02")]
+    TCGA_RnaseqTable <- TCGA_RnaseqTable[rownames(TCGA_RnaseqTable) %in% rownames(geneInfo),]
+
     geneInfo <- geneInfo[rownames(geneInfo) %in% rownames(TCGA_RnaseqTable), ]
     geneInfo <- geneInfo[!duplicated(rownames(geneInfo)), ]
     toKeep <- which(geneInfo[, "geneLength"] != 0)
@@ -60,6 +64,7 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
     TCGA_RnaseqTable <- TCGA_RnaseqTable[toKeep, ]
     geneInfo <- as.data.frame(geneInfo)
     TCGA_RnaseqTable <- round(TCGA_RnaseqTable)
+    TCGA_RnaseqTable <- TCGA_RnaseqTable[rownames(geneInfo),]
 
     timeEstimated <- format(ncol(TCGA_RnaseqTable)*nrow(TCGA_RnaseqTable)/80000,digits = 2)
     print(messageEstimation <- paste("I Need about ", timeEstimated, "seconds for this Complete Normalization Upper Quantile [Processing 80k elements /s]  "))

@@ -1,6 +1,6 @@
 Package: TCGAbiolinks
 Type: Package
-Title: Download Search and Analyse Data from TCGA
+Title: TCGAbiolinks: An R package to query, download, analyse, visualize and integrate data from TCGA
 Version: 0.99.0
 Date: 2015-06-12
 Author:
@@ -15,7 +15,7 @@ Author:
     Gianluca Bontempi,
     Michele Ceccarelli
 Maintainer: Antonio Colaprico <antonio.colaprico@ulb.ac.be>
-Depends: R (>= 3.1)
+Depends: R (>= 3.2)
 Imports:
     downloader,
     GGally,
