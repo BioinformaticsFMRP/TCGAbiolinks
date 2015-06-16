@@ -4,10 +4,14 @@
 \alias{TCGAsocial}
 \title{TCGAsocial}
 \usage{
-TCGAsocial(listPackage)
+TCGAsocial(siteToFind, listPackage = NULL, KeyInfo = NULL)
 }
 \arguments{
+\item{siteToFind}{website related to TCGA or a package}
+
 \item{listPackage}{list of package to find}
+
+\item{KeyInfo}{is a key to find related to TGGA or package}
 }
 \value{
 table with number of downloads about a package
