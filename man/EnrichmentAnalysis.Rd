@@ -4,7 +4,7 @@
 \alias{EnrichmentAnalysis}
 \title{EnrichmentAnalysis}
 \usage{
-EnrichmentAnalysis(GeneName, RegulonList, TableEnrichment, IPAGenes, GOtype,
+EnrichmentAnalysis(GeneName, RegulonList, TableEnrichment, EAGenes, GOtype,
   FDRThresh = 0.01)
 }
 \arguments{
@@ -14,7 +14,7 @@ EnrichmentAnalysis(GeneName, RegulonList, TableEnrichment, IPAGenes, GOtype,
 
 \item{TableEnrichment}{TableEnrichment}
 
-\item{IPAGenes}{IPAGenes}
+\item{EAGenes}{EAGenes}
 
 \item{GOtype}{GOtype}
 
