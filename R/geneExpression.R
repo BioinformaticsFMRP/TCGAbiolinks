@@ -78,8 +78,8 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
     TimeUse(TCGA_RnaseqTable_norm <- EDASeq::betweenLaneNormalization(TCGA_RnaseqTable_norm, which = "upper", offset = FALSE))
     print("Step 4 of 4: exprs ...")
 
-    TimeUse(TCGA_RnaseqTable_norm <- EDASeq::exprs(TCGA_RnaseqTable_norm))
-    #TimeUse(TCGA_RnaseqTable_norm <- EDASeq::counts(TCGA_RnaseqTable_norm))
+    #TimeUse(TCGA_RnaseqTable_norm <- EDASeq::exprs(TCGA_RnaseqTable_norm))
+    TimeUse(TCGA_RnaseqTable_norm <- EDASeq::counts(TCGA_RnaseqTable_norm))
 
     return(TCGA_RnaseqTable_norm)
 }
