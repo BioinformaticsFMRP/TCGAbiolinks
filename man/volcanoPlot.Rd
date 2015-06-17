@@ -57,7 +57,7 @@ beta.values <- matrix(beta.values,ncol = 100,nrow = 100)
 values <- as.data.frame(beta.values)
 colnames(values) <- patient
 rownames(values) <- Composite.Element.REF
-data <- calculate.pvalues(as.data.frame(t(values)),1:50,51:100, cores = 2)
+data <- calculate.pvalues(as.data.frame(t(values)),1:50,51:100)
 diffmean <- diffmean(values[,1:50],values[,51:100])
 data <-cbind(Composite.Element.REF,data,diffmean)
 hypo.hyper <- volcanoPlot(data, p.cut = 0.85)
