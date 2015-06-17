@@ -378,16 +378,11 @@ volcanoPlot <- function(data,
 get.GRCh.bioMart <- function() {
     ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
     chrom <- c(1:22, "X", "Y")
-    gene.location <- getBM(attributes = c("ensembl_gene_id",
-                                          "ensembl_transcript_id",
-                                          "chromosome_name",
+    gene.location <- getBM(attributes = c("chromosome_name",
                                           "start_position",
                                           "end_position", "strand",
                                           "external_gene_name",
-                                          "external_transcript_name",
-                                          "external_gene_source",
-                                          "external_transcript_source_name",
-                                          "hgnc_id", "entrezgene"),
+                                           "entrezgene"),
                            filters = c("chromosome_name"),
                            values = list(chrom), mart = ensembl)
 
@@ -428,7 +423,9 @@ get.GRCh.bioMart <- function() {
 starbursAnalysis <- function(met, expression) {
     #### fix methylation gene names before merging.  map gene ID to
     #### genomic coordinates
-    gene.location <- get("gene.location")
+    gene.location <- get("gene.location",
+                         envir =  as.environment("package:TCGAbiolinks"))
+
     gene.GR <- GRanges(seqnames = paste0("chr", gene.location$chromosome_name),
                        ranges = IRanges(start = gene.location$start_position,
                                         end = gene.location$end_position),
@@ -453,9 +450,6 @@ starbursAnalysis <- function(met, expression) {
                                                           "distance")],
                                by.x="Gene_Symbol", by.y="external_gene_name")
 
-    # volcano$gene <- met$Gene_Symbol volcano$cgID <-
-    # rownames(volcano)
-    print(head(expression))
     volcano <- merge(met, expression,
                      by.x = "Gene_Symbol",
                      by.y = "GeneSymbol",
