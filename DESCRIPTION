@@ -30,7 +30,6 @@ Imports:
     edgeR,
     rjson,
     plyr,
-    ggbiplot,
     biomaRt,
     exactRankTests,
     ggplot2,
