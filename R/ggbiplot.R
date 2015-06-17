@@ -33,20 +33,24 @@
 #' @param labels.size     size of the text used for the labels
 #' @param alpha           alpha transparency value for the points (0 = transparent, 1 = opaque)
 #' @param circle          draw a correlation circle? (only applies when prcomp was called with scale = TRUE and when var.scale = 1)
+#' @param circle.prob     definition of circle.prob
 #' @param var.axes        draw arrows for the variables?
 #' @param varname.size    size of the text for variable names
 #' @param varname.adjust  adjustment factor the placement of the variable names, >= 1 means farther from the arrow
 #' @param varname.abbrev  whether or not to abbreviate the variable names
 #' @import ggplot2
-#' @import plyr
-#' @import scales
+#' @importFrom plyr ddply
+#' @importFrom scales muted
+# @import plyr
+# @import scales
 #' @import grid
 #' @return                a ggplot2 plot
 #' @export
 #' @examples
 #'   data(wine)
 #'   wine.pca <- prcomp(wine, scale. = TRUE)
-#'   print(ggbiplot(wine.pca, obs.scale = 1, var.scale = 1, groups = wine.class, ellipse = TRUE, circle = TRUE))
+#'   print(ggbiplot(wine.pca, obs.scale = 1, var.scale = 1, groups = wine.class,
+#'   ellipse = TRUE, circle = TRUE))
 #'
 ggbiplot <- function(pcobj, choices = 1:2, scale = 1, pc.biplot = TRUE,
                      obs.scale = 1 - scale, var.scale = scale,
@@ -55,12 +59,13 @@ ggbiplot <- function(pcobj, choices = 1:2, scale = 1, pc.biplot = TRUE,
                      var.axes = TRUE,
                      circle = FALSE, circle.prob = 0.69,
                      varname.size = 3, varname.adjust = 1.5,
-                     varname.abbrev = FALSE, ...)
+                     varname.abbrev = FALSE)
 {
-    library(ggplot2)
-    library(plyr)
-    library(scales)
-    library(grid)
+    xvar <- NULL
+    yvar <- NULL
+    varname <-  NULL
+    angle <- NULL
+    hjust <- NULL
 
     stopifnot(length(choices) == 2)
 

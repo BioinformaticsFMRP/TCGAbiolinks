@@ -22,9 +22,6 @@ Imports:
     GenomicRanges,
     XML,
     EDASeq,
-    genefilter,
-    clue,
-    png,
     grid,
     RCurl,
     edgeR,
@@ -53,5 +50,5 @@ biocViews:
     Pathways,
     Network,
     Survival
-Suggests: testthat
+Suggests: testthat, png
 VignetteBuilder: knitr
