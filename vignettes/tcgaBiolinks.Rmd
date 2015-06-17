@@ -324,9 +324,6 @@ EAbarplot(tf = rownames(ansEA$ResBP),
            nRGTab = Genelist, 
            nBar = 10)
 
-
-
-
 ```
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
