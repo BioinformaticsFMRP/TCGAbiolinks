@@ -69,6 +69,20 @@ NULL
 #' @format A data frame with 40 rows and 3 variables
 NULL
 
+#' wine
+#' @docType data
+#' @keywords internal
+#' @name wine
+#' @format A data frame with 178 rows and 13 variables
+NULL
+
+#' wine.class
+#' @docType data
+#' @keywords internal
+#' @name wine.class
+#' @format vector factor with with 178 variables and 3 levels
+NULL
+
 #' TCGA data matrix BRCA
 #' @docType data
 #' @keywords internal
