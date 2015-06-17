@@ -44,7 +44,7 @@ RnaSeqFilt <- function(TableRnaseq,QuantileThresh ){
 #'   RnaSeqNormalization
 #' @param TCGA_RnaseqTable TCGA_RnaseqTable
 #' @param geneInfo geneInfo
-#' @importFrom EDASeq newSeqExpressionSet withinLaneNormalization betweenLaneNormalization exprs
+#' @importFrom EDASeq newSeqExpressionSet withinLaneNormalization betweenLaneNormalization exprs counts
 #' @export
 #' @return table normalized
 RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
