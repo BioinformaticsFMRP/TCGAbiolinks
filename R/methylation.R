@@ -227,10 +227,8 @@ metMeanBoxplot <- function(data, sort = FALSE,
 #' @param idx2  Index of the values in group 2
 #' @param paired  Do a paired wilcoxon test? Default: True
 #' @param exact  Do a exact wilcoxon test? Default: True
-#' @param cores  How many cores to be used Default: parallel::detectCores()
 #' @return Data frame with cols p values/p values adjusted
 #' @importFrom exactRankTests wilcox.exact
-#' @importFrom parallel mclapply detectCores
 #' @export
 #' @return Data frame with two cols
 #'         p-values/p-values adjusted
@@ -242,27 +240,25 @@ metMeanBoxplot <- function(data, sort = FALSE,
 #' values <- as.data.frame(beta.values)
 #' rownames(values) <- patient
 #' colnames(values) <- probes
-#' pvalues <- calculate.pvalues(values,1:50,51:100, cores = 2)
+#' pvalues <- calculate.pvalues(values,1:50,51:100)
 calculate.pvalues <- function(values, idx1 = NULL, idx2 = NULL, paired = TRUE,
-                              exact = TRUE, cores = NULL) {
+                              exact = TRUE) {
 
     if (is.null(idx1) | is.null(idx2) ) {
         message("One of the groups are null")
         message("Function call:")
         message("calculate.pvalues(values, idx1, idx2, paired = TRUE,
-                                      exact = TRUE, cores = NULL)")
+                                      exact = TRUE)")
         return(NULL)
     }
-    if (is.null(cores)) {
-        cores <- parallel::detectCores()/2
-    }
+
     # Apply Wilcoxon test in order to calculate the p-values
-    p.value <- unlist(mclapply(values, function(probe) {
+    p.value <- unlist(lapply(values, function(probe) {
         zz <- wilcox.exact(as.matrix(probe[idx1]), as.matrix(probe[idx2]),
                            exact = exact, paired = paired)
         z <- zz$p.value
         return(z)
-    }, mc.cores = cores))
+    }))
 
     ## Plot a histogram
     png(filename = "histogram_pvalues.png")
@@ -315,7 +311,7 @@ calculate.pvalues <- function(values, idx1 = NULL, idx2 = NULL, paired = TRUE,
 #' values <- as.data.frame(beta.values)
 #' colnames(values) <- patient
 #' rownames(values) <- Composite.Element.REF
-#' data <- calculate.pvalues(as.data.frame(t(values)),1:50,51:100, cores = 2)
+#' data <- calculate.pvalues(as.data.frame(t(values)),1:50,51:100)
 #' diffmean <- diffmean(values[,1:50],values[,51:100])
 #' data <-cbind(Composite.Element.REF,data,diffmean)
 #' hypo.hyper <- volcanoPlot(data, p.cut = 0.85)
