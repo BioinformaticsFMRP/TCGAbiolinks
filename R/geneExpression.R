@@ -213,7 +213,6 @@ CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
 #' @param dataDEGsFiltLevel dataDEGsFiltLevel
 #' @param ntopgenes ntopgenes
 #' @import ggplot2
-#' @import ggbiplot
 #' @export
 #' @return PCA plot
 plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
@@ -247,7 +246,7 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 
     names(sampleColors) <- colnames(expr2)
     cancer.pca <- stats::prcomp(t(expr2),cor = TRUE)
-    #library(ggbiplot)
+
     # print(sample.colors)
     g <- ggbiplot(cancer.pca, obs.scale = 1, var.scale = 1,
                   groups = sampleColors, ellipse = TRUE, circle = FALSE)
