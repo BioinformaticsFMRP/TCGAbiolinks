@@ -5,7 +5,7 @@
 \title{Calculate pvalues}
 \usage{
 calculate.pvalues(values, idx1 = NULL, idx2 = NULL, paired = TRUE,
-  exact = TRUE, cores = NULL)
+  exact = TRUE)
 }
 \arguments{
 \item{values}{Dataframe with values}
@@ -17,8 +17,6 @@ calculate.pvalues(values, idx1 = NULL, idx2 = NULL, paired = TRUE,
 \item{paired}{Do a paired wilcoxon test? Default: True}
 
 \item{exact}{Do a exact wilcoxon test? Default: True}
-
-\item{cores}{How many cores to be used Default: parallel::detectCores()}
 }
 \value{
 Data frame with cols p values/p values adjusted
@@ -42,6 +40,6 @@ beta.values <- matrix(beta.values,ncol = 100,nrow = 100)
 values <- as.data.frame(beta.values)
 rownames(values) <- patient
 colnames(values) <- probes
-pvalues <- calculate.pvalues(values,1:50,51:100, cores = 2)
+pvalues <- calculate.pvalues(values,1:50,51:100)
 }
 
