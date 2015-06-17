@@ -37,7 +37,10 @@
 #' @param varname.size    size of the text for variable names
 #' @param varname.adjust  adjustment factor the placement of the variable names, >= 1 means farther from the arrow
 #' @param varname.abbrev  whether or not to abbreviate the variable names
-#'
+#' @import ggplot2
+#' @import plyr
+#' @import scales
+#' @import grid
 #' @return                a ggplot2 plot
 #' @export
 #' @examples
