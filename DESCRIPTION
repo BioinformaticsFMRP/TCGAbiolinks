@@ -21,7 +21,7 @@ Imports:
     GGally,
     GenomicRanges,
     XML,
-    EDASeq,
+    EDASeq (>= 2.0.0),
     grid,
     RCurl,
     edgeR,
