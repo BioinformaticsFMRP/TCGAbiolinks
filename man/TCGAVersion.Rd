@@ -18,7 +18,14 @@ for Available Cancer Types.}
 illuminahiseq_rnaseqv2, humanmethylation27, humanmethylation450,
  illuminaga_mirnaseq, genome_wide_snp_6}
 }
+\value{
+Data frame with version, date, number of samples,size of
+        the platform and tumor
+}
 \description{
 TCGA Version
+}
+\examples{
+TCGAVersion("LGG","illuminahiseq_rnaseqv2")
 }
 

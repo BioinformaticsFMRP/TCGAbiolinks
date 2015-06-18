@@ -20,6 +20,8 @@
 #'NEBV \tab EBV Immortalized Normal \cr
 #'NBM \tab  Bone Marrow Normal \cr
 #'}
+#' @examples
+#'  SampleTypes(c("TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1"),"TR")
 #' @export
 #' @return SampleTypes
 SampleTypes <- function(barcode, typesample){
@@ -76,6 +78,10 @@ MultiSampleTypes <- function(barcode,typesample){
 #'   MatchedCoupledSampleTypes
 #' @param barcode barcode
 #' @param typesample typesample
+#' @examples
+#'  MatchedCoupledSampleTypes(c("TCGA-B0-4698-01Z-00-DX1",
+#'                              "TCGA-B0-4698-02Z-00-DX1"),
+#'                              c("TP","TR"))
 #' @export
 #' @return MultiSampleTypes
 MatchedCoupledSampleTypes <- function(barcode,typesample){
@@ -284,24 +290,16 @@ clinical_data_site_cancer <- function(cancer){
 #' clinical_omf_v4.0 \tab clinical_patient \cr
 #' clinical_radiation
 #'}
-
-
 #' @export
 #' @importFrom RCurl getURL
-#' @return clinic
+#' @return clinic data
+#' @examples
+#' data <- clinic("LGG","clinical_drug")
 clinic <- function(cancer,clinical_data_type){
-
-    URL <- paste0(clinical_data_site_cancer(cancer), "nationwidechildrens.org_",
-                  clinical_data_type, "_", cancer, ".txt")
-    fileconn<-file(paste0(clinical_data_type,".txt"),"wt")
-    #writeLines(getURL(URL,ssl.verifypeer = FALSE),
-     #          file(paste0(clinical_data_type,".txt")))
-    writeLines(getURL(URL,ssl.verifypeer = FALSE), fileconn)
-
-    clinical_patient <- read.delim(file(paste0(clinical_data_type,".txt")),
-                                   stringsAsFactors=FALSE)
-    clinical_patient <- clinical_patient[-c(1,2),]
+    query <- TCGAQuery(tumor = cancer,platform = "bio", level=2)
+    TCGADownload(query,type = clinical_data_type)
+    clinical_patient <- TCGAPrepare(query,type = clinical_data_type, dir = ".")
+    #clinical_patient <- clinical_patient[-c(1,2),]
     #close(fileconn)
-
     return(clinical_patient)
 }
