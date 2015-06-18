@@ -7,7 +7,8 @@
 #' @examples
 #' GenesCutID(c("CRKL|1399","TADA2A|6871","KRT76|51350"))
 GenesCutID <- function(GeneList){
-    GeneListCutID <- as.matrix(matrix(unlist(strsplit(as.character(GeneList),"|",fixed = TRUE)),length(GeneList),2,byrow = TRUE))[,1]
+    GeneListCutID <- as.matrix(matrix(unlist(strsplit(as.character(GeneList),
+                    "|",fixed = TRUE)),length(GeneList),2,byrow = TRUE))[,1]
     return(as.matrix(GeneListCutID))
 }
 
@@ -53,7 +54,8 @@ RnaSeqFilt <- function(TableRnaseq,QuantileThresh ){
 #'   RnaSeqNormalization
 #' @param TCGA_RnaseqTable TCGA_RnaseqTable
 #' @param geneInfo geneInfo
-#' @importFrom EDASeq newSeqExpressionSet withinLaneNormalization betweenLaneNormalization exprs counts
+#' @importFrom EDASeq newSeqExpressionSet withinLaneNormalization
+#'  betweenLaneNormalization exprs counts
 #' @export
 #' @return table normalized
 #' @examples
@@ -82,7 +84,9 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
     geneInfo <- geneInfo[commonGenes,]
 
     timeEstimated <- format(ncol(TCGA_RnaseqTable)*nrow(TCGA_RnaseqTable)/80000,digits = 2)
-    print(messageEstimation <- paste("I Need about ", timeEstimated, "seconds for this Complete Normalization Upper Quantile [Processing 80k elements /s]  "))
+    print(messageEstimation <- paste("I Need about ", timeEstimated,
+                "seconds for this Complete Normalization Upper Quantile",
+                " [Processing 80k elements /s]  "))
 
     print("Step 1 of 4: newSeqExpressionSet ...")
     TimeUse(TCGA_RnaseqTable_norm <- EDASeq::newSeqExpressionSet(TCGA_RnaseqTable, featureData = geneInfo))
@@ -100,11 +104,16 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
 
 #' @title Differentially expression analysis (DEA)
 #' @description
-#'    Perform DEA to identify differentially expressed genes (DEGs). It is possible to do a two-class analysis.
-#' @param mat1 numeric matrix, each row represents a gene, each column represents a sample with Cond1type
-#' @param mat2 numeric matrix, each row represents a gene, each column represents a sample with Cond2type
-#' @param Cond1type a string containing the class label of the samples in mat1  (e.g., control group)
-#' @param Cond2type a string containing the class label of the samples in mat2  (e.g., case group)
+#'    Perform DEA to identify differentially expressed genes (DEGs).
+#'     It is possible to do a two-class analysis.
+#' @param mat1 numeric matrix, each row represents a gene,
+#' each column represents a sample with Cond1type
+#' @param mat2 numeric matrix, each row represents a gene,
+#' each column represents a sample with Cond2type
+#' @param Cond1type a string containing the class label of the samples in mat1
+#'  (e.g., control group)
+#' @param Cond2type a string containing the class label of the samples in mat2
+#' (e.g., case group)
 #' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags
 #' @export
 #' @examples
@@ -112,7 +121,8 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
 #' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
 #' samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
 #' samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
-#' dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP],"Normal", "Tumor")
+#' dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT],
+#'                       dataFilt[,samplesTP],"Normal", "Tumor")
 #' @return table containing for each gene logFC, logCPM, pValue,and    FDR
 DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 
@@ -154,26 +164,34 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 #' @description
 #'    CreateTabLevel for Differentially expression analysis (DEA)
 #' @param FC_FDR_table_mRNA Output of dataDEGs filter by abs(LogFC) >=1
-#' @param typeCond1 a string containing the class label of the samples in TableCond1  (e.g., control group)
-#' @param typeCond2 a string containing the class label of the samples in TableCond2  (e.g., case group)
-#' @param TableCond1 numeric matrix, each row represents a gene, each column represents a sample with Cond1type
-#' @param TableCond2 numeric matrix, each row represents a gene, each column represents a sample with Cond2type
+#' @param typeCond1 a string containing the class label of the samples
+#'  in TableCond1  (e.g., control group)
+#' @param typeCond2 a string containing the class label of the samples
+#' in TableCond2  (e.g., case group)
+#' @param TableCond1 numeric matrix, each row represents a gene, each column
+#'  represents a sample with Cond1type
+#' @param TableCond2 numeric matrix, each row represents a gene, each column
+#' represents a sample with Cond2type
 #' @param typeOrder typeOrder
 #' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags
 #' @export
-#' @return table with DEGs, log Fold Change (FC), false discovery rate (FDR), the gene expression level
-#' for samples in  Cond1type, and Cond2type, and Delta value (the difference of gene expression between the two
+#' @return table with DEGs, log Fold Change (FC), false discovery rate (FDR),
+#' the gene expression level
+#' for samples in  Cond1type, and Cond2type, and Delta value (the difference
+#' of gene expression between the two
 #' conditions multiplied logFC)
 #' @examples
 #' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 #' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
 #' samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
 #' samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
-#' dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP],"Normal", "Tumor")
+#' dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP],
+#' "Normal", "Tumor")
 #' dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
 #' dataTP <- dataFilt[,samplesTP]
 #' dataTN <- dataFilt[,samplesNT]
-#' dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",dataTP,dataTN)
+#' dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",
+#' dataTP,dataTN)
 CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
                            TableCond1,TableCond2,typeOrder = TRUE) {
 
@@ -327,6 +345,7 @@ EAcomplete <- function(TFname, RegulonList){
 #' @param FDRThresh FDRThresh
 #' @param EAGenes EAGenes
 #' @export
+#' @import stats
 #' @return EAcomplete plot
 #' @examples
 #' \dontrun{
@@ -334,7 +353,8 @@ EAcomplete <- function(TFname, RegulonList){
 #' EAGenes <- get("EAGenes")
 #' RegulonList <- rownames(dataDEGsFiltLevel)
 #' DAVID_BP_matrix <- get("DAVID_BP_matrix")
-#' ResBP <- EnrichmentAnalysis(GeneName="DEA genes Normal Vs Tumor",RegulonList,DAVID_BP_matrix,
+#' ResBP <- EnrichmentAnalysis(GeneName="DEA genes Normal Vs Tumor",
+#'                            RegulonList,DAVID_BP_matrix,
 #'                            EAGenes,GOtype = "DavidBP")
 #'                            }
 EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,
@@ -433,6 +453,7 @@ GeneSplitRegulon <- function(Genelist,Sep){
 #' @param nRGTab nRGTab
 #' @export
 #' @importFrom EDASeq barplot
+#' @import graphics
 #' @return EAbarplot
 #' @examples
 #' \dontrun{
@@ -458,15 +479,17 @@ EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
         tmp <- tmp[tmp[, 1] != "NA", , drop = FALSE]
         tmp <- as.data.frame(tmp, stringsAsFactors = FALSE)
         tmp[, 2] <- as.numeric(sub(" FDR= ", "", tmp[, 2]))
-        tmp[, 3] <- as.numeric(unlist(strsplit(matrix(unlist(strsplit(tmp[, 3], "=")), nrow = 2)[2, ], ")")))
-        tmp[, 4] <- as.numeric(unlist(strsplit(matrix(unlist(strsplit(tmp[, 4], "=")), nrow = 2)[2, ], ")")))
+        tmp[, 3] <- as.numeric(unlist(strsplit(matrix(unlist(strsplit(tmp[, 3],
+                                                  "=")), nrow = 2)[2, ], ")")))
+        tmp[, 4] <- as.numeric(unlist(strsplit(matrix(unlist(strsplit(tmp[, 4],
+                                                  "=")), nrow = 2)[2, ], ")")))
 
         if (nrow(tmp) < nBar) nBar <- nrow(tmp)
 
         tmp[, 2] <- -log10(tmp[, 2])
         o <- order(tmp[, 2], decreasing = TRUE)
         toPlot <- tmp[o[nBar:1], 1:2]
-        toPlot[, 1] <- paste(toPlot[, 1], " (n=", tmp[o[nBar:1], 4], ")", sep = "")
+        toPlot[, 1] <- paste0(toPlot[, 1], " (n=", tmp[o[nBar:1], 4], ")")
         toPlot[, 3] <- tmp[o[nBar:1], 4]/tmp[o[nBar:1], 3]
 
         return(toPlot)

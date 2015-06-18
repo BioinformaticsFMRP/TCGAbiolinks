@@ -177,6 +177,8 @@ tcga.get.barcode <- function(data){
     return(all.barcode)
 }
 
+#' @import utils
+#' @importFrom RCurl getURL
 .DownloadURL <-
     function(Site){
         # setInternet2(use = TRUE)
