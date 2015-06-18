@@ -328,7 +328,7 @@ EAcomplete <- function(TFname, RegulonList){
 #' @examples
 #' EAGenes <- get("EAGenes")
 #' DAVID_BP_matrix <- get("DAVID_BP_matrix")
-#' ResBP <- EnrichmentAnalysis(TFname,RegulonList,DAVID_BP_matrix,
+#' ResBP <- EnrichmentAnalysis(GeneName="DEA genes Normal Vs Tumor",RegulonList,DAVID_BP_matrix,
 #'                            EAGenes,GOtype = "DavidBP")
 EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,
                                EAGenes,GOtype,FDRThresh=0.01) {
