@@ -20,8 +20,10 @@ PR_status_BRCA
 PR_status_BRCA
 }
 \examples{
+\dontrun{
 clin <- clinic("BRCA","clinical_patient")
 PR_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
 "Positive",clin)
+}
 }
 
