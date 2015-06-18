@@ -9,13 +9,10 @@
 #' @param platform illuminahiseq_rnaseq, agilentg4502a_07_3,
 #'        illuminahiseq_rnaseqv2, humanmethylation27, humanmethylation450,
 #'         illuminaga_mirnaseq, genome_wide_snp_6
-# @param PlatformAndAssociatedData data frame 615 observations of 12 variables,
-#        indicating the different characteristics of the data
-#        e.g. tumour, type, species.
 #' @importFrom rvest html html_text
-#' @importFrom stringr str_split
+#' @importFrom stringr str_split str_trim
 #' @examples
-#' TCGAVersion("LGG","illuminahiseq_rnaseqv2")
+#' TCGAVersion("BRCA","illuminahiseq_rnaseqv2")
 #' @export
 #' @return Data frame with version, date, number of samples,size of
 #'         the platform and tumor
@@ -30,24 +27,53 @@ TCGAVersion <- function(tumor = NULL, platform = NULL){
     html <- html(path)
     text <- html_text(html)
     lines <- unlist(str_split(text,"\n"))
-    folders <- lines[grep(".tar.gz ",lines)]
-    ret <- data.frame(date = query$addedDate,
-                         name=query$name,
-                         samples = unlist(lapply(query$barcode,
-                                function(x){length(unlist(strsplit(x,",")))}))
-                      )
-    for(i in seq_along(query$name)){
-        idx <- grep(query[i,"name"],folders)
-        ret[i,"hours"] <-  as.character(str_match(folders[idx],"[0-9]{2}:[0-9]{2}"))
+    folders <- lines[grep("./",lines)]
+    folders <- folders[-grep("Index of",folders)]
+    folders <- folders[-grep("mage-tab",folders)]
+    ret <- data.frame(Version = NULL,Date=NULL,
+                      Samples = NULL, SizeMB = NULL)
+    message(paste0("Found ", length(folders), " Version of ", platform))
+    for(i in seq_along(folders)){
+        regex <-"^.*/"
+        Version <- as.character(str_trim(str_match(folders[i],regex)))
+        ret[i,"Version"] <- Version
+        message(Version)
+        regex <-"[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}"
+        ret[i,"Date"] <-  as.character(str_match(folders[i],regex))
+        subdir <- html_text(html(file.path(path,Version)))
+        x <- unlist(str_split(subdir,"\n"))
+
+        if(platform == "illuminahiseq_rnaseq"){  x <- x[grep("gene.quantification", x)] }
+        if(platform == "agilentg4502a_07_3"){    x <- x[grep("tcga_level3", x)]}
+        if(platform == "illuminahiseq_rnaseqv2"){ x <- x[grep("rsem.genes.results", x)] }
+        if(platform == "humanmethylation27"){ x <- x[grep("HumanMethylation27", x)] }
+        if(platform == "humanmethylation450"){ x <- x[grep("HumanMethylation450", x)] }
+        if(platform == "illuminaga_mirnaseq"){ x <- x[grep("mirna.quantification", x)] }
+        if(platform == "genome_wide_snp_6"){ x <- x[grep("hg19.seg", x)]}
+
         regex <- "[0-9]+\\.?[0-9]*([K]{1}|[M]{1}|[G]{1})"
-        ret[i,"size"] <-  as.character(str_match(folders[idx],regex)[1,1])
+        size <-  as.character(str_match(x,regex)[,1])
+        ret[i,"Samples"] <- length(size)
+        size <- getTotalSize(size)
+        ret[i,"SizeMB"] <- size
     }
     message("==================  FOUND ==================")
     message("Platform: ", platform)
-    message("Level 1 versions: ", length(grep("Level_1", query$name)))
-    message("Level 2 versions: ", length(grep("Level_2", query$name)))
-    message("Level 3 versions: ", length(grep("Level_3", query$name)))
-    message("Mage versions: ", length(grep("mage-tab", query$name)))
+    message("Level 1 versions: ", length(grep("Level_1", ret$Version)))
+    message("Level 2 versions: ", length(grep("Level_2", ret$Version)))
+    message("Level 3 versions: ", length(grep("Level_3", ret$Version)))
+    message("Mage versions: ", length(grep("mage-tab", ret$Version)))
     message("============================================")
     return(ret)
+}
+
+getTotalSize <- function(sizeList){
+    sizeK  <- sizeList[grep("K",sizeList)]
+    sizeM  <- sizeList[grep("M",sizeList)]
+    sizeG  <- sizeList[grep("G",sizeList)]
+    totalK <- round(sum(as.numeric(gsub("K","",sizeK))) / 1000)
+    totalM <- sum(as.numeric(gsub("M","",sizeM)))
+    totalG <- sum(as.numeric(gsub("G","",sizeG))) * 1000
+
+    return (totalM + totalK + totalG)
 }
