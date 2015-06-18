@@ -18,8 +18,6 @@ table normalized
 RnaSeqNormalization
 }
 \examples{
-\dontrun{
 dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
-}
 }
 
