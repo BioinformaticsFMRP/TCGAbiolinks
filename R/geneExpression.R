@@ -404,6 +404,7 @@ GeneSplitRegulon <- function(Genelist,Sep){
 #' @param nBar nBar
 #' @param nRGTab nRGTab
 #' @export
+#' @importFrom EDASeq barplot
 #' @return GeneSplitRegulon
 EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
     splitFun <- function(tf, Tab, nBar){
