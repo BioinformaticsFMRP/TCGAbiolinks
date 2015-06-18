@@ -22,13 +22,11 @@ table containing for each gene logFC, logCPM, pValue,and    FDR
 Perform DEA to identify differentially expressed genes (DEGs). It is possible to do a two-class analysis.
 }
 \examples{
-\dontrun{
 library(TCGAbiolinks)
 dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 dataFilt <- RnaSeqFilt(dataNorm, 0.25)
 samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
 samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
 dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP],"Normal", "Tumor")
-}
 }
 
