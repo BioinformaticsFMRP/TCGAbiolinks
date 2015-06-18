@@ -40,7 +40,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                            basename(data[i, "deployLocation"])))
             if (!file.exists(file)) {
                 download(paste0(root, data[i, "deployLocation"]),
-                         file, quiet,method = methodForDownload)
+                         file, quiet,mode = methodForDownload)
                 untar(file, exdir = path)
             }
         }
@@ -68,7 +68,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             for (i in seq_along(files)) {
                 if (!file.exists(file.path(path,folder,files[i]))) {
                        download(paste0(root,url,"/",files[i]),
-                                 file.path(path,folder,files[i]),quiet,method = methodForDownload)
+                                 file.path(path,folder,files[i]),quiet,mode = methodForDownload)
                 }
             }
         }
