@@ -16,6 +16,6 @@ list of gene symbol without IDs
 GenesCutID
 }
 \examples{
-GenesCutID(c("?|100133144","?|100134869","?|10357" ))
+GenesCutID(c("CRKL|1399","TADA2A|6871","KRT76|51350"))
 }
 
