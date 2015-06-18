@@ -13,6 +13,7 @@
 #        indicating the different characteristics of the data
 #        e.g. tumour, type, species.
 #' @importFrom rvest html html_text
+#' @importFrom stringr str_split
 #' @examples
 #' TCGAVersion("LGG","illuminahiseq_rnaseqv2")
 #' @export
