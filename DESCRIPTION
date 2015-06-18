@@ -19,6 +19,9 @@ Depends: R (>= 3.2)
 Imports:
     downloader,
     GGally,
+    grDevices,
+    graphics,
+    stats,
     GenomicRanges,
     XML,
     EDASeq (>= 2.0.0),
