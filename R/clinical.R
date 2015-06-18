@@ -123,6 +123,9 @@ MatchedCoupledSampleTypes <- function(barcode,typesample){
 #' @param clinical_patient_data clinical_patient_data
 #' @export
 #' @return stage_BRCA
+#' @examples
+#' clin <- clinic("BRCA","clinical_patient")
+#' stage_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"stage_IX",clin)
 stage_BRCA <- function(barcode, stage, clinical_patient_data){
     table.stages <- c("Stage I$|Stage IA$|Stage IB$", "Stage I$", "Stage IA$",
                       "Stage IB$", "Stage II$|Stage IIA$|Stage IIB$",
@@ -137,6 +140,7 @@ stage_BRCA <- function(barcode, stage, clinical_patient_data){
 
     if (is.element(stage, names(table.stages))) {
         clinical_patient_data <- as.data.frame(clinical_patient_data)
+        print(table.stages[stage])
         stage.i <- clinical_patient_data[grep(table.stages[stage],
                   clinical_patient_data$ajcc_pathologic_tumor_stage), ]
         stage.i <- stage.i[,"bcr_patient_barcode"]
@@ -156,6 +160,9 @@ stage_BRCA <- function(barcode, stage, clinical_patient_data){
 #' @param clinical_patient_data clinical_patient_data
 #' @export
 #' @return stage_BRCA
+#' @examples
+#' clin <- clinic("BRCA","clinical_patient")
+#' gender_BRCA (c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"FEMALE",clin)
 gender_BRCA <- function(barcode, gender, clinical_patient_data){
 
     if (is.element(gender,c("MALE", "FEMALE"))) {
@@ -181,6 +188,10 @@ gender_BRCA <- function(barcode, gender, clinical_patient_data){
 #' @param clinical_patient_data clinical_patient_data
 #' @export
 #' @return ER_status_BRCA
+#' @examples
+#' clin <- clinic("BRCA","clinical_patient")
+#' ER_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
+#' "Positive",clin)
 ER_status_BRCA <- function(barcode,ER, clinical_patient_data){
     ## ER should be "Positive" or "Negative"
     # consider only barcode and ER status
@@ -204,6 +215,10 @@ ER_status_BRCA <- function(barcode,ER, clinical_patient_data){
 #' @param clinical_patient_data clinical_patient_data
 #' @export
 #' @return PR_status_BRCA
+#' @examples
+#' clin <- clinic("BRCA","clinical_patient")
+#' PR_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
+#' "Positive",clin)
 PR_status_BRCA  <- function(barcode,PR, clinical_patient_data){
     ## PR should be "Positive" or "Negative"
 
@@ -231,6 +246,10 @@ PR_status_BRCA  <- function(barcode,PR, clinical_patient_data){
 #' @param clinical_patient_data clinical_patient_data
 #' @export
 #' @return HER_status_BRCA
+#' @examples
+#' clin <- clinic("BRCA","clinical_patient")
+#' HER_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
+#' "Positive",clin)
 HER_status_BRCA  <- function(barcode, HER, clinical_patient_data){
     if (is.element(HER, c("Positive", "Negative"))) {
         clinical_patient_data <- as.data.frame(clinical_patient_data)
