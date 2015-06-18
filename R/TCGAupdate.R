@@ -211,63 +211,77 @@ tcgaGetTable <- function(url, max = 0) {
 #' @title TCGA TCGAUpdate
 #' @description Updates local TCGA database
 #' @return platform.table center.table disease.table tcga.db
+#' @param update Update options: all (default) disease center platform
 #' @examples
 #' \dontrun{
+#'   # Update all databases
 #'   TCGAUpdate()
+#'   # Update disease table
+#'   TCGAUpdate(update = "disease")
+
 #' }
+#' TCGAUpdate("none")
 #' @export
-TCGAUpdate <- function(){
+TCGAUpdate <- function(update = "all"){
 
-    tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
-    # Get platform table
-    tcga.query <- "query=Platform"
-    next.url <- paste0(tcga.root, tcga.query)
-    platform.table <- tcgaGetTable(next.url)
-    platform.table <- platform.table[, 1:4]
-    platform.table <- platform.table[order(platform.table$name,
-                                           decreasing = TRUE),]
+    if( update == "all" | update == "platform"){
+        tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
+        # Get platform table
+        tcga.query <- "query=Platform"
+        next.url <- paste0(tcga.root, tcga.query)
+        platform.table <- tcgaGetTable(next.url)
+        platform.table <- platform.table[, 1:4]
+        platform.table <- platform.table[order(platform.table$name,
+                                               decreasing = TRUE),]
+    }
+    if( update  == "all" | update == "disease"){
 
-    # Get disease table
-    tcga.query <- "query=Disease"
-    next.url <- paste0(tcga.root, tcga.query)
-    disease.table <- tcgaGetTable(next.url)
-    disease.table <- disease.table[, 1:3]
+        # Get disease table
+        tcga.query <- "query=Disease"
+        next.url <- paste0(tcga.root, tcga.query)
+        disease.table <- tcgaGetTable(next.url)
+        disease.table <- disease.table[, 1:3]
+    }
+    if( update  == "all" | update  == "center"){
+        # Get center table
+        tcga.query <- "query=Center"
+        next.url <- paste0(tcga.root, tcga.query)
+        center.table  <- tcgaGetTable(next.url)
+        center.table <- center.table[, 1:3]
+    }
+    if( update  == "all" | update  == "db"){
+        tcga.db <-  get("tcga.db", envir =  as.environment("package:TCGAbiolinks"))
 
-    # Get center table
-    tcga.query <- "query=Center"
-    next.url <- paste0(tcga.root, tcga.query)
-    center.table  <- tcgaGetTable(next.url)
-    center.table <- center.table[, 1:3]
-
-    tcga.db <-  get("tcga.db", envir =  as.environment("package:TCGAbiolinks"))
-
-    # get new version of files
-    new.db <-  createTcgaTable()
-    # copy not modified ones
-    for (i in seq_along(new.db[,1])){
-        db <- subset(tcga.db,new.db[i,"name"] == tcga.db$name)
-        if(nrow(db) == 1){
-            new.db[i,"deployStatus"] <- db$barcode
+        # get new version of files
+        new.db <-  createTcgaTable()
+        # copy not modified ones
+        for (i in seq_along(new.db[,1])){
+            db <- subset(tcga.db,new.db[i,"name"] == tcga.db$name)
+            if(nrow(db) == 1){
+                new.db[i,"deployStatus"] <- db$barcode
+            }
         }
+
+        idx <- ((new.db$deployStatus == "" |  new.db$deployStatus == "Not found" |
+                     (new.db$deployStatus == "Available")) &
+                    !grepl("aux|mage-tab", new.db$name)
+        )
+        new.db[idx,]$deployStatus <- "Available"
+        new.db[idx,]$deployStatus <- getBarcode(new.db[idx,])$barcode
+        colnames(new.db)[4] <- "barcode"
+        tcga.db <- new.db
     }
 
-    idx <- ((new.db$deployStatus == "" |  new.db$deployStatus == "Not found" |
-                 (new.db$deployStatus == "Available")) &
-                !grepl("aux|mage-tab", new.db$name)
-    )
-    new.db[idx,]$deployStatus <- "Available"
-    new.db[idx,]$deployStatus <- getBarcode(new.db[idx,])$barcode
-    colnames(new.db)[4] <- "barcode"
-    tcga.db <- new.db
+    if( grepl("all|db|platform|center|disease",update)){
+        message('============================================')
+        message("     Please reload the package to update    ")
+        message('detach("package:TCGAbiolinks", unload=TRUE) ')
+        message("library(TCGAbiolinks)"                       )
+        message('============================================')
 
-    message('============================================')
-    message("     Please reload the package to update    ")
-    message('detach("package:TCGAbiolinks", unload=TRUE) ')
-    message("library(TCGAbiolinks)"                       )
-    message('============================================')
-
-    save(platform.table, disease.table, tcga.db, center.table,
-         file = paste0(system.file("extdata", package = "TCGAbiolinks"),
-                       "/dataFolders.rda")
-    )
+        save(platform.table, disease.table, tcga.db, center.table,
+             file = paste0(system.file("extdata", package = "TCGAbiolinks"),
+                           "/dataFolders.rda")
+        )
+    }
 }

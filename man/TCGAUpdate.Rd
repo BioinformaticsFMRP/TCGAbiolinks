@@ -4,7 +4,10 @@
 \alias{TCGAUpdate}
 \title{TCGA TCGAUpdate}
 \usage{
-TCGAUpdate()
+TCGAUpdate(update = "all")
+}
+\arguments{
+\item{update}{Update options: all (default) disease center platform}
 }
 \value{
 platform.table center.table disease.table tcga.db
@@ -14,7 +17,11 @@ Updates local TCGA database
 }
 \examples{
 \dontrun{
+  # Update all databases
   TCGAUpdate()
+  # Update disease table
+  TCGAUpdate(update = "disease")
 }
+TCGAUpdate("none")
 }
 
