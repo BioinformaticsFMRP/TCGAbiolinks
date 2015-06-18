@@ -108,7 +108,6 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
 #' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags
 #' @export
 #' @examples
-#' library(TCGAbiolinks)
 #' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 #' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
 #' samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
@@ -166,7 +165,6 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 #' for samples in  Cond1type, and Cond2type, and Delta value (the difference of gene expression between the two
 #' conditions multiplied logFC)
 #' @examples
-#' library(TCGAbiolinks)
 #' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 #' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
 #' samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
@@ -226,12 +224,14 @@ CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
 #' @export
 #' @return PCA plot
 #' @examples
+#' \dontrun{
 #' # normalization of genes
 #' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 #' # quantile filter of genes
 #' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
 #' # Principal Component Analysis plot for ntop selected DEGs
 #' plotPCAforGroups(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
+#' }
 plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
     ComparisonSelected <- "Normal vs Tumor"
     TitlePlot <- paste0("PCA ", "top ", ntopgenes,

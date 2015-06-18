@@ -29,7 +29,6 @@ conditions multiplied logFC)
 CreateTabLevel for Differentially expression analysis (DEA)
 }
 \examples{
-library(TCGAbiolinks)
 dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 dataFilt <- RnaSeqFilt(dataNorm, 0.25)
 samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
