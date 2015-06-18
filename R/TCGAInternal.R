@@ -185,3 +185,17 @@ tcga.get.barcode <- function(data){
         x <- unlist(strsplit(x,"\n"))
         return(x)
     }
+
+
+is.windows <- function() {
+    Sys.info()["sysname"] == "Windows"
+}
+
+is.mac <- function() {
+    Sys.info()["sysname"] == "Darwin"
+}
+
+is.linux <- function() {
+    Sys.info()["sysname"] == "Linux"
+}
+
