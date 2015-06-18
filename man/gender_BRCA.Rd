@@ -19,4 +19,8 @@ stage_BRCA
 \description{
 gender_BRCA
 }
+\examples{
+clin <- clinic("BRCA","clinical_patient")
+gender_BRCA (c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"FEMALE",clin)
+}
 
