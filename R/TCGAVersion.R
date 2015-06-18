@@ -64,6 +64,7 @@ TCGAVersion <- function(tumor = NULL, platform = NULL){
     message("Level 3 versions: ", length(grep("Level_3", ret$Version)))
     message("Mage versions: ", length(grep("mage-tab", ret$Version)))
     message("============================================")
+    ret <- ret[order(ret$SizeMbyte,decreasing=TRUE),]
     return(ret)
 }
 
