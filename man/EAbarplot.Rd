@@ -28,7 +28,6 @@ EAbarplot
 EAbarplot
 }
 \examples{
-\dontrun{
 Genelist <- rownames(dataDEGsFiltLevel)
 TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
 Enrichment Analysis EA (TCGAVisualize)
@@ -40,6 +39,5 @@ EAbarplot(tf = rownames(ansEA$ResBP),
         PathTab = ansEA$ResPat,
          nRGTab = Genelist,
          nBar = 10)
-}
 }
 
