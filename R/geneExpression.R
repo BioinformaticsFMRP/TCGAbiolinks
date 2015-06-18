@@ -114,7 +114,6 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
 #' samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
 #' samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
 #' dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP],"Normal", "Tumor")
-#' }
 #' @return table containing for each gene logFC, logCPM, pValue,and    FDR
 DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 
@@ -177,7 +176,6 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 #' dataTP <- dataFilt[,samplesTP]
 #' dataTN <- dataFilt[,samplesNT]
 #' dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",dataTP,dataTN)
-#' }
 CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
                            TableCond1,TableCond2,typeOrder = TRUE) {
 
@@ -288,7 +286,6 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #' @examples
 #' Genelist <- rownames(dataDEGsFiltLevel)
 #' TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
-#' }
 EAcomplete <- function(TFname, RegulonList){
     EAGenes <- get("EAGenes")
     DAVID_BP_matrix <- get("DAVID_BP_matrix")
@@ -333,7 +330,6 @@ EAcomplete <- function(TFname, RegulonList){
 #' DAVID_BP_matrix <- get("DAVID_BP_matrix")
 #' ResBP <- EnrichmentAnalysis(TFname,RegulonList,DAVID_BP_matrix,
 #'                            EAGenes,GOtype = "DavidBP")
-#' }
 EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,
                                EAGenes,GOtype,FDRThresh=0.01) {
     topPathways <- nrow(TableEnrichment)

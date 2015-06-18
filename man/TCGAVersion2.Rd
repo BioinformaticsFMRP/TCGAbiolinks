@@ -16,7 +16,7 @@ for Available Cancer Types.}
 
 \item{PlatformType}{illuminahiseq_rnaseq, agilentg4502a_07_3,
 illuminahiseq_rnaseqv2, humanmethylation27, humanmethylation450,
- illuminaga_mirnaseq, genome_wide_snp_6}
+illuminaga_mirnaseq, genome_wide_snp_6}
 }
 \description{
 TCGA Version2

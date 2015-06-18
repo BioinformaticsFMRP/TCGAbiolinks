@@ -27,11 +27,9 @@ EAcomplete plot
 EnrichmentAnalysis
 }
 \examples{
-\dontrun{
 EAGenes <- get("EAGenes")
 DAVID_BP_matrix <- get("DAVID_BP_matrix")
 ResBP <- EnrichmentAnalysis(TFname,RegulonList,DAVID_BP_matrix,
                            EAGenes,GOtype = "DavidBP")
-}
 }
 
