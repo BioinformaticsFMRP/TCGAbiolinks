@@ -57,7 +57,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             for (i in seq_along(files)) {
                 if (!file.exists(file.path(path,folder,files[i]))) {
                     download(paste0(root,url,"/",files[i]),
-                             file.path(path,folder,files[i]),quiet)
+                             file.path(path,folder,files[i]),quiet,method="auto")
                 }
             }
         }
@@ -80,7 +80,7 @@ filterFiles <- function(data,samples,files){
     }
     # case barcode in name
     if(grepl("IlluminaHiSeq_RNASeq|humanmethylation",data$Platform,
-            ignore.case = TRUE)){
+             ignore.case = TRUE)){
         idx <- unique(unlist(lapply(samples, function(x) grep(x,files))))
         files <- files[idx]
         return(files)
