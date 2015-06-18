@@ -25,12 +25,10 @@ Download tcga into path
 Download data previously selected using the TCGASeach
 }
 \examples{
-\dontrun{
-   samples <- c("TCGA-06-0125-01A-01D-A45W-05")
+samples <- c("TCGA-06-0125-01A-01D-A45W-05")
    query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450",
    level = "3", samples = samples)
    TCGADownload(query,path = "dataDemo2")
-   }
 }
 \seealso{
 TCGASearch

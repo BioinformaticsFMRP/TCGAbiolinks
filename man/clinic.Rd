@@ -36,9 +36,12 @@ clinical_radiation
 }}
 }
 \value{
-clinic
+clinic data
 }
 \description{
 clinic
+}
+\examples{
+data <- clinic("LGG","clinical_drug")
 }
 

@@ -17,4 +17,9 @@ MultiSampleTypes
 \description{
 MatchedCoupledSampleTypes
 }
+\examples{
+MatchedCoupledSampleTypes(c("TCGA-B0-4698-01Z-00-DX1",
+                             "TCGA-B0-4698-02Z-00-DX1"),
+                             c("TP","TR"))
+}
 
