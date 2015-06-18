@@ -47,7 +47,9 @@
 #' @return                a ggplot2 plot
 #' @export
 #' @examples
-#'   data(wine)
+#'   file <- system.file("extdata/wine.rda",
+#'                    package = "TCGAbiolinks")
+#'   load(file,envir = as.environment("package:TCGAbiolinks"))
 #'   wine.pca <- prcomp(wine, scale. = TRUE)
 #'   print(ggbiplot(wine.pca, obs.scale = 1, var.scale = 1, groups = wine.class,
 #'   ellipse = TRUE, circle = TRUE))
