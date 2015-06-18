@@ -16,6 +16,17 @@
 #' @return Download tcga into path
 TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                          quiet = FALSE) {
+    OsArch <- sessionInfo()
+
+    if( length(grep("OS X", OsArch$running))==1){
+        methodForDownload <- "curl"
+    }
+    if( length(grep("Ubuntu", OsArch$running))==1){
+        methodForDownload <- "wget"
+    }
+    if( length(grep("Windows", OsArch$running))==1){
+        methodForDownload <- "wininet"
+    }
 
     dir.create(path, showWarnings = FALSE)
     root <- "https://tcga-data.nci.nih.gov"
@@ -29,7 +40,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                            basename(data[i, "deployLocation"])))
             if (!file.exists(file)) {
                 download(paste0(root, data[i, "deployLocation"]),
-                         file, quiet,method="auto")
+                         file, quiet,method = methodForDownload)
                 untar(file, exdir = path)
             }
         }
@@ -56,8 +67,8 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 
             for (i in seq_along(files)) {
                 if (!file.exists(file.path(path,folder,files[i]))) {
-                    download(paste0(root,url,"/",files[i]),
-                             file.path(path,folder,files[i]),quiet,method="auto")
+                       download(paste0(root,url,"/",files[i]),
+                                 file.path(path,folder,files[i]),quiet,method = methodForDownload)
                 }
             }
         }
