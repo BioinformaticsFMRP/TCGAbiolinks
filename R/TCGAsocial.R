@@ -10,6 +10,20 @@
 #' TCGAsocial("bioconductor.org","BiocCheck")
 TCGAsocial <- function(siteToFind, listPackage=NULL,KeyInfo=NULL){
 
+    # Find all packages in bioconductor
+    site3 <- "http://www.bioconductor.org/packages/3.1/bioc/"
+    tmp <- .DownloadURL(site3)
+    tmpPack <-  tmp[grep(".html",tmp)]
+    tmpPackMatrix <- as.matrix(tmpPack)
+    posA <- grep("bioconductor",tolower(tmpPackMatrix))[1]+1
+    posB <- grep("bioconductor",tolower(tmpPackMatrix))[2]-1
+    tmpPackMatrixNew <- tmpPackMatrix[posA:posB,]
+    tmpPackMatrixNew <- gsub("<td><a","",tmpPackMatrixNew)
+    tmpPck2 <- lapply(tmpPackMatrixNew, function(x) gsub("</a></td>","", as.matrix(unlist(strsplit(x,">")))[2]))
+    tmpPck3 <- as.matrix(unlist(tmpPck2))
+    tmpPck2a <- lapply(tmpPck2, function(x) gsub("</a","", x))
+    BiocPackageList <- as.matrix(unlist(tmpPck2a))
+
     if( siteToFind == "bioconductor.org"){
     siteBioC <- "http://www.bioconductor.org/packages/stats/index.html"
 
@@ -67,6 +81,8 @@ TCGAsocial <- function(siteToFind, listPackage=NULL,KeyInfo=NULL){
                     pos <- pos[1]
                 }
                 tmpPackage <-  tmpPack[pos]
+
+                #grep(list(BiocPackageList),tmpPackage)
                 PackageSuggested <- tmpPackage
                 #  print(PackageSuggested)
                 TableQuestions[i,"PackageSuggested"] <- substr(PackageSuggested,1, 64)
@@ -76,14 +92,6 @@ TCGAsocial <- function(siteToFind, listPackage=NULL,KeyInfo=NULL){
             tmp3a <- gsub("&#39;", ".", tmp3a)
             TableQuestions[i,"question"] <- tmp3a
         }
-        site3 <- "http://www.bioconductor.org/packages/3.1/bioc/"
-        tmp <- .DownloadURL(site3)
-        tmpPack <-  tmp[grep(".html",tmp)]
-        tmpPackMatrix <- as.matrix(tmpPack)
-        posA <- grep("bioconductor",tolower(tmpPackMatrix))[1]+1
-        posB <- grep("bioconductor",tolower(tmpPackMatrix))[2]-1
-        tmpPackMatrixNew <- tmpPackMatrix[posA:posB,]
-
         TableQuestions <- TableQuestions[order(TableQuestions$PackageSuggested,decreasing=TRUE),]
         TablePackage <- TableQuestions
     }
