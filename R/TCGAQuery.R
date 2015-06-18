@@ -67,8 +67,8 @@ TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
                              tolower(disease.table$abbreviation)))) {
                 suppressWarnings(
                     df <- as.data.frame(matrix(
-                                       sort(unique(disease.table$abbreviation)),
-                                       ncol = 8))
+                        sort(unique(disease.table$abbreviation)),
+                        ncol = 8))
                 )
                 print(kable(df, col.names = NULL, format = "pandoc",
                             caption = "TCGA tumors"))
@@ -87,7 +87,7 @@ TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
                 suppressWarnings(
                     df <- as.data.frame(matrix(
                         sort(unique(platform.table$name)),
-                                               ncol = 3))
+                        ncol = 3))
                 )
                 print(kable(df, col.names = NULL, format = "pandoc",
                             caption = "TCGA Platforms"))
@@ -156,7 +156,7 @@ TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
     }
     if (!is.null(level)) {
         if (nchar(level) == 1) {
-        id <- grep(paste0("Level_", level), db$name)
+            id <- grep(paste0("Level_", level), db$name)
         } else {
             id <- grep("mage-tab", db$name)
         }
@@ -254,8 +254,13 @@ getBarcode <- function(table){
                         next
                     }
                     if ( !file.exists(maf)) {
-                        download(paste0(root,folder,"/",maf), maf,
-                                 quiet = TRUE,method="auto")
+                        if(!is.windows()){
+                            download(paste0(root,folder,"/",maf), maf,
+                                     quiet = TRUE)
+                        } else {
+                            download(paste0(root,folder,"/",maf), maf,
+                                     quiet = TRUE, method="auto")
+                        }
                     }
                     df <- read.delim(file = maf,
                                      sep = "\t", comment.char = "#",
@@ -296,7 +301,7 @@ getBarcode <- function(table){
                         if (is.null(files))
                             next
                         pat <- paste0("tumor_sample_|org_control|",
-                                        "clinical_patient_|cqcf_")
+                                      "clinical_patient_|cqcf_")
                         idx <- grep(pat,files)
                         if(length(idx)>1){
                             files <- files[idx[1]]
