@@ -96,7 +96,7 @@ Query version for a specific platform for example IlluminaHiSeq_RNASeqV2
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 
-BRCA_RNASeqV2_version <- TCGAVersion(Tumor = "brca", 
+BRCA_RNASeqV2_version <- TCGAVersion2(Tumor = "brca", 
                                      PlatformType = "illuminahiseq_rnaseqv2")
 
 ```

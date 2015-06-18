@@ -17,4 +17,9 @@ table normalized
 \description{
 RnaSeqNormalization
 }
+\examples{
+\dontrun{
+dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
+}
+}
 
