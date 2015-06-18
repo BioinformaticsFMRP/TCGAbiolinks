@@ -34,7 +34,8 @@ Imports:
     stringr (>= 1.0.0),
     knitr,
     IRanges,
-    scales
+    scales,
+    rvest
 Description:
     Query the latest version of files by tumor, center, date, barcode,
     level and platform. Also Download and Preprocess data from TCGA portal.

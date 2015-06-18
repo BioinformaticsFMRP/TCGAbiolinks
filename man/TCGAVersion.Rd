@@ -4,7 +4,7 @@
 \alias{TCGAVersion}
 \title{TCGA Version}
 \usage{
-TCGAVersion(Tumor, PlatformType)
+TCGAVersion(tumor = NULL, platform = NULL)
 }
 \arguments{
 \item{Tumor}{a character string indicating the cancer type for
