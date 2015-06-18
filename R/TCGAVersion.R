@@ -12,7 +12,7 @@
 #' @importFrom rvest html html_text
 #' @importFrom stringr str_split str_trim
 #' @examples
-#' TCGAVersion("BRCA","illuminahiseq_rnaseqv2")
+#' TCGAVersion("LGG","agilentg4502a_07_3")
 #' @export
 #' @return Data frame with version, date, number of samples,size of
 #'         the platform and tumor
