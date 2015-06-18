@@ -6,7 +6,9 @@
 # @import RCurl
 #' @export
 #' @return table with number of downloads about a package
-TCGAsocial<- function(siteToFind, listPackage=NULL,KeyInfo=NULL){
+#' @examples
+#' TCGAsocial("bioconductor.org","BiocCheck")
+TCGAsocial <- function(siteToFind, listPackage=NULL,KeyInfo=NULL){
 
     if( siteToFind == "bioconductor.org"){
     siteBioC <- "http://www.bioconductor.org/packages/stats/index.html"

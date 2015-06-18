@@ -15,4 +15,9 @@ table with common samples among platforms from TCGAQuery
 \description{
 Common samples among platforms with 2 by 2 comparison
 }
+\examples{
+TCGAintegrate(c("TCGA-A7-A0D9-01A-31D-A060-02",
+                "TCGA-B6-A0RG-01A-11D-A060-02",
+                 "TCGA-B6-A0RG-01A-11D-A060-01"))
+}
 

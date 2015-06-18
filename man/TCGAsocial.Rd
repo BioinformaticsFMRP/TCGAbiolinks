@@ -19,4 +19,7 @@ table with number of downloads about a package
 \description{
 Find number of downloads about a package in CRAN or BioC
 }
+\examples{
+TCGAsocial("bioconductor.org","BiocCheck")
+}
 

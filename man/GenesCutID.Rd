@@ -15,4 +15,7 @@ list of gene symbol without IDs
 \description{
 GenesCutID
 }
+\examples{
+GenesCutID(c("?|100133144","?|100134869","?|10357" ))
+}
 
