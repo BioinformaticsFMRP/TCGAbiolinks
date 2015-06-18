@@ -4,8 +4,10 @@
 #' @param GeneList GeneList
 #' @export
 #' @return list of gene symbol without IDs
+#' @examples
+#' GenesCutID(c("?|100133144","?|100134869","?|10357" ))
 GenesCutID <- function(GeneList){
-    GeneListCutID <- as.matrix(matrix(unlist(strsplit(as.character(GeneList),"|",fixed = TRUE)),nrow(GeneList),2,byrow = TRUE))[,1]
+    GeneListCutID <- as.matrix(matrix(unlist(strsplit(as.character(GeneList),"|",fixed = TRUE)),length(GeneList),2,byrow = TRUE))[,1]
     return(as.matrix(GeneListCutID))
 }
 
