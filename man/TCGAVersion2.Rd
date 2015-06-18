@@ -13,6 +13,7 @@ CESC, COAD, DLBC, ESCA, GBM, HNSC, KICH, KIRC, KIRP, LAML,
 LGG, LIHC, LUAD, LUSC, OV, PAAD, PRAD, READ, SARC, SKCM, STAD,
 THCA, UCEC, UCS. Look at https://tcga-data.nci.nih.gov/tcga/
 for Available Cancer Types.}
+
 \item{PlatformType}{illuminahiseq_rnaseq, agilentg4502a_07_3,
 illuminahiseq_rnaseqv2, humanmethylation27, humanmethylation450,
  illuminaga_mirnaseq, genome_wide_snp_6}
