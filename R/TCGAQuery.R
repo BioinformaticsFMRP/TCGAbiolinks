@@ -255,7 +255,7 @@ getBarcode <- function(table){
                     }
                     if ( !file.exists(maf)) {
                         download(paste0(root,folder,"/",maf), maf,
-                                 quiet = TRUE)
+                                 quiet = TRUE,method="auto")
                     }
                     df <- read.delim(file = maf,
                                      sep = "\t", comment.char = "#",
