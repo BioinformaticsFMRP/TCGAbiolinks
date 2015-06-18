@@ -75,6 +75,7 @@ survivalPlot <- function(met.md, legend = "Legend", cutoff = 0,
                          color = c("green", "firebrick4", "orange3", "blue"),
                          default.plot = "ggplot") {
     .e <- environment()
+    group <- NULL
     if (cutoff != 0) {
         # Axis-x cut-off
         aux <- subset(met.md, met.md$death_days_to > cutoff)
