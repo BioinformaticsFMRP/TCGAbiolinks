@@ -230,6 +230,9 @@ metMeanBoxplot <- function(data, sort = FALSE,
 #' @param exact  Do a exact wilcoxon test? Default: True
 #' @return Data frame with cols p values/p values adjusted
 #' @importFrom exactRankTests wilcox.exact
+#' @importFrom graphics hist
+#' @importFrom grDevices png dev.off
+#' @importFrom stats p.adjust
 #' @export
 #' @return Data frame with two cols
 #'         p-values/p-values adjusted
