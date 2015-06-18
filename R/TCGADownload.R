@@ -17,6 +17,17 @@
 TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                          quiet = FALSE) {
 
+    OsArch <- sessionInfo()
+           if( length(grep("apple", OsArch$platform))==1){
+                   methodForDownload <- "curl"
+                }
+        if( length(grep("linux", OsArch$platform))==1){
+                methodForDownload <- "wget"
+            }
+        if( length(grep("Windows", OsArch$running))==1){
+               methodForDownload <- "wininet"
+            }
+
     dir.create(path, showWarnings = FALSE)
     root <- "https://tcga-data.nci.nih.gov"
 
@@ -30,16 +41,12 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             if (!file.exists(file)) {
                 if(!is.windows()){
                 download(paste0(root, data[i, "deployLocation"]),
-<<<<<<< HEAD
                          file, quiet,mode = methodForDownload)
-=======
-                         file, quiet)
                 } else {
                     download(paste0(root, data[i, "deployLocation"]),
-                             file, quiet,method = "auto")
+                             file, quiet,mode = methodForDownload)
 
                 }
->>>>>>> origin/master
                 untar(file, exdir = path)
             }
         }
@@ -68,18 +75,15 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                 if (!file.exists(file.path(path,folder,files[i]))) {
                     if(!is.windows()){
                        download(paste0(root,url,"/",files[i]),
-<<<<<<< HEAD
-                                 file.path(path,folder,files[i]),quiet,mode = methodForDownload)
+                       file.path(path,folder,files[i]),quiet,mode = methodForDownload)
                 }
-=======
-                                 file.path(path,folder,files[i]),quiet)
-                    } else {
+                    }
+                   else {
                         download(paste0(root,url,"/",files[i]),
                                  file.path(path,folder,files[i]),
-                                 quiet, method = "auto")
+                                 quiet, mode = methodForDownload)
                     }
-                    }
->>>>>>> origin/master
+
             }
         }
     }
