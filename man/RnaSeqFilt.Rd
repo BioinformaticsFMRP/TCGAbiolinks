@@ -18,9 +18,7 @@ table filtered
 Filtering rnaseq by quantile
 }
 \examples{
-\dontrun{
 dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 dataFilt <- RnaSeqFilt(dataNorm, 0.25)
-}
 }
 

@@ -18,9 +18,7 @@ EAcomplete plot
 EAcomplete
 }
 \examples{
-\dontrun{
 Genelist <- rownames(dataDEGsFiltLevel)
 TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
-}
 }
 
