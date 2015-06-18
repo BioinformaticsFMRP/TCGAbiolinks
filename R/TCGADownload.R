@@ -39,14 +39,8 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             message(paste0("Downloading:",
                            basename(data[i, "deployLocation"])))
             if (!file.exists(file)) {
-                if(!is.windows()){
                 download(paste0(root, data[i, "deployLocation"]),
                          file, quiet,mode = methodForDownload)
-                } else {
-                    download(paste0(root, data[i, "deployLocation"]),
-                             file, quiet,mode = methodForDownload)
-
-                }
                 untar(file, exdir = path)
             }
         }
