@@ -26,6 +26,6 @@ Data frame with version, date, number of samples,size of
 TCGA Version
 }
 \examples{
-TCGAVersion("LGG","illuminahiseq_rnaseqv2")
+TCGAVersion("BRCA","illuminahiseq_rnaseqv2")
 }
 
