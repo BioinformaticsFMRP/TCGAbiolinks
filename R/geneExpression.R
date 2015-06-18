@@ -39,10 +39,8 @@ TimeUse <- function(func){
 #' @export
 #' @return table filtered
 #' @examples
-#' \dontrun{
 #' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 #' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
-#'}
 RnaSeqFilt <- function(TableRnaseq,QuantileThresh ){
     GeneThresh <- as.numeric(quantile(rowMeans(TableRnaseq), QuantileThresh))
     geneFiltered <- names(which(rowMeans(TableRnaseq) > GeneThresh))
@@ -59,9 +57,7 @@ RnaSeqFilt <- function(TableRnaseq,QuantileThresh ){
 #' @export
 #' @return table normalized
 #' @examples
-#' \dontrun{
 #' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
-#'}
 RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
 
     TCGA_RnaseqTable <- TCGA_RnaseqTable[ !(GenesCutID(as.matrix(rownames(TCGA_RnaseqTable))) == "?"),]
@@ -83,6 +79,7 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
     commonGenes <- intersect(rownames(TCGA_RnaseqTable),rownames(geneInfo))
 
     TCGA_RnaseqTable <- TCGA_RnaseqTable[commonGenes,]
+    geneInfo <- geneInfo[commonGenes,]
 
     timeEstimated <- format(ncol(TCGA_RnaseqTable)*nrow(TCGA_RnaseqTable)/80000,digits = 2)
     print(messageEstimation <- paste("I Need about ", timeEstimated, "seconds for this Complete Normalization Upper Quantile [Processing 80k elements /s]  "))
@@ -111,7 +108,6 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
 #' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags
 #' @export
 #' @examples
-#' \dontrun{
 #' library(TCGAbiolinks)
 #' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 #' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
@@ -171,7 +167,6 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 #' for samples in  Cond1type, and Cond2type, and Delta value (the difference of gene expression between the two
 #' conditions multiplied logFC)
 #' @examples
-#' \dontrun{
 #' library(TCGAbiolinks)
 #' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 #' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
@@ -233,14 +228,12 @@ CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
 #' @export
 #' @return PCA plot
 #' @examples
-#' \dontrun{
 #' # normalization of genes
 #' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 #' # quantile filter of genes
 #' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
 #' # Principal Component Analysis plot for ntop selected DEGs
 #' plotPCAforGroups(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
-#'}
 plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
     ComparisonSelected <- "Normal vs Tumor"
     TitlePlot <- paste0("PCA ", "top ", ntopgenes,
@@ -293,7 +286,6 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #' @export
 #' @return EAcomplete plot
 #' @examples
-#' \dontrun{
 #' Genelist <- rownames(dataDEGsFiltLevel)
 #' TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
 #' }
@@ -337,7 +329,6 @@ EAcomplete <- function(TFname, RegulonList){
 #' @export
 #' @return EAcomplete plot
 #' @examples
-#' \dontrun{
 #' EAGenes <- get("EAGenes")
 #' DAVID_BP_matrix <- get("DAVID_BP_matrix")
 #' ResBP <- EnrichmentAnalysis(TFname,RegulonList,DAVID_BP_matrix,
@@ -441,7 +432,6 @@ GeneSplitRegulon <- function(Genelist,Sep){
 #' @importFrom EDASeq barplot
 #' @return EAbarplot
 #' @examples
-#' \dontrun{
 #' Genelist <- rownames(dataDEGsFiltLevel)
 #' TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
 #' Enrichment Analysis EA (TCGAVisualize)
@@ -453,7 +443,6 @@ GeneSplitRegulon <- function(Genelist,Sep){
 #'         PathTab = ansEA$ResPat,
 #'          nRGTab = Genelist,
 #'          nBar = 10)
-#'}
 EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
     splitFun <- function(tf, Tab, nBar){
         tmp <- lapply(Tab[tf, ], function(x) strsplit(x, ";"))
