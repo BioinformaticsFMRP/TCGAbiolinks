@@ -44,7 +44,8 @@
 # @import plyr
 # @import scales
 #' @import grid
-#' @return                a ggplot2 plot
+#' @import stats
+#' @return  a ggplot2 plot
 #' @export
 #' @examples
 #' \dontrun{
