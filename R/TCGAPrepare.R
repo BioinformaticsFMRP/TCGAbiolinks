@@ -16,6 +16,7 @@
 #' prepared <- TCGAPrepare(query, dir="exampleData")
 #' @export
 #' @importFrom stringr str_match str_trim
+#' @import utils
 TCGAPrepare <- function(query, dir = NULL, type = NULL){
 
     hg19genes   <- get("hg19genes",
@@ -96,7 +97,6 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
         # get array_design.txt from mage folder
         # and change uuid by Barcode
         uuid <- colnames(df)
-        print(uuid)
         idx <- grep("Sample|Control",uuid)
         if(length(idx) > 0){
             uuid <- uuid[-idx]
