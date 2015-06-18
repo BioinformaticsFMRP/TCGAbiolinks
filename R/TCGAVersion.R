@@ -13,25 +13,31 @@
 #        indicating the different characteristics of the data
 #        e.g. tumour, type, species.
 # @import importFrom RCurl getURL
+#' @examples
+#' TCGAVersion("LGG","illuminahiseq_rnaseqv2")
 #' @export
-
+#' @return Data frame with version, date, number of samples,size of
+#'         the platform and tumor
 TCGAVersion <- function(Tumor, PlatformType){
 
-    PlatformAndAssociatedData   <- get("PlatformAndAssociatedData",
-                                       envir =  as.environment("package:TCGAbiolinks"))
+    data   <- get("PlatformAndAssociatedData",
+                  envir =  as.environment("package:TCGAbiolinks"))
 
     #require(RCurl)
     #downloadFolder<-paste(downloadFolder,PlatformType,"/",sep="")
     #.createDirectory(PlatformType)
-    siteTCGA <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"
-    tmp <- PlatformAndAssociatedData[toupper(PlatformAndAssociatedData$Tumor) == toupper(Tumor)
-                                     & toupper(PlatformAndAssociatedData$Platform) == toupper(PlatformType), ]
+    siteTCGA <- paste0("https://tcga-data.nci.nih.gov/tcgafiles/",
+                       "ftp_auth/distro_ftpusers/anonymous/tumor/")
+    tmp <- data[toupper(data$Tumor) == toupper(Tumor)
+                & toupper(data$Platform) == toupper(PlatformType), ]
 
-    key1a <- paste(unique(tmp$CenterType), unique(tmp$Center), unique(tmp$Platform), sep="/")
+    key1a <- paste(unique(tmp$CenterType),
+                   unique(tmp$Center), unique(tmp$Platform), sep="/")
     Description <- paste(siteTCGA, tolower(tmp$Tumor), "/",key1a, sep="")
     key2a <- paste("/",tmp$Folder,"/",sep="")
 
-    #toDdl <- .DownloaDmageTAB_sdrf(Description, keySpecies = key2a, KeyGrep1 = "Level_3", KeyGrep2 = "MANIFEST.txt")
+    #toDdl <- .DownloaDmageTAB_sdrf(Description, keySpecies = key2a,
+    # KeyGrep1 = "Level_3", KeyGrep2 = "MANIFEST.txt")
     #toDdl <- paste(Description, key2a, toDdl, sep = "")
     #x <- .DownloadURL(toDdl)
     #x <- sapply(strsplit(x, "  "), function(y) y[2])
@@ -54,23 +60,38 @@ TCGAVersion <- function(Tumor, PlatformType){
         xverMat$Date[i]<-timeVer
     }
 
-
-    xverMat <- cbind(xverMat, Samples = matrix(0, nrow(xverMat),1), SizeMbyte = matrix(0, nrow(xverMat),1))
+    xverMat <- cbind(xverMat, Samples = matrix(0, nrow(xverMat),1),
+                     SizeMbyte = matrix(0, nrow(xverMat),1))
     print(paste("Found ", nrow(xverMat), " Version of ", PlatformType,sep=""))
 
     for( i in 1: nrow(xverMat)){
 
         todown1<- paste(Description,key2a,xverMat$Version[i],sep="")
-        print(paste("Version ", i , " of ", nrow(xverMat), " ", xverMat$Version[i], " ...done",sep=""))
+        print(paste("Version ", i , " of ", nrow(xverMat), " ",
+                    xverMat$Version[i], " ...done",sep=""))
         x <- .DownloadURL(todown1)
 
-        if(PlatformType == "illuminahiseq_rnaseq"){  x <- x[grep("gene.quantification", x)] }
-        if(PlatformType == "agilentg4502a_07_3"){    x <- x[grep("tcga_level3", x)]}
-        if(PlatformType == "illuminahiseq_rnaseqv2"){ x <- x[grep("rsem.genes.results", x)] }
-        if(PlatformType == "humanmethylation27"){ x <- x[grep("HumanMethylation27", x)] }
-        if(PlatformType == "humanmethylation450"){ x <- x[grep("HumanMethylation450", x)] }
-        if(PlatformType == "illuminaga_mirnaseq"){ x <- x[grep("mirna.quantification", x)] }
-        if(PlatformType == "genome_wide_snp_6"){ x <- x[grep("hg19.seg", x)]}
+        if(PlatformType == "illuminahiseq_rnaseq"){
+            x <- x[grep("gene.quantification", x)]
+        }
+        if(PlatformType == "agilentg4502a_07_3"){
+            x <- x[grep("tcga_level3", x)]
+        }
+        if(PlatformType == "illuminahiseq_rnaseqv2"){
+            x <- x[grep("rsem.genes.results", x)]
+        }
+        if(PlatformType == "humanmethylation27"){
+            x <- x[grep("HumanMethylation27", x)]
+        }
+        if(PlatformType == "humanmethylation450"){
+            x <- x[grep("HumanMethylation450", x)]
+        }
+        if(PlatformType == "illuminaga_mirnaseq"){
+            x <- x[grep("mirna.quantification", x)]
+        }
+        if(PlatformType == "genome_wide_snp_6"){
+            x <- x[grep("hg19.seg", x)]
+        }
 
         x2<- sapply(strsplit(x, ":"), function(y) y[2])
         x3<- sapply(strsplit(x2, " "), function(y) y[3])
