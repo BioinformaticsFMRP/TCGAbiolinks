@@ -12,100 +12,41 @@
 # @param PlatformAndAssociatedData data frame 615 observations of 12 variables,
 #        indicating the different characteristics of the data
 #        e.g. tumour, type, species.
-# @import importFrom RCurl getURL
+#' @importFrom rvest html html_text
 #' @examples
 #' TCGAVersion("LGG","illuminahiseq_rnaseqv2")
 #' @export
 #' @return Data frame with version, date, number of samples,size of
 #'         the platform and tumor
-TCGAVersion <- function(Tumor, PlatformType){
+TCGAVersion <- function(tumor = NULL, platform = NULL){
 
-    data   <- get("PlatformAndAssociatedData",
-                  envir =  as.environment("package:TCGAbiolinks"))
-
-    #require(RCurl)
-    #downloadFolder<-paste(downloadFolder,PlatformType,"/",sep="")
-    #.createDirectory(PlatformType)
-    siteTCGA <- paste0("https://tcga-data.nci.nih.gov/tcgafiles/",
-                       "ftp_auth/distro_ftpusers/anonymous/tumor/")
-    tmp <- data[toupper(data$Tumor) == toupper(Tumor)
-                & toupper(data$Platform) == toupper(PlatformType), ]
-
-    key1a <- paste(unique(tmp$CenterType),
-                   unique(tmp$Center), unique(tmp$Platform), sep="/")
-    Description <- paste(siteTCGA, tolower(tmp$Tumor), "/",key1a, sep="")
-    key2a <- paste("/",tmp$Folder,"/",sep="")
-
-    #toDdl <- .DownloaDmageTAB_sdrf(Description, keySpecies = key2a,
-    # KeyGrep1 = "Level_3", KeyGrep2 = "MANIFEST.txt")
-    #toDdl <- paste(Description, key2a, toDdl, sep = "")
-    #x <- .DownloadURL(toDdl)
-    #x <- sapply(strsplit(x, "  "), function(y) y[2])
-
-    toDdl <- paste(Description, key2a, sep = "")
-    x <- .DownloadURL(toDdl)
-    xver <- x[grep("Level_3",x)]
-    xver <- as.matrix(xver[-grep("tar.gz",xver)])
-    xverMat <- as.data.frame(matrix(0,nrow(xver),2))
-    colnames(xverMat)<-c("Version","Date")
-
-    for( i in 1: nrow(xverMat)){
-        xtmp1 <- xver[i]
-        xver2 <- as.matrix(unlist(strsplit(xtmp1, "  ")))
-        timeVer <- xver2[grep(":",xver2)]
-        Vers <- xver2[grep("Level_3",xver2)]
-        Vers  <- as.matrix(sapply(strsplit(Vers, ">"), function(y) y[2]))
-        Vers  <- as.matrix(sapply(strsplit(Vers, "<"), function(y) y[1]))
-        xverMat$Version[i]<- Vers
-        xverMat$Date[i]<-timeVer
+    if(is.null(tumor) && is.null(platform)){
+        message("Please provide one tumor and platform")
     }
-
-    xverMat <- cbind(xverMat, Samples = matrix(0, nrow(xverMat),1),
-                     SizeMbyte = matrix(0, nrow(xverMat),1))
-    print(paste("Found ", nrow(xverMat), " Version of ", PlatformType,sep=""))
-
-    for( i in 1: nrow(xverMat)){
-
-        todown1<- paste(Description,key2a,xverMat$Version[i],sep="")
-        print(paste("Version ", i , " of ", nrow(xverMat), " ",
-                    xverMat$Version[i], " ...done",sep=""))
-        x <- .DownloadURL(todown1)
-
-        if(PlatformType == "illuminahiseq_rnaseq"){
-            x <- x[grep("gene.quantification", x)]
-        }
-        if(PlatformType == "agilentg4502a_07_3"){
-            x <- x[grep("tcga_level3", x)]
-        }
-        if(PlatformType == "illuminahiseq_rnaseqv2"){
-            x <- x[grep("rsem.genes.results", x)]
-        }
-        if(PlatformType == "humanmethylation27"){
-            x <- x[grep("HumanMethylation27", x)]
-        }
-        if(PlatformType == "humanmethylation450"){
-            x <- x[grep("HumanMethylation450", x)]
-        }
-        if(PlatformType == "illuminaga_mirnaseq"){
-            x <- x[grep("mirna.quantification", x)]
-        }
-        if(PlatformType == "genome_wide_snp_6"){
-            x <- x[grep("hg19.seg", x)]
-        }
-
-        x2<- sapply(strsplit(x, ":"), function(y) y[2])
-        x3<- sapply(strsplit(x2, " "), function(y) y[3])
-        sizeK <- x3[grep("K",x3)]
-        sizeM <- x3[grep("M",x3)]
-        sizeK_1 <- as.numeric(gsub("K","",sizeK))
-        sizeM_1 <- as.numeric(gsub("M","",sizeM))
-        sizeK_2<- round(sum(sizeK_1)/1000)
-        sizeM_2<- sum(sizeM_1)
-        sizeTot<- sizeK_2+sizeM_2
-        xverMat$SizeMbyte[i]<-sizeTot
-        xverMat$Samples[i]<-length(x3)
-
+    query <- TCGAQuery(tumor,platform)
+    root <- "https://tcga-data.nci.nih.gov/"
+    path <- paste0(root,unique(dirname(query$deployLocation)))
+    html <- html(path)
+    text <- html_text(html)
+    lines <- unlist(str_split(text,"\n"))
+    folders <- lines[grep(".tar.gz ",lines)]
+    ret <- data.frame(date = query$addedDate,
+                         name=query$name,
+                         samples = unlist(lapply(query$barcode,
+                                function(x){length(unlist(strsplit(x,",")))}))
+                      )
+    for(i in seq_along(query$name)){
+        idx <- grep(query[i,"name"],folders)
+        ret[i,"hours"] <-  as.character(str_match(folders[idx],"[0-9]{2}:[0-9]{2}"))
+        regex <- "[0-9]+\\.?[0-9]*([K]{1}|[M]{1}|[G]{1})"
+        ret[i,"size"] <-  as.character(str_match(folders[idx],regex)[1,1])
     }
-    return(xverMat)
+    message("==================  FOUND ==================")
+    message("Platform: ", platform)
+    message("Level 1 versions: ", length(grep("Level_1", query$name)))
+    message("Level 2 versions: ", length(grep("Level_2", query$name)))
+    message("Level 3 versions: ", length(grep("Level_3", query$name)))
+    message("Mage versions: ", length(grep("mage-tab", query$name)))
+    message("============================================")
+    return(ret)
 }
-
