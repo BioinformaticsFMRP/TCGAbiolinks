@@ -32,14 +32,6 @@ NULL
 #' @format A data frame with 1157 rows and 2 variables
 NULL
 
-#' TCGA PlatformAndAssociatedData data frame indicating the different
-#' characteristics of the data e.g. tumour, type, species.
-#' @docType data
-#' @keywords internal
-#' @name PlatformAndAssociatedData
-#' @format A data frame with 615 rows and 12 variables
-NULL
-
 #' TCGA Table with version, number of samples and size (Mbyte) of
 #' BRCA IlluminaHiSeq_RNASeqV2 Level 3
 #' @docType data
