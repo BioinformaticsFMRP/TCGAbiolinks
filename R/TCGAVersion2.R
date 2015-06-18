@@ -7,8 +7,8 @@
 #'        THCA, UCEC, UCS. Look at https://tcga-data.nci.nih.gov/tcga/
 #'        for Available Cancer Types.
 #' @param PlatformType illuminahiseq_rnaseq, agilentg4502a_07_3,
-#'        illuminahiseq_rnaseqv2, humanmethylation27, humanmethylation450,
-#'         illuminaga_mirnaseq, genome_wide_snp_6
+#' illuminahiseq_rnaseqv2, humanmethylation27, humanmethylation450,
+#' illuminaga_mirnaseq, genome_wide_snp_6
 # @param PlatformAndAssociatedData data frame 615 observations of 12 variables,
 #        indicating the different characteristics of the data
 #        e.g. tumour, type, species.

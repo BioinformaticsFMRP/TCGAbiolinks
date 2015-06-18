@@ -29,7 +29,7 @@ TCGAbiolinks package.
 * center
 
 Some search examples are shown below
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 
 library(TCGAbiolinks)
 query <- TCGAQuery(tumor = "brca",level = 3)
@@ -67,7 +67,7 @@ knitr::kable(matSamples, digits = 2,
 ```
 
 Some examples of TCGAQuery are shown below
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 query <- TCGAQuery(tumor = "gbm",
                     added.since = "01/12/2013",
                     added.up.to = "06/01/2014")
@@ -244,7 +244,7 @@ clinical_brca_data <- clinic("brca","clinical_patient")
 You can prepare gene expression from TCGA data using the `TCGAprepare`
 function.
  
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 # Downstream analysis using gene expression data  
 # TCGA samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
 
