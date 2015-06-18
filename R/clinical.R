@@ -124,8 +124,10 @@ MatchedCoupledSampleTypes <- function(barcode,typesample){
 #' @export
 #' @return stage_BRCA
 #' @examples
+#' \dontrun{
 #' clin <- clinic("BRCA","clinical_patient")
 #' stage_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"stage_IX",clin)
+#' }
 stage_BRCA <- function(barcode, stage, clinical_patient_data){
     table.stages <- c("Stage I$|Stage IA$|Stage IB$", "Stage I$", "Stage IA$",
                       "Stage IB$", "Stage II$|Stage IIA$|Stage IIB$",
@@ -189,9 +191,11 @@ gender_BRCA <- function(barcode, gender, clinical_patient_data){
 #' @export
 #' @return ER_status_BRCA
 #' @examples
+#' \dontrun{
 #' clin <- clinic("BRCA","clinical_patient")
 #' ER_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
 #' "Positive",clin)
+#' }
 ER_status_BRCA <- function(barcode,ER, clinical_patient_data){
     ## ER should be "Positive" or "Negative"
     # consider only barcode and ER status
