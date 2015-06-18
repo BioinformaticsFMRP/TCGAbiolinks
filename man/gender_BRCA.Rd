@@ -20,7 +20,9 @@ stage_BRCA
 gender_BRCA
 }
 \examples{
+\dontrun{
 clin <- clinic("BRCA","clinical_patient")
 gender_BRCA (c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"FEMALE",clin)
+}
 }
 
