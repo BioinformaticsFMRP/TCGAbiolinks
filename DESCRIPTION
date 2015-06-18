@@ -39,9 +39,6 @@ Imports:
     IRanges,
     scales,
     rvest,
-    grDevices,
-    graphics,
-    stats,
     utils
 Description:
     Query the latest version of files by tumor, center, date, barcode,
