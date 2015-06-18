@@ -20,11 +20,13 @@ PCA plot
 plotPCAforGroups
 }
 \examples{
+\dontrun{
 # normalization of genes
 dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 # quantile filter of genes
 dataFilt <- RnaSeqFilt(dataNorm, 0.25)
 # Principal Component Analysis plot for ntop selected DEGs
 plotPCAforGroups(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
+}
 }
 
