@@ -430,8 +430,8 @@ GeneSplitRegulon <- function(Genelist,Sep){
 #' @examples
 #' Genelist <- rownames(dataDEGsFiltLevel)
 #' TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
-#' Enrichment Analysis EA (TCGAVisualize)
-#' Gene Ontology (GO) and Pathway enrichment barPlot
+#' # Enrichment Analysis EA (TCGAVisualize)
+#' # Gene Ontology (GO) and Pathway enrichment barPlot
 #' EAbarplot(tf = rownames(ansEA$ResBP),
 #'          GOBPTab = ansEA$ResBP,
 #'          GOCCTab = ansEA$ResCC,
