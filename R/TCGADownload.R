@@ -29,7 +29,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                            basename(data[i, "deployLocation"])))
             if (!file.exists(file)) {
                 download(paste0(root, data[i, "deployLocation"]),
-                         file, quiet)
+                         file, quiet,method="auto")
                 untar(file, exdir = path)
             }
         }
