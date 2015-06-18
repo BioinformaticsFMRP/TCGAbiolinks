@@ -11,6 +11,13 @@
 #' @name TCGAbiolinks
 NULL
 
+#' Clinical data TCGA BRCA
+#' @docType data
+#' @keywords internal
+#' @name clinBRCA
+#' @format A data frame with 1061 rows and 109 variables
+NULL
+
 #' DAVID GO table (BP)
 #' @docType data
 #' @keywords internal
