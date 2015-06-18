@@ -218,7 +218,6 @@ tcgaGetTable <- function(url, max = 0) {
 #' @export
 TCGAUpdate <- function(){
 
-
     tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
     # Get platform table
     tcga.query <- "query=Platform"
