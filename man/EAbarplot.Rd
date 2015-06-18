@@ -22,9 +22,24 @@ EAbarplot(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab)
 \item{nRGTab}{nRGTab}
 }
 \value{
-GeneSplitRegulon
+EAbarplot
 }
 \description{
 EAbarplot
+}
+\examples{
+\dontrun{
+Genelist <- rownames(dataDEGsFiltLevel)
+TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
+Enrichment Analysis EA (TCGAVisualize)
+Gene Ontology (GO) and Pathway enrichment barPlot
+EAbarplot(tf = rownames(ansEA$ResBP),
+         GOBPTab = ansEA$ResBP,
+         GOCCTab = ansEA$ResCC,
+         GOMFTab = ansEA$ResMF,
+        PathTab = ansEA$ResPat,
+         nRGTab = Genelist,
+         nBar = 10)
+}
 }
 
