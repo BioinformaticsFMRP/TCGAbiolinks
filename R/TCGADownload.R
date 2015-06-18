@@ -18,10 +18,10 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                          quiet = FALSE) {
     OsArch <- sessionInfo()
 
-    if( length(grep("OS X", OsArch$running))==1){
+    if( length(grep("apple", OsArch$platform))==1){
         methodForDownload <- "curl"
     }
-    if( length(grep("Ubuntu", OsArch$running))==1){
+    if( length(grep("linux", OsArch$platform))==1){
         methodForDownload <- "wget"
     }
     if( length(grep("Windows", OsArch$running))==1){
