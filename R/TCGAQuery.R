@@ -190,6 +190,7 @@ TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
     return(db)
 }
 
+#' @import utils
 getBarcode <- function(table){
     tcga.db <- get("tcga.db", envir =  as.environment("package:TCGAbiolinks"))
     root <- "https://tcga-data.nci.nih.gov"

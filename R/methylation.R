@@ -4,6 +4,8 @@
 #' @param group1 Data frame probes vs patient
 #' @param group2 Data frame probes vs patient
 #' @import ggplot2
+#' @import graphics
+#' @importFrom grDevices png dev.off
 #' @export
 #' @return dataframe with diffmean values
 #' @examples
@@ -159,6 +161,7 @@ survivalPlot <- function(met.md, legend = "Legend", cutoff = 0,
 #' @param xlab x axis text
 #' @param sort Sort by mean methylation? False by default
 #' @import ggplot2
+#' @import stats
 #' @export
 #' @return Save the survival plot
 #'
@@ -230,9 +233,9 @@ metMeanBoxplot <- function(data, sort = FALSE,
 #' @param exact  Do a exact wilcoxon test? Default: True
 #' @return Data frame with cols p values/p values adjusted
 #' @importFrom exactRankTests wilcox.exact
-#' @importFrom graphics hist
-#' @importFrom grDevices png dev.off
-#' @importFrom stats p.adjust
+#' @import graphics
+#' @importFrom grDevices png dev.off pdf
+#' @import stats
 #' @export
 #' @return Data frame with two cols
 #'         p-values/p-values adjusted
