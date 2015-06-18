@@ -284,8 +284,11 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #' @export
 #' @return EAcomplete plot
 #' @examples
+#' \dontrun{
+#'
 #' Genelist <- rownames(dataDEGsFiltLevel)
 #' TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
+#' }
 EAcomplete <- function(TFname, RegulonList){
     EAGenes <- get("EAGenes")
     DAVID_BP_matrix <- get("DAVID_BP_matrix")
@@ -326,11 +329,14 @@ EAcomplete <- function(TFname, RegulonList){
 #' @export
 #' @return EAcomplete plot
 #' @examples
+#' \dontrun{
+#'
 #' EAGenes <- get("EAGenes")
 #' RegulonList <- rownames(dataDEGsFiltLevel)
 #' DAVID_BP_matrix <- get("DAVID_BP_matrix")
 #' ResBP <- EnrichmentAnalysis(GeneName="DEA genes Normal Vs Tumor",RegulonList,DAVID_BP_matrix,
 #'                            EAGenes,GOtype = "DavidBP")
+#'                            }
 EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,
                                EAGenes,GOtype,FDRThresh=0.01) {
     topPathways <- nrow(TableEnrichment)
@@ -429,6 +435,8 @@ GeneSplitRegulon <- function(Genelist,Sep){
 #' @importFrom EDASeq barplot
 #' @return EAbarplot
 #' @examples
+#' \dontrun{
+#'
 #' Genelist <- rownames(dataDEGsFiltLevel)
 #' TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
 #' # Enrichment Analysis EA (TCGAVisualize)
@@ -440,6 +448,7 @@ GeneSplitRegulon <- function(Genelist,Sep){
 #'         PathTab = ansEA$ResPat,
 #'          nRGTab = Genelist,
 #'          nBar = 10)
+#'          }
 EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
     splitFun <- function(tf, Tab, nBar){
         tmp <- lapply(Tab[tf, ], function(x) strsplit(x, ";"))
