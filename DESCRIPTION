@@ -21,7 +21,6 @@ Imports:
     GGally,
     grDevices,
     graphics,
-    stats,
     GenomicRanges,
     XML,
     EDASeq (>= 2.0.0),
@@ -39,8 +38,6 @@ Imports:
     IRanges,
     scales,
     rvest,
-    grDevices,
-    graphics,
     stats,
     utils
 Description:
