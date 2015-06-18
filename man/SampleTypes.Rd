@@ -34,4 +34,7 @@ SampleTypes
 \description{
 SampleTypes
 }
+\examples{
+SampleTypes(c("TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1"),"TR")
+}
 
