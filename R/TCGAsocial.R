@@ -67,7 +67,6 @@ TCGAsocial <- function(siteToFind, listPackage=NULL,KeyInfo=NULL){
                     pos <- pos[1]
                 }
                 tmpPackage <-  tmpPack[pos]
-<<<<<<< HEAD
 
                 PackMat <- sapply(BiocPackageList, grepl, tmpPackage, ignore.case=TRUE)
                  if(sum(PackMat)>=1){
@@ -75,11 +74,6 @@ TCGAsocial <- function(siteToFind, listPackage=NULL,KeyInfo=NULL){
                      PackageSuggested <- paste(names(PackMat[which(PackMat == TRUE)]),collapse=";")
                      TableQuestions[i,"PackageSuggested"] <- PackageSuggested
                  }
-                #grep(list(BiocPackageList),tmpPackage)
-                #PackageSuggested <- tmpPackage
-=======
-                PackageSuggested <- tmpPackage
->>>>>>> origin/master
                 #  print(PackageSuggested)
                 TableQuestions[i,"PackageSuggested"] <- substr(PackageSuggested,1, 64)
             }
