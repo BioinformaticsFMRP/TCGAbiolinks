@@ -7,26 +7,16 @@
 #' @param samples List of samples to download
 #' @seealso TCGASearch
 #' @examples
-#'    samples <- c("TCGA-06-0125-01A-01D-A45W-05")
-#'    query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450",
+#'    samples <- c("TCGA-26-1442-01A-01R-1850-01")
+#'    query <- TCGAQuery(tumor = "gbm", platform = "IlluminaHiSeq_RNASeqV2",
 #'    level = "3", samples = samples)
-#'    TCGADownload(query,path = "dataDemo2")
+#'    TCGADownload(query,path = "dataDemo2",samples = samples, 
+#'                 type ="rsem.genes.results")
 #' @export
 #' @importFrom downloader download
 #' @return Download tcga into path
 TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                          quiet = FALSE) {
-
-    OsArch <- sessionInfo()
-    if( length(grep("apple", OsArch$platform))==1){
-        methodForDownload <- "curl"
-    }
-    if( length(grep("linux", OsArch$platform))==1){
-        methodForDownload <- "wget"
-    }
-    if( length(grep("Windows", OsArch$running))==1){
-        methodForDownload <- "wininet"
-    }
 
     dir.create(path, showWarnings = FALSE)
     root <- "https://tcga-data.nci.nih.gov"
@@ -39,8 +29,14 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             message(paste0("Downloading:",
                            basename(data[i, "deployLocation"])))
             if (!file.exists(file)) {
+		if(is.windows()){
                 download(paste0(root, data[i, "deployLocation"]),
-                         file, quiet,mode = methodForDownload)
+                         file, quiet,method = "auto")
+		} else {
+        	 download(paste0(root, data[i, "deployLocation"]),
+                         file, quiet)
+	
+		}
                 untar(file, exdir = path)
             }
         }
@@ -67,11 +63,15 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 
             for (i in seq_along(files)) {
                 if (!file.exists(file.path(path,folder,files[i]))) {
-                    if(!is.windows()){
+                    if(is.windows()){
                         download(paste0(root,url,"/",files[i]),
-                                 file.path(path,folder,files[i]),quiet,
-                                 mode = methodForDownload)
-                    }
+                                 file.path(path,folder,files[i]),
+				 quiet,method = "auto"
+                                 )
+                    } else {
+			download(paste0(root,url,"/",files[i]),
+                                 file.path(path,folder,files[i]),quiet)
+		    }
                 }
             }
         }
