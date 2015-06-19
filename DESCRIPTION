@@ -21,7 +21,6 @@ Imports:
     GGally,
     grDevices,
     graphics,
-    stats,
     GenomicRanges,
     XML,
     EDASeq (>= 2.0.0),
@@ -39,6 +38,7 @@ Imports:
     IRanges,
     scales,
     rvest,
+    stats,
     utils
 Description:
     Query the latest version of files by tumor, center, date, barcode,
