@@ -18,15 +18,15 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                          quiet = FALSE) {
 
     OsArch <- sessionInfo()
-           if( length(grep("apple", OsArch$platform))==1){
-                   methodForDownload <- "curl"
-                }
-        if( length(grep("linux", OsArch$platform))==1){
-                methodForDownload <- "wget"
-            }
-        if( length(grep("Windows", OsArch$running))==1){
-               methodForDownload <- "wininet"
-            }
+    if( length(grep("apple", OsArch$platform))==1){
+        methodForDownload <- "curl"
+    }
+    if( length(grep("linux", OsArch$platform))==1){
+        methodForDownload <- "wget"
+    }
+    if( length(grep("Windows", OsArch$running))==1){
+        methodForDownload <- "wininet"
+    }
 
     dir.create(path, showWarnings = FALSE)
     root <- "https://tcga-data.nci.nih.gov"
@@ -68,16 +68,11 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             for (i in seq_along(files)) {
                 if (!file.exists(file.path(path,folder,files[i]))) {
                     if(!is.windows()){
-                       download(paste0(root,url,"/",files[i]),
-                       file.path(path,folder,files[i]),quiet,mode = methodForDownload)
-                }
-                    }
-                   else {
                         download(paste0(root,url,"/",files[i]),
-                                 file.path(path,folder,files[i]),
-                                 quiet, mode = methodForDownload)
+                                 file.path(path,folder,files[i]),quiet,
+                                 mode = methodForDownload)
                     }
-
+                }
             }
         }
     }
