@@ -25,10 +25,11 @@ Download tcga into path
 Download data previously selected using the TCGASeach
 }
 \examples{
-samples <- c("TCGA-06-0125-01A-01D-A45W-05")
-   query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450",
+samples <- c("TCGA-26-1442-01A-01R-1850-01")
+   query <- TCGAQuery(tumor = "gbm", platform = "IlluminaHiSeq_RNASeqV2",
    level = "3", samples = samples)
-   TCGADownload(query,path = "dataDemo2")
+   TCGADownload(query,path = "dataDemo2",samples = samples,
+                type ="rsem.genes.results")
 }
 \seealso{
 TCGASearch
