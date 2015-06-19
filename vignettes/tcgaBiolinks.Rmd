@@ -155,9 +155,11 @@ You can easily search TCGA samples, download and prepare a matrix of gene expres
 ```{r, eval = FALSE}
 
 # Define a list of samples to query and download providing relative TCGA barcodes.
-samplesList <- c("TCGA-02-0046-10A-01D-0182-01", "TCGA-02-0052-01A-01D-0182-01", 
-"TCGA-02-0033-10A-01D-0182-01", "TCGA-02-0034-01A-01D-0182-01", 
-"TCGA-02-0007-01A-01D-0182-01")
+samplesList <- c("TCGA-02-0046-10A-01D-0182-01", 
+                 "TCGA-02-0052-01A-01D-0182-01", 
+                 "TCGA-02-0033-10A-01D-0182-01", 
+                 "TCGA-02-0034-01A-01D-0182-01", 
+                 "TCGA-02-0007-01A-01D-0182-01")
 
 # Query platform Genome_Wide_SNP_6 with a list of barcode 
 query <- TCGAQuery(tumor = "gbm", level = 3, platform = "Genome_Wide_SNP_6")
