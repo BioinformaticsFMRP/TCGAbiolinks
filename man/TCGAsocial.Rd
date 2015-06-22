@@ -7,11 +7,12 @@
 TCGAsocial(siteToFind, listPackage = NULL, KeyInfo = NULL)
 }
 \arguments{
-\item{siteToFind}{website related to TCGA or a package}
+\item{siteToFind}{website ("bioconductor.org" or "biostars.org")
+related to TCGA or a package}
 
-\item{listPackage}{list of package to find}
+\item{listPackage}{list of package to find in bioconductor}
 
-\item{KeyInfo}{is a key to find related to TGGA or package}
+\item{KeyInfo}{is a key to find in biostars related to TGGA or package}
 }
 \value{
 table with number of downloads about a package

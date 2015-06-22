@@ -1,14 +1,15 @@
 #' @title TCGAsocial
 #' @description Find number of downloads about a package in CRAN or BioC
-#' @param siteToFind website related to TCGA or a package
-#' @param listPackage list of package to find
-#' @param KeyInfo is a key to find related to TGGA or package
-# @import RCurl
+#' @param siteToFind website ("bioconductor.org" or "biostars.org")
+#' related to TCGA or a package
+#' @param listPackage list of package to find in bioconductor
+#' @param KeyInfo is a key to find in biostars related to TGGA or package
 #' @export
 #' @return table with number of downloads about a package
 #' @examples
 #' TCGAsocial("bioconductor.org","BiocCheck")
 TCGAsocial <- function(siteToFind, listPackage=NULL,KeyInfo=NULL){
+
 
     # Find all packages in bioconductor
     site3 <- "http://www.bioconductor.org/packages/3.1/bioc/"
@@ -25,6 +26,14 @@ TCGAsocial <- function(siteToFind, listPackage=NULL,KeyInfo=NULL){
     BiocPackageList <- as.matrix(unlist(tmpPck2a))
 
     if( siteToFind == "bioconductor.org"){
+
+        if(is.null(listPackage)) {
+            msg  <- paste0(
+                "\nPlease, provide a listofPackage argument\n",
+                "Example:  TCGAsocial('bioconductor.org','BiocCheck')")
+            stop(msg)
+        }
+
         siteBioC <- "http://www.bioconductor.org/packages/stats/index.html"
 
         TablePackage <- matrix(0, length(listPackage), 2)
@@ -48,64 +57,73 @@ TCGAsocial <- function(siteToFind, listPackage=NULL,KeyInfo=NULL){
         TablePackage <- TablePackage[order(TablePackage$NumberDownload,decreasing=TRUE),]
     }
 
-   if( siteToFind == "biostars.org"){
-       siteBioStar <- "https://www.biostars.org/local/search/page/?page=1&sort=update&limit=all%50time&q="
-       siteQuestions <- "https://www.biostars.org/p"
-       siteBioStarKey <- paste(siteBioStar,KeyInfo,sep="")
+    if( siteToFind == "biostars.org"){
 
-       tmp <- .DownloadURL(siteBioStarKey)
-       tmp2 <- tmp[ grep("<h4>",tmp)]
+        if(is.null(KeyInfo)) {
+            msg  <- paste0(
+                "\nPlease, provide a KeyInfo argument\n",
+                "Example: TCGAsocial('biostars.org', KeyInfo='methylation')")
+            stop(msg)
+        }
 
-       TableQuestions <- matrix(0, length(tmp2), 3)
-       rownames(TableQuestions)<-paste("q",c(1:length(tmp2)),sep="")
-       colnames(TableQuestions) <- c("question","BiostarsSite","PackageSuggested")
-       TableQuestions <- as.data.frame(TableQuestions)
 
-       for ( i in 1:nrow(TableQuestions)){
-           #print(i)
-           questiontofind <- tmp2[i]
-           questiontofind <- gsub("<h4>","", questiontofind)
-           qst_find_site <-gsub("<a href=","", as.matrix(unlist(strsplit(questiontofind,">")))[1])
-           qst_find_site2 <-gsub("<a href=","", as.matrix(unlist(strsplit(qst_find_site,"p")))[2])
+        siteBioStar <- "https://www.biostars.org/local/search/page/?page=1&sort=update&limit=all%50time&q="
+        siteQuestions <- "https://www.biostars.org/p"
+        siteBioStarKey <- paste(siteBioStar,KeyInfo,sep="")
 
-           qst_find_site2_sub <- substr(qst_find_site2,1, 7)
-           TableQuestions[i,"BiostarsSite"] <- qst_find_site2_sub
-           newsite_tofind <- paste(siteQuestions,qst_find_site2_sub,sep="")
+        tmp <- .DownloadURL(siteBioStarKey)
+        tmp2 <- tmp[ grep("<h4>",tmp)]
 
-           tmpPack <- .DownloadURL(newsite_tofind)
+        TableQuestions <- matrix(0, length(tmp2), 3)
+        rownames(TableQuestions)<-paste("q",c(1:length(tmp2)),sep="")
+        colnames(TableQuestions) <- c("question","BiostarsSite","PackageSuggested")
+        TableQuestions <- as.data.frame(TableQuestions)
 
-           if( length(grep("package",tolower(tmpPack)))!=0){
-               pos <- grep("package",tolower(tmpPack))
-               if( length(pos)!=1){
-                   pos <- pos[1]
-               }
-               tmpPackage <-  tmpPack[pos]
+        for ( i in 1:nrow(TableQuestions)){
+            #print(i)
+            questiontofind <- tmp2[i]
+            questiontofind <- gsub("<h4>","", questiontofind)
+            qst_find_site <-gsub("<a href=","", as.matrix(unlist(strsplit(questiontofind,">")))[1])
+            qst_find_site2 <-gsub("<a href=","", as.matrix(unlist(strsplit(qst_find_site,"p")))[2])
 
-               PackMat <- sapply(BiocPackageList, grepl, tmpPackage, ignore.case=TRUE)
-               if(sum(PackMat)>=1){
-                   print(which(PackMat == TRUE))
-                   PackageSuggested <- paste(names(PackMat[which(PackMat == TRUE)]),collapse=";")
-                   TableQuestions[i,"PackageSuggested"] <- PackageSuggested
-               }
-              # print(PackageSuggested)
-               TableQuestions[i,"PackageSuggested"] <- substr(PackageSuggested,1, 64)
-           }
+            qst_find_site2_sub <- substr(qst_find_site2,1, 7)
+            TableQuestions[i,"BiostarsSite"] <- qst_find_site2_sub
+            newsite_tofind <- paste(siteQuestions,qst_find_site2_sub,sep="")
 
-           tmp3a <- gsub("</a","", as.matrix(unlist(strsplit(questiontofind,">")))[2])
-           tmp3a <- gsub("&#39;", ".", tmp3a)
-           TableQuestions[i,"question"] <- tmp3a
-       }
-       site3 <- "http://www.bioconductor.org/packages/3.1/bioc/"
-       tmp <- .DownloadURL(site3)
-       tmpPack <-  tmp[grep(".html",tmp)]
-       tmpPackMatrix <- as.matrix(tmpPack)
-       posA <- grep("bioconductor",tolower(tmpPackMatrix))[1]+1
-       posB <- grep("bioconductor",tolower(tmpPackMatrix))[2]-1
-       tmpPackMatrixNew <- tmpPackMatrix[posA:posB,]
+            tmpPack <- .DownloadURL(newsite_tofind)
 
-       TableQuestions <- TableQuestions[order(TableQuestions$PackageSuggested,decreasing=TRUE),]
-       TablePackage <- TableQuestions
-   }
+            if( length(grep("package",tolower(tmpPack)))!=0){
+                pos <- grep("package",tolower(tmpPack))
+                if( length(pos)!=1){
+                    pos <- pos[1]
+                }
+                tmpPackage <-  tmpPack[pos]
+
+                PackMat <- sapply(BiocPackageList, grepl, tmpPackage, ignore.case=TRUE)
+                if(sum(PackMat)>=1){
+                    print(which(PackMat == TRUE))
+                    PackageSuggested <- paste(names(PackMat[which(PackMat == TRUE)]),collapse=";")
+                    TableQuestions[i,"PackageSuggested"] <- PackageSuggested
+                }
+                # print(PackageSuggested)
+                TableQuestions[i,"PackageSuggested"] <- substr(PackageSuggested,1, 64)
+            }
+
+            tmp3a <- gsub("</a","", as.matrix(unlist(strsplit(questiontofind,">")))[2])
+            tmp3a <- gsub("&#39;", ".", tmp3a)
+            TableQuestions[i,"question"] <- tmp3a
+        }
+        site3 <- "http://www.bioconductor.org/packages/3.1/bioc/"
+        tmp <- .DownloadURL(site3)
+        tmpPack <-  tmp[grep(".html",tmp)]
+        tmpPackMatrix <- as.matrix(tmpPack)
+        posA <- grep("bioconductor",tolower(tmpPackMatrix))[1]+1
+        posB <- grep("bioconductor",tolower(tmpPackMatrix))[2]-1
+        tmpPackMatrixNew <- tmpPackMatrix[posA:posB,]
+
+        TableQuestions <- TableQuestions[order(TableQuestions$PackageSuggested,decreasing=TRUE),]
+        TablePackage <- TableQuestions
+    }
 
     return(TablePackage)
 
