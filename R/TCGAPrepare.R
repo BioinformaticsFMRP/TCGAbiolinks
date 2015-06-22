@@ -74,7 +74,9 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
         }
         rownames(df) <- df$Composite.Element.REF
         # remove NA lines
-        df[,3:ncol(df)] <- sapply(df[,3:ncol(df)], as.numeric)
+        suppressWarnings(
+            df[,3:ncol(df)] <- sapply(df[,3:ncol(df)], as.numeric)
+        )
     }
 
     if (grepl("mda_rppa_core",tolower(platform))) {
@@ -333,11 +335,11 @@ getMage <- function(line){
         file <- file.path(path,basename(mage$deployLocation))
         if ( !file.exists(file)) {
             if(!is.windows()){
-            download(paste0(root,mage$deployLocation), file,
-                     quiet = TRUE)
+                download(paste0(root,mage$deployLocation), file,
+                         quiet = TRUE)
             } else {
                 download(paste0(root,mage$deployLocation), file,
-                             quiet = TRUE,method="auto")
+                         quiet = TRUE,method="auto")
             }
         }
         folder <- gsub(".tar.gz","",file)
