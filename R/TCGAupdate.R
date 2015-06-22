@@ -158,8 +158,6 @@ tcgaDbAddCol <- function(data) {
 #' @importFrom downloader download
 tcgaGetTable <- function(url, max = 0) {
     db <- data.frame()
-    #nbcon <- get("con")
-    #firstCon <- get("timeStamp")
 
     next.url <- url
     regex <- "<table summary=\"Data Summary\".*</a></td></tr></table>"
@@ -169,14 +167,22 @@ tcgaGetTable <- function(url, max = 0) {
         pb <- txtProgressBar(min = 0, max = max, style = 3)
         i <- 0
     }
-    # print(url)
     while (!is.na(next.url)) {
         # As we have a limitation of 1000 connections
         # every 3 minutes, we need to verify it
-        #nbcon <- nbcon + 1
-        #if(-firstCon)
+        if(is.windows()){
+            suppressWarnings(
+                download(next.url, "tcga.html",
+                         quiet = TRUE,
+                         method = "auto"
+                )
+            )
+        } else {
+            download(next.url,
+                     "tcga.html",
+                     quiet = TRUE)
+        }
 
-        download(next.url, "tcga.html", quiet = TRUE)
         html <- readLines("tcga.html")
         match <- str_match(html, regex)
         idx <- which(!is.na(match))
@@ -204,7 +210,7 @@ tcgaGetTable <- function(url, max = 0) {
         setTxtProgressBar(pb, max)
         close(pb)
     }
-    #assign(con, nbcon, envir=cacheEnv)
+    unlink("tcga.html")
     return(db)
 }
 
@@ -223,9 +229,10 @@ tcgaGetTable <- function(url, max = 0) {
 #' TCGAUpdate("none")
 #' @export
 TCGAUpdate <- function(update = "all"){
+    tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
 
     if( update == "all" | update == "platform"){
-        tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
+
         # Get platform table
         tcga.query <- "query=Platform"
         next.url <- paste0(tcga.root, tcga.query)
