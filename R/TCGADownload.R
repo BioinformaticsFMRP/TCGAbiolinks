@@ -10,7 +10,7 @@
 #'    samples <- c("TCGA-26-1442-01A-01R-1850-01")
 #'    query <- TCGAQuery(tumor = "gbm", platform = "IlluminaHiSeq_RNASeqV2",
 #'    level = "3", samples = samples)
-#'    TCGADownload(query,path = "dataDemo2",samples = samples, 
+#'    TCGADownload(query,path = "dataDemo2",samples = samples,
 #'                 type ="rsem.genes.results")
 #' @export
 #' @importFrom downloader download
@@ -18,7 +18,7 @@
 TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                          quiet = FALSE) {
 
-    dir.create(path, showWarnings = FALSE)
+    dir.create(path, showWarnings = FALSE, recursive = TRUE)
     root <- "https://tcga-data.nci.nih.gov"
 
     # Downloading the folder
@@ -35,7 +35,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 		} else {
         	 download(paste0(root, data[i, "deployLocation"]),
                          file, quiet)
-	
+
 		}
                 untar(file, exdir = path)
             }
