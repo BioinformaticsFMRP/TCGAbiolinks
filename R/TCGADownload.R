@@ -29,14 +29,16 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             message(paste0("Downloading:",
                            basename(data[i, "deployLocation"])))
             if (!file.exists(file)) {
-		if(is.windows()){
-                download(paste0(root, data[i, "deployLocation"]),
-                         file, quiet,method = "auto")
-		} else {
-        	 download(paste0(root, data[i, "deployLocation"]),
-                         file, quiet)
+                if(is.windows()){
+                    suppressWarnings(
+                        download(paste0(root, data[i, "deployLocation"]),
+                                 file, quiet, method = "auto")
+                    )
+                } else {
+                    download(paste0(root, data[i, "deployLocation"]),
+                             file, quiet)
 
-		}
+                }
                 untar(file, exdir = path)
             }
         }
@@ -64,14 +66,16 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             for (i in seq_along(files)) {
                 if (!file.exists(file.path(path,folder,files[i]))) {
                     if(is.windows()){
-                        download(paste0(root,url,"/",files[i]),
-                                 file.path(path,folder,files[i]),
-				 quiet,method = "auto"
-                                 )
+                        suppressWarnings(
+                            download(paste0(root,url,"/",files[i]),
+                                     file.path(path,folder,files[i]),
+                                     quiet,method = "auto"
+                            )
+                        )
                     } else {
-			download(paste0(root,url,"/",files[i]),
+                        download(paste0(root,url,"/",files[i]),
                                  file.path(path,folder,files[i]),quiet)
-		    }
+                    }
                 }
             }
         }
