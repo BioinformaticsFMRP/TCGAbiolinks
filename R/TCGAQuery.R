@@ -121,15 +121,15 @@ TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
     }
 
     if (!is.null(added.since)) {
-        d <- try(as.Date(added.since, format = "%Y/%m/%d"))
+        d <- try(as.Date(added.since, format = "%m/%d/%Y"))
         if (class(d) == "try-error" || is.na(d)) {
-            print("Date format should be YYYY-mm-dd")
+            print("Date format should be mm/dd/YYYY")
         }
     }
     if (!is.null(added.up.to)) {
-        d <- try(as.Date(added.up.to, format = "%Y/%m/%d"))
+        d <- try(as.Date(added.up.to, format = "%m/%d/%Y"))
         if (class(d) == "try-error" || is.na(d)) {
-            print("Date format should be YYYY-mm-dd")
+            print("Date format should be mm/dd/YYYY")
         }
     }
 
