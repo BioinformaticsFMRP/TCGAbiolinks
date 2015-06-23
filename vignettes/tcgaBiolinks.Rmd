@@ -438,7 +438,52 @@ img <- readPNG("PCAtop200DEGs.png")
 grid.raster(img)
 ```
 
+## TCGA analyze and visualize (Survival Analysis)
+You can analyze gene expression and clinical data from TCGA data using the `TCGAanalyze` function.
+ 
+```{r, eval = FALSE}
+library(TCGAbiolinks)
+# Survival Analysis SA
 
+library(TCGAbiolinks)
+
+load("/Users/antoniocolaprico/Documents/Rnaseqv2Data/BRCA_rnaseqv2.RData")
+
+clinical_patient_Cancer <- clinic("brca","clinical_patient")
+dataBRCA <- log2(Cancer_rnaseqv2)
+
+tokenStop<- 1
+
+tabSurvKMcomplete <- NULL
+
+for( i in 1: round(nrow(dataBRCA)/100)){
+message( paste( i, "of ", round(nrow(dataBRCA)/100)))
+tokenStart <- tokenStop
+tokenStop <-100*i
+tabSurvKM<-SurvivalKMunivariate(clinical_patient_Cancer,dataBRCA,Genelist = rownames(dataBRCA)[tokenStart:tokenStop],
+                                        Survresult = F,ThreshTop=0.67,ThreshDown=0.33)
+
+tabSurvKMcomplete <- rbind(tabSurvKMcomplete,tabSurvKM)
+}
+
+tabSurvKMcomplete <- tabSurvKMcomplete[tabSurvKMcomplete$pvalue < 0.01,]
+tabSurvKMcomplete <- tabSurvKMcomplete[!duplicated(tabSurvKMcomplete$mRNA),]
+rownames(tabSurvKMcomplete) <-tabSurvKMcomplete$mRNA
+tabSurvKMcomplete <- tabSurvKMcomplete[,-1]
+tabSurvKMcomplete <- tabSurvKMcomplete[order(tabSurvKMcomplete$pvalue, decreasing=F),]
+
+tabSurvKMcompleteDEGs <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% dataDEGsFiltLevel$mRNA,]
+
+
+
+```
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(TCGAbiolinks)
+tabSurvKMcompleteDEGs$pvalue <- format(tabSurvKMcompleteDEGs$pvalue, scientific = TRUE)
+knitr::kable(tabSurvKMcompleteDEGs[1:10,], digits = 2,
+             caption = "Table KM-survival genes after SA",row.names = TRUE)
+```
 
 ## TCGA investigate
 Find most studied TFs in pubmed related to a specific cancer, disease, or tissue
