@@ -18,6 +18,9 @@ vignette: >
 BiocStyle::markdown()
 ```
 
+```{r, echo = FALSE}
+library(TCGAbiolinks)
+```
 ## Introduction 
 
 This document describes how to search, download and analyze TCGA data using the
@@ -29,18 +32,37 @@ TCGAbiolinks package.
  with the following 
  parameters:
 
-* tumor
-* platform
-* added.since
-* added.up.to
+* tumor 
+* platform 
+* added.since (format: mm/dd/YYYY)
+* added.up.to (format: mm/dd/YYYY)
 * listSample
 * level
 * center
+* samples 
+
+Some search examples are shown below:
+```{r, eval = TRUE}
+query <- TCGAQuery(tumor = "gbm",added.since = "1/01/2013",added.up.to = "12/12/2013")
+
+query <- TCGAQuery(tumor = c("gbm","lgg"), platform = c("HumanMethylation450","HumanMethylation27"))
+
+query <- TCGAQuery(tumor = "gbm", platform = "bio")
+
+query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450", level = "3")
+
+query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-*")
+
+query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04")
+
+query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04", level = 3)
+
+query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04", tumor = "OV", platform = "CGH-1x1M_G4447A")
+```
+
 
 Some search examples are shown below
 ```{r, eval = TRUE}
-
-library(TCGAbiolinks)
 query <- TCGAQuery(tumor = "brca",level = 3)
 querySamples <- samplesfilter(query)
 
@@ -73,28 +95,6 @@ knitr::kable(matSamples, digits = 2,
 
 ```
 
-Some examples of TCGAQuery are shown below
-```{r, eval = TRUE}
-query <- TCGAQuery(tumor = "gbm",
-                    added.since = "01/12/2013",
-                    added.up.to = "06/01/2014")
-
-query <- TCGAQuery(tumor = c("gbm","lgg"),
-                    platform = c("HumanMethylation450","HumanMethylation27"))
-
-query <- TCGAQuery(tumor = "gbm", platform = "bio")
-
-query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450", level = "3")
-
-query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-*")
-
-query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04")
-
-query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04", level = 3)
-
-query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04",
-                    tumor = "OV", platform = "CGH-1x1M_G4447A")
-```
 
 
 
