@@ -472,7 +472,7 @@ knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF 
 ## TCGA social with BioConductor
 Find most downloaded packages in CRAN or BioConductor
  
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 library(TCGAbiolinks)
 
 # Define a list of package to find number of downloads
