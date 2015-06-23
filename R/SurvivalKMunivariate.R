@@ -7,7 +7,8 @@
 #' @param ThreshTop ThreshTop
 #' @param ThreshTop ThreshTop
 #' @importFrom survival Surv survdiff survfit
-#' @return table with survival genes pvalues from KM of pubmed related to tfs.
+#' @export
+#' @return table with survival genes pvalues from KM.
 
 SurvivalKMunivariate<-function(clinical_patient,dataGE,Genelist, Survresult,ThreshTop=0.67, ThreshDown=0.33){
 
@@ -42,9 +43,12 @@ SurvivalKMunivariate<-function(clinical_patient,dataGE,Genelist, Survresult,Thre
     cfu$days_to_last_followup<-as.numeric(as.character(cfu$days_to_last_followup))
     rownames(cfu) <- cfu[, "bcr_patient_barcode" ] #mod1
     cfu_complete<-cfu
+    ngenes<-nrow(as.matrix(rownames(dataNormal)))
 
     for( i in 1: nrow(as.matrix(rownames(dataNormal))))  {
-        print(i)
+        #print(i)
+        cat(paste( (ngenes-i),".",sep=""))
+
         mRNAselected<-as.matrix(rownames(dataNormal))[i]
         mRNAselected_surv_results_Matrix[i,"mRNA"]<-mRNAselected
 
