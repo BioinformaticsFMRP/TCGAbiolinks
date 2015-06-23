@@ -4,18 +4,27 @@ author: " Antonio Colaprico, Tiago Chedraoui Silva, Luciano Garofano,
 Catharina Olsen, Davide Garolini, Claudia Cava, Isabella Castiglioni,
 Houtan Noushmehr, Gianluca Bontempi, Michele Ceccarelli"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  BiocStyle::html_document:
+    toc: true
+
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
 
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+```
+
+## Introduction 
+
 This document describes how to search, download and analyze TCGA data using the
 TCGAbiolinks package.
 
-## TCGA query
- You can easily search TCGA samples using the `tcgaQuery` function.
+## Searching data using TCGAQuery
+ You can easily search TCGA samples using the `TCGAQuery` function.
  Using a summary of filters as used in the TCGA portal, the function works
  with the following 
  parameters:
@@ -35,9 +44,7 @@ library(TCGAbiolinks)
 query <- TCGAQuery(tumor = "brca",level = 3)
 querySamples <- samplesfilter(query)
 
-query <- TCGAQuery(tumor = "brca",
-                   level = 3,
-                   platform = "IlluminaHiSeq_RNASeqV2")
+query <- TCGAQuery(tumor = "brca", level = 3, platform = "IlluminaHiSeq_RNASeqV2")
 
 matSamples <- TCGAintegrate(querySamples)
 
@@ -150,44 +157,8 @@ knitr::kable(dataGE, digits = 2,
              row.names = TRUE)
 ```
 
-## [CNV] TCGA query, download, prepare list of a barcode
-You can easily search TCGA samples, download and prepare a matrix of gene expression.
-```{r, eval = FALSE}
 
-# Define a list of samples to query and download providing relative TCGA barcodes.
-samplesList <- c("TCGA-02-0046-10A-01D-0182-01", 
-                 "TCGA-02-0052-01A-01D-0182-01", 
-                 "TCGA-02-0033-10A-01D-0182-01", 
-                 "TCGA-02-0034-01A-01D-0182-01", 
-                 "TCGA-02-0007-01A-01D-0182-01")
-
-# Query platform Genome_Wide_SNP_6 with a list of barcode 
-query <- TCGAQuery(tumor = "gbm", level = 3, platform = "Genome_Wide_SNP_6")
-
-# Download a list of barcodes with platform Genome_Wide_SNP_6
-TCGADownload(query, path = "samples")
-
-# Prepare matrix 
-GBM_CNV <- TCGAPrepare(query, dir = "samples", type = ".hg19.seg.txt")
-```
-
-
-
-## TCGA download
-You can easily download data using the `TCGAdownload` function.
- 
-```{r, eval = FALSE}
-# get all samples from the query and save them in the TCGA folder
-# samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
-# samples to normalize later
-TCGADownload(query, path = "data", type = "rsem.genes.results")
-
-```
-
-Comment: The function will structure the folders to save the data as:
-_Path given by the user/Experiment folder_
-
-## TCGA query clinic data
+### Searching for clinical data
  
 ```{r, eval = FALSE}
 bar <- c("TCGA-G9-6378-02A-11R-1789-07", "TCGA-CH-5767-04A-11R-1789-07",  
@@ -207,13 +178,13 @@ bar <- c("TCGA-G9-6378-02A-11R-1789-07", "TCGA-CH-5767-04A-11R-1789-07",
          "TCGA-AO-A0J5-01A-11R-1789-07", "TCGA-G9-6336-11A-11R-1789-07",
          "TCGA-G9-6380-11A-11R-1789-07", "TCGA-G9-6380-01A-11R-1789-07")
 
-S<-SampleTypes(bar,"TP")
+S <- SampleTypes(bar,"TP")
 
 # Retrieve multiple tissue types  NOT FROM THE SAME PATIENTS
-SS<-MultiSampleTypes(bar,c("TP","NB"))
+SS <- MultiSampleTypes(bar,c("TP","NB"))
 
 # Retrieve multiple tissue types  FROM THE SAME PATIENTS
-SSS<-MatchedCoupledSampleTypes(bar,c("NT","TP"))
+SSS <- MatchedCoupledSampleTypes(bar,c("NT","TP"))
 
 clinical_brca_data <- clinic("brca","clinical_patient")
 
@@ -241,6 +212,44 @@ clinical_brca_data <- clinic("brca","clinical_patient")
 
 #clinical_brca_data_rnaseqv2 <- clinical_brca_data[clinical_brca_data$bcr_patient_barcode %in% substr(querySamples$IlluminaHiSeq_RNASeqV2,1,12),]
 ```
+
+## [CNV] TCGA query, download, prepare list of a barcode
+You can easily search TCGA samples, download and prepare a matrix of gene expression.
+```{r, eval = FALSE}
+
+# Define a list of samples to query and download providing relative TCGA barcodes.
+samplesList <- c("TCGA-02-0046-10A-01D-0182-01", 
+                 "TCGA-02-0052-01A-01D-0182-01", 
+                 "TCGA-02-0033-10A-01D-0182-01", 
+                 "TCGA-02-0034-01A-01D-0182-01", 
+                 "TCGA-02-0007-01A-01D-0182-01")
+
+# Query platform Genome_Wide_SNP_6 with a list of barcode 
+query <- TCGAQuery(tumor = "gbm", level = 3, platform = "Genome_Wide_SNP_6")
+
+# Download a list of barcodes with platform Genome_Wide_SNP_6
+TCGADownload(query, path = "samples")
+
+# Prepare matrix 
+GBM_CNV <- TCGAPrepare(query, dir = "samples", type = ".hg19.seg.txt")
+```
+
+
+
+## TCGA download
+You can easily download data using the `TCGADownload` function.
+ 
+```{r, eval = FALSE}
+# get all samples from the query and save them in the TCGA folder
+# samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
+# samples to normalize later
+TCGADownload(query, path = "data", type = "rsem.genes.results")
+
+```
+
+Comment: The function will structure the folders to save the data as:
+_Path given by the user/Experiment folder_
+
 
 ## TCGA Downstream Analysis TCGAprepare, TCGAanalyze, TCGAvisualize
 You can prepare gene expression from TCGA data using the `TCGAprepare`
@@ -461,22 +470,8 @@ query <- TCGAQuery(tumor = "brca",level = 3, platform = "IlluminaHiSeq_RNASeqV2"
 
 Comment: As these terms need to be exact, we validate user input before searching.
 
-## TCGA download
-You can easily download roadmap data using the `TCGAdownload` function.
- 
-```{r, eval = FALSE}
-# get all samples from the query and save into tcga folder
-# samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
-# samples to normalize later
-TCGADownload(query,path = "data",type ="rsem.genes.results")
-```
-
-Comment: The function will structure the folders to save the data as:
-_Path given by the user/Experiment folder_
-
-
 ## TCGA Downstream Analysis Integration 
-You can easily prepare gene expression from TCGA data using the `TCGAprepare` function.
+You can easily prepare gene expression from TCGA data using the `TCGAPrepare` function.
  
 ```{r, eval = FALSE}
 library(TCGAbiolinks)

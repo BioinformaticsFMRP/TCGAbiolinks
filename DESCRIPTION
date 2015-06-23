@@ -54,5 +54,5 @@ biocViews:
     Pathways,
     Network,
     Survival
-Suggests: testthat, png
+Suggests: testthat, png, BiocStyle, knitr, rmarkdown
 VignetteBuilder: knitr
