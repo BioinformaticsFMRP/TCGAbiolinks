@@ -2,6 +2,8 @@
 #' @description Plot with array array intensity correlation and boxplot of correlation samples by samples
 #' @param object object of class eset or gene expresion
 #' @param tabGroupCol table with group samples information in tabGroupCol$Color
+#' @export
+#' @importFrom Biobase pData sampleNames phenoData
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
 TCGApreprocessing<- function(object,tabGroupCol){
 
