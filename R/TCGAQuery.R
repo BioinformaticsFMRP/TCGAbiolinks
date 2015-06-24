@@ -46,7 +46,7 @@
 #' @example inst/examples/tcgaSearch.R
 #' @export
 #' @importFrom downloader download
-#' @importFrom knitr kable
+# @importFrom knitr kable
 #' @return A dataframe with the results of the query
 #'        (lastest version of the files)
 TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
