@@ -181,6 +181,7 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 #' of gene expression between the two
 #' conditions multiplied logFC)
 #' @examples
+#' \dontrun{
 #' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 #' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
 #' samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
@@ -192,6 +193,7 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 #' dataTN <- dataFilt[,samplesNT]
 #' dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",
 #' dataTP,dataTN)
+#' }
 CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
                            TableCond1,TableCond2,typeOrder = TRUE) {
 
