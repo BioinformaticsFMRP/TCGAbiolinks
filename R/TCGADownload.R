@@ -26,8 +26,8 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
         for (i in 1:nrow(data)) {
 
             file <- paste0(path, "/", basename(data[i, "deployLocation"]))
-            message(paste0("Downloading:",
-                           basename(data[i, "deployLocation"])))
+            cat(paste0("Downloading:",
+                           basename(data[i, "deployLocation"]),"\n"))
             if (!file.exists(file)) {
                 if(is.windows()){
                     suppressWarnings(
@@ -61,7 +61,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             if(!is.null(samples)){
                 files <- filterFiles(data[i,],samples,files)
             }
-            message(paste0("Downloading:", length(files), " files"))
+            cat(paste0("Downloading:", length(files), " files","\n"))
 
             for (i in seq_along(files)) {
                 if (!file.exists(file.path(path,folder,files[i]))) {
