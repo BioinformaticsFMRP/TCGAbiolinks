@@ -5,7 +5,7 @@
 #' @param Genelist Genelist
 #' @param Survresult Survresult
 #' @param ThreshTop ThreshTop
-#' @param ThreshTop ThreshTop
+#' @param ThreshDown ThreshDown
 #' @importFrom survival Surv survdiff survfit
 #' @export
 #' @return table with survival genes pvalues from KM.
