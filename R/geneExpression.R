@@ -239,7 +239,7 @@ CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
 #'   plotPCAforGroups
 #' @param dataFilt dataFilt
 #' @param dataDEGsFiltLevel dataDEGsFiltLevel
-#' @param ntopgenes ntopgenes
+#' @param ntopgenes number of DEGs genes to plot in PCA
 #' @import ggplot2
 #' @export
 #' @return PCA plot
@@ -300,7 +300,7 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #' @description
 #'   EAcomplete
 #' @param TFname TFname
-#' @param RegulonList RegulonList
+#' @param RegulonList List of genes such as TF's regulon or DEGs where to find enrichment
 #' @export
 #' @return EAcomplete plot
 #' @examples
@@ -344,7 +344,7 @@ EAcomplete <- function(TFname, RegulonList){
 #' @param TableEnrichment TableEnrichment
 #' @param RegulonList RegulonList
 #' @param GOtype GOtype
-#' @param FDRThresh FDRThresh
+#' @param FDRThresh pvalue corrected (FDR) as threshold
 #' @param EAGenes EAGenes
 #' @export
 #' @import stats
