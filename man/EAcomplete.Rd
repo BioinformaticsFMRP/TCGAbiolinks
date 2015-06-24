@@ -9,7 +9,7 @@ EAcomplete(TFname, RegulonList)
 \arguments{
 \item{TFname}{TFname}
 
-\item{RegulonList}{RegulonList}
+\item{RegulonList}{List of genes such as TF's regulon or DEGs where to find enrichment}
 }
 \value{
 EAcomplete plot

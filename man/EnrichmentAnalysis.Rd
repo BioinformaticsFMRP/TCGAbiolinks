@@ -18,7 +18,7 @@ EnrichmentAnalysis(GeneName, RegulonList, TableEnrichment, EAGenes, GOtype,
 
 \item{GOtype}{GOtype}
 
-\item{FDRThresh}{FDRThresh}
+\item{FDRThresh}{pvalue corrected (FDR) as threshold}
 }
 \value{
 EAcomplete plot
