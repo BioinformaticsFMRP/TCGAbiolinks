@@ -151,7 +151,7 @@ SurvivalKMunivariate<-function(clinical_patient,dataGE,Genelist, Survresult,Thre
 
             ttime[which(ttime== -Inf)]<-0
 
-            library(survival)
+
             ttime <- Surv(ttime, status)
             rownames(ttime) <- rownames(cfu)
             length(ttime)
