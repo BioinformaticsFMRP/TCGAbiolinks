@@ -527,10 +527,9 @@ tabSurvKMcompleteDEGs <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% data
 ```
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-getwd()
-#tabSurvKMcompleteDEGs$pvalue <- format(tabSurvKMcompleteDEGs$pvalue, scientific = TRUE)
-#knitr::kable(tabSurvKMcompleteDEGs[1:10,], digits = 2,
-#             caption = "Table KM-survival genes after SA",row.names = TRUE)
+tabSurvKMcompleteDEGs$pvalue <- format(tabSurvKMcompleteDEGs$pvalue, scientific = TRUE)
+knitr::kable(tabSurvKMcompleteDEGs[1:10,], digits = 2,
+             caption = "Table KM-survival genes after SA",row.names = TRUE)
 ```
 
 ## TCGA investigate
