@@ -18,7 +18,7 @@ SurvivalKMunivariate(clinical_patient, dataGE, Genelist, Survresult,
 
 \item{ThreshTop}{ThreshTop}
 
-\item{ThreshTop}{ThreshTop}
+\item{ThreshDown}{ThreshDown}
 }
 \value{
 table with survival genes pvalues from KM.
