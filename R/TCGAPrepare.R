@@ -26,7 +26,7 @@ TCGAPrepare <- function(query,
                         save = FALSE,
                         filename = NULL){
 
-    hg19genes   <- get("hg19genes",
+    gene.location   <- get("gene.location",
                        envir =  as.environment("package:TCGAbiolinks"))
 
     if (is.null(dir)) {
@@ -235,14 +235,16 @@ TCGAPrepare <- function(query,
             return(NULL)
         }
     }
-
     if (grepl("genome_wide_snp_6",tolower(platform))) {
 
+        close(pb)
         message("Preparing h19 files...")
         idx <- grep("nocnv|hg18", files)
         if(length(idx)>0){
             files <- files[-idx]
         }
+
+        pb <- txtProgressBar(min = 0, max = length(files), style = 3)
 
         if(is.vector(query)){
             mage <- getMage(query)
@@ -251,24 +253,23 @@ TCGAPrepare <- function(query,
         }
 
         #load("hg19genes.RData")
-        genes <- sort(unique(hg19genes$gene_name))
+        genes <- sort(unique(gene.location$external_gene_name))
 
         df <- matrix(0, nrow = length(genes), ncol = length(files))
         rownames(df) <- genes
 
         colNames <- rep("", ncol(df)) #check barcode
         for (i in seq_along(files)) {
-            data <- read.table(files[i], header = TRUE, sep = "\t",
+            data <- fread(files[i], header = TRUE, sep = "\t",
                                stringsAsFactors = FALSE)
             ####Check barcodes
             colNames[i] <- data$Sample[1]
-            infofiles <- paste0("n. ",i," of ", length(files), " done..")
-            message(infofiles)
-            for(j in 1:nrow(data)){
-                gg <- sort(unique(hg19genes[hg19genes$start >= data$Start[j] & hg19genes$end <= data$End[j], "gene_name"]))
-                df[gg, i] <- df[gg, i] + data$Segment_Mean[j]
 
-                #print(j)
+            for(j in 1:nrow(data)){
+                gg <- sort(unique(gene.location[gene.location$start_position >= data$Start[j]
+                                                & gene.location$end_position <= data$End[j],
+                                                "external_gene_name"]))
+                df[gg, i] <- df[gg, i] + data$Segment_Mean[j]
             }
             setTxtProgressBar(pb, i)
         }
@@ -276,8 +277,8 @@ TCGAPrepare <- function(query,
         #idx <- unlist(lapply(colNames,function(x){grep(x, mage$Derived.Array.Data.Matrix.File.2)}))
         names <- merge(id,mage,by.x="id",by.y="Hybridization.Name")
         colnames(df) <- names$Comment..TCGA.Barcode.
-
     }
+
     if(save){
         if(is.null(filename)){
             filename <- paste0(platform,"_",gsub(" ","_",Sys.time()),".rda")
