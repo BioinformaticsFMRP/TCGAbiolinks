@@ -344,21 +344,6 @@ samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
 
 ```
 
-## TCGA analyze (Preprocessing gene expression data)
-You can analyze gene expression from TCGA data using the `TCGAanalyze` 
-function.
- 
-```{r, eval = FALSE}
-# Downstream analysis using gene expression data  
-# TCGA samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
-# save(dataBRCA, geneInfo , file = "dataGeneExpression.rda")
-library(TCGAbiolinks)
-
-# Example with TCGApreprocessing
-
-```
-
-
 ## TCGA analyze and visualize (Diff.expr.analysis (DEA))
 You can analyze gene expression from TCGA data using the `TCGAanalyze` 
 function.
@@ -460,8 +445,6 @@ You can analyze gene expression and clinical data from TCGA data using the `TCGA
 library(TCGAbiolinks)
 # Survival Analysis SA
 
-library(TCGAbiolinks)
-
 clinical_patient_Cancer <- clinic("brca","clinical_patient")
 dataBRCA <- log2(BRCA_rnaseqv2)
 
@@ -493,7 +476,7 @@ tabSurvKMcompleteDEGs <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% data
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
 library(TCGAbiolinks)
-tabSurvKMcompleteDEGs$pvalue <- format(as.numeric(tabSurvKMcompleteDEGs$pvalue), scientific = TRUE)
+tabSurvKMcompleteDEGs$pvalue <- format(tabSurvKMcompleteDEGs$pvalue, scientific = TRUE)
 knitr::kable(tabSurvKMcompleteDEGs[1:10,], digits = 2,
              caption = "Table KM-survival genes after SA",row.names = TRUE)
 ```
