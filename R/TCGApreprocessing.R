@@ -2,10 +2,11 @@
 #' @description Plot with array array intensity correlation and boxplot of correlation samples by samples
 #' @param object object of class eset or gene expresion
 #' @param tabGroupCol table with group samples information in tabGroupCol$Color
+#' @param ArrayIndex ArrayIndex
+#' @param pmat pmat
 #' @export
-#' @importFrom Biobase pData sampleNames phenoData
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
-TCGApreprocessing<- function(object,tabGroupCol){
+TCGApreprocessing<- function(object,tabGroupCol,ArrayIndex,pmat){
 
   if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 
@@ -13,8 +14,8 @@ TCGApreprocessing<- function(object,tabGroupCol){
 
     # array array IC after RMA
     #object<-eset
-    ArrayIndex = as.character(1:length(sampleNames(object)))
-    pmat <- as.matrix(pData(phenoData(object)))
+    #ArrayIndex = as.character(1:length(sampleNames(object)))
+    #pmat <- as.matrix(pData(phenoData(object)))
     phenodepth <- min(ncol(pmat), 3)
     order <- switch(phenodepth + 1, ArrayIndex, order(pmat[, 1]), order(pmat[, 1], pmat[, 2]), order(pmat[, 1], pmat[, 2], pmat[, 3]))
     arraypos <- (1:length(ArrayIndex)) * (1/(length(ArrayIndex) - 1)) - (1/(length(ArrayIndex) - 1))
