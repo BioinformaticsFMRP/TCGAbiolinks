@@ -1,11 +1,11 @@
 #' @title TCGA Download
 #' @description Download data previously selected using the TCGASeach
-#' @param data TCGASearch output
-#' @param path location of the final data saving
-#' @param type Get files with type pattern instead of downloading all the files
-#' @param quiet Should download supress output messages. Default: false
+#' @param data TCGAQuery output
+#' @param path Directory to save the downloaded data
+#' @param type Filter the files that will be downloaded by type
+#' @param quiet Supress output messages?. Default: FALSE
 #' @param samples List of samples to download
-#' @seealso TCGASearch
+#' @seealso TCGAQuery
 #' @examples
 #'    samples <- c("TCGA-26-1442-01A-01R-1850-01")
 #'    query <- TCGAQuery(tumor = "gbm", platform = "IlluminaHiSeq_RNASeqV2",
