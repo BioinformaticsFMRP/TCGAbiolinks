@@ -70,7 +70,7 @@ TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
                         sort(unique(disease.table$abbreviation)),
                         ncol = 8))
                 )
-                print(kable(df, col.names = NULL, format = "pandoc",
+                print(knitr::kable(df, col.names = NULL, format = "pandoc",
                             caption = "TCGA tumors"))
                 cat("=======================================================\n")
                 cat("ERROR: Disease not found. Select from the table above.\n")
@@ -89,7 +89,7 @@ TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
                         sort(unique(platform.table$name)),
                         ncol = 3))
                 )
-                print(kable(df, col.names = NULL, format = "pandoc",
+                print(knitr::kable(df, col.names = NULL, format = "pandoc",
                             caption = "TCGA Platforms"))
                 cat("=======================================================\n")
                 cat("ERROR: Platform not found. Select from the table above.\n")
@@ -105,7 +105,7 @@ TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
                 df <- as.data.frame(matrix(sort(unique(center.table$name)),
                                            ncol = 3))
             )
-            print(kable(df, col.names = NULL, format = "pandoc",
+            print(knitr::kable(df, col.names = NULL, format = "pandoc",
                         caption = "TCGA Centers"))
             cat("=======================================================\n")
             cat("ERROR: Center not found. Select from the table above.\n")
