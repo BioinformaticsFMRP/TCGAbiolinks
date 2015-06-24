@@ -149,11 +149,23 @@ query <- TCGAQuery(tumor = "brca", level = 3, platform = "IlluminaHiSeq_RNASeqV2
 
 matSamples <- TCGAintegrate(querySamples)
 
+colnames(matSamples) <- paste("p",1:length(names(querySamples)), 
+                              names(querySamples),sep=".")
+rownames(matSamples) <- paste("p",1:length(names(querySamples)),
+                              names(querySamples),sep=".")
+colnames(matSamples) <- substr( colnames(matSamples), 1,4)
+
+
 ```
 
 The result from TCGAintegrate is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
+colnames(matSamples) <- paste("p",1:length(names(querySamples)), 
+                              names(querySamples),sep=".")
+rownames(matSamples) <- paste("p",1:length(names(querySamples)),
+                              names(querySamples),sep=".")
+colnames(matSamples) <- substr( colnames(matSamples), 1,4)
 
 knitr::kable(matSamples, digits = 2, 
              caption = "Table common samples among platforms from TCGAQuery",
