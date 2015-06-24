@@ -199,7 +199,7 @@ SurvivalKMunivariate<-function(clinical_patient,dataGE,Genelist, Survresult,Thre
 
     } #end for
 
-
+    mRNAselected_surv_results_Matrix[mRNAselected_surv_results_Matrix=="-Inf"]<-0
 
     return(mRNAselected_surv_results_Matrix)
 }
