@@ -94,6 +94,7 @@ TCGAPrepare <- function(query,
         setDF(df)
         rownames(df) <- df$Composite.Element.REF
         df$Composite.Element.REF <- NULL
+        df[,3:ncol(df)] <- sapply(df[,3:ncol(df)], as.numeric)
     }
 
     if (grepl("mda_rppa_core",tolower(platform))) {
@@ -283,6 +284,7 @@ TCGAPrepare <- function(query,
         }
         save(df,file = filename)
     }
+    close(pb)
     return(df)
 }
 
