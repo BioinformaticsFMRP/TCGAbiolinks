@@ -4,12 +4,16 @@
 \alias{TCGApreprocessing}
 \title{TCGApreprocessing}
 \usage{
-TCGApreprocessing(object, tabGroupCol)
+TCGApreprocessing(object, tabGroupCol, ArrayIndex, pmat)
 }
 \arguments{
 \item{object}{object of class eset or gene expresion}
 
 \item{tabGroupCol}{table with group samples information in tabGroupCol$Color}
+
+\item{ArrayIndex}{ArrayIndex}
+
+\item{pmat}{pmat}
 }
 \value{
 Plot with array array intensity correlation and boxplot of correlation samples by samples
