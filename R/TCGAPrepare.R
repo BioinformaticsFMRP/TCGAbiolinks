@@ -34,6 +34,7 @@ TCGAPrepare <- function(query,
                 with the folders to be prepared. ")
         return(NULL)
     }
+
     if (length(unique(query$Platform)) > 1 |
         length(unique(query$Center)) > 2) {
         message("Sorry! But, for the moment, we can only prepare on type of
@@ -43,6 +44,7 @@ TCGAPrepare <- function(query,
         platform <- unique(query$Platform)
     }
 
+    # Get all files from directory except MANIFEST, README, etc
     files <- NULL
     dirs <- gsub(".tar.gz","",basename(query$deployLocation))
     for (i in seq_along(dirs)) {
@@ -54,6 +56,8 @@ TCGAPrepare <- function(query,
     if (length(idx) > 0) {
         files <- files[-idx]
     }
+
+    # Filter by type
     if (!is.null(type)) {
         files <- files[grep(type,files)]
         if(length(files) == 0){
@@ -62,17 +66,20 @@ TCGAPrepare <- function(query,
         }
     }
 
-
+    pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     df <- NULL
+
+
     if (grepl("humanmethylation",tolower(platform))) {
 
         for (i in seq_along(files)) {
             data <- fread(files[i], header = TRUE, sep = "\t",
-                               stringsAsFactors = FALSE)
+                          stringsAsFactors = FALSE)
             sample <- colnames(data)[2]
             setnames(data,gsub(" ", "\\.", data[1,]))
             data <- data[-1,] # removing Composite Element REF
             setnames(data,2,sample)
+
             if (i == 1) {
                 setcolorder(data,c(1, 3:5, 2))
                 df <- data
@@ -80,7 +87,10 @@ TCGAPrepare <- function(query,
                 data <- subset(data,select = c(1,2))
                 df <- merge(df, data, by = "Composite.Element.REF")
             }
+
+            setTxtProgressBar(pb, i)
         }
+
         setDF(df)
         rownames(df) <- df$Composite.Element.REF
         df$Composite.Element.REF <- NULL
@@ -100,6 +110,7 @@ TCGAPrepare <- function(query,
             } else {
                 df <- merge(df, data,by = "Composite Element REF")
             }
+            setTxtProgressBar(pb, i)
         }
         rownames(df) <- df[,1]
         df[,1] <- NULL
@@ -125,6 +136,7 @@ TCGAPrepare <- function(query,
             } else {
                 df <- merge(df, data,by = colnames(df)[1])
             }
+            setTxtProgressBar(pb, i)
         }
         rownames(df) <- df[,1]
         df[,1] <- NULL
@@ -149,7 +161,9 @@ TCGAPrepare <- function(query,
             } else {
                 df <- merge(df, data,by = "Hybridization REF")
             }
+            setTxtProgressBar(pb, i)
         }
+
         rownames(df) <- df[,1]
         df[,1] <- NULL
     }
@@ -172,6 +186,7 @@ TCGAPrepare <- function(query,
             } else {
                 df <- merge(df, data[,c(1,2)],by = colnames(df)[1])
             }
+            setTxtProgressBar(pb, i)
         }
         rownames(df) <- df[,1]
         df[,1] <- NULL
@@ -254,6 +269,7 @@ TCGAPrepare <- function(query,
 
                 #print(j)
             }
+            setTxtProgressBar(pb, i)
         }
         id <- data.frame(id=colNames)
         #idx <- unlist(lapply(colNames,function(x){grep(x, mage$Derived.Array.Data.Matrix.File.2)}))
