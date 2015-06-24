@@ -4,7 +4,8 @@
 \alias{TCGAPrepare}
 \title{TCGA TCGAPrepare}
 \usage{
-TCGAPrepare(query, dir = NULL, type = NULL)
+TCGAPrepare(query, dir = NULL, type = NULL, save = FALSE,
+  filename = NULL)
 }
 \arguments{
 \item{query}{Data frame as the one returned from TCGAQuery}
@@ -12,6 +13,10 @@ TCGAPrepare(query, dir = NULL, type = NULL)
 \item{dir}{Directory with the files}
 
 \item{type}{File to prepare.}
+
+\item{save}{Save a rda object with the prepared object? Default FALSE}
+
+\item{filename}{Name of the saved file}
 }
 \value{
 Data frame with data read
