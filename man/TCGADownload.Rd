@@ -8,15 +8,15 @@ TCGADownload(data = NULL, path = ".", type = NULL, samples = NULL,
   quiet = FALSE)
 }
 \arguments{
-\item{data}{TCGASearch output}
+\item{data}{TCGAQuery output}
 
-\item{path}{location of the final data saving}
+\item{path}{Directory to save the downloaded data}
 
-\item{type}{Get files with type pattern instead of downloading all the files}
+\item{type}{Filter the files that will be downloaded by type}
 
 \item{samples}{List of samples to download}
 
-\item{quiet}{Should download supress output messages. Default: false}
+\item{quiet}{Supress output messages?. Default: FALSE}
 }
 \value{
 Download tcga into path
@@ -32,6 +32,6 @@ samples <- c("TCGA-26-1442-01A-01R-1850-01")
                 type ="rsem.genes.results")
 }
 \seealso{
-TCGASearch
+TCGAQuery
 }
 
