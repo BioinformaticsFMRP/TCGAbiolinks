@@ -21,7 +21,7 @@ SurvivalKMunivariate(clinical_patient, dataGE, Genelist, Survresult,
 \item{ThreshTop}{ThreshTop}
 }
 \value{
-table with survival genes pvalues from KM of pubmed related to tfs.
+table with survival genes pvalues from KM.
 }
 \description{
 Survival table with univariate Kaplan-Meier
