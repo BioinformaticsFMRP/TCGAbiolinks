@@ -39,7 +39,7 @@ TCGApreprocessing<- function(object,tabGroupCol,ArrayIndex,pmat){
 
     m = matrix(pretty(c, 10), nrow = 1, ncol = length(pretty(c, 10)))
     image(m, xaxt = "n", yaxt = "n", ylab = "Correlation Coefficient")
-    axis(2, label = as.list(pretty(c, 10)), at = seq(0, 1, by = (1/(length(pretty(c,  10)) - 1))))
+    axis(2, labels = as.list(pretty(c, 10)), at = seq(0, 1, by = (1/(length(pretty(c,  10)) - 1))))
     abline(h = seq((1/(length(pretty(c, 10)) - 1))/2, 1 - (1/(length(pretty(c, 10)) - 1)), by = (1/(length(pretty(c, 10)) - 1))))
 
     boxplot(c, outline = F,las =2, lwd = 6,col = tabGroupCol$Color, main ="Boxplot of correlation samples by samples after RMA")
