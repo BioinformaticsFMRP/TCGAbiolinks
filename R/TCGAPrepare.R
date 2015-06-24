@@ -9,6 +9,8 @@
 #' @param query Data frame as the one returned from TCGAQuery
 #' @param dir Directory with the files
 #' @param type File to prepare.
+#' @param save Save a rda object with the prepared object? Default FALSE
+#' @param filename Name of the saved file
 #' @examples
 #' sample <- "TCGA-06-0939-01A-01D-1228-05"
 #' query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
@@ -16,21 +18,26 @@
 #' prepared <- TCGAPrepare(query, dir="exampleData")
 #' @export
 #' @importFrom stringr str_match str_trim
+#' @import data.table
 #' @import utils
-TCGAPrepare <- function(query, dir = NULL, type = NULL){
+TCGAPrepare <- function(query,
+                        dir = NULL,
+                        type = NULL,
+                        save = FALSE,
+                        filename = NULL){
 
     hg19genes   <- get("hg19genes",
                        envir =  as.environment("package:TCGAbiolinks"))
 
     if (is.null(dir)) {
         message("Argument dir is NULL. Plese provide the directory
-            with the folders to be prepared. ")
+                with the folders to be prepared. ")
         return(NULL)
     }
     if (length(unique(query$Platform)) > 1 |
         length(unique(query$Center)) > 2) {
         message("Sorry! But, for the moment, we can only prepare on type of
-            platform per call")
+                platform per call")
         return(NULL)
     } else {
         platform <- unique(query$Platform)
@@ -58,25 +65,25 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
 
     df <- NULL
     if (grepl("humanmethylation",tolower(platform))) {
+
         for (i in seq_along(files)) {
-            data <- read.table(files[i], header = TRUE, sep = "\t",
+            data <- fread(files[i], header = TRUE, sep = "\t",
                                stringsAsFactors = FALSE)
-            sample <- gsub("\\.", "-", colnames(data)[2])
-            colnames(data) <- gsub(" ", "\\.", data[1,])
+            sample <- colnames(data)[2]
+            setnames(data,gsub(" ", "\\.", data[1,]))
             data <- data[-1,] # removing Composite Element REF
-            colnames(data)[2] <- sample
+            setnames(data,2,sample)
             if (i == 1) {
-                df <- data[, c(1, 3:5, 2)]
+                setcolorder(data,c(1, 3:5, 2))
+                df <- data
             } else {
-                df <- merge(df, data[, c(1, 2)],
-                            by = "Composite.Element.REF")
+                data <- subset(data,select = c(1,2))
+                df <- merge(df, data, by = "Composite.Element.REF")
             }
         }
+        setDF(df)
         rownames(df) <- df$Composite.Element.REF
-        # remove NA lines
-        suppressWarnings(
-            df[,3:ncol(df)] <- sapply(df[,3:ncol(df)], as.numeric)
-        )
+        df$Composite.Element.REF <- NULL
     }
 
     if (grepl("mda_rppa_core",tolower(platform))) {
@@ -254,7 +261,12 @@ TCGAPrepare <- function(query, dir = NULL, type = NULL){
         colnames(df) <- names$Comment..TCGA.Barcode.
 
     }
-
+    if(save){
+        if(is.null(filename)){
+            filename <- paste0(platform,"_",gsub(" ","_",Sys.time()),".rda")
+        }
+        save(df,file = filename)
+    }
     return(df)
 }
 
