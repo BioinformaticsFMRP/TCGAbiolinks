@@ -11,7 +11,7 @@ plotPCAforGroups(dataFilt, dataDEGsFiltLevel, ntopgenes)
 
 \item{dataDEGsFiltLevel}{dataDEGsFiltLevel}
 
-\item{ntopgenes}{ntopgenes}
+\item{ntopgenes}{number of DEGs genes to plot in PCA}
 }
 \value{
 PCA plot
