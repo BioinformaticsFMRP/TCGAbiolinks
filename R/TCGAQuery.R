@@ -43,7 +43,13 @@
 #' @param added.up.to 04- 14-2010
 #' @param center center name
 #' @param samples List of samples. Ex:c('TCGA-04-06-*','TCGA-04-08-*')
-#' @example inst/examples/tcgaSearch.R
+#' @examples
+#' query <- TCGAQuery(tumor = "gbm", added.since = "01/01/2013", added.up.to = "12/31/2013")
+#' query <- TCGAQuery(tumor = c("gbm","lgg"), platform = c("HumanMethylation450","HumanMethylation27"))
+#' query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450", level = "3")
+#' query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D")
+#' query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04", level = 3)
+#' query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04", tumor = "OV", platform = "CGH-1x1M_G4447A")
 #' @export
 #' @importFrom downloader download
 # @importFrom knitr kable
