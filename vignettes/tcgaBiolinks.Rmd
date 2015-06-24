@@ -458,17 +458,17 @@ library(TCGAbiolinks)
 # Survival Analysis SA
 
 clinical_patient_Cancer <- clinic("brca","clinical_patient")
-dataBRCA <- log2(BRCA_rnaseqv2)
+dataBRCAcomplete <- log2(BRCA_rnaseqv2)
 
 tokenStop<- 1
 
 tabSurvKMcomplete <- NULL
 
-for( i in 1: round(nrow(dataBRCA)/100)){
-message( paste( i, "of ", round(nrow(dataBRCA)/100)))
+for( i in 1: round(nrow(dataBRCAcomplete)/100)){
+message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
 tokenStart <- tokenStop
 tokenStop <-100*i
-tabSurvKM<-SurvivalKMunivariate(clinical_patient_Cancer,dataBRCA,Genelist = rownames(dataBRCA)[tokenStart:tokenStop],
+tabSurvKM<-SurvivalKMunivariate(clinical_patient_Cancer,dataBRCAcomplete,Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
                                         Survresult = F,ThreshTop=0.67,ThreshDown=0.33)
 
 tabSurvKMcomplete <- rbind(tabSurvKMcomplete,tabSurvKM)
