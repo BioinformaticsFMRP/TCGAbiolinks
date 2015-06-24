@@ -194,6 +194,50 @@ knitr::kable(BRCA_RNASeqV2_version, digits = 2,
              row.names = FALSE)
 ```
 
+
+
+## Downloading data with TCGADownload
+You can easily download data using the `TCGADownload` function.
+
+The arguments are:
+* data	The TCGAQuery output
+* path	location to save the files. Default: "."
+* type	Filter the files to download by type
+* samples	List of samples to download
+* quiet	Supress output messages? Default: FALSE
+
+Example of use:
+```{r, eval = FALSE}
+# get all samples from the query and save them in the TCGA folder
+# samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
+# samples to normalize later
+TCGADownload(query, path = "data", type = "rsem.genes.results")
+
+```
+
+Comment: The function will structure the folders to save the data as:
+_Path given by the user/Experiment folder_
+
+## Preparing the data with TCGAPrepare
+You can easily read your downloaded data using the `TCGAPrepare` function.
+This function will prepare data matrices for downstream analysis.
+
+The arguments are:
+* query	Data frame as the one returned from TCGAQuery
+* dir	Directory with the files
+* type	File to prepare.
+* save	Save a rda object with the prepared object? Default: FALSE
+* filename Name of the rda object that will be saved if `save` is TRUE
+
+Example of use:
+```{r, eval = FALSE}
+# get all samples from the query and save them in the TCGA folder
+# samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
+# samples to normalize later
+TCGAPrepare(query, dir = "data", save = TRUE, filename = "myfile.rda")
+```
+
+
 ## [Gene Expression] TCGA query, download, prepare list of a barcode
 You can easily search TCGA samples, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
@@ -309,22 +353,6 @@ TCGADownload(query, path = "samples")
 # Prepare matrix 
 GBM_CNV <- TCGAPrepare(query, dir = "samples", type = ".hg19.seg.txt")
 ```
-
-
-
-## TCGA download
-You can easily download data using the `TCGADownload` function.
- 
-```{r, eval = FALSE}
-# get all samples from the query and save them in the TCGA folder
-# samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
-# samples to normalize later
-TCGADownload(query, path = "data", type = "rsem.genes.results")
-
-```
-
-Comment: The function will structure the folders to save the data as:
-_Path given by the user/Experiment folder_
 
 
 ## TCGA Downstream Analysis TCGAprepare, TCGAanalyze, TCGAvisualize
@@ -487,10 +515,10 @@ tabSurvKMcompleteDEGs <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% data
 ```
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-library(TCGAbiolinks)
-tabSurvKMcompleteDEGs$pvalue <- format(tabSurvKMcompleteDEGs$pvalue, scientific = TRUE)
-knitr::kable(tabSurvKMcompleteDEGs[1:10,], digits = 2,
-             caption = "Table KM-survival genes after SA",row.names = TRUE)
+getwd()
+#tabSurvKMcompleteDEGs$pvalue <- format(tabSurvKMcompleteDEGs$pvalue, scientific = TRUE)
+#knitr::kable(tabSurvKMcompleteDEGs[1:10,], digits = 2,
+#             caption = "Table KM-survival genes after SA",row.names = TRUE)
 ```
 
 ## TCGA investigate
@@ -521,8 +549,13 @@ library(TCGAbiolinks)
 knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF in pubmed related to a specific cancer",row.names = FALSE)
 ```
 
+## TCGA social
+The `TCGASocial` function has two type of searches, one that searches for
+most downloaded packages in CRAN or BioConductor and one that searches the most related question in biostar 
 
-## TCGA social with BioConductor
+
+
+### TCGA social with BioConductor
 Find most downloaded packages in CRAN or BioConductor
  
 ```{r, eval = TRUE}
@@ -545,8 +578,8 @@ tabPackage <- TCGAsocial(siteToFind="bioconductor.org", listPackage)
 knitr::kable(tabPackage, digits = 2, caption = "Table with number of downloads about a list of packages",row.names = FALSE)
 ```
 
-## TCGA social with Biostar
-Find most downloaded packages in CRAN or BioConductor
+### TCGA social with Biostar
+Find most related question in biostar.
  
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
@@ -857,3 +890,7 @@ starburst analysis.
  starburstPlot(gene.met)
 ```
 
+## Session Information
+```{r, eval = TRUE}
+sessionInfo()
+```
