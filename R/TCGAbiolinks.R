@@ -117,13 +117,6 @@ NULL
 #' @format A data frame with 20531 rows and 2 variables
 NULL
 
-#' hg19genes data frame from Human (hg19) genome indicating different
-#' characteristics of genes e.g. chr, region, start, end, gene_name
-#' @docType data
-#' @keywords internal
-#' @name hg19genes
-#' @format A data frame with 869204 rows and 5 variables
-NULL
 
 #' list EA pathways
 #' @docType data
@@ -182,23 +175,18 @@ NULL
 #' @format A data frame with 4738 rows and 12 variables
 NULL
 
-#' Genome Reference Consortium Human retrived from biomaRt library
+#' Genome Reference Consortium Human (hg19) retrived from biomaRt library
 #' The data set contains the following fields:
 #' \itemize{
-#' \item ensembl_gene_id
-#' \item ensembl_transcript_id
 #' \item chromosome_name
 #' \item start_position
 #' \item end_position
-#' \item strand external_gene_name
-#' \item external_transcript_name
-#' \item external_gene_source
-#' \item external_transcript_source_name
-#' \item hgnc_id
+#' \item strand
+#' \item external_gene_name
 #' \item entrezgene
 #'}
 #' @docType data
 #' @keywords internal
 #' @name gene.location
-#' @format A data frame with 24474 rows and 12 variables
+#' @format A data frame with 25703 rows and 6 variables
 NULL

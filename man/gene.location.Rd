@@ -3,36 +3,26 @@
 \docType{data}
 \name{gene.location}
 \alias{gene.location}
-\title{Genome Reference Consortium Human retrived from biomaRt library
+\title{Genome Reference Consortium Human (hg19) retrived from biomaRt library
 The data set contains the following fields:
 \itemize{
-\item ensembl_gene_id
-\item ensembl_transcript_id
 \item chromosome_name
 \item start_position
 \item end_position
-\item strand external_gene_name
-\item external_transcript_name
-\item external_gene_source
-\item external_transcript_source_name
-\item hgnc_id
+\item strand
+\item external_gene_name
 \item entrezgene
 }}
-\format{A data frame with 24474 rows and 12 variables}
+\format{A data frame with 25703 rows and 6 variables}
 \description{
-Genome Reference Consortium Human retrived from biomaRt library
+Genome Reference Consortium Human (hg19) retrived from biomaRt library
 The data set contains the following fields:
 \itemize{
-\item ensembl_gene_id
-\item ensembl_transcript_id
 \item chromosome_name
 \item start_position
 \item end_position
-\item strand external_gene_name
-\item external_transcript_name
-\item external_gene_source
-\item external_transcript_source_name
-\item hgnc_id
+\item strand
+\item external_gene_name
 \item entrezgene
 }
 }
