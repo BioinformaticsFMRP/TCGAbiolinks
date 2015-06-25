@@ -82,6 +82,13 @@ NULL
 #' @format A data frame with 40 rows and 3 variables
 NULL
 
+#' tabPackageKey
+#' @docType data
+#' @keywords internal
+#' @name tabPackageKey
+#' @format A data frame with 40 rows and 3 variables
+NULL
+
 #' wine
 #' @docType data
 #' @keywords internal
