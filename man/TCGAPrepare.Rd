@@ -5,7 +5,7 @@
 \title{TCGA TCGAPrepare}
 \usage{
 TCGAPrepare(query, dir = NULL, type = NULL, save = FALSE,
-  filename = NULL)
+  filename = NULL, toPackage = NULL)
 }
 \arguments{
 \item{query}{Data frame as the one returned from TCGAQuery}
@@ -17,6 +17,9 @@ TCGAPrepare(query, dir = NULL, type = NULL, save = FALSE,
 \item{save}{Save a rda object with the prepared object? Default FALSE}
 
 \item{filename}{Name of the saved file}
+
+\item{toPackage}{For whihc package are you preparing the data?
+Default: NULL. Options: "ELMER"}
 }
 \value{
 Data frame with data read

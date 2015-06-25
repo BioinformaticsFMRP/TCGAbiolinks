@@ -11,6 +11,8 @@
 #' @param type File to prepare.
 #' @param save Save a rda object with the prepared object? Default FALSE
 #' @param filename Name of the saved file
+#' @param toPackage For whihc package are you preparing the data?
+#' Default: NULL. Options: "ELMER"
 #' @examples
 #' sample <- "TCGA-06-0939-01A-01D-1228-05"
 #' query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
@@ -24,10 +26,11 @@ TCGAPrepare <- function(query,
                         dir = NULL,
                         type = NULL,
                         save = FALSE,
-                        filename = NULL){
+                        filename = NULL,
+                        toPackage = NULL){
 
     gene.location   <- get("gene.location",
-                       envir =  as.environment("package:TCGAbiolinks"))
+                           envir =  as.environment("package:TCGAbiolinks"))
 
     if (is.null(dir)) {
         message("Argument dir is NULL. Plese provide the directory
@@ -261,7 +264,7 @@ TCGAPrepare <- function(query,
         colNames <- rep("", ncol(df)) #check barcode
         for (i in seq_along(files)) {
             data <- fread(files[i], header = TRUE, sep = "\t",
-                               stringsAsFactors = FALSE)
+                          stringsAsFactors = FALSE)
             ####Check barcodes
             colNames[i] <- data$Sample[1]
 
@@ -278,6 +281,7 @@ TCGAPrepare <- function(query,
         names <- merge(id,mage,by.x="id",by.y="Hybridization.Name")
         colnames(df) <- names$Comment..TCGA.Barcode.
     }
+    close(pb)
 
     if(save){
         if(is.null(filename)){
@@ -285,7 +289,57 @@ TCGAPrepare <- function(query,
         }
         save(df,file = filename)
     }
-    close(pb)
+
+
+    if(!is.null(toPackage)){
+        df <- prepareToPackage(df, platform,toPackage)
+    }
+
+    return(df)
+}
+
+# This function will help the user to prepare the data to an specific package
+prepareToPackage <- function(df, platform, toPackage){
+
+    if(grepl("elmer", toPackage, ignore.case = TRUE)){
+
+        if (grepl("illuminahiseq_rnaseqv2|illuminahiseq_totalrnaseqv2",
+                  platform, ignore.case = TRUE)){
+            message("============ Pre-pocessing expression data =============")
+            message(paste0("1 - expression = log2(expression + 1): ",
+                           "To linearize \n    relation between ",
+                           "methylation and expression"))
+            df <- log2(df+1)
+            message("2 - rownames  (gene|loci) => ('ID'loci) ")
+            aux <- strsplit(rownames(df),"\\|")
+            GeneID <- unlist(lapply(aux,function(x) x[2]))
+            row.names(df) <- paste0("ID",GeneID)
+        }
+
+        if (grepl("humanmethylation", platform, ignore.case = TRUE)) {
+            message("============ Pre-pocessing methylation data =============")
+            msg <- paste0("1 - Removing Columns: \n  * Gene_Symbol  \n",
+                          "  * Chromosome  \n  * Genomic_Coordinate")
+            message(msg)
+            df <- subset(df,select = 4:ncol(df))
+            msg <- paste0("2 - Removing probes with ",
+                          "NA values in more than 0.80% samples")
+            message(msg)
+            df <- df[rowMeans(is.na(df))<0.2,]
+        }
+    }
+
+    if(grepl("limma", toPackage, ignore.case = TRUE)){
+        message("TBD")
+    }
+
+    if(grepl("methylmix", toPackage, ignore.case = TRUE)){
+        message("TBD")
+    }
+
+    if(grepl("biomics", toPackage, ignore.case = TRUE)){
+        message("TBD")
+    }
     return(df)
 }
 
