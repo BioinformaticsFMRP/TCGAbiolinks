@@ -577,6 +577,9 @@ listPackage <-c("limma","edgeR","survcomp")
 
 tabPackage <- TCGAsocial(siteToFind ="bioconductor.org",listPackage)
 
+
+# define a keyword to find in support.bioconductor.org returing a table with suggested packages
+tabPackageKey <- TCGAsocial(siteToFind ="support.bioconductor.org" ,KeyInfo = "tcga")
 ```
 
 The result is shown below:
@@ -587,6 +590,9 @@ listPackage <-c("limma","edgeR","survcomp")
 tabPackage <- TCGAsocial(siteToFind="bioconductor.org", listPackage)
 
 knitr::kable(head(tabPackage), digits = 2, caption = "Table with number of downloads about a list of packages",row.names = FALSE)
+
+knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in support.bioconductor.org with keyword = tcga",row.names = FALSE)
+
 ```
 
 ### TCGA social with Biostar
