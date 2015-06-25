@@ -5,6 +5,7 @@
 #' @param dataDEGsFiltLevelTF dataDEGsFiltLevelTF
 #' @param topgenes topgenes
 #' @importFrom RCurl url.exists curlVersion
+#' @export
 #' @return table with number of pubmed related to tfs.
 TCGAinvestigate<- function(tumor,dataDEGsFiltLevelTF,topgenes){
     site <- "http://www.ncbi.nlm.nih.gov/pubmed/?term="
