@@ -4,7 +4,7 @@
 \alias{TCGAsocial}
 \title{TCGAsocial}
 \usage{
-TCGAsocial(siteToFind, listPackage = NULL, KeyInfo = NULL)
+TCGAsocial(siteToFind = NULL, listPackage = NULL, KeyInfo = NULL)
 }
 \arguments{
 \item{siteToFind}{website ("bioconductor.org" or "biostars.org")
