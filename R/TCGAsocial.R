@@ -103,10 +103,10 @@ TCGAsocial <- function(siteToFind=NULL, listPackage=NULL,KeyInfo=NULL){
                 if(sum(PackMat)>=1){
                     print(which(PackMat == TRUE))
                     PackageSuggested <- paste(names(PackMat[which(PackMat == TRUE)]),collapse=";")
-                    TableQuestions[i,"PackageSuggested"] <- PackageSuggested
+                    #TableQuestions[i,"PackageSuggested"] <- PackageSuggested
+                    TableQuestions[i,"PackageSuggested"] <- substr(PackageSuggested,1, 64)
                 }
                 # print(PackageSuggested)
-                TableQuestions[i,"PackageSuggested"] <- substr(PackageSuggested,1, 64)
             }
 
             tmp3a <- gsub("</a","", as.matrix(unlist(strsplit(questiontofind,">")))[2])

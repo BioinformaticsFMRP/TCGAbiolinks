@@ -532,6 +532,55 @@ knitr::kable(tabSurvKMcompleteDEGs[1:10,], digits = 2,
              caption = "Table KM-survival genes after SA",row.names = TRUE)
 ```
 
+## TCGA analyze and visualize (Survival Analysis Cox Regression and dnet package)
+You can analyze gene expression and clinical data from TCGA data using the `TCGAanalyze` function.
+ 
+```{r, eval = FALSE}
+library(TCGAbiolinks)
+# Survival Analysis SA
+
+clinical_patient_Cancer <- clinic("brca","clinical_patient")
+dataBRCAcomplete <- log2(BRCA_rnaseqv2)
+
+tokenStop<- 1
+
+tabSurvKMcomplete <- NULL
+
+for( i in 1: round(nrow(dataBRCAcomplete)/100)){
+message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
+tokenStart <- tokenStop
+tokenStop <-100*i
+tabSurvKM<-SurvivalKMunivariate(clinical_patient_Cancer,dataBRCAcomplete,Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],Survresult = F,ThreshTop=0.67,ThreshDown=0.33)
+
+tabSurvKMcomplete <- rbind(tabSurvKMcomplete,tabSurvKM)
+}
+
+tabSurvKMcomplete <- tabSurvKMcomplete[tabSurvKMcomplete$pvalue < 0.01,]
+tabSurvKMcomplete <- tabSurvKMcomplete[!duplicated(tabSurvKMcomplete$mRNA),]
+rownames(tabSurvKMcomplete) <-tabSurvKMcomplete$mRNA
+tabSurvKMcomplete <- tabSurvKMcomplete[,-1]
+tabSurvKMcomplete <- tabSurvKMcomplete[order(tabSurvKMcomplete$pvalue, decreasing=F),]
+
+tabSurvKMcompleteDEGs <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% dataDEGsFiltLevel$mRNA,]
+
+tflist <- EAGenes[EAGenes$Family == "transcription regulator","Gene"]
+tabSurvKMcomplete_onlyTF <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% tflist,]
+
+TabCoxNet <- SurvivalCoxNET(clinical_patient,dataBRCAcomplete,Genelist = rownames(tabSurvKMcomplete_onlyTF),scoreConfidence = 700,titlePlot = "SurvivalCoxNET Example")
+
+
+
+```
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+
+library(png)
+library(grid)
+img <- readPNG("SurvivalCoxNETOutput.png")
+grid.raster(img)
+```
+
+
 ## TCGA investigate
 Find most studied TFs in pubmed related to a specific cancer, disease, or tissue
  
