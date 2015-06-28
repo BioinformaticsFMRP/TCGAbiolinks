@@ -6,9 +6,10 @@
 ```R
 install.packages(c("downloader","RCurl","httr","devtools","stringr",
                     "exactRankTests","XML","GGally","parallel","ggplot2",
-                    "survival","biomaRt","RJSONIO","ggbiplot"))
+                    "survival","biomaRt","rjson","ggbiplot","dnet","igraph",
+                    "rvest"))
 source("http://bioconductor.org/biocLite.R")
-biocLite(c("GenomicRanges","edgeR","EDASeq","biomaRt"))
+biocLite(c("GenomicRanges","edgeR","EDASeq","biomaRt","supraHex"))
 devtools::install_github("vqv/ggbiplot")
 ```
 

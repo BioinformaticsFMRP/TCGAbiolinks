@@ -6,23 +6,32 @@
 #' @param scoreConfidence restrict to those edges with high confidence (eg. score>=700)
 #' @param titlePlot titlePlot
 #' @importFrom survival coxph
-#' @importFrom igraph subgraph.edges layout.fruchterman.reingold spinglass.community
+#' @importFrom igraph subgraph.edges layout.fruchterman.reingold
+#'             spinglass.community degree
 #' @importFrom dnet dRDataLoader dNetInduce dNetPipeline
 #' @importFrom supraHex visColormap
 #' @export
 #' @return net IGRAPH with attr: name (v/c), seqid (v/c), geneid (v/n), symbol (v/c), description (v/c) ...
-SurvivalCoxNET<-function(clinical_patient,dataGE,Genelist, scoreConfidence = 700, titlePlot = "SurvivalCoxNET Example"){
+SurvivalCoxNET <- function(clinical_patient,dataGE,Genelist,
+                           scoreConfidence = 700,
+                           titlePlot = "SurvivalCoxNET Example"){
 
 
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 
     png("SurvivalCoxNETOutput.png", width = 800, height = 800)
 
-
     ## fit a Cox proportional hazards model for age, gender, tumor type
     cfu<-clinical_patient[clinical_patient[,"bcr_patient_barcode"] %in% substr(colnames(dataGE),1,12),]
     rownames(cfu)<- cfu$bcr_patient_barcode
-    cfu <- as.data.frame(subset(cfu, select=c("bcr_patient_barcode","days_to_last_followup","days_to_death","vital_status","age_at_initial_pathologic_diagnosis", "gender"))  )
+    cfu <- as.data.frame(subset(cfu, select=c("bcr_patient_barcode",
+                                              "days_to_last_followup",
+                                              "days_to_death",
+                                              "vital_status",
+                                              "age_at_initial_pathologic_diagnosis",
+                                              "gender")
+                                )
+                         )
 
     rownames(cfu)<- cfu$bcr_patient_barcode
     cfu<-cfu[,-1]
@@ -59,7 +68,7 @@ SurvivalCoxNET<-function(clinical_patient,dataGE,Genelist, scoreConfidence = 700
         data <- cbind(pd, gene = md_selected[,i])
         data <- data [which(data$gene !="-Inf"),]
 
-        fit <- survival::coxph(formula=Surv(time,status) ~., data=data)
+        fit <- coxph(formula=Surv(time,status) ~., data=data)
         ## ANOVA (Chisq test)
         cox <- summary(fit)
         cat(paste( (ncol(md_selected)-i),".",sep=""))
@@ -71,20 +80,20 @@ SurvivalCoxNET<-function(clinical_patient,dataGE,Genelist, scoreConfidence = 700
     names(HR) <- colnames(md_selected)
     names(pvals) <- colnames(md_selected)
     # Network comunites >>=
-    library(dnet)
+
     # An igraph object that contains a functional protein association network in human. The network is extracted from the STRING database (version 9.1). Only those associations with medium confidence (score>=400) are retained.
-    org.Hs.string <- dnet::dRDataLoader(RData='org.Hs.string')
+    org.Hs.string <- dRDataLoader(RData='org.Hs.string')
     # restrict to those edges with high confidence (score>=700)
 
 
-    network <- igraph::subgraph.edges(org.Hs.string, eids=E(org.Hs.string)[combined_score>=scoreConfidence])
+    network <- subgraph.edges(org.Hs.string, eids=E(org.Hs.string)[combined_score>=scoreConfidence])
     network
 
     # extract network that only contains genes in pvals
     ind <- match(V(network)$symbol, names(pvals))
     ## for extracted graph
     nodes_mapped <- V(network)$name[!is.na(ind)]
-    network <- dnet::dNetInduce(g=network, nodes_query=nodes_mapped, knn=0, remove.loops=F, largest.comp=T)
+    network <- dNetInduce(g=network, nodes_query=nodes_mapped, knn=0, remove.loops=F, largest.comp=T)
     V(network)$name <- V(network)$symbol
     network
 
@@ -94,18 +103,18 @@ SurvivalCoxNET<-function(clinical_patient,dataGE,Genelist, scoreConfidence = 700
 
     # visualisation of the gene-active network itself
     ## the layout of the network visualisation (fixed in different visuals)
-    glayout <- igraph::layout.fruchterman.reingold(net)
+    glayout <- layout.fruchterman.reingold(net)
     ## color nodes according to communities (identified via a spin-glass model and simulated annealing)
-    com <- igraph::spinglass.community(net, spins=25)
+    com <- spinglass.community(net, spins=25)
     com$csize <- sapply(1:length(com),function(x) sum(com$membership==x))
     vgroups <- com$membership
     colormap <- "yellow-darkorange"
-    palette.name <- supraHex::visColormap(colormap=colormap)
+    palette.name <- visColormap(colormap=colormap)
     mcolors <- palette.name(length(com))
     vcolors <- mcolors[vgroups]
     com$significance <- dCommSignif(net, com)
     ## node sizes according to degrees
-    vdegrees <- igraph::degree(net)
+    vdegrees <- degree(net)
     ## highlight different communities
     mark.groups <- communities(com)
     mark.col <- visColoralpha(mcolors, alpha=0.2)
