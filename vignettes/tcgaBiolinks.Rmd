@@ -228,6 +228,7 @@ The arguments are:
 * type	File to prepare.
 * save	Save a rda object with the prepared object? Default: FALSE
 * filename Name of the rda object that will be saved if `save` is TRUE
+* toPackage Name of the package to prepare the data specific to that package. 
 
 Example of use:
 ```{r, eval = FALSE}
@@ -236,6 +237,50 @@ Example of use:
 # samples to normalize later
 TCGAPrepare(query, dir = "data", save = TRUE, filename = "myfile.rda")
 ```
+
+### Preparing the data with TCGAPrepare - toPackage 
+This section will show how to integrate TCGAbiolinks with other packages.
+Our intention is to provide as many integrations as possible.
+
+The example below shows how to use TCGAbiolinks with ELMER package 
+(expression/methylation analysis). The TCGAPrepare for the methylation data 
+will Removing probes with NA values in more than 0.80% samples and remove the 
+anottation data, fot the expression data it will take the log2(expression + 1)
+of the expression matrix in order to To linearize the relation between 
+methylation and expressionm also it will prepare the rownames as the 
+specified by the package.
+
+```{r, eval = FALSE}
+########################### Get tumor samples with TCGAbiolinks
+library(TCGAbiolinks)
+query <- TCGAQuery(tumor = "GBM",level = 3, platform = "HumanMethylation450")
+TCGADownload(query,path = "TCGA/450k")
+met <- TCGAPrepare(query,dir = "TCGA/450k",
+                   save = TRUE,
+                   filename = "met.rda",
+                   toPackage = "ELMER")
+
+query.rna <- TCGAQuery(tumor="GBM",level=3, platform="IlluminaHiSeq_RNASeqV2")
+TCGADownload(query.rna,path="TCGA/rna",type = "rsem.genes.normalized_results")
+exp <- TCGAPrepare(query.rna, dir="TCGA/rna", save = TRUE, filename = "exp.rda",toPackage = "ELMER")
+
+######################### To EMLER
+library(ELMER)
+
+################### genne annotation
+geneAnnot <- txs()
+geneAnnot$GENEID <- paste0("ID",geneAnnot$GENEID)
+geneInfo <- promoters(geneAnnot,upstream = 0, downstream = 0)
+######################## probe
+probe <- get.feature.probe()
+
+mee.gbm.glial.with.exp <- fetch.mee(meth = gbm.glial.m,
+                                exp = exp,
+                                probeInfo = probe,
+                                TCGA = TRUE,
+                                geneInfo = geneInfo)
+```
+
 
 
 ## Clinical data
