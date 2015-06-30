@@ -54,10 +54,8 @@ a ggplot2 plot
 Biplot for Principal Components using ggplot2
 }
 \examples{
-\dontrun{
-  wine.pca <- prcomp(wine, scale. = TRUE)
+wine.pca <- prcomp(wine, scale. = TRUE)
   print(ggbiplot(wine.pca, obs.scale = 1, var.scale = 1, groups = wine.class,
   ellipse = TRUE, circle = TRUE))
-  }
 }
 

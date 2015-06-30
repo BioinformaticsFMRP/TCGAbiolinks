@@ -31,7 +31,7 @@ EAbarplot
 \dontrun{
 
 Genelist <- rownames(dataDEGsFiltLevel)
-TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
+system.time(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
 # Enrichment Analysis EA (TCGAVisualize)
 # Gene Ontology (GO) and Pathway enrichment barPlot
 EAbarplot(tf = rownames(ansEA$ResBP),
