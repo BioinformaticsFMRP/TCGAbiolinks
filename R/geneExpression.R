@@ -8,28 +8,8 @@
 #' GenesCutID(c("CRKL|1399","TADA2A|6871","KRT76|51350"))
 GenesCutID <- function(GeneList){
     GeneListCutID <- as.matrix(matrix(unlist(strsplit(as.character(GeneList),
-                    "|",fixed = TRUE)),length(GeneList),2,byrow = TRUE))[,1]
+                                                      "|",fixed = TRUE)),length(GeneList),2,byrow = TRUE))[,1]
     return(as.matrix(GeneListCutID))
-}
-
-#' @title TimeUse
-#' @description
-#'   TimeUse
-#' @param func func
-#' @export
-#' @examples
-#'  TimeUse(print(1))
-#' \dontrun{
-#'  Genelist <-rownames(dataDEGsFiltLevel)
-#'  TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",
-#'  Genelist))
-#' }
-#' @return time execution of a function
-TimeUse <- function(func){
-    time1 <- proc.time() # mod1 to determine time calculation
-    result <- func
-    time2 <- proc.time()
-    show(timeelapsed <- time2 - time1)
 }
 
 #' @title Filtering rnaseq by quantile
@@ -85,19 +65,19 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
 
     timeEstimated <- format(ncol(TCGA_RnaseqTable)*nrow(TCGA_RnaseqTable)/80000,digits = 2)
     print(messageEstimation <- paste("I Need about ", timeEstimated,
-                "seconds for this Complete Normalization Upper Quantile",
-                " [Processing 80k elements /s]  "))
+                                     "seconds for this Complete Normalization Upper Quantile",
+                                     " [Processing 80k elements /s]  "))
 
     print("Step 1 of 4: newSeqExpressionSet ...")
-    TimeUse(TCGA_RnaseqTable_norm <- EDASeq::newSeqExpressionSet(TCGA_RnaseqTable, featureData = geneInfo))
+    system.time(TCGA_RnaseqTable_norm <- EDASeq::newSeqExpressionSet(TCGA_RnaseqTable, featureData = geneInfo))
     print("Step 2 of 4: withinLaneNormalization ...")
-    TimeUse(TCGA_RnaseqTable_norm <- EDASeq::withinLaneNormalization(TCGA_RnaseqTable_norm, "geneLength", which = "upper", offset = FALSE))
+    system.time(TCGA_RnaseqTable_norm <- EDASeq::withinLaneNormalization(TCGA_RnaseqTable_norm, "geneLength", which = "upper", offset = FALSE))
     print("Step 3 of 4: betweenLaneNormalization ...")
-    TimeUse(TCGA_RnaseqTable_norm <- EDASeq::betweenLaneNormalization(TCGA_RnaseqTable_norm, which = "upper", offset = FALSE))
+    system.time(TCGA_RnaseqTable_norm <- EDASeq::betweenLaneNormalization(TCGA_RnaseqTable_norm, which = "upper", offset = FALSE))
     print("Step 4 of 4: exprs ...")
 
-    #TimeUse(TCGA_RnaseqTable_norm <- EDASeq::exprs(TCGA_RnaseqTable_norm))
-    TimeUse(TCGA_RnaseqTable_norm <- EDASeq::counts(TCGA_RnaseqTable_norm))
+    #system.time(TCGA_RnaseqTable_norm <- EDASeq::exprs(TCGA_RnaseqTable_norm))
+    system.time(TCGA_RnaseqTable_norm <- EDASeq::counts(TCGA_RnaseqTable_norm))
 
     return(TCGA_RnaseqTable_norm)
 }
@@ -139,7 +119,7 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 
     timeEstimated <- format(ncol(TOC)*nrow(TOC)/30000,digits = 2)
     print(messageEstimation <- paste("I Need about ", timeEstimated,
-                    "seconds for this DEA. [Processing 30k elements /s]  "))
+                                     "seconds for this DEA. [Processing 30k elements /s]  "))
 
     # Reading in the data and creating a DGEList object
     colnames(TOC) <- paste0('s',1:ncol(TOC))
@@ -181,7 +161,6 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 #' of gene expression between the two
 #' conditions multiplied logFC)
 #' @examples
-#' \dontrun{
 #' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 #' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
 #' samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
@@ -193,7 +172,6 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 #' dataTN <- dataFilt[,samplesNT]
 #' dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",
 #' dataTP,dataTN)
-#' }
 CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
                            TableCond1,TableCond2,typeOrder = TRUE) {
 
@@ -244,14 +222,13 @@ CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
 #' @export
 #' @return PCA plot
 #' @examples
-#' \dontrun{
 #' # normalization of genes
 #' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 #' # quantile filter of genes
 #' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
 #' # Principal Component Analysis plot for ntop selected DEGs
 #' plotPCAforGroups(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
-#' }
+#'
 plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
     ComparisonSelected <- "Normal vs Tumor"
     TitlePlot <- paste0("PCA ", "top ", ntopgenes,
@@ -284,12 +261,14 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
     names(sampleColors) <- colnames(expr2)
     cancer.pca <- stats::prcomp(t(expr2),cor = TRUE)
 
-    # print(sample.colors)
+
     g <- ggbiplot(cancer.pca, obs.scale = 1, var.scale = 1,
                   groups = sampleColors, ellipse = TRUE, circle = FALSE)
     g <- g + scale_colour_manual(name = "",
                                  values = c("blue" = "blue","red" = "red"))
-    g <- g + geom_point(aes(colour = sampleColors), size = 3)
+    with(g,
+         g <- g + geom_point(aes(colour = sampleColors), size = 3)
+    )
     #shape = tabClusterNew$Study)
     g <- g + theme(legend.direction = 'horizontal',  legend.position = 'top')
     g <- g + ggtitle(TitlePlot)
@@ -307,7 +286,7 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #' \dontrun{
 #'
 #' Genelist <- rownames(dataDEGsFiltLevel)
-#' TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
+#' system.time(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
 #' }
 EAcomplete <- function(TFname, RegulonList){
     EAGenes <- get("EAGenes")
@@ -461,7 +440,7 @@ GeneSplitRegulon <- function(Genelist,Sep){
 #' \dontrun{
 #'
 #' Genelist <- rownames(dataDEGsFiltLevel)
-#' TimeUse(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
+#' system.time(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
 #' # Enrichment Analysis EA (TCGAVisualize)
 #' # Gene Ontology (GO) and Pathway enrichment barPlot
 #' EAbarplot(tf = rownames(ansEA$ResBP),
@@ -482,9 +461,9 @@ EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
         tmp <- as.data.frame(tmp, stringsAsFactors = FALSE)
         tmp[, 2] <- as.numeric(sub(" FDR= ", "", tmp[, 2]))
         tmp[, 3] <- as.numeric(unlist(strsplit(matrix(unlist(strsplit(tmp[, 3],
-                                                  "=")), nrow = 2)[2, ], ")")))
+                                                                      "=")), nrow = 2)[2, ], ")")))
         tmp[, 4] <- as.numeric(unlist(strsplit(matrix(unlist(strsplit(tmp[, 4],
-                                                  "=")), nrow = 2)[2, ], ")")))
+                                                                      "=")), nrow = 2)[2, ], ")")))
 
         if (nrow(tmp) < nBar) nBar <- nrow(tmp)
 
