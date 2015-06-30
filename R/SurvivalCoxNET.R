@@ -7,9 +7,10 @@
 #' @param titlePlot titlePlot
 #' @importFrom survival coxph
 #' @importFrom igraph subgraph.edges layout.fruchterman.reingold
-#'             spinglass.community degree
-#' @importFrom dnet dRDataLoader dNetInduce dNetPipeline
-#' @importFrom supraHex visColormap
+#'             spinglass.community degree E communities crossing V
+#' @importFrom dnet dRDataLoader dNetInduce dNetPipeline visNet dCommSignif
+#' @importFrom supraHex visColormap visColoralpha
+#' @importFrom grDevices dev.list
 #' @export
 #' @return net IGRAPH with attr: name (v/c), seqid (v/c), geneid (v/n), symbol (v/c), description (v/c) ...
 SurvivalCoxNET <- function(clinical_patient,dataGE,Genelist,
@@ -30,8 +31,8 @@ SurvivalCoxNET <- function(clinical_patient,dataGE,Genelist,
                                               "vital_status",
                                               "age_at_initial_pathologic_diagnosis",
                                               "gender")
-                                )
-                         )
+    )
+    )
 
     rownames(cfu)<- cfu$bcr_patient_barcode
     cfu<-cfu[,-1]
@@ -81,7 +82,9 @@ SurvivalCoxNET <- function(clinical_patient,dataGE,Genelist,
     names(pvals) <- colnames(md_selected)
     # Network comunites >>=
 
-    # An igraph object that contains a functional protein association network in human. The network is extracted from the STRING database (version 9.1). Only those associations with medium confidence (score>=400) are retained.
+    # An igraph object that contains a functional protein association network
+    # in human. The network is extracted from the STRING database (version 9.1).
+    # Only those associations with medium confidence (score>=400) are retained.
     org.Hs.string <- dRDataLoader(RData='org.Hs.string')
     # restrict to those edges with high confidence (score>=700)
 
@@ -93,12 +96,14 @@ SurvivalCoxNET <- function(clinical_patient,dataGE,Genelist,
     ind <- match(V(network)$symbol, names(pvals))
     ## for extracted graph
     nodes_mapped <- V(network)$name[!is.na(ind)]
-    network <- dNetInduce(g=network, nodes_query=nodes_mapped, knn=0, remove.loops=F, largest.comp=T)
+    network <- dNetInduce(g=network, nodes_query=nodes_mapped, knn=0,
+                          remove.loops=FALSE, largest.comp=TRUE)
     V(network)$name <- V(network)$symbol
     network
 
     # Identification of gene-active network
-    net <- dNetPipeline(g=network, pval=pvals, method="customised", significance.threshold=5e-02)
+    net <- dNetPipeline(g=network, pval=pvals, method="customised",
+                        significance.threshold=5e-02)
     net
 
     # visualisation of the gene-active network itself
@@ -122,7 +127,12 @@ SurvivalCoxNET <- function(clinical_patient,dataGE,Genelist,
     edge.color <- c("#C0C0C0", "#000000")[crossing(com,net)+1]
     edge.color <- visColoralpha(edge.color, alpha=0.5)
     ## visualise the subnetwrok
-    visNet(g=net, glayout=glayout, vertex.label=V(net)$geneSymbol, vertex.color=vcolors, vertex.frame.color=vcolors, vertex.shape="sphere", mark.groups=mark.groups, mark.col=mark.col, mark.border=mark.border, mark.shape=1, mark.expand=10, edge.color=edge.color, newpage=F, vertex.label.color="blue", vertex.label.dist=0.4, vertex.label.font=2, main = titlePlot)
+    visNet(g=net, glayout=glayout, vertex.label=V(net)$geneSymbol,
+           vertex.color=vcolors, vertex.frame.color=vcolors,
+           vertex.shape="sphere", mark.groups=mark.groups, mark.col=mark.col,
+           mark.border=mark.border, mark.shape=1, mark.expand=10,
+           edge.color=edge.color, newpage=FALSE, vertex.label.color="blue",
+           vertex.label.dist=0.4, vertex.label.font=2, main = titlePlot)
     legend_name <- paste("C",1:length(mcolors)," (n=",com$csize,", pval=",signif(com$significance,digits=2),")",sep='')
     legend("topright", legend=legend_name, fill=mcolors, bty="n", cex=1.4)
 
