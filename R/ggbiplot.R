@@ -48,11 +48,9 @@
 #' @return  a ggplot2 plot
 #' @export
 #' @examples
-#' \dontrun{
 #'   wine.pca <- prcomp(wine, scale. = TRUE)
 #'   print(ggbiplot(wine.pca, obs.scale = 1, var.scale = 1, groups = wine.class,
 #'   ellipse = TRUE, circle = TRUE))
-#'   }
 ggbiplot <- function(pcobj, choices = 1:2, scale = 1, pc.biplot = TRUE,
                      obs.scale = 1 - scale, var.scale = scale,
                      groups = NULL, ellipse = FALSE, ellipse.prob = 0.68,
