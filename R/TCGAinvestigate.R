@@ -5,9 +5,17 @@
 #' @param dataDEGsFiltLevelTF dataDEGsFiltLevelTF
 #' @param topgenes topgenes
 #' @importFrom RCurl url.exists curlVersion
+#' @examples
+#' TFs <- EAGenes[EAGenes$Family =="transcription regulator",]
+#' TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
+#' dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
+#  # Order table DEGs TFs according to Delta decrease
+#' dataDEGsFiltLevelTFs <- dataDEGsFiltLevelTFs[order(dataDEGsFiltLevelTFs$Delta,decreasing = TRUE),]
+#' # Find Pubmed of TF studied related to cancer
+#' tabDEGsTFPubmed <- TCGAinvestigate("breast", dataDEGsFiltLevelTFs, topgenes = 1)
 #' @export
 #' @return table with number of pubmed related to tfs.
-TCGAinvestigate<- function(tumor,dataDEGsFiltLevelTF,topgenes){
+TCGAinvestigate <- function(tumor,dataDEGsFiltLevelTF,topgenes){
     site <- "http://www.ncbi.nlm.nih.gov/pubmed/?term="
 
     # GenesTofix <- c("JUN","HR","HOMEZ",
