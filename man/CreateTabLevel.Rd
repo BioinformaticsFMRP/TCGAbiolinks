@@ -35,7 +35,6 @@ conditions multiplied logFC)
 CreateTabLevel for Differentially expression analysis (DEA)
 }
 \examples{
-\dontrun{
 dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 dataFilt <- RnaSeqFilt(dataNorm, 0.25)
 samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
@@ -47,6 +46,5 @@ dataTP <- dataFilt[,samplesTP]
 dataTN <- dataFilt[,samplesNT]
 dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",
 dataTP,dataTN)
-}
 }
 

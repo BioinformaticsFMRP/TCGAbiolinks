@@ -4,11 +4,12 @@
 #' @param tabGroupCol table with group samples information in tabGroupCol$Color
 #' @param ArrayIndex ArrayIndex
 #' @param pmat pmat
+#' @importFrom grDevices dev.list
 #' @export
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
 TCGApreprocessing<- function(object,tabGroupCol,ArrayIndex,pmat){
 
-  if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
+    if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 
     png("PreprocessingOutput.png", width = 1200, height = 1200)
 
@@ -42,9 +43,9 @@ TCGApreprocessing<- function(object,tabGroupCol,ArrayIndex,pmat){
     axis(2, labels = as.list(pretty(c, 10)), at = seq(0, 1, by = (1/(length(pretty(c,  10)) - 1))))
     abline(h = seq((1/(length(pretty(c, 10)) - 1))/2, 1 - (1/(length(pretty(c, 10)) - 1)), by = (1/(length(pretty(c, 10)) - 1))))
 
-    boxplot(c, outline = F,las =2, lwd = 6,col = tabGroupCol$Color, main ="Boxplot of correlation samples by samples after RMA")
+    boxplot(c, outline = FALSE,las =2, lwd = 6,col = tabGroupCol$Color, main ="Boxplot of correlation samples by samples after RMA")
 
     dev.off()
 
-return(c)
+    return(c)
 }
