@@ -314,6 +314,7 @@ prepareToPackage <- function(df, platform, toPackage){
             aux <- strsplit(rownames(df),"\\|")
             GeneID <- unlist(lapply(aux,function(x) x[2]))
             row.names(df) <- paste0("ID",GeneID)
+            df <- as.matrix(df)
         }
 
         if (grepl("humanmethylation", platform, ignore.case = TRUE)) {
