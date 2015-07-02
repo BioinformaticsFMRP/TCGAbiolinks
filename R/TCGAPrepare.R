@@ -152,7 +152,7 @@ TCGAPrepare <- function(query,
                                })
     }
 
-    if (grepl("illuminaga|illuminadnamethylation_oma",
+    if (grepl("illuminadnamethylation_oma",
               platform, ignore.case = TRUE)) {
 
         for (i in seq_along(files)) {
@@ -170,6 +170,30 @@ TCGAPrepare <- function(query,
 
         rownames(df) <- df[,1]
         df[,1] <- NULL
+    }
+
+    if (tolower(platform) == "illuminaga_rnaseq") {
+        # Barcode in the name
+        regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
+                        "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
+        barcode <- str_match(files,regex)
+
+        for (i in seq_along(files)) {
+            data <- fread(files[i], header = TRUE, sep = "\t",
+                               stringsAsFactors = FALSE)
+
+            x <- colnames(data)
+            setnames(data,colnames(data)[2:4],paste0(colnames(data)[2:4],"_",barcode[1]))
+            if (i == 1) {
+                df <- data
+            } else {
+                df <- merge(df, data, colnames(data)[1])
+            }
+            setTxtProgressBar(pb, i)
+        }
+
+
+        colnames(data)
     }
 
     if (grepl("illuminahiseq_rnaseqv2|illuminahiseq_totalrnaseqv2",
