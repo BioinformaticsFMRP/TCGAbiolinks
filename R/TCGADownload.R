@@ -118,19 +118,30 @@ filterFiles <- function(data,samples,files){
 
 
     # case uuid in name
-    if(grepl(uuidName,data$Platform)){
+    if(grepl(uuidName,data$Platform, ignore.case = TRUE)){
         # case uuid in name file
         regex <- paste0("[[:alnum:]]{8}-[[:alnum:]]{4}",
                         "-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}")
         uuid <- str_match(files,regex)[,1]
-        map <- mapuuidbarcode(unique(uuid))
-        idx <- which(map$barcode %in% samples)
+        map <- mapuuidbarcode(unique(na.omit(uuid)))
+        idx <- unique(unlist(lapply(samples, function(x) grep(x,map$barcode))))
         idx <- which(uuid %in% map[idx,]$uuid)
         files <- files[idx]
-    } else if(grepl(barcodeName, data$Platform, ignore.case = TRUE)){
+    } else if (grepl("IlluminaGA_DNASeq_curated",data$Platform) & data$Center == "broad.mit.edu"){
+    # Exception - two uuids in the name
+        # case uuid in name file
+        regex <- paste0("[[:alnum:]]{8}-[[:alnum:]]{4}",
+                        "-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}")
+        files <- files[grep(regex,files)]
+        uuid <- unlist(str_match_all(files,regex))
+        map <- mapuuidbarcode(unique(na.omit(uuid)))
+        idx <- unique(unlist(lapply(samples, function(x) grep(x,map$barcode))))
+        idx <- which(uuid %in% map[idx,]$uuid)
+        files <- files[ceiling(idx / 2)]
+    } else if(grepl(barcodeName, data$Platform, ignore.case = TRUE)) {
         idx <- unique(unlist(lapply(samples, function(x) grep(x,files))))
         files <- files[idx]
-    } else {
+    } else if(grepl(mageName, data$Platform, ignore.case = TRUE)) {
         mage <- getMage(data)
         idx <- unlist(lapply(samples,
                              function(x) grep(x,mage$Comment..TCGA.Barcode.)))
