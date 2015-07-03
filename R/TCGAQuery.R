@@ -155,7 +155,7 @@ TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
     }
     if (!is.null(platform)) {
         id <- sapply(platform, function(x){
-            x == tolower(db$Platform)
+            tolower(x) == tolower(db$Platform)
         })
         id <- apply(id, 1,any)
         db <-  db[id,]
