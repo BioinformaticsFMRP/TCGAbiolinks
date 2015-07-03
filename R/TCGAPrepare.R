@@ -129,28 +129,7 @@ TCGAPrepare <- function(query,
         idx <- which(colnames(df) %in% map$uuid)
         colnames(df)[idx] <- as.character(map$barcode)
     }
-    # case: header has barcode
-    # Line 2 is useless
-    if (grepl("agilent|H-miRNA_8x15K",platform, ignore.case = TRUE)) {
-        for (i in seq_along(files)) {
-            data <- read.table(files[i], skip=2,
-                               stringsAsFactors = FALSE)
-            if (i == 1) {
-                df <- data
-            } else {
-                df <- merge(df, data,by = colnames(df)[1])
-            }
-            setTxtProgressBar(pb, i)
-        }
-        rownames(df) <- df[,1]
-        df[,1] <- NULL
-        colnames(df) <- sapply(files,
-                               function(x) {
-                                   read.table(x,
-                                              stringsAsFactors = FALSE,
-                                              nrows=1)[3]
-                               })
-    }
+
 
     if (grepl("illuminadnamethylation_oma",
               platform, ignore.case = TRUE)) {
@@ -172,7 +151,8 @@ TCGAPrepare <- function(query,
         df[,1] <- NULL
     }
 
-    if (tolower(platform) == "illuminaga_rnaseq") {
+    if (tolower(platform) == "illuminaga_rnaseq" ||
+        tolower(platform) == "illuminahiseq_rnaseq") {
         # Barcode in the name
         regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                         "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
@@ -180,7 +160,7 @@ TCGAPrepare <- function(query,
 
         for (i in seq_along(files)) {
             data <- fread(files[i], header = TRUE, sep = "\t",
-                               stringsAsFactors = FALSE)
+                          stringsAsFactors = FALSE)
 
             x <- colnames(data)
             setnames(data,colnames(data)[2:4],paste0(colnames(data)[2:4],"_",barcode[1]))
@@ -191,13 +171,55 @@ TCGAPrepare <- function(query,
             }
             setTxtProgressBar(pb, i)
         }
-
-
-        colnames(data)
     }
 
-    if (grepl("illuminahiseq_rnaseqv2|illuminahiseq_totalrnaseqv2",
-              tolower(platform))) {
+    if (tolower(platform) == tolower("HT_HG-U133A")) {
+        # Barcode in the mage file
+        if(is.vector(query)){
+            mage <- getMage(query)
+        } else {
+            mage <- getMage(query[1,])
+        }
+
+        for (i in seq_along(files)) {
+            data <- fread(files[i], header = TRUE, sep = "\t", skip= 1,
+                          stringsAsFactors = FALSE)
+
+            if (i == 1) {
+                df <- data
+            } else {
+                df <- merge(df, data, colnames(data)[1])
+            }
+            setTxtProgressBar(pb, i)
+        }
+        names <- sapply(files,
+                        function(x) {
+                            y <- fread(x, header = FALSE,
+                                       stringsAsFactors = FALSE,
+                                       nrows=1)$V2
+                            idx <- grep(y,mage$Hybridization.Name)
+                            mage[idx,]$Comment..TCGA.Barcode.
+                        })
+        setnames(df,2:ncol(df),names)
+    }
+
+    if (tolower(platform) == tolower("HG-U133_Plus_2") ||
+        grepl("H-miRNA_8x15K|agilent",platform, ignore.case = TRUE)) {
+        for (i in seq_along(files)) {
+            data <- fread(files[i], header = TRUE, sep = "\t",
+                          stringsAsFactors = FALSE)
+
+            if (i == 1) {
+                df <- data
+            } else {
+                df <- merge(df, data, colnames(data)[1])
+            }
+            setTxtProgressBar(pb, i)
+        }
+        df <- df[-1,]
+
+     }
+    if (grepl("rnaseqv2",platform, ignore.case = TRUE)) {
         regex <- paste0("[:alnum:]{8}-[:alnum:]{4}",
                         "-[:alnum:]{4}-[:alnum:]{4}-[:alnum:]{12}")
         uuid <- str_match(files,regex)
