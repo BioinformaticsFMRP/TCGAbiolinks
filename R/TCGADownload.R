@@ -27,7 +27,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 
             file <- paste0(path, "/", basename(data[i, "deployLocation"]))
             cat(paste0("Downloading:",
-                           basename(data[i, "deployLocation"]),"\n"))
+                       basename(data[i, "deployLocation"]),"\n"))
             if (!file.exists(file)) {
                 if(is.windows()){
                     suppressWarnings(
@@ -50,6 +50,8 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             dir.create(file.path(path,folder), showWarnings = FALSE)
             url <- gsub(".tar.gz","",data[i,]$deployLocation)
             files <- getFileNames(paste0(root,url))
+            idx <- grep("MANIFEST|README|CHANGES|DESCRIPTION|DATA_USE|Name|Size|Parent|Last",files)
+            files <- files[-idx]
 
             if(!is.null(type)){
                 files <- files[grepl(type,files)]
@@ -85,25 +87,59 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 # Filter files by barcode
 filterFiles <- function(data,samples,files){
 
+    barcodeName <- paste("IlluminaHiSeq_RNASeq",
+                         "humanmethylation",
+                         "H-miRNA_8x15K",
+                         "images",
+                         "SOLiD_DNASeq",
+                         "pathology_reports",
+                         "IlluminaDNAMethylation",
+                         "HG-CGH-244A",
+                         "HG-CGH-415K_G4124A",
+                         "HG-U133_Plus_2",
+                         "IlluminaGA_DNASeq_automated",
+                         "IlluminaGA_miRNASeq",
+                         "IlluminaGA_mRNA_DGE",
+                         "IlluminaGA_RNASeq",
+                         "IlluminaHiSeq_DNASeqC",
+                         "IlluminaHiSeq_miRNASeq",
+                         "IlluminaHiSeq_RNASeq",
+                         "IlluminaHiSeq_WGBS", sep = "|")
+
+    uuidName <- paste("RNASeqV2",
+                      "MDA_RPPA_Core",
+                      sep = "|")
+
+    mageName <-  paste("AgilentG4502A",
+                       "CGH-1x1M_G4447A",
+                       "Genome_Wide_SNP_6",
+                       "HT_HG-U133A",
+                       sep = "|")
+
+
     # case uuid in name
-    if(grepl("IlluminaHiSeq_RNASeqV2",data$Platform) ||
-       tolower(data$Platform) == "illuminaga_rnaseqv2") {
+    if(grepl(uuidName,data$Platform)){
+        # case uuid in name file
+        regex <- paste0("[[:alnum:]]{8}-[[:alnum:]]{4}",
+                        "-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}")
+        uuid <- str_match(files,regex)[,1]
+        map <- mapuuidbarcode(unique(uuid))
+        idx <- which(map$barcode %in% samples)
+        idx <- which(uuid %in% map[idx,]$uuid)
+        files <- files[idx]
+    } else if(grepl(barcodeName, data$Platform, ignore.case = TRUE)){
+        idx <- unique(unlist(lapply(samples, function(x) grep(x,files))))
+        files <- files[idx]
+    } else {
         mage <- getMage(data)
         idx <- unlist(lapply(samples,
                              function(x) grep(x,mage$Comment..TCGA.Barcode.)))
         idx <- unique(idx)
-        names <- mage[idx,]$Extract.Name
+        mage <- mage[idx,]
+        idx <- grep("Derived.Array.Data.Matrix.File|Array.Data.File",colnames(mage))
+        names <- unique(unlist(mage[,idx]))
         idx <- unique(unlist(lapply(names, function(x) grep(x,files))))
         files <- files[idx]
-        return(files)
     }
-    # case barcode in name
-    if(grepl("IlluminaHiSeq_RNASeq|humanmethylation|",data$Platform,
-             ignore.case = TRUE) ||
-       tolower(data$Platform) == "illuminaga_rnaseq"){
-        idx <- unique(unlist(lapply(samples, function(x) grep(x,files))))
-        files <- files[idx]
-        return(files)
-    }
-
+    return(files)
 }
