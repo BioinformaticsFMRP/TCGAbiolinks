@@ -5,6 +5,7 @@
 #' @param type Filter the files that will be downloaded by type
 #' @param quiet Supress output messages?. Default: FALSE
 #' @param samples List of samples to download
+#' @param force Download files even if it was already downladed? Default: FALSE
 #' @seealso TCGAQuery
 #' @examples
 #'    samples <- c("TCGA-26-1442-01A-01R-1850-01")
@@ -16,7 +17,7 @@
 #' @importFrom downloader download
 #' @return Download tcga into path
 TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
-                         quiet = FALSE) {
+                         quiet = FALSE, force = FALSE) {
 
     dir.create(path, showWarnings = FALSE, recursive = TRUE)
     root <- "https://tcga-data.nci.nih.gov"
@@ -28,7 +29,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             file <- paste0(path, "/", basename(data[i, "deployLocation"]))
             cat(paste0("Downloading:",
                        basename(data[i, "deployLocation"]),"\n"))
-            if (!file.exists(file)) {
+            if (force || !file.exists(file)) {
                 if(is.windows()){
                     suppressWarnings(
                         download(paste0(root, data[i, "deployLocation"]),
@@ -66,7 +67,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             cat(paste0("Downloading:", length(files), " files","\n"))
 
             for (i in seq_along(files)) {
-                if (!file.exists(file.path(path,folder,files[i]))) {
+                if (force || !file.exists(file.path(path,folder,files[i]))) {
                     if(is.windows()){
                         suppressWarnings(
                             download(paste0(root,url,"/",files[i]),
