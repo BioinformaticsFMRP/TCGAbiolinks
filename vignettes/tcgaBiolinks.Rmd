@@ -32,14 +32,13 @@ TCGAbiolinks package.
  with the following 
  parameters:
 
-* tumor 
-* platform 
-* added.since (format: mm/dd/YYYY)
-* added.up.to (format: mm/dd/YYYY)
-* listSample
-* level
-* center
-* samples 
+* **tumor** Tumor or list of tumors. The list of tumor is shown in the examples. 
+* **platform** Platform or list of tumors. The list of platforms is shown in the examples.
+* **samples** List of TCGA barcodes
+* **added.since** (format: mm/dd/YYYY)
+* **added.up.to** (format: mm/dd/YYYY)
+* **level**  Options: 1,2,3,"mage-tab"
+* **center**
 
 ### Searching by tumor
 You can filter the search by tumor using the tumor parameter.
@@ -200,11 +199,13 @@ knitr::kable(BRCA_RNASeqV2_version, digits = 2,
 You can easily download data using the `TCGADownload` function.
 
 The arguments are:
-* data	The TCGAQuery output
-* path	location to save the files. Default: "."
-* type	Filter the files to download by type
-* samples	List of samples to download
-* quiet	Supress output messages? Default: FALSE
+
+*  **data**	The `TCGAQuery` output
+*  **path**	location to save the files. Default: "."
+*  **type**	Filter the files to download by type
+*  **samples**	List of samples to download
+*  **quiet**	Supress output messages? Default: FALSE
+*  **force**	Download again if file already exists? Default: FALSE
 
 Example of use:
 ```{r, eval = FALSE}
@@ -225,12 +226,13 @@ You can easily read your downloaded data using the `TCGAPrepare` function.
 This function will prepare data matrices for downstream analysis.
 
 The arguments are:
-* query	Data frame as the one returned from TCGAQuery
-* dir	Directory with the files
-* type	File to prepare.
-* save	Save a rda object with the prepared object? Default: FALSE
-* filename Name of the rda object that will be saved if `save` is TRUE
-* toPackage Name of the package to prepare the data specific to that package. 
+
+* **query**	Data frame as the one returned from TCGAQuery
+* **dir**	Directory with the files
+* **type**	File to prepare.
+* **save**	Save a rda object with the prepared object? Default: FALSE
+* **filename** Name of the rda object that will be saved if `save` is TRUE
+* **toPackage** Name of the package to prepare the data specific to that package. 
 
 Example of use:
 ```{r, eval = FALSE}
@@ -241,10 +243,10 @@ TCGAPrepare(query, dir = "data", save = TRUE, filename = "myfile.rda")
 ```
 
 ### Preparing the data with TCGAPrepare - toPackage 
-This section will show how to integrate TCGAbiolinks with other packages.
+This section will show how to integrate `TCGAbiolinks` with other packages.
 Our intention is to provide as many integrations as possible.
 
-The example below shows how to use TCGAbiolinks with ELMER package 
+The example below shows how to use `TCGAbiolinks` with `ELMER` package 
 (expression/methylation analysis). The TCGAPrepare for the methylation data 
 will Removing probes with NA values in more than 0.80% samples and remove the 
 anottation data, fot the expression data it will take the log2(expression + 1)
@@ -665,7 +667,7 @@ most downloaded packages in CRAN or BioConductor and one that searches the most 
 ### TCGA social with BioConductor
 Find most downloaded packages in CRAN or BioConductor
  
-```{r, eval = TRUE}
+```{r, eval = FALSE}
 library(TCGAbiolinks)
 
 # Define a list of package to find number of downloads
