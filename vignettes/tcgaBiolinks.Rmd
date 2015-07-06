@@ -211,8 +211,10 @@ Example of use:
 # get all samples from the query and save them in the TCGA folder
 # samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
 # samples to normalize later
+
 TCGADownload(query, path = "data", type = "rsem.genes.results")
 
+TCGADownload(query, path = "data", type = "rsem.isoforms.normalized_results")
 ```
 
 Comment: The function will structure the folders to save the data as:
