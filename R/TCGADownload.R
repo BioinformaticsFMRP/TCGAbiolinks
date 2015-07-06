@@ -48,7 +48,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
         for (i in 1:nrow(data)) {
 
             folder <- gsub(".tar.gz","",basename(data[i,]$deployLocation))
-            dir.create(file.path(path,folder), showWarnings = FALSE)
+
             url <- gsub(".tar.gz","",data[i,]$deployLocation)
             files <- getFileNames(paste0(root,url))
             idx <- grep("MANIFEST|README|CHANGES|DESCRIPTION|DATA_USE|Name|Size|Parent|Last",files)
@@ -64,7 +64,11 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             if(!is.null(samples)){
                 files <- filterFiles(data[i,],samples,files)
             }
-            cat(paste0("Downloading:", length(files), " files","\n"))
+
+            if(length(files) > 0){
+                dir.create(file.path(path,folder), showWarnings = FALSE)
+                message(paste0("Downloading:", length(files), " files","\n"))
+            }
 
             for (i in seq_along(files)) {
                 if (force || !file.exists(file.path(path,folder,files[i]))) {
@@ -129,7 +133,7 @@ filterFiles <- function(data,samples,files){
         idx <- which(uuid %in% map[idx,]$uuid)
         files <- files[idx]
     } else if (grepl("IlluminaGA_DNASeq_curated",data$Platform) & data$Center == "broad.mit.edu"){
-    # Exception - two uuids in the name
+        # Exception - two uuids in the name
         # case uuid in name file
         regex <- paste0("[[:alnum:]]{8}-[[:alnum:]]{4}",
                         "-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}")
