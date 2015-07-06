@@ -163,7 +163,7 @@ TCGAPrepare <- function(query,
                           stringsAsFactors = FALSE)
 
             x <- colnames(data)
-            setnames(data,colnames(data)[2:4],paste0(colnames(data)[2:4],"_",barcode[1]))
+            setnames(data,colnames(data)[2:4],paste0(colnames(data)[2:4],"_",barcode[i]))
             if (i == 1) {
                 df <- data
             } else {
