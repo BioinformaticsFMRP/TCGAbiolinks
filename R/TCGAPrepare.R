@@ -220,26 +220,48 @@ TCGAPrepare <- function(query,
 
     }
     if (grepl("rnaseqv2",platform, ignore.case = TRUE)) {
+
+        if(is.null(type) || (type != "rsem.genes.results" &&
+                             type != "rsem.isoforms.results" &&
+                             type != "rsem.genes.normalized_results" &&
+                             type != "rsem.isoforms.normalized_results")
+           ){
+            msg <- paste0("Plase select a type. \n Possibilities:\n",
+                          " = rsem.genes.results\n",
+                          " = rsem.isoforms.results\n",
+                          " = rsem.genes.normalized_results\n",
+                          " = rsem.isoforms.normalized_results\n"
+                          )
+            message(msg)
+            return()
+        }
+
+        if(type == "rsem.genes.results")               pat <- "rsem.genes.results"
+        if(type == "rsem.isoforms.results")            pat <- "rsem.isoforms.results"
+        if(type == "rsem.genes.normalized_results")    pat <- "rsem.genes.normalized_results"
+        if(type == "rsem.isoforms.normalized_results") pat <- "rsem.isoforms.normalized_results"
+
+        files <- files[grep(pat,files, perl = TRUE)]
+
         regex <- paste0("[:alnum:]{8}-[:alnum:]{4}",
                         "-[:alnum:]{4}-[:alnum:]{4}-[:alnum:]{12}")
         uuid <- str_match(files,regex)
         map <- mapuuidbarcode(uuid)
+
         for (i in seq_along(files)) {
-            data <- read.table(files[i], header = TRUE, sep = "\t",
-                               stringsAsFactors = FALSE, check.names = FALSE,
-                               comment.char = "#",fill = TRUE)
-            data <- data[-1,] # removing Composite Element REF
-            #            data <- fread(files[i], header = TRUE, sep = "\t",
-            #                          stringsAsFactors = FALSE)
-            x <- subset(map, uuid ==uuid[i])
-            colnames(data)[2] <- as.character(x$barcode)
+            data <- fread(files[i], header = TRUE, sep = "\t",
+                          stringsAsFactors = FALSE)
+            x <- subset(map, uuid == uuid[i])
+            setnames(data,2:ncol(data),
+                     paste0(as.character(x$barcode),".",colnames(data)[2:ncol(data)]))
             if (i == 1) {
-                df <- data[,c(1,2)]
+                df <- data
             } else {
-                df <- merge(df, data[,c(1,2)],by = colnames(df)[1])
+                df <- merge(df, data,by = colnames(df)[1])
             }
             setTxtProgressBar(pb, i)
         }
+        setDF(df)
         rownames(df) <- df[,1]
         df[,1] <- NULL
     }
