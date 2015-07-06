@@ -229,6 +229,8 @@ TCGAPrepare <- function(query,
                                stringsAsFactors = FALSE, check.names = FALSE,
                                comment.char = "#",fill = TRUE)
             data <- data[-1,] # removing Composite Element REF
+#            data <- fread(files[i], header = TRUE, sep = "\t",
+#                          stringsAsFactors = FALSE)
             x <- subset(map, uuid ==uuid[i])
             colnames(data)[2] <- as.character(x$barcode)
             if (i == 1) {
