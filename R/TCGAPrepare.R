@@ -218,7 +218,7 @@ TCGAPrepare <- function(query,
         }
         df <- df[-1,]
 
-     }
+    }
     if (grepl("rnaseqv2",platform, ignore.case = TRUE)) {
         regex <- paste0("[:alnum:]{8}-[:alnum:]{4}",
                         "-[:alnum:]{4}-[:alnum:]{4}-[:alnum:]{12}")
@@ -229,8 +229,8 @@ TCGAPrepare <- function(query,
                                stringsAsFactors = FALSE, check.names = FALSE,
                                comment.char = "#",fill = TRUE)
             data <- data[-1,] # removing Composite Element REF
-#            data <- fread(files[i], header = TRUE, sep = "\t",
-#                          stringsAsFactors = FALSE)
+            #            data <- fread(files[i], header = TRUE, sep = "\t",
+            #                          stringsAsFactors = FALSE)
             x <- subset(map, uuid ==uuid[i])
             colnames(data)[2] <- as.character(x$barcode)
             if (i == 1) {
@@ -245,7 +245,19 @@ TCGAPrepare <- function(query,
     }
 
     if (grepl("illuminahiseq_mirnaseq",platform, ignore.case = TRUE)) {
-        files <- files[grep("mirna",files)]
+
+        if(is.null(type) || (type != "hg19.mirna" && type != "mirna")){
+            msg <- paste0("Plase select a type. \n Possibilities:\n",
+                          " = hg19.mirna\n = mirna")
+            message(msg)
+            return()
+        }
+
+        if(type == "hg19.mirna")   pat <- "(hg19.)mirna"
+        if(type == "mirna")        pat <- "(?<!hg19\\.)mirna"
+
+        files <- files[grep(pat,files, perl = TRUE)]
+
         if(length(files) == 0){
             message("No mirna files of that type found")
             return(NULL)
@@ -256,17 +268,20 @@ TCGAPrepare <- function(query,
         barcode <- str_match(files,regex)
 
         for (i in seq_along(files)) {
-            data <- read.table(files[i], header = TRUE, sep = "\t",
-                               stringsAsFactors = FALSE, check.names = FALSE,
-                               comment.char = "#",fill = TRUE)
+            data <- fread(files[i], header = TRUE, sep = "\t",
+                          stringsAsFactors = FALSE)
+            data <- subset(data,select=c(1:3))
+            setnames(data,2:ncol(data),
+                     paste0(as.character(barcode[i]),".",colnames(data)[2:ncol(data)]))
             if (i == 1) {
-                df <- data[,"read_count"]
+                df <- data
             } else {
-                df <- cbind(df, data[,"read_count"])
+                df <- merge(df, data, by=colnames(data)[1])
             }
         }
-        colnames(df) <- as.character(barcode)
-        rownames(df) <- data[,1]
+        setDF(df)
+        rownames(df) <- df[,1]
+        df <- df[,-1]
     }
 
     if (grepl("bio",platform,ignore.case = TRUE)) {
