@@ -252,8 +252,8 @@ TCGAPrepare <- function(query,
             data <- fread(files[i], header = TRUE, sep = "\t",
                           stringsAsFactors = FALSE)
             x <- subset(map, uuid == uuid[i])
-            setnames(data,2:ncol(data),
-                     paste0(as.character(x$barcode),".",colnames(data)[2:ncol(data)]))
+            setnames(data,2, as.character(x$barcode))
+            data <- subset(data,select=c(1,2))
             if (i == 1) {
                 df <- data
             } else {
