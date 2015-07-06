@@ -5,7 +5,7 @@
 \title{TCGA Download}
 \usage{
 TCGADownload(data = NULL, path = ".", type = NULL, samples = NULL,
-  quiet = FALSE)
+  quiet = FALSE, force = FALSE)
 }
 \arguments{
 \item{data}{TCGAQuery output}
@@ -17,6 +17,8 @@ TCGADownload(data = NULL, path = ".", type = NULL, samples = NULL,
 \item{samples}{List of samples to download}
 
 \item{quiet}{Supress output messages?. Default: FALSE}
+
+\item{force}{Download files even if it was already downladed? Default: FALSE}
 }
 \value{
 Download tcga into path
