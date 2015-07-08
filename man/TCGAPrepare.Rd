@@ -22,14 +22,13 @@ TCGAPrepare(query, dir = NULL, type = NULL, save = FALSE,
 Default: NULL. Options: "ELMER"}
 }
 \value{
-Data frame with data read
+A SummarizedExperiment object
 }
 \description{
-Prepare data matrices for downstream analysis,
+Read the data from the experiments and prepare the data in a
+ for downstream analysis. The default output is a SummarizedExperiment object.
+ It also prepare the data for some specific packages
  ready to use also with other R packages
- DNA Methylation
-  Row: matrix with genes/loci
-  Cols: samples in columns
 }
 \examples{
 sample <- "TCGA-06-0939-01A-01D-1228-05"
