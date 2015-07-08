@@ -1,11 +1,10 @@
 #' @title TCGA TCGAPrepare
 #' @description
-#'  Prepare data matrices for downstream analysis,
+#'  Read the data from the experiments and prepare the data in a
+#'  for downstream analysis. The default output is a SummarizedExperiment object.
+#'  It also prepare the data for some specific packages
 #'  ready to use also with other R packages
-#'  DNA Methylation
-#'   Row: matrix with genes/loci
-#'   Cols: samples in columns
-#' @return Data frame with data read
+#' @return A SummarizedExperiment object
 #' @param query Data frame as the one returned from TCGAQuery
 #' @param dir Directory with the files
 #' @param type File to prepare.
@@ -75,13 +74,21 @@ TCGAPrepare <- function(query,
 
     if (grepl("humanmethylation",tolower(platform))) {
 
+        regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
+                        "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
+        barcode <- str_match(files,regex)
+
         for (i in seq_along(files)) {
             data <- fread(files[i], header = TRUE, sep = "\t",
-                          stringsAsFactors = FALSE)
-            sample <- colnames(data)[2]
-            setnames(data,gsub(" ", "\\.", data[1,]))
-            data <- data[-1,] # removing Composite Element REF
-            setnames(data,2,sample)
+                          stringsAsFactors = FALSE,skip = 1,
+                          colClasses=c("character", # Composite Element REF
+                                       "numeric",   # beta value
+                                       "character", # Gene symbol
+                                       "integer",   # Chromosome
+                                       "integer"))  # Genomic coordinate
+            setnames(data,gsub(" ", "\\.", colnames(data)))
+            #data <- data[-1,] # removing Composite Element REF
+            setnames(data,2,barcode[i])
 
             if (i == 1) {
                 setcolorder(data,c(1, 3:5, 2))
@@ -94,10 +101,16 @@ TCGAPrepare <- function(query,
             setTxtProgressBar(pb, i)
         }
 
-        setDF(df)
-        rownames(df) <- df$Composite.Element.REF
-        df$Composite.Element.REF <- NULL
-        df[,3:ncol(df)] <- sapply(df[,3:ncol(df)], as.numeric)
+        rowData <- GRanges(seqnames = paste0("chr", df$Chromosome),
+                              ranges = IRanges(start = df$Genomic_Coordinate,
+                                               end = df$Genomic_Coordinate),
+                              probeID = df$Composite.Element.REF)
+
+        colData <- DataFrame(sample=colnames(df)[5:ncol(df)])
+        sset <- SummarizedExperiment(assays= as.matrix(subset(df,select = c(5:ncol(df)))),
+                                     rowData=rowData,
+                                     colData=colData)
+        return(sset)
     }
 
     if (grepl("mda_rppa_core",tolower(platform))) {
