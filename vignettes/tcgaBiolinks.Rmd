@@ -239,7 +239,7 @@ Example of use:
 # get all samples from the query and save them in the TCGA folder
 # samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
 # samples to normalize later
-TCGAPrepare(query, dir = "data", save = TRUE, filename = "myfile.rda")
+data <- TCGAPrepare(query, dir = "data", save = TRUE, filename = "myfile.rda")
 ```
 
 ### Preparing the data with TCGAPrepare - toPackage 
