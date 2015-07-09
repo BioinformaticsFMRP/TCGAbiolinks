@@ -5,7 +5,7 @@
 \title{TCGA Download}
 \usage{
 TCGADownload(data = NULL, path = ".", type = NULL, samples = NULL,
-  quiet = FALSE, force = FALSE)
+  quiet = TRUE, force = FALSE)
 }
 \arguments{
 \item{data}{The TCGAQuery output}
