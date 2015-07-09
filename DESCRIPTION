@@ -42,7 +42,9 @@ Imports:
     utils,
     dnet,
     igraph,
-    supraHex
+    supraHex,
+    S4Vectors,
+    SummarizedExperiment
 Description:
     Query the latest version of files by tumor, center, date, barcode,
     level and platform. Also Download and Preprocess data from TCGA portal.
