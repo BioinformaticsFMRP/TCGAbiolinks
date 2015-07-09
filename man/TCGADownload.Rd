@@ -5,7 +5,7 @@
 \title{TCGA Download}
 \usage{
 TCGADownload(data = NULL, path = ".", type = NULL, samples = NULL,
-  quiet = FALSE, force = FALSE)
+  quiet = TRUE, force = FALSE)
 }
 \arguments{
 \item{data}{The TCGAQuery output}
@@ -17,7 +17,7 @@ type. Example:"rsem.genes.results"}
 
 \item{samples}{List of samples to download data}
 
-\item{quiet}{Supress output messages?. Default: \code{FALSE}}
+\item{quiet}{Supress output messages?. Default: \code{TRUE}}
 
 \item{force}{Download files even if it was already downladed?
 Default: \code{FALSE}}
