@@ -200,7 +200,7 @@ TCGAPrepare <- function(query,
 
             setnames(data,colnames(data)[2:ncol(data)],paste0(colnames(data)[2:ncol(data)],"_",barcode[i]))
             # removing duplicated rows
-            data <- subset(data,subset=(!duplicated(data[,1,with=F])))
+            data <- subset(data,subset=(!duplicated(data[,1,with=FALSE])))
             if (i == 1) {
                 df <- data
             } else {
@@ -372,7 +372,7 @@ TCGAPrepare <- function(query,
                 setnames(data,2, as.character(x$barcode))
             }
             # removing duplicated rows
-            data <- subset(data,subset=(!duplicated(data[,1,with=F])))
+            data <- subset(data,subset=(!duplicated(data[,1,with=FALSE])))
             if (i == 1) {
                 df <- data
             } else {
