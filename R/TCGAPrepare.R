@@ -22,7 +22,7 @@
 #' @export
 #' @importFrom stringr str_match str_trim str_detect
 #' @importFrom SummarizedExperiment SummarizedExperiment
-#' @importFrom S4Vectors DataFrame
+#' @importFrom S4Vectors DataFrame SimpleList
 #' @import   data.table
 #' @import utils
 TCGAPrepare <- function(query,
@@ -110,8 +110,9 @@ TCGAPrepare <- function(query,
                                  ranges = IRanges(start = df$Genomic_Coordinate,
                                                   end = df$Genomic_Coordinate),
                                  probeID = df$Composite.Element.REF)
-
-            colData <- DataFrame(sample=colnames(df)[5:ncol(df)])
+            names(rowRanges) <- as.character(df$Composite.Element.REF)
+            colData <- DataFrame(sample=colnames(df)[5:ncol(df)],
+                                 row.names=colnames(df)[5:ncol(df)])
             sset <- SummarizedExperiment(assays= as.matrix(subset(df,select = c(5:ncol(df)))),
                                          rowRanges=rowRanges,
                                          colData=colData)
@@ -186,8 +187,9 @@ TCGAPrepare <- function(query,
             data <- fread(files[i], header = TRUE, sep = "\t",
                           stringsAsFactors = FALSE)
 
-            x <- colnames(data)
-            setnames(data,colnames(data)[2:4],paste0(colnames(data)[2:4],"_",barcode[i]))
+            setnames(data,colnames(data)[2:ncol(data)],paste0(colnames(data)[2:ncol(data)],"_",barcode[i]))
+            # removing duplicated rows
+            data <- subset(data,subset=(!duplicated(data[,1,with=F])))
             if (i == 1) {
                 df <- data
             } else {
@@ -195,7 +197,74 @@ TCGAPrepare <- function(query,
             }
             setTxtProgressBar(pb, i)
         }
-    }
+        if(summarizedExperiment){
+            if(grepl("gene",colnames(df)[1])){
+
+                aux <- strsplit(df$gene,"\\|")
+                GeneID <- unlist(lapply(aux,function(x) x[2]))
+                df$entrezgene <- as.numeric(GeneID)
+                merged <- merge(df,gene.location,by="entrezgene")
+                rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
+                                     ranges = IRanges(start = merged$start_position,
+                                                      end = merged$end_position),
+                                     strand=merged$strand,
+                                     gene_id = merged$external_gene_name,
+                                     entrezgene = merged$entrezgene)
+                names(rowRanges) <- as.character(merged$gene)
+                assays <- SimpleList(raw_counts=as.matrix(subset(merged,select=seq(3,ncol(df),3))),
+                                     median_length_normalized=as.matrix(subset(merged,select=seq(4,ncol(df),3))),
+                                     RPKM=as.matrix(subset(merged,select=seq(5,ncol(df),3))))
+
+            }  else if(grepl("junction",colnames(df)[1])){
+
+                # junction example: chr1:12227:+,chr1:12595:+
+                aux    <- strsplit(df$junction,":")
+                name   <- unlist(lapply(aux,function(x) x[1]))
+                x <- as.numeric(unlist(lapply(aux,function(x) x[2])))
+                y    <- as.numeric(unlist(lapply(aux,function(x) x[4])))
+                start <- apply(data.frame(x,y),1,min)
+                end <- apply(data.frame(x,y),1,max)
+
+                strand <- unlist(lapply(aux,function(x) x[5]))
+
+                rowRanges <- GRanges(seqnames = name,
+                                     ranges = IRanges(start = start, end = end),
+                                     strand = strand)
+                names(rowRanges) <- as.character(df$junction)
+                assays <- SimpleList(raw_counts=as.matrix(subset(df,select=2:ncol(df))))
+
+            } else if(grepl("exon",colnames(df)[1])){
+                # exon chr1:11874-12227:+
+                aux       <- strsplit(df$exon,":")
+                name      <- unlist(lapply(aux,function(x) x[1]))
+                start.end <- strsplit(unlist(lapply(aux,function(x) x[2])),"-")
+                x       <- as.numeric(unlist(lapply(start.end,function(x) x[1])))
+                y     <- as.numeric(unlist(lapply(start.end,function(x) x[2])))
+                start <- apply(data.frame(x,y),1,min)
+                end <- apply(data.frame(x,y),1,max)
+                strand    <- unlist(lapply(aux,function(x) x[3]))
+
+                rowRanges <- GRanges(seqnames = name,
+                                     ranges = IRanges(start = start, end = end),
+                                     strand = strand)
+                names(rowRanges) <- as.character(df$exon)
+                assays <- SimpleList(raw_counts=as.matrix(subset(df,select=seq(2,ncol(df),3))),
+                                     median_length_normalized=as.matrix(subset(df,select=seq(3,ncol(df),3))),
+                                     RPKM=as.matrix(subset(df,select=seq(4,ncol(df),3))))
+
+            }
+            colData <- DataFrame(sample=as.character(barcode),
+                                 row.names=as.character(barcode))
+            sset <- SummarizedExperiment(assays=assays,
+                                         rowRanges=rowRanges,
+                                         colData=colData)
+            return(sset)
+        }else {
+            setDF(df)
+            rownames(df) <- df[,1]
+            df[,1] <- NULL
+        }
+}
 
     if (tolower(platform) == tolower("HT_HG-U133A")) {
         # Barcode in the mage file
@@ -302,8 +371,9 @@ TCGAPrepare <- function(query,
                                  strand=merged$strand,
                                  gene_id = merged$external_gene_name,
                                  entrezgene = merged$entrezgene )
-
-            colData <- DataFrame(sample=colnames(merged)[barcode])
+            names(rowRanges) <- as.character(merged$gene_id)
+            colData <- DataFrame(sample=colnames(merged)[barcode],
+                                 row.names=colnames(merged)[barcode])
             sset <- SummarizedExperiment(assays=as.matrix(subset(merged,select = barcode)),
                                          rowRanges=rowRanges,
                                          colData=colData)
