@@ -1,21 +1,43 @@
 #' @title TCGA Download
-#' @description Download data previously selected using the TCGASeach
-#' @param data TCGAQuery output
+#' @description
+#'      The TCGADownload function will download the data using as reference
+#'      the the lines of the TCGAQuery search result.
+#'
+#'      There is an option to download the entire tar.gz folder or download
+#'      specific files using the \emph{type} parameter or the \emph{samples}
+#'      parameter
+#'
+#'      The outpufiles will be saved into the path parameters. If this path does
+#'      not exists the package will try to create the directories.
+#'
+#'      By default, if a sample was already downloaded the function will not
+#'      download again, unless the force parameter is set to \code{TRUE}
+#'
+#' @param data The TCGAQuery output
 #' @param path Directory to save the downloaded data
-#' @param type Filter the files that will be downloaded by type
-#' @param quiet Supress output messages?. Default: FALSE
-#' @param samples List of samples to download
-#' @param force Download files even if it was already downladed? Default: FALSE
-#' @seealso TCGAQuery
+#' @param type Filter the files that will be downloaded by
+#'  type. Example:"rsem.genes.results"
+#' @param quiet Supress output messages?. Default: \code{FALSE}
+#' @param samples List of samples to download data
+#' @param force Download files even if it was already downladed?
+#' Default: \code{FALSE}
+#' @seealso \code{\link{TCGAQuery}} for searching the data to download
+#'
+#' \code{\link{TCGAPrepare}} for preparing the data for the user into
+#' a Summarized experiment object, or a matrix.
 #' @examples
-#'    samples <- c("TCGA-26-1442-01A-01R-1850-01")
-#'    query <- TCGAQuery(tumor = "gbm", platform = "IlluminaHiSeq_RNASeqV2",
-#'    level = "3", samples = samples)
-#'    TCGADownload(query,path = "dataDemo2",samples = samples,
-#'                 type ="rsem.genes.results")
+#' samples <- c("TCGA-26-1442-01A-01R-1850-01")
+#' query <- TCGAQuery(tumor = "gbm",
+#'                    platform = "IlluminaHiSeq_RNASeqV2",
+#'                    level = "3",
+#'                    samples = samples)
+#' TCGADownload(query,path = "RNA",
+#'              samples = samples,
+#'              type ="rsem.genes.results")
 #' @export
 #' @importFrom downloader download
-#' @return Download tcga into path
+#' @return Download TCGA data into the given path
+#' @family data functions
 TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                          quiet = FALSE, force = FALSE) {
 

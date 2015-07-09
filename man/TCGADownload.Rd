@@ -8,32 +8,54 @@ TCGADownload(data = NULL, path = ".", type = NULL, samples = NULL,
   quiet = FALSE, force = FALSE)
 }
 \arguments{
-\item{data}{TCGAQuery output}
+\item{data}{The TCGAQuery output}
 
 \item{path}{Directory to save the downloaded data}
 
-\item{type}{Filter the files that will be downloaded by type}
+\item{type}{Filter the files that will be downloaded by
+type. Example:"rsem.genes.results"}
 
-\item{samples}{List of samples to download}
+\item{samples}{List of samples to download data}
 
-\item{quiet}{Supress output messages?. Default: FALSE}
+\item{quiet}{Supress output messages?. Default: \code{FALSE}}
 
-\item{force}{Download files even if it was already downladed? Default: FALSE}
+\item{force}{Download files even if it was already downladed?
+Default: \code{FALSE}}
 }
 \value{
-Download tcga into path
+Download TCGA data into the given path
 }
 \description{
-Download data previously selected using the TCGASeach
+The TCGADownload function will download the data using as reference
+     the the lines of the TCGAQuery search result.
+
+     There is an option to download the entire tar.gz folder or download
+     specific files using the \emph{type} parameter or the \emph{samples}
+     parameter
+
+     The outpufiles will be saved into the path parameters. If this path does
+     not exists the package will try to create the directories.
+
+     By default, if a sample was already downloaded the function will not
+     download again, unless the force parameter is set to \code{TRUE}
 }
 \examples{
 samples <- c("TCGA-26-1442-01A-01R-1850-01")
-   query <- TCGAQuery(tumor = "gbm", platform = "IlluminaHiSeq_RNASeqV2",
-   level = "3", samples = samples)
-   TCGADownload(query,path = "dataDemo2",samples = samples,
-                type ="rsem.genes.results")
+query <- TCGAQuery(tumor = "gbm",
+                   platform = "IlluminaHiSeq_RNASeqV2",
+                   level = "3",
+                   samples = samples)
+TCGADownload(query,path = "RNA",
+             samples = samples,
+             type ="rsem.genes.results")
 }
 \seealso{
-TCGAQuery
+\code{\link{TCGAQuery}} for searching the data to download
+
+\code{\link{TCGAPrepare}} for preparing the data for the user into
+a Summarized experiment object, or a matrix.
+
+Other data.functions: \code{\link{TCGAPrepare}};
+  \code{\link{TCGAQuery}}; \code{\link{TCGAUpdate}}
 }
 
