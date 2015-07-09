@@ -264,7 +264,7 @@ TCGAPrepare <- function(query,
             rownames(df) <- df[,1]
             df[,1] <- NULL
         }
-}
+    }
 
     if (tolower(platform) == tolower("HT_HG-U133A")) {
         # Barcode in the mage file
@@ -317,13 +317,17 @@ TCGAPrepare <- function(query,
         if(is.null(type) || (type != "rsem.genes.results" &&
                              type != "rsem.isoforms.results" &&
                              type != "rsem.genes.normalized_results" &&
-                             type != "rsem.isoforms.normalized_results")
+                             type != "rsem.isoforms.normalized_results" &&
+                             type != "bt.exon_quantification" &&
+                             type != "junction_quantification")
         ){
             msg <- paste0("Plase select a type. \n Possibilities:\n",
                           " = rsem.genes.results\n",
                           " = rsem.isoforms.results\n",
                           " = rsem.genes.normalized_results\n",
-                          " = rsem.isoforms.normalized_results\n"
+                          " = rsem.isoforms.normalized_results\n",
+                          " = bt.exon_quantification\n",
+                          " = junction_quantification"
             )
             message(msg)
             return()
@@ -333,6 +337,10 @@ TCGAPrepare <- function(query,
         if(type == "rsem.isoforms.results")            pat <- "rsem.isoforms.results"
         if(type == "rsem.genes.normalized_results")    pat <- "rsem.genes.normalized_results"
         if(type == "rsem.isoforms.normalized_results") pat <- "rsem.isoforms.normalized_results"
+        if(type == "junction_quantification")          pat <- "junction_quantification"
+        if(type == "bt.exon_quantification")           pat <- "bt.exon_quantification"
+
+
 
         files <- files[grep(pat,files, perl = TRUE)]
 
@@ -345,8 +353,15 @@ TCGAPrepare <- function(query,
             data <- fread(files[i], header = TRUE, sep = "\t",
                           stringsAsFactors = FALSE)
             x <- subset(map, uuid == uuid[i])
-            setnames(data,2, as.character(x$barcode))
-            data <- subset(data,select=c(1,2))
+
+            if(summarizedExperiment){
+                setnames(data,colnames(data)[2:ncol(data)],
+                         paste0(colnames(data)[2:ncol(data)],"_",x$barcode))
+            } else {
+                setnames(data,2, as.character(x$barcode))
+            }
+            # removing duplicated rows
+            data <- subset(data,subset=(!duplicated(data[,1,with=F])))
             if (i == 1) {
                 df <- data
             } else {
@@ -356,25 +371,71 @@ TCGAPrepare <- function(query,
         }
 
         if(summarizedExperiment){
-            aux <- strsplit(df$gene_id,"\\|")
-            GeneID<-unlist(lapply(aux,function(x) x[2]))
-            df$entrezgene <- as.numeric(GeneID)
-            merged <- merge(df,gene.location,by="entrezgene")
+            if(grepl("gene_id",colnames(df)[1])){
+                aux <- strsplit(df$gene_id,"\\|")
+                GeneID<-unlist(lapply(aux,function(x) x[2]))
+                df$entrezgene <- as.numeric(GeneID)
+                merged <- merge(df,gene.location,by="entrezgene")
 
+
+                rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
+                                     ranges = IRanges(start = merged$start_position,
+                                                      end = merged$end_position),
+                                     strand=merged$strand,
+                                     gene_id = merged$external_gene_name,
+                                     entrezgene = merged$entrezgene )
+                names(rowRanges) <- as.character(merged$gene_id)
+
+                if(length(colnames(data))>2){
+                    assays <- SimpleList(raw_counts=as.matrix(subset(merged,select=seq(3,ncol(df),3))),
+                                         scaled_estimate=as.matrix(subset(merged,select=seq(4,ncol(df),3))),
+                                         transcript_id=as.matrix(subset(merged,select=seq(5,ncol(df),3))))
+                } else {
+                    assays <- SimpleList(raw_counts=as.matrix(subset(merged,select=seq(3,ncol(df)))))
+                }
+            } else if(grepl("junction",colnames(df)[1])){
+                aux    <- strsplit(df$junction,":")
+                name   <- unlist(lapply(aux,function(x) x[1]))
+                x <- as.numeric(unlist(lapply(aux,function(x) x[2])))
+                y    <- as.numeric(unlist(lapply(aux,function(x) x[4])))
+                start <- apply(data.frame(x,y),1,min)
+                end <- apply(data.frame(x,y),1,max)
+
+                strand <- unlist(lapply(aux,function(x) x[5]))
+
+                rowRanges <- GRanges(seqnames = name,
+                                     ranges = IRanges(start = start, end = end),
+                                     strand = strand)
+                names(rowRanges) <- as.character(df$junction)
+                assays <- SimpleList(raw_counts=as.matrix(subset(df,select=2:ncol(df))))
+            } else if(grepl("exon",colnames(df)[1])){
+                # exon chr1:11874-12227:+
+                aux       <- strsplit(df$exon,":")
+                name      <- unlist(lapply(aux,function(x) x[1]))
+                start.end <- strsplit(unlist(lapply(aux,function(x) x[2])),"-")
+                x       <- as.numeric(unlist(lapply(start.end,function(x) x[1])))
+                y     <- as.numeric(unlist(lapply(start.end,function(x) x[2])))
+                start <- apply(data.frame(x,y),1,min)
+                end <- apply(data.frame(x,y),1,max)
+                strand    <- unlist(lapply(aux,function(x) x[3]))
+
+                rowRanges <- GRanges(seqnames = name,
+                                     ranges = IRanges(start = start, end = end),
+                                     strand = strand)
+                names(rowRanges) <- as.character(df$exon)
+                assays <- SimpleList(raw_counts=as.matrix(subset(df,select=seq(2,ncol(df),3))),
+                                     median_length_normalized=as.matrix(subset(df,select=seq(3,ncol(df),3))),
+                                     RPKM=as.matrix(subset(df,select=seq(4,ncol(df),3))))
+            } else if(grepl("isoform",colnames(df)[1])){
+                message("TBD")
+            }
             regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
-            barcode <- which(str_detect(colnames(merged),regex)==TRUE)
+            barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
+            colData <- DataFrame(sample=barcode,
+                                 row.names=barcode)
 
-            rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
-                                 ranges = IRanges(start = merged$start_position,
-                                                  end = merged$end_position),
-                                 strand=merged$strand,
-                                 gene_id = merged$external_gene_name,
-                                 entrezgene = merged$entrezgene )
-            names(rowRanges) <- as.character(merged$gene_id)
-            colData <- DataFrame(sample=colnames(merged)[barcode],
-                                 row.names=colnames(merged)[barcode])
-            sset <- SummarizedExperiment(assays=as.matrix(subset(merged,select = barcode)),
+            sset <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
                                          colData=colData)
             return(sset)
