@@ -7,7 +7,7 @@
 TCGAsocial(siteToFind = NULL, listPackage = NULL, KeyInfo = NULL)
 }
 \arguments{
-\item{siteToFind}{website ("bioconductor.org" or "biostars.org")
+\item{siteToFind}{website ("bioconductor.org", "biostars.org", "stackoverflow)
 related to TCGA or a package}
 
 \item{listPackage}{list of package to find in bioconductor}
