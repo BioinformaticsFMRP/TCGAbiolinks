@@ -154,7 +154,7 @@ rownames(matSamples) <- paste("p",1:length(names(querySamples)),
                               names(querySamples),sep=".")
 colnames(matSamples) <- substr( colnames(matSamples), 1,4)
 
-
+#LatexPrintTableforPresentation(Table = matSamples,rowsForPage = nrow(matSamples), TableTitle = "TCGAqueryOutput", LabelTitle = "TCGAqueryOutput", withrows = T)
 ```
 
 The result from TCGAintegrate is shown below:
@@ -191,6 +191,9 @@ BRCA_RNASeqV2_version <- BRCA_RNASeqV2_version[order(BRCA_RNASeqV2_version$SizeM
 knitr::kable(BRCA_RNASeqV2_version, digits = 2, 
              caption = "Table with version, number of samples and size (Mbyte) of BRCA IlluminaHiSeq_RNASeqV2 Level 3", 
              row.names = FALSE)
+
+#LatexPrintTableforPresentation(Table = BRCA_RNASeqV2_version,rowsForPage = nrow(BRCA_RNASeqV2_version), TableTitle = "BRCA_RNASeqV2_version", LabelTitle = "BRCA_RNASeqV2_version", withrows = T)
+
 ```
 
 
@@ -656,6 +659,8 @@ The result is shown below:
 ```{r, eval = TRUE, echo = FALSE}
 library(TCGAbiolinks)
 knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF in pubmed related to a specific cancer",row.names = FALSE)
+
+#LatexPrintTableforPresentation(Table = tabDEGsTFPubmed,rowsForPage = nrow(tabDEGsTFPubmed), TableTitle = "tabDEGsTFPubmed", LabelTitle = "tabDEGsTFPubmed", withrows = T)
 ```
 
 ## TCGA social
