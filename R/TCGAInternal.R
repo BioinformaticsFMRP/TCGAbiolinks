@@ -13,7 +13,6 @@
         " ------------------------------------------------------------\n",
         " Query, download & analyze - TCGA                  \n",
         " Version:",utils::packageVersion("TCGAbiolinks"),"\n",
-        " Last TCGAUpdate(): ",time,"\n",
         " ==============================================================\n"
     )
     packageStartupMessage(welcome.message)
