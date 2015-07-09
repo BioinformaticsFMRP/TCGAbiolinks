@@ -7,6 +7,7 @@ date: "`r Sys.Date()`"
 output: 
   BiocStyle::html_document:
     toc: true
+    number_sections: true
 
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -14,19 +15,16 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-```{r style, echo = FALSE, results = 'asis'}
-BiocStyle::markdown()
+```{r, echo = FALSE,hide=TRUE, message=FALSE,}
+devtools::load_all(".")
 ```
 
-```{r, echo = FALSE}
-library(TCGAbiolinks)
-```
-## Introduction 
+# Introduction 
 
 This document describes how to search, download and analyze TCGA data using the
 TCGAbiolinks package.
 
-## Searching data using TCGAQuery
+# Searching data using TCGAQuery
  You can easily search TCGA samples using the `TCGAQuery` function.
  Using a summary of filters as used in the TCGA portal, the function works
  with the following 
@@ -40,7 +38,7 @@ TCGAbiolinks package.
 * **level**  Options: 1,2,3,"mage-tab"
 * **center**
 
-### Searching by tumor
+## Searching by tumor
 You can filter the search by tumor using the tumor parameter.
 
 ```{r, eval = TRUE}
@@ -55,7 +53,7 @@ help pages `?TCGAQuery`
 query <- TCGAQuery(tumor = "")
 ```
 
-### Searching by level
+## Searching by level
 You can filter the search by level	"1", "2", "3" or "mage-tab"
 ```{r, eval = TRUE}
 query <- TCGAQuery(tumor = "gbm", level = 3)
@@ -64,7 +62,7 @@ query <- TCGAQuery(tumor = "gbm", level = 1)
 query <- TCGAQuery(tumor = "gbm", level = "mage-tab")
 ```
 
-### Searching by date
+## Searching by date
 You can filter the search by date using the added.since and added.up.to parameters.
 For the moment, the format of date accepted is mm/dd/YYYY.
 
@@ -73,7 +71,7 @@ For the moment, the format of date accepted is mm/dd/YYYY.
 query <- TCGAQuery(tumor = "gbm", added.since = "01/01/2013", added.up.to = "12/31/2013")
 ```
 
-### Searching by platform
+## Searching by platform
 You can filter the search by platform using the platform parameter.
 
 ```{r, eval = TRUE}
@@ -88,7 +86,7 @@ help pages `?TCGAQuery`
 query <- TCGAQuery(tumor = "gbm", platform = "")
 ```
 
-### Searching by center
+## Searching by center
 You can filter the search by center using the center parameter.
 
 ```{r, eval = TRUE}
@@ -102,7 +100,7 @@ It will provide you with all the center names in TCGA.
 query <- TCGAQuery(tumor = "gbm", center = "")
 ```
 
-### Searching by samples
+## Searching by samples
 You can filter the search by samples using the samples parameter.
 You can give a list of barcodes or only one barcode. These barcode can be partial barcodes.
 
@@ -121,7 +119,7 @@ query <- TCGAQuery(samples = listSamples)
 query <- TCGAQuery(samples = "TCGA-61-1743-01A")
 ```
 
-### Examples
+## Examples
 
 Some search examples are shown below:
 ```{r, eval = TRUE}
@@ -198,7 +196,7 @@ knitr::kable(BRCA_RNASeqV2_version, digits = 2,
 
 
 
-## Downloading data with TCGADownload
+# Downloading data with TCGADownload
 You can easily download data using the `TCGADownload` function.
 
 The arguments are:
@@ -224,7 +222,7 @@ TCGADownload(query, path = "data", type = "rsem.isoforms.normalized_results")
 Comment: The function will structure the folders to save the data as:
 _Path given by the user/Experiment folder_
 
-## Preparing the data with TCGAPrepare
+# Preparing the data with TCGAPrepare
 You can easily read your downloaded data using the `TCGAPrepare` function.
 This function will prepare data matrices for downstream analysis.
 
@@ -245,7 +243,7 @@ Example of use:
 data <- TCGAPrepare(query, dir = "data", save = TRUE, filename = "myfile.rda")
 ```
 
-### Preparing the data with TCGAPrepare - toPackage 
+## Preparing the data with TCGAPrepare - toPackage 
 This section will show how to integrate `TCGAbiolinks` with other packages.
 Our intention is to provide as many integrations as possible.
 
@@ -258,7 +256,7 @@ methylation and expressionm also it will prepare the rownames as the
 specified by the package.
 
 ```{r, eval = FALSE}
-########################### Get tumor samples with TCGAbiolinks
+############## Get tumor samples with TCGAbiolinks
 library(TCGAbiolinks)
 query <- TCGAQuery(tumor = "GBM",level = 3, platform = "HumanMethylation450")
 TCGADownload(query,path = "TCGA/450k")
@@ -271,14 +269,14 @@ query.rna <- TCGAQuery(tumor="GBM",level=3, platform="IlluminaHiSeq_RNASeqV2")
 TCGADownload(query.rna,path="TCGA/rna",type = "rsem.genes.normalized_results")
 exp <- TCGAPrepare(query.rna, dir="TCGA/rna", save = TRUE, filename = "exp.rda",toPackage = "ELMER")
 
-######################### To EMLER
+############# To EMLER
 library(ELMER)
 
-################### genne annotation
+########## genne annotation
 geneAnnot <- txs()
 geneAnnot$GENEID <- paste0("ID",geneAnnot$GENEID)
 geneInfo <- promoters(geneAnnot,upstream = 0, downstream = 0)
-######################## probe
+############ probe
 probe <- get.feature.probe()
 
 mee.gbm.glial.with.exp <- fetch.mee(meth = gbm.glial.m,
@@ -290,7 +288,7 @@ mee.gbm.glial.with.exp <- fetch.mee(meth = gbm.glial.m,
 
 
 
-## Clinical data
+# Clinical data
 You can retrive clinical data using the `clinic` function. The parameters of this
 function is: 
 
@@ -356,7 +354,7 @@ HER_status_BRCA(bar,"Positive",clinical_brca_data)
 HER_status_BRCA(bar,"Negative",clinical_brca_data)
 ```
 
-## [Gene Expression] TCGA query, download, prepare list of a barcode
+# [Gene Expression] TCGA query, download, prepare list of a barcode
 You can easily search TCGA samples, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
 
@@ -397,7 +395,7 @@ knitr::kable(dataGE, digits = 2,
 
 
 
-## [CNV] TCGA query, download, prepare list of a barcode
+# [CNV] TCGA query, download, prepare list of a barcode
 You can easily search TCGA samples, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
 
@@ -419,7 +417,7 @@ GBM_CNV <- TCGAPrepare(query, dir = "samples", type = ".hg19.seg.txt")
 ```
 
 
-## TCGA Downstream Analysis TCGAprepare, TCGAanalyze, TCGAvisualize
+# TCGA Downstream Analysis TCGAprepare, TCGAanalyze, TCGAvisualize
 You can prepare gene expression from TCGA data using the `TCGAprepare`
 function.
  
@@ -448,7 +446,7 @@ samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
 
 ```
 
-## TCGA analyze and visualize (Diff.expr.analysis (DEA))
+# TCGA analyze and visualize (Diff.expr.analysis (DEA))
 You can analyze gene expression from TCGA data using the `TCGAanalyze` 
 function.
  
@@ -481,7 +479,7 @@ knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2,
 
 
 
-## TCGA analyze and visualize (Enrichment Analysis)
+# TCGA analyze and visualize (Enrichment Analysis)
 You can analyze gene expression from TCGA data using the `TCGAanalyze` function.
  
 ```{r, eval = FALSE}
@@ -512,7 +510,7 @@ img <- readPNG("EAplot.png")
 grid.raster(img)
 ```
 
-## TCGA analyze (Enrichment Analysis)
+# TCGA analyze (Enrichment Analysis)
 You can analyze gene expression from TCGA data using the `TCGAanalyze` function.
  
 ```{r, eval = FALSE}
@@ -542,7 +540,7 @@ img <- readPNG("PCAtop200DEGs.png")
 grid.raster(img)
 ```
 
-## TCGA analyze and visualize (Survival Analysis)
+# TCGA analyze and visualize (Survival Analysis)
 You can analyze gene expression and clinical data from TCGA data using the `TCGAanalyze` function.
  
 ```{r, eval = FALSE}
@@ -584,7 +582,7 @@ knitr::kable(tabSurvKMcompleteDEGs[1:10,], digits = 2,
              caption = "Table KM-survival genes after SA",row.names = TRUE)
 ```
 
-## TCGA analyze and visualize (Survival Analysis Cox Regression and dnet package)
+# TCGA analyze and visualize (Survival Analysis Cox Regression and dnet package)
 You can analyze gene expression and clinical data from TCGA data using the `TCGAanalyze` function.
  
 ```{r, eval = FALSE}
@@ -633,7 +631,7 @@ grid.raster(img)
 ```
 
 
-## TCGA investigate
+# TCGA investigate
 Find most studied TFs in pubmed related to a specific cancer, disease, or tissue
  
 ```{r, eval = FALSE}
@@ -663,13 +661,13 @@ knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF 
 #LatexPrintTableforPresentation(Table = tabDEGsTFPubmed,rowsForPage = nrow(tabDEGsTFPubmed), TableTitle = "tabDEGsTFPubmed", LabelTitle = "tabDEGsTFPubmed", withrows = T)
 ```
 
-## TCGA social
+# TCGA social
 The `TCGASocial` function has two type of searches, one that searches for
 most downloaded packages in CRAN or BioConductor and one that searches the most related question in biostar 
 
 
 
-### TCGA social with BioConductor
+## TCGA social with BioConductor
 Find most downloaded packages in CRAN or BioConductor
  
 ```{r, eval = FALSE}
@@ -698,7 +696,7 @@ knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in s
 
 ```
 
-### TCGA social with Biostar
+## TCGA social with Biostar
 Find most related question in biostar.
  
 ```{r, eval = FALSE}
@@ -724,7 +722,7 @@ knitr::kable(head(tabPackage1), digits = 2, caption = "Find most related questio
 knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in biostar with package",row.names = FALSE)
 ```
 
-## TCGA downstream Analysis
+# TCGA downstream Analysis
  
 Some examples for the integration of TCGA data are shown below
 ```{r, eval = FALSE}
@@ -740,7 +738,7 @@ query <- TCGAQuery(tumor = "brca",level = 3, platform = "IlluminaHiSeq_RNASeqV2"
 
 Comment: As these terms need to be exact, we validate user input before searching.
 
-## TCGA Downstream Analysis Integration 
+# TCGA Downstream Analysis Integration 
 You can easily prepare gene expression from TCGA data using the `TCGAPrepare` function.
  
 ```{r, eval = FALSE}
@@ -792,7 +790,7 @@ grid.raster(img)
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 
-##### Differential analysis
+### Differential analysis
 GroupBlueData <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "blue", "Sample"])]
 GroupGreen3Data <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "green3", "Sample"])]
 GroupRedData <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "red", "Sample"])]
@@ -882,7 +880,7 @@ grid.raster(img)
 ```
 
 
-#### TCGA downstream methylation analysis
+## TCGA downstream methylation analysis
 
 Some downstream analysis from methylation data can be done with TCGAbiolinks.
 An example is shown below. We search, download and prepare data from the 
@@ -1010,7 +1008,7 @@ starburst analysis.
  starburstPlot(gene.met)
 ```
 
-## Session Information
+# Session Information
 ```{r, eval = TRUE}
 sessionInfo()
 ```

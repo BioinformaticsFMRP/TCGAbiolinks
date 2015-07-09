@@ -28,13 +28,11 @@ EnrichmentAnalysis
 }
 \examples{
 \dontrun{
-
 EAGenes <- get("EAGenes")
 RegulonList <- rownames(dataDEGsFiltLevel)
-DAVID_BP_matrix <- get("DAVID_BP_matrix")
 ResBP <- EnrichmentAnalysis(GeneName="DEA genes Normal Vs Tumor",
                            RegulonList,DAVID_BP_matrix,
                            EAGenes,GOtype = "DavidBP")
-                           }
+}
 }
 

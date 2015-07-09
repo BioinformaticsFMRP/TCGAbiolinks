@@ -3,29 +3,6 @@
 # @keywords internal
 .onAttach <- function (libname, pkgname){
 
-    file = system.file("extdata/GRCh.rda",package = "TCGAbiolinks")
-    load(file,envir = as.environment("package:TCGAbiolinks"))
-
-    file = system.file("extdata/dataSocial.rda",package = "TCGAbiolinks")
-    load(file,envir = as.environment("package:TCGAbiolinks"))
-
-    file = system.file("extdata/dataGeneExpression.rda",
-                       package = "TCGAbiolinks")
-    load(file,envir = as.environment("package:TCGAbiolinks"))
-
-    file = system.file("extdata/dataEnrichmentAnalysis.rda",
-                       package = "TCGAbiolinks")
-    load(file,envir = as.environment("package:TCGAbiolinks"))
-
-    file = system.file("extdata/dataFolders.rda",package = "TCGAbiolinks")
-    time <- file.info(file)$ctime
-    if (file.exists(file)) {
-        load(file, envir = as.environment("package:TCGAbiolinks"))
-    } else {
-        env <- as.environment("package:TCGAbiolinks")
-        load.tcga(env)
-    }
-
     if (!interactive() || stats::runif(1) > 0.1) return()
     welcome.message <- paste0(
         " =============================================================\n",
