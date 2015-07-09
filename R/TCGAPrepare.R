@@ -1,16 +1,18 @@
 #' @title TCGA TCGAPrepare
 #' @description
-#'  Read the data from the experiments and prepare the data in a
-#'  for downstream analysis. The default output is a SummarizedExperiment object.
+#'  Read the data from the experiments and prepare the data for downstream
+#'  analysis.
+#'  The default output is a SummarizedExperiment object.
 #'  It also prepare the data for some specific packages
-#'  ready to use also with other R packages
-#' @return A SummarizedExperiment object
+#' @return A SummarizedExperiment object (If SummarizedExperiment = FALSE,
+#' a data.frame)
 #' @param query Data frame as the one returned from TCGAQuery
 #' @param dir Directory with the files
 #' @param type File to prepare.
 #' @param save Save a rda object with the prepared object? Default FALSE
 #' @param filename Name of the saved file
 #' @param toPackage For whihc package are you preparing the data?
+#' @param summarizedExperiment Output as SummarizedExperiment? Default: TRUE
 #' Default: NULL. Options: "ELMER"
 #' @examples
 #' sample <- "TCGA-06-0939-01A-01D-1228-05"
@@ -18,15 +20,18 @@
 #' TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
 #' prepared <- TCGAPrepare(query, dir="exampleData")
 #' @export
-#' @importFrom stringr str_match str_trim
-#' @import data.table
+#' @importFrom stringr str_match str_trim str_detect
+#' @importFrom SummarizedExperiment SummarizedExperiment
+#' @importFrom S4Vectors DataFrame
+#' @import   data.table
 #' @import utils
 TCGAPrepare <- function(query,
                         dir = NULL,
                         type = NULL,
                         save = FALSE,
                         filename = NULL,
-                        toPackage = NULL){
+                        toPackage = NULL,
+                        summarizedExperiment = TRUE){
 
     gene.location   <- get("gene.location",
                            envir =  as.environment("package:TCGAbiolinks"))
@@ -87,7 +92,6 @@ TCGAPrepare <- function(query,
                                        "integer",   # Chromosome
                                        "integer"))  # Genomic coordinate
             setnames(data,gsub(" ", "\\.", colnames(data)))
-            #data <- data[-1,] # removing Composite Element REF
             setnames(data,2,barcode[i])
 
             if (i == 1) {
@@ -101,16 +105,23 @@ TCGAPrepare <- function(query,
             setTxtProgressBar(pb, i)
         }
 
-        rowData <- GRanges(seqnames = paste0("chr", df$Chromosome),
-                              ranges = IRanges(start = df$Genomic_Coordinate,
-                                               end = df$Genomic_Coordinate),
-                              probeID = df$Composite.Element.REF)
+        if(summarizedExperiment){
+            rowRanges <- GRanges(seqnames = paste0("chr", df$Chromosome),
+                                 ranges = IRanges(start = df$Genomic_Coordinate,
+                                                  end = df$Genomic_Coordinate),
+                                 probeID = df$Composite.Element.REF)
 
-        colData <- DataFrame(sample=colnames(df)[5:ncol(df)])
-        sset <- SummarizedExperiment(assays= as.matrix(subset(df,select = c(5:ncol(df)))),
-                                     rowData=rowData,
-                                     colData=colData)
-        return(sset)
+            colData <- DataFrame(sample=colnames(df)[5:ncol(df)])
+            sset <- SummarizedExperiment(assays= as.matrix(subset(df,select = c(5:ncol(df)))),
+                                         rowRanges=rowRanges,
+                                         colData=colData)
+            return(sset)
+        } else {
+            setDF(df)
+            rownames(df) <- df$Composite.Element.REF
+            df$Composite.Element.REF <- NULL
+            df[,3:ncol(df)] <- sapply(df[,3:ncol(df)], as.numeric)
+        }
     }
 
     if (grepl("mda_rppa_core",tolower(platform))) {
@@ -238,13 +249,13 @@ TCGAPrepare <- function(query,
                              type != "rsem.isoforms.results" &&
                              type != "rsem.genes.normalized_results" &&
                              type != "rsem.isoforms.normalized_results")
-           ){
+        ){
             msg <- paste0("Plase select a type. \n Possibilities:\n",
                           " = rsem.genes.results\n",
                           " = rsem.isoforms.results\n",
                           " = rsem.genes.normalized_results\n",
                           " = rsem.isoforms.normalized_results\n"
-                          )
+            )
             message(msg)
             return()
         }
@@ -274,9 +285,34 @@ TCGAPrepare <- function(query,
             }
             setTxtProgressBar(pb, i)
         }
-        setDF(df)
-        rownames(df) <- df[,1]
-        df[,1] <- NULL
+
+        if(summarizedExperiment){
+            aux <- strsplit(df$gene_id,"\\|")
+            GeneID<-unlist(lapply(aux,function(x) x[2]))
+            df$entrezgene <- as.numeric(GeneID)
+            merged <- merge(df,gene.location,by="entrezgene")
+
+            regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
+                            "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
+            barcode <- which(str_detect(colnames(merged),regex)==TRUE)
+
+            rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
+                                 ranges = IRanges(start = merged$start_position,
+                                                  end = merged$end_position),
+                                 strand=merged$strand,
+                                 gene_id = merged$external_gene_name,
+                                 entrezgene = merged$entrezgene )
+
+            colData <- DataFrame(sample=colnames(merged)[barcode])
+            sset <- SummarizedExperiment(assays=as.matrix(subset(merged,select = barcode)),
+                                         rowRanges=rowRanges,
+                                         colData=colData)
+            return(sset)
+        } else {
+            setDF(df)
+            rownames(df) <- df[,1]
+            df[,1] <- NULL
+        }
     }
 
     if (grepl("illuminahiseq_mirnaseq",platform, ignore.case = TRUE)) {
