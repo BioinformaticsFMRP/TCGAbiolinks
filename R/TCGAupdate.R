@@ -214,9 +214,15 @@ tcgaGetTable <- function(url, max = 0) {
     return(db)
 }
 
-#' @title TCGA TCGAUpdate
-#' @description Updates local TCGA database
-#' @return platform.table center.table disease.table tcga.db
+#' @title TCGAUpdate
+#' @description Updates the preprocessed TCGA database used by the package.
+#'
+#' This function can update the the disease, platform, center, data table.
+#' Updating disease, platform, center will take some seconds. And Updating the
+#' data.table shoul take no more than 10 minutes.
+#'
+#' The package will be updated with lastest version of the table every week.
+#' @return platform/center/disease/data tables will be updated in the package
 #' @param update Update options: all (default) disease center platform
 #' @examples
 #' \dontrun{
@@ -224,10 +230,10 @@ tcgaGetTable <- function(url, max = 0) {
 #'   TCGAUpdate()
 #'   # Update disease table
 #'   TCGAUpdate(update = "disease")
-
 #' }
 #' TCGAUpdate("none")
 #' @export
+#' @family data functions
 TCGAUpdate <- function(update = "all"){
     tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
 
