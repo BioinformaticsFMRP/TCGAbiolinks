@@ -6,9 +6,6 @@
 \usage{
 TCGAUpdate()
 }
-\arguments{
-\item{update}{Update options: all (default) disease center platform}
-}
 \value{
 platform/center/disease/data tables will be updated in the package
 }
@@ -21,4 +18,5 @@ data.table shoul take no more than 10 minutes.
 
 The package will be updated with lastest version of the table every week.
 }
+\keyword{internal}
 

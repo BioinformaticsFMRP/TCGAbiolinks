@@ -217,7 +217,7 @@ tcgaGetTable <- function(url, max = 0) {
 #'
 #' The package will be updated with lastest version of the table every week.
 #' @return platform/center/disease/data tables will be updated in the package
-#' @param update Update options: all (default) disease center platform
+#' @keywords internal
 TCGAUpdate <- function(){
     tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
 
@@ -257,7 +257,7 @@ TCGAUpdate <- function(){
     new.db[idx,]$deployStatus <- getBarcode(new.db[idx,])$barcode
     colnames(new.db)[4] <- "barcode"
     tcga.db <- new.db
-    devtools::use_data(platform.table, disease.table, tcga.db, center.table,
+    use_data(platform.table, disease.table, tcga.db, center.table,
              DAVID_BP_matrix,DAVID_CC_matrix,DAVID_MF_matrix,
              EAGenes,gene.location,listEA_pathways,
              internal = TRUE,overwrite = TRUE)
