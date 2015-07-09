@@ -30,7 +30,7 @@
 #' TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
 #' data <- TCGAPrepare(query, dir="exampleData")
 #' @export
-#' @importFrom stringr str_match str_trim str_detect
+#' @importFrom stringr str_match str_trim str_detect str_match_all
 #' @importFrom SummarizedExperiment SummarizedExperiment
 #' @importFrom S4Vectors DataFrame SimpleList
 #' @import utils data.table
