@@ -1,7 +1,14 @@
-# ------------------------ Encode search
 #' @title TCGAQuery
 #' @description
-#'    Searches in the tcga database
+#'    The TCGAQuery searches TCGA open-access data throught a preprocessed
+#'    table with the lastest version of the files.
+#'
+#'    In order to update this table the function TCGAUpdate can be used.
+#'    Some parameters as tumor, platorm, level, center, barcode can be used
+#'    to search the data.
+#'
+#'    TCGAQuery will return a matrix with the results found,
+#'    that will be used in the other function TCGADownload, TCGAPrepare.
 #' @param tumor Disease Examples:
 #' \tabular{lllll}{
 #'OV   \tab BRCA \tab CESC \tab ESCA \tab PCPG\cr
@@ -39,29 +46,40 @@
 #'IlluminaHiSeq_RNASeqV2            \tab Mixed_DNASeq_Cont
 #'}
 #' @param level '1' '2' '3'
-#' @param added.since 04- 14-2010
-#' @param added.up.to 04- 14-2010
+#' @param added.since 04/14/2010
+#' @param added.up.to 04/14/2010
 #' @param center center name
-#' @param samples List of samples. Ex:c('TCGA-04-06-*','TCGA-04-08-*')
+#' @param samples List of samples. Ex:c('TCGA-04-06','TCGA-61-1743-01A-01D-0649-04')
 #' @examples
 #' query <- TCGAQuery(tumor = "gbm",
 #'                    added.since = "01/01/2013",
 #'                    added.up.to = "12/31/2013")
+#'
 #' query <- TCGAQuery(tumor = c("gbm","lgg"),
 #'                    platform = c("HumanMethylation450","HumanMethylation27"))
+#'
 #' query <- TCGAQuery(tumor = "gbm",
 #'                    platform = "HumanMethylation450",
 #'                    level = "3")
-#' query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D")
-#' query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04", level = 3)
+#'
 #' query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04",
 #'                    tumor = "OV",
-#'                    platform = "CGH-1x1M_G4447A")
+#'                    platform = "CGH-1x1M_G4447A",
+#'                    level = 3)
 #' @export
 #' @importFrom downloader download
 # @importFrom knitr kable
+#' @seealso \code{\link{TCGAUpdate}} for updating the preprocessed table used in
+#' the search
+#'
+#'  \code{\link{TCGADownload}} for downloading the data from the
+#' search
+#'
+#' \code{\link{TCGAPrepare}} for preparing the data for the user into
+#' a Summarized experiment object, or a matrix.
 #' @return A dataframe with the results of the query
 #'        (lastest version of the files)
+#' @family data functions
 TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
                       added.up.to = NULL, samples = NULL, center = NULL,
                       level = NULL) {

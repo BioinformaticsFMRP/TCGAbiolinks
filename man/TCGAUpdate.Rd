@@ -2,7 +2,7 @@
 % Please edit documentation in R/TCGAupdate.R
 \name{TCGAUpdate}
 \alias{TCGAUpdate}
-\title{TCGA TCGAUpdate}
+\title{TCGAUpdate}
 \usage{
 TCGAUpdate(update = "all")
 }
@@ -10,10 +10,16 @@ TCGAUpdate(update = "all")
 \item{update}{Update options: all (default) disease center platform}
 }
 \value{
-platform.table center.table disease.table tcga.db
+platform/center/disease/data tables will be updated in the package
 }
 \description{
-Updates local TCGA database
+Updates the preprocessed TCGA database used by the package.
+
+This function can update the the disease, platform, center, data table.
+Updating disease, platform, center will take some seconds. And Updating the
+data.table shoul take no more than 10 minutes.
+
+The package will be updated with lastest version of the table every week.
 }
 \examples{
 \dontrun{
@@ -23,5 +29,9 @@ Updates local TCGA database
   TCGAUpdate(update = "disease")
 }
 TCGAUpdate("none")
+}
+\seealso{
+Other data.functions: \code{\link{TCGADownload}};
+  \code{\link{TCGAPrepare}}; \code{\link{TCGAQuery}}
 }
 
