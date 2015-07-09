@@ -47,9 +47,6 @@ TCGAPrepare <- function(query,
                         toPackage = NULL,
                         summarizedExperiment = TRUE){
 
-    gene.location   <- get("gene.location",
-                           envir =  as.environment("package:TCGAbiolinks"))
-
     if (is.null(dir)) {
         message("Argument dir is NULL. Plese provide the directory
                 with the folders to be prepared. ")
@@ -686,7 +683,7 @@ mapbarcodeuuid <- function(barcode){
 # Obs: delete the file after reading
 #      is it better to save it?
 getMage <- function(line){
-    tcga.db <- get("tcga.db")
+
     root <- "https://tcga-data.nci.nih.gov"
     path <- "mages"
     dir.create(path,showWarnings = FALSE)
