@@ -22,21 +22,30 @@
 #'
 #' @param pcobj           an object returned by prcomp() or princomp()
 #' @param choices         which PCs to plot
-#' @param scale           covariance biplot (scale = 1), form biplot (scale = 0). When scale = 1, the inner product between the variables approximates the covariance and the distance between the points approximates the Mahalanobis distance.
+#' @param scale           covariance biplot (scale = 1), form biplot (scale = 0).
+#'                         When scale = 1, the inner product between the variables
+#'                         approximates the covariance and the distance between
+#'                         the points approximates the Mahalanobis distance.
 #' @param obs.scale       scale factor to apply to observations
 #' @param var.scale       scale factor to apply to variables
 #' @param pc.biplot       for compatibility with biplot.princomp()
-#' @param groups          optional factor variable indicating the groups that the observations belong to. If provided the points will be colored according to groups
+#' @param groups          optional factor variable indicating the groups that
+#'                         the observations belong to. If provided the points
+#'                         will be colored according to groups
 #' @param ellipse         draw a normal data ellipse for each group?
 #' @param ellipse.prob    size of the ellipse in Normal probability
 #' @param labels          optional vector of labels for the observations
 #' @param labels.size     size of the text used for the labels
-#' @param alpha           alpha transparency value for the points (0 = transparent, 1 = opaque)
-#' @param circle          draw a correlation circle? (only applies when prcomp was called with scale = TRUE and when var.scale = 1)
+#' @param alpha           alpha transparency value for the points
+#'                        (0 = transparent, 1 = opaque)
+#' @param circle          draw a correlation circle?
+#'                        (only applies when prcomp was called with scale = TRUE
+#'                        and when var.scale = 1)
 #' @param circle.prob     definition of circle.prob
 #' @param var.axes        draw arrows for the variables?
 #' @param varname.size    size of the text for variable names
-#' @param varname.adjust  adjustment factor the placement of the variable names, >= 1 means farther from the arrow
+#' @param varname.adjust  adjustment factor the placement of the variable names,
+#'                         >= 1 means farther from the arrow
 #' @param varname.abbrev  whether or not to abbreviate the variable names
 #' @import ggplot2
 #' @importFrom plyr ddply
@@ -47,10 +56,12 @@
 #' @import stats
 #' @return  a ggplot2 plot
 #' @export
+#' @author Vincent Q. Vu.
 #' @examples
-#'   wine.pca <- prcomp(wine, scale. = TRUE)
-#'   print(ggbiplot(wine.pca, obs.scale = 1, var.scale = 1, groups = wine.class,
-#'   ellipse = TRUE, circle = TRUE))
+#' data(iris)
+#' iris.pca <- prcomp(iris[,1:4], scale. = TRUE)
+#' print(ggbiplot(iris.pca, obs.scale = 1, var.scale = 1, groups = iris[,5],
+#' ellipse = TRUE, circle = TRUE))
 ggbiplot <- function(pcobj, choices = 1:2, scale = 1, pc.biplot = TRUE,
                      obs.scale = 1 - scale, var.scale = scale,
                      groups = NULL, ellipse = FALSE, ellipse.prob = 0.68,
