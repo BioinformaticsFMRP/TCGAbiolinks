@@ -39,13 +39,18 @@
 #' @return Download TCGA data into the given path
 #' @family data functions
 TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
-                         quiet = FALSE, force = FALSE) {
+                         quiet = TRUE, force = FALSE) {
 
     dir.create(path, showWarnings = FALSE, recursive = TRUE)
     root <- "https://tcga-data.nci.nih.gov"
 
     # Downloading the folder
     if (is.null(type) && is.null(samples) ) {
+        message(rep("-=",(nchar(file.path(path))/2)+4))
+        message(paste0("| Downloading:", length(files), " folders"))
+        message(paste0("| Path:", file.path(path)))
+        message(rep("-=",(nchar(file.path(path))/2)+4))
+        pb <- txtProgressBar(min = 0, max = nrow(data), style = 3)
         for (i in 1:nrow(data)) {
 
             file <- paste0(path, "/", basename(data[i, "deployLocation"]))
@@ -64,9 +69,11 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                 }
                 untar(file, exdir = path)
             }
+            setTxtProgressBar(pb, i)
         }
     } else {
         # Downloading files
+
         for (i in 1:nrow(data)) {
 
             folder <- gsub(".tar.gz","",basename(data[i,]$deployLocation))
@@ -89,11 +96,17 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 
             if(length(files) > 0){
                 dir.create(file.path(path,folder), showWarnings = FALSE)
-                message(paste0("Downloading:", length(files), " files","\n"))
+
+                message(rep("-=",(nchar(file.path(path,folder))/2)+4))
+                message(paste0("| Downloading:", length(files), " files"))
+                message(paste0("| Path:", file.path(path,folder)))
+                message(rep("-=",(nchar(file.path(path,folder))/2)+4))
+                pb <- txtProgressBar(min = 0, max = length(files), style = 3)
             }
 
             for (i in seq_along(files)) {
                 if (force || !file.exists(file.path(path,folder,files[i]))) {
+                    message(paste0("[",i,"] ", files[i],"\n"))
                     if(is.windows()){
                         suppressWarnings(
                             download(paste0(root,url,"/",files[i]),
@@ -106,9 +119,11 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                                  file.path(path,folder,files[i]),quiet)
                     }
                 }
+                setTxtProgressBar(pb, i)
             }
         }
     }
+    close(pb)
 }
 
 # Filter files by barcode
