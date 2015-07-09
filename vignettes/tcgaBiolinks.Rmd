@@ -393,8 +393,11 @@ query <- TCGAQuery(samples = listSamples)
 query <- TCGAQuery(tumor = "brca", samples = listSamples, 
   platform = "IlluminaHiSeq_RNASeqV2", level = "3")
 
-TCGADownload(query, path = "dataBrca", type = "rsem.genes.results",samples = listSamples)
+# dont run
+#TCGADownload(query, path = "dataBrca", type = "gene.quantification",samples = listSamples)
+
 # Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
+TCGADownload(query, path = "dataBrca", type = "rsem.genes.results",samples = listSamples)
 
 # Prepare expression matrix with gene id in rows and samples (barcode) in columns
 # rsem.genes.results as values
