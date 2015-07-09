@@ -17,7 +17,7 @@
 #' @param path Directory to save the downloaded data
 #' @param type Filter the files that will be downloaded by
 #'  type. Example:"rsem.genes.results"
-#' @param quiet Supress output messages?. Default: \code{FALSE}
+#' @param quiet Supress output messages?. Default: \code{TRUE}
 #' @param samples List of samples to download data
 #' @param force Download files even if it was already downladed?
 #' Default: \code{FALSE}
@@ -71,6 +71,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             }
             setTxtProgressBar(pb, i)
         }
+        close(pb)
     } else {
         # Downloading files
 
@@ -121,9 +122,10 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                 }
                 setTxtProgressBar(pb, i)
             }
+            close(pb)
         }
     }
-    close(pb)
+
 }
 
 # Filter files by barcode
