@@ -354,7 +354,27 @@ HER_status_BRCA(bar,"Positive",clinical_brca_data)
 HER_status_BRCA(bar,"Negative",clinical_brca_data)
 ```
 
-# [Gene Expression] TCGA query, download, prepare list of a barcode
+# [Gene Expression IlluminaHiSeq_RNASeq] TCGA query, download, prepare list of a barcode
+You can easily search TCGA samples, download and prepare a matrix of gene expression.
+```{r, eval = FALSE}
+# Query platform IlluminaHiSeq_RNASeq withot a list of barcode 
+query <- TCGAQuery(tumor = "brca", platform = "IlluminaHiSeq_RNASeq", level = "3")
+
+# You can define a list of samples to query and download providing relative TCGA barcodes.
+listSamples <- samplesfilter(query)
+
+# Download only first 5 samples for test.
+
+TCGADownload(query, path = "dataBrca", type = "gene.quantification",
+             samples = listSamples$IlluminaHiSeq_RNASeq[1:5])
+
+# Prepare expression matrix with gene id in rows and samples (barcode) in columns
+# rsem.genes.results as values
+BRCAMatrix <- TCGAPrepare(query,"dataBrca",type = "gene.quantification")
+```
+
+
+# [Gene Expression IlluminaHiSeq_RNASeqV2] TCGA query, download, prepare list of a barcode
 You can easily search TCGA samples, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
 
@@ -373,13 +393,12 @@ query <- TCGAQuery(samples = listSamples)
 query <- TCGAQuery(tumor = "brca", samples = listSamples, 
   platform = "IlluminaHiSeq_RNASeqV2", level = "3")
 
+TCGADownload(query, path = "dataBrca", type = "rsem.genes.results",samples = listSamples)
 # Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
-TCGADownload(query, path = "dataBrca", type = "rsem.genes.results",
-             samples = listSamples)
 
 # Prepare expression matrix with gene id in rows and samples (barcode) in columns
 # rsem.genes.results as values
-BRCAMatrix <- TCGAPrepare(query,"dataBrca")
+BRCAMatrix <- TCGAPrepare(query,"dataBrca",type = "rsem.genes.results")
 ```
 
 The result is shown below:
