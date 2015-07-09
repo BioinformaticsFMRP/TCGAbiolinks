@@ -4,7 +4,7 @@
 \alias{TCGAUpdate}
 \title{TCGAUpdate}
 \usage{
-TCGAUpdate(update = "all")
+TCGAUpdate()
 }
 \arguments{
 \item{update}{Update options: all (default) disease center platform}
@@ -20,18 +20,5 @@ Updating disease, platform, center will take some seconds. And Updating the
 data.table shoul take no more than 10 minutes.
 
 The package will be updated with lastest version of the table every week.
-}
-\examples{
-\dontrun{
-  # Update all databases
-  TCGAUpdate()
-  # Update disease table
-  TCGAUpdate(update = "disease")
-}
-TCGAUpdate("none")
-}
-\seealso{
-Other data.functions: \code{\link{TCGADownload}};
-  \code{\link{TCGAPrepare}}; \code{\link{TCGAQuery}}
 }
 

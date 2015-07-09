@@ -61,3 +61,4 @@ biocViews:
     Survival
 Suggests: testthat, png, BiocStyle, knitr, rmarkdown
 VignetteBuilder: knitr
+LazyData: true
