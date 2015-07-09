@@ -289,12 +289,6 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #' system.time(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
 #' }
 EAcomplete <- function(TFname, RegulonList){
-    EAGenes <- get("EAGenes")
-    DAVID_BP_matrix <- get("DAVID_BP_matrix")
-    DAVID_BP_matrix <- get("DAVID_BP_matrix")
-    DAVID_MF_matrix <- get("DAVID_MF_matrix")
-    DAVID_CC_matrix <- get("DAVID_CC_matrix")
-    listEA_pathways <- get("listEA_pathways")
 
     print(paste("I need about ", "1 minute to finish complete ",
                 "Enrichment analysis GO[BP,MF,CC] and Pathways... "))
@@ -325,19 +319,17 @@ EAcomplete <- function(TFname, RegulonList){
 #' @param GOtype GOtype
 #' @param FDRThresh pvalue corrected (FDR) as threshold
 #' @param EAGenes EAGenes
-#' @export
+# @export
 #' @import stats
 #' @return EAcomplete plot
 #' @examples
 #' \dontrun{
-#'
 #' EAGenes <- get("EAGenes")
 #' RegulonList <- rownames(dataDEGsFiltLevel)
-#' DAVID_BP_matrix <- get("DAVID_BP_matrix")
 #' ResBP <- EnrichmentAnalysis(GeneName="DEA genes Normal Vs Tumor",
 #'                            RegulonList,DAVID_BP_matrix,
 #'                            EAGenes,GOtype = "DavidBP")
-#'                            }
+#'}
 EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,
                                EAGenes,GOtype,FDRThresh=0.01) {
     topPathways <- nrow(TableEnrichment)

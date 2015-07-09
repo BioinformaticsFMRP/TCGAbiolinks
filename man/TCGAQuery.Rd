@@ -64,7 +64,6 @@ A dataframe with the results of the query
 The TCGAQuery searches TCGA open-access data throught a preprocessed
    table with the lastest version of the files.
 
-   In order to update this table the function TCGAUpdate can be used.
    Some parameters as tumor, platorm, level, center, barcode can be used
    to search the data.
 
@@ -89,16 +88,13 @@ query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04",
                    level = 3)
 }
 \seealso{
-\code{\link{TCGAUpdate}} for updating the preprocessed table used in
-the search
-
- \code{\link{TCGADownload}} for downloading the data from the
+\code{\link{TCGADownload}} for downloading the data from the
 search
 
 \code{\link{TCGAPrepare}} for preparing the data for the user into
 a Summarized experiment object, or a matrix.
 
 Other data.functions: \code{\link{TCGADownload}};
-  \code{\link{TCGAPrepare}}; \code{\link{TCGAUpdate}}
+  \code{\link{TCGAPrepare}}
 }
 
