@@ -6,9 +6,6 @@
     file = system.file("extdata/GRCh.rda",package = "TCGAbiolinks")
     load(file,envir = as.environment("package:TCGAbiolinks"))
 
-    file = system.file("extdata/wine.rda",package = "TCGAbiolinks")
-    load(file,envir = as.environment("package:TCGAbiolinks"))
-
     file = system.file("extdata/dataSocial.rda",package = "TCGAbiolinks")
     load(file,envir = as.environment("package:TCGAbiolinks"))
 

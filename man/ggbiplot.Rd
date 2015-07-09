@@ -15,7 +15,10 @@ ggbiplot(pcobj, choices = 1:2, scale = 1, pc.biplot = TRUE,
 
 \item{choices}{which PCs to plot}
 
-\item{scale}{covariance biplot (scale = 1), form biplot (scale = 0). When scale = 1, the inner product between the variables approximates the covariance and the distance between the points approximates the Mahalanobis distance.}
+\item{scale}{covariance biplot (scale = 1), form biplot (scale = 0).
+When scale = 1, the inner product between the variables
+approximates the covariance and the distance between
+the points approximates the Mahalanobis distance.}
 
 \item{pc.biplot}{for compatibility with biplot.princomp()}
 
@@ -23,7 +26,9 @@ ggbiplot(pcobj, choices = 1:2, scale = 1, pc.biplot = TRUE,
 
 \item{var.scale}{scale factor to apply to variables}
 
-\item{groups}{optional factor variable indicating the groups that the observations belong to. If provided the points will be colored according to groups}
+\item{groups}{optional factor variable indicating the groups that
+the observations belong to. If provided the points
+will be colored according to groups}
 
 \item{ellipse}{draw a normal data ellipse for each group?}
 
@@ -33,17 +38,21 @@ ggbiplot(pcobj, choices = 1:2, scale = 1, pc.biplot = TRUE,
 
 \item{labels.size}{size of the text used for the labels}
 
-\item{alpha}{alpha transparency value for the points (0 = transparent, 1 = opaque)}
+\item{alpha}{alpha transparency value for the points
+(0 = transparent, 1 = opaque)}
 
 \item{var.axes}{draw arrows for the variables?}
 
-\item{circle}{draw a correlation circle? (only applies when prcomp was called with scale = TRUE and when var.scale = 1)}
+\item{circle}{draw a correlation circle?
+(only applies when prcomp was called with scale = TRUE
+and when var.scale = 1)}
 
 \item{circle.prob}{definition of circle.prob}
 
 \item{varname.size}{size of the text for variable names}
 
-\item{varname.adjust}{adjustment factor the placement of the variable names, >= 1 means farther from the arrow}
+\item{varname.adjust}{adjustment factor the placement of the variable names,
+>= 1 means farther from the arrow}
 
 \item{varname.abbrev}{whether or not to abbreviate the variable names}
 }
@@ -54,8 +63,12 @@ a ggplot2 plot
 Biplot for Principal Components using ggplot2
 }
 \examples{
-wine.pca <- prcomp(wine, scale. = TRUE)
-  print(ggbiplot(wine.pca, obs.scale = 1, var.scale = 1, groups = wine.class,
-  ellipse = TRUE, circle = TRUE))
+data(iris)
+iris.pca <- prcomp(iris[,1:4], scale. = TRUE)
+print(ggbiplot(iris.pca, obs.scale = 1, var.scale = 1, groups = iris[,5],
+ellipse = TRUE, circle = TRUE))
+}
+\author{
+Vincent Q. Vu.
 }
 
