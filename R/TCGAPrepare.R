@@ -100,7 +100,7 @@ TCGAPrepare <- function(query,
                           colClasses=c("character", # Composite Element REF
                                        "numeric",   # beta value
                                        "character", # Gene symbol
-                                       "integer",   # Chromosome
+                                       "character",   # Chromosome
                                        "integer"))  # Genomic coordinate
             setnames(data,gsub(" ", "\\.", colnames(data)))
             setnames(data,2,barcode[i])
@@ -321,6 +321,25 @@ TCGAPrepare <- function(query,
             setTxtProgressBar(pb, i)
         }
         df <- df[-1,]
+
+        if(summarizedExperiment){
+            # TODO create GRanges
+            rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
+                                 ranges = IRanges(start = merged$start_position,
+                                                  end = merged$end_position),
+                                 strand=merged$strand,
+                                 gene_id = merged$external_gene_name,
+                                 entrezgene = merged$entrezgene )
+            names(rowRanges) <- as.character(merged$gene_id)
+
+            assays <- SimpleList(raw_counts=as.matrix(subset(df,select=seq(2,ncol(df)))))
+            colData <- DataFrame(sample=colnames(df)[2:ncol(df)],
+                                 row.names=colnames(df)[2:ncol(df)])
+
+            sset <- SummarizedExperiment(assays=assays,
+                                         rowRanges=rowRanges,
+                                         colData=colData)
+        }
 
     }
     if (grepl("rnaseqv2",platform, ignore.case = TRUE)) {
