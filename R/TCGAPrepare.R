@@ -1,30 +1,44 @@
-#' @title TCGA TCGAPrepare
+#' @title TCGAPrepare
 #' @description
-#'  Read the data from the experiments and prepare the data for downstream
-#'  analysis.
-#'  The default output is a SummarizedExperiment object.
-#'  It also prepare the data for some specific packages
-#' @return A SummarizedExperiment object (If SummarizedExperiment = FALSE,
+#'  This function will read the data from the experiments and prepare it
+#'  for downstream analysis.
+#'
+#'  The samples are always refered by their barcode.
+#'
+#'  If you want to save the data into an rda file, please use the \emph{save}
+#'  parameter that will save an rda object with the  \emph{filename} parameter.
+#'  If no filename was set, the filename will be the concatenation of platform and
+#'  Sys.time.
+#'
+#'  \strong{Return}The default output is a SummarizedExperiment object.
+#'
+#' @return A SummarizedExperiment object (If SummarizedExperiment = \code{FALSE},
 #' a data.frame)
-#' @param query Data frame as the one returned from TCGAQuery
-#' @param dir Directory with the files
-#' @param type File to prepare.
-#' @param save Save a rda object with the prepared object? Default FALSE
+#' @param query TCGAQuery output
+#' @param dir Directory with the files downloaded by TCGADownload
+#' @param type Filter the files to prepare.
+#' @param save Save a rda object with the prepared object?
+#'  Default: \code{FALSE}
 #' @param filename Name of the saved file
 #' @param toPackage For whihc package are you preparing the data?
-#' @param summarizedExperiment Output as SummarizedExperiment? Default: TRUE
 #' Default: NULL. Options: "ELMER"
+#' @param summarizedExperiment Output as SummarizedExperiment?
+#' Default: \code{FALSE}
 #' @examples
 #' sample <- "TCGA-06-0939-01A-01D-1228-05"
 #' query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
 #' TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
-#' prepared <- TCGAPrepare(query, dir="exampleData")
+#' data <- TCGAPrepare(query, dir="exampleData")
 #' @export
 #' @importFrom stringr str_match str_trim str_detect
 #' @importFrom SummarizedExperiment SummarizedExperiment
 #' @importFrom S4Vectors DataFrame SimpleList
-#' @import   data.table
-#' @import utils
+#' @import utils data.table
+#' @seealso  \code{\link{TCGAQuery}} for searching the data to download
+#'
+#'  \code{\link{TCGADownload}} for downloading the data from the
+#' search
+#' @family data functions
 TCGAPrepare <- function(query,
                         dir = NULL,
                         type = NULL,

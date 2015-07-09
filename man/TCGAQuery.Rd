@@ -46,11 +46,11 @@ HumanMethylation27                \tab Mixed_DNASeq_Cont_curated      \cr
 IlluminaHiSeq_RNASeqV2            \tab Mixed_DNASeq_Cont
 }}
 
-\item{added.since}{04- 14-2010}
+\item{added.since}{04/14/2010}
 
-\item{added.up.to}{04- 14-2010}
+\item{added.up.to}{04/14/2010}
 
-\item{samples}{List of samples. Ex:c('TCGA-04-06-*','TCGA-04-08-*')}
+\item{samples}{List of samples. Ex:c('TCGA-04-06','TCGA-61-1743-01A-01D-0649-04')}
 
 \item{center}{center name}
 
@@ -61,21 +61,44 @@ A dataframe with the results of the query
        (lastest version of the files)
 }
 \description{
-Searches in the tcga database
+The TCGAQuery searches TCGA open-access data throught a preprocessed
+   table with the lastest version of the files.
+
+   In order to update this table the function TCGAUpdate can be used.
+   Some parameters as tumor, platorm, level, center, barcode can be used
+   to search the data.
+
+   TCGAQuery will return a matrix with the results found,
+   that will be used in the other function TCGADownload, TCGAPrepare.
 }
 \examples{
 query <- TCGAQuery(tumor = "gbm",
                    added.since = "01/01/2013",
                    added.up.to = "12/31/2013")
+
 query <- TCGAQuery(tumor = c("gbm","lgg"),
                    platform = c("HumanMethylation450","HumanMethylation27"))
+
 query <- TCGAQuery(tumor = "gbm",
                    platform = "HumanMethylation450",
                    level = "3")
-query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D")
-query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04", level = 3)
+
 query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04",
                    tumor = "OV",
-                   platform = "CGH-1x1M_G4447A")
+                   platform = "CGH-1x1M_G4447A",
+                   level = 3)
+}
+\seealso{
+\code{\link{TCGAUpdate}} for updating the preprocessed table used in
+the search
+
+ \code{\link{TCGADownload}} for downloading the data from the
+search
+
+\code{\link{TCGAPrepare}} for preparing the data for the user into
+a Summarized experiment object, or a matrix.
+
+Other data.functions: \code{\link{TCGADownload}};
+  \code{\link{TCGAPrepare}}; \code{\link{TCGAUpdate}}
 }
 
