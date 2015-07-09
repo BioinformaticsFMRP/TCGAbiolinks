@@ -3,7 +3,6 @@
 #'    The TCGAQuery searches TCGA open-access data throught a preprocessed
 #'    table with the lastest version of the files.
 #'
-#'    In order to update this table the function TCGAUpdate can be used.
 #'    Some parameters as tumor, platorm, level, center, barcode can be used
 #'    to search the data.
 #'
@@ -69,9 +68,7 @@
 #' @export
 #' @importFrom downloader download
 # @importFrom knitr kable
-#' @seealso \code{\link{TCGAUpdate}} for updating the preprocessed table used in
-#' the search
-#'
+#' @seealso
 #'  \code{\link{TCGADownload}} for downloading the data from the
 #' search
 #'
@@ -83,15 +80,8 @@
 TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
                       added.up.to = NULL, samples = NULL, center = NULL,
                       level = NULL) {
-    disease.table   <- get("disease.table",
-                           envir =  as.environment("package:TCGAbiolinks"))
-    platform.table  <- get("platform.table",
-                           envir =  as.environment("package:TCGAbiolinks"))
-    center.table  <- get("center.table",
-                         envir =  as.environment("package:TCGAbiolinks"))
-    db <-  get("tcga.db",
-               envir =  as.environment("package:TCGAbiolinks"))
 
+    db <- tcga.db
     if (!is.null(tumor)) {
         for (j in seq_along(tumor)) {
             if (!(is.element(tolower(tumor[j]),
@@ -223,7 +213,7 @@ TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
 
 #' @import utils
 getBarcode <- function(table){
-    tcga.db <- get("tcga.db", envir =  as.environment("package:TCGAbiolinks"))
+
     root <- "https://tcga-data.nci.nih.gov"
     allFiles <- c()
     mages <-  tcga.db[grep("mage-tab",tcga.db$name),]

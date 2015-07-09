@@ -55,6 +55,6 @@ data <- TCGAPrepare(query, dir="exampleData")
 search
 
 Other data.functions: \code{\link{TCGADownload}};
-  \code{\link{TCGAQuery}}; \code{\link{TCGAUpdate}}
+  \code{\link{TCGAQuery}}
 }
 
