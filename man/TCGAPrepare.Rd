@@ -2,41 +2,59 @@
 % Please edit documentation in R/TCGAPrepare.R
 \name{TCGAPrepare}
 \alias{TCGAPrepare}
-\title{TCGA TCGAPrepare}
+\title{TCGAPrepare}
 \usage{
 TCGAPrepare(query, dir = NULL, type = NULL, save = FALSE,
   filename = NULL, toPackage = NULL, summarizedExperiment = TRUE)
 }
 \arguments{
-\item{query}{Data frame as the one returned from TCGAQuery}
+\item{query}{TCGAQuery output}
 
-\item{dir}{Directory with the files}
+\item{dir}{Directory with the files downloaded by TCGADownload}
 
-\item{type}{File to prepare.}
+\item{type}{Filter the files to prepare.}
 
-\item{save}{Save a rda object with the prepared object? Default FALSE}
+\item{save}{Save a rda object with the prepared object?
+Default: \code{FALSE}}
 
 \item{filename}{Name of the saved file}
 
-\item{toPackage}{For whihc package are you preparing the data?}
-
-\item{summarizedExperiment}{Output as SummarizedExperiment? Default: TRUE
+\item{toPackage}{For whihc package are you preparing the data?
 Default: NULL. Options: "ELMER"}
+
+\item{summarizedExperiment}{Output as SummarizedExperiment?
+Default: \code{FALSE}}
 }
 \value{
-A SummarizedExperiment object (If SummarizedExperiment = FALSE,
+A SummarizedExperiment object (If SummarizedExperiment = \code{FALSE},
 a data.frame)
 }
 \description{
-Read the data from the experiments and prepare the data for downstream
- analysis.
- The default output is a SummarizedExperiment object.
- It also prepare the data for some specific packages
+This function will read the data from the experiments and prepare it
+ for downstream analysis.
+
+ The samples are always refered by their barcode.
+
+ If you want to save the data into an rda file, please use the \emph{save}
+ parameter that will save an rda object with the  \emph{filename} parameter.
+ If no filename was set, the filename will be the concatenation of platform and
+ Sys.time.
+
+ \strong{Return}The default output is a SummarizedExperiment object.
 }
 \examples{
 sample <- "TCGA-06-0939-01A-01D-1228-05"
 query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
 TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
-prepared <- TCGAPrepare(query, dir="exampleData")
+data <- TCGAPrepare(query, dir="exampleData")
+}
+\seealso{
+\code{\link{TCGAQuery}} for searching the data to download
+
+ \code{\link{TCGADownload}} for downloading the data from the
+search
+
+Other data.functions: \code{\link{TCGADownload}};
+  \code{\link{TCGAQuery}}; \code{\link{TCGAUpdate}}
 }
 
