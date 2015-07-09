@@ -5,7 +5,7 @@
 \title{TCGA TCGAPrepare}
 \usage{
 TCGAPrepare(query, dir = NULL, type = NULL, save = FALSE,
-  filename = NULL, toPackage = NULL)
+  filename = NULL, toPackage = NULL, summarizedExperiment = TRUE)
 }
 \arguments{
 \item{query}{Data frame as the one returned from TCGAQuery}
@@ -18,17 +18,20 @@ TCGAPrepare(query, dir = NULL, type = NULL, save = FALSE,
 
 \item{filename}{Name of the saved file}
 
-\item{toPackage}{For whihc package are you preparing the data?
+\item{toPackage}{For whihc package are you preparing the data?}
+
+\item{summarizedExperiment}{Output as SummarizedExperiment? Default: TRUE
 Default: NULL. Options: "ELMER"}
 }
 \value{
-A SummarizedExperiment object
+A SummarizedExperiment object (If SummarizedExperiment = FALSE,
+a data.frame)
 }
 \description{
-Read the data from the experiments and prepare the data in a
- for downstream analysis. The default output is a SummarizedExperiment object.
+Read the data from the experiments and prepare the data for downstream
+ analysis.
+ The default output is a SummarizedExperiment object.
  It also prepare the data for some specific packages
- ready to use also with other R packages
 }
 \examples{
 sample <- "TCGA-06-0939-01A-01D-1228-05"
