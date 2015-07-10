@@ -308,6 +308,36 @@ TCGAPrepare <- function(query,
                             mage[idx,]$Comment..TCGA.Barcode.
                         })
         setnames(df,2:ncol(df),names)
+
+        if(summarizedExperiment){
+            # TODO create GRanges
+            df$external_gene_name <-  alias2SymbolTable(df$`Composite Element REF`)
+            merged <- merge(df,gene.location,by="external_gene_name")
+            rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
+                                 ranges = IRanges(start = merged$start_position,
+                                                  end = merged$end_position),
+                                 strand=merged$strand,
+                                 gene_id = merged$external_gene_name,
+                                 entrezgene = merged$entrezgene,
+                                 alias = merged$`Composite Element REF`)
+            names(rowRanges) <- as.character(merged$`Composite Element REF`)
+
+            regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
+                            "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
+            barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
+            colData <- DataFrame(sample=barcode,
+                                 row.names=barcode)
+
+            assays <- SimpleList(raw_counts=data.matrix(
+                subset(merged,select=seq(3,2+length(barcode)))
+            )
+            )
+
+            sset <- SummarizedExperiment(assays=assays,
+                                         rowRanges=rowRanges,
+                                         colData=colData)
+            return (sset)
+        }
     }
 
     if (tolower(platform) == tolower("HG-U133_Plus_2") ||
