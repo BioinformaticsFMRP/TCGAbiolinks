@@ -90,7 +90,6 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                     next
                 }
             }
-
             if(!is.null(samples)){
                 files <- filterFiles(data[i,],samples,files)
             }
@@ -122,7 +121,9 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                 }
                 setTxtProgressBar(pb, i)
             }
-            close(pb)
+            if(length(files) > 0){
+                close(pb)
+            }
         }
     }
 
