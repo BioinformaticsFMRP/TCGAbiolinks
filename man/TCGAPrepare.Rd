@@ -30,8 +30,8 @@ A SummarizedExperiment object (If SummarizedExperiment = \code{FALSE},
 a data.frame)
 }
 \description{
-This function will read the data from the experiments and prepare it
- for downstream analysis.
+This function will read the data from level 3 the experiments and prepare it
+ for downstream analysis into a SummarizedExperiment object.
 
  The samples are always refered by their barcode.
 
@@ -40,6 +40,23 @@ This function will read the data from the experiments and prepare it
  If no filename was set, the filename will be the concatenation of platform and
  Sys.time.
 
+List of accepted platforms:
+\itemize{
+\item AgilentG4502A_07_1/AgilentG4502A_07_2/AgilentG4502A_07_3
+\item Genome_Wide_SNP_6
+\item H-miRNA_8x15K/H-miRNA_8x15Kv2
+\item HG-U133_Plus_2
+\item HT_HG-U133A
+\item HumanMethylation27
+\item HumanMethylation450
+\item IlluminaDNAMethylation_OMA002_CPI
+\item IlluminaDNAMethylation_OMA003_CPI
+\item IlluminaGA_RNASeq
+\item IlluminaGA_RNASeqV2
+\item IlluminaHiSeq_RNASeq
+\item IlluminaHiSeq_RNASeqV2
+\item IlluminaHiSeq_TotalRNASeqV2
+}
  \strong{Return}The default output is a SummarizedExperiment object.
 }
 \examples{
