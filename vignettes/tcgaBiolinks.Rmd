@@ -8,6 +8,7 @@ output:
   BiocStyle::html_document:
     toc: true
     number_sections: true
+    toc_depth: 1
 
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -15,11 +16,15 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-```{r, echo = FALSE,hide=TRUE, message=FALSE,}
+```{r, echo = FALSE,hide=TRUE, message=FALSE}
 devtools::load_all(".")
 ```
 
 # Introduction 
+
+Motivation: The Cancer Genome Atlas (TCGA) provides us with an enormous collection of data sets, not only spanning a large number of cancers but also a large number of experimental platforms. Even though the data can be accessed and downloaded from the database, the possibility to analyse these downloaded data directly in one single R package has not yet been available. 
+
+ TCGAbiolinks consists of three parts or levels. Firstly, we provide different options to query and download from TCGA relevant data from all currently platforms and their subsequent pre-processing for commonly used bio-informatics (tools) packages in Bioconductor or CRAN. Secondly, the package allows to integrate different data types and it can be used for different types of analyses dealing with all platforms such as diff.expression, network inference or survival analysis, etc, and then it allows to visualize the obtained results. Thirdly we added a social level where a researcher can found a similar intereset in a bioinformatic community, and allows both to find a validation of results in literature in pubmed and also to retrieve questions and answers from site such as support.bioconductor.org, biostars.org, stackoverflow,etc.
 
 This document describes how to search, download and analyze TCGA data using the
 TCGAbiolinks package.
@@ -208,7 +213,7 @@ The arguments are:
 *  **quiet**	Supress output messages? Default: FALSE
 *  **force**	Download again if file already exists? Default: FALSE
 
-Example of use:
+## Example of use:
 ```{r, eval = FALSE}
 # get all samples from the query and save them in the TCGA folder
 # samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
@@ -217,14 +222,28 @@ Example of use:
 TCGADownload(query, path = "data", type = "rsem.genes.results")
 
 TCGADownload(query, path = "data", type = "rsem.isoforms.normalized_results")
+
+
+TCGADownload(query, path = "dataBrca", type = "rsem.genes.results",
+             samples = c("TCGA-E9-A1NG-11A-52R-A14M-07",
+                         "TCGA-BH-A1FC-11A-32R-A13Q-07")
+             )
 ```
 
 Comment: The function will structure the folders to save the data as:
 _Path given by the user/Experiment folder_
 
+## The types available for downloading
+
+Platform| Types of file
+:-------------:|:-------------:
+Illuminahiseq_totalrnaseqv2<br>  IlluminaHiSeq_RNASeqV2<br>IlluminaGA_RNASeqV2 |junction_quantification<br>rsem.genes.results<br>rsem.isoforms.results<br>rsem.genes.normalized_results<br>rsem.isoforms.normalized_results<br>bt.exon_quantification
+IlluminaHiSeq_RNASeq<br>illuminaga_rnaseq|exon.quantification<br>spljxn.quantification<br>gene.quantification
+genome_wide_snp_6| hg18.seg<br>hg19.seg<br>nocnv_hg18.seg<br>nocnv_hg19.seg
+
 # Preparing the data with TCGAPrepare
-You can easily read your downloaded data using the `TCGAPrepare` function.
-This function will prepare data matrices for downstream analysis.
+You can easily read the downloaded data using the `TCGAPrepare` function.
+This function will prepare the data into a [SummarizedExperiment](http://www.nature.com/nmeth/journal/v12/n2/abs/nmeth.3252.html) object for downstream analysis. For the moment this function is working only with data level 3.
 
 The arguments are:
 
@@ -232,16 +251,61 @@ The arguments are:
 * **dir**	Directory with the files
 * **type**	File to prepare.
 * **save**	Save a rda object with the prepared object? Default: FALSE
-* **filename** Name of the rda object that will be saved if `save` is TRUE
+* **filename** Name of the rda object that will be saved if `save` is `TRUE`
 * **toPackage** Name of the package to prepare the data specific to that package. 
+* **summarizedExperiment** Should the output be a SummarizedExperiment object? Default: `TRUE`
 
-Example of use:
+## Example of use:
 ```{r, eval = FALSE}
 # get all samples from the query and save them in the TCGA folder
 # samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
 # samples to normalize later
 data <- TCGAPrepare(query, dir = "data", save = TRUE, filename = "myfile.rda")
 ```
+
+```{r,echo=FALSE, results='hide',message=FALSE,warning=FALSE}
+library(SummarizedExperiment)
+query <- TCGAQuery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3 )
+TCGADownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
+                             "TCGA-DY-A0XA-01A-11R-A155-07"),
+             type = "rsem.genes.normalized_results")
+data <- TCGAPrepare(query = query,dir = ".", type = "rsem.genes.normalized_results")
+```
+
+As an example, for the platform IlluminaHiSeq_RNASeqV2 we prepared two samples (TCGA-DY-A1DE-01A-11R-A155-07 and TCGA-DY-A0XA-01A-11R-A155-07) for the rsem.genes.normalized_results type. In order to create the object mapped the gene_id 
+to the hg19. The genes_id not found are then removed from the final matrix.
+The default output is a SummarizedExperiment is shown below. 
+
+```{r, eval = TRUE}
+    data
+    head(assay(data,"raw_counts"))
+```
+
+In order to create the SummarizedExperiment object we mapped the rows of the 
+experiments into GRanges. In order to map miRNA we used the miRNA from the anotation database TxDb.Hsapiens.UCSC.hg19.knownGene, this will exclude the miRNA from viruses and bacteria. In order to map genes, genes alias, we used the biomart hg19 database (hsapiens_gene_ensembl from grch37.ensembl.org).
+
+In case you prefere to have the raw data. You can get a data frame without any
+modification setting the `summarizedExperiment` to false.
+
+```{r,echo=FALSE, results='hide',message=FALSE,warning=FALSE}
+data <- TCGAPrepare(query = query,dir = ".", type ="rsem.genes.normalized_results", summarizedExperiment = FALSE)
+```
+
+```{r, eval = TRUE}
+    class(data)
+    dim(data)
+    head(data)
+```
+
+
+## The `types` available for the preparing
+
+Platform| Types of file
+:-------------:|:-------------:
+Illuminahiseq_totalrnaseqv2<br>  IlluminaHiSeq_RNASeqV2<br>IlluminaGA_RNASeqV2 |junction_quantification<br>rsem.genes.results<br>rsem.isoforms.results<br>rsem.genes.normalized_results<br>rsem.isoforms.normalized_results<br>bt.exon_quantification
+IlluminaHiSeq_RNASeq<br>illuminaga_rnaseq|exon.quantification<br>spljxn.quantification<br>gene.quantification
+genome_wide_snp_6| hg19.seg
+
 
 ## Preparing the data with TCGAPrepare - toPackage 
 This section will show how to integrate `TCGAbiolinks` with other packages.
@@ -683,13 +747,11 @@ knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF 
 #LatexPrintTableforPresentation(Table = tabDEGsTFPubmed,rowsForPage = nrow(tabDEGsTFPubmed), TableTitle = "tabDEGsTFPubmed", LabelTitle = "tabDEGsTFPubmed", withrows = T)
 ```
 
-# TCGA social
+# Searching questions,answers and literature with TCGASocial
 The `TCGASocial` function has two type of searches, one that searches for
-most downloaded packages in CRAN or BioConductor and one that searches the most related question in biostar 
+most downloaded packages in CRAN or BioConductor and one that searches the most related question in biostar. 
 
-
-
-## TCGA social with BioConductor
+## TCGASocial with BioConductor
 Find most downloaded packages in CRAN or BioConductor
  
 ```{r, eval = FALSE}
@@ -709,8 +771,8 @@ The result is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
 library(TCGAbiolinks)
-listPackage <-c("limma","edgeR","survcomp")
-tabPackage <- TCGAsocial(siteToFind="bioconductor.org", listPackage)
+listPackage <- c("limma","edgeR","survcomp")
+tabPackage <- TCGAsocial(siteToFind = "bioconductor.org", listPackage)
 
 knitr::kable(head(tabPackage), digits = 2, caption = "Table with number of downloads about a list of packages",row.names = FALSE)
 
@@ -718,7 +780,7 @@ knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in s
 
 ```
 
-## TCGA social with Biostar
+## TCGASocial with Biostar
 Find most related question in biostar.
  
 ```{r, eval = FALSE}
