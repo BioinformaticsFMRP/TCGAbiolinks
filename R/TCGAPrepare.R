@@ -34,7 +34,9 @@
 #' @importFrom SummarizedExperiment SummarizedExperiment
 #' @importFrom S4Vectors DataFrame SimpleList
 #' @importFrom limma alias2SymbolTable
-#' @import utils data.table
+#' @importFrom GenomicFeatures microRNAs
+#' @importFrom BiocGenerics as.data.frame
+#' @import utils data.table TxDb.Hsapiens.UCSC.hg19.knownGene
 #' @seealso  \code{\link{TCGAQuery}} for searching the data to download
 #'
 #'  \code{\link{TCGADownload}} for downloading the data from the
@@ -363,6 +365,7 @@ TCGAPrepare <- function(query,
         df <- df[-1,]
 
         if(summarizedExperiment){
+            if(!grepl("H-miRNA_8x15K|agilent",platform, ignore.case = TRUE)){
             # TODO create GRanges
             df$external_gene_name <-  alias2SymbolTable(df$`Hybridization REF`)
             merged <- merge(df,gene.location,by="external_gene_name")
@@ -374,7 +377,17 @@ TCGAPrepare <- function(query,
                                  entrezgene = merged$entrezgene,
                                  alias = merged$`Hybridization REF`)
             names(rowRanges) <- as.character(merged$`Hybridization REF`)
-
+            } else {
+                microRNA <- as.data.frame(microRNAs(TxDb.Hsapiens.UCSC.hg19.knownGene))
+                df$mirna_id <- tolower(df$`Hybridization REF`)
+                merged <- merge(df,microRNA, by="mirna_id")
+                rowRanges <- GRanges(seqnames = merged$seqnames,
+                                     ranges = IRanges(start = merged$start,
+                                                      end = merged$end),
+                                     strand=merged$strand,
+                                     mirna_id = merged$mirna_id)
+                names(rowRanges) <- as.character(merged$mirna_id)
+        }
             regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
@@ -391,6 +404,7 @@ TCGAPrepare <- function(query,
                                          colData=colData)
             return (sset)
         }
+
     }
     if (grepl("rnaseqv2",platform, ignore.case = TRUE)) {
 
