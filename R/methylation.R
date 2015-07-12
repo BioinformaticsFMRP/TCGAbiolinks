@@ -43,107 +43,97 @@ diffmean <- function(group1, group2) {
     return(g1.g2)
 }
 
-#' @title creates survival analysis
-#' @description Creates survival analysis
+#' @title Creates survival analysis
+#' @description Creates a survival plot from TCGA patient clinical data
+#' using survival library. It uses the fields days_to_death and vital, plus a
+#' columns for groups.
 #'
-#' @param met.md Data frame with the following columns: vital, os, cluster
+#' @param clinical_patient TCGA Clinical patient with the information days_to_death
+#' @param clusterCol Column with groups to plot. This is a mandatory field, the
+#' caption will be based in this column
 #' @param legend Legend title of the figure
-#' @param cutoff xlim
-#' @param main main title
-#' @param ylab y axis text
-#' @param xlab x axis text
-#' @param time.reference In order not to forget -> MONTHS DAY YEAR
-#' @param filename output file name
-#' @param default.plot You can use ggplot or plot
-#' @param color not implemented yet
+#' @param cutoff xlim This parameter will be a limit in the x-axis. That means, that
+#' patients with days_to_deth > cutoff will be set to Alive.
+#' @param main main title of the plot
+#' @param ylab y axis text of the plot
+#' @param xlab x axis text of the plot
+#' @param filename The name of the pdf file
+#' @param color Define the colors of the lines.
 #' @importFrom GGally ggsurv
 #' @importFrom survival survfit Surv
 #' @importFrom scales percent
 #' @export
 #' @return Survival plot
 #' @examples
-#' death_days_to <- runif(100,10,200)
-#' vital_status <-sample (c("Alive","Dead"),100, replace = TRUE)
-#' cluster <- rep(c("group1","group2"),100)
-#' met.md <- data.frame(death_days_to,cluster,vital_status)
-#' survivalPlot(met.md,default.plot = "plot", filename = "surv.pdf")
+#' clinical <- clinic("gbm","clinical_patient")
+#' survivalPlot(clinical,"gender", filename = "surv.pdf", legend="Gender")
 #' survivalPlot(met.md)
-survivalPlot <- function(met.md, legend = "Legend", cutoff = 0,
+survivalPlot <- function(clinical_patient,
+                         clusterCol=NULL,
+                         legend = "Legend", cutoff = 0,
                          main = "Kaplan-Meier Overall Survival Curves",
                          ylab = "PROBABILITY OF SURVIVAL",
-                         xlab = "TIME SINCE DIAGNOSIS",
-                         time.reference = "DAYS",
+                         xlab = "TIME SINCE DIAGNOSIS (DAYS)",
                          filename = "survival.pdf",
-                         color = c("green", "firebrick4", "orange3", "blue"),
-                         default.plot = "ggplot") {
+                         color = c("green", "firebrick4", "orange3", "blue")
+) {
     .e <- environment()
     group <- NULL
+    if (is.null(clusterCol)) {
+        message("Please provide the clusterCol argument")
+        return(NULL)
+    }
+    notDead <- which(clinical_patient$days_to_death == "[Not Applicable]")
+
+    if (length(notDead) > 0) {
+        clinical_patient[notDead,]$days_to_death <- Inf
+    }
+
     if (cutoff != 0) {
         # Axis-x cut-off
-        aux <- subset(met.md, met.md$death_days_to > cutoff)
+        aux <- subset(clinical_patient, clinical_patient$days_to_death > cutoff)
         # 'cut' info bigger than cutoff
-        met.md[rownames(aux), "death_days_to"] <- cutoff
+        clinical_patient[rownames(aux), "days_to_death"] <- cutoff
         # Pacient is alive (0:alive,1:dead)
-        met.md[rownames(aux), "vital_status"] <- "Alive"
+        clinical_patient[rownames(aux), "vital_status"] <- "Alive"
     }
     # create a column to be used with survival package, info need
     # to be TRUE(DEAD)/FALSE (ALIVE)
-    met.md$s <- met.md$vital == "Dead"
+    clinical_patient$s <- clinical_patient$vital == "Dead"
 
     # Column with groups
-    met.md$type <- as.factor(met.md$cluster)
+    clinical_patient$type <- as.factor(clinical_patient[,clusterCol])
 
     # create the formula for survival analysis
-    f.m <- formula(Surv(as.numeric(met.md$death_days_to),
-                        met.md$s) ~ met.md$type)
-    fit <- survfit(f.m, data = met.md)
+    f.m <- formula(Surv(as.numeric(clinical_patient$days_to_death),
+                        clinical_patient$s) ~ clinical_patient$type)
+    fit <- survfit(f.m, data = clinical_patient)
 
-    if (default.plot == "plot") {
-        pdf(file = filename)
-        plot(fit, lwd = 4, col = color, main = main,
-             xlab = paste0(xlab,"(", time.reference, ")"),
-             ylab = ylab, yscale = 100,
-             bg = "black")
-        box(col = "black", lwd = 3)
-        par(xpd = TRUE)
-        legend("right", legend = sapply(seq_along(fit$n), function(x) {
-            paste0("group", x, " (n=", fit$n[x], ")")
-        }), col = color, lwd = 3, title = legend, box.lwd = 3,
-        bg = "white")
-        dev.off()
-    } else {
-        ## Using ggplot
-        label.add.n <- function(x) {
-            paste0(x, "(n=", nrow(met.md[met.md$cluster == x,]), ")")
-        }
-
-        surv <- ggsurv(fit, CI = "def", plot.cens = FALSE,
-                       surv.col = "gg.def",
-                       cens.col = "red", lty.est = 1,
-                       lty.ci = 2, cens.shape = 3,
-                       back.white = TRUE,
-                       xlab = paste0(xlab, "(", time.reference,
-                                     ")"), ylab = ylab, main = main)
-        if (cutoff != 0) {
-            surv <- surv + ggplot2::coord_cartesian(xlim = c(0, cutoff))
-        }
-        label.add.n <- function(x){
-            paste0(x,"(n=",nrow(met.md[met.md$cluster == x,]),")")
-        }
-        with(met.md,{
-            surv <- surv + scale_colour_discrete(name = "legend",
-                                                 labels = sapply(levels(met.md$type),label.add.n)
-            )
-            with(surv,{
-
-                surv <- surv + geom_point(aes(colour = group),
-                                          shape = 3,size = 2)
-                surv <- surv + guides(linetype = FALSE) +
-                    scale_y_continuous(labels = scales::percent)
-                ggsave(surv, filename = filename)
-            })
-        })
+    surv <- ggsurv(fit, CI = "def", plot.cens = FALSE,
+                   surv.col = "gg.def",
+                   cens.col = "red", lty.est = 1,
+                   lty.ci = 2, cens.shape = 3,
+                   back.white = TRUE,
+                   xlab = xlab, ylab = ylab, main = main)
+    if (cutoff != 0) {
+        surv <- surv + ggplot2::coord_cartesian(xlim = c(0, cutoff))
     }
+    label.add.n <- function(x) {
+        paste0(x, " (n = ",
+               nrow(subset(clinical_patient,clinical_patient[,clusterCol] == x)), ")")
+    }
+    with(clinical_patient,{
+        surv <- surv + scale_colour_discrete(name = legend,
+                    labels = sapply(levels(clinical_patient$type),label.add.n)
+        )
+        with(surv,{
+            surv <- surv + geom_point(aes(colour = group),
+                                      shape = 3,size = 2)
+            surv <- surv + guides(linetype = FALSE) +
+                scale_y_continuous(labels = scales::percent)
+            ggsave(surv, filename = filename)
+        })
+    })
 
 }
 #' @title Mean methylation boxplot
