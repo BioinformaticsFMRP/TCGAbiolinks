@@ -2,47 +2,46 @@
 % Please edit documentation in R/methylation.R
 \name{survivalPlot}
 \alias{survivalPlot}
-\title{creates survival analysis}
+\title{Creates survival analysis}
 \usage{
-survivalPlot(met.md, legend = "Legend", cutoff = 0,
-  main = "Kaplan-Meier Overall Survival Curves",
-  ylab = "PROBABILITY OF SURVIVAL", xlab = "TIME SINCE DIAGNOSIS",
-  time.reference = "DAYS", filename = "survival.pdf", color = c("green",
-  "firebrick4", "orange3", "blue"), default.plot = "ggplot")
+survivalPlot(clinical_patient, clusterCol = NULL, legend = "Legend",
+  cutoff = 0, main = "Kaplan-Meier Overall Survival Curves",
+  ylab = "PROBABILITY OF SURVIVAL", xlab = "TIME SINCE DIAGNOSIS (DAYS)",
+  filename = "survival.pdf", color = c("green", "firebrick4", "orange3",
+  "blue"))
 }
 \arguments{
-\item{met.md}{Data frame with the following columns: vital, os, cluster}
+\item{clinical_patient}{TCGA Clinical patient with the information days_to_death}
+
+\item{clusterCol}{Column with groups to plot. This is a mandatory field, the
+caption will be based in this column}
 
 \item{legend}{Legend title of the figure}
 
-\item{cutoff}{xlim}
+\item{cutoff}{xlim This parameter will be a limit in the x-axis. That means, that
+patients with days_to_deth > cutoff will be set to Alive.}
 
-\item{main}{main title}
+\item{main}{main title of the plot}
 
-\item{ylab}{y axis text}
+\item{ylab}{y axis text of the plot}
 
-\item{xlab}{x axis text}
+\item{xlab}{x axis text of the plot}
 
-\item{time.reference}{In order not to forget -> MONTHS DAY YEAR}
+\item{filename}{The name of the pdf file}
 
-\item{filename}{output file name}
-
-\item{color}{not implemented yet}
-
-\item{default.plot}{You can use ggplot or plot}
+\item{color}{Define the colors of the lines.}
 }
 \value{
 Survival plot
 }
 \description{
-Creates survival analysis
+Creates a survival plot from TCGA patient clinical data
+using survival library. It uses the fields days_to_death and vital, plus a
+columns for groups.
 }
 \examples{
-death_days_to <- runif(100,10,200)
-vital_status <-sample (c("Alive","Dead"),100, replace = TRUE)
-cluster <- rep(c("group1","group2"),100)
-met.md <- data.frame(death_days_to,cluster,vital_status)
-survivalPlot(met.md,default.plot = "plot", filename = "surv.pdf")
+clinical <- clinic("gbm","clinical_patient")
+survivalPlot(clinical,"gender", filename = "surv.pdf", legend="Gender")
 survivalPlot(met.md)
 }
 
