@@ -4,42 +4,53 @@
 \alias{metMeanBoxplot}
 \title{Mean methylation boxplot}
 \usage{
-metMeanBoxplot(data, sort = FALSE, filename = "G-CIMP-mean.methylation.pdf",
-  ylab = "Mean DNA methylation", xlab = "DNA Methylation Clusters",
+metMeanBoxplot(data, groupCol = NULL, sort = FALSE,
+  filename = "G-CIMP-mean.methylation.pdf", ylab = "Mean DNA methylation",
+  xlab = "DNA Methylation Clusters",
   title = "Mean DNA methylation by cluster", legend = "Legend",
   color = c("green", "red", "purple", "orange", "salmon", "grey"))
 }
 \arguments{
-\item{data}{data frame first col mean methylation by patient, second groups}
+\item{data}{SummarizedExperiment object obtained from TCGAPrepare}
+
+\item{groupCol}{Columns in colData(data) that defines the groups. If no
+columns defined a columns called "Patients" will be used}
 
 \item{sort}{Sort by mean methylation? False by default}
 
-\item{filename}{pdf filename}
+\item{filename}{The name of the pdf that will be saved}
 
-\item{ylab}{y axis text}
+\item{ylab}{y axis text in the plot}
 
-\item{xlab}{x axis text}
+\item{xlab}{x axis text in the plot}
 
-\item{title}{main title}
+\item{title}{main title in the plot}
 
-\item{legend}{legend title}
+\item{legend}{Caption title}
 
 \item{color}{vector of colors to be used in graph}
 }
 \value{
-Save the survival plot
+Save the pdf survival plot
 }
 \description{
-Mean methylation boxplot.
+Creates a mean methylation boxplot based for patients divided in by groups
   Input: a dataframe with two columns:
-   1 - values of mean methylation
-   2 - Groups it belongs
+   1 - SummarizedExperiment object
+   2 -
 }
 \examples{
-avg <- runif(500,0,1)
-cluster <- c('Lgm1','Lgm2','Lgm3','Lgm4','Lgm5','Lgm6')
-cluster <- sample(cluster, 500,replace = TRUE)
-data <- data.frame(avg,cluster)
-metMeanBoxplot(data)
+nrows <- 200; ncols <- 21
+counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
+rowRanges <- GRanges(rep(c("chr1", "chr2"), c(50, 150)),
+                   IRanges(floor(runif(200, 1e5, 1e6)), width=100),
+                    strand=sample(c("+", "-"), 200, TRUE),
+                    feature_id=sprintf("ID\%03d", 1:200))
+colData <- DataFrame(Treatment=rep(c("ChIP", "Input","Other"), 7),
+                    row.names=LETTERS[1:21],
+                    group=rep(c("group1","group2","group3"),c(7,7,7)))
+data <- SummarizedExperiment(assays=SimpleList(counts=counts),
+                          rowRanges=rowRanges, colData=colData)
+metMeanBoxplot(data,groupCol  = "group",sort=F)
 }
 

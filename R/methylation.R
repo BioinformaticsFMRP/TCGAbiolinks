@@ -1,6 +1,6 @@
-#' @title calculate diffmean methylation between two groups
+#' @title Calculate diffmean methylation between two groups
 #' @description
-#'    calculate diffmean methylation between two groups
+#'    Calculate diffmean methylation between two groups
 #' @param group1 Data frame probes vs patient
 #' @param group2 Data frame probes vs patient
 #' @import ggplot2
@@ -138,30 +138,39 @@ survivalPlot <- function(clinical_patient,
 }
 #' @title Mean methylation boxplot
 #' @description
-#'   Mean methylation boxplot.
+#'   Creates a mean methylation boxplot based for patients divided in by groups
 #'   Input: a dataframe with two columns:
-#'    1 - values of mean methylation
-#'    2 - Groups it belongs
-#' @param data data frame first col mean methylation by patient, second groups
-#' @param filename pdf filename
-#' @param legend legend title
+#'    1 - SummarizedExperiment object
+#'    2 -
+#' @param data SummarizedExperiment object obtained from TCGAPrepare
+#' @param groupCol Columns in colData(data) that defines the groups. If no
+#' columns defined a columns called "Patients" will be used
+#' @param filename The name of the pdf that will be saved
+#' @param legend Caption title
 #' @param color vector of colors to be used in graph
-#' @param title main title
-#' @param ylab y axis text
-#' @param xlab x axis text
+#' @param title main title in the plot
+#' @param ylab y axis text in the plot
+#' @param xlab x axis text in the plot
 #' @param sort Sort by mean methylation? False by default
-#' @import ggplot2
-#' @import stats
+#' @import ggplot2 stats
 #' @export
-#' @return Save the survival plot
-#'
+#' @return Save the pdf survival plot
 #' @examples
-#' avg <- runif(500,0,1)
-#' cluster <- c('Lgm1','Lgm2','Lgm3','Lgm4','Lgm5','Lgm6')
-#' cluster <- sample(cluster, 500,replace = TRUE)
-#' data <- data.frame(avg,cluster)
-#' metMeanBoxplot(data)
-metMeanBoxplot <- function(data, sort = FALSE,
+#' nrows <- 200; ncols <- 21
+#' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
+#' rowRanges <- GRanges(rep(c("chr1", "chr2"), c(50, 150)),
+#'                    IRanges(floor(runif(200, 1e5, 1e6)), width=100),
+#'                     strand=sample(c("+", "-"), 200, TRUE),
+#'                     feature_id=sprintf("ID%03d", 1:200))
+#'colData <- DataFrame(Treatment=rep(c("ChIP", "Input","Other"), 7),
+#'                     row.names=LETTERS[1:21],
+#'                     group=rep(c("group1","group2","group3"),c(7,7,7)))
+#'data <- SummarizedExperiment(assays=SimpleList(counts=counts),
+#'                           rowRanges=rowRanges, colData=colData)
+#' metMeanBoxplot(data,groupCol  = "group",sort=TRUE)
+metMeanBoxplot <- function(data,
+                           groupCol=NULL,
+                           sort = FALSE,
                            filename = "G-CIMP-mean.methylation.pdf",
                            ylab = "Mean DNA methylation",
                            xlab = "DNA Methylation Clusters",
@@ -170,30 +179,39 @@ metMeanBoxplot <- function(data, sort = FALSE,
                            color = c("green", "red", "purple",
                                      "orange", "salmon", "grey")) {
     .e <- environment()
+    mean <- apply(assay(data), 2, mean,na.rm = TRUE)
+
+    if (is.null(groupCol)){
+        groups <- rep("Patient",length(mean))
+    } else {
+        groups <- colData(data)[,groupCol]
+    }
+    df <- data.frame(mean = mean, groups = groups)
+
     # Plot for methylation analysis Axis x: LGm clusters Axis y:
     # mean methylation
     if (sort) {
-        p <- ggplot(data, aes(reorder(factor(data$cluster), data$avg),
-                              data$avg),  environment = .e) +
-            geom_boxplot(aes(fill = reorder(factor(data$cluster),
-                                            data$avg)),
+        p <- ggplot(df, aes(reorder(factor(df$groups), df$mean),
+                              df$mean),  environment = .e) +
+            geom_boxplot(aes(fill = reorder(factor(df$groups),
+                                            df$mean)),
                          notchwidth = 0.25) +
             geom_jitter(height = 0,position = position_jitter(width = 0.1),
                         size = 3) +
             scale_fill_manual(values = color,
-                              labels = levels(reorder(factor(data$cluster),
-                                                      data$avg)),
+                              labels = levels(reorder(factor(df$groups),
+                                                      df$mean)),
                               name = legend)
     } else {
-        p <- ggplot(data, aes(factor(data$cluster), data$avg),
+        p <- ggplot(df, aes(factor(df$groups), df$mean),
                     environment = .e) +
-            geom_boxplot(aes(fill = factor(data$cluster)),
+            geom_boxplot(aes(fill = factor(df$groups)),
                          notchwidth = 0.25) +
             geom_jitter(height = 0,
                         position = position_jitter(width = 0.1),
                         size = 3) +
             scale_fill_manual(values = color,
-                              labels = levels(factor(data$cluster)),
+                              labels = levels(factor(df$groups)),
                               name = legend)
     }
     p <- p + ylab(ylab) + xlab(xlab) + labs(title = title) +
@@ -208,7 +226,7 @@ metMeanBoxplot <- function(data, sort = FALSE,
 
     # saving box plot to analyse it
     ggsave(p, filename = filename, width = 10, height = 10, dpi = 600)
-    dev.off()
+    message(paste("Plot saved in: ", file.path(getwd(),filename)))
 }
 
 #' @title Calculate pvalues
