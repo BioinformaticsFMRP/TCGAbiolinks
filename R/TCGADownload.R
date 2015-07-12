@@ -46,10 +46,10 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 
     # Downloading the folder
     if (is.null(type) && is.null(samples) ) {
-        message(rep("-=",(nchar(file.path(path))/2)+4))
-        message(paste0("| Downloading:", length(files), " folders"))
+        message(rep("-=",(nchar(file.path(path))/2) + 4))
+        message(paste0("| Downloading:", dim(data), " folders"))
         message(paste0("| Path:", file.path(path)))
-        message(rep("-=",(nchar(file.path(path))/2)+4))
+        message(rep("-=",(nchar(file.path(path))/2) + 4))
         pb <- txtProgressBar(min = 0, max = nrow(data), style = 3)
         for (i in 1:nrow(data)) {
 
