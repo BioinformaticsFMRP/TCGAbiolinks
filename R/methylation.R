@@ -6,41 +6,46 @@
 #' @import ggplot2
 #' @import graphics
 #' @importFrom grDevices png dev.off
-#' @export
 #' @return dataframe with diffmean values
 #' @examples
-#' patient <- paste("patient",1:100)
-#' probes <- paste0("cg00",1:100)
-#' beta.values <- runif(10000,0,1)
-#' beta.values <- matrix(beta.values,ncol = 100,nrow = 100)
-#' values <- as.data.frame(beta.values)
-#' colnames(values) <- patient
-#' rownames(values) <- probes
-#' diff.group1xgroup2 <- diffmean(values[,1:50],values[,51:100])
-diffmean <- function(group1, group2) {
-    g1 <- as.data.frame(group1)
-    g1$mean.g1 <- apply(group1, 1, mean, na.rm = TRUE)
-    g1$probeID <- rownames(group1)
+#' nrows <- 200; ncols <- 20
+#' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
+#' rowRanges <- GRanges(rep(c("chr1", "chr2"), c(50, 150)),
+#'                    IRanges(floor(runif(200, 1e5, 1e6)), width=100),
+#'                     strand=sample(c("+", "-"), 200, TRUE),
+#'                     feature_id=sprintf("ID%03d", 1:200))
+#'colData <- DataFrame(Treatment=rep(c("ChIP", "Input"), 10),
+#'                     row.names=LETTERS[1:20],
+#'                     group=rep(c("group1","group2"),c(10,10)))
+#'data <- SummarizedExperiment(assays=SimpleList(counts=counts),
+#'                           rowRanges=rowRanges, colData=colData)
+#' data <- diffmean(data)
+diffmean <- function(data, groupCol = NULL ,group2 = NULL, group1 = NULL) {
 
-    g2 <- as.data.frame(group2)
-    g2$mean.g2 <- apply(group2, 1, mean, na.rm = TRUE)
-    g2$probeID <- rownames(group2)
-
-    g1.g2 <- merge(g1[, "mean.g1"],
-                   g2[, "mean.g2"],
-                   by = "row.names",
-                   all.x = TRUE
-    )
-    g1.g2 <- g1.g2[,-1]
-    rownames(g1.g2) <- rownames(g1)
-    colnames(g1.g2) <- c("mean.g1","mean.g2")
-    g1.g2$diffmean <- g1.g2$mean.g1 - g1.g2$mean.g2
-
+    if (is.null(groupCol)) {
+        message("Please, set the groupCol parameter")
+        return(NULL)
+    }
+    if ( length(unique(colData(data)[,groupCol])) != 2 &&
+         is.null(group1) && is.null(group2)) {
+        message("Please, set the group1 and group2 parameters")
+        return(NULL)
+    } else if (length(unique(colData(data)[,groupCol])) == 2) {
+        group1 <- unique(colData(data)[,groupCol])[1]
+        group2 <- unique(colData(data)[,groupCol])[2]
+    }
+    # Apply Wilcoxon test in order to calculate the p-values
+    idx1 <- which(colData(data)[,groupCol] == group1)
+    idx2 <- which(colData(data)[,groupCol] == group2)
+    mean.g1 <- apply(m[,idx1], 1, mean, na.rm = TRUE)
+    mean.g2 <- apply(m[,idx2], 1, mean, na.rm = TRUE)
+    diffmean <- mean.g1 - mean.g2
+    rowRanges(data)$diffmean <-  diffmean
     png(filename = "histogram_diffmean.png")
-    hist(g1.g2$diffmean)
+    hist(diffmean)
     dev.off()
 
-    return(g1.g2)
+    return(data)
 }
 
 #' @title Creates survival analysis
@@ -231,49 +236,70 @@ metMeanBoxplot <- function(data,
 
 #' @title Calculate pvalues
 #' @details
-#'    Input: two matrix to be compared with wilcoxon test,
-#'           a boolean value to do a paired or non-paired test
+#'    Verify if the data is significant between two groups. For the methylation
+#'    we search for probes that have a difference in the mean methylation and
+#'    also a significant value.
+#'    Input: A SummarizedExperiment object that will be used to
+#'    compared two groups with wilcoxon test, a boolean value to do a
+#'    paired or non-paired test
 #'    Output: p-values (non-adj/adj) histograms, p-values (non-adj/adj)
-#' @param values  Dataframe with values
-#' @param idx1  Index of the values in group 1
-#' @param idx2  Index of the values in group 2
+#' @param data  SummarizedExperiment obtained from the TCGAPrepare
+#' @param groupCol  Columns with the groups inside the SummarizedExperiment
+#'  object. (This will be obtained by the function colData(data))
+#' @param group1 In case our object has more than 2 groups, you should set the
+#'  groups
+#' @param group2 In case our object has more than 2 groups, you should set the
+#'  groups
 #' @param paired  Do a paired wilcoxon test? Default: True
 #' @param exact  Do a exact wilcoxon test? Default: True
+#' @param  method P-value adjustment method. Default:"BH" Benjamini-Hochberg
 #' @return Data frame with cols p values/p values adjusted
 #' @importFrom exactRankTests wilcox.exact
 #' @import graphics
 #' @importFrom grDevices png dev.off pdf
 #' @import stats
-#' @export
 #' @return Data frame with two cols
 #'         p-values/p-values adjusted
 #' @examples
-#' patient <- paste("patient",1:100)
-#' probes <- paste0("cg00",1:100)
-#' beta.values <- runif(10000,0,1)
-#' beta.values <- matrix(beta.values,ncol = 100,nrow = 100)
-#' values <- as.data.frame(beta.values)
-#' rownames(values) <- patient
-#' colnames(values) <- probes
-#' pvalues <- calculate.pvalues(values,1:50,51:100)
-calculate.pvalues <- function(values, idx1 = NULL, idx2 = NULL, paired = TRUE,
+#' nrows <- 200; ncols <- 20
+#' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
+#' rowRanges <- GRanges(rep(c("chr1", "chr2"), c(50, 150)),
+#'                    IRanges(floor(runif(200, 1e5, 1e6)), width=100),
+#'                     strand=sample(c("+", "-"), 200, TRUE),
+#'                     feature_id=sprintf("ID%03d", 1:200))
+#'colData <- DataFrame(Treatment=rep(c("ChIP", "Input"), 10),
+#'                     row.names=LETTERS[1:20],
+#'                     group=rep(c("group1","group2"),c(10,10)))
+#'data <- SummarizedExperiment(assays=SimpleList(counts=counts),
+#'                           rowRanges=rowRanges, colData=colData)
+#' data <- calculate.pvalues(data)
+calculate.pvalues <- function(data,
+                              groupCol = NULL,
+                              group1 = NULL,
+                              group2 = NULL,
+                              paired = TRUE,
                               exact = TRUE) {
 
-    if (is.null(idx1) | is.null(idx2) ) {
-        message("One of the groups are null")
-        message("Function call:")
-        message("calculate.pvalues(values, idx1, idx2, paired = TRUE,
-                                      exact = TRUE)")
+    if (is.null(groupCol)) {
+        message("Please, set the groupCol parameter")
         return(NULL)
+    }
+    if ( length(unique(colData(data)[,groupCol])) != 2 &&
+         is.null(group1) && is.null(group2)) {
+        message("Please, set the group1 and group2 parameters")
+        return(NULL)
+    } else if (length(unique(colData(data)[,groupCol])) == 2) {
+        group1 <- unique(colData(data)[,groupCol])[1]
+        group2 <- unique(colData(data)[,groupCol])[2]
     }
 
     # Apply Wilcoxon test in order to calculate the p-values
-    p.value <- unlist(lapply(values, function(probe) {
-        zz <- wilcox.exact(as.matrix(probe[idx1]), as.matrix(probe[idx2]),
-                           exact = exact, paired = paired)
-        z <- zz$p.value
-        return(z)
-    }))
+    idx1 <- which(colData(data)[,groupCol] == group1)
+    idx2 <- which(colData(data)[,groupCol] == group2)
+    p.value <- apply(assay(data),1,
+                    function(x) { wilcox.test(x[idx1], x[idx2],
+                                  exact = exact, paired = paired)$p.value}
+    )
 
     ## Plot a histogram
     png(filename = "histogram_pvalues.png")
@@ -282,7 +308,7 @@ calculate.pvalues <- function(values, idx1 = NULL, idx2 = NULL, paired = TRUE,
 
     ## Calculate the adjusted p-values by using Benjamini-Hochberg
     ## (BH) method
-    p.value.adj <- p.adjust(p.value, method = "BH")
+    p.value.adj <- p.adjust(p.value, method = method)
 
     png(filename = "histogram_pvalues_adj.png")
 
@@ -290,7 +316,10 @@ calculate.pvalues <- function(values, idx1 = NULL, idx2 = NULL, paired = TRUE,
     hist(p.value.adj)
     dev.off()
 
-    return(data.frame(p.value, p.value.adj))
+    rowRanges(data)$p.value <-  p.value
+    rowRanges(data)$p.value.adj <-  p.value.adj
+
+    return(data)
 }
 
 #' @title Volcano plot
@@ -319,16 +348,17 @@ calculate.pvalues <- function(values, idx1 = NULL, idx2 = NULL, paired = TRUE,
 #'          group 2 = Hypermethylated
 #'          group 3 = Hypomethylated
 #' @examples
-#' patient <- paste("patient",1:100)
-#' Composite.Element.REF <- paste0("cg00",1:100)
-#' beta.values <- runif(10000,0,1)
-#' beta.values <- matrix(beta.values,ncol = 100,nrow = 100)
-#' values <- as.data.frame(beta.values)
-#' colnames(values) <- patient
-#' rownames(values) <- Composite.Element.REF
-#' data <- calculate.pvalues(as.data.frame(t(values)),1:50,51:100)
-#' diffmean <- diffmean(values[,1:50],values[,51:100])
-#' data <-cbind(Composite.Element.REF,data,diffmean)
+#' nrows <- 200; ncols <- 20
+#' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
+#' rowRanges <- GRanges(rep(c("chr1", "chr2"), c(50, 150)),
+#'                    IRanges(floor(runif(200, 1e5, 1e6)), width=100),
+#'                     strand=sample(c("+", "-"), 200, TRUE),
+#'                     feature_id=sprintf("ID%03d", 1:200))
+#'colData <- DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
+#'                     row.names=LETTERS[1:20],
+#'                     group=rep(c("group1","group2"),c(10,10)))
+#'data <- SummarizedExperiment(assays=SimpleList(counts=counts),
+#'                           rowRanges=rowRanges, colData=colData)
 #' hypo.hyper <- volcanoPlot(data, p.cut = 0.85)
 volcanoPlot <- function(data,
                         filename = "volcano.pdf",
@@ -346,25 +376,29 @@ volcanoPlot <- function(data,
                         p.cut = 0.05,
                         diffmean.cut = 0) {
     .e <- environment()
-    data$threshold <- "1"
+
+    message("Calculating the p values of each probe...")
+    data <- calculate.pvalues(data,groupCol)
+    message("Calculating the diference between the mean methylation of the groups...")
+    data <- diffmean(data,groupCol)
+
+    rowRanges(data)$threshold <- "1"
 
     # get significant data
-    data.s <- subset(data, data$p.value.adj < p.cut)
+    sig <-  rowRanges(data)$p.value.adj < p.cut
 
     # hypermethylated samples compared to old state
-    hyper <- subset(data.s, data.s$diffmean < (-diffmean.cut))
-    if (nrow(hyper) > 0) {
-        data[rownames(hyper), "threshold"] <- "2"
-    }
+    hyper <- rowRanges(data)$diffmean < (-diffmean.cut)
+    if (any(hyper & sig)) rowRanges(data)[hyper & sig,]$threshold <- "2"
+
     # hypomethylated samples compared to old state
-    hypo <- subset(data.s, data.s$diffmean > diffmean.cut)
-    if (nrow(hypo) > 0) {
-        data[rownames(hypo), "threshold"] <- "3"
-    }
+    hypo <-  rowRanges(data)$diffmean  > diffmean.cut
+    if (any(hypo & sig))rowRanges(data)[hypo & sig,]$threshold <- "3"
+
     # Plot a volcano plot
-    p <- ggplot(data = data, aes(x = data$diffmean,
-                                 y = -1 * log10(data$p.value.adj),
-                                 colour = data$threshold),
+    p <- ggplot(data = as.data.frame(rowRanges(data)), aes(x = rowRanges(data)$diffmean ,
+                                 y = -1 * log10(rowRanges(data)$p.value.adj),
+                                 colour = rowRanges(data)$threshold),
                 environment = .e) + geom_point() +
         labs(title = title) + ylab(ylab) + xlab(xlab) +
         geom_vline(aes(xintercept = -diffmean.cut), colour = "black",
@@ -378,10 +412,9 @@ volcanoPlot <- function(data,
                            name = legend)
     # saving box plot to analyse it
     ggsave(p, filename = filename, width = 10, height = 5, dpi = 600)
-    data <- subset(data, data$threshold == "2" | data$threshold == "3")
-    return(data[, c("Composite.Element.REF", "threshold")])
+    data <- subset(data, rowRanges(data)$threshold  == "2" | rowRanges(data)$threshold == "3")
+    return(data)
 }
-
 
 # Get latest Genome Reference Consortium Human Build And save
 # it as Genomic Ranges
