@@ -217,6 +217,7 @@ tcgaGetTable <- function(url, max = 0) {
 #'
 #' The package will be updated with lastest version of the table every week.
 #' @return platform/center/disease/data tables will be updated in the package
+#' @importFrom devtools use_data load_all
 #' @keywords internal
 TCGAUpdate <- function(){
     tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"

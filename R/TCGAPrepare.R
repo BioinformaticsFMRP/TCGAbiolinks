@@ -53,6 +53,9 @@
 #' @importFrom limma alias2SymbolTable
 #' @importFrom GenomicFeatures microRNAs
 #' @importFrom BiocGenerics as.data.frame
+#' @importFrom GenomicRanges GRanges nearest
+#' @importFrom IRanges IRanges
+#' @importFrom R.oo abort
 #' @import utils data.table TxDb.Hsapiens.UCSC.hg19.knownGene
 #' @seealso  \code{\link{TCGAQuery}} for searching the data to download
 #'
@@ -136,11 +139,25 @@ TCGAPrepare <- function(query,
             setTxtProgressBar(pb, i)
         }
 
-        if(summarizedExperiment){
+        if (summarizedExperiment) {
+
+            gene.GR <- GRanges(seqnames = paste0("chr", gene.location$chromosome_name),
+                               ranges = IRanges(start = gene.location$start_position,
+                                                end = gene.location$end_position),
+                               strand = gene.location$strand,
+                               symbol = gene.location$external_gene_name,
+                               EntrezID = gene.location$entrezgene)
+
             rowRanges <- GRanges(seqnames = paste0("chr", df$Chromosome),
                                  ranges = IRanges(start = df$Genomic_Coordinate,
                                                   end = df$Genomic_Coordinate),
                                  probeID = df$Composite.Element.REF)
+
+            # closest gene to each 450k probe ##your data
+            neargene <- as.data.frame(nearest(rowRanges, gene.GR))
+            neargene <- gene.location[neargene[,1],]
+            rowRanges$Gene_Symbol <-  neargene$external_gene_name
+
             names(rowRanges) <- as.character(df$Composite.Element.REF)
             colData <- DataFrame(sample=colnames(df)[5:ncol(df)],
                                  row.names=colnames(df)[5:ncol(df)])
