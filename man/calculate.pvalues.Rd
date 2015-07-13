@@ -4,19 +4,26 @@
 \alias{calculate.pvalues}
 \title{Calculate pvalues}
 \usage{
-calculate.pvalues(values, idx1 = NULL, idx2 = NULL, paired = TRUE,
-  exact = TRUE)
+calculate.pvalues(data, groupCol = NULL, group1 = NULL, group2 = NULL,
+  paired = TRUE, exact = TRUE)
 }
 \arguments{
-\item{values}{Dataframe with values}
+\item{data}{SummarizedExperiment obtained from the TCGAPrepare}
 
-\item{idx1}{Index of the values in group 1}
+\item{groupCol}{Columns with the groups inside the SummarizedExperiment
+object. (This will be obtained by the function colData(data))}
 
-\item{idx2}{Index of the values in group 2}
+\item{group1}{In case our object has more than 2 groups, you should set the
+groups}
+
+\item{group2}{In case our object has more than 2 groups, you should set the
+groups}
 
 \item{paired}{Do a paired wilcoxon test? Default: True}
 
 \item{exact}{Do a exact wilcoxon test? Default: True}
+
+\item{method}{P-value adjustment method. Default:"BH" Benjamini-Hochberg}
 }
 \value{
 Data frame with cols p values/p values adjusted
@@ -28,18 +35,26 @@ Data frame with two cols
 Calculate pvalues
 }
 \details{
-Input: two matrix to be compared with wilcoxon test,
-          a boolean value to do a paired or non-paired test
+Verify if the data is significant between two groups. For the methylation
+   we search for probes that have a difference in the mean methylation and
+   also a significant value.
+   Input: A SummarizedExperiment object that will be used to
+   compared two groups with wilcoxon test, a boolean value to do a
+   paired or non-paired test
    Output: p-values (non-adj/adj) histograms, p-values (non-adj/adj)
 }
 \examples{
-patient <- paste("patient",1:100)
-probes <- paste0("cg00",1:100)
-beta.values <- runif(10000,0,1)
-beta.values <- matrix(beta.values,ncol = 100,nrow = 100)
-values <- as.data.frame(beta.values)
-rownames(values) <- patient
-colnames(values) <- probes
-pvalues <- calculate.pvalues(values,1:50,51:100)
+nrows <- 200; ncols <- 20
+counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
+rowRanges <- GRanges(rep(c("chr1", "chr2"), c(50, 150)),
+                   IRanges(floor(runif(200, 1e5, 1e6)), width=100),
+                    strand=sample(c("+", "-"), 200, TRUE),
+                    feature_id=sprintf("ID\%03d", 1:200))
+colData <- DataFrame(Treatment=rep(c("ChIP", "Input"), 10),
+                    row.names=LETTERS[1:20],
+                    group=rep(c("group1","group2"),c(10,10)))
+data <- SummarizedExperiment(assays=SimpleList(counts=counts),
+                          rowRanges=rowRanges, colData=colData)
+data <- calculate.pvalues(data)
 }
 

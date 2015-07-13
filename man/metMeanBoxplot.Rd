@@ -51,6 +51,6 @@ colData <- DataFrame(Treatment=rep(c("ChIP", "Input","Other"), 7),
                     group=rep(c("group1","group2","group3"),c(7,7,7)))
 data <- SummarizedExperiment(assays=SimpleList(counts=counts),
                           rowRanges=rowRanges, colData=colData)
-metMeanBoxplot(data,groupCol  = "group",sort=F)
+metMeanBoxplot(data,groupCol  = "group",sort=TRUE)
 }
 
