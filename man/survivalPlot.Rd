@@ -42,6 +42,5 @@ columns for groups.
 \examples{
 clinical <- clinic("gbm","clinical_patient")
 survivalPlot(clinical,"gender", filename = "surv.pdf", legend="Gender")
-survivalPlot(met.md)
 }
 

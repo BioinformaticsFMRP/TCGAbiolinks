@@ -22,6 +22,7 @@ dataframe with diffmean values
 Calculate diffmean methylation between two groups
 }
 \examples{
+\dontrun{
 nrows <- 200; ncols <- 20
 counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
 rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
@@ -36,5 +37,6 @@ data <- SummarizedExperiment::SummarizedExperiment(
          rowRanges=rowRanges,
          colData=colData)
 data <- diffmean(data)
+}
 }
 
