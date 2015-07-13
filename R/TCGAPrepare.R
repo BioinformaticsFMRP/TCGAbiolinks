@@ -106,7 +106,7 @@ TCGAPrepare <- function(query,
 
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     df <- NULL
-
+    sset <- NULL
 
     if (grepl("humanmethylation",tolower(platform))) {
 
@@ -146,10 +146,10 @@ TCGAPrepare <- function(query,
                                  row.names=colnames(df)[5:ncol(df)])
             assay <- data.matrix(subset(df,select = c(5:ncol(df))))
 
-            sset <- SummarizedExperiment(assays=assay,
-                                         rowRanges=rowRanges,
-                                         colData=colData)
-            return(sset)
+            sset <- SummarizedExperiment(assays = assay,
+                                         rowRanges = rowRanges,
+                                         colData = colData)
+
         } else {
             setDF(df)
             rownames(df) <- df$Composite.Element.REF
@@ -291,7 +291,6 @@ TCGAPrepare <- function(query,
             sset <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
                                          colData=colData)
-            return(sset)
         }else {
             setDF(df)
             rownames(df) <- df[,1]
@@ -355,7 +354,6 @@ TCGAPrepare <- function(query,
             sset <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
                                          colData=colData)
-            return (sset)
         }
     }
 
@@ -383,17 +381,17 @@ TCGAPrepare <- function(query,
 
         if(summarizedExperiment){
             if(!grepl("H-miRNA_8x15K|agilent",platform, ignore.case = TRUE)){
-            # TODO create GRanges
-            df$external_gene_name <-  alias2SymbolTable(df$`Hybridization REF`)
-            merged <- merge(df,gene.location,by="external_gene_name")
-            rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
-                                 ranges = IRanges(start = merged$start_position,
-                                                  end = merged$end_position),
-                                 strand=merged$strand,
-                                 gene_id = merged$external_gene_name,
-                                 entrezgene = merged$entrezgene,
-                                 alias = merged$`Hybridization REF`)
-            names(rowRanges) <- as.character(merged$`Hybridization REF`)
+                # TODO create GRanges
+                df$external_gene_name <-  alias2SymbolTable(df$`Hybridization REF`)
+                merged <- merge(df,gene.location,by="external_gene_name")
+                rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
+                                     ranges = IRanges(start = merged$start_position,
+                                                      end = merged$end_position),
+                                     strand=merged$strand,
+                                     gene_id = merged$external_gene_name,
+                                     entrezgene = merged$entrezgene,
+                                     alias = merged$`Hybridization REF`)
+                names(rowRanges) <- as.character(merged$`Hybridization REF`)
             } else {
                 microRNA <- as.data.frame(microRNAs(TxDb.Hsapiens.UCSC.hg19.knownGene))
                 df$mirna_id <- tolower(df$`Hybridization REF`)
@@ -404,7 +402,7 @@ TCGAPrepare <- function(query,
                                      strand=merged$strand,
                                      mirna_id = merged$mirna_id)
                 names(rowRanges) <- as.character(merged$mirna_id)
-        }
+            }
             regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
@@ -419,7 +417,6 @@ TCGAPrepare <- function(query,
             sset <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
                                          colData=colData)
-            return (sset)
         }
 
     }
@@ -549,7 +546,6 @@ TCGAPrepare <- function(query,
             sset <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
                                          colData=colData)
-            return(sset)
         } else {
             setDF(df)
             rownames(df) <- df[,1]
@@ -656,7 +652,7 @@ TCGAPrepare <- function(query,
         names <- merge(id,mage,by.x="id",by.y="Hybridization.Name")
         colnames(df) <- names$Comment..TCGA.Barcode.
 
-        if(summarizedExperiment){
+        if (summarizedExperiment){
             message("Preparing summarizedExperiment")
             df <- DataFrame(df)
             df$external_gene_name <- rownames(df)
@@ -670,32 +666,37 @@ TCGAPrepare <- function(query,
             names(rowRanges) <- as.character(merged$external_gene_name)
 
             idx  <- grep("TCGA",colnames(merged))
-            colData <- DataFrame(sample=colnames(merged)[idx],
+            colData <- DataFrame(sample = colnames(merged)[idx],
                                  row.names=colnames(merged)[idx])
             assays <- SimpleList(sum_Segment_Mean=data.matrix(
-                subset(merged,select=idx))
+                subset(merged,select = idx))
             )
 
-            sset <- SummarizedExperiment(assays=assays,
-                                         rowRanges=rowRanges,
-                                         colData=colData)
-            return (sset)
+            sset <- SummarizedExperiment(assays = assays,
+                                         rowRanges = rowRanges,
+                                         colData = colData)
+
         }
     }
     close(pb)
 
-    if(save){
-        if(is.null(filename)){
+    if (save) {
+        if (is.null(filename)) {
             filename <- paste0(platform,"_",gsub(" ","_",Sys.time()),".rda")
         }
-        save(df,file = filename)
+        if (!is.null(sset)) {
+            save(sset,file = filename)
+        } else {
+            save(df,file = filename)
+        }
     }
 
-
-    if(!is.null(toPackage) && !summarizedExperiment){
+    if (!is.null(toPackage) && !summarizedExperiment) {
         df <- prepareToPackage(df, platform,toPackage)
     }
-
+    if (!is.null(sset)) {
+        return(sset)
+    }
     return(df)
 }
 
