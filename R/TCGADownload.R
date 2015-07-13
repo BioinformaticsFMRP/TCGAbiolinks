@@ -54,7 +54,7 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
         for (i in 1:nrow(data)) {
 
             file <- paste0(path, "/", basename(data[i, "deployLocation"]))
-            cat(paste0("Downloading:",
+            cat(paste0("\nDownloading:",
                        basename(data[i, "deployLocation"]),"\n"))
             if (force || !file.exists(file)) {
                 if(is.windows()){
