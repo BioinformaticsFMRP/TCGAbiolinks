@@ -76,6 +76,8 @@ data <- SummarizedExperiment::SummarizedExperiment(
          assays=S4Vectors::SimpleList(counts=counts),
          rowRanges=rowRanges,
          colData=colData)
-hypo.hyper <- volcanoPlot(data, p.cut = 0.85)
+colData(data)$group <- c(rep("group1",ncol(data)/2),
+                         rep("group2",ncol(data)/2))
+hypo.hyper <- volcanoPlot(data, p.cut = 0.85,"group")
 }
 
