@@ -40,7 +40,14 @@ using survival library. It uses the fields days_to_death and vital, plus a
 columns for groups.
 }
 \examples{
+days_to_death <- floor(runif(200, 1, 1000))
+vital_status <- c(rep("Dead",200))
+groups <- c(rep(c("G1","G2"),c(100,100)))
+df <- data.table(days_to_death,vital_status,groups)
+survivalPlot(df,clusterCol="groups")
+\dontrun{
 clinical <- clinic("gbm","clinical_patient")
 survivalPlot(clinical,"gender", filename = "surv.pdf", legend="Gender")
+}
 }
 
