@@ -84,8 +84,15 @@ diffmean <- function(data, groupCol = NULL, group2 = NULL, group1 = NULL) {
 #' @export
 #' @return Survival plot
 #' @examples
+#' days_to_death <- floor(runif(200, 1, 1000))
+#' vital_status <- c(rep("Dead",200))
+#' groups <- c(rep(c("G1","G2"),c(100,100)))
+#' df <- data.table(days_to_death,vital_status,groups)
+#' survivalPlot(df,clusterCol="groups")
+#' \dontrun{
 #' clinical <- clinic("gbm","clinical_patient")
 #' survivalPlot(clinical,"gender", filename = "surv.pdf", legend="Gender")
+#' }
 survivalPlot <- function(clinical_patient,
                          clusterCol=NULL,
                          legend = "Legend", cutoff = 0,
@@ -117,7 +124,7 @@ survivalPlot <- function(clinical_patient,
     }
     # create a column to be used with survival package, info need
     # to be TRUE(DEAD)/FALSE (ALIVE)
-    clinical_patient$s <- clinical_patient$vital == "Dead"
+    clinical_patient$s <- clinical_patient$vital_status == "Dead"
 
     # Column with groups
     clinical_patient$type <- as.factor(clinical_patient[,clusterCol])
