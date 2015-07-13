@@ -5,7 +5,7 @@
 \title{Calculate pvalues}
 \usage{
 calculate.pvalues(data, groupCol = NULL, group1 = NULL, group2 = NULL,
-  paired = TRUE, exact = TRUE)
+  paired = TRUE, method = "BH", exact = TRUE)
 }
 \arguments{
 \item{data}{SummarizedExperiment obtained from the TCGAPrepare}
@@ -21,9 +21,9 @@ groups}
 
 \item{paired}{Do a paired wilcoxon test? Default: True}
 
-\item{exact}{Do a exact wilcoxon test? Default: True}
-
 \item{method}{P-value adjustment method. Default:"BH" Benjamini-Hochberg}
+
+\item{exact}{Do a exact wilcoxon test? Default: True}
 }
 \value{
 Data frame with cols p values/p values adjusted
@@ -44,17 +44,22 @@ Verify if the data is significant between two groups. For the methylation
    Output: p-values (non-adj/adj) histograms, p-values (non-adj/adj)
 }
 \examples{
+\dontrun{
 nrows <- 200; ncols <- 20
 counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
-rowRanges <- GRanges(rep(c("chr1", "chr2"), c(50, 150)),
-                   IRanges(floor(runif(200, 1e5, 1e6)), width=100),
+rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
+                   IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
                     strand=sample(c("+", "-"), 200, TRUE),
                     feature_id=sprintf("ID\%03d", 1:200))
-colData <- DataFrame(Treatment=rep(c("ChIP", "Input"), 10),
+colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 10),
                     row.names=LETTERS[1:20],
                     group=rep(c("group1","group2"),c(10,10)))
-data <- SummarizedExperiment(assays=SimpleList(counts=counts),
-                          rowRanges=rowRanges, colData=colData)
+data <- SummarizedExperiment::SummarizedExperiment(
+         assays=S4Vectors::SimpleList(counts=counts),
+         rowRanges=rowRanges,
+         colData=colData)
 data <- calculate.pvalues(data)
 }
+}
+\keyword{internal}
 
