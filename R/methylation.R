@@ -1,26 +1,31 @@
 #' @title Calculate diffmean methylation between two groups
 #' @description
 #'    Calculate diffmean methylation between two groups
-#' @param group1 Data frame probes vs patient
-#' @param group2 Data frame probes vs patient
+#' @param data SummarizedExperiment object obtained from TCGAPrepare
+#' @param groupCol Columns in colData(data) that defines the groups.
+#' @param group2 Name of group2 to be used in the analysis
+#' @param group1 Name of group1  to be used in the analysis
 #' @import ggplot2
 #' @import graphics
 #' @importFrom grDevices png dev.off
+#' @importFrom SummarizedExperiment colData rowRanges assay rowRanges<-
 #' @return dataframe with diffmean values
 #' @examples
 #' nrows <- 200; ncols <- 20
 #' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
-#' rowRanges <- GRanges(rep(c("chr1", "chr2"), c(50, 150)),
-#'                    IRanges(floor(runif(200, 1e5, 1e6)), width=100),
+#' rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
+#'                    IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
 #'                     strand=sample(c("+", "-"), 200, TRUE),
 #'                     feature_id=sprintf("ID%03d", 1:200))
-#'colData <- DataFrame(Treatment=rep(c("ChIP", "Input"), 10),
+#'colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 10),
 #'                     row.names=LETTERS[1:20],
 #'                     group=rep(c("group1","group2"),c(10,10)))
-#'data <- SummarizedExperiment(assays=SimpleList(counts=counts),
-#'                           rowRanges=rowRanges, colData=colData)
+#'data <- SummarizedExperiment::SummarizedExperiment(
+#'          assays=S4Vectors::SimpleList(counts=counts),
+#'          rowRanges=rowRanges,
+#'          colData=colData)
 #' data <- diffmean(data)
-diffmean <- function(data, groupCol = NULL ,group2 = NULL, group1 = NULL) {
+diffmean <- function(data, groupCol = NULL, group2 = NULL, group1 = NULL) {
 
     if (is.null(groupCol)) {
         message("Please, set the groupCol parameter")
@@ -34,13 +39,20 @@ diffmean <- function(data, groupCol = NULL ,group2 = NULL, group1 = NULL) {
         group1 <- unique(colData(data)[,groupCol])[1]
         group2 <- unique(colData(data)[,groupCol])[2]
     }
-    # Apply Wilcoxon test in order to calculate the p-values
+    message("Calculating the diference between the mean methylation of the groups...")
+
+    m <- assay(data)
     idx1 <- which(colData(data)[,groupCol] == group1)
     idx2 <- which(colData(data)[,groupCol] == group2)
     mean.g1 <- apply(m[,idx1], 1, mean, na.rm = TRUE)
     mean.g2 <- apply(m[,idx2], 1, mean, na.rm = TRUE)
     diffmean <- mean.g1 - mean.g2
+
+    # Saves the result into diffmean column
     rowRanges(data)$diffmean <-  diffmean
+
+    # Ploting a histogram to evaluate the data
+    message("Saved histogram_diffmean.png...")
     png(filename = "histogram_diffmean.png")
     hist(diffmean)
     dev.off()
@@ -144,9 +156,6 @@ survivalPlot <- function(clinical_patient,
 #' @title Mean methylation boxplot
 #' @description
 #'   Creates a mean methylation boxplot based for patients divided in by groups
-#'   Input: a dataframe with two columns:
-#'    1 - SummarizedExperiment object
-#'    2 -
 #' @param data SummarizedExperiment object obtained from TCGAPrepare
 #' @param groupCol Columns in colData(data) that defines the groups. If no
 #' columns defined a columns called "Patients" will be used
@@ -158,20 +167,23 @@ survivalPlot <- function(clinical_patient,
 #' @param xlab x axis text in the plot
 #' @param sort Sort by mean methylation? False by default
 #' @import ggplot2 stats
+#' @importFrom SummarizedExperiment colData rowRanges assay
 #' @export
 #' @return Save the pdf survival plot
 #' @examples
 #' nrows <- 200; ncols <- 21
 #' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
-#' rowRanges <- GRanges(rep(c("chr1", "chr2"), c(50, 150)),
-#'                    IRanges(floor(runif(200, 1e5, 1e6)), width=100),
+#' rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
+#'                    IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
 #'                     strand=sample(c("+", "-"), 200, TRUE),
 #'                     feature_id=sprintf("ID%03d", 1:200))
-#'colData <- DataFrame(Treatment=rep(c("ChIP", "Input","Other"), 7),
+#'colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input","Other"), 7),
 #'                     row.names=LETTERS[1:21],
 #'                     group=rep(c("group1","group2","group3"),c(7,7,7)))
-#'data <- SummarizedExperiment(assays=SimpleList(counts=counts),
-#'                           rowRanges=rowRanges, colData=colData)
+#'data <- SummarizedExperiment::SummarizedExperiment(
+#'          assays=S4Vectors::SimpleList(counts=counts),
+#'          rowRanges=rowRanges,
+#'          colData=colData)
 #' metMeanBoxplot(data,groupCol  = "group",sort=TRUE)
 metMeanBoxplot <- function(data,
                            groupCol=NULL,
@@ -258,26 +270,31 @@ metMeanBoxplot <- function(data,
 #' @import graphics
 #' @importFrom grDevices png dev.off pdf
 #' @import stats
+#' @importFrom SummarizedExperiment colData rowRanges rowRanges<-
 #' @return Data frame with two cols
 #'         p-values/p-values adjusted
 #' @examples
 #' nrows <- 200; ncols <- 20
 #' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
-#' rowRanges <- GRanges(rep(c("chr1", "chr2"), c(50, 150)),
-#'                    IRanges(floor(runif(200, 1e5, 1e6)), width=100),
+#' rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
+#'                    IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
 #'                     strand=sample(c("+", "-"), 200, TRUE),
 #'                     feature_id=sprintf("ID%03d", 1:200))
-#'colData <- DataFrame(Treatment=rep(c("ChIP", "Input"), 10),
+#'colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 10),
 #'                     row.names=LETTERS[1:20],
 #'                     group=rep(c("group1","group2"),c(10,10)))
-#'data <- SummarizedExperiment(assays=SimpleList(counts=counts),
-#'                           rowRanges=rowRanges, colData=colData)
+#'data <- SummarizedExperiment::SummarizedExperiment(
+#'          assays=S4Vectors::SimpleList(counts=counts),
+#'          rowRanges=rowRanges,
+#'          colData=colData)
 #' data <- calculate.pvalues(data)
+#' @keywords internal
 calculate.pvalues <- function(data,
                               groupCol = NULL,
                               group1 = NULL,
                               group2 = NULL,
                               paired = TRUE,
+                              method = "BH",
                               exact = TRUE) {
 
     if (is.null(groupCol)) {
@@ -292,16 +309,22 @@ calculate.pvalues <- function(data,
         group1 <- unique(colData(data)[,groupCol])[1]
         group2 <- unique(colData(data)[,groupCol])[2]
     }
-
+    message("Calculating the p-values of each probe...")
     # Apply Wilcoxon test in order to calculate the p-values
     idx1 <- which(colData(data)[,groupCol] == group1)
     idx2 <- which(colData(data)[,groupCol] == group2)
+    print(idx1)
+    print(idx2)
     p.value <- apply(assay(data),1,
-                    function(x) { wilcox.test(x[idx1], x[idx2],
-                                  exact = exact, paired = paired)$p.value}
+                    function(x) {
+                        print(x[idx1])
+                        wilcox.test(x[idx1], x[idx2],
+                        exact = exact, paired = paired)$p.value
+                        }
     )
 
     ## Plot a histogram
+    message("Saved histogram_pvalues.png...")
     png(filename = "histogram_pvalues.png")
     hist(p.value)
     dev.off()
@@ -310,12 +333,13 @@ calculate.pvalues <- function(data,
     ## (BH) method
     p.value.adj <- p.adjust(p.value, method = method)
 
-    png(filename = "histogram_pvalues_adj.png")
-
     ## Plot a histogram
+    message("Saved histogram_pvalues_adj.png")
+    png(filename = "histogram_pvalues_adj.png")
     hist(p.value.adj)
     dev.off()
 
+    #Saving the values into the object
     rowRanges(data)$p.value <-  p.value
     rowRanges(data)$p.value.adj <-  p.value.adj
 
@@ -324,11 +348,20 @@ calculate.pvalues <- function(data,
 
 #' @title Volcano plot
 #' @description
-#'   Volcano plot - hypo/hyper methylation graphic.
-#'   Input: a dataframe with columns:
-#'    1 - p.value.adj - p value adjusted
-#'    2 - diffmean - difference between old stated and new state of methylation
-#' @param data data frame columns: diffmean, p.value.adj
+#'   In order to searches for the probes that are different methylated and
+#'   are significant, we use a volcano plot (x-axis:diff mean methylation,
+#'   y-axis: significance) that compares the methylation data between the two groups.
+#'   Firstly, it calculates the difference between the mean methylation of each group
+#' for each probes. After, it calculates the p-value using the wilcoxon test
+#' using the Benjamini-Hochberg adjustment method. With both values, it is possible
+#' to analyse the data.
+#' @param data  SummarizedExperiment obtained from the TCGAPrepare
+#' @param groupCol  Columns with the groups inside the SummarizedExperiment
+#'  object. (This will be obtained by the function colData(data))
+#' @param group1 In case our object has more than 2 groups, you should set
+#' the name of the group
+#' @param group2 In case our object has more than 2 groups, you should set
+#' the name of the group
 #' @param filename pdf filename
 #' @param legend legend title
 #' @param color vector of colors to be used in graph
@@ -341,6 +374,7 @@ calculate.pvalues <- function(data,
 #' @param p.cut p values threshold
 #' @param diffmean.cut diffmean threshold
 #' @import ggplot2
+#' @importFrom SummarizedExperiment colData rowRanges assay rowRanges<-
 #' @export
 #' @return A dataframe with the Composite.Element.REF and
 #'         the group it was classified
@@ -350,17 +384,22 @@ calculate.pvalues <- function(data,
 #' @examples
 #' nrows <- 200; ncols <- 20
 #' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
-#' rowRanges <- GRanges(rep(c("chr1", "chr2"), c(50, 150)),
-#'                    IRanges(floor(runif(200, 1e5, 1e6)), width=100),
+#' rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
+#'                    IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
 #'                     strand=sample(c("+", "-"), 200, TRUE),
 #'                     feature_id=sprintf("ID%03d", 1:200))
-#'colData <- DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
+#'colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
 #'                     row.names=LETTERS[1:20],
 #'                     group=rep(c("group1","group2"),c(10,10)))
-#'data <- SummarizedExperiment(assays=SimpleList(counts=counts),
-#'                           rowRanges=rowRanges, colData=colData)
+#'data <- SummarizedExperiment::SummarizedExperiment(
+#'          assays=S4Vectors::SimpleList(counts=counts),
+#'          rowRanges=rowRanges,
+#'          colData=colData)
 #' hypo.hyper <- volcanoPlot(data, p.cut = 0.85)
 volcanoPlot <- function(data,
+                        groupCol=NULL,
+                        group1=NULL,
+                        group2=NULL,
                         filename = "volcano.pdf",
                         ylab = "- 1*log10 of the Significance",
                         xlab = "DNA Methylation",
@@ -377,10 +416,10 @@ volcanoPlot <- function(data,
                         diffmean.cut = 0) {
     .e <- environment()
 
-    message("Calculating the p values of each probe...")
-    data <- calculate.pvalues(data,groupCol)
-    message("Calculating the diference between the mean methylation of the groups...")
-    data <- diffmean(data,groupCol)
+
+    data <- calculate.pvalues(data,groupCol, group1, group2)
+    data <- diffmean(data,groupCol, group1 = group1, group2 = group2)
+    if (is.null(data$diffmean)) return(NULL)
 
     rowRanges(data)$threshold <- "1"
 

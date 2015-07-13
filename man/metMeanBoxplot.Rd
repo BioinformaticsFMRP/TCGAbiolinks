@@ -35,22 +35,21 @@ Save the pdf survival plot
 }
 \description{
 Creates a mean methylation boxplot based for patients divided in by groups
-  Input: a dataframe with two columns:
-   1 - SummarizedExperiment object
-   2 -
 }
 \examples{
 nrows <- 200; ncols <- 21
 counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
-rowRanges <- GRanges(rep(c("chr1", "chr2"), c(50, 150)),
-                   IRanges(floor(runif(200, 1e5, 1e6)), width=100),
+rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
+                   IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
                     strand=sample(c("+", "-"), 200, TRUE),
                     feature_id=sprintf("ID\%03d", 1:200))
-colData <- DataFrame(Treatment=rep(c("ChIP", "Input","Other"), 7),
+colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input","Other"), 7),
                     row.names=LETTERS[1:21],
                     group=rep(c("group1","group2","group3"),c(7,7,7)))
-data <- SummarizedExperiment(assays=SimpleList(counts=counts),
-                          rowRanges=rowRanges, colData=colData)
+data <- SummarizedExperiment::SummarizedExperiment(
+         assays=S4Vectors::SimpleList(counts=counts),
+         rowRanges=rowRanges,
+         colData=colData)
 metMeanBoxplot(data,groupCol  = "group",sort=TRUE)
 }
 
