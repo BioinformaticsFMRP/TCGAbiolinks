@@ -531,7 +531,29 @@ get.GRCh.bioMart <- function(genome="hg19") {
 #' @export
 #' @return Save a starburst plot
 #' @examples
-#' starburstPlot(gene.met)
+#' nrows <- 20000; ncols <- 20
+#' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
+#' rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(5000, 15000)),
+#'                    IRanges::IRanges(floor(runif(20000, 1e5, 1e6)), width=100),
+#'                     strand=sample(c("+", "-"), 20000, TRUE),
+#'                     probeID=sprintf("ID%03d", 1:20000),
+#'                     Gene_Symbol=sprintf("ID%03d", 1:20000))
+#'colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
+#'                     row.names=LETTERS[1:20],
+#'                     group=rep(c("group1","group2"),c(10,10)))
+#'data <- SummarizedExperiment::SummarizedExperiment(
+#'          assays=S4Vectors::SimpleList(counts=counts),
+#'          rowRanges=rowRanges,
+#'          colData=colData)
+#' met <- data
+#' exp <- data
+#' rowRanges(met)$diffmean <- c(runif(20000, -0.1, 0.1))
+#' rowRanges(met)$p.value <- c(runif(20000, 0, 1))
+#' rowRanges(met)$p.value.adj <- c(runif(20000, 0, 1))
+#' rowRanges(exp)$diffmean <- c(runif(20000, -0.1, 0.1))
+#' rowRanges(exp)$p.value <- c(runif(20000, 0, 1))
+#' rowRanges(exp)$p.value.adj <- c(runif(20000, 0, 1))
+#' result <- starburstPlot(met,exp,p.cut = 0.01)
 starburstPlot <- function(met,
                           exp,
                           filename = "volcano.pdf",
@@ -565,7 +587,7 @@ starburstPlot <- function(met,
     .e <- environment()
 
     met <- subsetByOverlaps(met,exp)
-    exp <- subsetByOverlaps(met,exp)
+    exp <- subsetByOverlaps(exp,met)
 
     a <- BiocGenerics::as.data.frame(rowRanges(met))
     idx <- grep("diffmean|p.value",colnames(a))
@@ -684,4 +706,5 @@ starburstPlot <- function(met,
     ggsave(filename = "starbust.gcimp.pdf", width = 14, height = 10)
 
     # return methylation < 0, expressao >0
+    return (volcano)
 }
