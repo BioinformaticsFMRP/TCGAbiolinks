@@ -11,6 +11,7 @@
 #' @importFrom SummarizedExperiment colData rowRanges assay rowRanges<-
 #' @return dataframe with diffmean values
 #' @examples
+#' \dontrun{
 #' nrows <- 200; ncols <- 20
 #' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
 #' rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
@@ -25,6 +26,7 @@
 #'          rowRanges=rowRanges,
 #'          colData=colData)
 #' data <- diffmean(data)
+#' }
 diffmean <- function(data, groupCol = NULL, group2 = NULL, group1 = NULL) {
 
     if (is.null(groupCol)) {
@@ -84,7 +86,6 @@ diffmean <- function(data, groupCol = NULL, group2 = NULL, group1 = NULL) {
 #' @examples
 #' clinical <- clinic("gbm","clinical_patient")
 #' survivalPlot(clinical,"gender", filename = "surv.pdf", legend="Gender")
-#' survivalPlot(met.md)
 survivalPlot <- function(clinical_patient,
                          clusterCol=NULL,
                          legend = "Legend", cutoff = 0,
@@ -274,6 +275,7 @@ metMeanBoxplot <- function(data,
 #' @return Data frame with two cols
 #'         p-values/p-values adjusted
 #' @examples
+#' \dontrun{
 #' nrows <- 200; ncols <- 20
 #' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
 #' rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
@@ -288,6 +290,7 @@ metMeanBoxplot <- function(data,
 #'          rowRanges=rowRanges,
 #'          colData=colData)
 #' data <- calculate.pvalues(data)
+#' }
 #' @keywords internal
 calculate.pvalues <- function(data,
                               groupCol = NULL,
@@ -313,11 +316,8 @@ calculate.pvalues <- function(data,
     # Apply Wilcoxon test in order to calculate the p-values
     idx1 <- which(colData(data)[,groupCol] == group1)
     idx2 <- which(colData(data)[,groupCol] == group2)
-    print(idx1)
-    print(idx2)
     p.value <- apply(assay(data),1,
                     function(x) {
-                        print(x[idx1])
                         wilcox.test(x[idx1], x[idx2],
                         exact = exact, paired = paired)$p.value
                         }
@@ -395,7 +395,9 @@ calculate.pvalues <- function(data,
 #'          assays=S4Vectors::SimpleList(counts=counts),
 #'          rowRanges=rowRanges,
 #'          colData=colData)
-#' hypo.hyper <- volcanoPlot(data, p.cut = 0.85)
+#' colData(data)$group <- c(rep("group1",ncol(data)/2),
+#'                          rep("group2",ncol(data)/2))
+#' hypo.hyper <- volcanoPlot(data, p.cut = 0.85,"group")
 volcanoPlot <- function(data,
                         groupCol=NULL,
                         group1=NULL,
