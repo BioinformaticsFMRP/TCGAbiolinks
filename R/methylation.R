@@ -111,7 +111,7 @@ survivalPlot <- function(clinical_patient,
     notDead <- which(clinical_patient$days_to_death == "[Not Applicable]")
 
     if (length(notDead) > 0) {
-        clinical_patient[notDead,]$days_to_death <- Inf
+        clinical_patient[notDead,]$days_to_death <- clinical_patient[notDead,]$days_to_last_followup
     }
 
     if (cutoff != 0) {
@@ -124,7 +124,7 @@ survivalPlot <- function(clinical_patient,
     }
     # create a column to be used with survival package, info need
     # to be TRUE(DEAD)/FALSE (ALIVE)
-    clinical_patient$s <- clinical_patient$vital_status == "Dead"
+    clinical_patient$s <- !(clinical_patient$vital_status == "Dead")
 
     # Column with groups
     clinical_patient$type <- as.factor(clinical_patient[,clusterCol])
@@ -425,10 +425,15 @@ volcanoPlot <- function(data,
                         diffmean.cut = 0) {
     .e <- environment()
 
+    if (is.null(rowRanges(data)$p.value)){
+        data <- calculate.pvalues(data,groupCol, group1, group2)
+        if (is.null(rowRanges(data)$p.value)) abort("Error!")
+    }
 
-    data <- calculate.pvalues(data,groupCol, group1, group2)
-    data <- diffmean(data,groupCol, group1 = group1, group2 = group2)
-    if (is.null(data$diffmean)) return(NULL)
+    if (is.null(rowRanges(data)$diffmean)){
+        data <- diffmean(data,groupCol, group1 = group1, group2 = group2)
+        if (is.null(rowRanges(data)$diffmean)) abort("Error!")
+    }
 
     rowRanges(data)$threshold <- "1"
 
@@ -451,6 +456,8 @@ volcanoPlot <- function(data,
         labs(title = title) + ylab(ylab) + xlab(xlab) +
         geom_vline(aes(xintercept = -diffmean.cut), colour = "black",
                    linetype = "dashed") +
+        geom_vline(aes(xintercept = diffmean.cut), colour = "black",
+                   linetype = "dashed") +
         geom_hline(aes(yintercept = -1 * log10(p.cut)),
                    colour = "black",
                    linetype = "dashed") +
@@ -460,7 +467,6 @@ volcanoPlot <- function(data,
                            name = legend)
     # saving box plot to analyse it
     ggsave(p, filename = filename, width = 10, height = 5, dpi = 600)
-    data <- subset(data, rowRanges(data)$threshold  == "2" | rowRanges(data)$threshold == "3")
     return(data)
 }
 
