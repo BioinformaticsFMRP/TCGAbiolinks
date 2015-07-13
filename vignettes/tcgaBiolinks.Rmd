@@ -268,8 +268,8 @@ library(SummarizedExperiment)
 query <- TCGAQuery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3 )
 TCGADownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
                              "TCGA-DY-A0XA-01A-11R-A155-07"),
-             type = "rsem.genes.normalized_results")
-data <- TCGAPrepare(query = query,dir = ".", type = "rsem.genes.normalized_results")
+             type = "rsem.genes.normalized_results",path = "../../")
+data <- TCGAPrepare(query = query,dir = "../../", type = "rsem.genes.normalized_results")
 ```
 
 As an example, for the platform IlluminaHiSeq_RNASeqV2 we prepared two samples (TCGA-DY-A1DE-01A-11R-A155-07 and TCGA-DY-A0XA-01A-11R-A155-07) for the rsem.genes.normalized_results type. In order to create the object mapped the gene_id 
@@ -288,7 +288,7 @@ In case you prefere to have the raw data. You can get a data frame without any
 modification setting the `summarizedExperiment` to false.
 
 ```{r,echo=FALSE, results='hide',message=FALSE,warning=FALSE}
-data <- TCGAPrepare(query = query,dir = ".", type ="rsem.genes.normalized_results", summarizedExperiment = FALSE)
+data <- TCGAPrepare(query = query,dir = "../../", type ="rsem.genes.normalized_results", summarizedExperiment = FALSE)
 ```
 
 ```{r, eval = TRUE}
@@ -967,64 +967,49 @@ grid.raster(img)
 ## TCGA downstream methylation analysis
 
 Some downstream analysis from methylation data can be done with TCGAbiolinks.
-An example is shown below. We search, download and prepare data from the 
-HumanMethylation450 platform.
+An example is shown below. Firstly, we search, download and prepare data from the 
+HumanMethylation450 platform for the GBM tumor and also get the clinical information
+from the patients. In this step, we will have a 
+SummarizedExperiment object, where the rows are the probes and the columns the 
+samples. For more information about this object you can take a look in the 
+documentation with the command `?SummarizedExperiment`.
 
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
-samples <- c("TCGA-06-0125-01A-01D-A45W-05","TCGA-06-0152-01A-02D-A45W-05",
-             "TCGA-06-0171-01A-02D-A45W-05","TCGA-06-0190-01A-01D-A45W-05",
-             "TCGA-06-0210-01A-01D-A45W-05","TCGA-06-0211-01A-01D-A45W-05",
-             "TCGA-06-0221-01A-01D-A45W-05","TCGA-14-0736-01A-01D-A45W-05",
-             "TCGA-19-0957-01C-01D-A45W-05","TCGA-19-1389-01A-01D-A45W-05",
-             "TCGA-14-1402-01A-01D-A45W-05","TCGA-19-4065-01A-01D-2004-05",
-             "TCGA-06-0125-02A-11D-2004-05","TCGA-06-0152-02A-01D-2004-05",
-             "TCGA-06-0171-02A-11D-2004-05","TCGA-06-0190-02A-01D-2004-05",
-             "TCGA-06-0210-02A-01D-2004-05","TCGA-06-0211-02A-02D-2004-05",
-             "TCGA-06-0221-02A-11D-2004-05","TCGA-14-0736-02A-01D-2004-05",
-             "TCGA-19-0957-02A-11D-2004-05","TCGA-19-1389-02A-21D-2004-05",
-             "TCGA-14-1402-02A-01D-2004-05","TCGA-19-4065-02A-11D-2004-05")
 
-query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450",
-                   level = "3", samples = samples)
-TCGADownload(query,path = "exampleData")
+# Getting the data 
+query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450", level = 3)
+TCGADownload(query,path="/Users/tiago/Desktop//biolinks")
+data <- TCGAPrepare(query = query,dir = "/Users/tiago/Desktop/biolinks",save = T)
+clinical <- clinic("gbm","clinical_patient")
 
-#-------------------------- Preparing data and metadata
-# met: data frame with probe info (probe id, ge) and beta values
-# beta: data frame with only beta values (probe vs patient)
-# probe: data frame with only probe info(probe vs patient)
-# Conclusion: met = probe +d beta
-# met.md = patient metadata
-met <- TCGAPrepare(query, dir="exampleData")
+#Preprocessing 
+
+# For the analysis we remove X and Y chromosome, because gender
+# should not influentiate the analysis
 met <-  met[ met$Chromosome != "X" &  met$Chromosome != "Y", ]
+
+# We will remove probes with NA level
 met <- na.omit(met)
-probe  <- met[,1:4]
-beta   <- met[,5:ncol(met)]
 
+# We will remove the rs probes that should not be used in the methylation analysis
+met <- na.omit(met)
 
-query <- TCGAQuery(tumor = "gbm", platform = "bio", level = "2")
-TCGADownload(query, path = "exampleData")
-met.md <- TCGAPrepare(query, dir="exampleData")
-
-samples <- colnames(beta)
-idx <- is.element(met.md$bcr_patient_barcode,strtrim(samples,12))
-met.md <- met.md[idx,]
 ```
 
-We divided the data into groups 
-in order to analyze the data. Using the metadata, it is possible to create a
+As an example, we divided the data into groups in order to analyze the data. 
+Using the clinical data, it is possible to create a
 survival plot with the function survivalPlot as follows:
 
 ```{r, eval = FALSE}
 # random split of pacients into groups
-met.md$cluster <- c(rep("group1",nrow(met.md)/4),
-                    rep("group2",nrow(met.md)/4),
-                    rep("group3",nrow(met.md)/4),
-                    rep("group4",nrow(met.md)-3*(floor(nrow(met.md)/4))))
-rownames(met.md) <- met.md$bcr_patient_barcode
+clinical$group <- c(rep("group1",nrow(clinical)/4),
+                    rep("group2",nrow(clinical)/4),
+                    rep("group3",nrow(clinical)/4),
+                    rep("group4",nrow(clinical)-3*(floor(nrow(clinical)/4))))
 
-#---------------------- survival
-survivalPlot(met.md)
+# survival using the column group 
+survivalPlot(clinical,"group")
 ```
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
@@ -1034,17 +1019,13 @@ img <- readPNG("survival.png")
 grid.raster(img)
 ```
 
-Using the data and calculating the mean methylation per group, it is possible to create a
-mean methylation boxplot with the function met.mean.boxplot as follows:
+Using the data and calculating the mean methylation per group, it is possible 
+to create a mean methylation boxplot with the function metMeanBoxplot as follows:
 
 ```{r, eval = FALSE}
-#----------------------mean methylation
-met.mean <- data.frame(apply(beta, 2, mean, na.rm = TRUE))
-colnames(met.mean) <- "avg"
-met.mean$patient <- strtrim(rownames(met.mean), 12)
-aux <- merge(met.mean, met.md, by.x = "patient", by.y = "bcr_patient_barcode")
-met.mean.boxplot(aux)
+metMeanBoxplot(data)
 ```
+
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
 library(png)
@@ -1053,25 +1034,23 @@ img <- readPNG("meanmet.png")
 grid.raster(img)
 ```
 
-The final example is a volcano plot 
+Finally, we want to know which are the probes that are different methylated and
+are significant. For that we use a volcano plot 
 that compares the methylation data between the two groups.
+Firstly, it calculates the difference between the mean methylation of each group
+for each probes. After, it calculates the p-value using the wilcoxon test 
+using the Benjamini-Hochberg adjustment method. With both values, it is possible
+to analyse the data.
+
 
 ```{r, eval = FALSE}
-#----------------------- calculate.pvalues (just an example)
-beta.t <-  data.frame(t(beta))
-# TODO verify class of the object
-pvalues <- calculate.pvalues(beta.t,c(1,3,5,7,9,11),c(2,4,6,8,10,12))
-
-#------------- volcano plot
-probe$p.value <- pvalues[,1]
-probe$p.value.adj <- pvalues[,2]
-diffmean <- diffmean(beta[,c(1,3,5,7,9,11)],beta[,c(2,4,6,8,10,12)])
-probe <- cbind(probe,diffmean)
-hypo.hyper <- volcanoPlot(data, p.cut = 0.85)
+data <- volcanoPlot(data, p.cut = 0.05, diffmean.cut = 0.15)
 ```
 
 The output will be an graph such as the figure below. The function will 
-return the most relevant values.
+return the SummarizedExperiment with the values of p-value, p-value adjusted,
+diffmean and the group it belongs in the graph (1 = non significant, 2 = hypomethylated,
+3 = hypermethylated). This values can be view/acessed using the `rowRanges` acessesor.
 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
 library(png)

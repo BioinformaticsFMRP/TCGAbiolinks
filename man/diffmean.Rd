@@ -7,9 +7,13 @@
 diffmean(data, groupCol = NULL, group2 = NULL, group1 = NULL)
 }
 \arguments{
-\item{group2}{Data frame probes vs patient}
+\item{data}{SummarizedExperiment object obtained from TCGAPrepare}
 
-\item{group1}{Data frame probes vs patient}
+\item{groupCol}{Columns in colData(data) that defines the groups.}
+
+\item{group2}{Name of group2 to be used in the analysis}
+
+\item{group1}{Name of group1  to be used in the analysis}
 }
 \value{
 dataframe with diffmean values
@@ -20,15 +24,17 @@ Calculate diffmean methylation between two groups
 \examples{
 nrows <- 200; ncols <- 20
 counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
-rowRanges <- GRanges(rep(c("chr1", "chr2"), c(50, 150)),
-                   IRanges(floor(runif(200, 1e5, 1e6)), width=100),
+rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
+                   IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
                     strand=sample(c("+", "-"), 200, TRUE),
                     feature_id=sprintf("ID\%03d", 1:200))
-colData <- DataFrame(Treatment=rep(c("ChIP", "Input"), 10),
+colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 10),
                     row.names=LETTERS[1:20],
                     group=rep(c("group1","group2"),c(10,10)))
-data <- SummarizedExperiment(assays=SimpleList(counts=counts),
-                          rowRanges=rowRanges, colData=colData)
+data <- SummarizedExperiment::SummarizedExperiment(
+         assays=S4Vectors::SimpleList(counts=counts),
+         rowRanges=rowRanges,
+         colData=colData)
 data <- diffmean(data)
 }
 
