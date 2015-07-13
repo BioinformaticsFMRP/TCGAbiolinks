@@ -4,15 +4,25 @@
 \alias{volcanoPlot}
 \title{Volcano plot}
 \usage{
-volcanoPlot(data, filename = "volcano.pdf",
-  ylab = "- 1*log10 of the Significance", xlab = "DNA Methylation",
-  title = "Volcano Plot TCGA GBM Tumors", legend = "Legend", color = c(`1`
-  = "black", `2` = "green", `3` = "red"), label = c(`1` = "Not Significant",
-  `2` = "Hypermethylated", `3` = "Hypomethylated"), xlim = NULL,
-  ylim = NULL, p.cut = 0.05, diffmean.cut = 0)
+volcanoPlot(data, groupCol = NULL, group1 = NULL, group2 = NULL,
+  filename = "volcano.pdf", ylab = "- 1*log10 of the Significance",
+  xlab = "DNA Methylation", title = "Volcano Plot TCGA GBM Tumors",
+  legend = "Legend", color = c(`1` = "black", `2` = "green", `3` = "red"),
+  label = c(`1` = "Not Significant", `2` = "Hypermethylated", `3` =
+  "Hypomethylated"), xlim = NULL, ylim = NULL, p.cut = 0.05,
+  diffmean.cut = 0)
 }
 \arguments{
-\item{data}{data frame columns: diffmean, p.value.adj}
+\item{data}{SummarizedExperiment obtained from the TCGAPrepare}
+
+\item{groupCol}{Columns with the groups inside the SummarizedExperiment
+object. (This will be obtained by the function colData(data))}
+
+\item{group1}{In case our object has more than 2 groups, you should set
+the name of the group}
+
+\item{group2}{In case our object has more than 2 groups, you should set
+the name of the group}
 
 \item{filename}{pdf filename}
 
@@ -44,22 +54,28 @@ A dataframe with the Composite.Element.REF and
          group 3 = Hypomethylated
 }
 \description{
-Volcano plot - hypo/hyper methylation graphic.
-  Input: a dataframe with columns:
-   1 - p.value.adj - p value adjusted
-   2 - diffmean - difference between old stated and new state of methylation
+In order to searches for the probes that are different methylated and
+  are significant, we use a volcano plot (x-axis:diff mean methylation,
+  y-axis: significance) that compares the methylation data between the two groups.
+  Firstly, it calculates the difference between the mean methylation of each group
+for each probes. After, it calculates the p-value using the wilcoxon test
+using the Benjamini-Hochberg adjustment method. With both values, it is possible
+to analyse the data.
 }
 \examples{
-patient <- paste("patient",1:100)
-Composite.Element.REF <- paste0("cg00",1:100)
-beta.values <- runif(10000,0,1)
-beta.values <- matrix(beta.values,ncol = 100,nrow = 100)
-values <- as.data.frame(beta.values)
-colnames(values) <- patient
-rownames(values) <- Composite.Element.REF
-data <- calculate.pvalues(as.data.frame(t(values)),1:50,51:100)
-diffmean <- diffmean(values[,1:50],values[,51:100])
-data <-cbind(Composite.Element.REF,data,diffmean)
+nrows <- 200; ncols <- 20
+counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
+rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
+                   IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
+                    strand=sample(c("+", "-"), 200, TRUE),
+                    feature_id=sprintf("ID\%03d", 1:200))
+colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
+                    row.names=LETTERS[1:20],
+                    group=rep(c("group1","group2"),c(10,10)))
+data <- SummarizedExperiment::SummarizedExperiment(
+         assays=S4Vectors::SimpleList(counts=counts),
+         rowRanges=rowRanges,
+         colData=colData)
 hypo.hyper <- volcanoPlot(data, p.cut = 0.85)
 }
 
