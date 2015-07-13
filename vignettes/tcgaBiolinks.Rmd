@@ -9,6 +9,10 @@ output:
     toc: true
     number_sections: true
     toc_depth: 1
+    highlight: haddock
+  BiocStyle::pdf_document:
+    toc: yes
+    number_sections: yes
 
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -355,6 +359,93 @@ mee.gbm.glial.with.exp <- fetch.mee(meth = gbm.glial.m,
 ```
 
 
+# Examples TCGAQuery, TCGADownload, TCGAPrepare
+
+## Gene Expression IlluminaHiSeq_RNASeq
+You can easily search TCGA samples, download and prepare a matrix of gene expression.
+```{r, eval = FALSE}
+# Query platform IlluminaHiSeq_RNASeq withot a list of barcode 
+query <- TCGAQuery(tumor = "brca", platform = "IlluminaHiSeq_RNASeq", level = "3")
+
+# You can define a list of samples to query and download providing relative TCGA barcodes.
+listSamples <- samplesfilter(query)
+
+# Download only first 5 samples for test.
+
+TCGADownload(query, path = "dataBrca", type = "gene.quantification",
+             samples = listSamples$IlluminaHiSeq_RNASeq[1:5])
+
+# Prepare expression matrix with gene id in rows and samples (barcode) in columns
+# rsem.genes.results as values
+BRCAMatrix <- TCGAPrepare(query,"dataBrca",type = "gene.quantification")
+```
+
+
+## Gene Expression IlluminaHiSeq_RNASeqV2
+You can easily search TCGA samples, download and prepare a matrix of gene expression.
+```{r, eval = FALSE}
+
+# You can define a list of samples to query and download providing relative TCGA barcodes.
+
+listSamples <- c("TCGA-E9-A1NG-11A-52R-A14M-07","TCGA-BH-A1FC-11A-32R-A13Q-07",
+                 "TCGA-A7-A13G-11A-51R-A13Q-07","TCGA-BH-A0DK-11A-13R-A089-07",
+                 "TCGA-E9-A1RH-11A-34R-A169-07","TCGA-BH-A0AU-01A-11R-A12P-07",
+                 "TCGA-C8-A1HJ-01A-11R-A13Q-07","TCGA-A7-A13D-01A-13R-A12P-07",
+                 "TCGA-A2-A0CV-01A-31R-A115-07","TCGA-AQ-A0Y5-01A-11R-A14M-07")
+
+# Query all available platforms with a list of barcode 
+query <- TCGAQuery(samples = listSamples)
+
+# Query platform IlluminaHiSeq_RNASeqV2 with a list of barcode 
+query <- TCGAQuery(tumor = "brca", samples = listSamples, 
+  platform = "IlluminaHiSeq_RNASeqV2", level = "3")
+
+# dont run
+#TCGADownload(query, path = "dataBrca", type = "gene.quantification",samples = listSamples)
+
+# Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
+TCGADownload(query, path = "dataBrca", type = "rsem.genes.results",samples = listSamples)
+
+# Prepare expression matrix with gene id in rows and samples (barcode) in columns
+# rsem.genes.results as values
+BRCAMatrix <- TCGAPrepare(query,"dataBrca",type = "rsem.genes.results")
+```
+
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+library(TCGAbiolinks)
+dataGE <- dataBRCA[sample(rownames(dataBRCA),10),sample(colnames(dataBRCA),7)]
+
+knitr::kable(dataGE, digits = 2, 
+             caption = "Example of a matrix of gene expression (10 genes in rows and 7 samples in columns)",
+             row.names = TRUE)
+```
+
+
+
+## CNV
+You can easily search TCGA samples, download and prepare a matrix of gene expression.
+```{r, eval = FALSE}
+
+# Define a list of samples to query and download providing relative TCGA barcodes.
+samplesList <- c("TCGA-02-0046-10A-01D-0182-01", 
+                 "TCGA-02-0052-01A-01D-0182-01", 
+                 "TCGA-02-0033-10A-01D-0182-01", 
+                 "TCGA-02-0034-01A-01D-0182-01", 
+                 "TCGA-02-0007-01A-01D-0182-01")
+
+# Query platform Genome_Wide_SNP_6 with a list of barcode 
+query <- TCGAQuery(tumor = "gbm", level = 3, platform = "Genome_Wide_SNP_6")
+
+# Download a list of barcodes with platform Genome_Wide_SNP_6
+TCGADownload(query, path = "samples")
+
+# Prepare matrix 
+GBM_CNV <- TCGAPrepare(query, dir = "samples", type = ".hg19.seg.txt")
+```
+
+
 
 # Clinical data
 You can retrive clinical data using the `clinic` function. The parameters of this
@@ -420,90 +511,6 @@ PR_status_BRCA(bar,"Negative",clinical_brca_data)
 HER_status_BRCA(bar,"Positive",clinical_brca_data)
 
 HER_status_BRCA(bar,"Negative",clinical_brca_data)
-```
-
-# [Gene Expression IlluminaHiSeq_RNASeq] TCGA query, download, prepare list of a barcode
-You can easily search TCGA samples, download and prepare a matrix of gene expression.
-```{r, eval = FALSE}
-# Query platform IlluminaHiSeq_RNASeq withot a list of barcode 
-query <- TCGAQuery(tumor = "brca", platform = "IlluminaHiSeq_RNASeq", level = "3")
-
-# You can define a list of samples to query and download providing relative TCGA barcodes.
-listSamples <- samplesfilter(query)
-
-# Download only first 5 samples for test.
-
-TCGADownload(query, path = "dataBrca", type = "gene.quantification",
-             samples = listSamples$IlluminaHiSeq_RNASeq[1:5])
-
-# Prepare expression matrix with gene id in rows and samples (barcode) in columns
-# rsem.genes.results as values
-BRCAMatrix <- TCGAPrepare(query,"dataBrca",type = "gene.quantification")
-```
-
-
-# [Gene Expression IlluminaHiSeq_RNASeqV2] TCGA query, download, prepare list of a barcode
-You can easily search TCGA samples, download and prepare a matrix of gene expression.
-```{r, eval = FALSE}
-
-# You can define a list of samples to query and download providing relative TCGA barcodes.
-
-listSamples <- c("TCGA-E9-A1NG-11A-52R-A14M-07","TCGA-BH-A1FC-11A-32R-A13Q-07",
-                 "TCGA-A7-A13G-11A-51R-A13Q-07","TCGA-BH-A0DK-11A-13R-A089-07",
-                 "TCGA-E9-A1RH-11A-34R-A169-07","TCGA-BH-A0AU-01A-11R-A12P-07",
-                 "TCGA-C8-A1HJ-01A-11R-A13Q-07","TCGA-A7-A13D-01A-13R-A12P-07",
-                 "TCGA-A2-A0CV-01A-31R-A115-07","TCGA-AQ-A0Y5-01A-11R-A14M-07")
-
-# Query all available platforms with a list of barcode 
-query <- TCGAQuery(samples = listSamples)
-
-# Query platform IlluminaHiSeq_RNASeqV2 with a list of barcode 
-query <- TCGAQuery(tumor = "brca", samples = listSamples, 
-  platform = "IlluminaHiSeq_RNASeqV2", level = "3")
-
-# dont run
-#TCGADownload(query, path = "dataBrca", type = "gene.quantification",samples = listSamples)
-
-# Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
-TCGADownload(query, path = "dataBrca", type = "rsem.genes.results",samples = listSamples)
-
-# Prepare expression matrix with gene id in rows and samples (barcode) in columns
-# rsem.genes.results as values
-BRCAMatrix <- TCGAPrepare(query,"dataBrca",type = "rsem.genes.results")
-```
-
-The result is shown below:
-
-```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
-dataGE <- dataBRCA[sample(rownames(dataBRCA),10),sample(colnames(dataBRCA),7)]
-
-knitr::kable(dataGE, digits = 2, 
-             caption = "Example of a matrix of gene expression (10 genes in rows and 7 samples in columns)",
-             row.names = TRUE)
-```
-
-
-
-# [CNV] TCGA query, download, prepare list of a barcode
-You can easily search TCGA samples, download and prepare a matrix of gene expression.
-```{r, eval = FALSE}
-
-# Define a list of samples to query and download providing relative TCGA barcodes.
-samplesList <- c("TCGA-02-0046-10A-01D-0182-01", 
-                 "TCGA-02-0052-01A-01D-0182-01", 
-                 "TCGA-02-0033-10A-01D-0182-01", 
-                 "TCGA-02-0034-01A-01D-0182-01", 
-                 "TCGA-02-0007-01A-01D-0182-01")
-
-# Query platform Genome_Wide_SNP_6 with a list of barcode 
-query <- TCGAQuery(tumor = "gbm", level = 3, platform = "Genome_Wide_SNP_6")
-
-# Download a list of barcodes with platform Genome_Wide_SNP_6
-TCGADownload(query, path = "samples")
-
-# Prepare matrix 
-GBM_CNV <- TCGAPrepare(query, dir = "samples", type = ".hg19.seg.txt")
 ```
 
 
@@ -970,7 +977,7 @@ grid.raster(img)
 
 ## TCGA downstream methylation analysis
 
-Some downstream analysis from methylation data can be done with TCGAbiolinks.
+Some downstream analysis from methylation data can be done with `TCGAbiolinks`.
 An example is shown below. Firstly, we search, download and prepare data from the 
 HumanMethylation450 platform for the GBM tumor and also get the clinical information
 from the patients. In this step, we will have a 
@@ -994,7 +1001,7 @@ data <- subset(data,subset=(rowSums(is.na(assay(data)))==0))
 # For the analysis we remove X and Y chromosome, because gender
 # should not influentiate the analysis
 # We will remove the rs probes that should not be used in the methylation analysis
-idx <- !(grepl("chrX|chrY|chrNA",seqnames(data)@values))
+idx <- !(grepl("chrX|chrY|chrNA",as.vector(seqnames(data))))
 data <- subset(data,subset=idx)
 ```
 
@@ -1007,16 +1014,29 @@ clinical$group <- c(rep("group1",nrow(clinical)/4),
                     rep("group4",nrow(clinical)-3*(floor(nrow(clinical)/4))))
 
  colData(data)$group <- c(rep("group1",ncol(data)/2), rep("group2",ncol(data)/2))
-
-# survival using the column group 
-survivalPlot(clinical,"group")
 ```
 
-Using the clinical data, it is possible to create a survival plot with the function survivalPlot as follows:
+Using the clinical data, it is possible to create a survival plot with the 
+function `survivalPlot` as follows:
+
 ```{r, eval = FALSE}
 # survival using the column group 
 survivalPlot(clinical,"group")
 ```
+
+The arguments of `survivalPlot` are:
+
+*  **clinical_patient** TCGA Clinical patient with the information days_to_death
+*  **clusterCol** Column with groups to plot. This is a mandatory field, 
+the caption will be based in this column
+*  **legend** Legend title of the figure
+*  **cutoff** xlim This parameter will be a limit in the x-axis. 
+That means, that patients with days_to_deth > cutoff will be set to Alive.
+*  **main**	 main title of the plot
+*  **ylab**	y-axis text of the plot
+*  **xlab** x-axis text of the plot
+*  **filename**	 The name of the pdf file
+*  **color** Define the colors of the lines.
 
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
@@ -1027,11 +1047,22 @@ grid.raster(img)
 ```
 
 Using the data and calculating the mean methylation per group, it is possible 
-to create a mean methylation boxplot with the function metMeanBoxplot as follows:
+to create a mean methylation boxplot with the function `metMeanBoxplot` as follows:
 
 ```{r, eval = FALSE}
 metMeanBoxplot(data,"group")
 ```
+The arguments of `metMeanBoxplot` are:
+
+*  **data**	 SummarizedExperiment object obtained from `TCGAPrepare`
+*  **groupCol** Columns in colData(data) that defines the groups. If no columns defined a columns called "Patients" will be used
+*  **sort**	Sort by mean methylation? False by default
+*  **filename**	 The name of the pdf that will be save
+*  **legend** Legend title of the figured
+*  **ylab**	y-axis text of the plot
+*  **xlab** x-axis text of the plot
+*  **filename**	 The name of the pdf file
+*  **color** Define the colors of the lines.
 
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
@@ -1059,6 +1090,24 @@ return the SummarizedExperiment with the values of p-value, p-value adjusted,
 diffmean and the group it belongs in the graph (1 = non significant, 2 = hypomethylated,
 3 = hypermethylated). This values can be view/acessed using the `rowRanges` acessesor.
 
+The arguments of volcanoPlot are:
+
+*  **data**	 SummarizedExperiment object obtained from `TCGAPrepare`
+*  **groupCol** Columns in colData(data) that defines the groups. If no columns defined a columns called "Patients" will be used
+*  **group1** In case our object has more than 2 groups, you should set the name of the group
+*  **group2** In case our object has more than 2 groups, you should set the name of the group
+*  **filename**	 The name of the pdf that will be save
+*  **legend** Legend title of the figured
+*  **ylab**	y-axis text of the plot
+*  **xlab** x-axis text of the plot
+*  **filename**	 The name of the pdf file
+*  **color** Define the colors of the lines.
+*  **label** vector of labels to be used in the figure
+*  **xlim** x limits to cut image
+*  **ylim** y limits to cut image
+*  **p.cut**	p values threshold
+*  **diffmean.cut**	diffmean threshold
+
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
 library(png)
 library(grid)
@@ -1079,6 +1128,6 @@ starburst analysis.
 ```
 
 # Session Information
-```{r, eval = TRUE}
+```{r sessionInfo}
 sessionInfo()
 ```

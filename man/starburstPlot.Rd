@@ -4,7 +4,7 @@
 \alias{starburstPlot}
 \title{Create starburst plot}
 \usage{
-starburstPlot(data, filename = "volcano.pdf",
+starburstPlot(met, exp, filename = "volcano.pdf",
   ylab = paste0("Gene Expression\\nlog10 of the",
   "adjusted Significance (FDR)"),
   xlab = paste0("DNA Methylation\\nlog10 of the",
@@ -17,7 +17,12 @@ starburstPlot(data, filename = "volcano.pdf",
   ylim = NULL, p.cut = 0.05)
 }
 \arguments{
-\item{data}{data frame columns: diffmean, p.value.adj}
+\item{met}{SummarizedExperiment with methylation data obtained from the
+TCGAPrepare. Expected colData columns: diffmean,  p.value.adj  and p.value
+Execute volcanoPlot function in order to obtain these values for the object.}
+
+\item{exp}{SummarizedExperiment with methylation data obtained from the
+TCGAPrepare. Expected colData columns: diffmean,  p.value.adj  and p.value}
 
 \item{filename}{pdf filename}
 
@@ -50,19 +55,6 @@ Input: data with gene expression/methylation expression
    Output: starburst plot
 }
 \examples{
-sample <- "TCGA-06-0939-01A-01D-1228-05"
-query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
-TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
-met <- TCGAPrepare(query, dir="exampleData", summarizedExperiment = FALSE)
-met <-  met[ met$Chromosome != "X" &  met$Chromosome != "Y", ]
-met <- na.omit(met)
-met$diffmean <- runif(nrow(met),-3,3)
-FDR <- runif(nrow(met),0,1)
-p.value.adj <- runif(nrow(met),0,1)
-GeneSymbol <- met$Gene_Symbol
-dm <-  runif(nrow(met),-3,3)
-expression <- data.frame(GeneSymbol,FDR,p.value.adj,dm)
-gene.met <- starbursAnalysis(met,expression)
 starburstPlot(gene.met)
 }
 
