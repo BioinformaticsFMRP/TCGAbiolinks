@@ -502,81 +502,6 @@ get.GRCh.bioMart <- function(genome="hg19") {
     save(gene.location, file = "inst/extdata/GRCh.rda")
 }
 
-#' @title Preparing methylation data and expression data
-#'
-#' @description
-#'  Preparing methylation data and expression data
-#'
-#' @param met methylation data
-#' @param expression expression data
-#' @return Dataframe with methylation and expression data
-#' @importFrom GenomicRanges GRanges distanceToNearest
-#' @importFrom IRanges IRanges
-#' @export
-#' @examples
-#' sample <- "TCGA-06-0939-01A-01D-1228-05"
-#' query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
-#' TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
-#' met <- TCGAPrepare(query, dir="exampleData",summarizedExperiment = FALSE)
-#' met <-  met[ met$Chromosome != "X" &  met$Chromosome != "Y", ]
-#' met <- na.omit(met)
-#' met$diffmean <- runif(nrow(met),-3,3)
-#' FDR <- runif(nrow(met),0,1)
-#' p.value.adj <- runif(nrow(met),0,1)
-#' GeneSymbol <- met$Gene_Symbol
-#' dm <-  runif(nrow(met),-3,3)
-#' expression <- data.frame(GeneSymbol,FDR,p.value.adj,dm)
-#' gene.met <- starbursAnalysis(met,expression)
-starbursAnalysis <- function(met, expression) {
-    #### fix methylation gene names before merging.  map gene ID to
-    #### genomic coordinates
-    gene.GR <- GRanges(seqnames = paste0("chr", gene.location$chromosome_name),
-                       ranges = IRanges(start = gene.location$start_position,
-                                        end = gene.location$end_position),
-                       strand = gene.location$strand,
-                       symbol = gene.location$external_gene_name,
-                       EntrezID = gene.location$entrezgene)
-
-    probe.info <- GRanges(seqnames = paste0("chr", met$Chromosome),
-                          ranges = IRanges(start = met$Genomic_Coordinate,
-                                           end = met$Genomic_Coordinate),
-                          probeID = met$Composite.Element.REF)
-
-    # closest gene to each 450k probe ##your data
-    distance <- as.data.frame(distanceToNearest(probe.info, gene.GR))
-    rownames(gene.location) <- NULL
-    gene.order.by.distance <- gene.location[distance$subjectHits,]
-    gene.order.by.distance$distance <- as.matrix(distance$distance)
-
-    data.nearest.gene <- merge(met,
-                               gene.order.by.distance[, c("external_gene_name",
-                                                          "entrezgene",
-                                                          "distance")],
-                               by.x="Gene_Symbol", by.y="external_gene_name")
-
-    volcano <- merge(met, expression,
-                     by.x = "Gene_Symbol",
-                     by.y = "GeneSymbol",
-                     incomparables = NA)
-
-    volcano$ID <- paste(volcano$Gene_Symbol,
-                        volcano$probeID,
-                        volcano$cgID, sep = ".")
-
-    # Preparing gene expression
-    volcano$geFDR <- log10(volcano$FDR)
-    volcano$geFDR2 <- volcano$geFDR
-    volcano[volcano$dm > 0, "geFDR2"] <- -1 * volcano[volcano$dm > 0, "geFDR"]
-
-    # Preparing methylation
-    volcano$meFDR <- log10(volcano$p.value.adj)
-    volcano$meFDR2 <- volcano$meFDR
-    volcano[volcano$diffmean > 0, "meFDR2"] <-
-        -1 * volcano[volcano$diffmean > 0, "meFDR"]
-
-    return(volcano)
-}
-
 #' @title Create starburst plot
 #'
 #' @description
@@ -586,7 +511,11 @@ starbursAnalysis <- function(met, expression) {
 #'    Input: data with gene expression/methylation expression
 #'    Output: starburst plot
 #'
-#' @param data data frame columns: diffmean, p.value.adj
+#' @param met SummarizedExperiment with methylation data obtained from the
+#' TCGAPrepare. Expected colData columns: diffmean,  p.value.adj  and p.value
+#' Execute volcanoPlot function in order to obtain these values for the object.
+#' @param exp SummarizedExperiment with methylation data obtained from the
+#' TCGAPrepare. Expected colData columns: diffmean,  p.value.adj  and p.value
 #' @param filename pdf filename
 #' @param legend legend title
 #' @param color vector of colors to be used in graph
@@ -598,24 +527,13 @@ starbursAnalysis <- function(met, expression) {
 #' @param ylim y limits to cut image
 #' @param p.cut p value cut-off
 #' @import ggplot2
+#' @importFrom SummarizedExperiment subsetByOverlaps
 #' @export
 #' @return Save a starburst plot
 #' @examples
-#' sample <- "TCGA-06-0939-01A-01D-1228-05"
-#' query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
-#' TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
-#' met <- TCGAPrepare(query, dir="exampleData", summarizedExperiment = FALSE)
-#' met <-  met[ met$Chromosome != "X" &  met$Chromosome != "Y", ]
-#' met <- na.omit(met)
-#' met$diffmean <- runif(nrow(met),-3,3)
-#' FDR <- runif(nrow(met),0,1)
-#' p.value.adj <- runif(nrow(met),0,1)
-#' GeneSymbol <- met$Gene_Symbol
-#' dm <-  runif(nrow(met),-3,3)
-#' expression <- data.frame(GeneSymbol,FDR,p.value.adj,dm)
-#' gene.met <- starbursAnalysis(met,expression)
 #' starburstPlot(gene.met)
-starburstPlot <- function(data,
+starburstPlot <- function(met,
+                          exp,
                           filename = "volcano.pdf",
                           ylab = paste0("Gene Expression\nlog10 of the",
                                         "adjusted Significance (FDR)"),
@@ -645,9 +563,41 @@ starburstPlot <- function(data,
 )
 {
     .e <- environment()
-    volcano.m <- data
-    volcano.m$threshold.starburst <- "1"
-    volcano.m$threshold.size <- "1"
+
+    met <- subsetByOverlaps(met,exp)
+    exp <- subsetByOverlaps(met,exp)
+
+    a <- BiocGenerics::as.data.frame(rowRanges(met))
+    idx <- grep("diffmean|p.value",colnames(a))
+    colnames(a)[idx] <- paste0("met.",colnames(a)[idx])
+
+    b <- BiocGenerics::as.data.frame(rowRanges(exp))
+    idx <- grep("diffmean|p.value",colnames(b))
+    colnames(b)[idx] <- paste0("exp.",colnames(b)[idx])
+    volcano <- merge(a,b)
+
+    volcano$ID <- paste(volcano$Gene_Symbol,
+                        volcano$probeID,
+                        volcano$cgID, sep = ".")
+
+    # Preparing gene expression
+    idx <- grep("exp.p.value.adj",colnames(volcano))
+    volcano$geFDR <- log10(volcano[,idx])
+    volcano$geFDR2 <- volcano$geFDR
+    idx <- grep("exp.diffmean",colnames(volcano))
+    volcano[volcano[,idx] > 0, "geFDR2"] <-
+        -1 * volcano[volcano[,idx] > 0, "geFDR"]
+
+    # Preparing methylation
+    idx <- grep("met.p.value.adj",colnames(volcano))
+    volcano$meFDR <- log10(volcano[,idx])
+    volcano$meFDR2 <- volcano$meFDR
+    idx <- grep("met.diffmean",colnames(volcano))
+    volcano[volcano[,idx] > 0, "meFDR2"] <-
+        -1 * volcano[volcano[,idx] > 0, "meFDR"]
+
+    volcano$threshold.starburst <- "1"
+    volcano$threshold.size <- "1"
 
     # subseting by regulation (geFDR) and methylation level
     # (meFDR) down regulated up regulated lowerthr
@@ -656,48 +606,48 @@ starburstPlot <- function(data,
     upperthr <- (-lowerthr)  # +1.30103
 
     # Group 2:up regulated and hypomethylated
-    a <- subset(volcano.m,
-                volcano.m$geFDR2 > upperthr &
-                    volcano.m$meFDR2 < lowerthr)
+    a <- subset(volcano,
+                volcano$geFDR2 > upperthr &
+                    volcano$meFDR2 < lowerthr)
 
     # Group 3: down regulated and hypomethylated
-    b <- subset(volcano.m,
-                volcano.m$geFDR2 < lowerthr &
-                    volcano.m$meFDR2 < lowerthr)
+    b <- subset(volcano,
+                volcano$geFDR2 < lowerthr &
+                    volcano$meFDR2 < lowerthr)
 
     # Group 4: hypomethylated
-    c <- subset(volcano.m,
-                volcano.m$geFDR2 > lowerthr &
-                    volcano.m$geFDR2 < upperthr &
-                    volcano.m$meFDR2 < lowerthr)
+    c <- subset(volcano,
+                volcano$geFDR2 > lowerthr &
+                    volcano$geFDR2 < upperthr &
+                    volcano$meFDR2 < lowerthr)
 
     # Group 5: hypermethylated
-    d <- subset(volcano.m,
-                volcano.m$geFDR2 > lowerthr &
-                    volcano.m$geFDR2 < upperthr &
-                    volcano.m$meFDR2 > upperthr)
+    d <- subset(volcano,
+                volcano$geFDR2 > lowerthr &
+                    volcano$geFDR2 < upperthr &
+                    volcano$meFDR2 > upperthr)
 
     # Group 6: upregulated
-    e <- subset(volcano.m,
-                volcano.m$geFDR2 > upperthr &
-                    volcano.m$meFDR2 < upperthr &
-                    volcano.m$meFDR2 > lowerthr)
+    e <- subset(volcano,
+                volcano$geFDR2 > upperthr &
+                    volcano$meFDR2 < upperthr &
+                    volcano$meFDR2 > lowerthr)
 
     # Group 7: downregulated
-    f <- subset(volcano.m,
-                volcano.m$geFDR2 < lowerthr &
-                    volcano.m$meFDR2 < upperthr &
-                    volcano.m$meFDR2 > lowerthr)
+    f <- subset(volcano,
+                volcano$geFDR2 < lowerthr &
+                    volcano$meFDR2 < upperthr &
+                    volcano$meFDR2 > lowerthr)
 
     # Group 8: upregulated and hypermethylated
-    g <- subset(volcano.m,
-                volcano.m$geFDR2 > upperthr &
-                    volcano.m$meFDR2 > upperthr)
+    g <- subset(volcano,
+                volcano$geFDR2 > upperthr &
+                    volcano$meFDR2 > upperthr)
 
     # Group 9: downregulated and hypermethylated
-    h <- subset(volcano.m,
-                volcano.m$geFDR2 < lowerthr &
-                    volcano.m$meFDR2 > upperthr)
+    h <- subset(volcano,
+                volcano$geFDR2 < lowerthr &
+                    volcano$meFDR2 > upperthr)
 
     size <- c("1", "1", "1", "1", "1", "1", "1","1")
     groups <- c("2", "3", "4", "5", "6", "7","8","9")
@@ -705,17 +655,17 @@ starburstPlot <- function(data,
     for (i in seq_along(s)) {
         idx <- rownames(s[[i]])
         if (length(idx) > 0) {
-            volcano.m[idx, "threshold.starburst"] <- groups[i]
-            volcano.m[idx, "threshold.size"] <- size[i]
+            volcano[idx, "threshold.starburst"] <- groups[i]
+            volcano[idx, "threshold.size"] <- size[i]
         }
     }
 
     ## starburst plot
-    p <- ggplot(data = volcano.m, environment = .e,
-                aes(x = volcano.m$meFDR2,
-                    y = volcano.m$geFDR2,
-                    colour = volcano.m$threshold.starburst,
-                    size = volcano.m$threshold.size)) +
+    p <- ggplot(data = volcano, environment = .e,
+                aes(x = volcano$meFDR2,
+                    y = volcano$geFDR2,
+                    colour = volcano$threshold.starburst,
+                    size = volcano$threshold.size)) +
         geom_point()
     if (!is.null(xlim)) {
         p <- p + xlim(xlim)
