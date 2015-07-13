@@ -16,6 +16,10 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dpi = 150)
+```
+
 ```{r, echo = FALSE,hide=TRUE, message=FALSE}
 devtools::load_all(".")
 ```
@@ -979,28 +983,22 @@ library(TCGAbiolinks)
 
 # Getting the data 
 query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450", level = 3)
-TCGADownload(query,path="/Users/tiago/Desktop//biolinks")
-data <- TCGAPrepare(query = query,dir = "/Users/tiago/Desktop/biolinks",save = T)
+TCGADownload(query,path=".")
+data <- TCGAPrepare(query = query,dir = ".",save = T)
 clinical <- clinic("gbm","clinical_patient")
 
 #Preprocessing 
+## We will remove probes with NA level
+data <- subset(data,subset=(rowSums(is.na(assay(data)))==0))
 
 # For the analysis we remove X and Y chromosome, because gender
 # should not influentiate the analysis
-met <-  met[ met$Chromosome != "X" &  met$Chromosome != "Y", ]
-
-# We will remove probes with NA level
-met <- na.omit(met)
-
 # We will remove the rs probes that should not be used in the methylation analysis
-met <- na.omit(met)
-
+idx <- !(grepl("chrX|chrY|chrNA",seqnames(data)@values))
+data <- subset(data,subset=idx)
 ```
 
 As an example, we divided the data into groups in order to analyze the data. 
-Using the clinical data, it is possible to create a
-survival plot with the function survivalPlot as follows:
-
 ```{r, eval = FALSE}
 # random split of pacients into groups
 clinical$group <- c(rep("group1",nrow(clinical)/4),
@@ -1008,9 +1006,18 @@ clinical$group <- c(rep("group1",nrow(clinical)/4),
                     rep("group3",nrow(clinical)/4),
                     rep("group4",nrow(clinical)-3*(floor(nrow(clinical)/4))))
 
+ colData(data)$group <- c(rep("group1",ncol(data)/2), rep("group2",ncol(data)/2))
+
 # survival using the column group 
 survivalPlot(clinical,"group")
 ```
+
+Using the clinical data, it is possible to create a survival plot with the function survivalPlot as follows:
+```{r, eval = FALSE}
+# survival using the column group 
+survivalPlot(clinical,"group")
+```
+
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
 library(png)
@@ -1023,7 +1030,7 @@ Using the data and calculating the mean methylation per group, it is possible
 to create a mean methylation boxplot with the function metMeanBoxplot as follows:
 
 ```{r, eval = FALSE}
-metMeanBoxplot(data)
+metMeanBoxplot(data,"group")
 ```
 
 The result is shown below:
@@ -1044,7 +1051,7 @@ to analyse the data.
 
 
 ```{r, eval = FALSE}
-data <- volcanoPlot(data, p.cut = 0.05, diffmean.cut = 0.15)
+data <- volcanoPlot(data,groupCol="group")
 ```
 
 The output will be an graph such as the figure below. The function will 
