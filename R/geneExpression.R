@@ -2,10 +2,11 @@
 #' @description
 #'   GenesCutID
 #' @param GeneList GeneList
-#' @export
-#' @return list of gene symbol without IDs
-#' @examples
-#' GenesCutID(c("CRKL|1399","TADA2A|6871","KRT76|51350"))
+# @export
+# @return list of gene symbol without IDs
+# @examples
+# GenesCutID(c("CRKL|1399","TADA2A|6871","KRT76|51350"))
+#' @keywords internal
 GenesCutID <- function(GeneList){
     GeneListCutID <- as.matrix(matrix(unlist(strsplit(as.character(GeneList),
                                                       "|",fixed = TRUE)),length(GeneList),2,byrow = TRUE))[,1]

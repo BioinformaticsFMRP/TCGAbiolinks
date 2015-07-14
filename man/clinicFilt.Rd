@@ -13,7 +13,7 @@ clinicFilt(barcode, clinical_patient_data, HER = NULL, ER = NULL,
 \item{clinical_patient_data}{clinical_patient_data obtained with clinic function
 Ex: clinical_patient_data <- clinic("LGG","clinical_patient")}
 
-\item{HER}{her2 neu immunohistochemistry receptorstatus: "Positive" or "Negative"}
+\item{HER}{her2 neu immunohistochemistry receptor status: "Positive" or "Negative"}
 
 \item{ER}{Estrogen receptor status: "Positive" or "Negative"}
 

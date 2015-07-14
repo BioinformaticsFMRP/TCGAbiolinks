@@ -4,13 +4,16 @@
 \alias{TCGAPrepare}
 \title{TCGAPrepare}
 \usage{
-TCGAPrepare(query, dir = NULL, type = NULL, save = FALSE,
-  filename = NULL, toPackage = NULL, summarizedExperiment = TRUE)
+TCGAPrepare(query, dir = NULL, samples = NULL, type = NULL,
+  save = FALSE, filename = NULL, toPackage = NULL,
+  summarizedExperiment = TRUE)
 }
 \arguments{
 \item{query}{TCGAQuery output}
 
 \item{dir}{Directory with the files downloaded by TCGADownload}
+
+\item{samples}{List of samples to prepare the data}
 
 \item{type}{Filter the files to prepare.}
 
