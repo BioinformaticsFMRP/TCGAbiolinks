@@ -338,7 +338,7 @@ clinic <- function(cancer,clinical_data_type){
 #' @param barcode List of barcodes
 #' @param clinical_patient_data clinical_patient_data obtained with clinic function
 #' Ex: clinical_patient_data <- clinic("LGG","clinical_patient")
-#' @param HER  her2 neu immunohistochemistry receptorstatus: "Positive" or "Negative"
+#' @param HER  her2 neu immunohistochemistry receptor status: "Positive" or "Negative"
 #' @param gender "MALE" or "FEMALE"
 #' @param PR  Progesterone receptor status: "Positive" or "Negative"
 #' @param stage Pathologic Stage: "stage_IX", "stage_I", "stage_IA", "stage_IB", "stage_IIX",
