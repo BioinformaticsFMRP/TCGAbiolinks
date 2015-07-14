@@ -2,7 +2,7 @@
 % Please edit documentation in R/geneExpression.R
 \name{EAbarplot}
 \alias{EAbarplot}
-\title{EAbarplot}
+\title{EAbarplot - EAcomplete plot}
 \usage{
 EAbarplot(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab)
 }
@@ -25,11 +25,19 @@ EAbarplot(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab)
 EAbarplot
 }
 \description{
-EAbarplot
+EAbarplot plots the result from EAcomplete
 }
 \examples{
+Genelist <- c("FN1","COL1A1")
+ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist)
+EAbarplot(tf = rownames(ansEA$ResBP),
+         GOBPTab = ansEA$ResBP,
+         GOCCTab = ansEA$ResCC,
+         GOMFTab = ansEA$ResMF,
+        PathTab = ansEA$ResPat,
+         nRGTab = Genelist,
+         nBar = 10)
 \dontrun{
-
 Genelist <- rownames(dataDEGsFiltLevel)
 system.time(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
 # Enrichment Analysis EA (TCGAVisualize)
@@ -41,6 +49,6 @@ EAbarplot(tf = rownames(ansEA$ResBP),
         PathTab = ansEA$ResPat,
          nRGTab = Genelist,
          nBar = 10)
-         }
+}
 }
 
