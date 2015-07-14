@@ -1,6 +1,7 @@
 #' @title SampleTypes
 #' @description
-#'   SampleTypes
+#'   For a given list of samples and a type sample, return the samples that are
+#'   from that type.
 #' @param barcode barcode list
 #' @param typesample a character vector indicating tissue type to query.
 #' Example:
@@ -276,8 +277,8 @@ HER_status_BRCA  <- function(barcode, HER, clinical_patient_data){
 #' @description
 #'   clinical_data_site_cancer
 #' @param cancer cancer
-#' @export
-#' @examples clinical_data_site_cancer("gbm")
+# @export
+# @examples clinical_data_site_cancer("gbm")
 #' @return clinical_data_site_cancer
 clinical_data_site_cancer <- function(cancer){
     return(paste0("https://tcga-data.nci.nih.gov/tcgafiles/",
@@ -285,9 +286,9 @@ clinical_data_site_cancer <- function(cancer){
                   cancer,"/bcr/biotab/clin/"))
 }
 
-#' @title clinic
+#' @title Get the clinical information
 #' @description
-#'   clinic
+#'   Get the clinical information
 #' @param cancer a character vector indicating cancer type Examples:
 #' \tabular{lllll}{
 #'OV   \tab BRCA \tab CESC \tab ESCA \tab PCPG\cr
