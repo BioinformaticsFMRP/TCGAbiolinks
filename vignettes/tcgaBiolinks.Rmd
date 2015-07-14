@@ -7,12 +7,12 @@ date: "`r Sys.Date()`"
 output: 
   BiocStyle::html_document:
     toc: true
-    number_sections: true
-    toc_depth: 1
+    number_sections: no
+    toc_depth: 2
     highlight: haddock
   BiocStyle::pdf_document:
     toc: yes
-    number_sections: yes
+    number_sections: no
 
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -35,7 +35,7 @@ Motivation: The Cancer Genome Atlas (TCGA) provides us with an enormous collecti
  TCGAbiolinks consists of three parts or levels. Firstly, we provide different options to query and download from TCGA relevant data from all currently platforms and their subsequent pre-processing for commonly used bio-informatics (tools) packages in Bioconductor or CRAN. Secondly, the package allows to integrate different data types and it can be used for different types of analyses dealing with all platforms such as diff.expression, network inference or survival analysis, etc, and then it allows to visualize the obtained results. Thirdly we added a social level where a researcher can found a similar intereset in a bioinformatic community, and allows both to find a validation of results in literature in pubmed and also to retrieve questions and answers from site such as support.bioconductor.org, biostars.org, stackoverflow,etc.
 
 This document describes how to search, download and analyze TCGA data using the
-TCGAbiolinks package.
+`TCGAbiolinks` package.
 
 # Searching data using TCGAQuery
  You can easily search TCGA samples using the `TCGAQuery` function.
@@ -51,7 +51,7 @@ TCGAbiolinks package.
 * **level**  Options: 1,2,3,"mage-tab"
 * **center**
 
-## Searching by tumor
+### Searching by tumor
 You can filter the search by tumor using the tumor parameter.
 
 ```{r, eval = TRUE}
@@ -66,7 +66,7 @@ help pages `?TCGAQuery`
 query <- TCGAQuery(tumor = "")
 ```
 
-## Searching by level
+### Searching by level
 You can filter the search by level	"1", "2", "3" or "mage-tab"
 ```{r, eval = TRUE}
 query <- TCGAQuery(tumor = "gbm", level = 3)
@@ -75,7 +75,7 @@ query <- TCGAQuery(tumor = "gbm", level = 1)
 query <- TCGAQuery(tumor = "gbm", level = "mage-tab")
 ```
 
-## Searching by date
+### Searching by date
 You can filter the search by date using the added.since and added.up.to parameters.
 For the moment, the format of date accepted is mm/dd/YYYY.
 
@@ -84,7 +84,7 @@ For the moment, the format of date accepted is mm/dd/YYYY.
 query <- TCGAQuery(tumor = "gbm", added.since = "01/01/2013", added.up.to = "12/31/2013")
 ```
 
-## Searching by platform
+### Searching by platform
 You can filter the search by platform using the platform parameter.
 
 ```{r, eval = TRUE}
@@ -99,7 +99,7 @@ help pages `?TCGAQuery`
 query <- TCGAQuery(tumor = "gbm", platform = "")
 ```
 
-## Searching by center
+### Searching by center
 You can filter the search by center using the center parameter.
 
 ```{r, eval = TRUE}
@@ -113,7 +113,7 @@ It will provide you with all the center names in TCGA.
 query <- TCGAQuery(tumor = "gbm", center = "")
 ```
 
-## Searching by samples
+### Searching by samples
 You can filter the search by samples using the samples parameter.
 You can give a list of barcodes or only one barcode. These barcode can be partial barcodes.
 
@@ -132,7 +132,7 @@ query <- TCGAQuery(samples = listSamples)
 query <- TCGAQuery(samples = "TCGA-61-1743-01A")
 ```
 
-## Examples
+### Examples
 
 Some search examples are shown below:
 ```{r, eval = TRUE}
@@ -221,7 +221,7 @@ The arguments are:
 *  **quiet**	Supress output messages? Default: FALSE
 *  **force**	Download again if file already exists? Default: FALSE
 
-## Example of use:
+### Example of use
 ```{r, eval = FALSE}
 # get all samples from the query and save them in the TCGA folder
 # samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
@@ -241,7 +241,7 @@ TCGADownload(query, path = "dataBrca", type = "rsem.genes.results",
 Comment: The function will structure the folders to save the data as:
 _Path given by the user/Experiment folder_
 
-## The types available for downloading
+### Table of types available for downloading
 
 Platform| Types of file
 :-------------:|:-------------:
@@ -263,7 +263,7 @@ The arguments are:
 * **toPackage** Name of the package to prepare the data specific to that package. 
 * **summarizedExperiment** Should the output be a SummarizedExperiment object? Default: `TRUE`
 
-## Example of use:
+### Example of use
 ```{r, eval = FALSE}
 # get all samples from the query and save them in the TCGA folder
 # samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
@@ -306,7 +306,7 @@ data <- TCGAPrepare(query = query,dir = "../../", type ="rsem.genes.normalized_r
 ```
 
 
-## The `types` available for the preparing
+### Table of `types` available for the `TCGAPrepare`
 
 Platform| Types of file
 :-------------:|:-------------:
@@ -315,7 +315,7 @@ IlluminaHiSeq_RNASeq<br>illuminaga_rnaseq|exon.quantification<br>spljxn.quantifi
 genome_wide_snp_6| hg19.seg
 
 
-## Preparing the data with TCGAPrepare - toPackage 
+### Preparing the data with TCGAPrepare - toPackage 
 This section will show how to integrate `TCGAbiolinks` with other packages.
 Our intention is to provide as many integrations as possible.
 
@@ -447,9 +447,9 @@ GBM_CNV <- TCGAPrepare(query, dir = "samples", type = ".hg19.seg.txt")
 
 
 
-# Clinical data
+# Working with clinical data
 You can retrive clinical data using the `clinic` function. The parameters of this
-function is: 
+function are: 
 
 * cancer ("OV","BRCA","GBM", etc)
 * clinical_data_type ("clinical_patient","clinical_drug", etc)
@@ -513,10 +513,14 @@ HER_status_BRCA(bar,"Positive",clinical_brca_data)
 HER_status_BRCA(bar,"Negative",clinical_brca_data)
 ```
 
-
-# TCGA Downstream Analysis TCGAprepare, TCGAanalyze, TCGAvisualize
-You can prepare gene expression from TCGA data using the `TCGAprepare`
-function.
+# TCGA Downstream Analysis
+After preparing the gene expression from TCGA data using the `TCGAprepare`
+function, you can do a normalization of genes using the 
+function `RnaSeqNormalization`, do a quantile filter of genes with
+the `RnaSeqFilt` function. Also, iin order to classify your samples (barcode) 
+you can use the `MultiSampleTypes` function, the typeSample "NT" will return 
+the  "Solid Tissue Normal"" samples, while the typeSample "TP" will return 
+"Primary Solid Tumor"" samples.
  
 ```{r, eval = FALSE}
 # Downstream analysis using gene expression data  
@@ -543,10 +547,18 @@ samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
 
 ```
 
-# TCGA analyze and visualize (Diff.expr.analysis (DEA))
-You can analyze gene expression from TCGA data using the `TCGAanalyze` 
-function.
- 
+## Differential expression analysis (DEA)
+
+Perform DEA (Differential expression analysis) to identify differentially expressed genes (DEGs) using the `DEArnaSEQ` function. This function receives as parameters:
+
+* **mat1** The matrix of the first group (in the example group 1 is the normal samples), 
+* **mat2** The matrix of the  second group (in the example group 2 is tumor samples)
+* **Cond1type** Label for group 1
+* **Cond1type** Label for group 2
+
+After, we filter the output of dataDEGs by abs(LogFC) >=1, and uses the
+`CreateTabLevel` function to create a table with DEGs (differentially expressed genes), log Fold Change (FC), false discovery rate (FDR), the gene expression level for samples in Cond1type, and Cond2type, and Delta value (the difference of gene expression between the two conditions multiplied logFC).
+
 ```{r, eval = FALSE}
 # Downstream analysis using gene expression data  
 # TCGA samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
@@ -574,11 +586,17 @@ knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2,
              caption = "Table DEGs after DEA",row.names = FALSE)
 ```
 
+## Enrichment Analysis
+
+Researchers, in order to better understand the underlying biological processes, often want to retrieve a functional profile of a set of genes that might 
+have an important role. This can be done by performing an enrichment analysis. 
+
+We will perform an enrichment analysis on gene sets using the `EAcomplete` function. 
+Given a set of genes that are up-regulated under certain conditions, an enrichment analysis will find  identify classes of genes or proteins that are over-represented  using annotations for that gene set.
 
 
-# TCGA analyze and visualize (Enrichment Analysis)
-You can analyze gene expression from TCGA data using the `TCGAanalyze` function.
- 
+To view the results you can use the `EAbarplot` function as shown below.
+
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 # Enrichment Analysis EA
@@ -607,9 +625,17 @@ img <- readPNG("EAplot.png")
 grid.raster(img)
 ```
 
-# TCGA analyze (Enrichment Analysis)
-You can analyze gene expression from TCGA data using the `TCGAanalyze` function.
- 
+## Principal Component Analysis plot for differentially expressed genes
+
+In order to understand better our genes, we can perform a PCA to reduce the
+number of dimensions of our gene set. The function `plotPCAforGroups` will plot
+the PCA for different groups.
+
+The parameters of this function are:
+* **dataFilt** The expression matrix after normalization and quantile filter
+* **dataDEGsFiltLevel** The CreateTabLevel output
+* **ntopgenes** number of DEGs genes to plot in PCA
+
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 
@@ -637,8 +663,8 @@ img <- readPNG("PCAtop200DEGs.png")
 grid.raster(img)
 ```
 
-# TCGA analyze and visualize (Survival Analysis)
-You can analyze gene expression and clinical data from TCGA data using the `TCGAanalyze` function.
+## Survival Analysis
+
  
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
@@ -679,9 +705,8 @@ knitr::kable(tabSurvKMcompleteDEGs[1:10,], digits = 2,
              caption = "Table KM-survival genes after SA",row.names = TRUE)
 ```
 
-# TCGA analyze and visualize (Survival Analysis Cox Regression and dnet package)
-You can analyze gene expression and clinical data from TCGA data using the `TCGAanalyze` function.
- 
+## Survival Analysis Cox Regression and dnet package
+
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 # Survival Analysis SA
@@ -728,114 +753,8 @@ grid.raster(img)
 ```
 
 
-# TCGA investigate
-Find most studied TFs in pubmed related to a specific cancer, disease, or tissue
- 
-```{r, eval = FALSE}
-# First perform DEGs with TCGAanalyze
-# See previous section 
-library(TCGAbiolinks)
+## TCGA Downstream Analysis Integration 
 
-# Select only transcription factors (TFs) from DEGs
-TFs <- EAGenes[EAGenes$Family =="transcription regulator",]
-TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
-dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
-
-# Order table DEGs TFs according to Delta decrease
-dataDEGsFiltLevelTFs <- dataDEGsFiltLevelTFs[order(dataDEGsFiltLevelTFs$Delta,decreasing = TRUE),]
-
-# Find Pubmed of TF studied related to cancer
-tabDEGsTFPubmed <- TCGAinvestigate("breast", dataDEGsFiltLevelTFs, topgenes = 10)
-                 
-```
-
-The result is shown below:
-
-```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
-knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF in pubmed related to a specific cancer",row.names = FALSE)
-
-#LatexPrintTableforPresentation(Table = tabDEGsTFPubmed,rowsForPage = nrow(tabDEGsTFPubmed), TableTitle = "tabDEGsTFPubmed", LabelTitle = "tabDEGsTFPubmed", withrows = T)
-```
-
-# Searching questions,answers and literature with TCGASocial
-The `TCGASocial` function has two type of searches, one that searches for
-most downloaded packages in CRAN or BioConductor and one that searches the most related question in biostar. 
-
-## TCGASocial with BioConductor
-Find most downloaded packages in CRAN or BioConductor
- 
-```{r, eval = FALSE}
-library(TCGAbiolinks)
-
-# Define a list of package to find number of downloads
-listPackage <-c("limma","edgeR","survcomp")
-
-tabPackage <- TCGAsocial(siteToFind ="bioconductor.org",listPackage)
-
-
-# define a keyword to find in support.bioconductor.org returing a table with suggested packages
-tabPackageKey <- TCGAsocial(siteToFind ="support.bioconductor.org" ,KeyInfo = "tcga")
-```
-
-The result is shown below:
-
-```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
-listPackage <- c("limma","edgeR","survcomp")
-tabPackage <- TCGAsocial(siteToFind = "bioconductor.org", listPackage)
-
-knitr::kable(head(tabPackage), digits = 2, caption = "Table with number of downloads about a list of packages",row.names = FALSE)
-
-knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in support.bioconductor.org with keyword = tcga",row.names = FALSE)
-
-```
-
-## TCGASocial with Biostar
-Find most related question in biostar.
- 
-```{r, eval = FALSE}
-library(TCGAbiolinks)
-
-# Find most related question in biostar with TCGA
-tabPackage1 <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "TCGA")
-
-# Find most related question in biostar with package
-tabPackage2 <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "package")
-
-```
-
-The result is shown below:
-
-```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
-# Find most related question in biostar with TCGA
-#tabPackage <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "package")
-
-knitr::kable(head(tabPackage1), digits = 2, caption = "Find most related question in biostar with TCGA",row.names = FALSE)
-
-knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in biostar with package",row.names = FALSE)
-```
-
-# TCGA downstream Analysis
- 
-Some examples for the integration of TCGA data are shown below
-```{r, eval = FALSE}
-
-library(TCGAbiolinks)
-query <- TCGAQuery(tumor = "brca",level = 3)
-
-querySamples <- samplesfilter(query)
-
-query <- TCGAQuery(tumor = "brca",level = 3, platform = "IlluminaHiSeq_RNASeqV2")
-
-```
-
-Comment: As these terms need to be exact, we validate user input before searching.
-
-# TCGA Downstream Analysis Integration 
-You can easily prepare gene expression from TCGA data using the `TCGAPrepare` function.
- 
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 library(genefilter)
@@ -1021,10 +940,10 @@ function `survivalPlot` as follows:
 
 ```{r, eval = FALSE}
 # survival using the column group 
-survivalPlot(clinical,"group")
+survivalAnalysis(clinical,"group")
 ```
 
-The arguments of `survivalPlot` are:
+The arguments of `survivalAnalysis` are:
 
 *  **clinical_patient** TCGA Clinical patient with the information days_to_death
 *  **clusterCol** Column with groups to plot. This is a mandatory field, 
@@ -1046,13 +965,14 @@ img <- readPNG("survival.png")
 grid.raster(img)
 ```
 
+## Mean Methylation Analysis
 Using the data and calculating the mean methylation per group, it is possible 
-to create a mean methylation boxplot with the function `metMeanBoxplot` as follows:
+to create a mean methylation boxplot with the function `meanMethylationAnalysis` as follows:
 
 ```{r, eval = FALSE}
-metMeanBoxplot(data,"group")
+meanMethylationAnalysis(data,"group")
 ```
-The arguments of `metMeanBoxplot` are:
+The arguments of `meanMethylationAnalysis` are:
 
 *  **data**	 SummarizedExperiment object obtained from `TCGAPrepare`
 *  **groupCol** Columns in colData(data) that defines the groups. If no columns defined a columns called "Patients" will be used
@@ -1072,6 +992,8 @@ img <- readPNG("meanmet.png")
 grid.raster(img)
 ```
 
+## Volcano plots for methylation data
+
 Finally, we want to know which are the probes that are different methylated and
 are significant. For that we use a volcano plot 
 that compares the methylation data between the two groups.
@@ -1082,7 +1004,7 @@ to analyse the data.
 
 
 ```{r, eval = FALSE}
-data <- volcanoPlot(data,groupCol="group")
+data <- volcanoAnalysis(data,groupCol="group")
 ```
 
 The output will be an graph such as the figure below. The function will 
@@ -1115,19 +1037,141 @@ img <- readPNG("volcano.png")
 grid.raster(img)
 ```
 
-In the next part, we will analyze expression data and methylation data with 
-starburst analysis.
+## Analyzing expression and methylation together - Starburst plot 
+
+ The starburst plot is proposed to combine information from two volcano plots, 
+ and is applied for a study of DNA methylation and gene expression. In order to
+ reproduce this plot, we will use the `starburstAnalysis` function.
+
+The parameters of this function are:
+* **met** SummarizedExperiment with methylation data obtained from the 
+`TCGAPrepare` and processed by `volcanoAnalysis` function. 
+Expected colData columns: diffmean, p.value.adj and p.value
+* **exp** SummarizedExperiment with methylation data obtained from the
+`TCGAPrepare` function  and processed by `DEArnaSEQ` function. Expected colData columns: diffmean, p.value.adj and p.value
+
 ```{r, eval = FALSE}
- FDR <- runif(nrow(met), 0, 1)
- p.value.adj <- runif(nrow(met), 0, 1)
- GeneSymbol <- met$Gene_Symbol
- dm <- runif(nrow(met), -3, 3)
- expression <- data.frame(GeneSymbol, FDR, p.value.adj, dm)
- gene.met <- starbursAnalysis(met, expression)
- starburstPlot(gene.met)
+nrows <- 20000; ncols <- 20
+counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
+rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(5000, 15000)),
+                    IRanges::IRanges(floor(runif(20000, 1e5, 1e6)), width=100),
+                     strand=sample(c("+", "-"), 20000, TRUE),
+                     probeID=sprintf("ID%03d", 1:20000),
+                     Gene_Symbol=sprintf("ID%03d", 1:20000))
+colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
+                     row.names=LETTERS[1:20],
+                     group=rep(c("group1","group2"),c(10,10)))
+data <- SummarizedExperiment::SummarizedExperiment(
+          assays=S4Vectors::SimpleList(counts=counts),
+          rowRanges=rowRanges,
+          colData=colData)
+met <- data
+exp <- data
+rowRanges(met)$diffmean <- c(runif(20000, -0.1, 0.1))
+rowRanges(met)$p.value <- c(runif(20000, 0, 1))
+rowRanges(met)$p.value.adj <- c(runif(20000, 0, 1))
+rowRanges(exp)$diffmean <- c(runif(20000, -0.1, 0.1))
+rowRanges(exp)$p.value <- c(runif(20000, 0, 1))
+rowRanges(exp)$p.value.adj <- c(runif(20000, 0, 1))
+result <- starburstPlot(met,exp,p.cut = 0.01)
+starburstAnalysis(met,exp)
 ```
 
-# Session Information
+
+# Searching questions, answers and literature 
+
+## Find most studied TFs in pubmed  with TCGAinvestigate
+Find most studied TFs in pubmed related to a specific cancer, disease, or tissue
+ 
+```{r, eval = FALSE}
+# First perform DEGs with TCGAanalyze
+# See previous section 
+library(TCGAbiolinks)
+
+# Select only transcription factors (TFs) from DEGs
+TFs <- EAGenes[EAGenes$Family =="transcription regulator",]
+TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
+dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
+
+# Order table DEGs TFs according to Delta decrease
+dataDEGsFiltLevelTFs <- dataDEGsFiltLevelTFs[order(dataDEGsFiltLevelTFs$Delta,decreasing = TRUE),]
+
+# Find Pubmed of TF studied related to cancer
+tabDEGsTFPubmed <- TCGAinvestigate("breast", dataDEGsFiltLevelTFs, topgenes = 10)
+                 
+```
+
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+library(TCGAbiolinks)
+knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF in pubmed related to a specific cancer",row.names = FALSE)
+
+#LatexPrintTableforPresentation(Table = tabDEGsTFPubmed,rowsForPage = nrow(tabDEGsTFPubmed), TableTitle = "tabDEGsTFPubmed", LabelTitle = "tabDEGsTFPubmed", withrows = T)
+```
+
+## Searching questions,answers and literature with TCGASocial
+The `TCGASocial` function has two type of searches, one that searches for
+most downloaded packages in CRAN or BioConductor and one that searches the most related question in biostar. 
+
+### TCGASocial with BioConductor
+Find most downloaded packages in CRAN or BioConductor
+ 
+```{r, eval = FALSE}
+library(TCGAbiolinks)
+
+# Define a list of package to find number of downloads
+listPackage <-c("limma","edgeR","survcomp")
+
+tabPackage <- TCGAsocial(siteToFind ="bioconductor.org",listPackage)
+
+
+# define a keyword to find in support.bioconductor.org returing a table with suggested packages
+tabPackageKey <- TCGAsocial(siteToFind ="support.bioconductor.org" ,KeyInfo = "tcga")
+```
+
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+library(TCGAbiolinks)
+listPackage <- c("limma","edgeR","survcomp")
+tabPackage <- TCGAsocial(siteToFind = "bioconductor.org", listPackage)
+
+knitr::kable(head(tabPackage), digits = 2, caption = "Table with number of downloads about a list of packages",row.names = FALSE)
+
+knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in support.bioconductor.org with keyword = tcga",row.names = FALSE)
+
+```
+
+### TCGASocial with Biostar
+Find most related question in biostar.
+ 
+```{r, eval = FALSE}
+library(TCGAbiolinks)
+
+# Find most related question in biostar with TCGA
+tabPackage1 <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "TCGA")
+
+# Find most related question in biostar with package
+tabPackage2 <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "package")
+
+```
+
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+library(TCGAbiolinks)
+# Find most related question in biostar with TCGA
+#tabPackage <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "package")
+
+knitr::kable(head(tabPackage1), digits = 2, caption = "Find most related question in biostar with TCGA",row.names = FALSE)
+
+knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in biostar with package",row.names = FALSE)
+```
+
+******
+### Session Information
+******
 ```{r sessionInfo}
 sessionInfo()
 ```

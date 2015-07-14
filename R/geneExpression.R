@@ -404,10 +404,10 @@ EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,
 #'   GeneSplitRegulon
 #' @param Genelist Genelist
 #' @param Sep Sep
-#' @export
+# @export
 #' @return GeneSplitRegulon
-#' @examples
-#' GeneSplitRegulon("CRKL;TADA2A;KRT76",Sep =";")
+# @examples
+# GeneSplitRegulon("CRKL;TADA2A;KRT76",Sep =";")
 GeneSplitRegulon <- function(Genelist,Sep){
     RegSplitted <- as.matrix(unlist(strsplit(as.character(Genelist), Sep)))
 
