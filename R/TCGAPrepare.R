@@ -617,7 +617,7 @@ TCGAPrepare <- function(query,
         if (length(files) == 1) {
             df <- read.table(files, header = TRUE, sep = "\t",
                              stringsAsFactors = FALSE, check.names = FALSE,
-                             comment.char = "#",fill = TRUE, skip =1)
+                             comment.char = "#",fill = TRUE)
             regex <- paste0("[[:alnum:]]{8}-[[:alnum:]]{4}",
                             "-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}")
             idx <- grepl(regex,df$bcr_patient_uuid)
