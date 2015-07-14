@@ -17,7 +17,4 @@ GeneSplitRegulon
 \description{
 GeneSplitRegulon
 }
-\examples{
-GeneSplitRegulon("CRKL;TADA2A;KRT76",Sep =";")
-}
 

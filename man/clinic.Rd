@@ -2,7 +2,7 @@
 % Please edit documentation in R/clinical.R
 \name{clinic}
 \alias{clinic}
-\title{clinic}
+\title{Get the clinical information}
 \usage{
 clinic(cancer, clinical_data_type)
 }
@@ -39,7 +39,7 @@ clinical_radiation
 clinic data
 }
 \description{
-clinic
+Get the clinical information
 }
 \examples{
 data <- clinic("LGG","clinical_drug")
