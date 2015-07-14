@@ -1,5 +1,5 @@
 #' @title TCGAsocial
-#' @description Find number of downloads about a package in CRAN or BioC
+#' @description Finds the number of downloads of a package on CRAN or BIOC
 #' @param siteToFind website ("bioconductor.org", "biostars.org", "stackoverflow)
 #' related to TCGA or a package
 #' @param listPackage list of package to find in bioconductor
