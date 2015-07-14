@@ -76,7 +76,7 @@ data <- SummarizedExperiment::SummarizedExperiment(
          assays=S4Vectors::SimpleList(counts=counts),
          rowRanges=rowRanges,
          colData=colData)
-colData(data)$group <- c(rep("group1",ncol(data)/2),
+SummarizedExperiment::colData(data)$group <- c(rep("group1",ncol(data)/2),
                          rep("group2",ncol(data)/2))
 hypo.hyper <- volcanoAnalysis(data, p.cut = 0.85,"group")
 }

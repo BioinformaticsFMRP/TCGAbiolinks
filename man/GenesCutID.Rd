@@ -9,13 +9,8 @@ GenesCutID(GeneList)
 \arguments{
 \item{GeneList}{GeneList}
 }
-\value{
-list of gene symbol without IDs
-}
 \description{
 GenesCutID
 }
-\examples{
-GenesCutID(c("CRKL|1399","TADA2A|6871","KRT76|51350"))
-}
+\keyword{internal}
 
