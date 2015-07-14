@@ -13,16 +13,7 @@ ER_status_BRCA(barcode, ER, clinical_patient_data)
 
 \item{clinical_patient_data}{clinical_patient_data}
 }
-\value{
-ER_status_BRCA
-}
 \description{
 ER_status_BRCA
-}
-\examples{
-# clin <- clinic("BRCA","clinical_patient")
-clin <- clinBRCA
-ER_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
-"Positive",clin)
 }
 
