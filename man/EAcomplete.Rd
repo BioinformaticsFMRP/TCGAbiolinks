@@ -2,7 +2,7 @@
 % Please edit documentation in R/geneExpression.R
 \name{EAcomplete}
 \alias{EAcomplete}
-\title{EAcomplete}
+\title{EAcomplete - enrichment analysis}
 \usage{
 EAcomplete(TFname, RegulonList)
 }
@@ -15,11 +15,21 @@ EAcomplete(TFname, RegulonList)
 EAcomplete plot
 }
 \description{
-EAcomplete
+Researchers, in order to better understand the underlying biological
+  processes, often want to retrieve a functional profile of a set of genes
+  that might have an important role. This can be done by performing an
+  enrichment analysis.
+
+We will perform an enrichment analysis on gene sets using the EAcomplete
+function. Given a set of genes that are
+up-regulated under certain conditions, an enrichment analysis will find
+identify classes of genes or proteins that are #'over-represented using
+annotations for that gene set.
 }
 \examples{
+Genelist <- c("FN1","COL1A1")
+ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist)
 \dontrun{
-
 Genelist <- rownames(dataDEGsFiltLevel)
 system.time(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
 }
