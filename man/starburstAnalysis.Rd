@@ -71,12 +71,12 @@ data <- SummarizedExperiment::SummarizedExperiment(
          colData=colData)
 met <- data
 exp <- data
-rowRanges(met)$diffmean <- c(runif(20000, -0.1, 0.1))
-rowRanges(met)$p.value <- c(runif(20000, 0, 1))
-rowRanges(met)$p.value.adj <- c(runif(20000, 0, 1))
-rowRanges(exp)$diffmean <- c(runif(20000, -0.1, 0.1))
-rowRanges(exp)$p.value <- c(runif(20000, 0, 1))
-rowRanges(exp)$p.value.adj <- c(runif(20000, 0, 1))
+SummarizedExperiment::rowRanges(met)$diffmean <- c(runif(20000, -0.1, 0.1))
+SummarizedExperiment::rowRanges(met)$p.value <- c(runif(20000, 0, 1))
+SummarizedExperiment::rowRanges(met)$p.value.adj <- c(runif(20000, 0, 1))
+SummarizedExperiment::rowRanges(exp)$diffmean <- c(runif(20000, -0.1, 0.1))
+SummarizedExperiment::rowRanges(exp)$p.value <- c(runif(20000, 0, 1))
+SummarizedExperiment::rowRanges(exp)$p.value.adj <- c(runif(20000, 0, 1))
 result <- starburstAnalysis(met,exp,p.cut = 0.01)
 }
 
