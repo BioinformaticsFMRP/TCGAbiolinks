@@ -32,7 +32,8 @@ NBM \tab  Bone Marrow Normal \cr
 SampleTypes
 }
 \description{
-SampleTypes
+For a given list of samples and a type sample, return the samples that are
+  from that type.
 }
 \examples{
 SampleTypes(c("TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1"),"TR")
