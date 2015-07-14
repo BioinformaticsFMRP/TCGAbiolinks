@@ -91,16 +91,16 @@ diffmean <- function(data, groupCol = NULL, group2 = NULL, group1 = NULL) {
 #' survivalPlot(df,clusterCol="groups")
 #' \dontrun{
 #' clinical <- clinic("gbm","clinical_patient")
-#' survivalPlot(clinical,"gender", filename = "surv.pdf", legend="Gender")
+#' survivalAnalysis(clinical,"gender", filename = "surv.pdf", legend="Gender")
 #' }
-survivalPlot <- function(clinical_patient,
-                         clusterCol=NULL,
-                         legend = "Legend", cutoff = 0,
-                         main = "Kaplan-Meier Overall Survival Curves",
-                         ylab = "PROBABILITY OF SURVIVAL",
-                         xlab = "TIME SINCE DIAGNOSIS (DAYS)",
-                         filename = "survival.pdf",
-                         color = c("green", "firebrick4", "orange3", "blue")
+survivalAnalysis <- function(clinical_patient,
+                             clusterCol=NULL,
+                             legend = "Legend", cutoff = 0,
+                             main = "Kaplan-Meier Overall Survival Curves",
+                             ylab = "PROBABILITY OF SURVIVAL",
+                             xlab = "TIME SINCE DIAGNOSIS (DAYS)",
+                             filename = "survival.pdf",
+                             color = c("green", "firebrick4", "orange3", "blue")
 ) {
     .e <- environment()
     group <- NULL
@@ -149,7 +149,7 @@ survivalPlot <- function(clinical_patient,
     }
     with(clinical_patient,{
         surv <- surv + scale_colour_discrete(name = legend,
-                    labels = sapply(levels(clinical_patient$type),label.add.n)
+                                             labels = sapply(levels(clinical_patient$type),label.add.n)
         )
         with(surv,{
             surv <- surv + geom_point(aes(colour = group),
@@ -163,7 +163,7 @@ survivalPlot <- function(clinical_patient,
 }
 #' @title Mean methylation boxplot
 #' @description
-#'   Creates a mean methylation boxplot based for patients divided in by groups
+#'   Creates a mean methylation boxplot divided in by groups
 #' @param data SummarizedExperiment object obtained from TCGAPrepare
 #' @param groupCol Columns in colData(data) that defines the groups. If no
 #' columns defined a columns called "Patients" will be used
@@ -192,17 +192,17 @@ survivalPlot <- function(clinical_patient,
 #'          assays=S4Vectors::SimpleList(counts=counts),
 #'          rowRanges=rowRanges,
 #'          colData=colData)
-#' metMeanBoxplot(data,groupCol  = "group",sort=TRUE)
-metMeanBoxplot <- function(data,
-                           groupCol=NULL,
-                           sort = FALSE,
-                           filename = "G-CIMP-mean.methylation.pdf",
-                           ylab = "Mean DNA methylation",
-                           xlab = "DNA Methylation Clusters",
-                           title = "Mean DNA methylation by cluster",
-                           legend = "Legend",
-                           color = c("green", "red", "purple",
-                                     "orange", "salmon", "grey")) {
+#' meanMethylationAnalysis(data,groupCol  = "group",sort=TRUE)
+meanMethylationAnalysis <- function(data,
+                                    groupCol=NULL,
+                                    sort = FALSE,
+                                    filename = "G-CIMP-mean.methylation.pdf",
+                                    ylab = "Mean DNA methylation",
+                                    xlab = "DNA Methylation Clusters",
+                                    title = "Mean DNA methylation by cluster",
+                                    legend = "Legend",
+                                    color = c("green", "red", "purple",
+                                              "orange", "salmon", "grey")) {
     .e <- environment()
     mean <- apply(assay(data), 2, mean,na.rm = TRUE)
 
@@ -217,7 +217,7 @@ metMeanBoxplot <- function(data,
     # mean methylation
     if (sort) {
         p <- ggplot(df, aes(reorder(factor(df$groups), df$mean),
-                              df$mean),  environment = .e) +
+                            df$mean),  environment = .e) +
             geom_boxplot(aes(fill = reorder(factor(df$groups),
                                             df$mean)),
                          notchwidth = 0.25) +
@@ -324,10 +324,10 @@ calculate.pvalues <- function(data,
     idx1 <- which(colData(data)[,groupCol] == group1)
     idx2 <- which(colData(data)[,groupCol] == group2)
     p.value <- apply(assay(data),1,
-                    function(x) {
-                        wilcox.test(x[idx1], x[idx2],
-                        exact = exact, paired = paired)$p.value
-                        }
+                     function(x) {
+                         wilcox.test(x[idx1], x[idx2],
+                                     exact = exact, paired = paired)$p.value
+                     }
     )
 
     ## Plot a histogram
@@ -355,7 +355,7 @@ calculate.pvalues <- function(data,
 
 #' @title Volcano plot
 #' @description
-#'   In order to searches for the probes that are different methylated and
+#'   In order to search for the probes that are different methylated and
 #'   are significant, we use a volcano plot (x-axis:diff mean methylation,
 #'   y-axis: significance) that compares the methylation data between the two groups.
 #'   Firstly, it calculates the difference between the mean methylation of each group
@@ -404,25 +404,25 @@ calculate.pvalues <- function(data,
 #'          colData=colData)
 #' colData(data)$group <- c(rep("group1",ncol(data)/2),
 #'                          rep("group2",ncol(data)/2))
-#' hypo.hyper <- volcanoPlot(data, p.cut = 0.85,"group")
-volcanoPlot <- function(data,
-                        groupCol=NULL,
-                        group1=NULL,
-                        group2=NULL,
-                        filename = "volcano.pdf",
-                        ylab = "- 1*log10 of the Significance",
-                        xlab = "DNA Methylation",
-                        title = "Volcano Plot TCGA GBM Tumors",
-                        legend = "Legend",
-                        color = c("1" = "black", "2" = "green",
-                                  "3" = "red"),
-                        label = c("1" = "Not Significant",
-                                  "2" = "Hypermethylated",
-                                  "3" = "Hypomethylated"),
-                        xlim = NULL,
-                        ylim = NULL,
-                        p.cut = 0.05,
-                        diffmean.cut = 0) {
+#' hypo.hyper <- volcanoAnalysis(data, p.cut = 0.85,"group")
+volcanoAnalysis <- function(data,
+                            groupCol=NULL,
+                            group1=NULL,
+                            group2=NULL,
+                            filename = "volcano.pdf",
+                            ylab = "- 1*log10 of the Significance",
+                            xlab = "DNA Methylation",
+                            title = "Volcano Plot TCGA GBM Tumors",
+                            legend = "Legend",
+                            color = c("1" = "black", "2" = "green",
+                                      "3" = "red"),
+                            label = c("1" = "Not Significant",
+                                      "2" = "Hypermethylated",
+                                      "3" = "Hypomethylated"),
+                            xlim = NULL,
+                            ylim = NULL,
+                            p.cut = 0.05,
+                            diffmean.cut = 0) {
     .e <- environment()
 
     if (is.null(rowRanges(data)$p.value)){
@@ -450,8 +450,8 @@ volcanoPlot <- function(data,
 
     # Plot a volcano plot
     p <- ggplot(data = as.data.frame(rowRanges(data)), aes(x = rowRanges(data)$diffmean ,
-                                 y = -1 * log10(rowRanges(data)$p.value.adj),
-                                 colour = rowRanges(data)$threshold),
+                                                           y = -1 * log10(rowRanges(data)$p.value.adj),
+                                                           colour = rowRanges(data)$threshold),
                 environment = .e) + geom_point() +
         labs(title = title) + ylab(ylab) + xlab(xlab) +
         geom_vline(aes(xintercept = -diffmean.cut), colour = "black",
@@ -527,13 +527,13 @@ get.GRCh.bioMart <- function(genome="hg19") {
 #' @param ylim y limits to cut image
 #' @param p.cut p value cut-off
 #' @import ggplot2
-#' @importFrom SummarizedExperiment subsetByOverlaps
+#' @importFrom SummarizedExperiment subsetByOverlaps rowRanges rowRanges<-
 #' @export
 #' @return Save a starburst plot
 #' @examples
 #' nrows <- 20000; ncols <- 20
 #' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
-#' rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(5000, 15000)),
+#' ranges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(5000, 15000)),
 #'                    IRanges::IRanges(floor(runif(20000, 1e5, 1e6)), width=100),
 #'                     strand=sample(c("+", "-"), 20000, TRUE),
 #'                     probeID=sprintf("ID%03d", 1:20000),
@@ -543,7 +543,7 @@ get.GRCh.bioMart <- function(genome="hg19") {
 #'                     group=rep(c("group1","group2"),c(10,10)))
 #'data <- SummarizedExperiment::SummarizedExperiment(
 #'          assays=S4Vectors::SimpleList(counts=counts),
-#'          rowRanges=rowRanges,
+#'          rowRanges=ranges,
 #'          colData=colData)
 #' met <- data
 #' exp <- data
@@ -553,35 +553,35 @@ get.GRCh.bioMart <- function(genome="hg19") {
 #' rowRanges(exp)$diffmean <- c(runif(20000, -0.1, 0.1))
 #' rowRanges(exp)$p.value <- c(runif(20000, 0, 1))
 #' rowRanges(exp)$p.value.adj <- c(runif(20000, 0, 1))
-#' result <- starburstPlot(met,exp,p.cut = 0.01)
-starburstPlot <- function(met,
-                          exp,
-                          filename = "volcano.pdf",
-                          ylab = paste0("Gene Expression\nlog10 of the",
-                                        "adjusted Significance (FDR)"),
-                          xlab = paste0("DNA Methylation\nlog10 of the",
-                                        " adjusted Significance (FDR)"),
-                          title = "Starburst Plot",
-                          legend = "Methylation/Expression Relation",
-                          color = c("1" = "black",
-                                    "2" = "purple",
-                                    "3" = "darkgreen",
-                                    "4" = "blue",
-                                    "5" = "darkred",
-                                    "6" = "red",
-                                    "7" = "green",
-                                    "8" = "yellow",
-                                    "9" = "orange"),
-                          label = c("1" = "Not Significant",
-                                    "2" = "Up & Hypo",
-                                    "3" = "Down & Hypo",
-                                    "4" = "hypo",
-                                    "5" = "hyper",
-                                    "6" = "Up",
-                                    "7" = "Down",
-                                    "8" = "Up & Hyper",
-                                    "9" = "Down & Hyper"),
-                          xlim = NULL, ylim = NULL, p.cut = 0.05
+#' result <- starburstAnalysis(met,exp,p.cut = 0.01)
+starburstAnalysis <- function(met,
+                              exp,
+                              filename = "volcano.pdf",
+                              ylab = paste0("Gene Expression\nlog10 of the",
+                                            "adjusted Significance (FDR)"),
+                              xlab = paste0("DNA Methylation\nlog10 of the",
+                                            " adjusted Significance (FDR)"),
+                              title = "Starburst Plot",
+                              legend = "Methylation/Expression Relation",
+                              color = c("1" = "black",
+                                        "2" = "purple",
+                                        "3" = "darkgreen",
+                                        "4" = "blue",
+                                        "5" = "darkred",
+                                        "6" = "red",
+                                        "7" = "green",
+                                        "8" = "yellow",
+                                        "9" = "orange"),
+                              label = c("1" = "Not Significant",
+                                        "2" = "Up & Hypo",
+                                        "3" = "Down & Hypo",
+                                        "4" = "hypo",
+                                        "5" = "hyper",
+                                        "6" = "Up",
+                                        "7" = "Down",
+                                        "8" = "Up & Hyper",
+                                        "9" = "Down & Hyper"),
+                              xlim = NULL, ylim = NULL, p.cut = 0.05
 )
 {
     .e <- environment()

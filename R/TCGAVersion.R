@@ -1,5 +1,8 @@
 #' @title TCGA Version
-#' @description  TCGA Version
+#' @description  As every new version of data has diferent samples and size
+#' the TCGAVersion function shows a summary (version, date, number of samples,
+#' size of the data) of all versions of data for a given tumor and platform.
+#'
 #' @param tumor  a character string indicating the cancer type for
 #'        which to download data. Options include ACC, BLCA, BRCA,
 #'        CESC, COAD, DLBC, ESCA, GBM, HNSC, KICH, KIRC, KIRP, LAML,
