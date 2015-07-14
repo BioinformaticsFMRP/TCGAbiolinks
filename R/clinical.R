@@ -122,12 +122,12 @@ MatchedCoupledSampleTypes <- function(barcode,typesample){
 #' @param barcode barcode
 #' @param stage stage
 #' @param clinical_patient_data clinical_patient_data
-#' @export
-#' @return stage_BRCA
-#' @examples
-#' # clin <- clinic("BRCA","clinical_patient")
-#' clin <- clinBRCA
-#' stage_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"stage_IX",clin)
+# @export
+# @return stage_BRCA
+# @examples
+# # clin <- clinic("BRCA","clinical_patient")
+# clin <- clinBRCA
+# stage_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"stage_IX",clin)
 stage_BRCA <- function(barcode, stage, clinical_patient_data){
     table.stages <- c("Stage I$|Stage IA$|Stage IB$", "Stage I$", "Stage IA$",
                       "Stage IB$", "Stage II$|Stage IIA$|Stage IIB$",
@@ -144,7 +144,7 @@ stage_BRCA <- function(barcode, stage, clinical_patient_data){
         clinical_patient_data <- as.data.frame(clinical_patient_data)
         print(table.stages[stage])
         stage.i <- clinical_patient_data[grep(table.stages[stage],
-                  clinical_patient_data$ajcc_pathologic_tumor_stage), ]
+                                              clinical_patient_data$ajcc_pathologic_tumor_stage), ]
         stage.i <- stage.i[,"bcr_patient_barcode"]
         samples <- substr(barcode, 1, 12)
         barcode <- intersect(samples,stage.i)
@@ -160,12 +160,12 @@ stage_BRCA <- function(barcode, stage, clinical_patient_data){
 #' @param barcode barcode
 #' @param gender gender
 #' @param clinical_patient_data clinical_patient_data
-#' @export
+# @export
 #' @return stage_BRCA
-#' @examples
-#' # clin <- clinic("BRCA","clinical_patient")
-#' clin <- clinBRCA
-#' gender_BRCA (c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"FEMALE",clin)
+# @examples
+# # clin <- clinic("BRCA","clinical_patient")
+# clin <- clinBRCA
+# gender_BRCA (c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"FEMALE",clin)
 gender_BRCA <- function(barcode, gender, clinical_patient_data){
 
     if (is.element(gender,c("MALE", "FEMALE"))) {
@@ -189,19 +189,19 @@ gender_BRCA <- function(barcode, gender, clinical_patient_data){
 #' @param barcode barcode
 #' @param ER ER
 #' @param clinical_patient_data clinical_patient_data
-#' @export
-#' @return ER_status_BRCA
-#' @examples
-#' # clin <- clinic("BRCA","clinical_patient")
-#' clin <- clinBRCA
-#' ER_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
-#' "Positive",clin)
+# @export
+# @return ER_status_BRCA
+# @examples
+# # clin <- clinic("BRCA","clinical_patient")
+# clin <- clinBRCA
+# ER_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
+# "Positive",clin)
 ER_status_BRCA <- function(barcode,ER, clinical_patient_data){
     ## ER should be "Positive" or "Negative"
     # consider only barcode and ER status
     if (is.element(ER, c("Positive", "Negative"))) {
         status <- as.data.frame(clinical_patient_data)[grep(paste0("^",ER,"$"),
-            clinical_patient_data$er_status_by_ihc), ][,"bcr_patient_barcode"]
+                                                            clinical_patient_data$er_status_by_ihc), ][,"bcr_patient_barcode"]
         samples <- substr(barcode, 1, 12)
         #find common patients between ER status and barcode data
         barcode <- intersect(samples,status)
@@ -217,20 +217,20 @@ ER_status_BRCA <- function(barcode,ER, clinical_patient_data){
 #' @param barcode barcode
 #' @param PR PR
 #' @param clinical_patient_data clinical_patient_data
-#' @export
+# @export
 #' @return PR_status_BRCA
-#' @examples
-#' # clin <- clinic("BRCA","clinical_patient")
-#' clin <- clinBRCA
-#' PR_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
-#' "Positive",clin)
+# @examples
+# # clin <- clinic("BRCA","clinical_patient")
+# clin <- clinBRCA
+# PR_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
+# "Positive",clin)
 PR_status_BRCA  <- function(barcode,PR, clinical_patient_data){
     ## PR should be "Positive" or "Negative"
 
     if(is.element(PR, c("Positive", "Negative"))){
         #for breast cancer
         status <- as.data.frame(clinical_patient_data)[grep(paste0("^", PR, "$"),
-            clinical_patient_data$pr_status_by_ihc), ][,"bcr_patient_barcode"]
+                                                            clinical_patient_data$pr_status_by_ihc), ][,"bcr_patient_barcode"]
 
         samples <- substr(barcode, 1, 12)
         #find common patients between PR status and barcode data
@@ -249,19 +249,19 @@ PR_status_BRCA  <- function(barcode,PR, clinical_patient_data){
 #' @param barcode barcode
 #' @param HER HER
 #' @param clinical_patient_data clinical_patient_data
-#' @export
+# @export
 #' @return HER_status_BRCA
-#' @examples
-#' # clin <- clinic("BRCA","clinical_patient")
-#' clin <- clinBRCA
-#' HER_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
-#' "Positive",clin)
+# @examples
+# # clin <- clinic("BRCA","clinical_patient")
+# clin <- clinBRCA
+# HER_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
+# "Positive",clin)
 HER_status_BRCA  <- function(barcode, HER, clinical_patient_data){
     if (is.element(HER, c("Positive", "Negative"))) {
         clinical_patient_data <- as.data.frame(clinical_patient_data)
         #for breast cancer HER+
         status <- as.data.frame(clinical_patient_data)[grep(paste0("^",HER,"$"),
-            clinical_patient_data$her2_status_by_ihc), ][,"bcr_patient_barcode"]
+                                                            clinical_patient_data$her2_status_by_ihc), ][,"bcr_patient_barcode"]
         samples <- substr(barcode, 1, 12)
         #find common patients between HER+ e barcode data
         barcode <- intersect(samples,status)
@@ -327,4 +327,112 @@ clinic <- function(cancer,clinical_data_type){
     #clinical_patient <- clinical_patient[-c(1,2),]
     #close(fileconn)
     return(clinical_patient)
+}
+
+
+
+#' @title Filter samples using clinical data
+#' @description
+#'   This function will return the samples that matches all filters.
+#'   Filters available: HER, ER,gender,PR, stage.
+#' @param barcode List of barcodes
+#' @param clinical_patient_data clinical_patient_data obtained with clinic function
+#' Ex: clinical_patient_data <- clinic("LGG","clinical_patient")
+#' @param HER  her2 neu immunohistochemistry receptorstatus: "Positive" or "Negative"
+#' @param gender "MALE" or "FEMALE"
+#' @param PR  Progesterone receptor status: "Positive" or "Negative"
+#' @param stage Pathologic Stage: "stage_IX", "stage_I", "stage_IA", "stage_IB", "stage_IIX",
+#' "stage_IIA", "stage_IIB", "stage_IIIX","stage_IIIA", "stage_IIIB",
+#' "stage_IIIC", "stage_IV" -
+#' @param ER Estrogen receptor status: "Positive" or "Negative"
+#' @export
+#' @return List of samples that matches the filters
+#' @examples
+#' # clin <- clinic("BRCA","clinical_patient")
+#' clin <- clinBRCA
+#' bar <- c("TCGA-G9-6378-02A-11R-1789-07", "TCGA-CH-5767-04A-11R-1789-07",
+#'         "TCGA-G9-6332-60A-11R-1789-07", "TCGA-G9-6336-01A-11R-1789-07",
+#'         "TCGA-G9-6336-11A-11R-1789-07", "TCGA-G9-7336-11A-11R-1789-07",
+#'         "TCGA-G9-7336-04A-11R-1789-07", "TCGA-G9-7336-14A-11R-1789-07",
+#'         "TCGA-G9-7036-04A-11R-1789-07", "TCGA-G9-7036-02A-11R-1789-07",
+#'         "TCGA-G9-7036-11A-11R-1789-07", "TCGA-G9-7036-03A-11R-1789-07",
+#'         "TCGA-G9-7036-10A-11R-1789-07", "TCGA-BH-A1ES-10A-11R-1789-07",
+#'         "TCGA-BH-A1F0-10A-11R-1789-07", "TCGA-BH-A0BZ-02A-11R-1789-07",
+#'         "TCGA-B6-A0WY-04A-11R-1789-07", "TCGA-BH-A1FG-04A-11R-1789-08",
+#'         "TCGA-D8-A1JS-04A-11R-2089-08", "TCGA-AN-A0FN-11A-11R-8789-08",
+#'         "TCGA-AR-A2LQ-12A-11R-8799-08", "TCGA-AR-A2LH-03A-11R-1789-07",
+#'         "TCGA-BH-A1F8-04A-11R-5789-07", "TCGA-AR-A24T-04A-55R-1789-07",
+#'         "TCGA-AO-A0J5-05A-11R-1789-07", "TCGA-BH-A0B4-11A-12R-1789-07",
+#'         "TCGA-B6-A1KN-60A-13R-1789-07", "TCGA-AO-A0J5-01A-11R-1789-07",
+#'         "TCGA-AO-A0J5-01A-11R-1789-07", "TCGA-G9-6336-11A-11R-1789-07",
+#'         "TCGA-G9-6380-11A-11R-1789-07", "TCGA-G9-6380-01A-11R-1789-07",
+#'         "TCGA-G9-6340-01A-11R-1789-07","TCGA-G9-6340-11A-11R-1789-07")
+#'
+#' clinicFilt(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),clin,
+#' HER="Positive", gender="FEMALE",ER="Positive")
+clinicFilt <- function(barcode,
+                       clinical_patient_data,
+                       HER=NULL,
+                       ER=NULL,
+                       gender=NULL,
+                       PR=NULL,
+                       stage=NULL){
+
+    x <- NULL
+
+    if (!is.null(PR)) {
+        res.pr <- PR_status_BRCA(barcode,PR, clinical_patient_data)
+        message(paste0("PR ",PR," Samples:"))
+        message(paste(paste("\t",res.pr,"\n")))
+
+        if (is.null(x)) x <- res.pr
+    }
+
+    if (!is.null(ER)) {
+        res.er <- ER_status_BRCA(barcode,ER, clinical_patient_data)
+        message(paste0("ER ",ER," Samples:"))
+        message(paste(paste("\t",res.er,"\n")))
+
+        if (is.null(x)) {
+            x <- res.er
+        } else {
+            x <- intersect(x,res.er)
+        }
+    }
+
+    if (!is.null(HER)) {
+        res.her <- HER_status_BRCA(barcode,HER, clinical_patient_data)
+        message(paste0("HER ",HER," Samples:"))
+        message(paste(paste("\t",res.her,"\n")))
+        if (is.null(x)) {
+            x <- res.her
+        } else {
+            x <- intersect(x,res.her)
+        }
+
+    }
+    if (!is.null(stage)) {
+        res.stage <- stage_BRCA(barcode,stage, clinical_patient_data)
+        message(paste0("Stage ",stage," Samples:"))
+        message(paste(paste("\t",res.stage,"\n")))
+        if (is.null(x)) {
+            x <- res.stage
+        } else {
+            x <- intersect(x,res.stage)
+        }
+
+    }
+    if (!is.null(gender)) {
+        res.gender <- gender_BRCA(barcode,gender, clinical_patient_data)
+        message(paste0("GENDER ",gender," Samples:"))
+        message(paste(paste("\t",res.gender,"\n")))
+        if (is.null(x)) {
+            x <- res.gender
+        } else {
+            x <- intersect(x,res.gender)
+        }
+
+    }
+
+    return(x)
 }
