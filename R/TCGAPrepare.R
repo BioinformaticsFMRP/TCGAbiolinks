@@ -33,6 +33,7 @@
 #' a data.frame)
 #' @param query TCGAQuery output
 #' @param dir Directory with the files downloaded by TCGADownload
+#' @param samples List of samples to prepare the data
 #' @param type Filter the files to prepare.
 #' @param save Save a rda object with the prepared object?
 #'  Default: \code{FALSE}
@@ -64,6 +65,7 @@
 #' @family data functions
 TCGAPrepare <- function(query,
                         dir = NULL,
+                        samples = NULL,
                         type = NULL,
                         save = FALSE,
                         filename = NULL,
@@ -106,6 +108,16 @@ TCGAPrepare <- function(query,
             return(NULL)
         }
     }
+
+    # Filter by samples
+    if (!is.null(samples)) {
+        files <- filterFiles(query[i,],samples,files)
+        if(length(files) == 0){
+            message("No files for that samples found")
+            return(NULL)
+        }
+    }
+
 
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     df <- NULL
