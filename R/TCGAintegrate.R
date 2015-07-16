@@ -47,7 +47,6 @@ samplesfilter <- function(query) {
     for (idx in 1:length(TumorDataList)) {
         currPlatform <- query[query$Platform == names(TumorDataList)[idx],]
         TumorDataList[[idx]] <- as.matrix(unlist(strsplit(currPlatform$barcode,",")))
-        print(dim(TumorDataList[[idx]]))
     }
     return(TumorDataList)
 }
