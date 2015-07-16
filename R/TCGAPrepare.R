@@ -171,8 +171,7 @@ TCGAPrepare <- function(query,
             rowRanges$Gene_Symbol <-  neargene$external_gene_name
 
             names(rowRanges) <- as.character(df$Composite.Element.REF)
-            colData <- DataFrame(sample=colnames(df)[5:ncol(df)],
-                                 row.names=colnames(df)[5:ncol(df)])
+            colData <-  colDataPrepare(colnames(df)[5:ncol(df)])
             assay <- data.matrix(subset(df,select = c(5:ncol(df))))
 
             sset <- SummarizedExperiment(assays = assay,
@@ -315,8 +314,7 @@ TCGAPrepare <- function(query,
                                      RPKM=data.matrix(subset(df,select=seq(4,ncol(df),3))))
 
             }
-            colData <- DataFrame(sample=as.character(barcode),
-                                 row.names=as.character(barcode))
+            colData <- colDataPrepare(as.character(barcode))
             sset <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
                                          colData=colData)
@@ -372,8 +370,7 @@ TCGAPrepare <- function(query,
             regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
-            colData <- DataFrame(sample=barcode,
-                                 row.names=barcode)
+            colData <- colDataPrepare(barcode)
 
             assays <- SimpleList(raw_counts=data.matrix(
                 subset(merged,select=seq(3,2+length(barcode)))
@@ -435,8 +432,7 @@ TCGAPrepare <- function(query,
             regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
-            colData <- DataFrame(sample=barcode,
-                                 row.names=barcode)
+            colData <- colDataPrepare(barcode)
 
             assays <- SimpleList(raw_counts=data.matrix(
                 subset(merged,select=seq(3,2+length(barcode)))
@@ -569,8 +565,7 @@ TCGAPrepare <- function(query,
             regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
-            colData <- DataFrame(sample=barcode,
-                                 row.names=barcode)
+            colData <- colDataPrepare(barcode)
 
             sset <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
@@ -695,8 +690,7 @@ TCGAPrepare <- function(query,
             names(rowRanges) <- as.character(merged$external_gene_name)
 
             idx  <- grep("TCGA",colnames(merged))
-            colData <- DataFrame(sample = colnames(merged)[idx],
-                                 row.names=colnames(merged)[idx])
+            colData <- colDataPrepare(colnames(merged)[idx])
             assays <- SimpleList(sum_Segment_Mean=data.matrix(
                 subset(merged,select = idx))
             )
