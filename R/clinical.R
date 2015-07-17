@@ -123,7 +123,7 @@ MatchedCoupledSampleTypes <- function(barcode,typesample){
 #' @param stage stage
 #' @param clinical_patient_data clinical_patient_data
 # @export
-# @return stage_BRCA
+#' @return stage_BRCA
 # @examples
 # # clin <- clinic("BRCA","clinical_patient")
 # clin <- clinBRCA
@@ -143,8 +143,9 @@ stage_BRCA <- function(barcode, stage, clinical_patient_data){
     if (is.element(stage, names(table.stages))) {
         clinical_patient_data <- as.data.frame(clinical_patient_data)
         print(table.stages[stage])
-        stage.i <- clinical_patient_data[grep(table.stages[stage],
-                                              clinical_patient_data$ajcc_pathologic_tumor_stage), ]
+        stage.i <- clinical_patient_data[
+            grep(table.stages[stage],
+                 clinical_patient_data$ajcc_pathologic_tumor_stage), ]
         stage.i <- stage.i[,"bcr_patient_barcode"]
         samples <- substr(barcode, 1, 12)
         barcode <- intersect(samples,stage.i)
@@ -190,7 +191,7 @@ gender_BRCA <- function(barcode, gender, clinical_patient_data){
 #' @param ER ER
 #' @param clinical_patient_data clinical_patient_data
 # @export
-# @return ER_status_BRCA
+#' @return ER_status_BRCA
 # @examples
 # # clin <- clinic("BRCA","clinical_patient")
 # clin <- clinBRCA
@@ -200,8 +201,9 @@ ER_status_BRCA <- function(barcode,ER, clinical_patient_data){
     ## ER should be "Positive" or "Negative"
     # consider only barcode and ER status
     if (is.element(ER, c("Positive", "Negative"))) {
-        status <- as.data.frame(clinical_patient_data)[grep(paste0("^",ER,"$"),
-                                                            clinical_patient_data$er_status_by_ihc), ][,"bcr_patient_barcode"]
+        status <- as.data.frame(clinical_patient_data)[
+            grep(paste0("^",ER,"$"),
+                 clinical_patient_data$er_status_by_ihc), ][,"bcr_patient_barcode"]
         samples <- substr(barcode, 1, 12)
         #find common patients between ER status and barcode data
         barcode <- intersect(samples,status)
@@ -229,8 +231,9 @@ PR_status_BRCA  <- function(barcode,PR, clinical_patient_data){
 
     if(is.element(PR, c("Positive", "Negative"))){
         #for breast cancer
-        status <- as.data.frame(clinical_patient_data)[grep(paste0("^", PR, "$"),
-                                                            clinical_patient_data$pr_status_by_ihc), ][,"bcr_patient_barcode"]
+        status <- as.data.frame(clinical_patient_data)[
+            grep(paste0("^", PR, "$"),
+                 clinical_patient_data$pr_status_by_ihc), ][,"bcr_patient_barcode"]
 
         samples <- substr(barcode, 1, 12)
         #find common patients between PR status and barcode data
@@ -260,8 +263,9 @@ HER_status_BRCA  <- function(barcode, HER, clinical_patient_data){
     if (is.element(HER, c("Positive", "Negative"))) {
         clinical_patient_data <- as.data.frame(clinical_patient_data)
         #for breast cancer HER+
-        status <- as.data.frame(clinical_patient_data)[grep(paste0("^",HER,"$"),
-                                                            clinical_patient_data$her2_status_by_ihc), ][,"bcr_patient_barcode"]
+        status <- as.data.frame(clinical_patient_data)[
+            grep(paste0("^",HER,"$"),
+                 clinical_patient_data$her2_status_by_ihc), ][,"bcr_patient_barcode"]
         samples <- substr(barcode, 1, 12)
         #find common patients between HER+ e barcode data
         barcode <- intersect(samples,status)

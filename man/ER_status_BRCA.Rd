@@ -13,6 +13,9 @@ ER_status_BRCA(barcode, ER, clinical_patient_data)
 
 \item{clinical_patient_data}{clinical_patient_data}
 }
+\value{
+ER_status_BRCA
+}
 \description{
 ER_status_BRCA
 }
