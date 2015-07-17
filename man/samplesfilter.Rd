@@ -9,6 +9,9 @@ samplesfilter(query)
 \arguments{
 \item{query}{metaData output from TCGAQuery}
 }
+\value{
+list of samples for a tumor
+}
 \description{
 Filtering sample output from TCGAQuery
 }

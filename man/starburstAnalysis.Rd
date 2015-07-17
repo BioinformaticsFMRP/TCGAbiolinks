@@ -4,10 +4,11 @@
 \alias{starburstAnalysis}
 \title{Create starburst plot}
 \usage{
-starburstAnalysis(met, exp, filename = "volcano.pdf",
-  ylab = expression(atop("Gene Expression", paste(Log[10],
-  " (FDR corrected P values)"))), xlab = expression(atop("DNA Methylation",
-  paste(Log[10], " (FDR corrected P values)"))), title = "Starburst Plot",
+starburstAnalysis(met, exp, group1 = NULL, group2 = NULL,
+  filename = "volcano.pdf", ylab = expression(atop("Gene Expression",
+  paste(Log[10], " (FDR corrected P values)"))),
+  xlab = expression(atop("DNA Methylation", paste(Log[10],
+  " (FDR corrected P values)"))), title = "Starburst Plot",
   legend = "Methylation/Expression Relation", color = c(`1` = "black", `2` =
   "purple", `3` = "darkgreen", `4` = "blue", `5` = "darkred", `6` = "red", `7` =
   "green", `8` = "yellow", `9` = "orange"), label = c(`1` = "Not Significant",
@@ -15,7 +16,7 @@ starburstAnalysis(met, exp, filename = "volcano.pdf",
   "Down regulated & Hypo methylated", `4` = "hypo methylated", `5` =
   "hyper methylated", `6` = "Up regulated", `7` = "Down regulated", `8` =
   "Up regulated & Hyper methylated", `9` = "Down regulated & Hyper methylated"),
-  xlim = NULL, ylim = NULL, p.cut = 0.05)
+  xlim = NULL, ylim = NULL, p.cut = 0.01)
 }
 \arguments{
 \item{met}{SummarizedExperiment with methylation data obtained from the
@@ -23,6 +24,12 @@ TCGAPrepare. Expected colData columns: diffmean,  p.value.adj  and p.value
 Execute volcanoPlot function in order to obtain these values for the object.}
 
 \item{exp}{Object obtained by DEArnaSEQ function}
+
+\item{group1}{In case our object has more than 2 groups, you should set
+the name of the group}
+
+\item{group2}{In case our object has more than 2 groups, you should set
+the name of the group}
 
 \item{filename}{pdf filename}
 
@@ -49,9 +56,9 @@ Save a starburst plot
 }
 \description{
 Create Starburst plot for comparison of DNA methylation and gene expression.
-   The log10 (FDR-corrected P value) is plotted for β value for DNA
+   The log10 (FDR-corrected P value) is plotted for beta value for DNA
    methylation (x axis) and gene expression (y axis) for each gene.
-   Black black line shows by the fault the FDR-adjusted P value of 0.05
+   The black dashed line shows the FDR-adjusted P value of 0.01.
 }
 \details{
 Input: data with gene expression/methylation expression
@@ -73,13 +80,12 @@ data <- SummarizedExperiment::SummarizedExperiment(
          rowRanges=ranges,
          colData=colData)
 met <- data
-exp <- data
-SummarizedExperiment::rowRanges(met)$diffmean <- c(runif(20000, -0.1, 0.1))
-SummarizedExperiment::rowRanges(met)$p.value <- c(runif(20000, 0, 1))
-SummarizedExperiment::rowRanges(met)$p.value.adj <- c(runif(20000, 0, 1))
-SummarizedExperiment::rowRanges(exp)$diffmean <- c(runif(20000, -0.1, 0.1))
-SummarizedExperiment::rowRanges(exp)$p.value <- c(runif(20000, 0, 1))
-SummarizedExperiment::rowRanges(exp)$p.value.adj <- c(runif(20000, 0, 1))
-result <- starburstAnalysis(met,exp,p.cut = 0.01)
+exp <- data.frame(row.names=sprintf("ID\%03d", 1:20000),
+                  logFC=runif(20000, -0.2, 0.2),
+                  FDR=runif(20000, 0.01, 1))
+SummarizedExperiment::rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
+SummarizedExperiment::rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
+SummarizedExperiment::rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
+result <- starburstAnalysis(met,exp,p.cut = 0.05,"g1","g2")
 }
 

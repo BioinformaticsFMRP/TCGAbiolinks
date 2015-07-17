@@ -13,6 +13,9 @@ stage_BRCA(barcode, stage, clinical_patient_data)
 
 \item{clinical_patient_data}{clinical_patient_data}
 }
+\value{
+stage_BRCA
+}
 \description{
 stage_BRCA
 }
