@@ -248,7 +248,8 @@ TCGAPrepare <- function(query,
             data <- fread(files[i], header = TRUE, sep = "\t",
                           stringsAsFactors = FALSE)
 
-            setnames(data,colnames(data)[2:ncol(data)],paste0(colnames(data)[2:ncol(data)],"_",barcode[i]))
+            setnames(data,colnames(data)[2:ncol(data)],
+                     paste0(colnames(data)[2:ncol(data)],"_",barcode[i]))
             # removing duplicated rows
             data <- subset(data,subset=(!duplicated(data[,1,with=FALSE])))
             if (i == 1) {
@@ -272,9 +273,10 @@ TCGAPrepare <- function(query,
                                      gene_id = merged$external_gene_name,
                                      entrezgene = merged$entrezgene)
                 names(rowRanges) <- as.character(merged$gene)
-                assays <- SimpleList(raw_counts=data.matrix(subset(merged,select=seq(3,ncol(df),3))),
-                                     median_length_normalized=data.matrix(subset(merged,select=seq(4,ncol(df),3))),
-                                     RPKM=data.matrix(subset(merged,select=seq(5,ncol(df),3))))
+                assays <- SimpleList(
+                    raw_counts=data.matrix(subset(merged,select=seq(3,ncol(df),3))),
+                    median_length_normalized=data.matrix(subset(merged,select=seq(4,ncol(df),3))),
+                    RPKM=data.matrix(subset(merged,select=seq(5,ncol(df),3))))
 
             }  else if(grepl("junction",colnames(df)[1])){
 
@@ -309,9 +311,10 @@ TCGAPrepare <- function(query,
                                      ranges = IRanges(start = start, end = end),
                                      strand = strand)
                 names(rowRanges) <- as.character(df$exon)
-                assays <- SimpleList(raw_counts=data.matrix(subset(df,select=seq(2,ncol(df),3))),
-                                     median_length_normalized=data.matrix(subset(df,select=seq(3,ncol(df),3))),
-                                     RPKM=data.matrix(subset(df,select=seq(4,ncol(df),3))))
+                assays <- SimpleList(
+                    raw_counts=data.matrix(subset(df,select=seq(2,ncol(df),3))),
+                    median_length_normalized=data.matrix(subset(df,select=seq(3,ncol(df),3))),
+                    RPKM=data.matrix(subset(df,select=seq(4,ncol(df),3))))
 
             }
             colData <- colDataPrepare(as.character(barcode))
@@ -520,11 +523,13 @@ TCGAPrepare <- function(query,
                 names(rowRanges) <- as.character(merged$gene_id)
 
                 if(length(colnames(data))>2){
-                    assays <- SimpleList(raw_counts=data.matrix(subset(merged,select=seq(3,ncol(df),3))),
-                                         scaled_estimate=data.matrix(subset(merged,select=seq(4,ncol(df),3))),
-                                         transcript_id=data.matrix(subset(merged,select=seq(5,ncol(df),3))))
+                    assays <- SimpleList(
+                        raw_counts=data.matrix(subset(merged,select=seq(3,ncol(df),3))),
+                        scaled_estimate=data.matrix(subset(merged,select=seq(4,ncol(df),3))),
+                        transcript_id=data.matrix(subset(merged,select=seq(5,ncol(df),3))))
                 } else {
-                    assays <- SimpleList(raw_counts=data.matrix(subset(merged,select=seq(3,ncol(df)))))
+                    assays <- SimpleList(
+                        raw_counts=data.matrix(subset(merged,select=seq(3,ncol(df)))))
                 }
             } else if(grepl("junction",colnames(df)[1])){
                 aux    <- strsplit(df$junction,":")
@@ -556,9 +561,10 @@ TCGAPrepare <- function(query,
                                      ranges = IRanges(start = start, end = end),
                                      strand = strand)
                 names(rowRanges) <- as.character(df$exon)
-                assays <- SimpleList(raw_counts=data.matrix(subset(df,select=seq(2,ncol(df),3))),
-                                     median_length_normalized=data.matrix(subset(df,select=seq(3,ncol(df),3))),
-                                     RPKM=data.matrix(subset(df,select=seq(4,ncol(df),3))))
+                assays <- SimpleList(
+                    raw_counts=data.matrix(subset(df,select=seq(2,ncol(df),3))),
+                    median_length_normalized=data.matrix(subset(df,select=seq(3,ncol(df),3))),
+                    RPKM=data.matrix(subset(df,select=seq(4,ncol(df),3))))
             } else if(grepl("isoform",colnames(df)[1])){
                 message("TBD")
             }

@@ -3,7 +3,7 @@
 #'   GenesCutID
 #' @param GeneList GeneList
 # @export
-# @return list of gene symbol without IDs
+#' @return list of gene symbol without IDs
 # @examples
 # GenesCutID(c("CRKL|1399","TADA2A|6871","KRT76|51350"))
 #' @keywords internal
