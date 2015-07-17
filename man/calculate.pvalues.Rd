@@ -5,7 +5,7 @@
 \title{Calculate pvalues}
 \usage{
 calculate.pvalues(data, groupCol = NULL, group1 = NULL, group2 = NULL,
-  paired = TRUE, method = "BH", exact = TRUE)
+  paired = FALSE, method = "BH", exact = TRUE)
 }
 \arguments{
 \item{data}{SummarizedExperiment obtained from the TCGAPrepare}

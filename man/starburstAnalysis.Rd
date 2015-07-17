@@ -5,24 +5,24 @@
 \title{Create starburst plot}
 \usage{
 starburstAnalysis(met, exp, filename = "volcano.pdf",
-  ylab = paste0("Gene Expression\\nlog10 of the",
-  "adjusted Significance (FDR)"),
-  xlab = paste0("DNA Methylation\\nlog10 of the",
-  " adjusted Significance (FDR)"), title = "Starburst Plot",
+  ylab = expression(atop("Gene Expression", paste(Log[10],
+  " (FDR corrected P values)"))), xlab = expression(atop("DNA Methylation",
+  paste(Log[10], " (FDR corrected P values)"))), title = "Starburst Plot",
   legend = "Methylation/Expression Relation", color = c(`1` = "black", `2` =
   "purple", `3` = "darkgreen", `4` = "blue", `5` = "darkred", `6` = "red", `7` =
   "green", `8` = "yellow", `9` = "orange"), label = c(`1` = "Not Significant",
-  `2` = "Up & Hypo", `3` = "Down & Hypo", `4` = "hypo", `5` = "hyper", `6` =
-  "Up", `7` = "Down", `8` = "Up & Hyper", `9` = "Down & Hyper"), xlim = NULL,
-  ylim = NULL, p.cut = 0.05)
+  `2` = "Up regulated & Hypo methylated", `3` =
+  "Down regulated & Hypo methylated", `4` = "hypo methylated", `5` =
+  "hyper methylated", `6` = "Up regulated", `7` = "Down regulated", `8` =
+  "Up regulated & Hyper methylated", `9` = "Down regulated & Hyper methylated"),
+  xlim = NULL, ylim = NULL, p.cut = 0.05)
 }
 \arguments{
 \item{met}{SummarizedExperiment with methylation data obtained from the
 TCGAPrepare. Expected colData columns: diffmean,  p.value.adj  and p.value
 Execute volcanoPlot function in order to obtain these values for the object.}
 
-\item{exp}{SummarizedExperiment with methylation data obtained from the
-TCGAPrepare. Expected colData columns: diffmean,  p.value.adj  and p.value}
+\item{exp}{Object obtained by DEArnaSEQ function}
 
 \item{filename}{pdf filename}
 
@@ -48,7 +48,10 @@ TCGAPrepare. Expected colData columns: diffmean,  p.value.adj  and p.value}
 Save a starburst plot
 }
 \description{
-Create starburst plot
+Create Starburst plot for comparison of DNA methylation and gene expression.
+   The log10 (FDR-corrected P value) is plotted for β value for DNA
+   methylation (x axis) and gene expression (y axis) for each gene.
+   Black black line shows by the fault the FDR-adjusted P value of 0.05
 }
 \details{
 Input: data with gene expression/methylation expression
