@@ -4,22 +4,25 @@
 \alias{diffmean}
 \title{Calculate diffmean methylation between two groups}
 \usage{
-diffmean(data, groupCol = NULL, group2 = NULL, group1 = NULL)
+diffmean(data, groupCol = NULL, group1 = NULL, group2 = NULL)
 }
 \arguments{
 \item{data}{SummarizedExperiment object obtained from TCGAPrepare}
 
 \item{groupCol}{Columns in colData(data) that defines the groups.}
 
-\item{group2}{Name of group2 to be used in the analysis}
+\item{group1}{Name of group1 to be used in the analysis}
 
-\item{group1}{Name of group1  to be used in the analysis}
+\item{group2}{Name of group2  to be used in the analysis}
 }
 \value{
-dataframe with diffmean values
+Saves in the rowRages(data) the columns: mean.group1, mean.group2
+       diffmean.group1.group2; Where group1 and group2 are the names of the
+       groups.
 }
 \description{
-Calculate diffmean methylation between two groups
+Calculate diffmean methylation of probes between two groups removing lines
+   that has NA values.
 }
 \examples{
 \dontrun{
