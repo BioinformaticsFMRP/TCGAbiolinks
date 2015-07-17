@@ -10,7 +10,7 @@ install.packages(c("downloader","RCurl","httr","devtools","stringr",
                     "rvest"))
 source("http://bioconductor.org/biocLite.R")
 biocLite(c("GenomicRanges","edgeR","EDASeq","biomaRt","supraHex",
-           "SummarizedExperiment","limma","TxDb.Hsapiens.UCSC.hg19.knownGene"))
+            "SummarizedExperiment","limma","TxDb.Hsapiens.UCSC.hg19.knownGene"))
 ```
 
 * Creating roxygen documentation
