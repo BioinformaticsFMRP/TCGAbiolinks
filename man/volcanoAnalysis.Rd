@@ -10,7 +10,7 @@ volcanoAnalysis(data, groupCol = NULL, group1 = NULL, group2 = NULL,
   legend = "Legend", color = c(`1` = "black", `2` = "green", `3` = "red"),
   label = c(`1` = "Not Significant", `2` = "Hypermethylated", `3` =
   "Hypomethylated"), xlim = NULL, ylim = NULL, p.cut = 0.05,
-  diffmean.cut = 0)
+  diffmean.cut = 0, paired = TRUE, adj.method = "BH")
 }
 \arguments{
 \item{data}{SummarizedExperiment obtained from the TCGAPrepare}
