@@ -303,7 +303,7 @@ calculate.pvalues <- function(data,
                               groupCol = NULL,
                               group1 = NULL,
                               group2 = NULL,
-                              paired = TRUE,
+                              paired = FALSE,
                               method = "BH",
                               exact = TRUE) {
 
@@ -422,11 +422,14 @@ volcanoAnalysis <- function(data,
                             xlim = NULL,
                             ylim = NULL,
                             p.cut = 0.05,
-                            diffmean.cut = 0) {
+                            diffmean.cut = 0,
+                            paired = TRUE,
+                            adj.method="BH") {
     .e <- environment()
 
     if (is.null(rowRanges(data)$p.value)){
-        data <- calculate.pvalues(data,groupCol, group1, group2)
+        data <- calculate.pvalues(data,groupCol, group1, group2,
+                                  paired = paired,method = adj.method)
         if (is.null(rowRanges(data)$p.value)) abort("Error!")
     }
 
@@ -446,7 +449,7 @@ volcanoAnalysis <- function(data,
 
     # hypomethylated samples compared to old state
     hypo <-  rowRanges(data)$diffmean  > diffmean.cut
-    if (any(hypo & sig))rowRanges(data)[hypo & sig,]$threshold <- "3"
+    if (any(hypo & sig)) rowRanges(data)[hypo & sig,]$threshold <- "3"
 
     # Plot a volcano plot
     p <- ggplot(data = as.data.frame(rowRanges(data)), aes(x = rowRanges(data)$diffmean ,
@@ -475,12 +478,12 @@ volcanoAnalysis <- function(data,
 #' @importFrom biomaRt useMart getBM
 get.GRCh.bioMart <- function(genome="hg19") {
 
-    if(genome == "hg19"){
+    if (genome == "hg19"){
         # for hg19
-        ensembl <- useMart(biomart="ENSEMBL_MART_ENSEMBL",
-                           host="grch37.ensembl.org",
-                           path="/biomart/martservice" ,
-                           dataset="hsapiens_gene_ensembl")
+        ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
+                           host = "grch37.ensembl.org",
+                           path = "/biomart/martservice" ,
+                           dataset = "hsapiens_gene_ensembl")
     } else {
         # for hg39
         ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
@@ -505,7 +508,10 @@ get.GRCh.bioMart <- function(genome="hg19") {
 #' @title Create starburst plot
 #'
 #' @description
-#'   Create starburst plot
+#'   Create Starburst plot for comparison of DNA methylation and gene expression.
+#'    The log10 (FDR-corrected P value) is plotted for β value for DNA
+#'    methylation (x axis) and gene expression (y axis) for each gene.
+#'    Black black line shows by the fault the FDR-adjusted P value of 0.05
 #'
 #' @details
 #'    Input: data with gene expression/methylation expression
@@ -514,8 +520,7 @@ get.GRCh.bioMart <- function(genome="hg19") {
 #' @param met SummarizedExperiment with methylation data obtained from the
 #' TCGAPrepare. Expected colData columns: diffmean,  p.value.adj  and p.value
 #' Execute volcanoPlot function in order to obtain these values for the object.
-#' @param exp SummarizedExperiment with methylation data obtained from the
-#' TCGAPrepare. Expected colData columns: diffmean,  p.value.adj  and p.value
+#' @param exp Object obtained by DEArnaSEQ function
 #' @param filename pdf filename
 #' @param legend legend title
 #' @param color vector of colors to be used in graph
@@ -557,10 +562,12 @@ get.GRCh.bioMart <- function(genome="hg19") {
 starburstAnalysis <- function(met,
                               exp,
                               filename = "volcano.pdf",
-                              ylab = paste0("Gene Expression\nlog10 of the",
-                                            "adjusted Significance (FDR)"),
-                              xlab = paste0("DNA Methylation\nlog10 of the",
-                                            " adjusted Significance (FDR)"),
+                              ylab = expression(atop("Gene Expression",
+                                                     paste(Log[10],
+                                                           " (FDR corrected P values)"))),
+                              xlab = expression(atop("DNA Methylation",
+                                                     paste(Log[10],
+                                                           " (FDR corrected P values)"))),
                               title = "Starburst Plot",
                               legend = "Methylation/Expression Relation",
                               color = c("1" = "black",
@@ -573,50 +580,37 @@ starburstAnalysis <- function(met,
                                         "8" = "yellow",
                                         "9" = "orange"),
                               label = c("1" = "Not Significant",
-                                        "2" = "Up & Hypo",
-                                        "3" = "Down & Hypo",
-                                        "4" = "hypo",
-                                        "5" = "hyper",
-                                        "6" = "Up",
-                                        "7" = "Down",
-                                        "8" = "Up & Hyper",
-                                        "9" = "Down & Hyper"),
+                                        "2" = "Up regulated & Hypo methylated",
+                                        "3" = "Down regulated & Hypo methylated",
+                                        "4" = "hypo methylated",
+                                        "5" = "hyper methylated",
+                                        "6" = "Up regulated",
+                                        "7" = "Down regulated",
+                                        "8" = "Up regulated & Hyper methylated",
+                                        "9" = "Down regulated & Hyper methylated"),
                               xlim = NULL, ylim = NULL, p.cut = 0.05
 )
 {
     .e <- environment()
 
-    met <- subsetByOverlaps(met,exp)
-    exp <- subsetByOverlaps(exp,met)
-
-    a <- BiocGenerics::as.data.frame(rowRanges(met))
-    idx <- grep("diffmean|p.value",colnames(a))
-    colnames(a)[idx] <- paste0("met.",colnames(a)[idx])
-
-    b <- BiocGenerics::as.data.frame(rowRanges(exp))
-    idx <- grep("diffmean|p.value",colnames(b))
-    colnames(b)[idx] <- paste0("exp.",colnames(b)[idx])
-    volcano <- merge(a,b)
+    met <- as.data.frame(rowRanges(met))
+    exp$Gene_Symbol <- row.names(exp)
+    volcano <- merge(met, exp, by = "Gene_Symbol")
 
     volcano$ID <- paste(volcano$Gene_Symbol,
-                        volcano$probeID,
-                        volcano$cgID, sep = ".")
+                        volcano$probeID, sep = ".")
 
     # Preparing gene expression
-    idx <- grep("exp.p.value.adj",colnames(volcano))
-    volcano$geFDR <- log10(volcano[,idx])
+    volcano$geFDR <- log10(volcano$FDR)
     volcano$geFDR2 <- volcano$geFDR
-    idx <- grep("exp.diffmean",colnames(volcano))
-    volcano[volcano[,idx] > 0, "geFDR2"] <-
-        -1 * volcano[volcano[,idx] > 0, "geFDR"]
+    volcano[volcano$logFC > 0, "geFDR2"] <-
+        -1 * volcano[volcano$logFC > 0, "geFDR"]
 
     # Preparing methylation
-    idx <- grep("met.p.value.adj",colnames(volcano))
-    volcano$meFDR <- log10(volcano[,idx])
+    volcano$meFDR <- log10(volcano[,"p.value.adj"])
     volcano$meFDR2 <- volcano$meFDR
-    idx <- grep("met.diffmean",colnames(volcano))
-    volcano[volcano[,idx] > 0, "meFDR2"] <-
-        -1 * volcano[volcano[,idx] > 0, "meFDR"]
+    volcano[volcano$diffmean > 0, "meFDR2"] <-
+        -1 * volcano[volcano$diffmean > 0, "meFDR"]
 
     volcano$threshold.starburst <- "1"
     volcano$threshold.size <- "1"
@@ -696,13 +690,15 @@ starburstAnalysis <- function(met,
         p <- p + ylim(ylim)
     }
     p <- p + labs(title) + ylab(ylab) + xlab(xlab)
-    p <- p + scale_color_manual(values = color, labels = label,
-                                name = legend)
-    p + geom_hline(aes(yintercept = lowerthr)) +
-        geom_hline(aes(yintercept = upperthr)) +
-        geom_vline(aes(xintercept = lowerthr)) +
-        geom_vline(aes(xintercept = upperthr))
-
+    p <- p + scale_color_manual(values = color, labels = label, name = legend)
+    p <-  p + geom_hline(aes(yintercept = lowerthr), colour = "black",
+                   linetype = "dashed") +
+        geom_hline(aes(yintercept = upperthr), colour = "black",
+                   linetype = "dashed") +
+        geom_vline(aes(xintercept = lowerthr), colour = "black",
+                   linetype = "dashed") +
+        geom_vline(aes(xintercept = upperthr), colour = "black",
+                   linetype = "dashed")
     ggsave(filename = "starbust.gcimp.pdf", width = 14, height = 10)
 
     # return methylation < 0, expressao >0
