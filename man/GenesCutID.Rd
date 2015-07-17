@@ -9,6 +9,9 @@ GenesCutID(GeneList)
 \arguments{
 \item{GeneList}{GeneList}
 }
+\value{
+list of gene symbol without IDs
+}
 \description{
 GenesCutID
 }

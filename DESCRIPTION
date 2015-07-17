@@ -1,6 +1,8 @@
 Package: TCGAbiolinks
 Type: Package
-Title: TCGAbiolinks: An R package to query, download, analyze, visualize, integrate and socialize data from TCGA
+Title:
+    TCGAbiolinks: An R package to query, download,
+    analyze, visualize, integrate and socialize data from TCGA
 Version: 0.99.1
 Date: 2015-06-18
 Author:
