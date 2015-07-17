@@ -4,14 +4,14 @@
 \alias{survivalAnalysis}
 \title{Creates survival analysis}
 \usage{
-survivalAnalysis(clinical_patient, clusterCol = NULL, legend = "Legend",
-  cutoff = 0, main = "Kaplan-Meier Overall Survival Curves",
+survivalAnalysis(data, clusterCol = NULL, legend = "Legend", cutoff = 0,
+  main = "Kaplan-Meier Overall Survival Curves",
   ylab = "PROBABILITY OF SURVIVAL", xlab = "TIME SINCE DIAGNOSIS (DAYS)",
   filename = "survival.pdf", color = c("green", "firebrick4", "orange3",
   "blue"))
 }
 \arguments{
-\item{clinical_patient}{TCGA Clinical patient with the information days_to_death}
+\item{data}{TCGA Clinical patient with the information days_to_death}
 
 \item{clusterCol}{Column with groups to plot. This is a mandatory field, the
 caption will be based in this column}
@@ -40,10 +40,10 @@ using survival library. It uses the fields days_to_death and vital, plus a
 columns for groups.
 }
 \examples{
-days_to_death <- floor(runif(200, 1, 1000))
+death_days_to <- floor(runif(200, 1, 1000))
 vital_status <- c(rep("Dead",200))
 groups <- c(rep(c("G1","G2"),c(100,100)))
-df <- data.frame(days_to_death,vital_status,groups)
+df <- data.frame(death_days_to,vital_status,groups)
 survivalAnalysis(df,clusterCol="groups")
 \dontrun{
 clinical <- clinic("gbm","clinical_patient")

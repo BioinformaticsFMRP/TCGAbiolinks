@@ -10,9 +10,6 @@ output:
     number_sections: no
     toc_depth: 2
     highlight: haddock
-  BiocStyle::pdf_document:
-    toc: yes
-    number_sections: no
 
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -120,10 +117,10 @@ You can give a list of barcodes or only one barcode. These barcode can be partia
 ```{r, eval = TRUE}
 # You can define a list of samples to query and download providing relative TCGA barcodes.
 listSamples <- c("TCGA-E9-A1NG-11A-52R-A14M-07","TCGA-BH-A1FC-11A-32R-A13Q-07",
-                 "TCGA-A7-A13G-11A-51R-A13Q-07","TCGA-BH-A0DK-11A-13R-A089-07",
-                 "TCGA-E9-A1RH-11A-34R-A169-07","TCGA-BH-A0AU-01A-11R-A12P-07",
-                 "TCGA-C8-A1HJ-01A-11R-A13Q-07","TCGA-A7-A13D-01A-13R-A12P-07",
-                 "TCGA-A2-A0CV-01A-31R-A115-07","TCGA-AQ-A0Y5-01A-11R-A14M-07")
+                "TCGA-A7-A13G-11A-51R-A13Q-07","TCGA-BH-A0DK-11A-13R-A089-07",
+                "TCGA-E9-A1RH-11A-34R-A169-07","TCGA-BH-A0AU-01A-11R-A12P-07",
+                "TCGA-C8-A1HJ-01A-11R-A13Q-07","TCGA-A7-A13D-01A-13R-A12P-07",
+                "TCGA-A2-A0CV-01A-31R-A115-07","TCGA-AQ-A0Y5-01A-11R-A14M-07")
 
 # Query all available platforms with a list of barcode 
 query <- TCGAQuery(samples = listSamples)
@@ -138,7 +135,8 @@ Some search examples are shown below:
 ```{r, eval = TRUE}
 query <- TCGAQuery(tumor = "gbm", added.since = "01/01/2013", added.up.to = "12/31/2013")
 
-query <- TCGAQuery(tumor = c("gbm","lgg"), platform = c("HumanMethylation450","HumanMethylation27"))
+query <- TCGAQuery(tumor = c("gbm","lgg"), 
+                    platform = c("HumanMethylation450","HumanMethylation27"))
 
 query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450", level = "3")
 
@@ -146,7 +144,8 @@ query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D")
 
 query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04", level = 3)
 
-query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04", tumor = "OV", platform = "CGH-1x1M_G4447A")
+query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04", 
+                   tumor = "OV", platform = "CGH-1x1M_G4447A")
 ```
 
 # `TCGAintegrate`: Summary of the common numbers of patient samples in different platforms 
@@ -187,7 +186,8 @@ The result is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
 library(TCGAbiolinks)
-BRCA_RNASeqV2_version <- BRCA_RNASeqV2_version[order(BRCA_RNASeqV2_version$SizeMbyte,decreasing=TRUE),]
+BRCA_RNASeqV2_version <- BRCA_RNASeqV2_version[
+    order(BRCA_RNASeqV2_version$SizeMbyte,decreasing=TRUE),]
 knitr::kable(BRCA_RNASeqV2_version, digits = 2, 
              caption = "Table with version, number of samples and size (Mbyte) of BRCA IlluminaHiSeq_RNASeqV2 Level 3", 
              row.names = FALSE)
@@ -240,7 +240,9 @@ genome_wide_snp_6| hg18.seg<br>hg19.seg<br>nocnv_hg18.seg<br>nocnv_hg19.seg
 
 # `TCGAPrepare`: Preparing the data
 You can easily read the downloaded data using the `TCGAPrepare` function.
-This function will prepare the data into a [SummarizedExperiment](http://www.nature.com/nmeth/journal/v12/n2/abs/nmeth.3252.html) object for downstream analysis. For the moment this function is working only with data level 3.
+This function will prepare the data into a [SummarizedExperiment](http://www.nature.com/nmeth/journal/v12/n2/abs/nmeth.3252.html) 
+object for downstream analysis. For the moment this function is working only
+with data level 3.
 
 The arguments are:
 
@@ -328,7 +330,8 @@ met <- TCGAPrepare(query,dir = "TCGA/450k",
 
 query.rna <- TCGAQuery(tumor="GBM",level=3, platform="IlluminaHiSeq_RNASeqV2")
 TCGADownload(query.rna,path="TCGA/rna",type = "rsem.genes.normalized_results")
-exp <- TCGAPrepare(query.rna, dir="TCGA/rna", save = TRUE, filename = "exp.rda",toPackage = "ELMER")
+exp <- TCGAPrepare(query.rna, dir="TCGA/rna", save = TRUE, 
+                    filename = "exp.rda",toPackage = "ELMER")
 
 ############# To EMLER
 library(ELMER)
@@ -377,10 +380,10 @@ You can easily search TCGA samples, download and prepare a matrix of gene expres
 # You can define a list of samples to query and download providing relative TCGA barcodes.
 
 listSamples <- c("TCGA-E9-A1NG-11A-52R-A14M-07","TCGA-BH-A1FC-11A-32R-A13Q-07",
-                 "TCGA-A7-A13G-11A-51R-A13Q-07","TCGA-BH-A0DK-11A-13R-A089-07",
-                 "TCGA-E9-A1RH-11A-34R-A169-07","TCGA-BH-A0AU-01A-11R-A12P-07",
-                 "TCGA-C8-A1HJ-01A-11R-A13Q-07","TCGA-A7-A13D-01A-13R-A12P-07",
-                 "TCGA-A2-A0CV-01A-31R-A115-07","TCGA-AQ-A0Y5-01A-11R-A14M-07")
+                "TCGA-A7-A13G-11A-51R-A13Q-07","TCGA-BH-A0DK-11A-13R-A089-07",
+                "TCGA-E9-A1RH-11A-34R-A169-07","TCGA-BH-A0AU-01A-11R-A12P-07",
+                "TCGA-C8-A1HJ-01A-11R-A13Q-07","TCGA-A7-A13D-01A-13R-A12P-07",
+                "TCGA-A2-A0CV-01A-31R-A115-07","TCGA-AQ-A0Y5-01A-11R-A14M-07")
 
 # Query all available platforms with a list of barcode 
 query <- TCGAQuery(samples = listSamples)
@@ -407,8 +410,8 @@ library(TCGAbiolinks)
 dataGE <- dataBRCA[sample(rownames(dataBRCA),10),sample(colnames(dataBRCA),7)]
 
 knitr::kable(dataGE, digits = 2, 
-             caption = "Example of a matrix of gene expression (10 genes in rows and 7 samples in columns)",
-             row.names = TRUE)
+            caption = "Example of a matrix of gene expression (10 genes in rows and 7 samples in columns)",
+            row.names = TRUE)
 ```
 
 
@@ -419,10 +422,10 @@ You can easily search TCGA samples, download and prepare a matrix of gene expres
 
 # Define a list of samples to query and download providing relative TCGA barcodes.
 samplesList <- c("TCGA-02-0046-10A-01D-0182-01", 
-                 "TCGA-02-0052-01A-01D-0182-01", 
-                 "TCGA-02-0033-10A-01D-0182-01", 
-                 "TCGA-02-0034-01A-01D-0182-01", 
-                 "TCGA-02-0007-01A-01D-0182-01")
+                "TCGA-02-0052-01A-01D-0182-01", 
+                "TCGA-02-0033-10A-01D-0182-01", 
+                "TCGA-02-0034-01A-01D-0182-01", 
+                "TCGA-02-0007-01A-01D-0182-01")
 
 # Query platform Genome_Wide_SNP_6 with a list of barcode 
 query <- TCGAQuery(tumor = "gbm", level = 3, platform = "Genome_Wide_SNP_6")
@@ -473,22 +476,22 @@ Ex: clinical_patient_data <- clinic("LGG","clinical_patient")
 
 ```{r, eval = FALSE}
 bar <- c("TCGA-G9-6378-02A-11R-1789-07", "TCGA-CH-5767-04A-11R-1789-07",  
-         "TCGA-G9-6332-60A-11R-1789-07", "TCGA-G9-6336-01A-11R-1789-07",
-         "TCGA-G9-6336-11A-11R-1789-07", "TCGA-G9-7336-11A-11R-1789-07",
-         "TCGA-G9-7336-04A-11R-1789-07", "TCGA-G9-7336-14A-11R-1789-07",
-         "TCGA-G9-7036-04A-11R-1789-07", "TCGA-G9-7036-02A-11R-1789-07",
-         "TCGA-G9-7036-11A-11R-1789-07", "TCGA-G9-7036-03A-11R-1789-07",
-         "TCGA-G9-7036-10A-11R-1789-07", "TCGA-BH-A1ES-10A-11R-1789-07",
-         "TCGA-BH-A1F0-10A-11R-1789-07", "TCGA-BH-A0BZ-02A-11R-1789-07",
-         "TCGA-B6-A0WY-04A-11R-1789-07", "TCGA-BH-A1FG-04A-11R-1789-08",
-         "TCGA-D8-A1JS-04A-11R-2089-08", "TCGA-AN-A0FN-11A-11R-8789-08",
-         "TCGA-AR-A2LQ-12A-11R-8799-08", "TCGA-AR-A2LH-03A-11R-1789-07",
-         "TCGA-BH-A1F8-04A-11R-5789-07", "TCGA-AR-A24T-04A-55R-1789-07",
-         "TCGA-AO-A0J5-05A-11R-1789-07", "TCGA-BH-A0B4-11A-12R-1789-07",
-         "TCGA-B6-A1KN-60A-13R-1789-07", "TCGA-AO-A0J5-01A-11R-1789-07",
-         "TCGA-AO-A0J5-01A-11R-1789-07", "TCGA-G9-6336-11A-11R-1789-07",
-         "TCGA-G9-6380-11A-11R-1789-07", "TCGA-G9-6380-01A-11R-1789-07",
-         "TCGA-G9-6340-01A-11R-1789-07","TCGA-G9-6340-11A-11R-1789-07")
+        "TCGA-G9-6332-60A-11R-1789-07", "TCGA-G9-6336-01A-11R-1789-07",
+        "TCGA-G9-6336-11A-11R-1789-07", "TCGA-G9-7336-11A-11R-1789-07",
+        "TCGA-G9-7336-04A-11R-1789-07", "TCGA-G9-7336-14A-11R-1789-07",
+        "TCGA-G9-7036-04A-11R-1789-07", "TCGA-G9-7036-02A-11R-1789-07",
+        "TCGA-G9-7036-11A-11R-1789-07", "TCGA-G9-7036-03A-11R-1789-07",
+        "TCGA-G9-7036-10A-11R-1789-07", "TCGA-BH-A1ES-10A-11R-1789-07",
+        "TCGA-BH-A1F0-10A-11R-1789-07", "TCGA-BH-A0BZ-02A-11R-1789-07",
+        "TCGA-B6-A0WY-04A-11R-1789-07", "TCGA-BH-A1FG-04A-11R-1789-08",
+        "TCGA-D8-A1JS-04A-11R-2089-08", "TCGA-AN-A0FN-11A-11R-8789-08",
+        "TCGA-AR-A2LQ-12A-11R-8799-08", "TCGA-AR-A2LH-03A-11R-1789-07",
+        "TCGA-BH-A1F8-04A-11R-5789-07", "TCGA-AR-A24T-04A-55R-1789-07",
+        "TCGA-AO-A0J5-05A-11R-1789-07", "TCGA-BH-A0B4-11A-12R-1789-07",
+        "TCGA-B6-A1KN-60A-13R-1789-07", "TCGA-AO-A0J5-01A-11R-1789-07",
+        "TCGA-AO-A0J5-01A-11R-1789-07", "TCGA-G9-6336-11A-11R-1789-07",
+        "TCGA-G9-6380-11A-11R-1789-07", "TCGA-G9-6380-01A-11R-1789-07",
+        "TCGA-G9-6340-01A-11R-1789-07","TCGA-G9-6340-11A-11R-1789-07")
 
 S <- SampleTypes(bar,"TP")
 S2 <- SampleTypes(bar,"NB")
@@ -508,24 +511,24 @@ The result is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
 bar <- c("TCGA-G9-6378-02A-11R-1789-07", "TCGA-CH-5767-04A-11R-1789-07",  
-         "TCGA-G9-6332-60A-11R-1789-07", "TCGA-G9-6336-01A-11R-1789-07",
-         "TCGA-G9-6336-11A-11R-1789-07", "TCGA-G9-7336-11A-11R-1789-07",
-         "TCGA-G9-7336-04A-11R-1789-07", "TCGA-G9-7336-14A-11R-1789-07",
-         "TCGA-G9-7036-04A-11R-1789-07", "TCGA-G9-7036-02A-11R-1789-07",
-         "TCGA-G9-7036-11A-11R-1789-07", "TCGA-G9-7036-03A-11R-1789-07",
-         "TCGA-G9-7036-10A-11R-1789-07", "TCGA-BH-A1ES-10A-11R-1789-07",
-         "TCGA-BH-A1F0-10A-11R-1789-07", "TCGA-BH-A0BZ-02A-11R-1789-07",
-         "TCGA-B6-A0WY-04A-11R-1789-07", "TCGA-BH-A1FG-04A-11R-1789-08",
-         "TCGA-D8-A1JS-04A-11R-2089-08", "TCGA-AN-A0FN-11A-11R-8789-08",
-         "TCGA-AR-A2LQ-12A-11R-8799-08", "TCGA-AR-A2LH-03A-11R-1789-07",
-         "TCGA-BH-A1F8-04A-11R-5789-07", "TCGA-AR-A24T-04A-55R-1789-07",
-         "TCGA-AO-A0J5-05A-11R-1789-07", "TCGA-BH-A0B4-11A-12R-1789-07",
-         "TCGA-B6-A1KN-60A-13R-1789-07", "TCGA-AO-A0J5-01A-11R-1789-07",
-         "TCGA-AO-A0J5-01A-11R-1789-07", "TCGA-G9-6336-11A-11R-1789-07",
-         "TCGA-G9-6380-11A-11R-1789-07", "TCGA-G9-6380-01A-11R-1789-07",
-         "TCGA-G9-6340-01A-11R-1789-07","TCGA-G9-6340-11A-11R-1789-07")
-female_erpos_herpos <- clinicFilt(bar, clinBRCA, HER="Positive", 
-                                  gender="FEMALE",ER="Positive")
+        "TCGA-G9-6332-60A-11R-1789-07", "TCGA-G9-6336-01A-11R-1789-07",
+        "TCGA-G9-6336-11A-11R-1789-07", "TCGA-G9-7336-11A-11R-1789-07",
+        "TCGA-G9-7336-04A-11R-1789-07", "TCGA-G9-7336-14A-11R-1789-07",
+        "TCGA-G9-7036-04A-11R-1789-07", "TCGA-G9-7036-02A-11R-1789-07",
+        "TCGA-G9-7036-11A-11R-1789-07", "TCGA-G9-7036-03A-11R-1789-07",
+        "TCGA-G9-7036-10A-11R-1789-07", "TCGA-BH-A1ES-10A-11R-1789-07",
+        "TCGA-BH-A1F0-10A-11R-1789-07", "TCGA-BH-A0BZ-02A-11R-1789-07",
+        "TCGA-B6-A0WY-04A-11R-1789-07", "TCGA-BH-A1FG-04A-11R-1789-08",
+        "TCGA-D8-A1JS-04A-11R-2089-08", "TCGA-AN-A0FN-11A-11R-8789-08",
+        "TCGA-AR-A2LQ-12A-11R-8799-08", "TCGA-AR-A2LH-03A-11R-1789-07",
+        "TCGA-BH-A1F8-04A-11R-5789-07", "TCGA-AR-A24T-04A-55R-1789-07",
+        "TCGA-AO-A0J5-05A-11R-1789-07", "TCGA-BH-A0B4-11A-12R-1789-07",
+        "TCGA-B6-A1KN-60A-13R-1789-07", "TCGA-AO-A0J5-01A-11R-1789-07",
+        "TCGA-AO-A0J5-01A-11R-1789-07", "TCGA-G9-6336-11A-11R-1789-07",
+        "TCGA-G9-6380-11A-11R-1789-07", "TCGA-G9-6380-01A-11R-1789-07",
+        "TCGA-G9-6340-01A-11R-1789-07","TCGA-G9-6340-11A-11R-1789-07")
+female_erpos_herpos <- clinicFilt(bar, clinBRCA, HER = "Positive", 
+                                gender = "FEMALE", ER = "Positive")
 print(female_erpos_herpos)
 ```
 
@@ -584,14 +587,14 @@ library(TCGAbiolinks)
 
 # Diff.expr.analysis (DEA)
 dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP],
-                      "Normal", "Tumor")
+                    "Normal", "Tumor")
 
 # DEGs filter by abs(logFC) >=1
 dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
 
 # DEGs table with expression values in normal and tumor samples
 dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",
-                                    dataFilt[,samplesTP],dataFilt[,samplesNT])
+                                dataFilt[,samplesTP],dataFilt[,samplesNT])
 
 ```
 The result is shown below:
@@ -600,7 +603,7 @@ The result is shown below:
 library(TCGAbiolinks)
 dataDEGsFiltLevel$FDR <- format(dataDEGsFiltLevel$FDR, scientific = TRUE)
 knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2,
-             caption = "Table DEGs after DEA",row.names = FALSE)
+                caption = "Table DEGs after DEA",row.names = FALSE)
 ```
 
 ## `EAcomplete & EAbarplot`: Enrichment Analysis
@@ -630,12 +633,12 @@ system.time(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
 # Gene Ontology (GO) and Pathway enrichment barPlot
 
 EAbarplot(tf = rownames(ansEA$ResBP), 
-           GOBPTab = ansEA$ResBP,
-           GOCCTab = ansEA$ResCC,
-           GOMFTab = ansEA$ResMF,
-           PathTab = ansEA$ResPat,
-           nRGTab = Genelist, 
-           nBar = 10)
+            GOBPTab = ansEA$ResBP,
+            GOCCTab = ansEA$ResCC,
+            GOMFTab = ansEA$ResMF,
+            PathTab = ansEA$ResPat,
+            nRGTab = Genelist, 
+            nBar = 10)
 
 ```
 The result is shown below:
@@ -673,9 +676,8 @@ plotPCAforGroups(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
 #sampleGenes <- rownames(dataDEGsFilt[dataDEGsFilt$logFC >=1,])[1:20]
 #boxplot(log(dataBRCA[sampleGenes,]), las = 2)
 #boxplot(log(dataFilt[sampleGenes,]), las = 2)
-
-
 ```
+
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
 library(png)
@@ -702,7 +704,8 @@ for( i in 1: round(nrow(dataBRCAcomplete)/100)){
 message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
 tokenStart <- tokenStop
 tokenStop <-100*i
-tabSurvKM<-SurvivalKMunivariate(clinical_patient_Cancer,dataBRCAcomplete,Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
+tabSurvKM<-SurvivalKMunivariate(clinical_patient_Cancer,dataBRCAcomplete,
+                                Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
                                         Survresult = F,ThreshTop=0.67,ThreshDown=0.33)
 
 tabSurvKMcomplete <- rbind(tabSurvKMcomplete,tabSurvKM)
@@ -713,17 +716,16 @@ tabSurvKMcomplete <- tabSurvKMcomplete[!duplicated(tabSurvKMcomplete$mRNA),]
 rownames(tabSurvKMcomplete) <-tabSurvKMcomplete$mRNA
 tabSurvKMcomplete <- tabSurvKMcomplete[,-1]
 tabSurvKMcomplete <- tabSurvKMcomplete[order(tabSurvKMcomplete$pvalue, decreasing=F),]
-
+    
 tabSurvKMcompleteDEGs <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% dataDEGsFiltLevel$mRNA,]
-
-
-
 ```
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
 tabSurvKMcompleteDEGs$pvalue <- format(tabSurvKMcompleteDEGs$pvalue, scientific = TRUE)
-knitr::kable(tabSurvKMcompleteDEGs[1:10,], digits = 2,
-             caption = "Table KM-survival genes after SA",row.names = TRUE)
+knitr::kable(tabSurvKMcompleteDEGs[1:10,], 
+            digits = 2,
+            caption = "Table KM-survival genes after SA",
+            row.names = TRUE)
 ```
 
 ## Survival Analysis Cox Regression and dnet package
@@ -743,7 +745,10 @@ for( i in 1: round(nrow(dataBRCAcomplete)/100)){
 message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
 tokenStart <- tokenStop
 tokenStop <-100*i
-tabSurvKM<-SurvivalKMunivariate(clinical_patient_Cancer,dataBRCAcomplete,Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],Survresult = F,ThreshTop=0.67,ThreshDown=0.33)
+tabSurvKM<-SurvivalKMunivariate(clinical_patient_Cancer,
+                                dataBRCAcomplete,
+                                Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
+                                Survresult = F,ThreshTop=0.67,ThreshDown=0.33)
 
 tabSurvKMcomplete <- rbind(tabSurvKMcomplete,tabSurvKM)
 }
@@ -759,10 +764,9 @@ tabSurvKMcompleteDEGs <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% data
 tflist <- EAGenes[EAGenes$Family == "transcription regulator","Gene"]
 tabSurvKMcomplete_onlyTF <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% tflist,]
 
-TabCoxNet <- SurvivalCoxNET(clinical_patient,dataBRCAcomplete,Genelist = rownames(tabSurvKMcomplete_onlyTF),scoreConfidence = 700,titlePlot = "SurvivalCoxNET Example")
-
-
-
+TabCoxNet <- SurvivalCoxNET(clinical_patient,dataBRCAcomplete,
+                            Genelist = rownames(tabSurvKMcomplete_onlyTF),
+                            scoreConfidence = 700,titlePlot = "SurvivalCoxNET Example")
 ```
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
@@ -783,14 +787,14 @@ library(clue)
 
 BRCArnaseqV2 <- dataBRCA
 BRCArnaseqV2MostVar <- varFilter(BRCArnaseqV2, var.func = IQR,  var.cutoff = 0.75, 
-                                 filterByQuantile = TRUE)
+                                filterByQuantile = TRUE)
 
 wData <- t(BRCArnaseqV2MostVar)
 ddist <- dist(wData, method = "euclidean")
 sHc <- hclust(ddist, method = "ward.D")
 
 plot(sHc, labels = FALSE, main ="BRCA Cancer cluster dendrogram all samples",
-   xlab = "Samples with relative group color",sub="")
+     xlab = "Samples with relative group color",sub="")
 
 rect.hclust(sHc, k=3, border="red")
 tabCluster <- as.matrix(cutree(sHc, k = 3))
@@ -826,47 +830,55 @@ grid.raster(img)
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 
+
 ### Differential analysis
-GroupBlueData <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "blue", "Sample"])]
-GroupGreen3Data <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "green3", "Sample"])]
-GroupRedData <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == "red", "Sample"])]
+GroupBlueData <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == 
+    "blue", "Sample"])]
+GroupGreen3Data <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == 
+    "green3", "Sample"])]
+GroupRedData <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == 
+    "red", "Sample"])]
 
-DEGsBlue <- DEArnaSEQ(cbind(GroupGreen3Data, GroupRedData),
-                      GroupBlueData, "GroupOther", "GroupBlue")
-DEGsGreen3 <- DEArnaSEQ(cbind(GroupBlueData, GroupRedData),
-                        GroupGreen3Data, "GroupOther", "GroupGreen3")
-DEGsRed <- DEArnaSEQ(cbind(GroupBlueData, GroupGreen3Data), 
-                     GroupRedData, "GroupOther", "GroupRed")
+DEGsBlue <- DEArnaSEQ(cbind(GroupGreen3Data, GroupRedData), GroupBlueData, 
+    "GroupOther", "GroupBlue")
+DEGsGreen3 <- DEArnaSEQ(cbind(GroupBlueData, GroupRedData), GroupGreen3Data, 
+    "GroupOther", "GroupGreen3")
+DEGsRed <- DEArnaSEQ(cbind(GroupBlueData, GroupGreen3Data), GroupRedData, 
+    "GroupOther", "GroupRed")
 
 
-dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP], "Normal", "Tumor")
+dataDEGs <- DEArnaSEQ(dataFilt[, samplesNT], dataFilt[, samplesTP], "Normal", 
+    "Tumor")
 
 # DEGs filter by abs(logFC) >=1
-dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
+dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1, ]
 
-dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",
-                                    [,samplesTP],dataFilt[,samplesNT])
+dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt, "Tumor", "Normal", dataFilt[, 
+    samplesTP], dataFilt[, samplesNT])
 
-DEGsBlueLevel <- CreateTabLevel(DEGsBlue, "GroupBlue", "GroupOther", 
-  GroupBlueData, cbind(GroupGreen3Data, GroupRedData), typeOrder = TRUE)
-DEGsGreen3Level <- CreateTabLevel(DEGsGreen3, "GroupGreen3", "GroupOther",
-  GroupGreen3Data, cbind(GroupBlueData, GroupRedData), typeOrder = TRUE)
-DEGsRedLevel <- CreateTabLevel(DEGsRed, "GroupRed", "GroupOther",
-  GroupRedData, cbind(GroupBlueData, GroupGreen3Data), typeOrder = TRUE)
+DEGsBlueLevel <- CreateTabLevel(DEGsBlue, "GroupBlue", "GroupOther", GroupBlueData, 
+    cbind(GroupGreen3Data, GroupRedData), typeOrder = TRUE)
+DEGsGreen3Level <- CreateTabLevel(DEGsGreen3, "GroupGreen3", "GroupOther", 
+    GroupGreen3Data, cbind(GroupBlueData, GroupRedData), typeOrder = TRUE)
+DEGsRedLevel <- CreateTabLevel(DEGsRed, "GroupRed", "GroupOther", GroupRedData, 
+    cbind(GroupBlueData, GroupGreen3Data), typeOrder = TRUE)
 
-blueDEGs <- DEGsBlueLevel[DEGsBlueLevel$FDR < 0.01 & DEGsBlueLevel$logFC >= 1, ]
+blueDEGs <- DEGsBlueLevel[DEGsBlueLevel$FDR < 0.01 & DEGsBlueLevel$logFC >= 
+    1, ]
 blueDEGs <- blueDEGs[order(blueDEGs$FDR), ]
-green3DEGs <- DEGsGreen3Level[DEGsGreen3Level$FDR < 0.01 & DEGsGreen3Level$logFC >= 1, ]
+green3DEGs <- DEGsGreen3Level[DEGsGreen3Level$FDR < 0.01 & DEGsGreen3Level$logFC >= 
+    1, ]
 green3DEGs <- green3DEGs[order(green3DEGs$FDR), ]
-redDEGs <- DEGsRedLevel[DEGsRedLevel$FDR < 0.01 & DEGsRedLevel$logFC >= 1, ]
+redDEGs <- DEGsRedLevel[DEGsRedLevel$FDR < 0.01 & DEGsRedLevel$logFC >= 
+    1, ]
 redDEGs <- redDEGs[order(redDEGs$FDR), ]
 
-blueDEGsSpec <- blueDEGs[setdiff(rownames(blueDEGs), 
-                                 union(rownames(green3DEGs), rownames(redDEGs))), ]
-green3DEGsSpec <- green3DEGs[setdiff(rownames(green3DEGs), 
-                                     union(rownames(blueDEGs), rownames(redDEGs))), ]
-redDEGsSpec <- redDEGs[setdiff(rownames(redDEGs), 
-                               union(rownames(blueDEGs), rownames(green3DEGs))), ]
+blueDEGsSpec <- blueDEGs[setdiff(rownames(blueDEGs), union(rownames(green3DEGs), 
+    rownames(redDEGs))), ]
+green3DEGsSpec <- green3DEGs[setdiff(rownames(green3DEGs), union(rownames(blueDEGs), 
+    rownames(redDEGs))), ]
+redDEGsSpec <- redDEGs[setdiff(rownames(redDEGs), union(rownames(blueDEGs), 
+    rownames(green3DEGs))), ]
 
 blueDEGsSpec <- blueDEGsSpec[1:50, ]
 green3DEGsSpec <- green3DEGsSpec[1:50, ]
@@ -875,26 +887,30 @@ redDEGsSpec <- redDEGsSpec[1:50, ]
 tabCluster <- tabCluster[order(tabCluster$Color), ]
 
 MfiltQuantileOrdered <- BRCArnaseqV2[c(rownames(blueDEGsSpec), rownames(green3DEGsSpec), 
-  rownames(redDEGsSpec)), rownames(tabCluster)]
+    rownames(redDEGsSpec)), rownames(tabCluster)]
 
 MRactivity <- t(MfiltQuantileOrdered)
 
 HMactivity <- MRactivity
-thresholdquantile<-0.75
-HMactivity[ HMactivity >= quantile(HMactivity,thresholdquantile)]<- quantile(HMactivity,thresholdquantile)
+thresholdquantile <- 0.75
+HMactivity[HMactivity >= quantile(HMactivity, thresholdquantile)] <- quantile(HMactivity, 
+    thresholdquantile)
 
 summary(as.vector(HMactivity))
-quantile(HMactivity, 0.15); quantile(HMactivity, 0.85)
-HMactivity[HMactivity <= quantile(HMactivity, 0.15)] <- quantile(HMactivity, 0.15)
-HMactivity[HMactivity >= quantile(HMactivity, 0.85)] <- quantile(HMactivity, 0.85)
+quantile(HMactivity, 0.15)
+quantile(HMactivity, 0.85)
+HMactivity[HMactivity <= quantile(HMactivity, 0.15)] <- quantile(HMactivity, 
+    0.15)
+HMactivity[HMactivity >= quantile(HMactivity, 0.85)] <- quantile(HMactivity, 
+    0.85)
 
 column_annotation <- matrix(" ", nrow = nrow(HMactivity), ncol = 1)
 column_annotation[, 1] <- tabCluster$Color
 
 row_annotation <- matrix(" ", nrow = 1, ncol = ncol(HMactivity))
-row_annotation[1, ] <- c(rep("blue", nrow(blueDEGsSpec)),
-                         rep("green3", nrow(green3DEGsSpec)), 
-                         rep("red", nrow(redDEGsSpec)))
+row_annotation[1, ] <- c(rep("blue", nrow(blueDEGsSpec)), rep("green3", 
+    nrow(green3DEGsSpec)), rep("red", nrow(redDEGsSpec)))
+
 library("GMD")
 
 png("BRCA_heatmap.png", width = 1200, height = 800)
@@ -1016,32 +1032,46 @@ img <- readPNG("meanmet.png")
 grid.raster(img)
 ```
 
-## `volcanoAnalysis`: Volcano plots for methylation data
+## `DMRAnalysis`: Differentially methylated regions Analysis
 
-Finally, we want to know which are the probes that are different methylated and
-are significant. For that we use a volcano plot 
-that compares the methylation data between the two groups.
+We will search for differentially methylated CpG sites using the `DMRAnalysis`
+function. In order to find these regions we use the beta-values 
+(methylation values ranging from 0.0 to 1.0) to compare two groups. 
+
 Firstly, it calculates the difference between the mean methylation of each group
-for each probes. After, it calculates the p-value using the wilcoxon test 
-using the Benjamini-Hochberg adjustment method. With both values, it is possible
-to analyse the data.
+for each probes. 
+
+Secondly, it calculates the p-value using the wilcoxon test 
+adjusting by the Benjamini-Hochberg method. The default parameters was set to
+ require a minimum absolute beta-values difference of 0.2 and a p-value adjusted
+ of < 0.01. 
+
+After these analysis, we save a volcano plot (x-axis:diff mean methylation,
+y-axis: significance) that will help the user identify the differentially
+methylated CpG sites and return the object with the calculus in the rowRanges.
 
 
 ```{r, eval = FALSE}
-data <- volcanoAnalysis(data,groupCol="group")
+data <- DMRAnalysis(data,groupCol="group")
 ```
 
-The output will be an graph such as the figure below. The function will 
-return the SummarizedExperiment with the values of p-value, p-value adjusted,
-diffmean and the group it belongs in the graph (1 = non significant, 2 = hypomethylated,
-3 = hypermethylated). This values can be view/acessed using the `rowRanges` acessesor.
+Volcano plot saved and the given data with the results (diffmean.group1.group2,p.value.group1.group2, p.value.adj.group1.group2,status.group1.group2) in the rowRanges where group1 and group2 are the names of the groups
+
+The output will be an graph such as the figure below. Also, the `DMRAnalysis` 
+function will return the SummarizedExperiment with the values of p-value,
+p-value adjusted, diffmean and the group it belongs in the graph 
+(non significant, hypomethylated, hypermethylated). 
+This values can be view/acessed using the `rowRanges` acessesor.
 
 The arguments of volcanoPlot are:
 
 *  **data**	 SummarizedExperiment object obtained from `TCGAPrepare`
-*  **groupCol** Columns in colData(data) that defines the groups. If no columns defined a columns called "Patients" will be used
-*  **group1** In case our object has more than 2 groups, you should set the name of the group
-*  **group2** In case our object has more than 2 groups, you should set the name of the group
+*  **groupCol** Columns in colData(data) that defines the groups. 
+If no columns defined a columns called "Patients" will be used
+*  **group1** In case our object has more than 2 groups, 
+you should set the name of the group
+*  **group2** In case our object has more than 2 groups,
+you should set the name of the group
 *  **filename**	 The name of the pdf that will be save
 *  **legend** Legend title of the figured
 *  **ylab**	y-axis text of the plot
@@ -1053,6 +1083,8 @@ The arguments of volcanoPlot are:
 *  **ylim** y limits to cut image
 *  **p.cut**	p values threshold
 *  **diffmean.cut**	diffmean threshold
+*  ** paired**	Wilcoxon paired parameter
+*  **adj.method**	Adjusted method for the p-value calculation
 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
 library(png)
@@ -1066,6 +1098,11 @@ grid.raster(img)
  The starburst plot is proposed to combine information from two volcano plots, 
  and is applied for a study of DNA methylation and gene expression. In order to
  reproduce this plot, we will use the `starburstAnalysis` function.
+ 
+The function creates Starburst plot for comparison of DNA methylation
+and gene expression. The log10 (FDR-corrected P value) is plotted for beta 
+value for DNA methylation (x axis) and gene expression (y axis) for each gene. 
+The black dashed line shows the FDR-adjusted P value of 0.01.
 
 The parameters of this function are:
 * **met** SummarizedExperiment with methylation data obtained from the 
@@ -1073,6 +1110,8 @@ The parameters of this function are:
 Expected colData columns: diffmean, p.value.adj and p.value
 * **exp** SummarizedExperiment with methylation data obtained from the
 `TCGAPrepare` function  and processed by `DEArnaSEQ` function. Expected colData columns: diffmean, p.value.adj and p.value
+*  **group1** Name of the group1
+*  **group2** Name of the group2
 
 ```{r, eval = FALSE}
 nrows <- 20000; ncols <- 20
@@ -1098,7 +1137,7 @@ rowRanges(exp)$diffmean <- c(runif(20000, -0.1, 0.1))
 rowRanges(exp)$p.value <- c(runif(20000, 0, 1))
 rowRanges(exp)$p.value.adj <- c(runif(20000, 0, 1))
 result <- starburstPlot(met,exp,p.cut = 0.01)
-starburstAnalysis(met,exp)
+starburstAnalysis(met,exp,"group1","group2")
 ```
 
 
