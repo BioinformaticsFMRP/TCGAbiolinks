@@ -62,12 +62,6 @@ a ggplot2 plot
 \description{
 Biplot for Principal Components using ggplot2
 }
-\examples{
-data(iris)
-iris.pca <- prcomp(iris[,1:4], scale. = TRUE)
-print(ggbiplot(iris.pca, obs.scale = 1, var.scale = 1, groups = iris[,5],
-ellipse = TRUE, circle = TRUE))
-}
 \author{
 Vincent Q. Vu.
 }
