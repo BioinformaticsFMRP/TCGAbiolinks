@@ -19,9 +19,4 @@ stage_BRCA
 \description{
 stage_BRCA
 }
-\examples{
-# clin <- clinic("BRCA","clinical_patient")
-clin <- clinBRCA
-stage_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"stage_IX",clin)
-}
 

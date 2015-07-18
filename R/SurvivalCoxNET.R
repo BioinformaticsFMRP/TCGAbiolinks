@@ -7,8 +7,9 @@
 #' @param titlePlot titlePlot
 #' @importFrom survival coxph
 #' @importFrom igraph subgraph.edges layout.fruchterman.reingold
-#'             spinglass.community degree E communities crossing V
-#' @importFrom dnet dRDataLoader dNetInduce dNetPipeline visNet dCommSignif
+#'             spinglass.community degree E communities crossing V V<-
+#' @importFrom dnet dRDataLoader dNetInduce dNetPipeline
+#'             visNet dCommSignif
 #' @importFrom supraHex visColormap visColoralpha
 #' @importFrom grDevices dev.list
 #' @export
@@ -17,7 +18,7 @@ SurvivalCoxNET <- function(clinical_patient,dataGE,Genelist,
                            scoreConfidence = 700,
                            titlePlot = "SurvivalCoxNET Example"){
 
-
+    combined_score <- NULL
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 
     png("SurvivalCoxNETOutput.png", width = 800, height = 800)
@@ -87,9 +88,8 @@ SurvivalCoxNET <- function(clinical_patient,dataGE,Genelist,
     # Only those associations with medium confidence (score>=400) are retained.
     org.Hs.string <- dRDataLoader(RData='org.Hs.string')
     # restrict to those edges with high confidence (score>=700)
-
-
-    network <- subgraph.edges(org.Hs.string, eids=E(org.Hs.string)[combined_score>=scoreConfidence])
+    with(org.Hs.string,{
+        network <- subgraph.edges(org.Hs.string, eids=E(org.Hs.string)[combined_score>=scoreConfidence])})
     network
 
     # extract network that only contains genes in pvals
