@@ -21,11 +21,13 @@ Find most studied TF in pubmed related to a specific cancer,
  disease, or tissue
 }
 \examples{
+\dontrun{
 TFs <- EAGenes[EAGenes$Family =="transcription regulator",]
 TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
 dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
 dataDEGsFiltLevelTFs <- dataDEGsFiltLevelTFs[order(dataDEGsFiltLevelTFs$Delta,decreasing = TRUE),]
 # Find Pubmed of TF studied related to cancer
 tabDEGsTFPubmed <- TCGAinvestigate("breast", dataDEGsFiltLevelTFs, topgenes = 1)
+}
 }
 

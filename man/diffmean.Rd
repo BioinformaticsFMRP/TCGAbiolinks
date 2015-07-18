@@ -2,29 +2,44 @@
 % Please edit documentation in R/methylation.R
 \name{diffmean}
 \alias{diffmean}
-\title{calculate diffmean methylation between two groups}
+\title{Calculate diffmean methylation between two groups}
 \usage{
-diffmean(group1, group2)
+diffmean(data, groupCol = NULL, group1 = NULL, group2 = NULL)
 }
 \arguments{
-\item{group1}{Data frame probes vs patient}
+\item{data}{SummarizedExperiment object obtained from TCGAPrepare}
 
-\item{group2}{Data frame probes vs patient}
+\item{groupCol}{Columns in colData(data) that defines the groups.}
+
+\item{group1}{Name of group1 to be used in the analysis}
+
+\item{group2}{Name of group2  to be used in the analysis}
 }
 \value{
-dataframe with diffmean values
+Saves in the rowRages(data) the columns: mean.group1, mean.group2
+       diffmean.group1.group2; Where group1 and group2 are the names of the
+       groups.
 }
 \description{
-calculate diffmean methylation between two groups
+Calculate diffmean methylation of probes between two groups removing lines
+   that has NA values.
 }
 \examples{
-patient <- paste("patient",1:100)
-probes <- paste0("cg00",1:100)
-beta.values <- runif(10000,0,1)
-beta.values <- matrix(beta.values,ncol = 100,nrow = 100)
-values <- as.data.frame(beta.values)
-colnames(values) <- patient
-rownames(values) <- probes
-diff.group1xgroup2 <- diffmean(values[,1:50],values[,51:100])
+\dontrun{
+nrows <- 200; ncols <- 20
+counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
+rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
+                   IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
+                    strand=sample(c("+", "-"), 200, TRUE),
+                    feature_id=sprintf("ID\%03d", 1:200))
+colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 10),
+                    row.names=LETTERS[1:20],
+                    group=rep(c("group1","group2"),c(10,10)))
+data <- SummarizedExperiment::SummarizedExperiment(
+         assays=S4Vectors::SimpleList(counts=counts),
+         rowRanges=rowRanges,
+         colData=colData)
+data <- diffmean(data)
+}
 }
 
