@@ -6,7 +6,7 @@
 #' @param topgenes topgenes
 #' @importFrom RCurl url.exists curlVersion
 #' @examples
-#' TFs <- EAGenes[EAGenes$Family =="transcription regulator",]
+# TFs <- EAGenes[EAGenes$Family =="transcription regulator",]
 #' TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
 #' dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
 #  # Order table DEGs TFs according to Delta decrease
