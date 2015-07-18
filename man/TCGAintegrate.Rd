@@ -4,10 +4,10 @@
 \alias{TCGAintegrate}
 \title{TCGAintegrate}
 \usage{
-TCGAintegrate(querySamples)
+TCGAintegrate(query)
 }
 \arguments{
-\item{querySamples}{output of TCGAQuery filtered}
+\item{query}{output of TCGAQuery}
 }
 \value{
 table with common samples among platforms from TCGAQuery
@@ -16,8 +16,7 @@ table with common samples among platforms from TCGAQuery
 Common samples among platforms with 2 by 2 comparison
 }
 \examples{
-TCGAintegrate(c("TCGA-A7-A0D9-01A-31D-A060-02",
-                "TCGA-B6-A0RG-01A-11D-A060-02",
-                 "TCGA-B6-A0RG-01A-11D-A060-01"))
+query <- TCGAQuery(tumor = "brca",level = 3)
+matSamples <- TCGAintegrate(query)
 }
 
