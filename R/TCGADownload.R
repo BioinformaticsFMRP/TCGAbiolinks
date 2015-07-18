@@ -46,15 +46,15 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 
     # Downloading the folder
     if (is.null(type) && is.null(samples) ) {
-        message(rep("-=",(nchar(file.path(path))/2)+4))
-        message(paste0("| Downloading:", length(files), " folders"))
+        message(rep("-=",(nchar(file.path(path))/2) + 4))
+        message(paste0("| Downloading:", dim(data), " folders"))
         message(paste0("| Path:", file.path(path)))
-        message(rep("-=",(nchar(file.path(path))/2)+4))
+        message(rep("-=",(nchar(file.path(path))/2) + 4))
         pb <- txtProgressBar(min = 0, max = nrow(data), style = 3)
         for (i in 1:nrow(data)) {
 
             file <- paste0(path, "/", basename(data[i, "deployLocation"]))
-            cat(paste0("Downloading:",
+            cat(paste0("\nDownloading:",
                        basename(data[i, "deployLocation"]),"\n"))
             if (force || !file.exists(file)) {
                 if(is.windows()){
@@ -90,7 +90,6 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                     next
                 }
             }
-
             if(!is.null(samples)){
                 files <- filterFiles(data[i,],samples,files)
             }
@@ -122,7 +121,9 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                 }
                 setTxtProgressBar(pb, i)
             }
-            close(pb)
+            if(length(files) > 0){
+                close(pb)
+            }
         }
     }
 
@@ -130,6 +131,13 @@ TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 
 # Filter files by barcode
 filterFiles <- function(data,samples,files){
+
+    # If it if maf it is better to let download all files
+    #maf <- paste("SOLiD_DNASeq_curated",
+    #             "SOLiD_DNASeq", # partial barcode 2
+    #             "illuminaga_dnaseq",
+    #             sep = "|"
+    #)
 
     barcodeName <- paste("IlluminaHiSeq_RNASeq",
                          "humanmethylation",
@@ -147,8 +155,7 @@ filterFiles <- function(data,samples,files){
                          "IlluminaGA_RNASeq",
                          "IlluminaHiSeq_DNASeqC",
                          "IlluminaHiSeq_miRNASeq",
-                         "IlluminaHiSeq_RNASeq",
-                         "IlluminaHiSeq_WGBS", sep = "|")
+                         "IlluminaHiSeq_RNASeq", sep = "|")
 
     uuidName <- paste("RNASeqV2",
                       "MDA_RPPA_Core",
@@ -158,20 +165,20 @@ filterFiles <- function(data,samples,files){
                        "CGH-1x1M_G4447A",
                        "Genome_Wide_SNP_6",
                        "HT_HG-U133A",
+                       "IlluminaHiSeq_WGBS",
                        sep = "|")
 
 
-    # case uuid in name
-    if(grepl(uuidName,data$Platform, ignore.case = TRUE)){
+    if (grepl(uuidName,data$Platform, ignore.case = TRUE)) {
         # case uuid in name file
         regex <- paste0("[[:alnum:]]{8}-[[:alnum:]]{4}",
                         "-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}")
         uuid <- str_match(files,regex)[,1]
         map <- mapuuidbarcode(unique(na.omit(uuid)))
         idx <- unique(unlist(lapply(samples, function(x) grep(x,map$barcode))))
-        idx <- which(uuid %in% map[idx,]$uuid)
+        idx <- which(tolower(uuid) %in% map[idx,]$uuid)
         files <- files[idx]
-    } else if (grepl("IlluminaGA_DNASeq_curated",data$Platform) & data$Center == "broad.mit.edu"){
+    } else if (grepl("IlluminaGA_DNASeq_curated|illuminaga_dnaseq_automated",data$Platform) & data$Center == "broad.mit.edu") {
         # Exception - two uuids in the name
         # case uuid in name file
         regex <- paste0("[[:alnum:]]{8}-[[:alnum:]]{4}",
@@ -191,7 +198,8 @@ filterFiles <- function(data,samples,files){
                              function(x) grep(x,mage$Comment..TCGA.Barcode.)))
         idx <- unique(idx)
         mage <- mage[idx,]
-        idx <- grep("Derived.Array.Data.Matrix.File|Array.Data.File",colnames(mage))
+        idx <- grep("Derived.Array.Data.Matrix.File|Array.Data.File|Derived.Data.File",
+                    colnames(mage))
         names <- unique(unlist(mage[,idx]))
         idx <- unique(unlist(lapply(names, function(x) grep(x,files))))
         files <- files[idx]

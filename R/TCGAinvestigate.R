@@ -6,13 +6,19 @@
 #' @param topgenes topgenes
 #' @importFrom RCurl url.exists curlVersion
 #' @examples
+<<<<<<< HEAD
 # TFs <- EAGenes[EAGenes$Family =="transcription regulator",]
+=======
+#' \dontrun{
+#' TFs <- EAGenes[EAGenes$Family =="transcription regulator",]
+>>>>>>> origin/master
 #' TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
 #' dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
 #  # Order table DEGs TFs according to Delta decrease
 #' dataDEGsFiltLevelTFs <- dataDEGsFiltLevelTFs[order(dataDEGsFiltLevelTFs$Delta,decreasing = TRUE),]
 #' # Find Pubmed of TF studied related to cancer
 #' tabDEGsTFPubmed <- TCGAinvestigate("breast", dataDEGsFiltLevelTFs, topgenes = 1)
+#' }
 #' @export
 #' @return table with number of pubmed related to tfs.
 TCGAinvestigate <- function(tumor,dataDEGsFiltLevelTF,topgenes){
@@ -33,7 +39,7 @@ TCGAinvestigate <- function(tumor,dataDEGsFiltLevelTF,topgenes){
 
     for (k in 1:nrow( dataDEGsFiltLevelTF)){
         CurrentGene <- dataDEGsFiltLevelTF$mRNA[k]
-        site2 <- paste(site,CurrentGene, "+", tumor,sep="")
+        site2 <- paste(site,CurrentGene, "+", tumor,sep = "")
 
         if(interactive() && ("ssl" %in% names(curlVersion()$features)) &&
            url.exists(site2)) {
@@ -43,12 +49,13 @@ TCGAinvestigate <- function(tumor,dataDEGsFiltLevelTF,topgenes){
 
 
 
-        if ( length(grep("No items found.",x))!=1){
+        if ( length(grep("No items found.",x)) != 1) {
 
-            if (length(grep("Display Settings",x))==1){
+            if (length(grep("Display Settings",x)) == 1) {
                 x6 <- 1
-                dataDEGsFiltLevelTF[k,"PMID"] <- substr(gsub("</dt> <dd>","",
-                                        unlist(strsplit(x,"PMID:"))[2]),1,8)
+                dataDEGsFiltLevelTF[k,"PMID"] <- substr(
+                    gsub("</dt> <dd>","",unlist(strsplit(x,"PMID:"))[2]),1,8
+                )
 
             }
 
@@ -105,16 +112,21 @@ TCGAinvestigate <- function(tumor,dataDEGsFiltLevelTF,topgenes){
                                                      decreasing = TRUE),]
 
     if( sum(dataDEGsFiltLevelTF$Pubmed == 1) != 0) {
-        dataDEGsFiltLevelTF[dataDEGsFiltLevelTF$Pubmed == 1,][ which( nchar(dataDEGsFiltLevelTF[dataDEGsFiltLevelTF$Pubmed == 1,]$PMID) > 8),"PMID"] <- substr(dataDEGsFiltLevelTF[dataDEGsFiltLevelTF$Pubmed == 1,][ which( nchar(dataDEGsFiltLevelTF[dataDEGsFiltLevelTF$Pubmed == 1,]$PMID) > 8),"PMID"],1,8)
+        dataDEGsFiltLevelTF[dataDEGsFiltLevelTF$Pubmed == 1,][
+            which( nchar(dataDEGsFiltLevelTF[
+                dataDEGsFiltLevelTF$Pubmed == 1,]$PMID) > 8),"PMID"] <- substr(
+                    dataDEGsFiltLevelTF[dataDEGsFiltLevelTF$Pubmed == 1,][
+                        which( nchar(dataDEGsFiltLevelTF[
+                            dataDEGsFiltLevelTF$Pubmed == 1,]$PMID) > 8),
+                        "PMID"],1,8)
     }
-    if( sum(dataDEGsFiltLevelTF$Pubmed == 0) != 0){
+    if ( sum(dataDEGsFiltLevelTF$Pubmed == 0) != 0) {
         dataDEGsFiltLevelTF[dataDEGsFiltLevelTF$Pubmed == 0,"PMID"] <- 0
     }
 
     tabDEGsTFPubmed$Tumor <- round(tabDEGsTFPubmed$Tumor)
     tabDEGsTFPubmed$Normal <- round(tabDEGsTFPubmed$Normal)
     tabDEGsTFPubmed$Delta <- round(tabDEGsTFPubmed$Delta)
-
 
     return(dataDEGsFiltLevelTF)
 }
