@@ -55,13 +55,12 @@
 #' @import grid
 #' @import stats
 #' @return  a ggplot2 plot
-#' @export
 #' @author Vincent Q. Vu.
-#' @examples
-#' data(iris)
-#' iris.pca <- prcomp(iris[,1:4], scale. = TRUE)
-#' print(ggbiplot(iris.pca, obs.scale = 1, var.scale = 1, groups = iris[,5],
-#' ellipse = TRUE, circle = TRUE))
+# @examples
+# data(iris)
+# iris.pca <- prcomp(iris[,1:4], scale. = TRUE)
+# print(ggbiplot(iris.pca, obs.scale = 1, var.scale = 1, groups = iris[,5],
+# ellipse = TRUE, circle = TRUE))
 ggbiplot <- function(pcobj, choices = 1:2, scale = 1, pc.biplot = TRUE,
                      obs.scale = 1 - scale, var.scale = scale,
                      groups = NULL, ellipse = FALSE, ellipse.prob = 0.68,
