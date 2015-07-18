@@ -1,7 +1,7 @@
 #' @title TCGAPrepare
 #' @description
-#'  This function will read the data from the experiments and prepare it
-#'  for downstream analysis.
+#'  This function will read the data from level 3 the experiments and prepare it
+#'  for downstream analysis into a SummarizedExperiment object.
 #'
 #'  The samples are always refered by their barcode.
 #'
@@ -10,12 +10,30 @@
 #'  If no filename was set, the filename will be the concatenation of platform and
 #'  Sys.time.
 #'
+#' List of accepted platforms:
+#'\itemize{
+#' \item AgilentG4502A_07_1/AgilentG4502A_07_2/AgilentG4502A_07_3
+#' \item Genome_Wide_SNP_6
+#' \item H-miRNA_8x15K/H-miRNA_8x15Kv2
+#' \item HG-U133_Plus_2
+#' \item HT_HG-U133A
+#' \item HumanMethylation27
+#' \item HumanMethylation450
+#' \item IlluminaDNAMethylation_OMA002_CPI
+#' \item IlluminaDNAMethylation_OMA003_CPI
+#' \item IlluminaGA_RNASeq
+#' \item IlluminaGA_RNASeqV2
+#' \item IlluminaHiSeq_RNASeq
+#' \item IlluminaHiSeq_RNASeqV2
+#' \item IlluminaHiSeq_TotalRNASeqV2
+#' }
 #'  \strong{Return}The default output is a SummarizedExperiment object.
 #'
 #' @return A SummarizedExperiment object (If SummarizedExperiment = \code{FALSE},
 #' a data.frame)
 #' @param query TCGAQuery output
 #' @param dir Directory with the files downloaded by TCGADownload
+#' @param samples List of samples to prepare the data
 #' @param type Filter the files to prepare.
 #' @param save Save a rda object with the prepared object?
 #'  Default: \code{FALSE}
@@ -33,7 +51,13 @@
 #' @importFrom stringr str_match str_trim str_detect str_match_all
 #' @importFrom SummarizedExperiment SummarizedExperiment
 #' @importFrom S4Vectors DataFrame SimpleList
-#' @import utils data.table
+#' @importFrom limma alias2SymbolTable
+#' @importFrom GenomicFeatures microRNAs
+#' @importFrom BiocGenerics as.data.frame
+#' @importFrom GenomicRanges GRanges nearest
+#' @importFrom IRanges IRanges
+#' @importFrom R.oo abort
+#' @import utils data.table TxDb.Hsapiens.UCSC.hg19.knownGene
 #' @seealso  \code{\link{TCGAQuery}} for searching the data to download
 #'
 #'  \code{\link{TCGADownload}} for downloading the data from the
@@ -41,6 +65,7 @@
 #' @family data functions
 TCGAPrepare <- function(query,
                         dir = NULL,
+                        samples = NULL,
                         type = NULL,
                         save = FALSE,
                         filename = NULL,
@@ -84,9 +109,19 @@ TCGAPrepare <- function(query,
         }
     }
 
+    # Filter by samples
+    if (!is.null(samples)) {
+        files <- filterFiles(query[i,],samples,files)
+        if(length(files) == 0){
+            message("No files for that samples found")
+            return(NULL)
+        }
+    }
+
+
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     df <- NULL
-
+    sset <- NULL
 
     if (grepl("humanmethylation",tolower(platform))) {
 
@@ -116,18 +151,33 @@ TCGAPrepare <- function(query,
             setTxtProgressBar(pb, i)
         }
 
-        if(summarizedExperiment){
+        if (summarizedExperiment) {
+
+            gene.GR <- GRanges(seqnames = paste0("chr", gene.location$chromosome_name),
+                               ranges = IRanges(start = gene.location$start_position,
+                                                end = gene.location$end_position),
+                               strand = gene.location$strand,
+                               symbol = gene.location$external_gene_name,
+                               EntrezID = gene.location$entrezgene)
+
             rowRanges <- GRanges(seqnames = paste0("chr", df$Chromosome),
                                  ranges = IRanges(start = df$Genomic_Coordinate,
                                                   end = df$Genomic_Coordinate),
                                  probeID = df$Composite.Element.REF)
+
+            # closest gene to each 450k probe ##your data
+            neargene <- as.data.frame(nearest(rowRanges, gene.GR))
+            neargene <- gene.location[neargene[,1],]
+            rowRanges$Gene_Symbol <-  neargene$external_gene_name
+
             names(rowRanges) <- as.character(df$Composite.Element.REF)
-            colData <- DataFrame(sample=colnames(df)[5:ncol(df)],
-                                 row.names=colnames(df)[5:ncol(df)])
-            sset <- SummarizedExperiment(assays= as.matrix(subset(df,select = c(5:ncol(df)))),
-                                         rowRanges=rowRanges,
-                                         colData=colData)
-            return(sset)
+            colData <-  colDataPrepare(colnames(df)[5:ncol(df)])
+            assay <- data.matrix(subset(df,select = c(5:ncol(df))))
+
+            sset <- SummarizedExperiment(assays = assay,
+                                         rowRanges = rowRanges,
+                                         colData = colData)
+
         } else {
             setDF(df)
             rownames(df) <- df$Composite.Element.REF
@@ -198,7 +248,8 @@ TCGAPrepare <- function(query,
             data <- fread(files[i], header = TRUE, sep = "\t",
                           stringsAsFactors = FALSE)
 
-            setnames(data,colnames(data)[2:ncol(data)],paste0(colnames(data)[2:ncol(data)],"_",barcode[i]))
+            setnames(data,colnames(data)[2:ncol(data)],
+                     paste0(colnames(data)[2:ncol(data)],"_",barcode[i]))
             # removing duplicated rows
             data <- subset(data,subset=(!duplicated(data[,1,with=FALSE])))
             if (i == 1) {
@@ -222,9 +273,10 @@ TCGAPrepare <- function(query,
                                      gene_id = merged$external_gene_name,
                                      entrezgene = merged$entrezgene)
                 names(rowRanges) <- as.character(merged$gene)
-                assays <- SimpleList(raw_counts=as.matrix(subset(merged,select=seq(3,ncol(df),3))),
-                                     median_length_normalized=as.matrix(subset(merged,select=seq(4,ncol(df),3))),
-                                     RPKM=as.matrix(subset(merged,select=seq(5,ncol(df),3))))
+                assays <- SimpleList(
+                    raw_counts=data.matrix(subset(merged,select=seq(3,ncol(df),3))),
+                    median_length_normalized=data.matrix(subset(merged,select=seq(4,ncol(df),3))),
+                    RPKM=data.matrix(subset(merged,select=seq(5,ncol(df),3))))
 
             }  else if(grepl("junction",colnames(df)[1])){
 
@@ -242,7 +294,7 @@ TCGAPrepare <- function(query,
                                      ranges = IRanges(start = start, end = end),
                                      strand = strand)
                 names(rowRanges) <- as.character(df$junction)
-                assays <- SimpleList(raw_counts=as.matrix(subset(df,select=2:ncol(df))))
+                assays <- SimpleList(raw_counts=data.matrix(subset(df,select=2:ncol(df))))
 
             } else if(grepl("exon",colnames(df)[1])){
                 # exon chr1:11874-12227:+
@@ -259,17 +311,16 @@ TCGAPrepare <- function(query,
                                      ranges = IRanges(start = start, end = end),
                                      strand = strand)
                 names(rowRanges) <- as.character(df$exon)
-                assays <- SimpleList(raw_counts=as.matrix(subset(df,select=seq(2,ncol(df),3))),
-                                     median_length_normalized=as.matrix(subset(df,select=seq(3,ncol(df),3))),
-                                     RPKM=as.matrix(subset(df,select=seq(4,ncol(df),3))))
+                assays <- SimpleList(
+                    raw_counts=data.matrix(subset(df,select=seq(2,ncol(df),3))),
+                    median_length_normalized=data.matrix(subset(df,select=seq(3,ncol(df),3))),
+                    RPKM=data.matrix(subset(df,select=seq(4,ncol(df),3))))
 
             }
-            colData <- DataFrame(sample=as.character(barcode),
-                                 row.names=as.character(barcode))
+            colData <- colDataPrepare(as.character(barcode))
             sset <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
                                          colData=colData)
-            return(sset)
         }else {
             setDF(df)
             rownames(df) <- df[,1]
@@ -305,36 +356,91 @@ TCGAPrepare <- function(query,
                             mage[idx,]$Comment..TCGA.Barcode.
                         })
         setnames(df,2:ncol(df),names)
-    }
-
-    if (tolower(platform) == tolower("HG-U133_Plus_2") ||
-        grepl("H-miRNA_8x15K|agilent",platform, ignore.case = TRUE)) {
-        for (i in seq_along(files)) {
-            data <- fread(files[i], header = TRUE, sep = "\t",
-                          stringsAsFactors = FALSE)
-
-            if (i == 1) {
-                df <- data
-            } else {
-                df <- merge(df, data, colnames(data)[1])
-            }
-            setTxtProgressBar(pb, i)
-        }
-        df <- df[-1,]
 
         if(summarizedExperiment){
             # TODO create GRanges
+            df$external_gene_name <-  alias2SymbolTable(df$`Composite Element REF`)
+            merged <- merge(df,gene.location,by="external_gene_name")
             rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
                                  ranges = IRanges(start = merged$start_position,
                                                   end = merged$end_position),
                                  strand=merged$strand,
                                  gene_id = merged$external_gene_name,
-                                 entrezgene = merged$entrezgene )
-            names(rowRanges) <- as.character(merged$gene_id)
+                                 entrezgene = merged$entrezgene,
+                                 alias = merged$`Composite Element REF`)
+            names(rowRanges) <- as.character(merged$`Composite Element REF`)
 
-            assays <- SimpleList(raw_counts=as.matrix(subset(df,select=seq(2,ncol(df)))))
-            colData <- DataFrame(sample=colnames(df)[2:ncol(df)],
-                                 row.names=colnames(df)[2:ncol(df)])
+            regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
+                            "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
+            barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
+            colData <- colDataPrepare(barcode)
+
+            assays <- SimpleList(raw_counts=data.matrix(
+                subset(merged,select=seq(3,2+length(barcode)))
+            )
+            )
+
+            sset <- SummarizedExperiment(assays=assays,
+                                         rowRanges=rowRanges,
+                                         colData=colData)
+        }
+    }
+
+    if (tolower(platform) == tolower("HG-U133_Plus_2") ||
+        grepl("H-miRNA_8x15K|agilent",platform, ignore.case = TRUE)) {
+
+        for (i in seq_along(files)) {
+            header <- fread(files[i], sep = "\t",
+                            stringsAsFactors = FALSE, nrows =  1, header = FALSE,
+                            colClasses=c("character",
+                                         "character"))
+            data <- fread(files[i], header = TRUE, sep = "\t",
+                          stringsAsFactors = FALSE, skip = 1,
+                          colClasses=c("character",
+                                       "numeric"))
+            setnames(data,1:2,as.character(header))
+            if (i == 1) {
+                df <- data
+            } else {
+                df <- merge(df, data, colnames(data)[1])
+            }
+            #setTxtProgressBar(pb, i)
+        }
+        df <- df[-1,]
+
+        if(summarizedExperiment){
+            if(!grepl("H-miRNA_8x15K|agilent",platform, ignore.case = TRUE)){
+                # TODO create GRanges
+                df$external_gene_name <-  alias2SymbolTable(df$`Hybridization REF`)
+                merged <- merge(df,gene.location,by="external_gene_name")
+                rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
+                                     ranges = IRanges(start = merged$start_position,
+                                                      end = merged$end_position),
+                                     strand=merged$strand,
+                                     gene_id = merged$external_gene_name,
+                                     entrezgene = merged$entrezgene,
+                                     alias = merged$`Hybridization REF`)
+                names(rowRanges) <- as.character(merged$`Hybridization REF`)
+            } else {
+                microRNA <- as.data.frame(microRNAs(TxDb.Hsapiens.UCSC.hg19.knownGene))
+                df$mirna_id <- tolower(df$`Hybridization REF`)
+                merged <- merge(df,microRNA, by="mirna_id")
+                rowRanges <- GRanges(seqnames = merged$seqnames,
+                                     ranges = IRanges(start = merged$start,
+                                                      end = merged$end),
+                                     strand=merged$strand,
+                                     mirna_id = merged$mirna_id)
+                names(rowRanges) <- as.character(merged$mirna_id)
+            }
+            regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
+                            "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
+            barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
+            colData <- colDataPrepare(barcode)
+
+            assays <- SimpleList(raw_counts=data.matrix(
+                subset(merged,select=seq(3,2+length(barcode)))
+            )
+            )
 
             sset <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
@@ -417,11 +523,13 @@ TCGAPrepare <- function(query,
                 names(rowRanges) <- as.character(merged$gene_id)
 
                 if(length(colnames(data))>2){
-                    assays <- SimpleList(raw_counts=as.matrix(subset(merged,select=seq(3,ncol(df),3))),
-                                         scaled_estimate=as.matrix(subset(merged,select=seq(4,ncol(df),3))),
-                                         transcript_id=as.matrix(subset(merged,select=seq(5,ncol(df),3))))
+                    assays <- SimpleList(
+                        raw_counts=data.matrix(subset(merged,select=seq(3,ncol(df),3))),
+                        scaled_estimate=data.matrix(subset(merged,select=seq(4,ncol(df),3))),
+                        transcript_id=data.matrix(subset(merged,select=seq(5,ncol(df),3))))
                 } else {
-                    assays <- SimpleList(raw_counts=as.matrix(subset(merged,select=seq(3,ncol(df)))))
+                    assays <- SimpleList(
+                        raw_counts=data.matrix(subset(merged,select=seq(3,ncol(df)))))
                 }
             } else if(grepl("junction",colnames(df)[1])){
                 aux    <- strsplit(df$junction,":")
@@ -437,7 +545,7 @@ TCGAPrepare <- function(query,
                                      ranges = IRanges(start = start, end = end),
                                      strand = strand)
                 names(rowRanges) <- as.character(df$junction)
-                assays <- SimpleList(raw_counts=as.matrix(subset(df,select=2:ncol(df))))
+                assays <- SimpleList(raw_counts=data.matrix(subset(df,select=2:ncol(df))))
             } else if(grepl("exon",colnames(df)[1])){
                 # exon chr1:11874-12227:+
                 aux       <- strsplit(df$exon,":")
@@ -453,22 +561,21 @@ TCGAPrepare <- function(query,
                                      ranges = IRanges(start = start, end = end),
                                      strand = strand)
                 names(rowRanges) <- as.character(df$exon)
-                assays <- SimpleList(raw_counts=as.matrix(subset(df,select=seq(2,ncol(df),3))),
-                                     median_length_normalized=as.matrix(subset(df,select=seq(3,ncol(df),3))),
-                                     RPKM=as.matrix(subset(df,select=seq(4,ncol(df),3))))
+                assays <- SimpleList(
+                    raw_counts=data.matrix(subset(df,select=seq(2,ncol(df),3))),
+                    median_length_normalized=data.matrix(subset(df,select=seq(3,ncol(df),3))),
+                    RPKM=data.matrix(subset(df,select=seq(4,ncol(df),3))))
             } else if(grepl("isoform",colnames(df)[1])){
                 message("TBD")
             }
             regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
-            colData <- DataFrame(sample=barcode,
-                                 row.names=barcode)
+            colData <- colDataPrepare(barcode)
 
             sset <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
                                          colData=colData)
-            return(sset)
         } else {
             setDF(df)
             rownames(df) <- df[,1]
@@ -523,7 +630,7 @@ TCGAPrepare <- function(query,
         if (length(files) == 1) {
             df <- read.table(files, header = TRUE, sep = "\t",
                              stringsAsFactors = FALSE, check.names = FALSE,
-                             comment.char = "#",fill = TRUE, skip =1)
+                             comment.char = "#",fill = TRUE)
             regex <- paste0("[[:alnum:]]{8}-[[:alnum:]]{4}",
                             "-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}")
             idx <- grepl(regex,df$bcr_patient_uuid)
@@ -550,7 +657,6 @@ TCGAPrepare <- function(query,
             mage <- getMage(query[1,])
         }
 
-        #load("hg19genes.RData")
         genes <- sort(unique(gene.location$external_gene_name))
 
         df <- matrix(0, nrow = length(genes), ncol = length(files))
@@ -564,32 +670,62 @@ TCGAPrepare <- function(query,
             colNames[i] <- data$Sample[1]
 
             for(j in 1:nrow(data)){
-                gg <- sort(unique(gene.location[gene.location$start_position >= data$Start[j]
-                                                & gene.location$end_position <= data$End[j],
-                                                "external_gene_name"]))
+                gg <- sort(unique(gene.location[
+                    gene.location$start_position >= data$Start[j]
+                    & gene.location$end_position <= data$End[j],
+                    "external_gene_name"]))
                 df[gg, i] <- df[gg, i] + data$Segment_Mean[j]
             }
             setTxtProgressBar(pb, i)
         }
         id <- data.frame(id=colNames)
-        #idx <- unlist(lapply(colNames,function(x){grep(x, mage$Derived.Array.Data.Matrix.File.2)}))
         names <- merge(id,mage,by.x="id",by.y="Hybridization.Name")
         colnames(df) <- names$Comment..TCGA.Barcode.
+
+        if (summarizedExperiment){
+            message("Preparing summarizedExperiment")
+            df <- DataFrame(df)
+            df$external_gene_name <- rownames(df)
+            merged <- merge(df,gene.location,by="external_gene_name")
+            rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
+                                 ranges = IRanges(start = merged$start_position,
+                                                  end = merged$end_position),
+                                 strand=merged$strand,
+                                 gene_id = merged$external_gene_name,
+                                 entrezgene = merged$entrezgene)
+            names(rowRanges) <- as.character(merged$external_gene_name)
+
+            idx  <- grep("TCGA",colnames(merged))
+            colData <- colDataPrepare(colnames(merged)[idx])
+            assays <- SimpleList(sum_Segment_Mean=data.matrix(
+                subset(merged,select = idx))
+            )
+
+            sset <- SummarizedExperiment(assays = assays,
+                                         rowRanges = rowRanges,
+                                         colData = colData)
+
+        }
     }
     close(pb)
 
-    if(save){
-        if(is.null(filename)){
+    if (save) {
+        if (is.null(filename)) {
             filename <- paste0(platform,"_",gsub(" ","_",Sys.time()),".rda")
         }
-        save(df,file = filename)
+        if (!is.null(sset)) {
+            save(sset,file = filename)
+        } else {
+            save(df,file = filename)
+        }
     }
 
-
-    if(!is.null(toPackage)){
+    if (!is.null(toPackage) && !summarizedExperiment) {
         df <- prepareToPackage(df, platform,toPackage)
     }
-
+    if (!is.null(sset)) {
+        return(sset)
+    }
     return(df)
 }
 
@@ -609,7 +745,7 @@ prepareToPackage <- function(df, platform, toPackage){
             aux <- strsplit(rownames(df),"\\|")
             GeneID <- unlist(lapply(aux,function(x) x[2]))
             row.names(df) <- paste0("ID",GeneID)
-            df <- as.matrix(df)
+            df <- data.matrix(df)
         }
 
         if (grepl("humanmethylation", platform, ignore.case = TRUE)) {

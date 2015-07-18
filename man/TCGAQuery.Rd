@@ -61,8 +61,8 @@ A dataframe with the results of the query
        (lastest version of the files)
 }
 \description{
-The TCGAQuery searches TCGA open-access data throught a preprocessed
-   table with the lastest version of the files.
+The TCGAQuery searches TCGA open-access data through a preprocessed table
+   with the latest version of the files.
 
    Some parameters as tumor, platorm, level, center, barcode can be used
    to search the data.
