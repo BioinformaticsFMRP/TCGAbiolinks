@@ -402,6 +402,16 @@ TCGADownload(query, path = "dataBrca", type = "rsem.genes.results",samples = lis
 # Prepare expression matrix with gene id in rows and samples (barcode) in columns
 # rsem.genes.results as values
 BRCAMatrix <- TCGAPrepare(query,"dataBrca",type = "rsem.genes.results")
+
+
+# checking summarized experiment with data.frame
+
+#BRCAMatrix_data <- BRCAMatrix@assays$data$raw_counts
+#colnames(BRCAMatrix_data)<-BRCAMatrix@colData$sample
+#rownames(BRCAMatrix_data)<-BRCAMatrix@rowRanges@elementMetadata$gene_id
+BRCAMatrix_assay <- assay(BRCAMatrix,1)
+commonGenes <- intersect(rownames(BRCAMatrix_assay), rownames(dataBRCA))
+sum(dataBRCA[commonGenes,] != BRCAMatrix_assay[commonGenes,])
 ```
 
 The result is shown below:
