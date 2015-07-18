@@ -12,13 +12,17 @@ GenesCutID <- function(GeneList){
     return(as.matrix(GeneListCutID))
 }
 
-#' @title Filtering rnaseq by quantile
+#' @title RnaSeqFilt
 #' @description
-#'   Filtering rnaseq by quantile
-#' @param TableRnaseq TableRnaseq
-#' @param QuantileThresh QuantileThresh
+#'    RnaSeqFilt allows user to filter mRNA transcripts and miRNA,
+#'    selecting a threshold. For istance returns all mRNA or miRNA with mean across all
+#'    samples, higher than the threshold defined quantile mean across all samples.
+#' @param TableRnaseq is a dataframe or numeric matrix, each row represents a gene,
+#' each column represents a sample come from TCGAPrepare
+#' @param QuantileThresh is threshold selected as mean for filtering
 #' @export
-#' @return table filtered
+#' @return A filtered dataframe or numeric matrix where each row represents a gene,
+#' each column represents a sample
 #' @examples
 #' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 #' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
@@ -31,7 +35,18 @@ RnaSeqFilt <- function(TableRnaseq,QuantileThresh ){
 
 #' @title RnaSeqNormalization
 #' @description
-#'   RnaSeqNormalization
+#'   RnaSeqNormalization allows user to normalize mRNA transcripts and miRNA,
+#'    using EDASeq package.
+#'     Normalization for RNA-Seq
+#'     Numerical and graphical summaries of RNA-Seq read data. Within-lane normalization procedures
+to adjust for GC-content effect (or other gene-level effects) on read counts:
+    loess robust local regression, global-scaling, and full-quantile normalization
+(Risso et al., 2011). Between-lane normalization procedures to adjust for
+distributional differences between lanes (e.g., sequencing depth): global-scaling and full-quantile normalization (Bullard et al., 2010).
+#'
+#'
+#'    For istance returns all mRNA or miRNA with mean across all
+#'    samples, higher than the threshold defined quantile mean across all samples.
 #' @param TCGA_RnaseqTable TCGA_RnaseqTable
 #' @param geneInfo geneInfo
 #' @importFrom EDASeq newSeqExpressionSet withinLaneNormalization
