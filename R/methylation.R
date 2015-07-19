@@ -84,6 +84,8 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' @param xlab x axis text of the plot
 #' @param filename The name of the pdf file
 #' @param color Define the colors of the lines.
+#' @param width Image width
+#' @param height Image height
 #' @importFrom GGally ggsurv
 #' @importFrom survival survfit Surv
 #' @importFrom scales percent
@@ -106,7 +108,9 @@ survivalAnalysis <- function(data,
                              ylab = "PROBABILITY OF SURVIVAL",
                              xlab = "TIME SINCE DIAGNOSIS (DAYS)",
                              filename = "survival.pdf",
-                             color = c("green", "firebrick4", "orange3", "blue")
+                             color = c("green", "firebrick4", "orange3", "blue"),
+                             height=10,
+                             width=5
 ) {
     .e <- environment()
     group <- NULL
@@ -114,17 +118,17 @@ survivalAnalysis <- function(data,
         message("Please provide the clusterCol argument")
         return(NULL)
     }
-    notDead <- which(data$death_days_to == "[Not Applicable]")
+    notDead <- which(data$days_to_death == "[Not Applicable]")
 
     if (length(notDead) > 0) {
-        data[notDead,]$death_days_to <- data[notDead,]$last_contact_days_to
+        data[notDead,]$days_to_death <- data[notDead,]$days_to_last_followup
     }
 
     if (cutoff != 0) {
         # Axis-x cut-off
-        aux <- subset(data, data$death_days_to > cutoff)
+        aux <- subset(data, data$days_to_death > cutoff)
         # 'cut' info bigger than cutoff
-        data[rownames(aux), "death_days_to"] <- cutoff
+        data[rownames(aux), "days_to_death"] <- cutoff
         # Pacient is alive (0:alive,1:dead)
         data[rownames(aux), "vital_status"] <- "Alive"
     }
@@ -134,9 +138,8 @@ survivalAnalysis <- function(data,
 
     # Column with groups
     data$type <- as.factor(data[,clusterCol])
-
     # create the formula for survival analysis
-    f.m <- formula(Surv(as.numeric(data$death_days_to),
+    f.m <- formula(Surv(as.numeric(data$days_to_death),
                         data$s) ~ data$type)
     fit <- survfit(f.m, data = data)
 
@@ -162,7 +165,8 @@ survivalAnalysis <- function(data,
                                       shape = 3,size = 2)
             surv <- surv + guides(linetype = FALSE) +
                 scale_y_continuous(labels = scales::percent)
-            ggsave(surv, filename = filename)
+            ggsave(surv, filename = filename,
+                   width = width, height = height)
         })
     })
 
