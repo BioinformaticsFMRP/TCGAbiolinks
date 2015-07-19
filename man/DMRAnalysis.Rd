@@ -10,7 +10,8 @@ DMRAnalysis(data, groupCol = NULL, group1 = NULL, group2 = NULL,
   title = "Volcano plot", legend = "Legend", color = c(`1` = "black", `2`
   = "green", `3` = "red"), label = c(`1` = "Not Significant", `2` =
   "Hypermethylated", `3` = "Hypomethylated"), xlim = NULL, ylim = NULL,
-  p.cut = 0.01, diffmean.cut = 0.2, paired = FALSE, adj.method = "BH")
+  p.cut = 0.01, diffmean.cut = 0.2, paired = FALSE, adj.method = "BH",
+  overwrite = FALSE)
 }
 \arguments{
 \item{data}{SummarizedExperiment obtained from the TCGAPrepare}
@@ -49,6 +50,9 @@ the name of the group}
 \item{paired}{Wilcoxon paired parameter}
 
 \item{adj.method}{Adjusted method for the p-value calculation}
+
+\item{overwrite}{Overwrite the pvalues and diffmean values if already in the object
+for both groups? Default: FALSE}
 }
 \value{
 Volcano plot saved and the given data with the results
