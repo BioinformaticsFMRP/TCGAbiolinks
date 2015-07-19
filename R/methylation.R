@@ -284,10 +284,10 @@ meanMethylationAnalysis <- function(data,
 #' @param exact  Do a exact wilcoxon test? Default: True
 #' @param  method P-value adjustment method. Default:"BH" Benjamini-Hochberg
 #' @return Data frame with cols p values/p values adjusted
-#' @importFrom exactRankTests wilcox.exact
 #' @import graphics
 #' @importFrom grDevices png dev.off pdf
 #' @import stats
+#' @importFrom coin wilcox_test wilcoxsign_test
 #' @importFrom SummarizedExperiment colData rowRanges rowRanges<-
 #' @return Data frame with two cols
 #'         p-values/p-values adjusted
@@ -333,13 +333,24 @@ calculate.pvalues <- function(data,
     # Apply Wilcoxon test in order to calculate the p-values
     idx1 <- which(colData(data)[,groupCol] == group1)
     idx2 <- which(colData(data)[,groupCol] == group2)
-    p.value <- apply(assay(data),1,
-                     function(x) {
-                         wilcox.test(x[idx1], x[idx2],
-                                     exact = exact, paired = paired)$p.value
-                     }
-    )
 
+    if(!paired){
+        p.value <- apply(assay(data),1,
+                         function(x) {
+                             aux <-data.frame(beta=x[c(idx1,idx2)],
+                                              cluster=droplevels(colData(data)[c(idx1,idx2),groupCol]))
+                             pvalue(wilcox_test(beta ~ cluster, data=aux, distribution = "exact"))
+                         }
+        )
+    } else {
+        p.value <- apply(assay(data),1,
+                         function(x) {
+                             aux <-data.frame(beta=x[c(idx1,idx2)],
+                                              cluster=droplevels(colData(data)[c(idx1,idx2),groupCol]))
+                             pvalue(wilcoxsign_test(beta ~ cluster, data=aux, distribution = exact()))
+                         }
+        )
+    }
     ## Plot a histogram
     message("Saved histogram_pvalues.png...")
     png(filename = "histogram_pvalues.png")
@@ -401,6 +412,8 @@ calculate.pvalues <- function(data,
 #' @param diffmean.cut diffmean threshold
 #' @param adj.method Adjusted method for the p-value calculation
 #' @param paired Wilcoxon paired parameter
+#' @param overwrite Overwrite the pvalues and diffmean values if already in the object
+#' for both groups? Default: FALSE
 #' @import ggplot2
 #' @importFrom SummarizedExperiment colData rowRanges assay rowRanges<- values<-
 #' @export
@@ -445,7 +458,8 @@ DMRAnalysis <- function(data,
                         p.cut = 0.01,
                         diffmean.cut = 0.2,
                         paired = FALSE,
-                        adj.method="BH") {
+                        adj.method="BH",
+                        overwrite=FALSE) {
     .e <- environment()
 
     if (is.null(groupCol)) {
@@ -462,12 +476,12 @@ DMRAnalysis <- function(data,
     }
 
     diffcol <- paste("diffmean",group1,group2,sep = ".")
-    if (!(diffcol %in% colnames(values(rowRanges(data))))) {
+    if (!(diffcol %in% colnames(values(rowRanges(data)))) || overwrite) {
         data <- diffmean(data,groupCol, group1 = group1, group2 = group2)
         if (!(diffcol %in% colnames(values(rowRanges(data))))) stop("Error!")
     }
     pcol <- paste("p.value.adj",group1,group2,sep = ".")
-    if (!(pcol %in% colnames(values(rowRanges(data))))) {
+    if (!(pcol %in% colnames(values(rowRanges(data)))) || overwrite) {
         data <- calculate.pvalues(data,groupCol, group1, group2,
                                   paired = paired,method = adj.method)
         # An error should not happen, if it happens (probably due to an incorret
