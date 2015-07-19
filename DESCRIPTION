@@ -33,7 +33,7 @@ Imports:
     rjson,
     plyr,
     biomaRt,
-    exactRankTests,
+    coin,
     ggplot2,
     survival,
     stringr (>= 1.0.0),
