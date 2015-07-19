@@ -633,6 +633,7 @@ TCGAPrepare <- function(query,
                              comment.char = "#",fill = TRUE)
             regex <- paste0("[[:alnum:]]{8}-[[:alnum:]]{4}",
                             "-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}")
+            if (grepl("clinical",type)) colnames(df) <- df[1,]
             idx <- grepl(regex,df$bcr_patient_uuid)
             df <- df[idx,]
         } else {
