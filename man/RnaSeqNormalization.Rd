@@ -23,6 +23,11 @@ RnaSeqNormalization allows user to normalize mRNA transcripts and miRNA,
    distributional differences between lanes (e.g., sequencing depth): global-scaling and full-quantile normalization (Bullard et al., 2010).
    For istance returns all mRNA or miRNA with mean across all
    samples, higher than the threshold defined quantile mean across all samples.
+   RnaSeqNormalization performs normalization using following functions from EDASeq
+   1. EDASeq::newSeqExpressionSet
+   2. EDASeq::withinLaneNormalization
+   3. EDASeq::betweenLaneNormalization
+   4. EDASeq::counts
 }
 \examples{
 dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
