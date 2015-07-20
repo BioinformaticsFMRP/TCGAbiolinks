@@ -775,7 +775,7 @@ tabSurvKMcompleteDEGs <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% data
 tflist <- EAGenes[EAGenes$Family == "transcription regulator","Gene"]
 tabSurvKMcomplete_onlyTF <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% tflist,]
 
-TabCoxNet <- SurvivalCoxNET(clinical_patient,dataBRCAcomplete,
+TabCoxNet <- SurvivalCoxNET(clinical_patient_Cancer,dataBRCAcomplete,
                             Genelist = rownames(tabSurvKMcomplete_onlyTF),
                             scoreConfidence = 700,titlePlot = "SurvivalCoxNET Example")
 ```
