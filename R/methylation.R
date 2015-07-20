@@ -92,10 +92,10 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' @export
 #' @return Survival plot
 #' @examples
-#' death_days_to <- floor(runif(200, 1, 1000))
+#' days_to_death <- floor(runif(200, 1, 1000))
 #' vital_status <- c(rep("Dead",200))
 #' groups <- c(rep(c("G1","G2"),c(100,100)))
-#' df <- data.frame(death_days_to,vital_status,groups)
+#' df <- data.frame(days_to_death,vital_status,groups)
 #' survivalAnalysis(df,clusterCol="groups")
 #' \dontrun{
 #' clinical <- clinic("gbm","clinical_patient")
