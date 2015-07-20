@@ -666,6 +666,7 @@ number of dimensions of our gene set. The function `plotPCAforGroups` will plot
 the PCA for different groups.
 
 The parameters of this function are:
+
 * **dataFilt** The expression matrix after normalization and quantile filter
 * **dataDEGsFiltLevel** The CreateTabLevel output
 * **ntopgenes** number of DEGs genes to plot in PCA
@@ -1093,7 +1094,7 @@ you should set the name of the group
 *  **ylim** y limits to cut image
 *  **p.cut**	p values threshold
 *  **diffmean.cut**	diffmean threshold
-*  ** paired**	Wilcoxon paired parameter
+*  **paired**	Wilcoxon paired parameter
 *  **adj.method**	Adjusted method for the p-value calculation
 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
@@ -1115,6 +1116,7 @@ value for DNA methylation (x axis) and gene expression (y axis) for each gene.
 The black dashed line shows the FDR-adjusted P value of 0.01.
 
 The parameters of this function are:
+
 * **met** SummarizedExperiment with methylation data obtained from the 
 `TCGAPrepare` and processed by `volcanoAnalysis` function. 
 Expected colData columns: diffmean, p.value.adj and p.value
@@ -1124,9 +1126,9 @@ Expected colData columns: diffmean, p.value.adj and p.value
 *  **group2** Name of the group2
 
 ```{r, eval = FALSE}
-nrows <- 20000; ncols <- 20
-counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
-rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(5000, 15000)),
+ nrows <- 20000; ncols <- 20
+ counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
+ ranges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(5000, 15000)),
                     IRanges::IRanges(floor(runif(20000, 1e5, 1e6)), width=100),
                      strand=sample(c("+", "-"), 20000, TRUE),
                      probeID=sprintf("ID%03d", 1:20000),
@@ -1136,18 +1138,16 @@ colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
                      group=rep(c("group1","group2"),c(10,10)))
 data <- SummarizedExperiment::SummarizedExperiment(
           assays=S4Vectors::SimpleList(counts=counts),
-          rowRanges=rowRanges,
+          rowRanges=ranges,
           colData=colData)
-met <- data
-exp <- data
-rowRanges(met)$diffmean <- c(runif(20000, -0.1, 0.1))
-rowRanges(met)$p.value <- c(runif(20000, 0, 1))
-rowRanges(met)$p.value.adj <- c(runif(20000, 0, 1))
-rowRanges(exp)$diffmean <- c(runif(20000, -0.1, 0.1))
-rowRanges(exp)$p.value <- c(runif(20000, 0, 1))
-rowRanges(exp)$p.value.adj <- c(runif(20000, 0, 1))
-result <- starburstPlot(met,exp,p.cut = 0.01)
-starburstAnalysis(met,exp,"group1","group2")
+ met <- data
+ exp <- data.frame(row.names=sprintf("ID%03d", 1:20000),
+                   logFC=runif(20000, -0.2, 0.2),
+                   FDR=runif(20000, 0.01, 1))
+ SummarizedExperiment::rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
+ SummarizedExperiment::rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
+ SummarizedExperiment::rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
+ result <- starburstAnalysis(met,exp,p.cut = 0.05,"g1","g2")
 ```
 
 
