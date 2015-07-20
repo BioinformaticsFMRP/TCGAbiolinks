@@ -84,6 +84,8 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' @param xlab x axis text of the plot
 #' @param filename The name of the pdf file
 #' @param color Define the colors of the lines.
+#' @param width Image width
+#' @param height Image height
 #' @importFrom GGally ggsurv
 #' @importFrom survival survfit Surv
 #' @importFrom scales percent
@@ -106,7 +108,9 @@ survivalAnalysis <- function(data,
                              ylab = "PROBABILITY OF SURVIVAL",
                              xlab = "TIME SINCE DIAGNOSIS (DAYS)",
                              filename = "survival.pdf",
-                             color = c("green", "firebrick4", "orange3", "blue")
+                             color = c("green", "firebrick4", "orange3", "blue"),
+                             height=10,
+                             width=5
 ) {
     .e <- environment()
     group <- NULL
@@ -114,17 +118,17 @@ survivalAnalysis <- function(data,
         message("Please provide the clusterCol argument")
         return(NULL)
     }
-    notDead <- which(data$death_days_to == "[Not Applicable]")
+    notDead <- which(data$days_to_death == "[Not Applicable]")
 
     if (length(notDead) > 0) {
-        data[notDead,]$death_days_to <- data[notDead,]$last_contact_days_to
+        data[notDead,]$days_to_death <- data[notDead,]$days_to_last_followup
     }
 
     if (cutoff != 0) {
         # Axis-x cut-off
-        aux <- subset(data, data$death_days_to > cutoff)
+        aux <- subset(data, data$days_to_death > cutoff)
         # 'cut' info bigger than cutoff
-        data[rownames(aux), "death_days_to"] <- cutoff
+        data[rownames(aux), "days_to_death"] <- cutoff
         # Pacient is alive (0:alive,1:dead)
         data[rownames(aux), "vital_status"] <- "Alive"
     }
@@ -134,9 +138,8 @@ survivalAnalysis <- function(data,
 
     # Column with groups
     data$type <- as.factor(data[,clusterCol])
-
     # create the formula for survival analysis
-    f.m <- formula(Surv(as.numeric(data$death_days_to),
+    f.m <- formula(Surv(as.numeric(data$days_to_death),
                         data$s) ~ data$type)
     fit <- survfit(f.m, data = data)
 
@@ -162,7 +165,8 @@ survivalAnalysis <- function(data,
                                       shape = 3,size = 2)
             surv <- surv + guides(linetype = FALSE) +
                 scale_y_continuous(labels = scales::percent)
-            ggsave(surv, filename = filename)
+            ggsave(surv, filename = filename,
+                   width = width, height = height)
         })
     })
 
@@ -280,10 +284,10 @@ meanMethylationAnalysis <- function(data,
 #' @param exact  Do a exact wilcoxon test? Default: True
 #' @param  method P-value adjustment method. Default:"BH" Benjamini-Hochberg
 #' @return Data frame with cols p values/p values adjusted
-#' @importFrom exactRankTests wilcox.exact
 #' @import graphics
 #' @importFrom grDevices png dev.off pdf
 #' @import stats
+#' @importFrom coin wilcox_test wilcoxsign_test
 #' @importFrom SummarizedExperiment colData rowRanges rowRanges<-
 #' @return Data frame with two cols
 #'         p-values/p-values adjusted
@@ -329,13 +333,24 @@ calculate.pvalues <- function(data,
     # Apply Wilcoxon test in order to calculate the p-values
     idx1 <- which(colData(data)[,groupCol] == group1)
     idx2 <- which(colData(data)[,groupCol] == group2)
-    p.value <- apply(assay(data),1,
-                     function(x) {
-                         wilcox.test(x[idx1], x[idx2],
-                                     exact = exact, paired = paired)$p.value
-                     }
-    )
 
+    if(!paired){
+        p.value <- apply(assay(data),1,
+                         function(x) {
+                             aux <-data.frame(beta=x[c(idx1,idx2)],
+                                              cluster=droplevels(colData(data)[c(idx1,idx2),groupCol]))
+                             pvalue(wilcox_test(beta ~ cluster, data=aux, distribution = "exact"))
+                         }
+        )
+    } else {
+        p.value <- apply(assay(data),1,
+                         function(x) {
+                             aux <-data.frame(beta=x[c(idx1,idx2)],
+                                              cluster=droplevels(colData(data)[c(idx1,idx2),groupCol]))
+                             pvalue(wilcoxsign_test(beta ~ cluster, data=aux, distribution = exact()))
+                         }
+        )
+    }
     ## Plot a histogram
     message("Saved histogram_pvalues.png...")
     png(filename = "histogram_pvalues.png")
@@ -397,6 +412,8 @@ calculate.pvalues <- function(data,
 #' @param diffmean.cut diffmean threshold
 #' @param adj.method Adjusted method for the p-value calculation
 #' @param paired Wilcoxon paired parameter
+#' @param overwrite Overwrite the pvalues and diffmean values if already in the object
+#' for both groups? Default: FALSE
 #' @import ggplot2
 #' @importFrom SummarizedExperiment colData rowRanges assay rowRanges<- values<-
 #' @export
@@ -441,7 +458,8 @@ DMRAnalysis <- function(data,
                         p.cut = 0.01,
                         diffmean.cut = 0.2,
                         paired = FALSE,
-                        adj.method="BH") {
+                        adj.method="BH",
+                        overwrite=FALSE) {
     .e <- environment()
 
     if (is.null(groupCol)) {
@@ -458,12 +476,12 @@ DMRAnalysis <- function(data,
     }
 
     diffcol <- paste("diffmean",group1,group2,sep = ".")
-    if (!(diffcol %in% colnames(values(rowRanges(data))))) {
+    if (!(diffcol %in% colnames(values(rowRanges(data)))) || overwrite) {
         data <- diffmean(data,groupCol, group1 = group1, group2 = group2)
         if (!(diffcol %in% colnames(values(rowRanges(data))))) stop("Error!")
     }
     pcol <- paste("p.value.adj",group1,group2,sep = ".")
-    if (!(pcol %in% colnames(values(rowRanges(data))))) {
+    if (!(pcol %in% colnames(values(rowRanges(data)))) || overwrite) {
         data <- calculate.pvalues(data,groupCol, group1, group2,
                                   paired = paired,method = adj.method)
         # An error should not happen, if it happens (probably due to an incorret
