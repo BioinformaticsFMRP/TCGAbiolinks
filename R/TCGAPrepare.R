@@ -54,9 +54,8 @@
 #' @importFrom limma alias2SymbolTable
 #' @importFrom GenomicFeatures microRNAs
 #' @importFrom BiocGenerics as.data.frame
-#' @importFrom GenomicRanges GRanges nearest
+#' @importFrom GenomicRanges GRanges
 #' @importFrom IRanges IRanges
-#' @importFrom R.oo abort
 #' @import utils data.table TxDb.Hsapiens.UCSC.hg19.knownGene
 #' @seealso  \code{\link{TCGAQuery}} for searching the data to download
 #'
@@ -129,6 +128,8 @@ TCGAPrepare <- function(query,
                         "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
         barcode <- str_match(files,regex)
 
+
+
         for (i in seq_along(files)) {
             data <- fread(files[i], header = TRUE, sep = "\t",
                           stringsAsFactors = FALSE,skip = 1,
@@ -163,12 +164,8 @@ TCGAPrepare <- function(query,
             rowRanges <- GRanges(seqnames = paste0("chr", df$Chromosome),
                                  ranges = IRanges(start = df$Genomic_Coordinate,
                                                   end = df$Genomic_Coordinate),
-                                 probeID = df$Composite.Element.REF)
-
-            # closest gene to each 450k probe ##your data
-            neargene <- as.data.frame(nearest(rowRanges, gene.GR))
-            neargene <- gene.location[neargene[,1],]
-            rowRanges$Gene_Symbol <-  neargene$external_gene_name
+                                 probeID = df$Composite.Element.REF,
+                                 Gene_Symbol = df$Gene_Symbol)
 
             names(rowRanges) <- as.character(df$Composite.Element.REF)
             colData <-  colDataPrepare(colnames(df)[5:ncol(df)])

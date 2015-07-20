@@ -2,7 +2,7 @@
 % Please edit documentation in R/geneExpression.R
 \name{DEArnaSEQ}
 \alias{DEArnaSEQ}
-\title{Differentially expression analysis (DEA)}
+\title{DEArnaSEQ}
 \usage{
 DEArnaSEQ(mat1, mat2, Cond1type, Cond2type)
 }
@@ -23,8 +23,15 @@ each column represents a sample with Cond2type}
 table containing for each gene logFC, logCPM, pValue,and    FDR
 }
 \description{
-Perform DEA to identify differentially expressed genes (DEGs).
+DEArnaSEQ allows user to perform Differentially expression analysis (DEA),
+   using edgeR package. DEA to identify differentially expressed genes (DEGs).
     It is possible to do a two-class analysis.
+    DEArnaSEQ performs DEA using following functions from edgeR
+    1. edgeR::DGEList converts the count matrix into an edgeR object.
+    2. edgeR::estimateCommonDisp each gene gets assigned the same dispersion estimate.
+    3. edgeR::exactTest performs pair-wise tests for differential expression between two groups.
+    4. edgeR::topTags takes the output from exactTest(), adjusts the raw p-values using the
+    False Discovery Rate (FDR) correction, and returns the top differentially expressed genes.
 }
 \examples{
 dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
