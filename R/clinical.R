@@ -145,7 +145,7 @@ stage_BRCA <- function(barcode, stage, clinical_patient_data){
         print(table.stages[stage])
         stage.i <- clinical_patient_data[
             grep(table.stages[stage],
-                 clinical_patient_data$ajcc_pathologic_tumor_stage), ]
+                 clinical_patient_data$pathologic_stage), ]
         stage.i <- stage.i[,"bcr_patient_barcode"]
         samples <- substr(barcode, 1, 12)
         barcode <- intersect(samples,stage.i)
@@ -200,10 +200,12 @@ gender_BRCA <- function(barcode, gender, clinical_patient_data){
 ER_status_BRCA <- function(barcode,ER, clinical_patient_data){
     ## ER should be "Positive" or "Negative"
     # consider only barcode and ER status
+    idx <- grep("estrogen_receptor_status",colnames(clinical_patient_data))
+    if(length(idx) > 0) idx <- idx[1]
     if (is.element(ER, c("Positive", "Negative"))) {
         status <- as.data.frame(clinical_patient_data)[
             grep(paste0("^",ER,"$"),
-                 clinical_patient_data$er_status_by_ihc), ][,"bcr_patient_barcode"]
+                 clinical_patient_data[,idx]), ][,"bcr_patient_barcode"]
         samples <- substr(barcode, 1, 12)
         #find common patients between ER status and barcode data
         barcode <- intersect(samples,status)
@@ -262,10 +264,12 @@ PR_status_BRCA  <- function(barcode,PR, clinical_patient_data){
 HER_status_BRCA  <- function(barcode, HER, clinical_patient_data){
     if (is.element(HER, c("Positive", "Negative"))) {
         clinical_patient_data <- as.data.frame(clinical_patient_data)
+        idx <- grep("immunohistochemistry_receptor_",colnames(clinical_patient_data))
+        if(length(idx) > 0) idx <- idx[1]
         #for breast cancer HER+
         status <- as.data.frame(clinical_patient_data)[
             grep(paste0("^",HER,"$"),
-                 clinical_patient_data$her2_status_by_ihc), ][,"bcr_patient_barcode"]
+                 clinical_patient_data[,idx],), ][,"bcr_patient_barcode"]
         samples <- substr(barcode, 1, 12)
         #find common patients between HER+ e barcode data
         barcode <- intersect(samples,status)
@@ -328,8 +332,6 @@ clinic <- function(cancer,clinical_data_type){
     query <- TCGAQuery(tumor = cancer,platform = "bio", level=2)
     TCGADownload(query,type = clinical_data_type)
     clinical_patient <- TCGAPrepare(query,type = clinical_data_type, dir = ".")
-    #clinical_patient <- clinical_patient[-c(1,2),]
-    #close(fileconn)
     return(clinical_patient)
 }
 

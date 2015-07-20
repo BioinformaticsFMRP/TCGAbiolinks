@@ -8,7 +8,7 @@ survivalAnalysis(data, clusterCol = NULL, legend = "Legend", cutoff = 0,
   main = "Kaplan-Meier Overall Survival Curves",
   ylab = "PROBABILITY OF SURVIVAL", xlab = "TIME SINCE DIAGNOSIS (DAYS)",
   filename = "survival.pdf", color = c("green", "firebrick4", "orange3",
-  "blue"))
+  "blue"), height = 10, width = 5)
 }
 \arguments{
 \item{data}{TCGA Clinical patient with the information days_to_death}
@@ -30,6 +30,10 @@ patients with days_to_deth > cutoff will be set to Alive.}
 \item{filename}{The name of the pdf file}
 
 \item{color}{Define the colors of the lines.}
+
+\item{height}{Image height}
+
+\item{width}{Image width}
 }
 \value{
 Survival plot
