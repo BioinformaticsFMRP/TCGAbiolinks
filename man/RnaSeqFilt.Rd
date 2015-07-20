@@ -2,20 +2,24 @@
 % Please edit documentation in R/geneExpression.R
 \name{RnaSeqFilt}
 \alias{RnaSeqFilt}
-\title{Filtering rnaseq by quantile}
+\title{RnaSeqFilt}
 \usage{
 RnaSeqFilt(TableRnaseq, QuantileThresh)
 }
 \arguments{
-\item{TableRnaseq}{TableRnaseq}
+\item{TableRnaseq}{is a dataframe or numeric matrix, each row represents a gene,
+each column represents a sample come from TCGAPrepare}
 
-\item{QuantileThresh}{QuantileThresh}
+\item{QuantileThresh}{is threshold selected as mean for filtering}
 }
 \value{
-table filtered
+A filtered dataframe or numeric matrix where each row represents a gene,
+each column represents a sample
 }
 \description{
-Filtering rnaseq by quantile
+RnaSeqFilt allows user to filter mRNA transcripts and miRNA,
+   selecting a threshold. For istance returns all mRNA or miRNA with mean across all
+   samples, higher than the threshold defined quantile mean across all samples.
 }
 \examples{
 dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
