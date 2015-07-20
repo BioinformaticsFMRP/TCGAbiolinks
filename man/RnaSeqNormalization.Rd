@@ -16,11 +16,25 @@ table normalized
 }
 \description{
 RnaSeqNormalization allows user to normalize mRNA transcripts and miRNA,
+<<<<<<< HEAD
    using EDASeq package. Normalization for RNA-Seq Numerical and graphical summaries of RNA-Seq read data. Within-lane normalization procedures
    to adjust for GC-content effect (or other gene-level effects) on read counts:
    loess robust local regression, global-scaling, and full-quantile normalization
    (Risso et al., 2011). Between-lane normalization procedures to adjust for
    distributional differences between lanes (e.g., sequencing depth): global-scaling and full-quantile normalization (Bullard et al., 2010).
+=======
+  using EDASeq package.
+
+  Normalization for RNA-Seq
+  Numerical and graphical summaries of RNA-Seq read data. Within-lane
+  normalization procedures to adjust for GC-content effect
+  (or other gene-level effects) on read counts:
+  loess robust local regression, global-scaling, and full-quantile normalization
+  (Risso et al., 2011). Between-lane normalization procedures to adjust for
+distributional differences between lanes (e.g., sequencing depth):
+global-scaling and full-quantile normalization (Bullard et al., 2010).
+
+>>>>>>> origin/master
    For istance returns all mRNA or miRNA with mean across all
    samples, higher than the threshold defined quantile mean across all samples.
 }
