@@ -387,15 +387,9 @@ TCGAPrepare <- function(query,
         grepl("H-miRNA_8x15K|agilent",platform, ignore.case = TRUE)) {
 
         for (i in seq_along(files)) {
-            header <- fread(files[i], sep = "\t",
-                            stringsAsFactors = FALSE, nrows =  1, header = FALSE,
-                            colClasses=c("character",
-                                         "character"))
+
             data <- fread(files[i], header = TRUE, sep = "\t",
-                          stringsAsFactors = FALSE, skip = 1,
-                          colClasses=c("character",
-                                       "numeric"))
-            setnames(data,1:2,as.character(header))
+                          stringsAsFactors = FALSE)
             if (i == 1) {
                 df <- data
             } else {
@@ -406,9 +400,10 @@ TCGAPrepare <- function(query,
         df <- df[-1,]
 
         if(summarizedExperiment){
-            if(!grepl("H-miRNA_8x15K|agilent",platform, ignore.case = TRUE)){
-                # TODO create GRanges
-                df$external_gene_name <-  alias2SymbolTable(df$`Hybridization REF`)
+            if(grepl("HG-U133_Plus_2|agilent",platform, ignore.case = TRUE)){
+                suppressWarnings(
+                    df$external_gene_name <-  alias2SymbolTable(df$`Hybridization REF`)
+                )
                 merged <- merge(df,gene.location,by="external_gene_name")
                 rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
                                      ranges = IRanges(start = merged$start_position,
@@ -419,6 +414,7 @@ TCGAPrepare <- function(query,
                                      alias = merged$`Hybridization REF`)
                 names(rowRanges) <- as.character(merged$`Hybridization REF`)
             } else {
+
                 microRNA <- as.data.frame(microRNAs(TxDb.Hsapiens.UCSC.hg19.knownGene))
                 df$mirna_id <- tolower(df$`Hybridization REF`)
                 merged <- merge(df,microRNA, by="mirna_id")
@@ -434,9 +430,9 @@ TCGAPrepare <- function(query,
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
             colData <- colDataPrepare(barcode)
 
-            assays <- SimpleList(raw_counts=data.matrix(
-                subset(merged,select=seq(3,2+length(barcode)))
-            )
+            suppressWarnings(
+                assays <- SimpleList(raw_counts=data.matrix(
+                    subset(merged,select=seq(3,2+length(barcode)))))
             )
 
             sset <- SummarizedExperiment(assays=assays,
