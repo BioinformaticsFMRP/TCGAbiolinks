@@ -28,6 +28,6 @@ the TCGAVersion function shows a summary (version, date, number of samples,
 size of the data) of all versions of data for a given tumor and platform.
 }
 \examples{
-TCGAVersion("LGG","agilentg4502a_07_3")
+TCGAVersion('LGG','agilentg4502a_07_3')
 }
 
