@@ -306,7 +306,7 @@ meanMethylationAnalysis <- function(data,
 #'          assays=S4Vectors::SimpleList(counts=counts),
 #'          rowRanges=rowRanges,
 #'          colData=colData)
-#' data <- calculate.pvalues(data)
+#' data <- calculate.pvalues(data,"group")
 #' }
 #' @keywords internal
 calculate.pvalues <- function(data,
@@ -337,6 +337,11 @@ calculate.pvalues <- function(data,
     if(!paired){
         p.value <- apply(assay(data),1,
                          function(x) {
+                             if(!is.factor(colData(data)[,groupCol])) {
+                                 colData(data)[,groupCol] <- factor(
+                                     colData(data)[,groupCol]
+                                     )
+                             }
                              aux <-data.frame(beta=x[c(idx1,idx2)],
                                               cluster=droplevels(colData(data)[c(idx1,idx2),groupCol]))
                              pvalue(wilcox_test(beta ~ cluster, data=aux, distribution = "exact"))
