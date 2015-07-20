@@ -16,7 +16,7 @@ table with common samples among platforms from TCGAQuery
 Common samples among platforms with 2 by 2 comparison
 }
 \examples{
-query <- TCGAQuery(tumor = "brca",level = 3)
+query <- TCGAQuery(tumor = 'brca',level = 3)
 matSamples <- TCGAintegrate(query)
 }
 
