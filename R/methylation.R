@@ -287,8 +287,8 @@ meanMethylationAnalysis <- function(data,
 #' @import graphics
 #' @importFrom grDevices png dev.off pdf
 #' @import stats
-#' @importFrom coin wilcox_test wilcoxsign_test
-#' @importFrom SummarizedExperiment colData rowRanges rowRanges<-
+#' @importFrom coin wilcox_test wilcoxsign_test pvalue
+#' @importFrom SummarizedExperiment colData rowRanges rowRanges<- colData<-
 #' @return Data frame with two cols
 #'         p-values/p-values adjusted
 #' @examples
