@@ -58,7 +58,7 @@ data <- SummarizedExperiment::SummarizedExperiment(
          assays=S4Vectors::SimpleList(counts=counts),
          rowRanges=rowRanges,
          colData=colData)
-data <- calculate.pvalues(data)
+data <- calculate.pvalues(data,"group")
 }
 }
 \keyword{internal}
