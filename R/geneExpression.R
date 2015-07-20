@@ -44,6 +44,11 @@ RnaSeqFilt <- function(TableRnaseq,QuantileThresh ){
 #'    distributional differences between lanes (e.g., sequencing depth): global-scaling and full-quantile normalization (Bullard et al., 2010).
 #'    For istance returns all mRNA or miRNA with mean across all
 #'    samples, higher than the threshold defined quantile mean across all samples.
+#'    RnaSeqNormalization performs normalization using following functions from EDASeq
+#'    1. EDASeq::newSeqExpressionSet
+#'    2. EDASeq::withinLaneNormalization
+#'    3. EDASeq::betweenLaneNormalization
+#'    4. EDASeq::counts
 #' @param TCGA_RnaseqTable TCGA_RnaseqTable
 #' @param geneInfo geneInfo
 #' @importFrom EDASeq newSeqExpressionSet withinLaneNormalization
@@ -94,10 +99,17 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
     return(TCGA_RnaseqTable_norm)
 }
 
-#' @title Differentially expression analysis (DEA)
+#' @title DEArnaSEQ
 #' @description
-#'    Perform DEA to identify differentially expressed genes (DEGs).
+#'    DEArnaSEQ allows user to perform Differentially expression analysis (DEA),
+#'    using edgeR package. DEA to identify differentially expressed genes (DEGs).
 #'     It is possible to do a two-class analysis.
+#'     DEArnaSEQ performs DEA using following functions from edgeR
+#'     1. edgeR::DGEList converts the count matrix into an edgeR object.
+#'     2. edgeR::estimateCommonDisp each gene gets assigned the same dispersion estimate.
+#'     3. edgeR::exactTest performs pair-wise tests for differential expression between two groups.
+#'     4. edgeR::topTags takes the output from exactTest(), adjusts the raw p-values using the
+#'     False Discovery Rate (FDR) correction, and returns the top differentially expressed genes.
 #' @param mat1 numeric matrix, each row represents a gene,
 #' each column represents a sample with Cond1type
 #' @param mat2 numeric matrix, each row represents a gene,
