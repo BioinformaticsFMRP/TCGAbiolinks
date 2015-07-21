@@ -19,6 +19,9 @@ TCGApreprocessing(object, tabGroupCol, ArrayIndex, pmat)
 Plot with array array intensity correlation and boxplot of correlation samples by samples
 }
 \description{
-Plot with array array intensity correlation and boxplot of correlation samples by samples
+TCGApreprocessing perform Array Array Intensity correlation (AAIC).
+It defines a square symmetric matrix of pearson correlation among samples.
+According this matrix and boxplot of correlation samples by samples it is possible
+to find samples with low correlation that can be identified as possible outliers.
 }
 
