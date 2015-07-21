@@ -1,6 +1,9 @@
 #' @title TCGAintegrate
-#' @description Common samples among platforms with 2 by 2 comparison
-#' @param query output of TCGAQuery
+#' @description In order to help the user to have an overview of the number of
+#' samples in commun we created the function `TCGAintegrate` that will receive the
+#' data frame returned from `TCGAQuery` and produce a matrix n platforms x n platforms
+#' with the values of samples in commum.
+#' @param query is the output of TCGAQuery
 #' @export
 #' @return table with common samples among platforms from TCGAQuery
 #' @examples
