@@ -13,7 +13,7 @@ GenesCutID <- function(GeneList){
     return(as.matrix(GeneListCutID))
 }
 
-#' @title TCGAanalyze_Filtering
+#' @title Filtering mRNA transcripts and miRNA selecting a threshold.
 #' @description
 #'    TCGAanalyze_Filtering allows user to filter mRNA transcripts and miRNA,
 #'    selecting a threshold. For istance returns all mRNA or miRNA with mean across all
@@ -102,7 +102,7 @@ TCGAanalyze_Normalization <- function(TCGA_RnaseqTable,geneInfo){
     return(TCGA_RnaseqTable_norm)
 }
 
-#' @title TCGAanalyze_DEA
+#' @title Differentially expression analysis (DEA) using edgeR package.
 #' @description
 #'    TCGAanalyze_DEA allows user to perform Differentially expression analysis (DEA),
 #'    using edgeR package. DEA to identify differentially expressed genes (DEGs).
@@ -167,9 +167,9 @@ TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type) {
 
 }
 
-#' @title CreateTabLevel
+#' @title Adding information related to DEGs genes from DEA as mean values in two conditions.
 #' @description
-#'    CreateTabLevel allows user to add information related to DEGs genes from
+#'    TCGAanalyze_LevelTab allows user to add information related to DEGs genes from
 #'    Differentially expression analysis (DEA) such as mean values and in two conditions.
 #' @param FC_FDR_table_mRNA Output of dataDEGs filter by abs(LogFC) >=1
 #' @param typeCond1 a string containing the class label of the samples
@@ -198,9 +198,9 @@ TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type) {
 #' dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
 #' dataTP <- dataFilt[,samplesTP]
 #' dataTN <- dataFilt[,samplesNT]
-#' dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",
+#' dataDEGsFiltLevel <- TCGAanalyze_LevelTab(dataDEGsFilt,"Tumor","Normal",
 #' dataTP,dataTN)
-CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
+TCGAanalyze_LevelTab <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
                            TableCond1,TableCond2,typeOrder = TRUE) {
 
     TF_enriched <- as.matrix(rownames(FC_FDR_table_mRNA))
@@ -240,14 +240,14 @@ CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
     return(TableLevel)
 }
 
-#' @title plotPCAforGroups
+#' @title Principal components analysis (PCA) plot
 #' @description
-#'   plotPCAforGroups performs a principal components analysis (PCA) on the given data matrix
+#'   TCGAvisualize_PCA performs a principal components analysis (PCA) on the given data matrix
 #'   and returns the results as an object of class prcomp, and shows results in PCA level.
 #' @param dataFilt A filtered dataframe or numeric matrix where each row represents a gene,
 #' each column represents a sample from function TCGAanalyze_Filtering
 #' @param dataDEGsFiltLevel table with DEGs, log Fold Change (FC), false discovery rate (FDR),
-#' the gene expression level, etc, from function CreateTabLevel.
+#' the gene expression level, etc, from function TCGAanalyze_LevelTab.
 #' @param ntopgenes number of DEGs genes to plot in PCA
 #' @import ggplot2
 #' @export
@@ -258,9 +258,9 @@ CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
 #' # quantile filter of genes
 #' dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
 #' # Principal Component Analysis plot for ntop selected DEGs
-#' plotPCAforGroups(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
+#' TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
 #'
-plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
+TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
     ComparisonSelected <- "Normal vs Tumor"
     TitlePlot <- paste0("PCA ", "top ", ntopgenes,
                         " Up and down diff.expr genes between ",
@@ -307,44 +307,44 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
     return(cancer.pca)
 }
 
-#' @title EAcomplete
+#' @title Enrichment analysis for Gene Ontology (GO) [BP,MF,CC] and Pathways
 #' @description
 #'   Researchers, in order to better understand the underlying biological
 #'   processes, often want to retrieve a functional profile of a set of genes
 #'   that might have an important role. This can be done by performing an
 #'   enrichment analysis.
 #'
-#'We will perform an enrichment analysis on gene sets using the EAcomplete
+#'We will perform an enrichment analysis on gene sets using the TCGAanalyze_EAcomplete
 #'function. Given a set of genes that are
 #'up-regulated under certain conditions, an enrichment analysis will find
 #'identify classes of genes or proteins that are #'over-represented using
 #'annotations for that gene set.
 #' @param TFname is the name of the list of genes or TF's regulon.
-#' @param RegulonList List of genes such as TF's regulon or DEGs where to find enrichment
+#' @param RegulonList List of genes such as TF's regulon or DEGs where to find enrichment.
 #' @export
-#' @return Enrichment analysis GO[BP,MF,CC] and Pathways complete barPlot
+#' @return Enrichment analysis GO[BP,MF,CC] and Pathways complete table enriched by genelist.
 #' @examples
 #' Genelist <- c("FN1","COL1A1")
-#' ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist)
+#' ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist)
 #' \dontrun{
 #' Genelist <- rownames(dataDEGsFiltLevel)
-#' system.time(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
+#' system.time(ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
 #' }
-EAcomplete <- function(TFname, RegulonList){
+TCGAanalyze_EAcomplete <- function(TFname, RegulonList){
 
     print(paste("I need about ", "1 minute to finish complete ",
                 "Enrichment analysis GO[BP,MF,CC] and Pathways... "))
 
-    ResBP <- EnrichmentAnalysis(TFname,RegulonList,DAVID_BP_matrix,
+    ResBP <- TCGAanalyze_EA(TFname,RegulonList,DAVID_BP_matrix,
                                 EAGenes,GOtype = "DavidBP")
     print("GO Enrichment Analysis BP completed....done")
-    ResMF <- EnrichmentAnalysis(TFname,RegulonList,DAVID_MF_matrix,
+    ResMF <- TCGAanalyze_EA(TFname,RegulonList,DAVID_MF_matrix,
                                 EAGenes,GOtype = "DavidMF")
     print("GO Enrichment Analysis MF completed....done")
-    ResCC <- EnrichmentAnalysis(TFname,RegulonList,DAVID_CC_matrix,
+    ResCC <- TCGAanalyze_EA(TFname,RegulonList,DAVID_CC_matrix,
                                 EAGenes,GOtype = "DavidCC")
     print("GO Enrichment Analysis CC completed....done")
-    ResPat <- EnrichmentAnalysis(TFname,RegulonList,listEA_pathways,
+    ResPat <- TCGAanalyze_EA(TFname,RegulonList,listEA_pathways,
                                  EAGenes,GOtype = "Pathway")
     print("Pathway Enrichment Analysis completed....done")
 
@@ -352,7 +352,7 @@ EAcomplete <- function(TFname, RegulonList){
     return(ans)
 }
 
-#' @title EnrichmentAnalysis
+#' @title Enrichment analysis of a gene-set with GO [BP,MF,CC]  and pathways.
 #' @description
 #' The rational behind a enrichment analysis ( gene-set, pathway etc) is to compute
 #' statistics of whether the overlap between the focus list (signature) and the gene-set
@@ -386,11 +386,11 @@ EAcomplete <- function(TFname, RegulonList){
 #' \dontrun{
 #' EAGenes <- get("EAGenes")
 #' RegulonList <- rownames(dataDEGsFiltLevel)
-#' ResBP <- EnrichmentAnalysis(GeneName="DEA genes Normal Vs Tumor",
+#' ResBP <- TCGAanalyze_EA(GeneName="DEA genes Normal Vs Tumor",
 #'                            RegulonList,DAVID_BP_matrix,
 #'                            EAGenes,GOtype = "DavidBP")
 #'}
-EnrichmentAnalysis <- function(GeneName,RegulonList,TableEnrichment,
+TCGAanalyze_EA <- function(GeneName,RegulonList,TableEnrichment,
                                EAGenes,GOtype,FDRThresh=0.01) {
     topPathways <- nrow(TableEnrichment)
     topPathways_tab <- matrix(0,1,topPathways)
@@ -474,14 +474,14 @@ GeneSplitRegulon <- function(Genelist,Sep){
     return(RegSplitted)
 }
 
-#' @title EAbarplot
+#' @title barPlot for a complete Enrichment Analysis
 #' @description
-#'   EAbarplot plots the result from EAcomplete in a complete barPlot
+#'   TCGAvisualize_EAbarplot plots the result from TCGAanalyze_EAcomplete in a complete barPlot
 #' @param tf is a list of gene symbols
-#' @param GOBPTab is results from EAcomplete related to Biological Process (BP)
-#' @param GOCCTab is results from EAcomplete related to Cellular Component (CC)
-#' @param GOMFTab is results from EAcomplete related to Molecular Function (MF)
-#' @param PathTab is results from EAcomplete related to Pathways EA
+#' @param GOBPTab is results from TCGAanalyze_EAcomplete related to Biological Process (BP)
+#' @param GOCCTab is results from TCGAanalyze_EAcomplete related to Cellular Component (CC)
+#' @param GOMFTab is results from TCGAanalyze_EAcomplete related to Molecular Function (MF)
+#' @param PathTab is results from TCGAanalyze_EAcomplete related to Pathways EA
 #' @param nBar is the number of bar histogram selected to show (default = 10)
 #' @param nRGTab is the gene signature list with gene symbols.
 #' @export
@@ -491,8 +491,8 @@ GeneSplitRegulon <- function(Genelist,Sep){
 #' BP,CC,MF and pathways enriched by list of genes.
 #' @examples
 #' Genelist <- c("FN1","COL1A1")
-#' ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist)
-#' EAbarplot(tf = rownames(ansEA$ResBP),
+#' ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist)
+#' TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
 #'          GOBPTab = ansEA$ResBP,
 #'          GOCCTab = ansEA$ResCC,
 #'          GOMFTab = ansEA$ResMF,
@@ -501,10 +501,10 @@ GeneSplitRegulon <- function(Genelist,Sep){
 #'          nBar = 10)
 #' \dontrun{
 #' Genelist <- rownames(dataDEGsFiltLevel)
-#' system.time(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
+#' system.time(ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
 #' # Enrichment Analysis EA (TCGAVisualize)
 #' # Gene Ontology (GO) and Pathway enrichment barPlot
-#' EAbarplot(tf = rownames(ansEA$ResBP),
+#' TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
 #'          GOBPTab = ansEA$ResBP,
 #'          GOCCTab = ansEA$ResCC,
 #'          GOMFTab = ansEA$ResMF,
@@ -512,7 +512,7 @@ GeneSplitRegulon <- function(Genelist,Sep){
 #'          nRGTab = Genelist,
 #'          nBar = 10)
 #'}
-EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
+TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
     splitFun <- function(tf, Tab, nBar){
         tmp <- lapply(Tab[tf, ], function(x) strsplit(x, ";"))
         names(tmp) <- NULL
