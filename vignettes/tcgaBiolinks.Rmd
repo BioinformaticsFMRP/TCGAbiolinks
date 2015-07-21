@@ -546,8 +546,8 @@ print(female_erpos_herpos)
 # TCGA Downstream Analysis
 After preparing the gene expression from TCGA data using the `TCGAPrepare`
 function, you can do a normalization of genes using the 
-function `RnaSeqNormalization`, do a quantile filter of genes with
-the `RnaSeqFilt` function. Also, iin order to classify your samples (barcode) 
+function `TCGAanalyze_Normalization`, do a quantile filter of genes with
+the `TCGAanalyze_Filtering` function. Also, iin order to classify your samples (barcode) 
 you can use the `MultiSampleTypes` function, the typeSample "NT" will return 
 the  "Solid Tissue Normal"" samples, while the typeSample "TP" will return 
 "Primary Solid Tumor"" samples.
@@ -563,10 +563,10 @@ library(TCGAbiolinks)
 # dataBRCA <- BRCAMatrix
 
 # normalization of genes
-dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
+dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 
 # quantile filter of genes
-dataFilt <- RnaSeqFilt(dataNorm, 0.25)
+dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
 
 # selection of normal samples "NT"
 samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
@@ -577,9 +577,9 @@ samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
 
 ```
 
-## `DEArnaSEQ` `&` `CreateTabLevel` Differential expression analysis (DEA)
+## `TCGAanalyze_DEA` `&` `CreateTabLevel` Differential expression analysis (DEA)
 
-Perform DEA (Differential expression analysis) to identify differentially expressed genes (DEGs) using the `DEArnaSEQ` function. This function receives as parameters:
+Perform DEA (Differential expression analysis) to identify differentially expressed genes (DEGs) using the `TCGAanalyze_DEA` function. This function receives as parameters:
 
 * **mat1** The matrix of the first group (in the example group 1 is the normal samples), 
 * **mat2** The matrix of the  second group (in the example group 2 is tumor samples)
@@ -596,7 +596,7 @@ After, we filter the output of dataDEGs by abs(LogFC) >=1, and uses the
 library(TCGAbiolinks)
 
 # Diff.expr.analysis (DEA)
-dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP],
+dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT], dataFilt[,samplesTP],
                     "Normal", "Tumor")
 
 # DEGs filter by abs(logFC) >=1
@@ -675,10 +675,10 @@ The parameters of this function are:
 library(TCGAbiolinks)
 
 # normalization of genes
-dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
+dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 
 # quantile filter of genes
-dataFilt <- RnaSeqFilt(dataNorm, 0.25)
+dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
 
 # Principal Component Analysis plot for ntop selected DEGs
 plotPCAforGroups(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
@@ -855,15 +855,15 @@ GroupGreen3Data <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color ==
 GroupRedData <- BRCArnaseqV2[, as.character(tabCluster[tabCluster$Color == 
     "red", "Sample"])]
 
-DEGsBlue <- DEArnaSEQ(cbind(GroupGreen3Data, GroupRedData), GroupBlueData, 
+DEGsBlue <- TCGAanalyze_DEA(cbind(GroupGreen3Data, GroupRedData), GroupBlueData, 
     "GroupOther", "GroupBlue")
-DEGsGreen3 <- DEArnaSEQ(cbind(GroupBlueData, GroupRedData), GroupGreen3Data, 
+DEGsGreen3 <- TCGAanalyze_DEA(cbind(GroupBlueData, GroupRedData), GroupGreen3Data, 
     "GroupOther", "GroupGreen3")
-DEGsRed <- DEArnaSEQ(cbind(GroupBlueData, GroupGreen3Data), GroupRedData, 
+DEGsRed <- TCGAanalyze_DEA(cbind(GroupBlueData, GroupGreen3Data), GroupRedData, 
     "GroupOther", "GroupRed")
 
 
-dataDEGs <- DEArnaSEQ(dataFilt[, samplesNT], dataFilt[, samplesTP], "Normal", 
+dataDEGs <- TCGAanalyze_DEA(dataFilt[, samplesNT], dataFilt[, samplesTP], "Normal", 
     "Tumor")
 
 # DEGs filter by abs(logFC) >=1
@@ -1126,7 +1126,7 @@ The parameters of this function are:
 `TCGAPrepare` and processed by `volcanoAnalysis` function. 
 Expected colData columns: diffmean, p.value.adj and p.value
 * **exp** SummarizedExperiment with methylation data obtained from the
-`TCGAPrepare` function  and processed by `DEArnaSEQ` function. Expected colData columns: diffmean, p.value.adj and p.value
+`TCGAPrepare` function  and processed by `TCGAanalyze_DEA` function. Expected colData columns: diffmean, p.value.adj and p.value
 *  **group1** Name of the group1
 *  **group2** Name of the group2
 
