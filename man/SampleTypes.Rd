@@ -7,7 +7,7 @@
 SampleTypes(barcode, typesample)
 }
 \arguments{
-\item{barcode}{barcode list}
+\item{barcode}{is a list of samples as TCGA barcodes}
 
 \item{typesample}{a character vector indicating tissue type to query.
 Example:
@@ -29,7 +29,7 @@ NBM \tab  Bone Marrow Normal \cr
 }}
 }
 \value{
-SampleTypes
+a list of samples / barcode filtered by type sample selected
 }
 \description{
 For a given list of samples and a type sample, return the samples that are
