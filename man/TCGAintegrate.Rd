@@ -7,13 +7,16 @@
 TCGAintegrate(query)
 }
 \arguments{
-\item{query}{output of TCGAQuery}
+\item{query}{is the output of TCGAQuery}
 }
 \value{
 table with common samples among platforms from TCGAQuery
 }
 \description{
-Common samples among platforms with 2 by 2 comparison
+In order to help the user to have an overview of the number of
+samples in commun we created the function `TCGAintegrate` that will receive the
+data frame returned from `TCGAQuery` and produce a matrix n platforms x n platforms
+with the values of samples in commum.
 }
 \examples{
 query <- TCGAQuery(tumor = 'brca',level = 3)

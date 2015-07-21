@@ -698,7 +698,12 @@ grid.raster(img)
 ```
 
 ## Survival Analysis
-
+When analyzing survival times, different problems come up than the ones dis-
+cussed so far. One question is how do we deal with subjects dropping out of a
+study. For example, assume that we test a new cancer drug. While some subjects
+die, others may believe that the new drug is not effective, and decide to drop out
+of the study before the study is finished. A similar problem would be faced when
+we investigate how long a machine lasts before it breaks down.
  
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
