@@ -2,7 +2,7 @@
 % Please edit documentation in R/geneExpression.R
 \name{TCGAanalyze_DEA}
 \alias{TCGAanalyze_DEA}
-\title{TCGAanalyze_DEA}
+\title{Differentially expression analysis (DEA) using edgeR package.}
 \usage{
 TCGAanalyze_DEA(mat1, mat2, Cond1type, Cond2type)
 }
