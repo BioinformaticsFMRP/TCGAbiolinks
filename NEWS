@@ -2,5 +2,54 @@ TCGAbiolinks 0.99.0
 ----------------------------------------------------------------
   FIRST VERSION - FEATURES
 
-* Searches/Download/Prepare TCGA
-* Create some methylation/expression analysis functions
+  SEARCH:
+-----------------------
+* TCGAQuery: searches TCGA open-access data through a preprocessed table with the latest version of the files.
+* TCGAsocial: Finds the number of downloads of a package on CRAN or BIOC
+* TCGAinvestigate:Find most studied TF in pubmed related to a specific cancer, disease, or tissue
+* TCGAVersion: shows a summary (version, date, number of samples, size of the data) of all versions of data for a given tumor and platform.
+
+  DOWNLOAD:
+-----------------------
+* TCGADownload: The TCGADownload function will download the data using as reference the lines of the TCGAQuery search result.
+* clinic: Get the clinical information
+
+  PREPARING THE DATA:
+-----------------------
+* TCGAPrepare:This function will read the data from level 3 the experiments and prepare it for downstream analysis into a SummarizedExperiment object.
+* RnaSeqNormalization: RnaSeqNormalization
+
+  ANALYSIS:
+-----------------------
+* meanMethylationAnalysis:  Creates a mean methylation boxplot divided in by groups
+* plotPCAforGroups: plotPCAforGroups
+* starburstAnalysis:Creates a starburst plot
+* volcanoAnalysis: In order to search for the probes that are different methylated and are significant, we use a volcano plot (x-axis:diff mean methylation, y-axis: significance) that compares the methylation data between the two groups. Firstly, it calculates the difference between the mean methylation of each group for each probes. After, it calculates the p-value using the wilcoxon test using the Benjamini-Hochberg adjustment method.
+* CreateTabLevel: CreateTabLevel for Differentially expression analysis (DEA)
+* DEArnaSEQ: Perform DEA to identify differentially expressed genes (DEGs). It is possible to do a two-class analysis.
+* survivalAnalysis: Creates a survival plot from TCGA patient clinical data using survival library. It uses the fields days_to_death and vital, plus a columns for groups. (I'll take a look, maybe we have made the same function[SurvivalCoxNET, SurvivalKMunivariate, survivalAnalysis])
+* SurvivalCoxNET: Survival analysis with univariate Cox regression package (dnet)
+* SurvivalKMunivariate: Survival table with univariate Kaplan-Meier
+* TCGApreprocessing:Plot with array array intensity correlation and boxplot of correlation samples by samples. No example and it is not in the vignette.
+
+  OTHER:
+-----------------------
+* GenesCutID : Get the gene_symbol from annotations like ?|1032332,AML2|103434. (I think that exporting this function is useless,  It is almost the same as strsplit.)
+* TCGAintegrate: Common samples among platforms with 2 by 2 comparison (This function verifies if a sample is from the same patient? If so, is it useful to have an n vs n matrix with no header or rows?)
+* ggbiplot: Biplot for Principal Components using ggplot2
+* EAbarplot: EAbarplot (Needs a better description)
+* EAcomplete: EAcomplete (Needs a better description)
+
+  FILTER FUNCTIONS:
+-----------------------
+We need a better description for these functions. Also, when you call '_BRCA' it works only with BRCA clinical data? Maybe I'm wrong, but some of these functions are not the same as subsetting the clinical data frame?
+* RnaSeqFilt:Filtering rnaseq by quantile
+* samplesfilter: Filtering sample output from TCGAQuery (Almost the same as strsplit. Is it useful?)
+* stage_BRCA: stage_BRCA
+* ER_status_BRCA: ER_status_BRCA
+* HER_status_BRCA: HER_status_BRCA
+* MatchedCoupledSampleTypes: MatchedCoupledSampleTypes
+* MultiSampleTypes: MultiSampleTypes
+* PR_status_BRCA: PR_status_BRCA
+* gender_BRCA: gender_BRCA
+* SampleTypes: For a given list of samples and a type sample, return the samples that are from that type.
