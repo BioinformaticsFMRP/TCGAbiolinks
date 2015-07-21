@@ -51,6 +51,6 @@ tabSurvKM <- tabSurvKM[tabSurvKM$pvalue < 0.01,]
 tabSurvKM <- tabSurvKM[!duplicated(tabSurvKM$mRNA),]
 rownames(tabSurvKM) <-tabSurvKM$mRNA
 tabSurvKM <- tabSurvKM[,-1]
-tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing=F),]
+tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing=FALSE),]
 }
 

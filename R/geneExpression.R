@@ -13,9 +13,9 @@ GenesCutID <- function(GeneList){
     return(as.matrix(GeneListCutID))
 }
 
-#' @title RnaSeqFilt
+#' @title TCGAanalyze_Filtering
 #' @description
-#'    RnaSeqFilt allows user to filter mRNA transcripts and miRNA,
+#'    TCGAanalyze_Filtering allows user to filter mRNA transcripts and miRNA,
 #'    selecting a threshold. For istance returns all mRNA or miRNA with mean across all
 #'    samples, higher than the threshold defined quantile mean across all samples.
 #' @param TableRnaseq is a dataframe or numeric matrix, each row represents a gene,
@@ -25,18 +25,18 @@ GenesCutID <- function(GeneList){
 #' @return A filtered dataframe or numeric matrix where each row represents a gene,
 #' each column represents a sample
 #' @examples
-#' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
-#' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
-RnaSeqFilt <- function(TableRnaseq,QuantileThresh ){
+#' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
+#' dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
+TCGAanalyze_Filtering <- function(TableRnaseq,QuantileThresh ){
     GeneThresh <- as.numeric(quantile(rowMeans(TableRnaseq), QuantileThresh))
     geneFiltered <- names(which(rowMeans(TableRnaseq) > GeneThresh))
     Table_Rnaseq_Rawcount_Filt <- TableRnaseq[geneFiltered, ]
     return( Table_Rnaseq_Rawcount_Filt)
 }
 
-#' @title RnaSeqNormalization
+#' @title normalization mRNA transcripts and miRNA using EDASeq package.
 #' @description
-#'   RnaSeqNormalization allows user to normalize mRNA transcripts and miRNA,
+#'   TCGAanalyze_Normalization allows user to normalize mRNA transcripts and miRNA,
 #'    using EDASeq package. Normalization for RNA-Seq Numerical and graphical summaries of RNA-Seq read data. Within-lane normalization procedures
 #'    to adjust for GC-content effect (or other gene-level effects) on read counts:
 #'    loess robust local regression, global-scaling, and full-quantile normalization
@@ -44,7 +44,7 @@ RnaSeqFilt <- function(TableRnaseq,QuantileThresh ){
 #'    distributional differences between lanes (e.g., sequencing depth): global-scaling and full-quantile normalization (Bullard et al., 2010).
 #'    For istance returns all mRNA or miRNA with mean across all
 #'    samples, higher than the threshold defined quantile mean across all samples.
-#'    RnaSeqNormalization performs normalization using following functions from EDASeq
+#'    TCGAanalyze_Normalization performs normalization using following functions from EDASeq
 #'    1. EDASeq::newSeqExpressionSet
 #'    2. EDASeq::withinLaneNormalization
 #'    3. EDASeq::betweenLaneNormalization
@@ -59,8 +59,8 @@ RnaSeqFilt <- function(TableRnaseq,QuantileThresh ){
 #' of non-negative integer count values, one row for each observational unit (gene or the like),
 #' and one column for each sample.
 #' @examples
-#' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
-RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
+#' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
+TCGAanalyze_Normalization <- function(TCGA_RnaseqTable,geneInfo){
 
     TCGA_RnaseqTable <- TCGA_RnaseqTable[ !(GenesCutID(as.matrix(rownames(TCGA_RnaseqTable))) == "?"),]
     TCGA_RnaseqTable <- TCGA_RnaseqTable[ !(GenesCutID(as.matrix(rownames(TCGA_RnaseqTable))) == "SLC35E2"),]
@@ -102,12 +102,12 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
     return(TCGA_RnaseqTable_norm)
 }
 
-#' @title DEArnaSEQ
+#' @title TCGAanalyze_DEA
 #' @description
-#'    DEArnaSEQ allows user to perform Differentially expression analysis (DEA),
+#'    TCGAanalyze_DEA allows user to perform Differentially expression analysis (DEA),
 #'    using edgeR package. DEA to identify differentially expressed genes (DEGs).
 #'     It is possible to do a two-class analysis.
-#'     DEArnaSEQ performs DEA using following functions from edgeR
+#'     TCGAanalyze_DEA performs DEA using following functions from edgeR
 #'     1. edgeR::DGEList converts the count matrix into an edgeR object.
 #'     2. edgeR::estimateCommonDisp each gene gets assigned the same dispersion estimate.
 #'     3. edgeR::exactTest performs pair-wise tests for differential expression between two groups.
@@ -124,14 +124,14 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
 #' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags
 #' @export
 #' @examples
-#' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
-#' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
+#' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
+#' dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
 #' samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
 #' samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
-#' dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT],
+#' dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT],
 #'                       dataFilt[,samplesTP],"Normal", "Tumor")
 #' @return table with DEGs containing for each gene logFC, logCPM, pValue,and FDR
-DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
+TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type) {
 
     TOC <- cbind(mat1,mat2)
     Cond1num <- ncol(mat1)
@@ -189,11 +189,11 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 #' of gene expression between the two
 #' conditions multiplied logFC)
 #' @examples
-#' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
-#' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
+#' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
+#' dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
 #' samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
 #' samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
-#' dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP],
+#' dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT], dataFilt[,samplesTP],
 #' "Normal", "Tumor")
 #' dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
 #' dataTP <- dataFilt[,samplesTP]
@@ -245,7 +245,7 @@ CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
 #'   plotPCAforGroups performs a principal components analysis (PCA) on the given data matrix
 #'   and returns the results as an object of class prcomp, and shows results in PCA level.
 #' @param dataFilt A filtered dataframe or numeric matrix where each row represents a gene,
-#' each column represents a sample from function RnaSeqFilt
+#' each column represents a sample from function TCGAanalyze_Filtering
 #' @param dataDEGsFiltLevel table with DEGs, log Fold Change (FC), false discovery rate (FDR),
 #' the gene expression level, etc, from function CreateTabLevel.
 #' @param ntopgenes number of DEGs genes to plot in PCA
@@ -254,9 +254,9 @@ CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
 #' @return principal components analysis (PCA) plot of PC1 and PC2
 #' @examples
 #' # normalization of genes
-#' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
+#' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 #' # quantile filter of genes
-#' dataFilt <- RnaSeqFilt(dataNorm, 0.25)
+#' dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
 #' # Principal Component Analysis plot for ntop selected DEGs
 #' plotPCAforGroups(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
 #'

@@ -38,4 +38,7 @@ For a given list of samples and a type sample, return the samples that are
 \examples{
 SampleTypes(c("TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1"),"TR")
 }
+\author{
+Catharina Olsen, Claudia Cava.
+}
 
