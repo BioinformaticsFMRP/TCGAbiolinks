@@ -577,7 +577,7 @@ samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
 
 ```
 
-## `TCGAanalyze_DEA` `&` `CreateTabLevel` Differential expression analysis (DEA)
+## `TCGAanalyze_DEA` `&` `TCGAanalyze_LevelTab` Differential expression analysis (DEA)
 
 Perform DEA (Differential expression analysis) to identify differentially expressed genes (DEGs) using the `TCGAanalyze_DEA` function. This function receives as parameters:
 
@@ -587,7 +587,7 @@ Perform DEA (Differential expression analysis) to identify differentially expres
 * **Cond1type** Label for group 2
 
 After, we filter the output of dataDEGs by abs(LogFC) >=1, and uses the
-`CreateTabLevel` function to create a table with DEGs (differentially expressed genes), log Fold Change (FC), false discovery rate (FDR), the gene expression level for samples in Cond1type, and Cond2type, and Delta value (the difference of gene expression between the two conditions multiplied logFC).
+`TCGAanalyze_LevelTab` function to create a table with DEGs (differentially expressed genes), log Fold Change (FC), false discovery rate (FDR), the gene expression level for samples in Cond1type, and Cond2type, and Delta value (the difference of gene expression between the two conditions multiplied logFC).
 
 ```{r, eval = FALSE}
 # Downstream analysis using gene expression data  
@@ -603,7 +603,7 @@ dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT], dataFilt[,samplesTP],
 dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
 
 # DEGs table with expression values in normal and tumor samples
-dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt,"Tumor","Normal",
+dataDEGsFiltLevel <- TCGAanalyze_LevelTab(dataDEGsFilt,"Tumor","Normal",
                                 dataFilt[,samplesTP],dataFilt[,samplesNT])
 
 ```
@@ -616,20 +616,20 @@ knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2,
                 caption = "Table DEGs after DEA",row.names = FALSE)
 ```
 
-## `EAcomplete & EAbarplot`: Enrichment Analysis
+## `TCGAanalyze_EAcomplete & TCGAvisualize_EAbarplot`: Enrichment Analysis
 
 Researchers, in order to better understand the underlying biological processes, 
 often want to retrieve a functional profile of a set of genes that might 
 have an important role. This can be done by performing an enrichment analysis. 
 
-We will perform an enrichment analysis on gene sets using the `EAcomplete` 
+We will perform an enrichment analysis on gene sets using the `TCGAanalyze_EAcomplete` 
 function. 
 Given a set of genes that are up-regulated under certain conditions, 
 an enrichment analysis will find  identify classes of genes or proteins that 
 are over-represented  using annotations for that gene set.
 
 
-To view the results you can use the `EAbarplot` function as shown below.
+To view the results you can use the `TCGAvisualize_EAbarplot` function as shown below.
 
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
@@ -637,12 +637,12 @@ library(TCGAbiolinks)
 # Gene Ontology (GO) and Pathway enrichment by DEGs list
 Genelist <- rownames(dataDEGsFiltLevel)
 
-system.time(ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
+system.time(ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
 
 # Enrichment Analysis EA (TCGAVisualize)
 # Gene Ontology (GO) and Pathway enrichment barPlot
 
-EAbarplot(tf = rownames(ansEA$ResBP), 
+TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP), 
             GOBPTab = ansEA$ResBP,
             GOCCTab = ansEA$ResCC,
             GOMFTab = ansEA$ResMF,
@@ -659,16 +659,16 @@ img <- readPNG("EAplot.png")
 grid.raster(img)
 ```
 
-## `plotPCAforGroups`: Principal Component Analysis plot for differentially expressed genes
+## `TCGAvisualize_PCA`: Principal Component Analysis plot for differentially expressed genes
 
 In order to understand better our genes, we can perform a PCA to reduce the
-number of dimensions of our gene set. The function `plotPCAforGroups` will plot
+number of dimensions of our gene set. The function `TCGAvisualize_PCA` will plot
 the PCA for different groups.
 
 The parameters of this function are:
 
 * **dataFilt** The expression matrix after normalization and quantile filter
-* **dataDEGsFiltLevel** The CreateTabLevel output
+* **dataDEGsFiltLevel** The TCGAanalyze_LevelTab output
 * **ntopgenes** number of DEGs genes to plot in PCA
 
 ```{r, eval = FALSE}
@@ -681,7 +681,7 @@ dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
 
 # Principal Component Analysis plot for ntop selected DEGs
-plotPCAforGroups(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
+TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
 
 # boxplot of normalized data
 #sampleGenes <- rownames(dataDEGsFilt[dataDEGsFilt$logFC >=1,])[1:20]
@@ -869,14 +869,14 @@ dataDEGs <- TCGAanalyze_DEA(dataFilt[, samplesNT], dataFilt[, samplesTP], "Norma
 # DEGs filter by abs(logFC) >=1
 dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1, ]
 
-dataDEGsFiltLevel <- CreateTabLevel(dataDEGsFilt, "Tumor", "Normal", dataFilt[, 
+dataDEGsFiltLevel <- TCGAanalyze_LevelTab(dataDEGsFilt, "Tumor", "Normal", dataFilt[, 
     samplesTP], dataFilt[, samplesNT])
 
-DEGsBlueLevel <- CreateTabLevel(DEGsBlue, "GroupBlue", "GroupOther", GroupBlueData, 
+DEGsBlueLevel <- TCGAanalyze_LevelTab(DEGsBlue, "GroupBlue", "GroupOther", GroupBlueData, 
     cbind(GroupGreen3Data, GroupRedData), typeOrder = TRUE)
-DEGsGreen3Level <- CreateTabLevel(DEGsGreen3, "GroupGreen3", "GroupOther", 
+DEGsGreen3Level <- TCGAanalyze_LevelTab(DEGsGreen3, "GroupGreen3", "GroupOther", 
     GroupGreen3Data, cbind(GroupBlueData, GroupRedData), typeOrder = TRUE)
-DEGsRedLevel <- CreateTabLevel(DEGsRed, "GroupRed", "GroupOther", GroupRedData, 
+DEGsRedLevel <- TCGAanalyze_LevelTab(DEGsRed, "GroupRed", "GroupOther", GroupRedData, 
     cbind(GroupBlueData, GroupGreen3Data), typeOrder = TRUE)
 
 blueDEGs <- DEGsBlueLevel[DEGsBlueLevel$FDR < 0.01 & DEGsBlueLevel$logFC >= 
