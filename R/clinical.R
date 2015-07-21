@@ -2,7 +2,7 @@
 #' @description
 #'   For a given list of samples and a type sample, return the samples that are
 #'   from that type.
-#' @param barcode barcode list
+#' @param barcode is a list of samples as TCGA barcodes
 #' @param typesample a character vector indicating tissue type to query.
 #' Example:
 #' \tabular{ll}{
@@ -24,7 +24,7 @@
 #' @examples
 #'  SampleTypes(c("TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1"),"TR")
 #' @export
-#' @return SampleTypes
+#' @return a list of samples / barcode filtered by type sample selected
 SampleTypes <- function(barcode, typesample){
     table.code <- c('01','02','03','04','05','06','07','08','09','10','11',
                     '12','13','14','20','40','50','60','61')
@@ -43,15 +43,22 @@ SampleTypes <- function(barcode, typesample){
 
 #' @title MultiSampleTypes
 #' @description
-#'   MultiSampleTypes
-#' @param barcode barcode
-#' @param typesample typesample
+#'   MultiSampleTypes for a given list of samples and a type sample, return the samples that are
+#'   from that type. MultiSampleTypes allows using several type sample together.
+#' @param barcode barcode is a list of samples as TCGA barcodes
+#' @param typesample is the type of samples barcode.
+#' #' \tabular{lllll}{
+#'TP   \tab TR \tab TB \tab TRBM \tab TAP \cr
+#'TM \tab TAM \tab THOC \tab TBM \tab NB \cr
+#'NT \tab NBC \tab NEBV \tab NBM \tab CELLC \cr
+#'TRB \tab CELL \tab XP \tab XCL \tab
+#'}
 #' @export
 #' @examples
 #' # selection of normal samples "NT"
 #' dataFilt <- "TCGA-06-0125-01A-01D-A45W-05"
 #' samplesNT <- MultiSampleTypes(dataFilt, typesample = c("NT"))
-#' @return MultiSampleTypes
+#' @return a list of samples / barcode filtered by type sample selected
 MultiSampleTypes <- function(barcode,typesample){
     # Tumor AND Solid Tissue Normal NOT FROM THE SAME PATIENTS
     table.code <- c('01','02','03','04','05','06','07','08','09','10',
@@ -84,7 +91,7 @@ MultiSampleTypes <- function(barcode,typesample){
 #'                              "TCGA-B0-4698-02Z-00-DX1"),
 #'                              c("TP","TR"))
 #' @export
-#' @return MultiSampleTypes
+#' @return a list of samples / barcode filtered by type sample selected
 MatchedCoupledSampleTypes <- function(barcode,typesample){
     # Tumor AND Solid Tissue Normal FROM THE SAME PATIENTS
     table.code <- c('01','02','03','04','05','06','07','08','09','10',
@@ -446,7 +453,7 @@ clinicFilt <- function(barcode,
 
 
 # This function will preprare the colData for TCGAPrepare
-# The ideia is to add usefull information to the object
+# The idea is to add usefull information to the object
 # that will help the users to understand their samples
 # ref: TCGA codeTablesReport - Table: Sample type
 #' @importFrom S4Vectors DataFrame
