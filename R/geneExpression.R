@@ -49,8 +49,9 @@ RnaSeqFilt <- function(TableRnaseq,QuantileThresh ){
 #'    2. EDASeq::withinLaneNormalization
 #'    3. EDASeq::betweenLaneNormalization
 #'    4. EDASeq::counts
-#' @param TCGA_RnaseqTable TCGA_RnaseqTable
-#' @param geneInfo geneInfo
+#' @param TCGA_RnaseqTable Rnaseq numeric matrix, each row represents a gene,
+#' each column represents a sample
+#' @param geneInfo Information matrix of 20531 genes about geneLength and gcContent
 #' @importFrom EDASeq newSeqExpressionSet withinLaneNormalization
 #'  betweenLaneNormalization exprs counts
 #' @export
