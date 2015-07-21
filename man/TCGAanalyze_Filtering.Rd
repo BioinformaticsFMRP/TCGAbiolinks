@@ -2,7 +2,7 @@
 % Please edit documentation in R/geneExpression.R
 \name{TCGAanalyze_Filtering}
 \alias{TCGAanalyze_Filtering}
-\title{TCGAanalyze_Filtering}
+\title{Filtering mRNA transcripts and miRNA selecting a threshold.}
 \usage{
 TCGAanalyze_Filtering(TableRnaseq, QuantileThresh)
 }
