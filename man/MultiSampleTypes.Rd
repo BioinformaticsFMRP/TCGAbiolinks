@@ -7,15 +7,22 @@
 MultiSampleTypes(barcode, typesample)
 }
 \arguments{
-\item{barcode}{barcode}
+\item{barcode}{barcode is a list of samples as TCGA barcodes}
 
-\item{typesample}{typesample}
+\item{typesample}{is the type of samples barcode.
+#' \tabular{lllll}{
+TP   \tab TR \tab TB \tab TRBM \tab TAP \cr
+TM \tab TAM \tab THOC \tab TBM \tab NB \cr
+NT \tab NBC \tab NEBV \tab NBM \tab CELLC \cr
+TRB \tab CELL \tab XP \tab XCL \tab
+}}
 }
 \value{
-MultiSampleTypes
+a list of samples / barcode filtered by type sample selected
 }
 \description{
-MultiSampleTypes
+MultiSampleTypes for a given list of samples and a type sample, return the samples that are
+  from that type. MultiSampleTypes allows using several type sample together.
 }
 \examples{
 # selection of normal samples "NT"
