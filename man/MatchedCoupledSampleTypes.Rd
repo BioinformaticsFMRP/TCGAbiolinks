@@ -12,7 +12,7 @@ MatchedCoupledSampleTypes(barcode, typesample)
 \item{typesample}{typesample}
 }
 \value{
-MultiSampleTypes
+a list of samples / barcode filtered by type sample selected
 }
 \description{
 MatchedCoupledSampleTypes
