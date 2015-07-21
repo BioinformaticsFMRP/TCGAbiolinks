@@ -336,7 +336,7 @@ exp <- TCGAPrepare(query.rna, dir="TCGA/rna", save = TRUE,
 ############# To EMLER
 library(ELMER)
 
-########## genne annotation
+########## gene annotation
 geneAnnot <- txs()
 geneAnnot$GENEID <- paste0("ID",geneAnnot$GENEID)
 geneInfo <- promoters(geneAnnot,upstream = 0, downstream = 0)

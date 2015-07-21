@@ -12,35 +12,40 @@ SurvivalKMunivariate(clinical_patient, dataGE, Genelist, Survresult,
 related to barcode / samples such as bcr_patient_barcode, days_to_death ,
 days_to_last_followup , vital_status, etc}
 
-\item{dataGE}{dataGE}
+\item{dataGE}{is a matrix of Gene expression (genes in rows, samples in cols) from TCGAprepare}
 
-\item{Genelist}{Genelist}
+\item{Genelist}{is a list of gene symbols where perform survival KM.}
 
-\item{Survresult}{Survresult}
+\item{Survresult}{is a parameter (default = FALSE) if is TRUE will show KM plot and results.}
 
-\item{ThreshTop}{ThreshTop}
+\item{ThreshTop}{is a quantile threshold to identify samples with high expression of a gene}
 
-\item{ThreshDown}{ThreshDown}
+\item{ThreshDown}{is a quantile threshold to identify samples with low expression of a gene}
 }
 \value{
 table with survival genes pvalues from KM.
 }
 \description{
 SurvivalKMtable perform an univariate Kaplan-Meier (KM) survival analysis (SA).
- SurvivalKMtable performs SA using following functions from survival package
+It performed Kaplan-Meier survival univariate using complte follow up with all days
+taking one gene a time from Genelist of gene symbols.
+For each gene according its level of mean expression in cancer samples, defining two thresholds for quantile
+expression of that gene in all samples (default ThreshTop=0.67,ThreshDown=0.33) it is possible
+to define a threshold of intensity of gene expression to divide the samples in 3 groups
+(High, intermediate, low).
+SurvivalKMtable performs SA between High and low groups using following functions
+from survival package
    1. survival::Surv
    2. survival::survdiff
    3. survival::survfit
 }
 \examples{
-library(TCGAbiolinks)
 clinical_patient_Cancer <- clinic("brca","clinical_patient")
 dataBRCAcomplete <- log2(BRCA_rnaseqv2)
 # Selecting only 10 genes for example
 dataBRCAcomplete <- dataBRCAcomplete[1:10,]
 tabSurvKM<-SurvivalKMunivariate(clinical_patient_Cancer,dataBRCAcomplete,
-Genelist = rownames(dataBRCAcomplete),
-Survresult = F,ThreshTop=0.67,ThreshDown=0.33)
+Genelist = rownames(dataBRCAcomplete), Survresult = FALSE,ThreshTop=0.67,ThreshDown=0.33)
 # Filtering by pvalue < 0.01
 tabSurvKM <- tabSurvKM[tabSurvKM$pvalue < 0.01,]
 tabSurvKM <- tabSurvKM[!duplicated(tabSurvKM$mRNA),]
