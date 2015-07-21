@@ -7,12 +7,15 @@
 RnaSeqNormalization(TCGA_RnaseqTable, geneInfo)
 }
 \arguments{
-\item{TCGA_RnaseqTable}{TCGA_RnaseqTable}
+\item{TCGA_RnaseqTable}{Rnaseq numeric matrix, each row represents a gene,
+each column represents a sample}
 
-\item{geneInfo}{geneInfo}
+\item{geneInfo}{Information matrix of 20531 genes about geneLength and gcContent}
 }
 \value{
-table normalized
+Rnaseq matrix normalized with counts slot holds the count data as a matrix
+of non-negative integer count values, one row for each observational unit (gene or the like),
+and one column for each sample.
 }
 \description{
 RnaSeqNormalization allows user to normalize mRNA transcripts and miRNA,

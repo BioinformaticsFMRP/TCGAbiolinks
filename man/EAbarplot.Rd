@@ -2,30 +2,31 @@
 % Please edit documentation in R/geneExpression.R
 \name{EAbarplot}
 \alias{EAbarplot}
-\title{EAbarplot - EAcomplete plot}
+\title{EAbarplot}
 \usage{
 EAbarplot(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab)
 }
 \arguments{
-\item{tf}{tf}
+\item{tf}{is a list of gene symbols}
 
-\item{GOMFTab}{GOMFTab}
+\item{GOMFTab}{is results from EAcomplete related to Molecular Function (MF)}
 
-\item{GOBPTab}{GOBPTab}
+\item{GOBPTab}{is results from EAcomplete related to Biological Process (BP)}
 
-\item{GOCCTab}{GOCCTab}
+\item{GOCCTab}{is results from EAcomplete related to Cellular Component (CC)}
 
-\item{PathTab}{PathTab}
+\item{PathTab}{is results from EAcomplete related to Pathways EA}
 
-\item{nBar}{nBar}
+\item{nBar}{is the number of bar histogram selected to show (default = 10)}
 
-\item{nRGTab}{nRGTab}
+\item{nRGTab}{is the gene signature list with gene symbols.}
 }
 \value{
-EAbarplot
+Complete barPlot from Enrichment Analysis showing significant (default FDR < 0.01)
+BP,CC,MF and pathways enriched by list of genes.
 }
 \description{
-EAbarplot plots the result from EAcomplete
+EAbarplot plots the result from EAcomplete in a complete barPlot
 }
 \examples{
 Genelist <- c("FN1","COL1A1")
