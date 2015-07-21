@@ -55,7 +55,9 @@ RnaSeqFilt <- function(TableRnaseq,QuantileThresh ){
 #' @importFrom EDASeq newSeqExpressionSet withinLaneNormalization
 #'  betweenLaneNormalization exprs counts
 #' @export
-#' @return table normalized
+#' @return Rnaseq matrix normalized with counts slot holds the count data as a matrix
+#' of non-negative integer count values, one row for each observational unit (gene or the like),
+#' and one column for each sample.
 #' @examples
 #' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
 RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
@@ -128,7 +130,7 @@ RnaSeqNormalization <- function(TCGA_RnaseqTable,geneInfo){
 #' samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
 #' dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT],
 #'                       dataFilt[,samplesTP],"Normal", "Tumor")
-#' @return table containing for each gene logFC, logCPM, pValue,and    FDR
+#' @return table with DEGs containing for each gene logFC, logCPM, pValue,and FDR
 DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 
     TOC <- cbind(mat1,mat2)
@@ -165,9 +167,10 @@ DEArnaSEQ <- function(mat1,mat2,Cond1type,Cond2type) {
 
 }
 
-#' @title CreateTabLevel for Differentially expression analysis (DEA)
+#' @title CreateTabLevel
 #' @description
-#'    CreateTabLevel for Differentially expression analysis (DEA)
+#'    CreateTabLevel allows user to add information related to DEGs genes from
+#'    Differentially expression analysis (DEA) such as mean values and in two conditions.
 #' @param FC_FDR_table_mRNA Output of dataDEGs filter by abs(LogFC) >=1
 #' @param typeCond1 a string containing the class label of the samples
 #'  in TableCond1  (e.g., control group)
@@ -239,13 +242,16 @@ CreateTabLevel <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
 
 #' @title plotPCAforGroups
 #' @description
-#'   plotPCAforGroups
-#' @param dataFilt dataFilt
-#' @param dataDEGsFiltLevel dataDEGsFiltLevel
+#'   plotPCAforGroups performs a principal components analysis (PCA) on the given data matrix
+#'   and returns the results as an object of class prcomp, and shows results in PCA level.
+#' @param dataFilt A filtered dataframe or numeric matrix where each row represents a gene,
+#' each column represents a sample from function RnaSeqFilt
+#' @param dataDEGsFiltLevel table with DEGs, log Fold Change (FC), false discovery rate (FDR),
+#' the gene expression level, etc, from function CreateTabLevel.
 #' @param ntopgenes number of DEGs genes to plot in PCA
 #' @import ggplot2
 #' @export
-#' @return PCA plot
+#' @return principal components analysis (PCA) plot of PC1 and PC2
 #' @examples
 #' # normalization of genes
 #' dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
@@ -298,9 +304,10 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
     g <- g + theme(legend.direction = 'horizontal',  legend.position = 'top')
     g <- g + ggtitle(TitlePlot)
     print(g)
+    return(cancer.pca)
 }
 
-#' @title EAcomplete - enrichment analysis
+#' @title EAcomplete
 #' @description
 #'   Researchers, in order to better understand the underlying biological
 #'   processes, often want to retrieve a functional profile of a set of genes
@@ -312,10 +319,10 @@ plotPCAforGroups <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #'up-regulated under certain conditions, an enrichment analysis will find
 #'identify classes of genes or proteins that are #'over-represented using
 #'annotations for that gene set.
-#' @param TFname TFname
+#' @param TFname is the name of the list of genes or TF's regulon.
 #' @param RegulonList List of genes such as TF's regulon or DEGs where to find enrichment
 #' @export
-#' @return EAcomplete plot
+#' @return Enrichment analysis GO[BP,MF,CC] and Pathways complete barPlot
 #' @examples
 #' Genelist <- c("FN1","COL1A1")
 #' ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist)
@@ -347,16 +354,34 @@ EAcomplete <- function(TFname, RegulonList){
 
 #' @title EnrichmentAnalysis
 #' @description
-#'   EnrichmentAnalysis
-#' @param GeneName GeneName
-#' @param TableEnrichment TableEnrichment
-#' @param RegulonList RegulonList
-#' @param GOtype GOtype
-#' @param FDRThresh pvalue corrected (FDR) as threshold
-#' @param EAGenes EAGenes
+#' The rational behind a enrichment analysis ( gene-set, pathway etc) is to compute
+#' statistics of whether the overlap between the focus list (signature) and the gene-set
+#' is significant. ie the confidence that overlap between the list is not due to chance.
+#'  The Gene Ontology project describes genes (gene products) using terms from
+#'  three structured vocabularies: biological process, cellular component and molecular function.
+#'  The Gene Ontology Enrichment component, also referred to as the GO Terms" component, allows
+#'  the genes in any such "changed-gene" list to be characterized using the Gene Ontology terms
+#'  annotated to them. It asks, whether for any particular GO term, the fraction of genes
+#'  assigned to it in the "changed-gene" list is higher than expected by chance
+#'  (is over-represented), relative to the fraction of genes assigned to that term in the
+#'  reference set.
+#'  In statistical terms it peform the analysis tests the null hypothesis that,
+#'  for any particular ontology term, there is no diffeerence in the proportion of genes
+#'  annotated to it in the reference list and the proportion annotated to it in the test list.
+#'  We adopted a Fisher Exact Test to perform the EA.
+#' @param GeneName is the name of gene signatures list
+#' @param TableEnrichment is a table related to annotations of gene symbols such as
+#' GO[BP,MF,CC] and Pathways. It was created from DAVID gene ontology on-line.
+#' @param RegulonList is a gene signature (lisf of genes) in which perform EA.
+#' @param GOtype is type of gene ontology Biological process (BP), Molecular Function (MF),
+#' Cellular componet (CC)
+#' @param FDRThresh pvalue corrected (FDR) as threshold to selected significant
+#' BP, MF,CC, or pathways. (default FDR < 0.01)
+#' @param EAGenes is a table with informations about genes
+#' such as ID, Gene, Description, Location and Family.
 # @export
 #' @import stats
-#' @return EAcomplete plot
+#' @return Table with enriched GO or pathways by selected gene signature.
 #' @examples
 #' \dontrun{
 #' EAGenes <- get("EAGenes")
@@ -449,20 +474,21 @@ GeneSplitRegulon <- function(Genelist,Sep){
     return(RegSplitted)
 }
 
-#' @title EAbarplot - EAcomplete plot
+#' @title EAbarplot
 #' @description
-#'   EAbarplot plots the result from EAcomplete
-#' @param tf tf
-#' @param GOBPTab GOBPTab
-#' @param GOCCTab GOCCTab
-#' @param GOMFTab GOMFTab
-#' @param PathTab PathTab
-#' @param nBar nBar
-#' @param nRGTab nRGTab
+#'   EAbarplot plots the result from EAcomplete in a complete barPlot
+#' @param tf is a list of gene symbols
+#' @param GOBPTab is results from EAcomplete related to Biological Process (BP)
+#' @param GOCCTab is results from EAcomplete related to Cellular Component (CC)
+#' @param GOMFTab is results from EAcomplete related to Molecular Function (MF)
+#' @param PathTab is results from EAcomplete related to Pathways EA
+#' @param nBar is the number of bar histogram selected to show (default = 10)
+#' @param nRGTab is the gene signature list with gene symbols.
 #' @export
 #' @importFrom EDASeq barplot
 #' @import graphics
-#' @return EAbarplot
+#' @return Complete barPlot from Enrichment Analysis showing significant (default FDR < 0.01)
+#' BP,CC,MF and pathways enriched by list of genes.
 #' @examples
 #' Genelist <- c("FN1","COL1A1")
 #' ansEA <- EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist)
