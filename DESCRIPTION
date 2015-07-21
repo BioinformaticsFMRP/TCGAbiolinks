@@ -4,7 +4,7 @@ Title:
     TCGAbiolinks: An R package to query, download,
     analyze, visualize, integrate and socialize data from TCGA
 Version: 0.99.1
-Date: 2015-06-18
+Date: 2015-07-21
 Author:
     Antonio Colaprico,
     Tiago Chedraoui Silva,
