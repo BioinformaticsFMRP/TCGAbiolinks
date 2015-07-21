@@ -36,11 +36,11 @@ CreateTabLevel allows user to add information related to DEGs genes from
    Differentially expression analysis (DEA) such as mean values and in two conditions.
 }
 \examples{
-dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
-dataFilt <- RnaSeqFilt(dataNorm, 0.25)
+dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
+dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
 samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
 samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
-dataDEGs <- DEArnaSEQ(dataFilt[,samplesNT], dataFilt[,samplesTP],
+dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT], dataFilt[,samplesTP],
 "Normal", "Tumor")
 dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
 dataTP <- dataFilt[,samplesTP]
