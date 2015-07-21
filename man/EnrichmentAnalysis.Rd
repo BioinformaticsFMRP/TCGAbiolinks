@@ -8,23 +8,41 @@ EnrichmentAnalysis(GeneName, RegulonList, TableEnrichment, EAGenes, GOtype,
   FDRThresh = 0.01)
 }
 \arguments{
-\item{GeneName}{GeneName}
+\item{GeneName}{is the name of gene signatures list}
 
-\item{RegulonList}{RegulonList}
+\item{RegulonList}{is a gene signature (lisf of genes) in which perform EA.}
 
-\item{TableEnrichment}{TableEnrichment}
+\item{TableEnrichment}{is a table related to annotations of gene symbols such as
+GO[BP,MF,CC] and Pathways. It was created from DAVID gene ontology on-line.}
 
-\item{EAGenes}{EAGenes}
+\item{EAGenes}{is a table with informations about genes
+such as ID, Gene, Description, Location and Family.}
 
-\item{GOtype}{GOtype}
+\item{GOtype}{is type of gene ontology Biological process (BP), Molecular Function (MF),
+Cellular componet (CC)}
 
-\item{FDRThresh}{pvalue corrected (FDR) as threshold}
+\item{FDRThresh}{pvalue corrected (FDR) as threshold to selected significant
+BP, MF,CC, or pathways. (default FDR < 0.01)}
 }
 \value{
-EAcomplete plot
+Table with enriched GO or pathways by selected gene signature.
 }
 \description{
-EnrichmentAnalysis
+The rational behind a enrichment analysis ( gene-set, pathway etc) is to compute
+statistics of whether the overlap between the focus list (signature) and the gene-set
+is significant. ie the confidence that overlap between the list is not due to chance.
+ The Gene Ontology project describes genes (gene products) using terms from
+ three structured vocabularies: biological process, cellular component and molecular function.
+ The Gene Ontology Enrichment component, also referred to as the GO Terms" component, allows
+ the genes in any such "changed-gene" list to be characterized using the Gene Ontology terms
+ annotated to them. It asks, whether for any particular GO term, the fraction of genes
+ assigned to it in the "changed-gene" list is higher than expected by chance
+ (is over-represented), relative to the fraction of genes assigned to that term in the
+ reference set.
+ In statistical terms it peform the analysis tests the null hypothesis that,
+ for any particular ontology term, there is no diffeerence in the proportion of genes
+ annotated to it in the reference list and the proportion annotated to it in the test list.
+ We adopted a Fisher Exact Test to perform the EA.
 }
 \examples{
 \dontrun{

@@ -20,7 +20,7 @@ each column represents a sample with Cond2type}
 (e.g., case group)}
 }
 \value{
-table containing for each gene logFC, logCPM, pValue,and    FDR
+table with DEGs containing for each gene logFC, logCPM, pValue,and FDR
 }
 \description{
 DEArnaSEQ allows user to perform Differentially expression analysis (DEA),

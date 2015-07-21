@@ -2,17 +2,17 @@
 % Please edit documentation in R/geneExpression.R
 \name{EAcomplete}
 \alias{EAcomplete}
-\title{EAcomplete - enrichment analysis}
+\title{EAcomplete}
 \usage{
 EAcomplete(TFname, RegulonList)
 }
 \arguments{
-\item{TFname}{TFname}
+\item{TFname}{is the name of the list of genes or TF's regulon.}
 
 \item{RegulonList}{List of genes such as TF's regulon or DEGs where to find enrichment}
 }
 \value{
-EAcomplete plot
+Enrichment analysis GO[BP,MF,CC] and Pathways complete barPlot
 }
 \description{
 Researchers, in order to better understand the underlying biological
