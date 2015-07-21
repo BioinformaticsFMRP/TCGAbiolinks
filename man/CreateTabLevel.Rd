@@ -2,7 +2,7 @@
 % Please edit documentation in R/geneExpression.R
 \name{CreateTabLevel}
 \alias{CreateTabLevel}
-\title{CreateTabLevel for Differentially expression analysis (DEA)}
+\title{CreateTabLevel}
 \usage{
 CreateTabLevel(FC_FDR_table_mRNA, typeCond1, typeCond2, TableCond1, TableCond2,
   typeOrder = TRUE)
@@ -32,7 +32,8 @@ of gene expression between the two
 conditions multiplied logFC)
 }
 \description{
-CreateTabLevel for Differentially expression analysis (DEA)
+CreateTabLevel allows user to add information related to DEGs genes from
+   Differentially expression analysis (DEA) such as mean values and in two conditions.
 }
 \examples{
 dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
