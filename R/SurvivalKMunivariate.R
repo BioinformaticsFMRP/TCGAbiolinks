@@ -34,7 +34,7 @@
 #' tabSurvKM <- tabSurvKM[!duplicated(tabSurvKM$mRNA),]
 #' rownames(tabSurvKM) <-tabSurvKM$mRNA
 #' tabSurvKM <- tabSurvKM[,-1]
-#' tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing=F),]
+#' tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing=FALSE),]
 SurvivalKMunivariate<-function(clinical_patient,dataGE,Genelist, Survresult,ThreshTop=0.67, ThreshDown=0.33){
 
     samplesNT <- MultiSampleTypes(colnames(dataGE), typesample = c("NT"))

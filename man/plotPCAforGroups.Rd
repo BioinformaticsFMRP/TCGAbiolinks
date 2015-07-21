@@ -8,7 +8,7 @@ plotPCAforGroups(dataFilt, dataDEGsFiltLevel, ntopgenes)
 }
 \arguments{
 \item{dataFilt}{A filtered dataframe or numeric matrix where each row represents a gene,
-each column represents a sample from function RnaSeqFilt}
+each column represents a sample from function TCGAanalyze_Filtering}
 
 \item{dataDEGsFiltLevel}{table with DEGs, log Fold Change (FC), false discovery rate (FDR),
 the gene expression level, etc, from function CreateTabLevel.}
@@ -24,9 +24,9 @@ plotPCAforGroups performs a principal components analysis (PCA) on the given dat
 }
 \examples{
 # normalization of genes
-dataNorm <- TCGAbiolinks::RnaSeqNormalization(dataBRCA, geneInfo)
+dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 # quantile filter of genes
-dataFilt <- RnaSeqFilt(dataNorm, 0.25)
+dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
 # Principal Component Analysis plot for ntop selected DEGs
 plotPCAforGroups(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
 }
