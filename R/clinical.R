@@ -25,6 +25,7 @@
 #'  SampleTypes(c("TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1"),"TR")
 #' @export
 #' @return a list of samples / barcode filtered by type sample selected
+#' @author Catharina Olsen, Claudia Cava.
 SampleTypes <- function(barcode, typesample){
     table.code <- c('01','02','03','04','05','06','07','08','09','10','11',
                     '12','13','14','20','40','50','60','61')
