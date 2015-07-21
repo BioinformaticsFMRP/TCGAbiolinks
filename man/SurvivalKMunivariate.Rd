@@ -8,7 +8,9 @@ SurvivalKMunivariate(clinical_patient, dataGE, Genelist, Survresult,
   ThreshTop = 0.67, ThreshDown = 0.33)
 }
 \arguments{
-\item{clinical_patient}{clinical_patient}
+\item{clinical_patient}{is a data.frame using function 'clinic' with information
+related to barcode / samples such as bcr_patient_barcode, days_to_death ,
+days_to_last_followup , vital_status, etc}
 
 \item{dataGE}{dataGE}
 
@@ -24,6 +26,26 @@ SurvivalKMunivariate(clinical_patient, dataGE, Genelist, Survresult,
 table with survival genes pvalues from KM.
 }
 \description{
-Survival table with univariate Kaplan-Meier
+SurvivalKMtable perform an univariate Kaplan-Meier (KM) survival analysis (SA).
+ SurvivalKMtable performs SA using following functions from survival package
+   1. survival::Surv
+   2. survival::survdiff
+   3. survival::survfit
+}
+\examples{
+library(TCGAbiolinks)
+clinical_patient_Cancer <- clinic("brca","clinical_patient")
+dataBRCAcomplete <- log2(BRCA_rnaseqv2)
+# Selecting only 10 genes for example
+dataBRCAcomplete <- dataBRCAcomplete[1:10,]
+tabSurvKM<-SurvivalKMunivariate(clinical_patient_Cancer,dataBRCAcomplete,
+Genelist = rownames(dataBRCAcomplete),
+Survresult = F,ThreshTop=0.67,ThreshDown=0.33)
+# Filtering by pvalue < 0.01
+tabSurvKM <- tabSurvKM[tabSurvKM$pvalue < 0.01,]
+tabSurvKM <- tabSurvKM[!duplicated(tabSurvKM$mRNA),]
+rownames(tabSurvKM) <-tabSurvKM$mRNA
+tabSurvKM <- tabSurvKM[,-1]
+tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing=F),]
 }
 
