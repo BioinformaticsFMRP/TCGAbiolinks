@@ -7,17 +7,20 @@
 plotPCAforGroups(dataFilt, dataDEGsFiltLevel, ntopgenes)
 }
 \arguments{
-\item{dataFilt}{dataFilt}
+\item{dataFilt}{A filtered dataframe or numeric matrix where each row represents a gene,
+each column represents a sample from function RnaSeqFilt}
 
-\item{dataDEGsFiltLevel}{dataDEGsFiltLevel}
+\item{dataDEGsFiltLevel}{table with DEGs, log Fold Change (FC), false discovery rate (FDR),
+the gene expression level, etc, from function CreateTabLevel.}
 
 \item{ntopgenes}{number of DEGs genes to plot in PCA}
 }
 \value{
-PCA plot
+principal components analysis (PCA) plot of PC1 and PC2
 }
 \description{
-plotPCAforGroups
+plotPCAforGroups performs a principal components analysis (PCA) on the given data matrix
+  and returns the results as an object of class prcomp, and shows results in PCA level.
 }
 \examples{
 # normalization of genes
