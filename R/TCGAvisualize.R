@@ -15,8 +15,8 @@
 #' @export
 #' @return net IGRAPH with attr: name (v/c), seqid (v/c), geneid (v/n), symbol (v/c), description (v/c) ...
 TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,dataGE,Genelist,
-                           scoreConfidence = 700,
-                           titlePlot = "TCGAvisualize_SurvivalCoxNET Example"){
+                                         scoreConfidence = 700,
+                                         titlePlot = "TCGAvisualize_SurvivalCoxNET Example"){
 
     combined_score <- NULL
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
@@ -175,11 +175,11 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
     color2 <- "red"
 
     # selection of normal samples "NT"
-    samplesNT <- TCGAbiolinks::MultiSampleTypes(colnames(dataFilt),
-                                                typesample = c("NT"))
+    samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt),
+                                       typesample = c("NT"))
     # selection of tumor samples "TP"
-    samplesTP <- TCGAbiolinks::MultiSampleTypes(colnames(dataFilt),
-                                                typesample = c("TP"))
+    samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt),
+                                       typesample = c("TP"))
 
     nsample1 <- length(samplesNT)
     nsample2 <- length(samplesTP)
