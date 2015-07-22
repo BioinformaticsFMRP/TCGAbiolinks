@@ -11,7 +11,7 @@ clinicFilt(barcode, clinical_patient_data, HER = NULL, ER = NULL,
 \item{barcode}{List of barcodes}
 
 \item{clinical_patient_data}{clinical_patient_data obtained with clinic function
-Ex: clinical_patient_data <- clinic("LGG","clinical_patient")}
+Ex: clinical_patient_data <- TCGAquery_clinic("LGG","clinical_patient")}
 
 \item{HER}{her2 neu immunohistochemistry receptor status: "Positive" or "Negative"}
 
@@ -33,7 +33,7 @@ This function will return the samples that matches all filters.
   Filters available: HER, ER,gender,PR, stage.
 }
 \examples{
-# clin <- clinic("BRCA","clinical_patient")
+# clin <- TCGAquery_clinic("BRCA","clinical_patient")
 clin <- clinBRCA
 bar <- c("TCGA-G9-6378-02A-11R-1789-07", "TCGA-CH-5767-04A-11R-1789-07",
         "TCGA-G9-6332-60A-11R-1789-07", "TCGA-G9-6336-01A-11R-1789-07",
