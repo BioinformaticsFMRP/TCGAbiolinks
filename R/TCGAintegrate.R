@@ -11,7 +11,7 @@
 #' matSamples <- TCGAintegrate(query)
 TCGAintegrate <- function(query) {
 
-    querySamples <- samplesfilter(query)
+    querySamples <- TCGAquery_samplesfilter(query)
 
     matSamples <- matrix(0, length(querySamples), length(querySamples))
     colnames(matSamples) <- names(querySamples)
@@ -35,10 +35,11 @@ TCGAintegrate <- function(query) {
 #' @description
 #'    Filtering sample output from TCGAQuery
 #' @param query metaData output from TCGAQuery
-# @examples query <- TCGAQuery(tumor = 'brca',level = 3) querySamples <-
-# samplesfilter(query) @export
+#' @examples query <- TCGAQuery(tumor = 'brca',level = 3)
+#' querySamples <- TCGAquery_samplesfilter(query)
+#' @export
 #' @return list of samples for a tumor
-samplesfilter <- function(query) {
+TCGAquery_samplesfilter <- function(query) {
 
     # Find unique platforms
     plat <- sort(unique(query$Platform))
