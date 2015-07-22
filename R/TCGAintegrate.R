@@ -1,13 +1,13 @@
-#' @title Filtering common samples among platforms from TCGAQuery for the same tumor
+#' @title Filtering common samples among platforms from TCGAquery for the same tumor
 #' @description In order to help the user to have an overview of the number of
 #' samples in commun we created the function `TCGAintegrate` that will receive the
-#' data frame returned from `TCGAQuery` and produce a matrix n platforms x n platforms
+#' data frame returned from `TCGAquery` and produce a matrix n platforms x n platforms
 #' with the values of samples in commum.
-#' @param query is the output of TCGAQuery
+#' @param query is the output of TCGAquery
 #' @export
-#' @return table with common samples among platforms from TCGAQuery
+#' @return table with common samples among platforms from TCGAquery
 #' @examples
-#' query <- TCGAQuery(tumor = 'brca',level = 3)
+#' query <- TCGAquery(tumor = 'brca',level = 3)
 #' matSamples <- TCGAintegrate(query)
 TCGAintegrate <- function(query) {
 
@@ -31,11 +31,11 @@ TCGAintegrate <- function(query) {
     return(matSamples)
 }
 
-#' @title Filtering sample output from TCGAQuery
+#' @title Filtering sample output from TCGAquery
 #' @description
-#'    Filtering sample output from TCGAQuery
-#' @param query metaData output from TCGAQuery
-#' @examples query <- TCGAQuery(tumor = 'brca',level = 3)
+#'    Filtering sample output from TCGAquery
+#' @param query metaData output from TCGAquery
+#' @examples query <- TCGAquery(tumor = 'brca',level = 3)
 #' querySamples <- TCGAquery_samplesfilter(query)
 #' @export
 #' @return list of samples for a tumor
