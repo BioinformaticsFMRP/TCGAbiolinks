@@ -2,7 +2,7 @@
 % Please edit documentation in R/clinical.R
 \name{TCGAquery_SampleTypes}
 \alias{TCGAquery_SampleTypes}
-\title{TCGAquery_SampleTypes}
+\title{Filtering list of samples by selected type sample}
 \usage{
 TCGAquery_SampleTypes(barcode, typesample)
 }

@@ -1,4 +1,4 @@
-#' @title TCGAquery_SampleTypes
+#' @title Filtering list of samples by selected type sample
 #' @description
 #'   For a given list of samples and a type sample, return the samples that are
 #'   from that type.
@@ -42,7 +42,7 @@ TCGAquery_SampleTypes <- function(barcode, typesample){
     return(barcode)
 }
 
-#' @title TCGAquery_MultiSampleTypes
+#' @title Retrieve multiple tissue types not from the same patients.
 #' @description
 #'   TCGAquery_MultiSampleTypes for a given list of samples and a type sample, return the samples that are
 #'   from that type. TCGAquery_MultiSampleTypes allows using several type sample together.
@@ -82,7 +82,7 @@ TCGAquery_MultiSampleTypes <- function(barcode,typesample){
     }
 }
 
-#' @title TCGAquery_MatchedCoupledSampleTypes
+#' @title Retrieve multiple tissue types from the same patients.
 #' @description
 #'   TCGAquery_MatchedCoupledSampleTypes
 #' @param barcode barcode
@@ -382,9 +382,9 @@ TCGAquery_clinic <- function(cancer,clinical_data_type){
 #'         "TCGA-G9-6380-11A-11R-1789-07", "TCGA-G9-6380-01A-11R-1789-07",
 #'         "TCGA-G9-6340-01A-11R-1789-07","TCGA-G9-6340-11A-11R-1789-07")
 #'
-#' clinicFilt(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),clin,
+#' TCGAquery_clinicFilt(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),clin,
 #' HER="Positive", gender="FEMALE",ER="Positive")
-clinicFilt <- function(barcode,
+TCGAquery_clinicFilt <- function(barcode,
                        clinical_patient_data,
                        HER=NULL,
                        ER=NULL,
