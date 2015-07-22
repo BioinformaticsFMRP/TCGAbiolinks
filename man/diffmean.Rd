@@ -42,4 +42,5 @@ data <- SummarizedExperiment::SummarizedExperiment(
 data <- diffmean(data)
 }
 }
+\keyword{internal}
 
