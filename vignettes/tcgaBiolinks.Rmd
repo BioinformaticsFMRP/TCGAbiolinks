@@ -839,6 +839,11 @@ knitr::kable(tabSurvKMcompleteDEGs[1:10,],
 ```
 
 ### Survival Analysis Cox Regression and dnet package
+TCGAvisualize_SurvivalCoxNET can help an user to identify a group of survival genes that are significant from univariate Kaplan Meier Analysis and also for Cox Regression.
+It shows in the end a network build with community of genes with similar range of pvalues from
+Cox regression (same color) and that interaction among those genes is already validated in
+literatures using the STRING database (version 9.1).
+
 
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
@@ -878,6 +883,11 @@ TabCoxNet <- TCGAvisualize_SurvivalCoxNET(clinical_patient_Cancer,dataBRCAcomple
                             Genelist = rownames(tabSurvKMcomplete_onlyTF),
                             scoreConfidence = 700,titlePlot = "TCGAvisualize_SurvivalCoxNET Example")
 ```
+In particular the survival analysis with kaplan meier and cox regression allow user to reduce the feature / number of genes significant for survival. And using 'dnet' pipeline with 'TCGAvisualize_SurvivalCoxNET' function the user can further filter those genes according some already validated interaction according STRING database.
+This is important because the user can have an idea about the biology inside the 
+survival discrimination and further investigate in a sub-group of genes that are working in as synergistic effect influencing the risk of survival.
+In the following picture the user can see some community of genes with same color and survival pvalues.
+
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
 
