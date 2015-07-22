@@ -4,16 +4,10 @@
 \alias{TCGAanalyze_Preprocessing}
 \title{Array Array Intensity correlation (AAIC) and correlation boxplot to define outlier}
 \usage{
-TCGAanalyze_Preprocessing(object, tabGroupCol, ArrayIndex, pmat)
+TCGAanalyze_Preprocessing(object)
 }
 \arguments{
-\item{object}{object of class eset or gene expresion}
-
-\item{tabGroupCol}{table with group samples information in tabGroupCol$Color}
-
-\item{ArrayIndex}{ArrayIndex}
-
-\item{pmat}{pmat}
+\item{object}{of gene expression of class RangedSummarizedExperiment from TCGAprepare}
 }
 \value{
 Plot with array array intensity correlation and boxplot of correlation samples by samples

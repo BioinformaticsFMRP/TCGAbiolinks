@@ -339,7 +339,7 @@ clinical_data_site_cancer <- function(cancer){
 TCGAquery_clinic <- function(cancer,clinical_data_type){
     query <- TCGAquery(tumor = cancer,platform = "bio", level=2)
     TCGAdownload(query,type = clinical_data_type)
-    clinical_patient <- TCGAPrepare(query,type = clinical_data_type, dir = ".")
+    clinical_patient <- TCGAprepare(query,type = clinical_data_type, dir = ".")
     return(clinical_patient)
 }
 

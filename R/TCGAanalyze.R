@@ -3,23 +3,38 @@
 #' It defines a square symmetric matrix of pearson correlation among samples.
 #' According this matrix and boxplot of correlation samples by samples it is possible
 #' to find samples with low correlation that can be identified as possible outliers.
-#' @param object object of class eset or gene expresion
-#' @param tabGroupCol table with group samples information in tabGroupCol$Color
-#' @param ArrayIndex ArrayIndex
-#' @param pmat pmat
+#' @param object of gene expression of class RangedSummarizedExperiment from TCGAprepare
 #' @importFrom grDevices dev.list
 #' @export
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
-TCGAanalyze_Preprocessing<- function(object,tabGroupCol,ArrayIndex,pmat){
+TCGAanalyze_Preprocessing<- function(object){
 
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 
     png("PreprocessingOutput.png", width = 1200, height = 1200)
 
     # array array IC after RMA
-    #object<-eset
-    #ArrayIndex = as.character(1:length(sampleNames(object)))
-    #pmat <- as.matrix(pData(phenoData(object)))
+    #object <-BRCARnaseq_assay
+
+   #object<-eset_COMBAT
+   #ArrayIndex = as.character(1:length(sampleNames(object)))
+    ArrayIndex = as.character(1:length( colData(object)$sample))
+
+    pmat_new <- matrix(0, length(ArrayIndex),4)
+    colnames(pmat_new) <-c("Disease","platform","SampleID","Study")
+    rownames(pmat_new)<- as.character(colData(object)$sample)
+    pmat_new <- as.data.frame(pmat_new)
+    pmat_new$Disease <-as.character(colData(object)$shortLetterCode)
+    pmat_new$platform <-"platform"
+    pmat_new$SampleID <- as.character(colData(object)$sample)
+    pmat_new$Study<-"study"
+
+    tabGroupCol <-cbind(pmat_new, Color = matrix(0,nrow(pmat_new),1))
+    tabGroupCol[which(tabGroupCol$Disease=="TP"),"Color"]<-"red"
+    tabGroupCol[which(tabGroupCol$Disease=="NT"),"Color"]<-"blue"
+
+#    pmat <- as.matrix(pData(phenoData(object)))
+    pmat <- pmat_new
     phenodepth <- min(ncol(pmat), 3)
     order <- switch(phenodepth + 1, ArrayIndex, order(pmat[, 1]), order(pmat[, 1], pmat[, 2]), order(pmat[, 1], pmat[, 2], pmat[, 3]))
     arraypos <- (1:length(ArrayIndex)) * (1/(length(ArrayIndex) - 1)) - (1/(length(ArrayIndex) - 1))
@@ -27,9 +42,9 @@ TCGAanalyze_Preprocessing<- function(object,tabGroupCol,ArrayIndex,pmat){
     for (i in 2:length(ArrayIndex)) { arraypos2[i - 1] <- (arraypos[i] + arraypos[i - 1])/2 }
     layout(matrix(c(1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 3, 3, 3, 4), 4, 4, byrow = TRUE))
 
-    c <- cor(exprs(object)[, order], method = "spearman")
-    colnames(c) <- gsub(".CEL","",colnames(c))
-    rownames(c) <- gsub(".CEL","",rownames(c))
+    #c <- cor(exprs(object)[, order], method = "spearman")
+    c <- cor(assay(object,"raw_counts")[, order], method = "spearman")
+
     image(c, xaxt = "n", yaxt = "n", xlab = "Array Samples", ylab = "Array Samples",  main = "Array-Array Intensity Correlation after RMA")
     #abline(h = arraypos2, v = arraypos2)
 
