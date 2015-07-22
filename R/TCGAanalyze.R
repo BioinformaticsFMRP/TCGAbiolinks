@@ -16,8 +16,8 @@ TCGAanalyze_Preprocessing<- function(object){
     # array array IC after RMA
     #object <-BRCARnaseq_assay
 
-   #object<-eset_COMBAT
-   #ArrayIndex = as.character(1:length(sampleNames(object)))
+    #object<-eset_COMBAT
+    #ArrayIndex = as.character(1:length(sampleNames(object)))
     ArrayIndex = as.character(1:length( colData(object)$sample))
 
     pmat_new <- matrix(0, length(ArrayIndex),4)
@@ -33,7 +33,7 @@ TCGAanalyze_Preprocessing<- function(object){
     tabGroupCol[which(tabGroupCol$Disease=="TP"),"Color"]<-"red"
     tabGroupCol[which(tabGroupCol$Disease=="NT"),"Color"]<-"blue"
 
-#    pmat <- as.matrix(pData(phenoData(object)))
+    #    pmat <- as.matrix(pData(phenoData(object)))
     pmat <- pmat_new
     phenodepth <- min(ncol(pmat), 3)
     order <- switch(phenodepth + 1, ArrayIndex, order(pmat[, 1]), order(pmat[, 1], pmat[, 2]), order(pmat[, 1], pmat[, 2], pmat[, 3]))
@@ -107,8 +107,8 @@ TCGAanalyze_Preprocessing<- function(object){
 #' tabSurvKM <- tabSurvKM[,-1]
 #' tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing=FALSE),]
 TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,ThreshTop=0.67, ThreshDown=0.33){
-    samplesNT <- TCGAquery_MultiSampleTypes(colnames(dataGE), typesample = c("NT"))
-    samplesTP <- TCGAquery_MultiSampleTypes(colnames(dataGE), typesample = c("TP"))
+    samplesNT <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
+    samplesTP <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
     Genelist <- intersect(rownames(dataGE),Genelist)
     dataCancer <- dataGE[Genelist,samplesTP]
     dataNormal <- dataGE[Genelist,samplesNT]
@@ -310,18 +310,27 @@ TCGAanalyze_Filtering <- function(TableRnaseq,QuantileThresh ){
 #' @title normalization mRNA transcripts and miRNA using EDASeq package.
 #' @description
 #'   TCGAanalyze_Normalization allows user to normalize mRNA transcripts and miRNA,
-#'    using EDASeq package. Normalization for RNA-Seq Numerical and graphical summaries of RNA-Seq read data. Within-lane normalization procedures
+#'    using EDASeq package.
+#'
+#'    Normalization for RNA-Seq Numerical and graphical
+#'     summaries of RNA-Seq read data. Within-lane normalization procedures
 #'    to adjust for GC-content effect (or other gene-level effects) on read counts:
 #'    loess robust local regression, global-scaling, and full-quantile normalization
 #'    (Risso et al., 2011). Between-lane normalization procedures to adjust for
-#'    distributional differences between lanes (e.g., sequencing depth): global-scaling and full-quantile normalization (Bullard et al., 2010).
+#'    distributional differences between lanes (e.g., sequencing depth):
+#'    global-scaling and full-quantile normalization (Bullard et al., 2010).
+#'
 #'    For istance returns all mRNA or miRNA with mean across all
 #'    samples, higher than the threshold defined quantile mean across all samples.
-#'    TCGAanalyze_Normalization performs normalization using following functions from EDASeq
-#'    1. EDASeq::newSeqExpressionSet
-#'    2. EDASeq::withinLaneNormalization
-#'    3. EDASeq::betweenLaneNormalization
-#'    4. EDASeq::counts
+#'
+#'    TCGAanalyze_Normalization performs normalization using following functions
+#'    from EDASeq
+#'    \enumerate{
+#'    \item  EDASeq::newSeqExpressionSet
+#'    \item  EDASeq::withinLaneNormalization
+#'    \item  EDASeq::betweenLaneNormalization
+#'    \item  EDASeq::counts
+#'    }
 #' @param TCGA_RnaseqTable Rnaseq numeric matrix, each row represents a gene,
 #' each column represents a sample
 #' @param geneInfo Information matrix of 20531 genes about geneLength and gcContent
@@ -378,14 +387,17 @@ TCGAanalyze_Normalization <- function(TCGA_RnaseqTable,geneInfo){
 #' @title Differentially expression analysis (DEA) using edgeR package.
 #' @description
 #'    TCGAanalyze_DEA allows user to perform Differentially expression analysis (DEA),
-#'    using edgeR package. DEA to identify differentially expressed genes (DEGs).
+#'    using edgeR package to identify differentially expressed genes (DEGs).
 #'     It is possible to do a two-class analysis.
-#'     TCGAanalyze_DEA performs DEA using following functions from edgeR
-#'     1. edgeR::DGEList converts the count matrix into an edgeR object.
-#'     2. edgeR::estimateCommonDisp each gene gets assigned the same dispersion estimate.
-#'     3. edgeR::exactTest performs pair-wise tests for differential expression between two groups.
-#'     4. edgeR::topTags takes the output from exactTest(), adjusts the raw p-values using the
+#'
+#'     TCGAanalyze_DEA performs DEA using following functions from edgeR:
+#'     \enumerate{
+#'     \item edgeR::DGEList converts the count matrix into an edgeR object.
+#'     \item edgeR::estimateCommonDisp each gene gets assigned the same dispersion estimate.
+#'     \item edgeR::exactTest performs pair-wise tests for differential expression between two groups.
+#'     \item edgeR::topTags takes the output from exactTest(), adjusts the raw p-values using the
 #'     False Discovery Rate (FDR) correction, and returns the top differentially expressed genes.
+#'     }
 #' @param mat1 numeric matrix, each row represents a gene,
 #' each column represents a sample with Cond1type
 #' @param mat2 numeric matrix, each row represents a gene,
@@ -399,8 +411,8 @@ TCGAanalyze_Normalization <- function(TCGA_RnaseqTable,geneInfo){
 #' @examples
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 #' dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
-#' samplesNT <- TCGAquery_MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
-#' samplesTP <- TCGAquery_MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
+#' samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
+#' samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 #' dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT],
 #'                       dataFilt[,samplesTP],"Normal", "Tumor")
 #' @return table with DEGs containing for each gene logFC, logCPM, pValue,and FDR
@@ -464,8 +476,8 @@ TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type) {
 #' @examples
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 #' dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
-#' samplesNT <- TCGAquery_MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
-#' samplesTP <- TCGAquery_MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
+#' samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
+#' samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 #' dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT], dataFilt[,samplesTP],
 #' "Normal", "Tumor")
 #' dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
