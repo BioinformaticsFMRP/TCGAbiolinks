@@ -18,7 +18,7 @@ days_to_last_followup , vital_status, etc}
 
 \item{scoreConfidence}{restrict to those edges with high confidence (eg. score>=700)}
 
-\item{titlePlot}{is the title to show in the plot.}
+\item{titlePlot}{is the title to show in the final plot.}
 }
 \value{
 net IGRAPH with related Cox survival genes in community (same pval and color) and with

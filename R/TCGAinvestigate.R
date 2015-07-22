@@ -1,9 +1,10 @@
 #' @title Find most studied TF in pubmed related to a specific cancer, disease, or tissue
 #' @description Find most studied TF in pubmed related to a specific cancer,
 #'  disease, or tissue
-#' @param tumor tumor
-#' @param dataDEGsFiltLevelTF dataDEGsFiltLevelTF
-#' @param topgenes topgenes
+#' @param tumor is character such as cancer, disease, or tissue eg. BRCA or breast
+#' @param dataDEGsFiltLevelTF is a table output from TCGAanalyze_LevelTab with only TFs
+#' @param topgenes is the number of top genes (eg. 10) in the rownames(dataDEGsFiltLevelTF)
+#' where find in pubmed if those genes or TFs are already related to that cancer or disease
 #' @importFrom RCurl url.exists curlVersion
 #' @examples
 #' \dontrun{
