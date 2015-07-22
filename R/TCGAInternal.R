@@ -242,6 +242,7 @@ is.linux <- function() {
 # @import scales
 #' @import grid
 #' @import stats
+#' @keywords internal
 #' @return  a ggplot2 plot
 #' @author Vincent Q. Vu.
 # @examples
@@ -428,7 +429,6 @@ ggbiplot <- function(pcobj, choices = 1:2, scale = 1, pc.biplot = TRUE,
 #' @description
 #'   GenesCutID
 #' @param GeneList GeneList
-# @export
 #' @return list of gene symbol without IDs
 # @examples
 # GenesCutID(c("CRKL|1399","TADA2A|6871","KRT76|51350"))
@@ -444,7 +444,7 @@ GenesCutID <- function(GeneList){
 #'   GeneSplitRegulon
 #' @param Genelist Genelist
 #' @param Sep Sep
-# @export
+#' @keywords internal
 #' @return GeneSplitRegulon
 # @examples
 # GeneSplitRegulon("CRKL;TADA2A;KRT76",Sep =";")

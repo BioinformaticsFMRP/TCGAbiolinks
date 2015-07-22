@@ -98,7 +98,7 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' df <- data.frame(days_to_death,vital_status,groups)
 #' survivalAnalysis(df,clusterCol="groups")
 #' \dontrun{
-#' clinical <- clinic("gbm","clinical_patient")
+#' clinical <- TCGAquery_clinic("gbm","clinical_patient")
 #' survivalAnalysis(clinical,"gender", filename = "surv.pdf", legend="Gender")
 #' }
 survivalAnalysis <- function(data,

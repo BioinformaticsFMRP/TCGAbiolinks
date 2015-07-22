@@ -130,7 +130,7 @@ TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
 #' @param barcode barcode
 #' @param stage stage
 #' @param clinical_patient_data clinical_patient_data
-# @export
+#' @keywords internal
 #' @return stage_BRCA
 # @examples
 # # clin <- TCGAquery_clinic("BRCA","clinical_patient")
@@ -169,7 +169,7 @@ stage_BRCA <- function(barcode, stage, clinical_patient_data){
 #' @param barcode barcode
 #' @param gender gender
 #' @param clinical_patient_data clinical_patient_data
-# @export
+#' @keywords internal
 #' @return stage_BRCA
 # @examples
 # # clin <- TCGAquery_clinic("BRCA","clinical_patient")
@@ -198,7 +198,7 @@ gender_BRCA <- function(barcode, gender, clinical_patient_data){
 #' @param barcode barcode
 #' @param ER ER
 #' @param clinical_patient_data clinical_patient_data
-# @export
+#' @keywords internal
 #' @return ER_status_BRCA
 # @examples
 # # clin <- TCGAquery_clinic("BRCA","clinical_patient")
@@ -229,7 +229,7 @@ ER_status_BRCA <- function(barcode,ER, clinical_patient_data){
 #' @param barcode barcode
 #' @param PR PR
 #' @param clinical_patient_data clinical_patient_data
-# @export
+#' @keywords internal
 #' @return PR_status_BRCA
 # @examples
 # # clin <- TCGAquery_clinic("BRCA","clinical_patient")
@@ -262,7 +262,7 @@ PR_status_BRCA  <- function(barcode,PR, clinical_patient_data){
 #' @param barcode barcode
 #' @param HER HER
 #' @param clinical_patient_data clinical_patient_data
-# @export
+#' @keywords internal
 #' @return HER_status_BRCA
 # @examples
 # # clin <- TCGAquery_clinic("BRCA","clinical_patient")
@@ -293,7 +293,7 @@ HER_status_BRCA  <- function(barcode, HER, clinical_patient_data){
 #' @description
 #'   clinical_data_site_cancer
 #' @param cancer cancer
-# @export
+#' @keywords internal
 # @examples clinical_data_site_cancer("gbm")
 #' @return clinical_data_site_cancer
 clinical_data_site_cancer <- function(cancer){
