@@ -94,7 +94,7 @@ search
 \code{\link{TCGAPrepare}} for preparing the data for the user into
 a Summarized experiment object, or a matrix.
 
-Other data.functions: \code{\link{TCGADownload}};
-  \code{\link{TCGAPrepare}}
+Other data.functions: \code{\link{TCGAdownload}};
+  \code{\link{TCGAprepare}}
 }
 
