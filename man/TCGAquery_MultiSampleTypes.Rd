@@ -2,7 +2,7 @@
 % Please edit documentation in R/clinical.R
 \name{TCGAquery_MultiSampleTypes}
 \alias{TCGAquery_MultiSampleTypes}
-\title{TCGAquery_MultiSampleTypes}
+\title{Retrieve multiple tissue types not from the same patients.}
 \usage{
 TCGAquery_MultiSampleTypes(barcode, typesample)
 }
