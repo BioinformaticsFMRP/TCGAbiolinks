@@ -198,8 +198,8 @@ knitr::kable(BRCA_RNASeqV2_version, digits = 2,
 
 
 
-# `TCGADownload`: Downloading open-access data  
-You can easily download data using the `TCGADownload` function.
+# `TCGAdownload`: Downloading open-access data  
+You can easily download data using the `TCGAdownload` function.
 
 The arguments are:
 
@@ -216,12 +216,12 @@ The arguments are:
 # samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
 # samples to normalize later
 
-TCGADownload(query, path = "data", type = "rsem.genes.results")
+TCGAdownload(query, path = "data", type = "rsem.genes.results")
 
-TCGADownload(query, path = "data", type = "rsem.isoforms.normalized_results")
+TCGAdownload(query, path = "data", type = "rsem.isoforms.normalized_results")
 
 
-TCGADownload(query, path = "dataBrca", type = "rsem.genes.results",
+TCGAdownload(query, path = "dataBrca", type = "rsem.genes.results",
              samples = c("TCGA-E9-A1NG-11A-52R-A14M-07",
                          "TCGA-BH-A1FC-11A-32R-A13Q-07")
              )
@@ -238,8 +238,8 @@ Illuminahiseq_totalrnaseqv2<br>  IlluminaHiSeq_RNASeqV2<br>IlluminaGA_RNASeqV2 |
 IlluminaHiSeq_RNASeq<br>illuminaga_rnaseq|exon.quantification<br>spljxn.quantification<br>gene.quantification
 genome_wide_snp_6| hg18.seg<br>hg19.seg<br>nocnv_hg18.seg<br>nocnv_hg19.seg
 
-# `TCGAPrepare`: Preparing the data
-You can easily read the downloaded data using the `TCGAPrepare` function.
+# `TCGAprepare`: Preparing the data
+You can easily read the downloaded data using the `TCGAprepare` function.
 This function will prepare the data into a [SummarizedExperiment](http://www.nature.com/nmeth/journal/v12/n2/abs/nmeth.3252.html) 
 object for downstream analysis. For the moment this function is working only
 with data level 3.
@@ -259,16 +259,16 @@ The arguments are:
 # get all samples from the query and save them in the TCGA folder
 # samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
 # samples to normalize later
-data <- TCGAPrepare(query, dir = "data", save = TRUE, filename = "myfile.rda")
+data <- TCGAprepare(query, dir = "data", save = TRUE, filename = "myfile.rda")
 ```
 
 ```{r,echo=FALSE, results='hide',message=FALSE,warning=FALSE}
 library(SummarizedExperiment)
 query <- TCGAquery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3 )
-TCGADownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
+TCGAdownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
                              "TCGA-DY-A0XA-01A-11R-A155-07"),
              type = "rsem.genes.normalized_results",path = "../../")
-data <- TCGAPrepare(query = query,dir = "../../", type = "rsem.genes.normalized_results")
+data <- TCGAprepare(query = query,dir = "../../", type = "rsem.genes.normalized_results")
 ```
 
 As an example, for the platform IlluminaHiSeq_RNASeqV2 we prepared two samples (TCGA-DY-A1DE-01A-11R-A155-07 and TCGA-DY-A0XA-01A-11R-A155-07) for the rsem.genes.normalized_results type. In order to create the object mapped the gene_id 
@@ -287,7 +287,7 @@ In case you prefere to have the raw data. You can get a data frame without any
 modification setting the `summarizedExperiment` to false.
 
 ```{r,echo=FALSE, results='hide',message=FALSE,warning=FALSE}
-data <- TCGAPrepare(query = query,dir = "../../", type ="rsem.genes.normalized_results", summarizedExperiment = FALSE)
+data <- TCGAprepare(query = query,dir = "../../", type ="rsem.genes.normalized_results", summarizedExperiment = FALSE)
 ```
 
 ```{r, eval = TRUE}
@@ -297,7 +297,7 @@ data <- TCGAPrepare(query = query,dir = "../../", type ="rsem.genes.normalized_r
 ```
 
 
-### Table of `types` available for the `TCGAPrepare`
+### Table of `types` available for the `TCGAprepare`
 
 Platform| Types of file
 :-------------:|:-------------:
@@ -306,12 +306,12 @@ IlluminaHiSeq_RNASeq<br>illuminaga_rnaseq|exon.quantification<br>spljxn.quantifi
 genome_wide_snp_6| hg19.seg
 
 
-### Preparing the data with TCGAPrepare - toPackage 
+### Preparing the data with TCGAprepare - toPackage 
 This section will show how to integrate `TCGAbiolinks` with other packages.
 Our intention is to provide as many integrations as possible.
 
 The example below shows how to use `TCGAbiolinks` with `ELMER` package 
-(expression/methylation analysis). The TCGAPrepare for the methylation data 
+(expression/methylation analysis). The TCGAprepare for the methylation data 
 will Removing probes with NA values in more than 0.80% samples and remove the 
 anottation data, fot the expression data it will take the log2(expression + 1)
 of the expression matrix in order to To linearize the relation between 
@@ -323,15 +323,15 @@ specified by the package.
 library(TCGAbiolinks)
 query <- TCGAquery(tumor = "GBM",level = 3, platform = "HumanMethylation450")
 # This function will take a lot of time depens on internet connection
-TCGADownload(query,path = "TCGA/450k")
-met <- TCGAPrepare(query,dir = "TCGA/450k",
+TCGAdownload(query,path = "TCGA/450k")
+met <- TCGAprepare(query,dir = "TCGA/450k",
                    save = TRUE,
                    filename = "met.rda",
                    toPackage = "ELMER")
 
 query.rna <- TCGAquery(tumor="GBM",level=3, platform="IlluminaHiSeq_RNASeqV2")
-TCGADownload(query.rna,path="TCGA/rna",type = "rsem.genes.normalized_results")
-exp <- TCGAPrepare(query.rna, dir="TCGA/rna", save = TRUE, 
+TCGAdownload(query.rna,path="TCGA/rna",type = "rsem.genes.normalized_results")
+exp <- TCGAprepare(query.rna, dir="TCGA/rna", save = TRUE, 
                     filename = "exp.rda",toPackage = "ELMER")
 
 ############# To EMLER
@@ -352,7 +352,7 @@ mee.gbm.glial.with.exp <- fetch.mee(meth = gbm.glial.m,
 ```
 
 
-# Examples `TCGAquery`, `TCGADownload`, `TCGAPrepare`
+# Examples `TCGAquery`, `TCGAdownload`, `TCGAprepare`
 
 ## Gene Expression IlluminaHiSeq_RNASeq
 You can easily search TCGA samples, download and prepare a matrix of gene expression.
@@ -365,12 +365,12 @@ listSamples <- TCGAquery_samplesfilter(query)
 
 # Download only first 5 samples for test.
 
-TCGADownload(query, path = "dataBrca", type = "gene.quantification",
+TCGAdownload(query, path = "dataBrca", type = "gene.quantification",
              samples = listSamples$IlluminaHiSeq_RNASeq[1:5])
 
 # Prepare expression matrix with gene id in rows and samples (barcode) in columns
 # rsem.genes.results as values
-BRCAMatrix <- TCGAPrepare(query,"dataBrca",type = "gene.quantification")
+BRCAMatrix <- TCGAprepare(query,"dataBrca",type = "gene.quantification")
 ```
 
 
@@ -394,14 +394,14 @@ query <- TCGAquery(tumor = "brca", samples = listSamples,
   platform = "IlluminaHiSeq_RNASeqV2", level = "3")
 
 # dont run
-#TCGADownload(query, path = "dataBrca", type = "gene.quantification",samples = listSamples)
+#TCGAdownload(query, path = "dataBrca", type = "gene.quantification",samples = listSamples)
 
 # Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
-TCGADownload(query, path = "../dataBrca", type = "rsem.genes.results",samples = listSamples)
+TCGAdownload(query, path = "../dataBrca", type = "rsem.genes.results",samples = listSamples)
 
 # Prepare expression matrix with gene id in rows and samples (barcode) in columns
 # rsem.genes.results as values
-BRCAMatrix <- TCGAPrepare(query,"dataBrca",type = "rsem.genes.results")
+BRCAMatrix <- TCGAprepare(query,"dataBrca",type = "rsem.genes.results")
 
 BRCAMatrix_assay <- assay(BRCAMatrix,"raw_counts")
 
@@ -435,10 +435,10 @@ samplesList <- c("TCGA-02-0046-10A-01D-0182-01",
 query <- TCGAquery(tumor = "gbm", level = 3, platform = "Genome_Wide_SNP_6")
 
 # Download a list of barcodes with platform Genome_Wide_SNP_6
-TCGADownload(query, path = "samples")
+TCGAdownload(query, path = "samples")
 
 # Prepare matrix 
-GBM_CNV <- TCGAPrepare(query, dir = "samples", type = ".hg19.seg.txt")
+GBM_CNV <- TCGAprepare(query, dir = "samples", type = ".hg19.seg.txt")
 ```
 
 
@@ -538,7 +538,7 @@ print(female_erpos_herpos)
 
 
 # TCGA Downstream Analysis
-After preparing the gene expression from TCGA data using the `TCGAPrepare`
+After preparing the gene expression from TCGA data using the `TCGAprepare`
 function, you can do a normalization of genes using the 
 function `TCGAanalyze_Normalization`, do a quantile filter of genes with
 the `TCGAanalyze_Filtering` function. Also, iin order to classify your samples (barcode) 
@@ -553,7 +553,7 @@ the  "Solid Tissue Normal"" samples, while the typeSample "TP" will return
 library(TCGAbiolinks)
 
 # dataBRCA in TCGAbiolinks package is a table from TCGA BRCA [10 samples] and comes from 
-# BRCAMatrix <- TCGAPrepare(query,"dataBrca") from above example
+# BRCAMatrix <- TCGAprepare(query,"dataBrca") from above example
 # dataBRCA <- BRCAMatrix
 
 # normalization of genes
@@ -957,8 +957,8 @@ library(TCGAbiolinks)
 
 # Getting the data 
 query <- TCGAquery(tumor = "gbm", platform = "HumanMethylation450", level = 3)
-TCGADownload(query,path=".")
-data <- TCGAPrepare(query = query,dir = ".",save = T)
+TCGAdownload(query,path=".")
+data <- TCGAprepare(query = query,dir = ".",save = T)
 clinical <- TCGAquery_clinic("gbm","clinical_patient")
 
 #Preprocessing 
@@ -1023,7 +1023,7 @@ meanMethylationAnalysis(data,"group")
 ```
 The arguments of `meanMethylationAnalysis` are:
 
-*  **data**	 SummarizedExperiment object obtained from `TCGAPrepare`
+*  **data**	 SummarizedExperiment object obtained from `TCGAprepare`
 *  **groupCol** Columns in colData(data) that defines the groups. 
 If no columns defined a columns called "Patients" will be used
 *  **sort**	Sort by mean methylation? False by default
@@ -1075,7 +1075,7 @@ This values can be view/acessed using the `rowRanges` acessesor.
 
 The arguments of volcanoPlot are:
 
-*  **data**	 SummarizedExperiment object obtained from `TCGAPrepare`
+*  **data**	 SummarizedExperiment object obtained from `TCGAprepare`
 *  **groupCol** Columns in colData(data) that defines the groups. 
 If no columns defined a columns called "Patients" will be used
 *  **group1** In case our object has more than 2 groups, 
@@ -1117,10 +1117,10 @@ The black dashed line shows the FDR-adjusted P value of 0.01.
 The parameters of this function are:
 
 * **met** SummarizedExperiment with methylation data obtained from the 
-`TCGAPrepare` and processed by `volcanoAnalysis` function. 
+`TCGAprepare` and processed by `volcanoAnalysis` function. 
 Expected colData columns: diffmean, p.value.adj and p.value
 * **exp** SummarizedExperiment with methylation data obtained from the
-`TCGAPrepare` function  and processed by `TCGAanalyze_DEA` function. Expected colData columns: diffmean, p.value.adj and p.value
+`TCGAprepare` function  and processed by `TCGAanalyze_DEA` function. Expected colData columns: diffmean, p.value.adj and p.value
 *  **group1** Name of the group1
 *  **group2** Name of the group2
 
