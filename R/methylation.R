@@ -96,12 +96,12 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' vital_status <- c(rep("Dead",200))
 #' groups <- c(rep(c("G1","G2"),c(100,100)))
 #' df <- data.frame(days_to_death,vital_status,groups)
-#' survivalAnalysis(df,clusterCol="groups")
+#' TCGAanalyze_survival(df,clusterCol="groups")
 #' \dontrun{
 #' clinical <- TCGAquery_clinic("gbm","clinical_patient")
-#' survivalAnalysis(clinical,"gender", filename = "surv.pdf", legend="Gender")
+#' TCGAanalyze_survival(clinical,"gender", filename = "surv.pdf", legend="Gender")
 #' }
-survivalAnalysis <- function(data,
+TCGAanalyze_survival <- function(data,
                              clusterCol=NULL,
                              legend = "Legend", cutoff = 0,
                              main = "Kaplan-Meier Overall Survival Curves",
@@ -202,8 +202,8 @@ survivalAnalysis <- function(data,
 #'          assays=S4Vectors::SimpleList(counts=counts),
 #'          rowRanges=rowRanges,
 #'          colData=colData)
-#' meanMethylationAnalysis(data,groupCol  = "group",sort=TRUE)
-meanMethylationAnalysis <- function(data,
+#' TCGAvisualize_meanMethylation(data,groupCol  = "group",sort=TRUE)
+TCGAvisualize_meanMethylation <- function(data,
                                     groupCol=NULL,
                                     sort = FALSE,
                                     filename = "G-CIMP-mean.methylation.pdf",
@@ -442,8 +442,8 @@ calculate.pvalues <- function(data,
 #'          colData=colData)
 #' SummarizedExperiment::colData(data)$group <- c(rep("group1",ncol(data)/2),
 #'                          rep("group2",ncol(data)/2))
-#' hypo.hyper <- DMRAnalysis(data, p.cut = 0.85,"group","group1","group2")
-DMRAnalysis <- function(data,
+#' hypo.hyper <- TCGAanalyze_DMR(data, p.cut = 0.85,"group","group1","group2")
+TCGAanalyze_DMR <- function(data,
                         groupCol=NULL,
                         group1=NULL,
                         group2=NULL,
@@ -623,8 +623,8 @@ get.GRCh.bioMart <- function(genome="hg19") {
 #' SummarizedExperiment::rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
 #' SummarizedExperiment::rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
 #' SummarizedExperiment::rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
-#' result <- starburstAnalysis(met,exp,p.cut = 0.05,"g1","g2")
-starburstAnalysis <- function(met,
+#' result <- TCGAvisualize_starburst(met,exp,p.cut = 0.05,"g1","g2")
+TCGAvisualize_starburst <- function(met,
                               exp,
                               group1=NULL,
                               group2=NULL,
