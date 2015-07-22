@@ -175,10 +175,10 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
     color2 <- "red"
 
     # selection of normal samples "NT"
-    samplesNT <- TCGAbiolinks::MultiSampleTypes(colnames(dataFilt),
+    samplesNT <- TCGAquery_MultiSampleTypes(colnames(dataFilt),
                                                 typesample = c("NT"))
     # selection of tumor samples "TP"
-    samplesTP <- TCGAbiolinks::MultiSampleTypes(colnames(dataFilt),
+    samplesTP <- TCGAquery_MultiSampleTypes(colnames(dataFilt),
                                                 typesample = c("TP"))
 
     nsample1 <- length(samplesNT)
