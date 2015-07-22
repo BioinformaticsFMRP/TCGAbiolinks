@@ -40,7 +40,7 @@ from survival package
    3. survival::survfit
 }
 \examples{
-clinical_patient_Cancer <- clinic("brca","clinical_patient")
+clinical_patient_Cancer <- TCGAquery_clinic("brca","clinical_patient")
 dataBRCAcomplete <- log2(BRCA_rnaseqv2)
 # Selecting only 10 genes for example
 dataBRCAcomplete <- dataBRCAcomplete[1:10,]
