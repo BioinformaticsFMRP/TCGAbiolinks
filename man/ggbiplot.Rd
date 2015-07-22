@@ -65,4 +65,5 @@ Biplot for Principal Components using ggplot2
 \author{
 Vincent Q. Vu.
 }
+\keyword{internal}
 
