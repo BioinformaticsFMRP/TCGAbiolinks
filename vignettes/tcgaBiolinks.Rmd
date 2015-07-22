@@ -460,10 +460,10 @@ A full list of cancer and clinical data type can be found in the help of the fun
 
 ```{r, eval = FALSE}
 # Get clinical data
-clinical_brca_data <- clinic("brca","clinical_patient")
-clinical_uvm_data_bio <- clinic("uvm","biospecimen_normal_control")
-clinical_brca_data_bio <- clinic("brca","biospecimen_normal_control")
-clinical_brca_data <- clinic("brca","clinical_patient")
+clinical_brca_data <- TCGAquery_clinic("brca","clinical_patient")
+clinical_uvm_data_bio <- TCGAquery_clinic("uvm","biospecimen_normal_control")
+clinical_brca_data_bio <- TCGAquery_clinic("brca","biospecimen_normal_control")
+clinical_brca_data <- TCGAquery_clinic("brca","clinical_patient")
 ```
 
 Also, some functions to work with clinical data are provided.
@@ -474,7 +474,7 @@ The parameters of `clinicFilt` are:
 
 * **barcode** List of barcodes
 * **clinical_patient_data** clinical patient data obtained with clinic function 
-Ex: clinical_patient_data <- clinic("LGG","clinical_patient")
+Ex: clinical_patient_data <- TCGAquery_clinic("LGG","clinical_patient")
 * **HER**  her2 neu immunohistochemistry receptor status: "Positive" or "Negative"
 * **gender** "MALE" or "FEMALE"
 * **PR**  Progesterone receptor status: "Positive" or "Negative"
@@ -503,17 +503,17 @@ bar <- c("TCGA-G9-6378-02A-11R-1789-07", "TCGA-CH-5767-04A-11R-1789-07",
         "TCGA-G9-6380-11A-11R-1789-07", "TCGA-G9-6380-01A-11R-1789-07",
         "TCGA-G9-6340-01A-11R-1789-07","TCGA-G9-6340-11A-11R-1789-07")
 
-S <- SampleTypes(bar,"TP")
-S2 <- SampleTypes(bar,"NB")
+S <- TCGAquery_SampleTypes(bar,"TP")
+S2 <- TCGAquery_SampleTypes(bar,"NB")
 
 # Retrieve multiple tissue types  NOT FROM THE SAME PATIENTS
-SS <- MultiSampleTypes(bar,c("TP","NB"))
+SS <- TCGAquery_MultiSampleTypes(bar,c("TP","NB"))
 
 # Retrieve multiple tissue types  FROM THE SAME PATIENTS
-SSS <- MatchedCoupledSampleTypes(bar,c("NT","TP"))
+SSS <- TCGAquery_MatchedCoupledSampleTypes(bar,c("NT","TP"))
 
 # Get clinical data
-clinical_brca_data <- clinic("brca","clinical_patient")
+clinical_brca_data <- TCGAquery_clinic("brca","clinical_patient")
 female_erpos_herpos <- clinicFilt(bar,clin, HER="Positive", gender="FEMALE", ER="Positive")
 ```
 
@@ -548,7 +548,7 @@ After preparing the gene expression from TCGA data using the `TCGAPrepare`
 function, you can do a normalization of genes using the 
 function `TCGAanalyze_Normalization`, do a quantile filter of genes with
 the `TCGAanalyze_Filtering` function. Also, iin order to classify your samples (barcode) 
-you can use the `MultiSampleTypes` function, the typeSample "NT" will return 
+you can use the `TCGAquery_MultiSampleTypes` function, the typeSample "NT" will return 
 the  "Solid Tissue Normal"" samples, while the typeSample "TP" will return 
 "Primary Solid Tumor"" samples.
  
@@ -569,10 +569,10 @@ dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
 
 # selection of normal samples "NT"
-samplesNT <- MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
+samplesNT <- TCGAquery_MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
 
 # selection of tumor samples "TP"
-samplesTP <- MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
+samplesTP <- TCGAquery_MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
 
 
 ```
@@ -709,7 +709,7 @@ we investigate how long a machine lasts before it breaks down.
 library(TCGAbiolinks)
 # Survival Analysis SA
 
-clinical_patient_Cancer <- clinic("brca","clinical_patient")
+clinical_patient_Cancer <- TCGAquery_clinic("brca","clinical_patient")
 dataBRCAcomplete <- log2(BRCA_rnaseqv2)
 
 tokenStop<- 1
@@ -750,7 +750,7 @@ knitr::kable(tabSurvKMcompleteDEGs[1:10,],
 library(TCGAbiolinks)
 # Survival Analysis SA
 
-clinical_patient_Cancer <- clinic("brca","clinical_patient")
+clinical_patient_Cancer <- TCGAquery_clinic("brca","clinical_patient")
 dataBRCAcomplete <- log2(BRCA_rnaseqv2)
 
 tokenStop<- 1
@@ -965,7 +965,7 @@ library(TCGAbiolinks)
 query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450", level = 3)
 TCGADownload(query,path=".")
 data <- TCGAPrepare(query = query,dir = ".",save = T)
-clinical <- clinic("gbm","clinical_patient")
+clinical <- TCGAquery_clinic("gbm","clinical_patient")
 
 #Preprocessing 
 ## We will remove probes with NA level
