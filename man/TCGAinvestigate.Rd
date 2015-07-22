@@ -7,11 +7,12 @@
 TCGAinvestigate(tumor, dataDEGsFiltLevelTF, topgenes)
 }
 \arguments{
-\item{tumor}{tumor}
+\item{tumor}{is character such as cancer, disease, or tissue eg. BRCA or breast}
 
-\item{dataDEGsFiltLevelTF}{dataDEGsFiltLevelTF}
+\item{dataDEGsFiltLevelTF}{is a table output from TCGAanalyze_LevelTab with only TFs}
 
-\item{topgenes}{topgenes}
+\item{topgenes}{is the number of top genes (eg. 10) in the rownames(dataDEGsFiltLevelTF)
+where find in pubmed if those genes or TFs are already related to that cancer or disease}
 }
 \value{
 table with number of pubmed related to tfs.
