@@ -245,7 +245,7 @@ TCGAUpdate <- function(){
     # copy not modified ones
     for (i in seq_along(new.db[,1])){
         db <- subset(tcga.db,new.db[i,"name"] == tcga.db$name)
-        if(nrow(db) == 1){
+        if (nrow(db) == 1){
             new.db[i,"deployStatus"] <- db$barcode
         }
     }
@@ -258,8 +258,41 @@ TCGAUpdate <- function(){
     new.db[idx,]$deployStatus <- getBarcode(new.db[idx,])$barcode
     colnames(new.db)[4] <- "barcode"
     tcga.db <- new.db
+
+    gene.location <- get.GRCh.bioMart()
+
     use_data(platform.table, disease.table, tcga.db, center.table,
              DAVID_BP_matrix,DAVID_CC_matrix,DAVID_MF_matrix,
              EAGenes,gene.location,listEA_pathways,
              internal = TRUE,overwrite = TRUE)
+}
+
+
+# Get latest Genome Reference Consortium Human Build And save
+# it as Genomic Ranges
+#' @importFrom biomaRt useMart getBM
+#' @keywords internal
+get.GRCh.bioMart <- function(genome="hg19") {
+
+    if (genome == "hg19"){
+        # for hg19
+        ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
+                           host = "grch37.ensembl.org",
+                           path = "/biomart/martservice" ,
+                           dataset = "hsapiens_gene_ensembl")
+    } else {
+        # for hg39
+        ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+    }
+
+    chrom <- c(1:22, "X", "Y")
+    gene.location <- getBM(attributes = c("chromosome_name",
+                                          "start_position",
+                                          "end_position", "strand",
+                                          "external_gene_name",
+                                          "entrezgene"),
+                           filters = c("chromosome_name"),
+                           values = list(chrom), mart = ensembl)
+
+    return(gene.location)
 }
