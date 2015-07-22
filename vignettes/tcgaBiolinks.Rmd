@@ -988,10 +988,10 @@ function `survivalPlot` as follows:
 
 ```{r, eval = FALSE}
 # survival using the column group 
-survivalAnalysis(clinical,"group")
+TCGAanalyze_survival(clinical,"group")
 ```
 
-The arguments of `survivalAnalysis` are:
+The arguments of `TCGAanalyze_survival` are:
 
 *  **clinical_patient** TCGA Clinical patient with the information days_to_death
 *  **clusterCol** Column with groups to plot. This is a mandatory field, 
@@ -1013,15 +1013,16 @@ img <- readPNG("survival.png")
 grid.raster(img)
 ```
 
-## `meanMethylationAnalysis`: Mean Methylation Analysis
+
+## `TCGAvisualize_meanMethylation`: Mean Methylation Analysis
 Using the data and calculating the mean methylation per group, it is possible 
-to create a mean methylation boxplot with the function `meanMethylationAnalysis`
+to create a mean methylation boxplot with the function `TCGAvisualize_meanMethylation`
 as follows:
 
 ```{r, eval = FALSE}
-meanMethylationAnalysis(data,"group")
+TCGAvisualize_meanMethylation(data,"group")
 ```
-The arguments of `meanMethylationAnalysis` are:
+The arguments of `TCGAvisualize_meanMethylation` are:
 
 *  **data**	 SummarizedExperiment object obtained from `TCGAprepare`
 *  **groupCol** Columns in colData(data) that defines the groups. 
@@ -1042,9 +1043,9 @@ img <- readPNG("meanmet.png")
 grid.raster(img)
 ```
 
-## `DMRAnalysis`: Differentially methylated regions Analysis
+## `TCGAanalyze_DMR`: Differentially methylated regions Analysis
 
-We will search for differentially methylated CpG sites using the `DMRAnalysis`
+We will search for differentially methylated CpG sites using the `TCGAanalyze_DMR`
 function. In order to find these regions we use the beta-values 
 (methylation values ranging from 0.0 to 1.0) to compare two groups. 
 
@@ -1062,12 +1063,12 @@ methylated CpG sites and return the object with the calculus in the rowRanges.
 
 
 ```{r, eval = FALSE}
-data <- DMRAnalysis(data,groupCol="group")
+data <- TCGAanalyze_DMR(data,groupCol="group")
 ```
 
 Volcano plot saved and the given data with the results (diffmean.group1.group2,p.value.group1.group2, p.value.adj.group1.group2,status.group1.group2) in the rowRanges where group1 and group2 are the names of the groups
 
-The output will be an graph such as the figure below. Also, the `DMRAnalysis` 
+The output will be an graph such as the figure below. Also, the `TCGAanalyze_DMR` 
 function will return the SummarizedExperiment with the values of p-value,
 p-value adjusted, diffmean and the group it belongs in the graph 
 (non significant, hypomethylated, hypermethylated). 
@@ -1103,11 +1104,11 @@ img <- readPNG("volcano.png")
 grid.raster(img)
 ```
 
-## `starburstAnalysis`: Analyzing expression and methylation together 
+## `TCGAvisualize_starburst`: Analyzing expression and methylation together 
 
  The starburst plot is proposed to combine information from two volcano plots, 
  and is applied for a study of DNA methylation and gene expression. In order to
- reproduce this plot, we will use the `starburstAnalysis` function.
+ reproduce this plot, we will use the `TCGAvisualize_starburst` function.
  
 The function creates Starburst plot for comparison of DNA methylation
 and gene expression. The log10 (FDR-corrected P value) is plotted for beta 
@@ -1146,7 +1147,7 @@ data <- SummarizedExperiment::SummarizedExperiment(
  SummarizedExperiment::rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
  SummarizedExperiment::rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
  SummarizedExperiment::rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
- result <- starburstAnalysis(met,exp,p.cut = 0.05,"g1","g2")
+ result <- TCGAvisualize_starburst(met,exp,p.cut = 0.05,"g1","g2")
 ```
 
 
