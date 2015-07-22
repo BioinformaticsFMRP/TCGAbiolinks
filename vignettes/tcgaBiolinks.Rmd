@@ -255,11 +255,11 @@ _Path given by the user/Experiment folder_
 
 ### Table of types available for downloading
 
-Platform| Types of file
-:-------------:|:-------------:
-Illuminahiseq_totalrnaseqv2<br>  IlluminaHiSeq_RNASeqV2<br>IlluminaGA_RNASeqV2 |junction_quantification<br>rsem.genes.results<br>rsem.isoforms.results<br>rsem.genes.normalized_results<br>rsem.isoforms.normalized_results<br>bt.exon_quantification
-IlluminaHiSeq_RNASeq<br>illuminaga_rnaseq|exon.quantification<br>spljxn.quantification<br>gene.quantification
-genome_wide_snp_6| hg18.seg<br>hg19.seg<br>nocnv_hg18.seg<br>nocnv_hg19.seg
+*  **RNASeqV2:** junction_quantification,rsem.genes.results,
+rsem.isoforms.results, rsem.genes.normalized_results, 
+rsem.isoforms.normalized_results, bt.exon_quantification
+*  **RNASeq:** exon.quantification,spljxn.quantification, gene.quantification
+*  **genome_wide_snp_6:** hg18.seg,hg19.seg,nocnv_hg18.seg,nocnv_hg19.seg
 
 # `TCGAprepare`: Preparing the data
 You can easily read the downloaded data using the `TCGAprepare` function.
@@ -322,11 +322,12 @@ data <- TCGAprepare(query = query,dir = "../../", type ="rsem.genes.normalized_r
 
 ### Table of `types` available for the `TCGAprepare`
 
-Platform| Types of file
-:-------------:|:-------------:
-Illuminahiseq_totalrnaseqv2<br>  IlluminaHiSeq_RNASeqV2<br>IlluminaGA_RNASeqV2 |junction_quantification<br>rsem.genes.results<br>rsem.isoforms.results<br>rsem.genes.normalized_results<br>rsem.isoforms.normalized_results<br>bt.exon_quantification
-IlluminaHiSeq_RNASeq<br>illuminaga_rnaseq|exon.quantification<br>spljxn.quantification<br>gene.quantification
-genome_wide_snp_6| hg19.seg
+*  **RNASeqV2:** junction_quantification,rsem.genes.results,
+rsem.isoforms.results, rsem.genes.normalized_results, 
+rsem.isoforms.normalized_results, bt.exon_quantification
+*  **RNASeq:** exon.quantification,spljxn.quantification, gene.quantification
+*  **genome_wide_snp_6:** hg18.seg,hg19.seg,nocnv_hg18.seg,nocnv_hg19.seg
+
 
 
 ### Preparing the data with TCGAprepare - toPackage 
