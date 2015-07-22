@@ -96,12 +96,12 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' vital_status <- c(rep("Dead",200))
 #' groups <- c(rep(c("G1","G2"),c(100,100)))
 #' df <- data.frame(days_to_death,vital_status,groups)
-#' survivalAnalysis(df,clusterCol="groups")
+#' TCGAanalyze_survival(df,clusterCol="groups")
 #' \dontrun{
 #' clinical <- TCGAquery_clinic("gbm","clinical_patient")
-#' survivalAnalysis(clinical,"gender", filename = "surv.pdf", legend="Gender")
+#' TCGAanalyze_survival(clinical,"gender", filename = "surv.pdf", legend="Gender")
 #' }
-survivalAnalysis <- function(data,
+TCGAanalyze_survival <- function(data,
                              clusterCol=NULL,
                              legend = "Legend", cutoff = 0,
                              main = "Kaplan-Meier Overall Survival Curves",
