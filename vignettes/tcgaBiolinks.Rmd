@@ -386,9 +386,6 @@ listSamples <- c("TCGA-E9-A1NG-11A-52R-A14M-07","TCGA-BH-A1FC-11A-32R-A13Q-07",
                 "TCGA-C8-A1HJ-01A-11R-A13Q-07","TCGA-A7-A13D-01A-13R-A12P-07",
                 "TCGA-A2-A0CV-01A-31R-A115-07","TCGA-AQ-A0Y5-01A-11R-A14M-07")
 
-# Query all available platforms with a list of barcode 
-query <- TCGAquery(samples = listSamples)
-
 # Query platform IlluminaHiSeq_RNASeqV2 with a list of barcode 
 query <- TCGAquery(tumor = "brca", samples = listSamples, 
   platform = "IlluminaHiSeq_RNASeqV2", level = "3")
@@ -401,9 +398,14 @@ TCGAdownload(query, path = "../dataBrca", type = "rsem.genes.results",samples = 
 
 # Prepare expression matrix with gene id in rows and samples (barcode) in columns
 # rsem.genes.results as values
-BRCAMatrix <- TCGAprepare(query,"dataBrca",type = "rsem.genes.results")
+BRCARnaseq_assay <- TCGAprepare(query,"../dataBrca",type = "rsem.genes.results")
 
-BRCAMatrix_assay <- assay(BRCAMatrix,"raw_counts")
+BRCAMatrix <- assay(BRCARnaseq_assay,"raw_counts")
+
+# For gene expression if you need to see a boxplot correlation and AAIC plot 
+# to define outliers you can run
+
+BRCARnaseq_CorOutliers <- TCGAanalyze_Preprocessing(BRCARnaseq_assay)
 
 ```
 
@@ -418,7 +420,13 @@ knitr::kable(dataGE, digits = 2,
             row.names = TRUE)
 ```
 
-
+The result from TCGAanalyze_Preprocessing is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("PreprocessingOutput.png")
+grid.raster(img)
+```
 
 ## CNV
 You can easily search TCGA samples, download and prepare a matrix of gene expression.
