@@ -5,11 +5,56 @@ Catharina Olsen, Davide Garolini, Claudia Cava, Isabella Castiglioni,
 Houtan Noushmehr, Gianluca Bontempi, Michele Ceccarelli"
 date: "`r Sys.Date()`"
 output: 
+  BiocStyle::pdf_document:
+    toc: true
+    number_sections: no
+    toc_depth: 2
+    highlight: haddock
+    latex_engine: lualatex
   BiocStyle::html_document:
     toc: true
     number_sections: no
     toc_depth: 2
     highlight: haddock
+
+
+references:
+- id: ref1
+  title: Orchestrating high-throughput genomic analysis with Bioconductor
+  author: 
+  - family: Huber, Wolfgang and Carey, Vincent J and Gentleman, Robert and Anders, Simon and Carlson, Marc and Carvalho, Benilton S and Bravo, Hector Corrada and Davis, Sean and Gatto, Laurent and Girke, Thomas and others
+    given:
+  journal: Nature methods
+  volume: 12
+  number: 2
+  pages: 115-121
+  issued:
+    year: 2015
+
+- id: ref2
+  title: GC-content normalization for RNA-Seq data
+  author: 
+  - family: Risso, Davide and Schwartz, Katja and Sherlock, Gavin and Dudoit, Sandrine
+    given:
+  journal: BMC bioinformatics
+  volume: 12
+  number: 1
+  pages: 480
+  issued:
+    year: 2011 
+    
+- id: ref3
+  title: Evaluation of statistical methods for normalization and differential expression in mRNA-Seq experiments
+  author: 
+  - family: Bullard, James H and Purdom, Elizabeth and Hansen, Kasper D and Dudoit, Sandrine
+    given:
+  journal: BMC bioinformatics
+  volume: 11
+  number: 1
+  pages: 94
+  issued:
+    year: 2010 
+
 
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -207,7 +252,6 @@ The arguments are:
 *  **path**	location to save the files. Default: "."
 *  **type**	Filter the files to download by type
 *  **samples**	List of samples to download
-*  **quiet**	Supress output messages? Default: FALSE
 *  **force**	Download again if file already exists? Default: FALSE
 
 ### Example of use
@@ -232,17 +276,17 @@ _Path given by the user/Experiment folder_
 
 ### Table of types available for downloading
 
-Platform| Types of file
-:-------------:|:-------------:
-Illuminahiseq_totalrnaseqv2<br>  IlluminaHiSeq_RNASeqV2<br>IlluminaGA_RNASeqV2 |junction_quantification<br>rsem.genes.results<br>rsem.isoforms.results<br>rsem.genes.normalized_results<br>rsem.isoforms.normalized_results<br>bt.exon_quantification
-IlluminaHiSeq_RNASeq<br>illuminaga_rnaseq|exon.quantification<br>spljxn.quantification<br>gene.quantification
-genome_wide_snp_6| hg18.seg<br>hg19.seg<br>nocnv_hg18.seg<br>nocnv_hg19.seg
+*  **RNASeqV2:** junction_quantification,rsem.genes.results,
+rsem.isoforms.results, rsem.genes.normalized_results, 
+rsem.isoforms.normalized_results, bt.exon_quantification
+*  **RNASeq:** exon.quantification,spljxn.quantification, gene.quantification
+*  **genome_wide_snp_6:** hg18.seg,hg19.seg,nocnv_hg18.seg,nocnv_hg19.seg
 
 # `TCGAprepare`: Preparing the data
 You can easily read the downloaded data using the `TCGAprepare` function.
 This function will prepare the data into a [SummarizedExperiment](http://www.nature.com/nmeth/journal/v12/n2/abs/nmeth.3252.html) 
-object for downstream analysis. For the moment this function is working only
-with data level 3.
+[@ref1] object for downstream analysis. 
+For the moment this function is working only with data level 3.
 
 The arguments are:
 
@@ -299,11 +343,12 @@ data <- TCGAprepare(query = query,dir = "../../", type ="rsem.genes.normalized_r
 
 ### Table of `types` available for the `TCGAprepare`
 
-Platform| Types of file
-:-------------:|:-------------:
-Illuminahiseq_totalrnaseqv2<br>  IlluminaHiSeq_RNASeqV2<br>IlluminaGA_RNASeqV2 |junction_quantification<br>rsem.genes.results<br>rsem.isoforms.results<br>rsem.genes.normalized_results<br>rsem.isoforms.normalized_results<br>bt.exon_quantification
-IlluminaHiSeq_RNASeq<br>illuminaga_rnaseq|exon.quantification<br>spljxn.quantification<br>gene.quantification
-genome_wide_snp_6| hg19.seg
+*  **RNASeqV2:** junction_quantification,rsem.genes.results,
+rsem.isoforms.results, rsem.genes.normalized_results, 
+rsem.isoforms.normalized_results, bt.exon_quantification
+*  **RNASeq:** exon.quantification,spljxn.quantification, gene.quantification
+*  **genome_wide_snp_6:** hg18.seg,hg19.seg,nocnv_hg18.seg,nocnv_hg19.seg
+
 
 
 ### Preparing the data with TCGAprepare - toPackage 
@@ -449,9 +494,7 @@ TCGAdownload(query, path = "samples")
 GBM_CNV <- TCGAprepare(query, dir = "samples", type = ".hg19.seg.txt")
 ```
 
-
-
-#  `clinic` `&` `TCGAquery_clinicFilt`: Working with clinical data
+#  `TCGAquery_clinic` `&` `TCGAquery_clinicFilt`: Working with clinical data
 You can retrive clinical data using the `clinic` function. The parameters of this
 function are: 
 
@@ -509,7 +552,7 @@ S <- TCGAquery_SampleTypes(bar,"TP")
 S2 <- TCGAquery_SampleTypes(bar,"NB")
 
 # Retrieve multiple tissue types  NOT FROM THE SAME PATIENTS
-SS <- TCGAquery_MultiSampleTypes(bar,c("TP","NB"))
+SS <- TCGAquery_SampleTypes(bar,c("TP","NB"))
 
 # Retrieve multiple tissue types  FROM THE SAME PATIENTS
 SSS <- TCGAquery_MatchedCoupledSampleTypes(bar,c("NT","TP"))
@@ -549,8 +592,16 @@ print(female_erpos_herpos)
 After preparing the gene expression from TCGA data using the `TCGAprepare`
 function, you can do a normalization of genes using the 
 function `TCGAanalyze_Normalization`, do a quantile filter of genes with
-the `TCGAanalyze_Filtering` function. Also, iin order to classify your samples (barcode) 
-you can use the `TCGAquery_MultiSampleTypes` function, the typeSample "NT" will return 
+the `TCGAanalyze_Filtering` function. 
+
+TCGAanalyze_Normalization allows user to normalize mRNA transcripts and miRNA, 
+using `r Biocpkg("EDASeq")` package. Normalization for RNA-Seq Numerical and graphical summaries of RNA-Seq read data. Within-lane normalization procedures to adjust for GC-content effect (or other gene-level effects) on read counts: loess robust local regression, global-scaling, and full-quantile normalization [@ref2]. Between-lane normalization procedures to adjust for distributional differences between lanes (e.g., sequencing depth): global-scaling and full-quantile normalization [@ref3].
+
+For istance returns all mRNA or miRNA with mean across all samples, higher than the threshold defined quantile mean across all samples.
+
+
+Also, in order to classify your samples (barcode) 
+you can use the `TCGAquery_SampleTypes` function, the typeSample "NT" will return 
 the  "Solid Tissue Normal"" samples, while the typeSample "TP" will return 
 "Primary Solid Tumor"" samples.
  
@@ -571,17 +622,26 @@ dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
 
 # selection of normal samples "NT"
-samplesNT <- TCGAquery_MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
+samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
 
 # selection of tumor samples "TP"
-samplesTP <- TCGAquery_MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
+samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 
 
 ```
 
 ## `TCGAanalyze_DEA` `&` `TCGAanalyze_LevelTab` Differential expression analysis (DEA)
 
-Perform DEA (Differential expression analysis) to identify differentially expressed genes (DEGs) using the `TCGAanalyze_DEA` function. This function receives as parameters:
+Perform DEA (Differential expression analysis) to identify differentially expressed genes (DEGs) using the `TCGAanalyze_DEA` function. 
+
+`TCGAanalyze_DEA` performs DEA using following functions from `r Biocpkg("edgeR")`:
+
+1. edgeR::DGEList converts the count matrix into an edgeR object.
+2. edgeR::estimateCommonDisp each gene gets assigned the same dispersion estimate.
+3. edgeR::exactTest performs pair-wise tests for differential expression between two groups.
+4. edgeR::topTags takes the output from exactTest(), adjusts the raw p-values using the False Discovery Rate (FDR) correction, and returns the top differentially expressed genes.
+
+This function receives as parameters:
 
 * **mat1** The matrix of the first group (in the example group 1 is the normal samples), 
 * **mat2** The matrix of the  second group (in the example group 2 is tumor samples)
@@ -699,13 +759,45 @@ img <- readPNG("PCAtop200DEGs.png")
 grid.raster(img)
 ```
 
-## Survival Analysis
+## Survival Analysis: `TCGAanalyze_survival`, Cox Regression and dnet package
 When analyzing survival times, different problems come up than the ones dis-
 cussed so far. One question is how do we deal with subjects dropping out of a
 study. For example, assume that we test a new cancer drug. While some subjects
 die, others may believe that the new drug is not effective, and decide to drop out
 of the study before the study is finished. A similar problem would be faced when
 we investigate how long a machine lasts before it breaks down.
+ 
+Using the clinical data, it is possible to create a survival plot with the 
+function `TCGAanalyze_survival` as follows:
+
+```{r, eval = FALSE}
+# survival using the column group 
+clinical <- TCGAquery_clinic("gbm","clinical_patient")
+TCGAanalyze_survival(clinical,"gender")
+```
+
+The arguments of `TCGAanalyze_survival` are:
+
+*  **clinical_patient** TCGA Clinical patient with the information days_to_death
+*  **clusterCol** Column with groups to plot. This is a mandatory field, 
+the caption will be based in this column
+*  **legend** Legend title of the figure
+*  **cutoff** xlim This parameter will be a limit in the x-axis. 
+That means, that patients with days_to_deth > cutoff will be set to Alive.
+*  **main**	 main title of the plot
+*  **ylab**	y-axis text of the plot
+*  **xlab** x-axis text of the plot
+*  **filename**	 The name of the pdf file
+*  **color** Define the colors of the lines.
+
+ The result is shown below:
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("survival.png")
+grid.raster(img)
+```
+
  
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
@@ -746,7 +838,7 @@ knitr::kable(tabSurvKMcompleteDEGs[1:10,],
             row.names = TRUE)
 ```
 
-## Survival Analysis Cox Regression and dnet package
+### Survival Analysis Cox Regression and dnet package
 
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
@@ -991,37 +1083,6 @@ clinical$group <- c(rep("group1",nrow(clinical)/4),
  colData(data)$group <- c(rep("group1",ncol(data)/2), rep("group2",ncol(data)/2))
 ```
 
-Using the clinical data, it is possible to create a survival plot with the 
-function `survivalPlot` as follows:
-
-```{r, eval = FALSE}
-# survival using the column group 
-TCGAanalyze_survival(clinical,"group")
-```
-
-The arguments of `TCGAanalyze_survival` are:
-
-*  **clinical_patient** TCGA Clinical patient with the information days_to_death
-*  **clusterCol** Column with groups to plot. This is a mandatory field, 
-the caption will be based in this column
-*  **legend** Legend title of the figure
-*  **cutoff** xlim This parameter will be a limit in the x-axis. 
-That means, that patients with days_to_deth > cutoff will be set to Alive.
-*  **main**	 main title of the plot
-*  **ylab**	y-axis text of the plot
-*  **xlab** x-axis text of the plot
-*  **filename**	 The name of the pdf file
-*  **color** Define the colors of the lines.
-
-The result is shown below:
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
-library(png)
-library(grid)
-img <- readPNG("survival.png")
-grid.raster(img)
-```
-
-
 ## `TCGAvisualize_meanMethylation`: Mean Methylation Analysis
 Using the data and calculating the mean methylation per group, it is possible 
 to create a mean methylation boxplot with the function `TCGAvisualize_meanMethylation`
@@ -1256,3 +1317,5 @@ knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in b
 ```{r sessionInfo}
 sessionInfo()
 ```
+
+# References

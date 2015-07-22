@@ -19,18 +19,27 @@ and one column for each sample.
 }
 \description{
 TCGAanalyze_Normalization allows user to normalize mRNA transcripts and miRNA,
-   using EDASeq package. Normalization for RNA-Seq Numerical and graphical summaries of RNA-Seq read data. Within-lane normalization procedures
+   using EDASeq package.
+
+   Normalization for RNA-Seq Numerical and graphical
+    summaries of RNA-Seq read data. Within-lane normalization procedures
    to adjust for GC-content effect (or other gene-level effects) on read counts:
    loess robust local regression, global-scaling, and full-quantile normalization
    (Risso et al., 2011). Between-lane normalization procedures to adjust for
-   distributional differences between lanes (e.g., sequencing depth): global-scaling and full-quantile normalization (Bullard et al., 2010).
+   distributional differences between lanes (e.g., sequencing depth):
+   global-scaling and full-quantile normalization (Bullard et al., 2010).
+
    For istance returns all mRNA or miRNA with mean across all
    samples, higher than the threshold defined quantile mean across all samples.
-   TCGAanalyze_Normalization performs normalization using following functions from EDASeq
-   1. EDASeq::newSeqExpressionSet
-   2. EDASeq::withinLaneNormalization
-   3. EDASeq::betweenLaneNormalization
-   4. EDASeq::counts
+
+   TCGAanalyze_Normalization performs normalization using following functions
+   from EDASeq
+   \enumerate{
+   \item  EDASeq::newSeqExpressionSet
+   \item  EDASeq::withinLaneNormalization
+   \item  EDASeq::betweenLaneNormalization
+   \item  EDASeq::counts
+   }
 }
 \examples{
 dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
