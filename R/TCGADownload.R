@@ -23,7 +23,7 @@
 #' Default: \code{FALSE}
 #' @seealso \code{\link{TCGAquery}} for searching the data to download
 #'
-#' \code{\link{TCGAPrepare}} for preparing the data for the user into
+#' \code{\link{TCGAprepare}} for preparing the data for the user into
 #' a Summarized experiment object, or a matrix.
 #' @examples
 #' samples <- c("TCGA-26-1442-01A-01R-1850-01")
