@@ -79,9 +79,11 @@ TCGAanalyze_Preprocessing<- function(object){
 #' (High, intermediate, low).
 #' TCGAanalyze_SurvivalKM performs SA between High and low groups using following functions
 #' from survival package
-#'    1. survival::Surv
-#'    2. survival::survdiff
-#'    3. survival::survfit
+#' \enumerate{
+#' \item survival::Surv
+#' \item survival::survdiff
+#' \item survival::survfit
+#' }
 #' @param clinical_patient is a data.frame using function 'clinic' with information
 #' related to barcode / samples such as bcr_patient_barcode, days_to_death ,
 #' days_to_last_followup , vital_status, etc

@@ -29,15 +29,18 @@ table with survival genes pvalues from KM.
 TCGAanalyze_SurvivalKM perform an univariate Kaplan-Meier (KM) survival analysis (SA).
 It performed Kaplan-Meier survival univariate using complte follow up with all days
 taking one gene a time from Genelist of gene symbols.
-For each gene according its level of mean expression in cancer samples, defining two thresholds for quantile
+For each gene according its level of mean expression in cancer samples,
+defining two thresholds for quantile
 expression of that gene in all samples (default ThreshTop=0.67,ThreshDown=0.33) it is possible
 to define a threshold of intensity of gene expression to divide the samples in 3 groups
 (High, intermediate, low).
 TCGAanalyze_SurvivalKM performs SA between High and low groups using following functions
 from survival package
-   1. survival::Surv
-   2. survival::survdiff
-   3. survival::survfit
+\enumerate{
+\item survival::Surv
+\item survival::survdiff
+\item survival::survfit
+}
 }
 \examples{
 clinical_patient_Cancer <- TCGAquery_clinic("brca","clinical_patient")
