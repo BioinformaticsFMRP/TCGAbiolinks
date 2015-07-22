@@ -531,7 +531,7 @@ S <- TCGAquery_SampleTypes(bar,"TP")
 S2 <- TCGAquery_SampleTypes(bar,"NB")
 
 # Retrieve multiple tissue types  NOT FROM THE SAME PATIENTS
-SS <- TCGAquery_MultiSampleTypes(bar,c("TP","NB"))
+SS <- TCGAquery_SampleTypes(bar,c("TP","NB"))
 
 # Retrieve multiple tissue types  FROM THE SAME PATIENTS
 SSS <- TCGAquery_MatchedCoupledSampleTypes(bar,c("NT","TP"))
@@ -572,7 +572,7 @@ After preparing the gene expression from TCGA data using the `TCGAprepare`
 function, you can do a normalization of genes using the 
 function `TCGAanalyze_Normalization`, do a quantile filter of genes with
 the `TCGAanalyze_Filtering` function. Also, iin order to classify your samples (barcode) 
-you can use the `TCGAquery_MultiSampleTypes` function, the typeSample "NT" will return 
+you can use the `TCGAquery_SampleTypes` function, the typeSample "NT" will return 
 the  "Solid Tissue Normal"" samples, while the typeSample "TP" will return 
 "Primary Solid Tumor"" samples.
  
@@ -593,10 +593,10 @@ dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
 
 # selection of normal samples "NT"
-samplesNT <- TCGAquery_MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
+samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
 
 # selection of tumor samples "TP"
-samplesTP <- TCGAquery_MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
+samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 
 
 ```

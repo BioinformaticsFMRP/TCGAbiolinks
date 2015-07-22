@@ -1,7 +1,7 @@
-#' @title Filtering list of samples by selected type sample
+#' @title Retrieve multiple tissue types not from the same patients.
 #' @description
-#'   For a given list of samples and a type sample, return the samples that are
-#'   from that type.
+#'   TCGAquery_SampleTypes for a given list of samples and types,
+#'    return the union of samples that are from theses type.
 #' @param barcode is a list of samples as TCGA barcodes
 #' @param typesample a character vector indicating tissue type to query.
 #' Example:
@@ -21,46 +21,16 @@
 #'NEBV \tab EBV Immortalized Normal \cr
 #'NBM \tab  Bone Marrow Normal \cr
 #'}
-#' @examples
-#'  TCGAquery_SampleTypes(c("TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1"),"TR")
-#' @export
-#' @return a list of samples / barcode filtered by type sample selected
-#' @author Catharina Olsen, Claudia Cava.
-TCGAquery_SampleTypes <- function(barcode, typesample){
-    table.code <- c('01','02','03','04','05','06','07','08','09','10','11',
-                    '12','13','14','20','40','50','60','61')
-    names(table.code) <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
-                           "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
-                           "CELL","XP","XCL")
-
-    if(is.element(typesample,names(table.code))){
-        barcode <- barcode[grep(table.code[typesample],
-                                substr(barcode, 14, 15))]
-    }else{
-        return("Error message: sample type does not exist")
-    }
-    return(barcode)
-}
-
-#' @title Retrieve multiple tissue types not from the same patients.
-#' @description
-#'   TCGAquery_MultiSampleTypes for a given list of samples and a type sample, return the samples that are
-#'   from that type. TCGAquery_MultiSampleTypes allows using several type sample together.
-#' @param barcode barcode is a list of samples as TCGA barcodes
-#' @param typesample is the type of samples barcode.
-#' #' \tabular{lllll}{
-#'TP   \tab TR \tab TB \tab TRBM \tab TAP \cr
-#'TM \tab TAM \tab THOC \tab TBM \tab NB \cr
-#'NT \tab NBC \tab NEBV \tab NBM \tab CELLC \cr
-#'TRB \tab CELL \tab XP \tab XCL \tab
-#'}
 #' @export
 #' @examples
 #' # selection of normal samples "NT"
-#' dataFilt <- "TCGA-06-0125-01A-01D-A45W-05"
-#' samplesNT <- TCGAquery_MultiSampleTypes(dataFilt, typesample = c("NT"))
+#' barcode <- c("TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1")
+#' # Returns the second barcode
+#'  TCGAquery_SampleTypes(barcode,"TR")
+#'  # Returns both barcode
+#'  TCGAquery_SampleTypes(barcode,c("TR","TP"))
 #' @return a list of samples / barcode filtered by type sample selected
-TCGAquery_MultiSampleTypes <- function(barcode,typesample){
+TCGAquery_SampleTypes <- function(barcode,typesample){
     # Tumor AND Solid Tissue Normal NOT FROM THE SAME PATIENTS
     table.code <- c('01','02','03','04','05','06','07','08','09','10',
                     '11','12','13','14','20','40','50','60','61')
@@ -68,11 +38,11 @@ TCGAquery_MultiSampleTypes <- function(barcode,typesample){
                            "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
                            "CELL","XP","XCL")
 
-    if(sum(is.element(typesample,names(table.code))) == length(typesample)) {
+    if (sum(is.element(typesample,names(table.code))) == length(typesample)) {
 
         string <- substr(barcode, 14, 15)
         barcode.all <- NULL
-        for(sample.i in typesample){
+        for (sample.i in typesample) {
             barcode.all <- union(barcode.all,
                                  barcode[grep(table.code[sample.i], string)])
         }
