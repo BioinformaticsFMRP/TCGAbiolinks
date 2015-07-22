@@ -10,7 +10,7 @@ TCGAPrepare(query, dir = NULL, samples = NULL, type = NULL,
   summarizedExperiment = TRUE)
 }
 \arguments{
-\item{query}{TCGAQuery output}
+\item{query}{TCGAquery output}
 
 \item{dir}{Directory with the files downloaded by TCGADownload}
 
@@ -65,12 +65,12 @@ List of accepted platforms:
 }
 \examples{
 sample <- "TCGA-06-0939-01A-01D-1228-05"
-query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
+query <- TCGAquery(tumor = "GBM",samples = sample, level = 3)
 TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
 data <- TCGAPrepare(query, dir="exampleData")
 }
 \seealso{
-\code{\link{TCGAQuery}} for searching the data to download
+\code{\link{TCGAquery}} for searching the data to download
 
  \code{\link{TCGADownload}} for downloading the data from the
 search
