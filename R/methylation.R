@@ -31,6 +31,7 @@
 #'          colData=colData)
 #' data <- diffmean(data)
 #' }
+#' @keywords internal
 diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 
     if (is.null(groupCol)) {
@@ -532,38 +533,6 @@ TCGAanalyze_DMR <- function(data,
     ggsave(p, filename = filename, width = 10, height = 5, dpi = 600)
     rowRanges(data)$threshold <- NULL
     return(data)
-}
-
-# Get latest Genome Reference Consortium Human Build And save
-# it as Genomic Ranges
-#' @importFrom biomaRt useMart getBM
-get.GRCh.bioMart <- function(genome="hg19") {
-
-    if (genome == "hg19"){
-        # for hg19
-        ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
-                           host = "grch37.ensembl.org",
-                           path = "/biomart/martservice" ,
-                           dataset = "hsapiens_gene_ensembl")
-    } else {
-        # for hg39
-        ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
-    }
-
-    chrom <- c(1:22, "X", "Y")
-    gene.location <- getBM(attributes = c("chromosome_name",
-                                          "start_position",
-                                          "end_position", "strand",
-                                          "external_gene_name",
-                                          "entrezgene"),
-                           filters = c("chromosome_name"),
-                           values = list(chrom), mart = ensembl)
-
-    gene.location <- gene.location[!is.na(gene.location$entrezgene),]
-    # the duplicates are different transcripts, not different
-    # coordinates
-    gene.location <- gene.location[!duplicated(gene.location$entrezgene),]
-    save(gene.location, file = "inst/extdata/GRCh.rda")
 }
 
 #' @title Create starburst plot
