@@ -1,4 +1,4 @@
-#' @title SampleTypes
+#' @title TCGAquery_SampleTypes
 #' @description
 #'   For a given list of samples and a type sample, return the samples that are
 #'   from that type.
@@ -22,11 +22,11 @@
 #'NBM \tab  Bone Marrow Normal \cr
 #'}
 #' @examples
-#'  SampleTypes(c("TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1"),"TR")
+#'  TCGAquery_SampleTypes(c("TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1"),"TR")
 #' @export
 #' @return a list of samples / barcode filtered by type sample selected
 #' @author Catharina Olsen, Claudia Cava.
-SampleTypes <- function(barcode, typesample){
+TCGAquery_SampleTypes <- function(barcode, typesample){
     table.code <- c('01','02','03','04','05','06','07','08','09','10','11',
                     '12','13','14','20','40','50','60','61')
     names(table.code) <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
@@ -42,10 +42,10 @@ SampleTypes <- function(barcode, typesample){
     return(barcode)
 }
 
-#' @title MultiSampleTypes
+#' @title TCGAquery_MultiSampleTypes
 #' @description
-#'   MultiSampleTypes for a given list of samples and a type sample, return the samples that are
-#'   from that type. MultiSampleTypes allows using several type sample together.
+#'   TCGAquery_MultiSampleTypes for a given list of samples and a type sample, return the samples that are
+#'   from that type. TCGAquery_MultiSampleTypes allows using several type sample together.
 #' @param barcode barcode is a list of samples as TCGA barcodes
 #' @param typesample is the type of samples barcode.
 #' #' \tabular{lllll}{
@@ -58,9 +58,9 @@ SampleTypes <- function(barcode, typesample){
 #' @examples
 #' # selection of normal samples "NT"
 #' dataFilt <- "TCGA-06-0125-01A-01D-A45W-05"
-#' samplesNT <- MultiSampleTypes(dataFilt, typesample = c("NT"))
+#' samplesNT <- TCGAquery_MultiSampleTypes(dataFilt, typesample = c("NT"))
 #' @return a list of samples / barcode filtered by type sample selected
-MultiSampleTypes <- function(barcode,typesample){
+TCGAquery_MultiSampleTypes <- function(barcode,typesample){
     # Tumor AND Solid Tissue Normal NOT FROM THE SAME PATIENTS
     table.code <- c('01','02','03','04','05','06','07','08','09','10',
                     '11','12','13','14','20','40','50','60','61')
@@ -82,18 +82,18 @@ MultiSampleTypes <- function(barcode,typesample){
     }
 }
 
-#' @title MatchedCoupledSampleTypes
+#' @title TCGAquery_MatchedCoupledSampleTypes
 #' @description
-#'   MatchedCoupledSampleTypes
+#'   TCGAquery_MatchedCoupledSampleTypes
 #' @param barcode barcode
 #' @param typesample typesample
 #' @examples
-#'  MatchedCoupledSampleTypes(c("TCGA-B0-4698-01Z-00-DX1",
+#'  TCGAquery_MatchedCoupledSampleTypes(c("TCGA-B0-4698-01Z-00-DX1",
 #'                              "TCGA-B0-4698-02Z-00-DX1"),
 #'                              c("TP","TR"))
 #' @export
 #' @return a list of samples / barcode filtered by type sample selected
-MatchedCoupledSampleTypes <- function(barcode,typesample){
+TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
     # Tumor AND Solid Tissue Normal FROM THE SAME PATIENTS
     table.code <- c('01','02','03','04','05','06','07','08','09','10',
                     '11','12','13','14','20','40','50','60','61')
@@ -133,7 +133,7 @@ MatchedCoupledSampleTypes <- function(barcode,typesample){
 # @export
 #' @return stage_BRCA
 # @examples
-# # clin <- clinic("BRCA","clinical_patient")
+# # clin <- TCGAquery_clinic("BRCA","clinical_patient")
 # clin <- clinBRCA
 # stage_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"stage_IX",clin)
 stage_BRCA <- function(barcode, stage, clinical_patient_data){
@@ -172,7 +172,7 @@ stage_BRCA <- function(barcode, stage, clinical_patient_data){
 # @export
 #' @return stage_BRCA
 # @examples
-# # clin <- clinic("BRCA","clinical_patient")
+# # clin <- TCGAquery_clinic("BRCA","clinical_patient")
 # clin <- clinBRCA
 # gender_BRCA (c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"FEMALE",clin)
 gender_BRCA <- function(barcode, gender, clinical_patient_data){
@@ -201,7 +201,7 @@ gender_BRCA <- function(barcode, gender, clinical_patient_data){
 # @export
 #' @return ER_status_BRCA
 # @examples
-# # clin <- clinic("BRCA","clinical_patient")
+# # clin <- TCGAquery_clinic("BRCA","clinical_patient")
 # clin <- clinBRCA
 # ER_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
 # "Positive",clin)
@@ -232,7 +232,7 @@ ER_status_BRCA <- function(barcode,ER, clinical_patient_data){
 # @export
 #' @return PR_status_BRCA
 # @examples
-# # clin <- clinic("BRCA","clinical_patient")
+# # clin <- TCGAquery_clinic("BRCA","clinical_patient")
 # clin <- clinBRCA
 # PR_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
 # "Positive",clin)
@@ -265,7 +265,7 @@ PR_status_BRCA  <- function(barcode,PR, clinical_patient_data){
 # @export
 #' @return HER_status_BRCA
 # @examples
-# # clin <- clinic("BRCA","clinical_patient")
+# # clin <- TCGAquery_clinic("BRCA","clinical_patient")
 # clin <- clinBRCA
 # HER_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
 # "Positive",clin)
@@ -335,8 +335,8 @@ clinical_data_site_cancer <- function(cancer){
 #' @importFrom RCurl getURL
 #' @return clinic data
 #' @examples
-#' data <- clinic("LGG","clinical_drug")
-clinic <- function(cancer,clinical_data_type){
+#' data <- TCGAquery_clinic("LGG","clinical_drug")
+TCGAquery_clinic <- function(cancer,clinical_data_type){
     query <- TCGAQuery(tumor = cancer,platform = "bio", level=2)
     TCGADownload(query,type = clinical_data_type)
     clinical_patient <- TCGAPrepare(query,type = clinical_data_type, dir = ".")
@@ -351,7 +351,7 @@ clinic <- function(cancer,clinical_data_type){
 #'   Filters available: HER, ER,gender,PR, stage.
 #' @param barcode List of barcodes
 #' @param clinical_patient_data clinical_patient_data obtained with clinic function
-#' Ex: clinical_patient_data <- clinic("LGG","clinical_patient")
+#' Ex: clinical_patient_data <- TCGAquery_clinic("LGG","clinical_patient")
 #' @param HER  her2 neu immunohistochemistry receptor status: "Positive" or "Negative"
 #' @param gender "MALE" or "FEMALE"
 #' @param PR  Progesterone receptor status: "Positive" or "Negative"
@@ -362,7 +362,7 @@ clinic <- function(cancer,clinical_data_type){
 #' @export
 #' @return List of samples that matches the filters
 #' @examples
-#' # clin <- clinic("BRCA","clinical_patient")
+#' # clin <- TCGAquery_clinic("BRCA","clinical_patient")
 #' clin <- clinBRCA
 #' bar <- c("TCGA-G9-6378-02A-11R-1789-07", "TCGA-CH-5767-04A-11R-1789-07",
 #'         "TCGA-G9-6332-60A-11R-1789-07", "TCGA-G9-6336-01A-11R-1789-07",
