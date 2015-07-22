@@ -1,7 +1,7 @@
-#' @title TCGA Download
+#' @title Download the data from TCGA using as reference the output from TCGAquery
 #' @description
 #'      The TCGADownload function will download the data using as reference
-#'      the the lines of the TCGAQuery search result.
+#'      the the lines of the TCGAquery search result.
 #'
 #'      There is an option to download the entire tar.gz folder or download
 #'      specific files using the \emph{type} parameter or the \emph{samples}
@@ -13,7 +13,7 @@
 #'      By default, if a sample was already downloaded the function will not
 #'      download again, unless the force parameter is set to \code{TRUE}
 #'
-#' @param data The TCGAQuery output
+#' @param data The TCGAquery output
 #' @param path Directory to save the downloaded data
 #' @param type Filter the files that will be downloaded by
 #'  type. Example:"rsem.genes.results"
@@ -21,13 +21,13 @@
 #' @param samples List of samples to download data
 #' @param force Download files even if it was already downladed?
 #' Default: \code{FALSE}
-#' @seealso \code{\link{TCGAQuery}} for searching the data to download
+#' @seealso \code{\link{TCGAquery}} for searching the data to download
 #'
 #' \code{\link{TCGAPrepare}} for preparing the data for the user into
 #' a Summarized experiment object, or a matrix.
 #' @examples
 #' samples <- c("TCGA-26-1442-01A-01R-1850-01")
-#' query <- TCGAQuery(tumor = "gbm",
+#' query <- TCGAquery(tumor = "gbm",
 #'                    platform = "IlluminaHiSeq_RNASeqV2",
 #'                    level = "3",
 #'                    samples = samples)

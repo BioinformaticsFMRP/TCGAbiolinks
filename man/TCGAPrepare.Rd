@@ -2,7 +2,8 @@
 % Please edit documentation in R/TCGAPrepare.R
 \name{TCGAPrepare}
 \alias{TCGAPrepare}
-\title{TCGAPrepare}
+\title{Read the data from level 3 the experiments and prepare it
+ for downstream analysis into a SummarizedExperiment object.}
 \usage{
 TCGAPrepare(query, dir = NULL, samples = NULL, type = NULL,
   save = FALSE, filename = NULL, toPackage = NULL,
