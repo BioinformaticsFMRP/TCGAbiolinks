@@ -337,7 +337,7 @@ clinical_data_site_cancer <- function(cancer){
 #' @examples
 #' data <- TCGAquery_clinic("LGG","clinical_drug")
 TCGAquery_clinic <- function(cancer,clinical_data_type){
-    query <- TCGAQuery(tumor = cancer,platform = "bio", level=2)
+    query <- TCGAquery(tumor = cancer,platform = "bio", level=2)
     TCGADownload(query,type = clinical_data_type)
     clinical_patient <- TCGAPrepare(query,type = clinical_data_type, dir = ".")
     return(clinical_patient)
