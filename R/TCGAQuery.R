@@ -7,7 +7,7 @@
 #'    to search the data.
 #'
 #'    TCGAquery will return a matrix with the results found,
-#'    that will be used in the other function TCGADownload, TCGAPrepare.
+#'    that will be used in the other function TCGAdownload, TCGAprepare.
 #' @param tumor Disease Examples:
 #' \tabular{lllll}{
 #'OV   \tab BRCA \tab CESC \tab ESCA \tab PCPG\cr
@@ -69,10 +69,10 @@
 #' @importFrom downloader download
 # @importFrom knitr kable
 #' @seealso
-#'  \code{\link{TCGADownload}} for downloading the data from the
+#'  \code{\link{TCGAdownload}} for downloading the data from the
 #' search
 #'
-#' \code{\link{TCGAPrepare}} for preparing the data for the user into
+#' \code{\link{TCGAprepare}} for preparing the data for the user into
 #' a Summarized experiment object, or a matrix.
 #' @return A dataframe with the results of the query
 #'        (lastest version of the files)
