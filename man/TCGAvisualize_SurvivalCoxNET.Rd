@@ -8,15 +8,17 @@ TCGAvisualize_SurvivalCoxNET(clinical_patient, dataGE, Genelist,
   scoreConfidence = 700, titlePlot = "TCGAvisualize_SurvivalCoxNET Example")
 }
 \arguments{
-\item{clinical_patient}{clinical_patient}
+\item{clinical_patient}{is a data.frame using function 'clinic' with information
+related to barcode / samples such as bcr_patient_barcode, days_to_death ,
+days_to_last_followup , vital_status, etc}
 
-\item{dataGE}{dataGE}
+\item{dataGE}{is a matrix of Gene expression (genes in rows, samples in cols) from TCGAprepare}
 
-\item{Genelist}{Genelist}
+\item{Genelist}{is a list of gene symbols where perform survival KM.}
 
 \item{scoreConfidence}{restrict to those edges with high confidence (eg. score>=700)}
 
-\item{titlePlot}{titlePlot}
+\item{titlePlot}{is the title to show in the plot.}
 }
 \value{
 net IGRAPH with related Cox survival genes in community (same pval and color) and with
