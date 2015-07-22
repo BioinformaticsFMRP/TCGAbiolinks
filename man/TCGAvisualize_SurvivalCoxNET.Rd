@@ -19,9 +19,50 @@ TCGAvisualize_SurvivalCoxNET(clinical_patient, dataGE, Genelist,
 \item{titlePlot}{titlePlot}
 }
 \value{
-net IGRAPH with attr: name (v/c), seqid (v/c), geneid (v/n), symbol (v/c), description (v/c) ...
+net IGRAPH with related Cox survival genes in community (same pval and color) and with
+interactions from STRING database.
 }
 \description{
-Survival analysis with univariate Cox regression package (dnet)
+TCGAvisualize_SurvivalCoxNET can help an user to identify a group of survival genes that are
+significant from univariate Kaplan Meier Analysis and also for Cox Regression.
+It shows in the end a network build with community of genes with similar range of pvalues from
+Cox regression (same color) and that interaction among those genes is already validated in
+literatures using the STRING database (version 9.1).
+TCGAvisualize_SurvivalCoxNET perform survival analysis with univariate Cox regression
+and package (dnet) using following functions wrapping from these packages:
+\enumerate{
+\item survival::coxph
+\item igraph::subgraph.edges
+\item igraph::layout.fruchterman.reingold
+\item igraph::spinglass.community
+\item igraph::communities
+\item dnet::dRDataLoader
+\item dnet::dNetInduce
+\item dnet::dNetPipeline
+\item dnet::visNet
+\item dnet::dCommSignif
+}
+}
+\details{
+TCGAvisualize_SurvivalCoxNET allow user to perform the complete workflow using coxph
+and dnet package related to survival analysis with an identification of gene-active networks from
+high-throughput omics data using gene expression and clinical data.
+\enumerate{
+\item Cox regression survival analysis to obtain hazard ratio (HR) and pvaules
+\item fit a Cox proportional hazards model and ANOVA (Chisq test)
+\item Network comunites
+\item An igraph object that contains a functional protein association network in human.
+The network is extracted from the STRING database (version 9.1).
+Only those associations with medium confidence (score>=400) are retained.
+\item restrict to those edges with high confidence (score>=700)
+\item extract network that only contains genes in pvals
+\item Identification of gene-active network
+\item visualisation of the gene-active network itself
+\item the layout of the network visualisation (fixed in different visuals)
+\item color nodes according to communities (identified via a spin-glass model and simulated annealing)
+\item node sizes according to degrees
+\item highlight different communities
+\item visualise the subnetwrok
+}
 }
 
