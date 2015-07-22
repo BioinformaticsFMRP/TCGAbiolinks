@@ -66,7 +66,7 @@ List of accepted platforms:
 \examples{
 sample <- "TCGA-06-0939-01A-01D-1228-05"
 query <- TCGAquery(tumor = "GBM",samples = sample, level = 3)
-TCGAdownload(query,path = "exampleData",samples = sample, quiet = TRUE)
+TCGAdownload(query,path = "exampleData",samples = sample)
 data <- TCGAprepare(query, dir="exampleData")
 }
 \seealso{
