@@ -32,7 +32,7 @@
 #'
 #' @return A SummarizedExperiment object (If SummarizedExperiment = \code{FALSE},
 #' a data.frame)
-#' @param query TCGAQuery output
+#' @param query TCGAquery output
 #' @param dir Directory with the files downloaded by TCGADownload
 #' @param samples List of samples to prepare the data
 #' @param type Filter the files to prepare.
@@ -45,7 +45,7 @@
 #' Default: \code{FALSE}
 #' @examples
 #' sample <- "TCGA-06-0939-01A-01D-1228-05"
-#' query <- TCGAQuery(tumor = "GBM",samples = sample, level = 3)
+#' query <- TCGAquery(tumor = "GBM",samples = sample, level = 3)
 #' TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
 #' data <- TCGAPrepare(query, dir="exampleData")
 #' @export
@@ -58,7 +58,7 @@
 #' @importFrom GenomicRanges GRanges
 #' @importFrom IRanges IRanges
 #' @import utils data.table TxDb.Hsapiens.UCSC.hg19.knownGene
-#' @seealso  \code{\link{TCGAQuery}} for searching the data to download
+#' @seealso  \code{\link{TCGAquery}} for searching the data to download
 #'
 #'  \code{\link{TCGADownload}} for downloading the data from the
 #' search
@@ -828,7 +828,7 @@ mapbarcodeuuid <- function(barcode){
 
 # Get sdrf file/array_design of a line
 # example
-# query <- TCGAQuery(tumor = "BRCA")
+# query <- TCGAquery(tumor = "BRCA")
 # getMagecontent(query[1,])
 # Obs: delete the file after reading
 #      is it better to save it?
