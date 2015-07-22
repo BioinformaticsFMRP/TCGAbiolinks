@@ -17,7 +17,6 @@
 #' @param path Directory to save the downloaded data
 #' @param type Filter the files that will be downloaded by
 #'  type. Example:"rsem.genes.results"
-#' @param quiet Supress output messages?. Default: \code{TRUE}
 #' @param samples List of samples to download data
 #' @param force Download files even if it was already downladed?
 #' Default: \code{FALSE}
@@ -39,7 +38,7 @@
 #' @return Download TCGA data into the given path
 #' @family data functions
 TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
-                         quiet = TRUE, force = FALSE) {
+                         force = FALSE) {
 
     dir.create(path, showWarnings = FALSE, recursive = TRUE)
     root <- "https://tcga-data.nci.nih.gov"
@@ -60,11 +59,13 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                 if(is.windows()){
                     suppressWarnings(
                         download(paste0(root, data[i, "deployLocation"]),
-                                 file, quiet, method = "auto")
+                                 file, quiet = TRUE, method = "auto")
                     )
                 } else {
-                    download(paste0(root, data[i, "deployLocation"]),
-                             file, quiet)
+                    suppressWarnings(
+                        download(paste0(root, data[i, "deployLocation"]),
+                                 file, quiet = TRUE)
+                    )
 
                 }
                 untar(file, exdir = path)
@@ -111,12 +112,15 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                         suppressWarnings(
                             download(paste0(root,url,"/",files[i]),
                                      file.path(path,folder,files[i]),
-                                     quiet,method = "auto"
+                                     quiet = TRUE,method = "auto"
                             )
                         )
                     } else {
-                        download(paste0(root,url,"/",files[i]),
-                                 file.path(path,folder,files[i]),quiet)
+                        suppressWarnings(
+                            download(paste0(root,url,"/",files[i]),
+                                     file.path(path,folder,files[i]),
+                                     quiet = TRUE)
+                        )
                     }
                 }
                 setTxtProgressBar(pb, i)
