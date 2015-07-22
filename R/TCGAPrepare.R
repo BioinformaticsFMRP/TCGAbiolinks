@@ -46,7 +46,7 @@
 #' @examples
 #' sample <- "TCGA-06-0939-01A-01D-1228-05"
 #' query <- TCGAquery(tumor = "GBM",samples = sample, level = 3)
-#' TCGAdownload(query,path = "exampleData",samples = sample, quiet = TRUE)
+#' TCGAdownload(query,path = "exampleData",samples = sample)
 #' data <- TCGAprepare(query, dir="exampleData")
 #' @export
 #' @importFrom stringr str_match str_trim str_detect str_match_all
@@ -847,11 +847,15 @@ getMage <- function(line){
         file <- file.path(path,basename(mage$deployLocation))
         if ( !file.exists(file)) {
             if(!is.windows()){
-                download(paste0(root,mage$deployLocation), file,
-                         quiet = TRUE)
+                suppressWarnings(
+                    download(paste0(root,mage$deployLocation), file,
+                             quiet = TRUE)
+                )
             } else {
-                download(paste0(root,mage$deployLocation), file,
-                         quiet = TRUE,method="auto")
+                suppressWarnings(
+                    download(paste0(root,mage$deployLocation), file,
+                             quiet = TRUE,method="auto")
+                )
             }
         }
         folder <- gsub(".tar.gz","",file)
