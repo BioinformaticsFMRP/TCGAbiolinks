@@ -38,8 +38,8 @@ TCGAanalyze_LevelTab allows user to add information related to DEGs genes from
 \examples{
 dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
-samplesNT <- TCGAquery_MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
-samplesTP <- TCGAquery_MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
+samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
+samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT], dataFilt[,samplesTP],
 "Normal", "Tumor")
 dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
