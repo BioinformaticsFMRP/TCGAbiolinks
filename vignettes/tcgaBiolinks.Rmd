@@ -34,8 +34,8 @@ Motivation: The Cancer Genome Atlas (TCGA) provides us with an enormous collecti
 This document describes how to search, download and analyze TCGA data using the
 `TCGAbiolinks` package.
 
-# `TCGAQuery`: Searching TCGA open-access data  
- You can easily search TCGA samples using the `TCGAQuery` function.
+# `TCGAquery`: Searching TCGA open-access data  
+ You can easily search TCGA samples using the `TCGAquery` function.
  Using a summary of filters as used in the TCGA portal, the function works
  with the following 
  parameters:
@@ -52,24 +52,24 @@ This document describes how to search, download and analyze TCGA data using the
 You can filter the search by tumor using the tumor parameter.
 
 ```{r, eval = TRUE}
-query <- TCGAQuery(tumor = "gbm")
+query <- TCGAquery(tumor = "gbm")
 ```
 
 If you don't remember the tumor name, or if you have incorrectly typed it. 
 It will provide you with all the tumor names in TCGA.  Also the names can be seen in the
-help pages `?TCGAQuery`
+help pages `?TCGAquery`
 
 ```{r, eval = TRUE}
-query <- TCGAQuery(tumor = "")
+query <- TCGAquery(tumor = "")
 ```
 
 ### Searching by level
 You can filter the search by level	"1", "2", "3" or "mage-tab"
 ```{r, eval = TRUE}
-query <- TCGAQuery(tumor = "gbm", level = 3)
-query <- TCGAQuery(tumor = "gbm", level = 2)
-query <- TCGAQuery(tumor = "gbm", level = 1)
-query <- TCGAQuery(tumor = "gbm", level = "mage-tab")
+query <- TCGAquery(tumor = "gbm", level = 3)
+query <- TCGAquery(tumor = "gbm", level = 2)
+query <- TCGAquery(tumor = "gbm", level = 1)
+query <- TCGAquery(tumor = "gbm", level = "mage-tab")
 ```
 
 ### Searching by date
@@ -78,36 +78,36 @@ For the moment, the format of date accepted is mm/dd/YYYY.
 
 ```{r, eval = TRUE}
 # Get all gbm data produced in 2013
-query <- TCGAQuery(tumor = "gbm", added.since = "01/01/2013", added.up.to = "12/31/2013")
+query <- TCGAquery(tumor = "gbm", added.since = "01/01/2013", added.up.to = "12/31/2013")
 ```
 
 ### Searching by platform
 You can filter the search by platform using the platform parameter.
 
 ```{r, eval = TRUE}
-query <- TCGAQuery(tumor = "gbm", platform = "IlluminaHiSeq_RNASeqV2")
+query <- TCGAquery(tumor = "gbm", platform = "IlluminaHiSeq_RNASeqV2")
 ```
 
 If you don't remember the platform, or if you have incorrectly typed it. 
 It will provide you with all the platforms names in TCGA. Also the names can be seen in the
-help pages `?TCGAQuery`
+help pages `?TCGAquery`
 
 ```{r, eval = TRUE}
-query <- TCGAQuery(tumor = "gbm", platform = "")
+query <- TCGAquery(tumor = "gbm", platform = "")
 ```
 
 ### Searching by center
 You can filter the search by center using the center parameter.
 
 ```{r, eval = TRUE}
-query <- TCGAQuery(tumor = "gbm", center = "mskcc.org")
+query <- TCGAquery(tumor = "gbm", center = "mskcc.org")
 ```
 
 If you don't remember the center or if you have incorrectly typed it. 
 It will provide you with all the center names in TCGA. 
 
 ```{r, eval = TRUE}
-query <- TCGAQuery(tumor = "gbm", center = "")
+query <- TCGAquery(tumor = "gbm", center = "")
 ```
 
 ### Searching by samples
@@ -123,28 +123,28 @@ listSamples <- c("TCGA-E9-A1NG-11A-52R-A14M-07","TCGA-BH-A1FC-11A-32R-A13Q-07",
                 "TCGA-A2-A0CV-01A-31R-A115-07","TCGA-AQ-A0Y5-01A-11R-A14M-07")
 
 # Query all available platforms with a list of barcode 
-query <- TCGAQuery(samples = listSamples)
+query <- TCGAquery(samples = listSamples)
 
 # Query with a partial barcode 
-query <- TCGAQuery(samples = "TCGA-61-1743-01A")
+query <- TCGAquery(samples = "TCGA-61-1743-01A")
 ```
 
 ### Examples
 
 Some search examples are shown below:
 ```{r, eval = TRUE}
-query <- TCGAQuery(tumor = "gbm", added.since = "01/01/2013", added.up.to = "12/31/2013")
+query <- TCGAquery(tumor = "gbm", added.since = "01/01/2013", added.up.to = "12/31/2013")
 
-query <- TCGAQuery(tumor = c("gbm","lgg"), 
+query <- TCGAquery(tumor = c("gbm","lgg"), 
                     platform = c("HumanMethylation450","HumanMethylation27"))
 
-query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450", level = "3")
+query <- TCGAquery(tumor = "gbm", platform = "HumanMethylation450", level = "3")
 
-query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D")
+query <- TCGAquery(samples = "TCGA-61-1743-01A-01D")
 
-query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04", level = 3)
+query <- TCGAquery(samples = "TCGA-61-1743-01A-01D-0649-04", level = 3)
 
-query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04", 
+query <- TCGAquery(samples = "TCGA-61-1743-01A-01D-0649-04", 
                    tumor = "OV", platform = "CGH-1x1M_G4447A")
 ```
 
@@ -153,12 +153,12 @@ query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04",
 Some times researches would like to use samples from different platforms 
 from the same patient. In order to help the user to have an overview of the number of
 samples in commun we created the function `TCGAintegrate` that will receive the 
-data frame returned from `TCGAQuery` and produce a matrix n platforms x n platforms 
+data frame returned from `TCGAquery` and produce a matrix n platforms x n platforms 
 with the values of samples in commum.
 
 Some search examples are shown below
 ```{r, eval = TRUE}
-query <- TCGAQuery(tumor = "brca",level = 3)
+query <- TCGAquery(tumor = "brca",level = 3)
 matSamples <- TCGAintegrate(query)
 
 ```
@@ -167,17 +167,17 @@ The result of the 3 platforms  of `TCGAintegrate` result is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
 knitr::kable(matSamples[c(1,4,9),c(1,4,9)], digits = 2, 
-             caption = "Table common samples among platforms from TCGAQuery",
+             caption = "Table common samples among platforms from TCGAquery",
              row.names = TRUE)
 ```
 
-# `TCGAVersion`: Summary versions of the data in TCGA 
+# `TCGAquery_version`: Summary versions of the data in TCGA 
 
 Query version for a specific platform for example IlluminaHiSeq_RNASeqV2
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 
-BRCA_RNASeqV2_version <- TCGAVersion(tumor = "brca", 
+BRCA_RNASeqV2_version <- TCGAquery_version(tumor = "brca", 
                                      platform = "illuminahiseq_rnaseqv2")
 
 ```
@@ -203,7 +203,7 @@ You can easily download data using the `TCGADownload` function.
 
 The arguments are:
 
-*  **data**	The `TCGAQuery` output
+*  **data**	The `TCGAquery` output
 *  **path**	location to save the files. Default: "."
 *  **type**	Filter the files to download by type
 *  **samples**	List of samples to download
@@ -246,7 +246,7 @@ with data level 3.
 
 The arguments are:
 
-* **query**	Data frame as the one returned from TCGAQuery
+* **query**	Data frame as the one returned from TCGAquery
 * **dir**	Directory with the files
 * **type**	File to prepare.
 * **save**	Save a rda object with the prepared object? Default: FALSE
@@ -264,7 +264,7 @@ data <- TCGAPrepare(query, dir = "data", save = TRUE, filename = "myfile.rda")
 
 ```{r,echo=FALSE, results='hide',message=FALSE,warning=FALSE}
 library(SummarizedExperiment)
-query <- TCGAQuery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3 )
+query <- TCGAquery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3 )
 TCGADownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
                              "TCGA-DY-A0XA-01A-11R-A155-07"),
              type = "rsem.genes.normalized_results",path = "../../")
@@ -321,14 +321,14 @@ specified by the package.
 ```{r, eval = FALSE}
 ############## Get tumor samples with TCGAbiolinks
 library(TCGAbiolinks)
-query <- TCGAQuery(tumor = "GBM",level = 3, platform = "HumanMethylation450")
+query <- TCGAquery(tumor = "GBM",level = 3, platform = "HumanMethylation450")
 TCGADownload(query,path = "TCGA/450k")
 met <- TCGAPrepare(query,dir = "TCGA/450k",
                    save = TRUE,
                    filename = "met.rda",
                    toPackage = "ELMER")
 
-query.rna <- TCGAQuery(tumor="GBM",level=3, platform="IlluminaHiSeq_RNASeqV2")
+query.rna <- TCGAquery(tumor="GBM",level=3, platform="IlluminaHiSeq_RNASeqV2")
 TCGADownload(query.rna,path="TCGA/rna",type = "rsem.genes.normalized_results")
 exp <- TCGAPrepare(query.rna, dir="TCGA/rna", save = TRUE, 
                     filename = "exp.rda",toPackage = "ELMER")
@@ -351,13 +351,13 @@ mee.gbm.glial.with.exp <- fetch.mee(meth = gbm.glial.m,
 ```
 
 
-# Examples `TCGAQuery`, `TCGADownload`, `TCGAPrepare`
+# Examples `TCGAquery`, `TCGADownload`, `TCGAPrepare`
 
 ## Gene Expression IlluminaHiSeq_RNASeq
 You can easily search TCGA samples, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
 # Query platform IlluminaHiSeq_RNASeq withot a list of barcode 
-query <- TCGAQuery(tumor = "brca", platform = "IlluminaHiSeq_RNASeq", level = "3")
+query <- TCGAquery(tumor = "brca", platform = "IlluminaHiSeq_RNASeq", level = "3")
 
 # You can define a list of samples to query and download providing relative TCGA barcodes.
 listSamples <- samplesfilter(query)
@@ -386,10 +386,10 @@ listSamples <- c("TCGA-E9-A1NG-11A-52R-A14M-07","TCGA-BH-A1FC-11A-32R-A13Q-07",
                 "TCGA-A2-A0CV-01A-31R-A115-07","TCGA-AQ-A0Y5-01A-11R-A14M-07")
 
 # Query all available platforms with a list of barcode 
-query <- TCGAQuery(samples = listSamples)
+query <- TCGAquery(samples = listSamples)
 
 # Query platform IlluminaHiSeq_RNASeqV2 with a list of barcode 
-query <- TCGAQuery(tumor = "brca", samples = listSamples, 
+query <- TCGAquery(tumor = "brca", samples = listSamples, 
   platform = "IlluminaHiSeq_RNASeqV2", level = "3")
 
 # dont run
@@ -438,7 +438,7 @@ samplesList <- c("TCGA-02-0046-10A-01D-0182-01",
                 "TCGA-02-0007-01A-01D-0182-01")
 
 # Query platform Genome_Wide_SNP_6 with a list of barcode 
-query <- TCGAQuery(tumor = "gbm", level = 3, platform = "Genome_Wide_SNP_6")
+query <- TCGAquery(tumor = "gbm", level = 3, platform = "Genome_Wide_SNP_6")
 
 # Download a list of barcodes with platform Genome_Wide_SNP_6
 TCGADownload(query, path = "samples")
@@ -449,7 +449,7 @@ GBM_CNV <- TCGAPrepare(query, dir = "samples", type = ".hg19.seg.txt")
 
 
 
-#  `clinic` `&` `clinicFilt`: Working with clinical data
+#  `clinic` `&` `TCGAquery_clinicFilt`: Working with clinical data
 You can retrive clinical data using the `clinic` function. The parameters of this
 function are: 
 
@@ -467,10 +467,10 @@ clinical_brca_data <- TCGAquery_clinic("brca","clinical_patient")
 ```
 
 Also, some functions to work with clinical data are provided.
-For example the function `clinicFilt` will filter your data, returning the list 
+For example the function `TCGAquery_clinicFilt` will filter your data, returning the list 
 of barcodes that matches all the filter.
 
-The parameters of `clinicFilt` are:
+The parameters of `TCGAquery_clinicFilt` are:
 
 * **barcode** List of barcodes
 * **clinical_patient_data** clinical patient data obtained with clinic function 
@@ -514,7 +514,7 @@ SSS <- TCGAquery_MatchedCoupledSampleTypes(bar,c("NT","TP"))
 
 # Get clinical data
 clinical_brca_data <- TCGAquery_clinic("brca","clinical_patient")
-female_erpos_herpos <- clinicFilt(bar,clin, HER="Positive", gender="FEMALE", ER="Positive")
+female_erpos_herpos <- TCGAquery_clinicFilt(bar,clin, HER="Positive", gender="FEMALE", ER="Positive")
 ```
 
 The result is shown below:
@@ -537,7 +537,7 @@ bar <- c("TCGA-G9-6378-02A-11R-1789-07", "TCGA-CH-5767-04A-11R-1789-07",
         "TCGA-AO-A0J5-01A-11R-1789-07", "TCGA-G9-6336-11A-11R-1789-07",
         "TCGA-G9-6380-11A-11R-1789-07", "TCGA-G9-6380-01A-11R-1789-07",
         "TCGA-G9-6340-01A-11R-1789-07","TCGA-G9-6340-11A-11R-1789-07")
-female_erpos_herpos <- clinicFilt(bar, clinBRCA, HER = "Positive", 
+female_erpos_herpos <- TCGAquery_clinicFilt(bar, clinBRCA, HER = "Positive", 
                                 gender = "FEMALE", ER = "Positive")
 print(female_erpos_herpos)
 ```
@@ -720,7 +720,7 @@ for( i in 1: round(nrow(dataBRCAcomplete)/100)){
 message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
 tokenStart <- tokenStop
 tokenStop <-100*i
-tabSurvKM<-SurvivalKMunivariate(clinical_patient_Cancer,dataBRCAcomplete,
+tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,dataBRCAcomplete,
                                 Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
                                         Survresult = F,ThreshTop=0.67,ThreshDown=0.33)
 
@@ -761,7 +761,7 @@ for( i in 1: round(nrow(dataBRCAcomplete)/100)){
 message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
 tokenStart <- tokenStop
 tokenStop <-100*i
-tabSurvKM<-SurvivalKMunivariate(clinical_patient_Cancer,
+tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
                                 dataBRCAcomplete,
                                 Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
                                 Survresult = F,ThreshTop=0.67,ThreshDown=0.33)
@@ -780,9 +780,9 @@ tabSurvKMcompleteDEGs <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% data
 tflist <- EAGenes[EAGenes$Family == "transcription regulator","Gene"]
 tabSurvKMcomplete_onlyTF <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% tflist,]
 
-TabCoxNet <- SurvivalCoxNET(clinical_patient_Cancer,dataBRCAcomplete,
+TabCoxNet <- TCGAvisualize_SurvivalCoxNET(clinical_patient_Cancer,dataBRCAcomplete,
                             Genelist = rownames(tabSurvKMcomplete_onlyTF),
-                            scoreConfidence = 700,titlePlot = "SurvivalCoxNET Example")
+                            scoreConfidence = 700,titlePlot = "TCGAvisualize_SurvivalCoxNET Example")
 ```
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
@@ -962,7 +962,7 @@ documentation with the command `?SummarizedExperiment`.
 library(TCGAbiolinks)
 
 # Getting the data 
-query <- TCGAQuery(tumor = "gbm", platform = "HumanMethylation450", level = 3)
+query <- TCGAquery(tumor = "gbm", platform = "HumanMethylation450", level = 3)
 TCGADownload(query,path=".")
 data <- TCGAPrepare(query = query,dir = ".",save = T)
 clinical <- TCGAquery_clinic("gbm","clinical_patient")
@@ -1188,11 +1188,11 @@ knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF 
 #LatexPrintTableforPresentation(Table = tabDEGsTFPubmed,rowsForPage = nrow(tabDEGsTFPubmed), TableTitle = "tabDEGsTFPubmed", LabelTitle = "tabDEGsTFPubmed", withrows = T)
 ```
 
-## `TCGAquestion`: Searching questions,answers and literature
-The `TCGAquestion` function has two type of searches, one that searches for
+## `TCGAsocial`: Searching questions,answers and literature
+The `TCGAsocial` function has two type of searches, one that searches for
 most downloaded packages in CRAN or BioConductor and one that searches the most related question in biostar. 
 
-### `TCGAquestion` with BioConductor
+### `TCGAsocial` with BioConductor
 Find most downloaded packages in CRAN or BioConductor
  
 ```{r, eval = FALSE}
@@ -1201,11 +1201,11 @@ library(TCGAbiolinks)
 # Define a list of package to find number of downloads
 listPackage <-c("limma","edgeR","survcomp")
 
-tabPackage <- TCGAquestion(siteToFind ="bioconductor.org",listPackage)
+tabPackage <- TCGAsocial(siteToFind ="bioconductor.org",listPackage)
 
 
 # define a keyword to find in support.bioconductor.org returing a table with suggested packages
-tabPackageKey <- TCGAquestion(siteToFind ="support.bioconductor.org" ,KeyInfo = "tcga")
+tabPackageKey <- TCGAsocial(siteToFind ="support.bioconductor.org" ,KeyInfo = "tcga")
 ```
 
 The result is shown below:
@@ -1213,7 +1213,7 @@ The result is shown below:
 ```{r, eval = TRUE, echo = FALSE}
 library(TCGAbiolinks)
 listPackage <- c("limma","edgeR","survcomp")
-tabPackage <- TCGAquestion(siteToFind = "bioconductor.org", listPackage)
+tabPackage <- TCGAsocial(siteToFind = "bioconductor.org", listPackage)
 
 knitr::kable(head(tabPackage), digits = 2, caption = "Table with number of downloads about a list of packages",row.names = FALSE)
 
@@ -1221,17 +1221,17 @@ knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in s
 
 ```
 
-### `TCGAquestion` with Biostar
+### `TCGAsocial` with Biostar
 Find most related question in biostar.
  
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 
 # Find most related question in biostar with TCGA
-tabPackage1 <- TCGAquestion(siteToFind ="biostars.org",KeyInfo = "TCGA")
+tabPackage1 <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "TCGA")
 
 # Find most related question in biostar with package
-tabPackage2 <- TCGAquestion(siteToFind ="biostars.org",KeyInfo = "package")
+tabPackage2 <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "package")
 
 ```
 
@@ -1240,7 +1240,7 @@ The result is shown below:
 ```{r, eval = TRUE, echo = FALSE}
 library(TCGAbiolinks)
 # Find most related question in biostar with TCGA
-#tabPackage <- TCGAquestion(siteToFind ="biostars.org",KeyInfo = "package")
+#tabPackage <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "package")
 
 knitr::kable(head(tabPackage1), digits = 2, caption = "Find most related question in biostar with TCGA",row.names = FALSE)
 
