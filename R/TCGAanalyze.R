@@ -106,8 +106,8 @@ TCGAanalyze_Preprocessing<- function(object){
 #' tabSurvKM <- tabSurvKM[,-1]
 #' tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing=FALSE),]
 TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,ThreshTop=0.67, ThreshDown=0.33){
-    samplesNT <- TCGAquery_MultiSampleTypes(colnames(dataGE), typesample = c("NT"))
-    samplesTP <- TCGAquery_MultiSampleTypes(colnames(dataGE), typesample = c("TP"))
+    samplesNT <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
+    samplesTP <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
     Genelist <- intersect(rownames(dataGE),Genelist)
     dataCancer <- dataGE[Genelist,samplesTP]
     dataNormal <- dataGE[Genelist,samplesNT]
@@ -410,8 +410,8 @@ TCGAanalyze_Normalization <- function(TCGA_RnaseqTable,geneInfo){
 #' @examples
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 #' dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
-#' samplesNT <- TCGAquery_MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
-#' samplesTP <- TCGAquery_MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
+#' samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
+#' samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 #' dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT],
 #'                       dataFilt[,samplesTP],"Normal", "Tumor")
 #' @return table with DEGs containing for each gene logFC, logCPM, pValue,and FDR
@@ -475,8 +475,8 @@ TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type) {
 #' @examples
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 #' dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
-#' samplesNT <- TCGAquery_MultiSampleTypes(colnames(dataFilt), typesample = c("NT"))
-#' samplesTP <- TCGAquery_MultiSampleTypes(colnames(dataFilt), typesample = c("TP"))
+#' samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
+#' samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 #' dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT], dataFilt[,samplesTP],
 #' "Normal", "Tumor")
 #' dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
