@@ -1,12 +1,12 @@
-#' @title TCGAQuery
+#' @title TCGAquery
 #' @description
-#'    The TCGAQuery searches TCGA open-access data through a preprocessed table
+#'    The TCGAquery searches TCGA open-access data through a preprocessed table
 #'    with the latest version of the files.
 #'
 #'    Some parameters as tumor, platorm, level, center, barcode can be used
 #'    to search the data.
 #'
-#'    TCGAQuery will return a matrix with the results found,
+#'    TCGAquery will return a matrix with the results found,
 #'    that will be used in the other function TCGADownload, TCGAPrepare.
 #' @param tumor Disease Examples:
 #' \tabular{lllll}{
@@ -50,18 +50,18 @@
 #' @param center center name
 #' @param samples List of samples. Ex:c('TCGA-04-06','TCGA-61-1743-01A-01D-0649-04')
 #' @examples
-#' query <- TCGAQuery(tumor = "gbm",
+#' query <- TCGAquery(tumor = "gbm",
 #'                    added.since = "01/01/2013",
 #'                    added.up.to = "12/31/2013")
 #'
-#' query <- TCGAQuery(tumor = c("gbm","lgg"),
+#' query <- TCGAquery(tumor = c("gbm","lgg"),
 #'                    platform = c("HumanMethylation450","HumanMethylation27"))
 #'
-#' query <- TCGAQuery(tumor = "gbm",
+#' query <- TCGAquery(tumor = "gbm",
 #'                    platform = "HumanMethylation450",
 #'                    level = "3")
 #'
-#' query <- TCGAQuery(samples = "TCGA-61-1743-01A-01D-0649-04",
+#' query <- TCGAquery(samples = "TCGA-61-1743-01A-01D-0649-04",
 #'                    tumor = "OV",
 #'                    platform = "CGH-1x1M_G4447A",
 #'                    level = 3)
@@ -77,7 +77,7 @@
 #' @return A dataframe with the results of the query
 #'        (lastest version of the files)
 #' @family data functions
-TCGAQuery <- function(tumor = NULL, platform = NULL, added.since = NULL,
+TCGAquery <- function(tumor = NULL, platform = NULL, added.since = NULL,
                       added.up.to = NULL, samples = NULL, center = NULL,
                       level = NULL) {
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/clinical.R
 \name{TCGAquery_MatchedCoupledSampleTypes}
 \alias{TCGAquery_MatchedCoupledSampleTypes}
-\title{TCGAquery_MatchedCoupledSampleTypes}
+\title{Retrieve multiple tissue types from the same patients.}
 \usage{
 TCGAquery_MatchedCoupledSampleTypes(barcode, typesample)
 }
