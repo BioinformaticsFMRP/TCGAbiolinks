@@ -177,7 +177,7 @@ Query version for a specific platform for example IlluminaHiSeq_RNASeqV2
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 
-BRCA_RNASeqV2_version <- TCGAquery_version(tumor = "brca", 
+BRCA_RNASeqV2_version <- TCGAquery_Version(tumor = "brca", 
                                      platform = "illuminahiseq_rnaseqv2")
 
 ```
@@ -322,6 +322,7 @@ specified by the package.
 ############## Get tumor samples with TCGAbiolinks
 library(TCGAbiolinks)
 query <- TCGAquery(tumor = "GBM",level = 3, platform = "HumanMethylation450")
+# This function will take a lot of time depens on internet connection
 TCGADownload(query,path = "TCGA/450k")
 met <- TCGAPrepare(query,dir = "TCGA/450k",
                    save = TRUE,
@@ -396,21 +397,14 @@ query <- TCGAquery(tumor = "brca", samples = listSamples,
 #TCGADownload(query, path = "dataBrca", type = "gene.quantification",samples = listSamples)
 
 # Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
-TCGADownload(query, path = "dataBrca", type = "rsem.genes.results",samples = listSamples)
+TCGADownload(query, path = "../dataBrca", type = "rsem.genes.results",samples = listSamples)
 
 # Prepare expression matrix with gene id in rows and samples (barcode) in columns
 # rsem.genes.results as values
 BRCAMatrix <- TCGAPrepare(query,"dataBrca",type = "rsem.genes.results")
 
+BRCAMatrix_assay <- assay(BRCAMatrix,"raw_counts")
 
-# checking summarized experiment with data.frame
-
-#BRCAMatrix_data <- BRCAMatrix@assays$data$raw_counts
-#colnames(BRCAMatrix_data)<-BRCAMatrix@colData$sample
-#rownames(BRCAMatrix_data)<-BRCAMatrix@rowRanges@elementMetadata$gene_id
-BRCAMatrix_assay <- assay(BRCAMatrix,1)
-commonGenes <- intersect(rownames(BRCAMatrix_assay), rownames(dataBRCA))
-sum(dataBRCA[commonGenes,] != BRCAMatrix_assay[commonGenes,])
 ```
 
 The result is shown below:
