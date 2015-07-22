@@ -33,7 +33,7 @@
 #' @return A SummarizedExperiment object (If SummarizedExperiment = \code{FALSE},
 #' a data.frame)
 #' @param query TCGAquery output
-#' @param dir Directory with the files downloaded by TCGADownload
+#' @param dir Directory with the files downloaded by TCGAdownload
 #' @param samples List of samples to prepare the data
 #' @param type Filter the files to prepare.
 #' @param save Save a rda object with the prepared object?
@@ -46,8 +46,8 @@
 #' @examples
 #' sample <- "TCGA-06-0939-01A-01D-1228-05"
 #' query <- TCGAquery(tumor = "GBM",samples = sample, level = 3)
-#' TCGADownload(query,path = "exampleData",samples = sample, quiet = TRUE)
-#' data <- TCGAPrepare(query, dir="exampleData")
+#' TCGAdownload(query,path = "exampleData",samples = sample, quiet = TRUE)
+#' data <- TCGAprepare(query, dir="exampleData")
 #' @export
 #' @importFrom stringr str_match str_trim str_detect str_match_all
 #' @importFrom SummarizedExperiment SummarizedExperiment
@@ -60,10 +60,10 @@
 #' @import utils data.table TxDb.Hsapiens.UCSC.hg19.knownGene
 #' @seealso  \code{\link{TCGAquery}} for searching the data to download
 #'
-#'  \code{\link{TCGADownload}} for downloading the data from the
+#'  \code{\link{TCGAdownload}} for downloading the data from the
 #' search
 #' @family data functions
-TCGAPrepare <- function(query,
+TCGAprepare <- function(query,
                         dir = NULL,
                         samples = NULL,
                         type = NULL,

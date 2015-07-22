@@ -1,6 +1,6 @@
 #' @title Download the data from TCGA using as reference the output from TCGAquery
 #' @description
-#'      The TCGADownload function will download the data using as reference
+#'      The TCGAdownload function will download the data using as reference
 #'      the the lines of the TCGAquery search result.
 #'
 #'      There is an option to download the entire tar.gz folder or download
@@ -31,14 +31,14 @@
 #'                    platform = "IlluminaHiSeq_RNASeqV2",
 #'                    level = "3",
 #'                    samples = samples)
-#' TCGADownload(query,path = "RNA",
+#' TCGAdownload(query,path = "RNA",
 #'              samples = samples,
 #'              type ="rsem.genes.results")
 #' @export
 #' @importFrom downloader download
 #' @return Download TCGA data into the given path
 #' @family data functions
-TCGADownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
+TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                          quiet = TRUE, force = FALSE) {
 
     dir.create(path, showWarnings = FALSE, recursive = TRUE)
