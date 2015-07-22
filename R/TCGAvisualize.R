@@ -44,11 +44,13 @@
 #' \item highlight different communities
 #' \item visualise the subnetwrok
 #' }
-#' @param clinical_patient clinical_patient
-#' @param dataGE dataGE
-#' @param Genelist Genelist
+#' @param clinical_patient is a data.frame using function 'clinic' with information
+#' related to barcode / samples such as bcr_patient_barcode, days_to_death ,
+#' days_to_last_followup , vital_status, etc
+#' @param dataGE is a matrix of Gene expression (genes in rows, samples in cols) from TCGAprepare
+#' @param Genelist is a list of gene symbols where perform survival KM.
 #' @param scoreConfidence restrict to those edges with high confidence (eg. score>=700)
-#' @param titlePlot titlePlot
+#' @param titlePlot is the title to show in the final plot.
 #' @importFrom survival coxph
 #' @importFrom igraph subgraph.edges layout.fruchterman.reingold
 #'             spinglass.community degree E communities crossing V V<-
