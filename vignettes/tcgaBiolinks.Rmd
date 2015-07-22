@@ -16,7 +16,20 @@ output:
     number_sections: no
     toc_depth: 2
     highlight: haddock
-fontsize: 10pt
+fontsize: 9pt
+
+references:
+- id: ref1
+  title: Orchestrating high-throughput genomic analysis with Bioconductor
+  author: 
+  - family: Huber, Wolfgang and Carey, Vincent J and Gentleman, Robert and Anders, Simon and Carlson, Marc and Carvalho, Benilton S and Bravo, Hector Corrada and Davis, Sean and Gatto, Laurent and Girke, Thomas and others
+    given:
+  journal: Nature methods
+  volume: 12
+  number: 2
+  pages: 115-121
+  issued:
+    year: 2015
 
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -251,7 +264,7 @@ genome_wide_snp_6| hg18.seg<br>hg19.seg<br>nocnv_hg18.seg<br>nocnv_hg19.seg
 # `TCGAprepare`: Preparing the data
 You can easily read the downloaded data using the `TCGAprepare` function.
 This function will prepare the data into a [SummarizedExperiment](http://www.nature.com/nmeth/journal/v12/n2/abs/nmeth.3252.html) 
-object for downstream analysis. For the moment this function is working only
+[@ref1] object for downstream analysis. For the moment this function is working only
 with data level 3.
 
 The arguments are:
@@ -1265,3 +1278,5 @@ knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in b
 ```{r sessionInfo}
 sessionInfo()
 ```
+
+# References
