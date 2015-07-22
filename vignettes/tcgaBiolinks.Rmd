@@ -207,7 +207,6 @@ The arguments are:
 *  **path**	location to save the files. Default: "."
 *  **type**	Filter the files to download by type
 *  **samples**	List of samples to download
-*  **quiet**	Supress output messages? Default: FALSE
 *  **force**	Download again if file already exists? Default: FALSE
 
 ### Example of use
@@ -699,13 +698,46 @@ img <- readPNG("PCAtop200DEGs.png")
 grid.raster(img)
 ```
 
-## Survival Analysis
+## Survival Analysis: `TCGAanalyze_survival`, Cox Regression and dnet package
 When analyzing survival times, different problems come up than the ones dis-
 cussed so far. One question is how do we deal with subjects dropping out of a
 study. For example, assume that we test a new cancer drug. While some subjects
 die, others may believe that the new drug is not effective, and decide to drop out
 of the study before the study is finished. A similar problem would be faced when
 we investigate how long a machine lasts before it breaks down.
+ 
+Using the clinical data, it is possible to create a survival plot with the 
+function `TCGAanalyze_survival` as follows:
+
+```{r, eval = FALSE}
+# survival using the column group 
+clinical <- TCGAquery_clinic("gbm","clinical_patient")
+TCGAanalyze_survival(clinical,"gender")
+```
+
+The arguments of `TCGAanalyze_survival` are:
+
+*  **clinical_patient** TCGA Clinical patient with the information days_to_death
+*  **clusterCol** Column with groups to plot. This is a mandatory field, 
+the caption will be based in this column
+*  **legend** Legend title of the figure
+*  **cutoff** xlim This parameter will be a limit in the x-axis. 
+That means, that patients with days_to_deth > cutoff will be set to Alive.
+*  **main**	 main title of the plot
+*  **ylab**	y-axis text of the plot
+*  **xlab** x-axis text of the plot
+*  **filename**	 The name of the pdf file
+*  **color** Define the colors of the lines.
+
+Merging LGG and GBM clinical data and grouping some samples, shows 
+result is shown below:
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("survival.png")
+grid.raster(img)
+```
+
  
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
@@ -746,7 +778,7 @@ knitr::kable(tabSurvKMcompleteDEGs[1:10,],
             row.names = TRUE)
 ```
 
-## Survival Analysis Cox Regression and dnet package
+### Survival Analysis Cox Regression and dnet package
 
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
@@ -990,37 +1022,6 @@ clinical$group <- c(rep("group1",nrow(clinical)/4),
 
  colData(data)$group <- c(rep("group1",ncol(data)/2), rep("group2",ncol(data)/2))
 ```
-
-Using the clinical data, it is possible to create a survival plot with the 
-function `survivalPlot` as follows:
-
-```{r, eval = FALSE}
-# survival using the column group 
-TCGAanalyze_survival(clinical,"group")
-```
-
-The arguments of `TCGAanalyze_survival` are:
-
-*  **clinical_patient** TCGA Clinical patient with the information days_to_death
-*  **clusterCol** Column with groups to plot. This is a mandatory field, 
-the caption will be based in this column
-*  **legend** Legend title of the figure
-*  **cutoff** xlim This parameter will be a limit in the x-axis. 
-That means, that patients with days_to_deth > cutoff will be set to Alive.
-*  **main**	 main title of the plot
-*  **ylab**	y-axis text of the plot
-*  **xlab** x-axis text of the plot
-*  **filename**	 The name of the pdf file
-*  **color** Define the colors of the lines.
-
-The result is shown below:
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
-library(png)
-library(grid)
-img <- readPNG("survival.png")
-grid.raster(img)
-```
-
 
 ## `TCGAvisualize_meanMethylation`: Mean Methylation Analysis
 Using the data and calculating the mean methylation per group, it is possible 

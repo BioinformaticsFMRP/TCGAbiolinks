@@ -847,11 +847,15 @@ getMage <- function(line){
         file <- file.path(path,basename(mage$deployLocation))
         if ( !file.exists(file)) {
             if(!is.windows()){
-                download(paste0(root,mage$deployLocation), file,
-                         quiet = TRUE)
+                suppressWarnings(
+                    download(paste0(root,mage$deployLocation), file,
+                             quiet = TRUE)
+                )
             } else {
-                download(paste0(root,mage$deployLocation), file,
-                         quiet = TRUE,method="auto")
+                suppressWarnings(
+                    download(paste0(root,mage$deployLocation), file,
+                             quiet = TRUE,method="auto")
+                )
             }
         }
         folder <- gsub(".tar.gz","",file)
