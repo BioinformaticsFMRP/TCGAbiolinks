@@ -2,21 +2,21 @@
 % Please edit documentation in R/TCGAintegrate.R
 \name{TCGAquery_samplesfilter}
 \alias{TCGAquery_samplesfilter}
-\title{Filtering sample output from TCGAQuery}
+\title{Filtering sample output from TCGAquery}
 \usage{
 TCGAquery_samplesfilter(query)
 }
 \arguments{
-\item{query}{metaData output from TCGAQuery}
+\item{query}{metaData output from TCGAquery}
 }
 \value{
 list of samples for a tumor
 }
 \description{
-Filtering sample output from TCGAQuery
+Filtering sample output from TCGAquery
 }
 \examples{
-query <- TCGAQuery(tumor = 'brca',level = 3)
+query <- TCGAquery(tumor = 'brca',level = 3)
 querySamples <- TCGAquery_samplesfilter(query)
 }
 
