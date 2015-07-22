@@ -16,7 +16,7 @@ output:
     number_sections: no
     toc_depth: 2
     highlight: haddock
-fontsize: 9pt
+
 
 references:
 - id: ref1
@@ -31,15 +31,36 @@ references:
   issued:
     year: 2015
 
+- id: ref2
+  title: GC-content normalization for RNA-Seq data
+  author: 
+  - family: Risso, Davide and Schwartz, Katja and Sherlock, Gavin and Dudoit, Sandrine
+    given:
+  journal: BMC bioinformatics
+  volume: 12
+  number: 1
+  pages: 480
+  issued:
+    year: 2011 
+    
+- id: ref3
+  title: Evaluation of statistical methods for normalization and differential expression in mRNA-Seq experiments
+  author: 
+  - family: Bullard, James H and Purdom, Elizabeth and Hansen, Kasper D and Dudoit, Sandrine
+    given:
+  journal: BMC bioinformatics
+  volume: 11
+  number: 1
+  pages: 94
+  issued:
+    year: 2010 
+
+
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
-
-```{r style, echo = FALSE, results = 'asis'}
-BiocStyle::markdown()
-```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(dpi = 150)
@@ -264,8 +285,8 @@ rsem.isoforms.normalized_results, bt.exon_quantification
 # `TCGAprepare`: Preparing the data
 You can easily read the downloaded data using the `TCGAprepare` function.
 This function will prepare the data into a [SummarizedExperiment](http://www.nature.com/nmeth/journal/v12/n2/abs/nmeth.3252.html) 
-[@ref1] object for downstream analysis. For the moment this function is working only
-with data level 3.
+[@ref1] object for downstream analysis. 
+For the moment this function is working only with data level 3.
 
 The arguments are:
 
@@ -571,7 +592,15 @@ print(female_erpos_herpos)
 After preparing the gene expression from TCGA data using the `TCGAprepare`
 function, you can do a normalization of genes using the 
 function `TCGAanalyze_Normalization`, do a quantile filter of genes with
-the `TCGAanalyze_Filtering` function. Also, iin order to classify your samples (barcode) 
+the `TCGAanalyze_Filtering` function. 
+
+TCGAanalyze_Normalization allows user to normalize mRNA transcripts and miRNA, 
+using `r Biocpkg("EDASeq")` package. Normalization for RNA-Seq Numerical and graphical summaries of RNA-Seq read data. Within-lane normalization procedures to adjust for GC-content effect (or other gene-level effects) on read counts: loess robust local regression, global-scaling, and full-quantile normalization [@ref2]. Between-lane normalization procedures to adjust for distributional differences between lanes (e.g., sequencing depth): global-scaling and full-quantile normalization [@ref3].
+
+For istance returns all mRNA or miRNA with mean across all samples, higher than the threshold defined quantile mean across all samples.
+
+
+Also, in order to classify your samples (barcode) 
 you can use the `TCGAquery_SampleTypes` function, the typeSample "NT" will return 
 the  "Solid Tissue Normal"" samples, while the typeSample "TP" will return 
 "Primary Solid Tumor"" samples.
@@ -603,7 +632,16 @@ samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 
 ## `TCGAanalyze_DEA` `&` `TCGAanalyze_LevelTab` Differential expression analysis (DEA)
 
-Perform DEA (Differential expression analysis) to identify differentially expressed genes (DEGs) using the `TCGAanalyze_DEA` function. This function receives as parameters:
+Perform DEA (Differential expression analysis) to identify differentially expressed genes (DEGs) using the `TCGAanalyze_DEA` function. 
+
+`TCGAanalyze_DEA` performs DEA using following functions from `r Biocpkg("edgeR")`:
+
+1. edgeR::DGEList converts the count matrix into an edgeR object.
+2. edgeR::estimateCommonDisp each gene gets assigned the same dispersion estimate.
+3. edgeR::exactTest performs pair-wise tests for differential expression between two groups.
+4. edgeR::topTags takes the output from exactTest(), adjusts the raw p-values using the False Discovery Rate (FDR) correction, and returns the top differentially expressed genes.
+
+This function receives as parameters:
 
 * **mat1** The matrix of the first group (in the example group 1 is the normal samples), 
 * **mat2** The matrix of the  second group (in the example group 2 is tumor samples)

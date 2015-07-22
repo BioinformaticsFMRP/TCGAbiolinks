@@ -24,14 +24,17 @@ table with DEGs containing for each gene logFC, logCPM, pValue,and FDR
 }
 \description{
 TCGAanalyze_DEA allows user to perform Differentially expression analysis (DEA),
-   using edgeR package. DEA to identify differentially expressed genes (DEGs).
+   using edgeR package to identify differentially expressed genes (DEGs).
     It is possible to do a two-class analysis.
-    TCGAanalyze_DEA performs DEA using following functions from edgeR
-    1. edgeR::DGEList converts the count matrix into an edgeR object.
-    2. edgeR::estimateCommonDisp each gene gets assigned the same dispersion estimate.
-    3. edgeR::exactTest performs pair-wise tests for differential expression between two groups.
-    4. edgeR::topTags takes the output from exactTest(), adjusts the raw p-values using the
+
+    TCGAanalyze_DEA performs DEA using following functions from edgeR:
+    \enumerate{
+    \item edgeR::DGEList converts the count matrix into an edgeR object.
+    \item edgeR::estimateCommonDisp each gene gets assigned the same dispersion estimate.
+    \item edgeR::exactTest performs pair-wise tests for differential expression between two groups.
+    \item edgeR::topTags takes the output from exactTest(), adjusts the raw p-values using the
     False Discovery Rate (FDR) correction, and returns the top differentially expressed genes.
+    }
 }
 \examples{
 dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
