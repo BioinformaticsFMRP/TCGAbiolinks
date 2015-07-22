@@ -1,4 +1,4 @@
-#' @title TCGAintegrate
+#' @title Filtering common samples among platforms from TCGAQuery for the same tumor
 #' @description In order to help the user to have an overview of the number of
 #' samples in commun we created the function `TCGAintegrate` that will receive the
 #' data frame returned from `TCGAQuery` and produce a matrix n platforms x n platforms

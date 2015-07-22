@@ -1,4 +1,4 @@
-#' @title TCGAquery
+#' @title Searches TCGA open-access data providing also latest version of the files.
 #' @description
 #'    The TCGAquery searches TCGA open-access data through a preprocessed table
 #'    with the latest version of the files.
