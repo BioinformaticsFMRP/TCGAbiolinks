@@ -6,9 +6,9 @@
 \usage{
 TCGAanalyze_survival(data, clusterCol = NULL, legend = "Legend",
   cutoff = 0, main = "Kaplan-Meier Overall Survival Curves",
-  ylab = "PROBABILITY OF SURVIVAL", xlab = "TIME SINCE DIAGNOSIS (DAYS)",
+  ylab = "Probability of survival", xlab = "Time since diagnosis (days)",
   filename = "survival.pdf", color = c("green", "firebrick4", "orange3",
-  "blue"), height = 10, width = 5)
+  "blue"), height = par("din")[2], width = par("din")[1], pvalue = TRUE)
 }
 \arguments{
 \item{data}{TCGA Clinical patient with the information days_to_death}
@@ -34,6 +34,8 @@ patients with days_to_deth > cutoff will be set to Alive.}
 \item{height}{Image height}
 
 \item{width}{Image width}
+
+\item{pvalue}{Print pvalue in the plot? Default: TRUE}
 }
 \value{
 Survival plot
