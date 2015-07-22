@@ -361,7 +361,7 @@ You can easily search TCGA samples, download and prepare a matrix of gene expres
 query <- TCGAquery(tumor = "brca", platform = "IlluminaHiSeq_RNASeq", level = "3")
 
 # You can define a list of samples to query and download providing relative TCGA barcodes.
-listSamples <- samplesfilter(query)
+listSamples <- TCGAquery_samplesfilter(query)
 
 # Download only first 5 samples for test.
 
