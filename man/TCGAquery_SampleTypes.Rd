@@ -2,7 +2,7 @@
 % Please edit documentation in R/TCGAquery_clinical.R
 \name{TCGAquery_SampleTypes}
 \alias{TCGAquery_SampleTypes}
-\title{Filtering list of samples by selected type sample}
+\title{Retrieve multiple tissue types not from the same patients.}
 \usage{
 TCGAquery_SampleTypes(barcode, typesample)
 }
@@ -32,13 +32,15 @@ NBM \tab  Bone Marrow Normal \cr
 a list of samples / barcode filtered by type sample selected
 }
 \description{
-For a given list of samples and a type sample, return the samples that are
-  from that type.
+TCGAquery_SampleTypes for a given list of samples and types,
+   return the union of samples that are from theses type.
 }
 \examples{
-TCGAquery_SampleTypes(c("TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1"),"TR")
-}
-\author{
-Catharina Olsen, Claudia Cava.
+# selection of normal samples "NT"
+barcode <- c("TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1")
+# Returns the second barcode
+ TCGAquery_SampleTypes(barcode,"TR")
+ # Returns both barcode
+ TCGAquery_SampleTypes(barcode,c("TR","TP"))
 }
 
