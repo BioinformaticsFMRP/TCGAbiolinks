@@ -729,8 +729,7 @@ That means, that patients with days_to_deth > cutoff will be set to Alive.
 *  **filename**	 The name of the pdf file
 *  **color** Define the colors of the lines.
 
-Merging LGG and GBM clinical data and grouping some samples, shows 
-result is shown below:
+ The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
 library(png)
 library(grid)
