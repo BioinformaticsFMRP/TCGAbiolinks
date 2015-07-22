@@ -1,4 +1,4 @@
-#' @title SurvivalCoxNET
+#' @title Survival analysis with univariate Cox regression package (dnet)
 #' @description Survival analysis with univariate Cox regression package (dnet)
 #' @param clinical_patient clinical_patient
 #' @param dataGE dataGE
@@ -14,9 +14,9 @@
 #' @importFrom grDevices dev.list
 #' @export
 #' @return net IGRAPH with attr: name (v/c), seqid (v/c), geneid (v/n), symbol (v/c), description (v/c) ...
-SurvivalCoxNET <- function(clinical_patient,dataGE,Genelist,
+TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,dataGE,Genelist,
                            scoreConfidence = 700,
-                           titlePlot = "SurvivalCoxNET Example"){
+                           titlePlot = "TCGAvisualize_SurvivalCoxNET Example"){
 
     combined_score <- NULL
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
