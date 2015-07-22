@@ -595,7 +595,7 @@ function `TCGAanalyze_Normalization`, do a quantile filter of genes with
 the `TCGAanalyze_Filtering` function. 
 
 TCGAanalyze_Normalization allows user to normalize mRNA transcripts and miRNA, 
-using `r Biocpkg("EDASeq")` package. Normalization for RNA-Seq Numerical and graphical summaries of RNA-Seq read data. Within-lane normalization procedures to adjust for GC-content effect (or other gene-level effects) on read counts: loess robust local regression, global-scaling, and full-quantile normalization [@ref2]. Between-lane normalization procedures to adjust for distributional differences between lanes (e.g., sequencing depth): global-scaling and full-quantile normalization [@ref3].
+using R \Biocpkg{EDASeq} package. Normalization for RNA-Seq Numerical and graphical summaries of RNA-Seq read data. Within-lane normalization procedures to adjust for GC-content effect (or other gene-level effects) on read counts: loess robust local regression, global-scaling, and full-quantile normalization [@ref2]. Between-lane normalization procedures to adjust for distributional differences between lanes (e.g., sequencing depth): global-scaling and full-quantile normalization [@ref3].
 
 For istance returns all mRNA or miRNA with mean across all samples, higher than the threshold defined quantile mean across all samples.
 
@@ -634,7 +634,7 @@ samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 
 Perform DEA (Differential expression analysis) to identify differentially expressed genes (DEGs) using the `TCGAanalyze_DEA` function. 
 
-`TCGAanalyze_DEA` performs DEA using following functions from `r Biocpkg("edgeR")`:
+`TCGAanalyze_DEA` performs DEA using following functions from R \Biocpkg{edgeR}:
 
 1. edgeR::DGEList converts the count matrix into an edgeR object.
 2. edgeR::estimateCommonDisp each gene gets assigned the same dispersion estimate.
