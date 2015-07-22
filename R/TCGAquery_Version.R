@@ -1,6 +1,7 @@
-#' @title TCGA Version
+#' @title Shows a summary (version, date, number of samples, size of the data) of
+#' all versions of data for a given tumor and platform.
 #' @description  As every new version of data has diferent samples and size
-#' the TCGAVersion function shows a summary (version, date, number of samples,
+#' the TCGAquery_Version function shows a summary (version, date, number of samples,
 #' size of the data) of all versions of data for a given tumor and platform.
 #'
 #' @param tumor  a character string indicating the cancer type for
@@ -15,11 +16,11 @@
 #' @importFrom rvest html html_text
 #' @importFrom stringr str_split str_trim
 #' @examples
-#' TCGAVersion('LGG','agilentg4502a_07_3')
+#' TCGAquery_Version('LGG','agilentg4502a_07_3')
 #' @export
 #' @return Data frame with version, date, number of samples,size of
 #'         the platform and tumor
-TCGAVersion <- function(tumor = NULL, platform = NULL) {
+TCGAquery_Version <- function(tumor = NULL, platform = NULL) {
 
     if (is.null(tumor) && is.null(platform)) {
         message("Please provide one tumor and platform")
