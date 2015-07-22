@@ -87,6 +87,7 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' @param color Define the colors of the lines.
 #' @param width Image width
 #' @param height Image height
+#' @param pvalue Print pvalue in the plot? Default: TRUE
 #' @importFrom GGally ggsurv
 #' @importFrom survival survfit Surv
 #' @importFrom scales percent
@@ -103,15 +104,16 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' TCGAanalyze_survival(clinical,"gender", filename = "surv.pdf", legend="Gender")
 #' }
 TCGAanalyze_survival <- function(data,
-                             clusterCol=NULL,
-                             legend = "Legend", cutoff = 0,
-                             main = "Kaplan-Meier Overall Survival Curves",
-                             ylab = "PROBABILITY OF SURVIVAL",
-                             xlab = "TIME SINCE DIAGNOSIS (DAYS)",
-                             filename = "survival.pdf",
-                             color = c("green", "firebrick4", "orange3", "blue"),
-                             height=10,
-                             width=5
+                                 clusterCol=NULL,
+                                 legend = "Legend", cutoff = 0,
+                                 main = "Kaplan-Meier Overall Survival Curves",
+                                 ylab = "Probability of survival",
+                                 xlab = "Time since diagnosis (days)",
+                                 filename = "survival.pdf",
+                                 color = c("green", "firebrick4", "orange3", "blue"),
+                                 height=par("din")[2],
+                                 width=par("din")[1],
+                                 pvalue=TRUE
 ) {
     .e <- environment()
     group <- NULL
@@ -125,24 +127,21 @@ TCGAanalyze_survival <- function(data,
         data[notDead,]$days_to_death <- data[notDead,]$days_to_last_followup
     }
 
-    if (cutoff != 0) {
-        # Axis-x cut-off
-        aux <- subset(data, data$days_to_death > cutoff)
-        # 'cut' info bigger than cutoff
-        data[rownames(aux), "days_to_death"] <- cutoff
-        # Pacient is alive (0:alive,1:dead)
-        data[rownames(aux), "vital_status"] <- "Alive"
-    }
     # create a column to be used with survival package, info need
     # to be TRUE(DEAD)/FALSE (ALIVE)
-    data$s <- !(data$vital_status == "Dead")
+    data$s <- (data$vital_status == "Dead")
 
     # Column with groups
     data$type <- as.factor(data[,clusterCol])
     # create the formula for survival analysis
-    f.m <- formula(Surv(as.numeric(data$days_to_death),
-                        data$s) ~ data$type)
+    f.m <- formula(Surv(as.numeric(data$days_to_death),event=data$s) ~ data$type)
     fit <- survfit(f.m, data = data)
+
+    # calculating p-value
+    pvalue <- summary(coxph(
+        Surv(as.numeric(data$days_to_death),event=data$s)
+        ~ data$type))$logtest[3]
+
 
     surv <- ggsurv(fit, CI = "def", plot.cens = FALSE,
                    surv.col = "gg.def",
@@ -150,6 +149,12 @@ TCGAanalyze_survival <- function(data,
                    lty.ci = 2, cens.shape = 3,
                    back.white = TRUE,
                    xlab = xlab, ylab = ylab, main = main)
+
+    if (pvalue){
+        surv <- surv + annotate("text",x = -Inf,y = -Inf, hjust = -0.1,
+                                vjust = -1.0, size = 5,
+                                label = paste0("Log-Rank P-value = ",pvalue))
+    }
     if (cutoff != 0) {
         surv <- surv + ggplot2::coord_cartesian(xlim = c(0, cutoff))
     }
@@ -166,9 +171,10 @@ TCGAanalyze_survival <- function(data,
                                       shape = 3,size = 2)
             surv <- surv + guides(linetype = FALSE) +
                 scale_y_continuous(labels = scales::percent)
-            ggsave(surv, filename = filename,
-                   width = width, height = height)
+
+            ggsave(surv, filename = filename, width = width, height = height)
         })
+
     })
 
 }
@@ -205,15 +211,15 @@ TCGAanalyze_survival <- function(data,
 #'          colData=colData)
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group",sort=TRUE)
 TCGAvisualize_meanMethylation <- function(data,
-                                    groupCol=NULL,
-                                    sort = FALSE,
-                                    filename = "G-CIMP-mean.methylation.pdf",
-                                    ylab = "Mean DNA methylation",
-                                    xlab = "DNA Methylation Clusters",
-                                    title = "Mean DNA methylation by cluster",
-                                    legend = "Legend",
-                                    color = c("green", "red", "purple",
-                                              "orange", "salmon", "grey")) {
+                                          groupCol=NULL,
+                                          sort = FALSE,
+                                          filename = "G-CIMP-mean.methylation.pdf",
+                                          ylab = "Mean DNA methylation",
+                                          xlab = "DNA Methylation Clusters",
+                                          title = "Mean DNA methylation by cluster",
+                                          legend = "Legend",
+                                          color = c("green", "red", "purple",
+                                                    "orange", "salmon", "grey")) {
     .e <- environment()
     mean <- apply(assay(data), 2, mean,na.rm = TRUE)
 
@@ -341,7 +347,7 @@ calculate.pvalues <- function(data,
                              if(!is.factor(colData(data)[,groupCol])) {
                                  colData(data)[,groupCol] <- factor(
                                      colData(data)[,groupCol]
-                                     )
+                                 )
                              }
                              aux <-data.frame(beta=x[c(idx1,idx2)],
                                               cluster=droplevels(colData(data)[c(idx1,idx2),groupCol]))
@@ -445,27 +451,27 @@ calculate.pvalues <- function(data,
 #'                          rep("group2",ncol(data)/2))
 #' hypo.hyper <- TCGAanalyze_DMR(data, p.cut = 0.85,"group","group1","group2")
 TCGAanalyze_DMR <- function(data,
-                        groupCol=NULL,
-                        group1=NULL,
-                        group2=NULL,
-                        filename = "volcano.pdf",
-                        ylab =  expression(paste(-Log[10],
-                                                 " (FDR corrected -P values)")),
-                        xlab = "DNA Methylation\n difference",
-                        title = "Volcano plot",
-                        legend = "Legend",
-                        color = c("1" = "black", "2" = "green",
-                                  "3" = "red"),
-                        label = c("1" = "Not Significant",
-                                  "2" = "Hypermethylated",
-                                  "3" = "Hypomethylated"),
-                        xlim = NULL,
-                        ylim = NULL,
-                        p.cut = 0.01,
-                        diffmean.cut = 0.2,
-                        paired = FALSE,
-                        adj.method="BH",
-                        overwrite=FALSE) {
+                            groupCol=NULL,
+                            group1=NULL,
+                            group2=NULL,
+                            filename = "volcano.pdf",
+                            ylab =  expression(paste(-Log[10],
+                                                     " (FDR corrected -P values)")),
+                            xlab = "DNA Methylation\n difference",
+                            title = "Volcano plot",
+                            legend = "Legend",
+                            color = c("1" = "black", "2" = "green",
+                                      "3" = "red"),
+                            label = c("1" = "Not Significant",
+                                      "2" = "Hypermethylated",
+                                      "3" = "Hypomethylated"),
+                            xlim = NULL,
+                            ylim = NULL,
+                            p.cut = 0.01,
+                            diffmean.cut = 0.2,
+                            paired = FALSE,
+                            adj.method="BH",
+                            overwrite=FALSE) {
     .e <- environment()
 
     if (is.null(groupCol)) {
@@ -594,37 +600,37 @@ TCGAanalyze_DMR <- function(data,
 #' SummarizedExperiment::rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
 #' result <- TCGAvisualize_starburst(met,exp,p.cut = 0.05,"g1","g2")
 TCGAvisualize_starburst <- function(met,
-                              exp,
-                              group1=NULL,
-                              group2=NULL,
-                              filename = "volcano.pdf",
-                              ylab = expression(atop("Gene Expression",
-                                                     paste(Log[10],
-                                                           " (FDR corrected P values)"))),
-                              xlab = expression(atop("DNA Methylation",
-                                                     paste(Log[10],
-                                                           " (FDR corrected P values)"))),
-                              title = "Starburst Plot",
-                              legend = "Methylation/Expression Relation",
-                              color = c("1" = "black",
-                                        "2" = "purple",
-                                        "3" = "darkgreen",
-                                        "4" = "blue",
-                                        "5" = "darkred",
-                                        "6" = "red",
-                                        "7" = "green",
-                                        "8" = "yellow",
-                                        "9" = "orange"),
-                              label = c("1" = "Not Significant",
-                                        "2" = "Up regulated & Hypo methylated",
-                                        "3" = "Down regulated & Hypo methylated",
-                                        "4" = "hypo methylated",
-                                        "5" = "hyper methylated",
-                                        "6" = "Up regulated",
-                                        "7" = "Down regulated",
-                                        "8" = "Up regulated & Hyper methylated",
-                                        "9" = "Down regulated & Hyper methylated"),
-                              xlim = NULL, ylim = NULL, p.cut = 0.01
+                                    exp,
+                                    group1=NULL,
+                                    group2=NULL,
+                                    filename = "volcano.pdf",
+                                    ylab = expression(atop("Gene Expression",
+                                                           paste(Log[10],
+                                                                 " (FDR corrected P values)"))),
+                                    xlab = expression(atop("DNA Methylation",
+                                                           paste(Log[10],
+                                                                 " (FDR corrected P values)"))),
+                                    title = "Starburst Plot",
+                                    legend = "Methylation/Expression Relation",
+                                    color = c("1" = "black",
+                                              "2" = "purple",
+                                              "3" = "darkgreen",
+                                              "4" = "blue",
+                                              "5" = "darkred",
+                                              "6" = "red",
+                                              "7" = "green",
+                                              "8" = "yellow",
+                                              "9" = "orange"),
+                                    label = c("1" = "Not Significant",
+                                              "2" = "Up regulated & Hypo methylated",
+                                              "3" = "Down regulated & Hypo methylated",
+                                              "4" = "hypo methylated",
+                                              "5" = "hyper methylated",
+                                              "6" = "Up regulated",
+                                              "7" = "Down regulated",
+                                              "8" = "Up regulated & Hyper methylated",
+                                              "9" = "Down regulated & Hyper methylated"),
+                                    xlim = NULL, ylim = NULL, p.cut = 0.01
 )
 {
     .e <- environment()
