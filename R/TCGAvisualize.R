@@ -142,4 +142,193 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,dataGE,Genelist,
 
 }
 
+#' @title Principal components analysis (PCA) plot
+#' @description
+#'   TCGAvisualize_PCA performs a principal components analysis (PCA) on the given data matrix
+#'   and returns the results as an object of class prcomp, and shows results in PCA level.
+#' @param dataFilt A filtered dataframe or numeric matrix where each row represents a gene,
+#' each column represents a sample from function TCGAanalyze_Filtering
+#' @param dataDEGsFiltLevel table with DEGs, log Fold Change (FC), false discovery rate (FDR),
+#' the gene expression level, etc, from function TCGAanalyze_LevelTab.
+#' @param ntopgenes number of DEGs genes to plot in PCA
+#' @import ggplot2
+#' @export
+#' @return principal components analysis (PCA) plot of PC1 and PC2
+#' @examples
+#' # normalization of genes
+#' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
+#' # quantile filter of genes
+#' dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
+#' # Principal Component Analysis plot for ntop selected DEGs
+#' TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
+#'
+TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
+    ComparisonSelected <- "Normal vs Tumor"
+    TitlePlot <- paste0("PCA ", "top ", ntopgenes,
+                        " Up and down diff.expr genes between ",
+                        ComparisonSelected)
+
+    Genelist <- rownames(dataDEGsFiltLevel)[1:ntopgenes]
+    commonGenes <- intersect(Genelist, rownames(dataFilt) )
+    expr2 <- dataFilt[commonGenes,]
+    color1 <- "blue"
+    color2 <- "red"
+
+    # selection of normal samples "NT"
+    samplesNT <- TCGAbiolinks::MultiSampleTypes(colnames(dataFilt),
+                                                typesample = c("NT"))
+    # selection of tumor samples "TP"
+    samplesTP <- TCGAbiolinks::MultiSampleTypes(colnames(dataFilt),
+                                                typesample = c("TP"))
+
+    nsample1 <- length(samplesNT)
+    nsample2 <- length(samplesTP)
+
+    #sampleColors <- rep(c(color1,color2), c(nsample1, nsample2))
+    #sampleColors <- rep(c("blue","red"), c(length(samplesNT),
+    #                     length(samplesTP)))
+    sampleColors <- c(rep("blue", length(samplesNT)),
+                      rep("red", length(samplesTP)))
+
+
+    names(sampleColors) <- colnames(expr2)
+    cancer.pca <- stats::prcomp(t(expr2),cor = TRUE)
+
+
+    g <- ggbiplot(cancer.pca, obs.scale = 1, var.scale = 1,
+                  groups = sampleColors, ellipse = TRUE, circle = FALSE)
+    g <- g + scale_colour_manual(name = "",
+                                 values = c("blue" = "blue","red" = "red"))
+    with(g,
+         g <- g + geom_point(aes(colour = sampleColors), size = 3)
+    )
+    #shape = tabClusterNew$Study)
+    g <- g + theme(legend.direction = 'horizontal',  legend.position = 'top')
+    g <- g + ggtitle(TitlePlot)
+    print(g)
+    return(cancer.pca)
+}
+
+#' @title barPlot for a complete Enrichment Analysis
+#' @description
+#'   TCGAvisualize_EAbarplot plots the result from TCGAanalyze_EAcomplete in a complete barPlot
+#' @param tf is a list of gene symbols
+#' @param GOBPTab is results from TCGAanalyze_EAcomplete related to Biological Process (BP)
+#' @param GOCCTab is results from TCGAanalyze_EAcomplete related to Cellular Component (CC)
+#' @param GOMFTab is results from TCGAanalyze_EAcomplete related to Molecular Function (MF)
+#' @param PathTab is results from TCGAanalyze_EAcomplete related to Pathways EA
+#' @param nBar is the number of bar histogram selected to show (default = 10)
+#' @param nRGTab is the gene signature list with gene symbols.
+#' @export
+#' @importFrom EDASeq barplot
+#' @import graphics
+#' @return Complete barPlot from Enrichment Analysis showing significant (default FDR < 0.01)
+#' BP,CC,MF and pathways enriched by list of genes.
+#' @examples
+#' Genelist <- c("FN1","COL1A1")
+#' ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist)
+#' TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
+#'          GOBPTab = ansEA$ResBP,
+#'          GOCCTab = ansEA$ResCC,
+#'          GOMFTab = ansEA$ResMF,
+#'         PathTab = ansEA$ResPat,
+#'          nRGTab = Genelist,
+#'          nBar = 10)
+#' \dontrun{
+#' Genelist <- rownames(dataDEGsFiltLevel)
+#' system.time(ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
+#' # Enrichment Analysis EA (TCGAVisualize)
+#' # Gene Ontology (GO) and Pathway enrichment barPlot
+#' TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
+#'          GOBPTab = ansEA$ResBP,
+#'          GOCCTab = ansEA$ResCC,
+#'          GOMFTab = ansEA$ResMF,
+#'         PathTab = ansEA$ResPat,
+#'          nRGTab = Genelist,
+#'          nBar = 10)
+#'}
+TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
+    splitFun <- function(tf, Tab, nBar){
+        tmp <- lapply(Tab[tf, ], function(x) strsplit(x, ";"))
+        names(tmp) <- NULL
+        tmp <- matrix(unlist(tmp), ncol = 4, byrow = TRUE)
+        if (nrow(tmp) == 0 | tmp[1, 1] == "NA") return(matrix(0, ncol = 2))
+        tmp <- tmp[tmp[, 1] != "NA", , drop = FALSE]
+        tmp <- as.data.frame(tmp, stringsAsFactors = FALSE)
+        tmp[, 2] <- as.numeric(sub(" FDR= ", "", tmp[, 2]))
+        tmp[, 3] <- as.numeric(unlist(strsplit(matrix(unlist(strsplit(tmp[, 3],
+                                                                      "=")), nrow = 2)[2, ], ")")))
+        tmp[, 4] <- as.numeric(unlist(strsplit(matrix(unlist(strsplit(tmp[, 4],
+                                                                      "=")), nrow = 2)[2, ], ")")))
+
+        if (nrow(tmp) < nBar) nBar <- nrow(tmp)
+
+        tmp[, 2] <- -log10(tmp[, 2])
+        o <- order(tmp[, 2], decreasing = TRUE)
+        toPlot <- tmp[o[nBar:1], 1:2]
+        toPlot[, 1] <- paste0(toPlot[, 1], " (n=", tmp[o[nBar:1], 4], ")")
+        toPlot[, 3] <- tmp[o[nBar:1], 4]/tmp[o[nBar:1], 3]
+
+        return(toPlot)
+    }
+
+    par(mfrow = c(2, 2))
+
+    toPlot <- splitFun(tf, GOBPTab, nBar)
+    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "orange",
+                     main = "GO:Biological Process", xlab = "-log10(FDR)")
+    labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
+    text(x = 1, y = xAxis, labs, pos = 4)
+    lines(x = toPlot[, 3], y = xAxis, col = "red")
+    points(x = toPlot[, 3], y = xAxis, col = "red")
+    axis(side = 3, at = pretty(range(0:1)), col = "red")
+
+    toPlot <- splitFun(tf, GOCCTab, nBar)
+    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "cyan",
+                     main = "GO:Cellular Component", xlab = "-log10(FDR)")
+    labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
+    text(x = 1, y = xAxis, labs, pos = 4)
+    lines(x = toPlot[, 3], y = xAxis, col = "red")
+    points(x = toPlot[, 3], y = xAxis, col = "red")
+    axis(side = 3, at = pretty(range(0:1)), col = "red")
+
+    toPlot <- splitFun(tf, GOMFTab, nBar)
+    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "green",
+                     main = "GO:Molecular Function", xlab = "-log10(FDR)")
+    labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
+    text(x = 1, y = xAxis, labs, pos = 4)
+    lines(x = toPlot[, 3], y = xAxis, col = "red")
+    points(x = toPlot[, 3], y = xAxis, col = "red")
+    axis(side = 3, at = pretty(range(0:1)), col = "red")
+
+    toPlot <- splitFun(tf, PathTab, nBar)
+    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "yellow",
+                     main = "Pathways", xlab = "-log10(FDR)")
+    labs <- toPlot[, 1]
+    text(x = 1, y = xAxis, labs, pos = 4)
+    lines(x = toPlot[, 3], y = xAxis, col = "red")
+    points(x = toPlot[, 3], y = xAxis, col = "red")
+    #axis(side = 1, at = pretty(range(0:1)), col = "red", line = 2.5)
+    axis(side = 3, at = pretty(range(0:1)), col = "red")
+
+    #par(new = TRUE)
+    #plot(toPlot[, 3], xAxis, axes = FALSE, bty = "n", xlab = "",
+    # ylab = "", col = "blue")
+    #par(new = TRUE)
+    #plot(toPlot[, 3], xAxis, type = "l", axes = FALSE, bty = "n", xlab = "",
+    # ylab = "", col = "blue")
+    #axis(side = 2, at = pretty(range(xAxis)))
+    #axis(side = 1, at = pretty(range(toPlot[, 3])), col = "red", line=2.5)
+    #axis(side = 3, at = pretty(range(toPlot[, 3])), col = "red")
+
+    if ( is.character( nRGTab)) {
+        nRG <- length(nRGTab)
+    } else {
+        nRG <- nRGTab[tf, "RegSizeTF"]
+    }
+
+    mainLab <- paste(tf, " (nRG = ", nRG, ")", sep = "")
+    mtext(mainLab, side = 3, line = -1, outer = TRUE, font = 2)
+}
+
 

@@ -25,7 +25,7 @@ TCGAquery_Version <- function(tumor = NULL, platform = NULL) {
     if (is.null(tumor) && is.null(platform)) {
         message("Please provide one tumor and platform")
     }
-    query <- TCGAQuery(tumor, platform)
+    query <- TCGAquery(tumor, platform)
     root <- "https://tcga-data.nci.nih.gov/"
     path <- paste0(root, unique(dirname(query$deployLocation)))
     html <- html(path)
