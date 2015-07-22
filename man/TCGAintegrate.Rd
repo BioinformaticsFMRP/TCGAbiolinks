@@ -2,7 +2,7 @@
 % Please edit documentation in R/TCGAintegrate.R
 \name{TCGAintegrate}
 \alias{TCGAintegrate}
-\title{TCGAintegrate}
+\title{Filtering common samples among platforms from TCGAQuery for the same tumor}
 \usage{
 TCGAintegrate(query)
 }
