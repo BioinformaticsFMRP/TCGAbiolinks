@@ -1,4 +1,4 @@
-#' @title TCGAinvestigate
+#' @title Find most studied TF in pubmed related to a specific cancer, disease, or tissue
 #' @description Find most studied TF in pubmed related to a specific cancer,
 #'  disease, or tissue
 #' @param tumor tumor

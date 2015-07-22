@@ -1,4 +1,5 @@
-#' @title TCGAPrepare
+#' @title Read the data from level 3 the experiments and prepare it
+#'  for downstream analysis into a SummarizedExperiment object.
 #' @description
 #'  This function will read the data from level 3 the experiments and prepare it
 #'  for downstream analysis into a SummarizedExperiment object.
