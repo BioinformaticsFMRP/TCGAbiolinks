@@ -1,5 +1,5 @@
 #' @title Survival analysis with univariate Cox regression package (dnet)
-#' @description Survival analysis with univariate Cox regression package (dnet)
+#' @description Survival analysis with univariate Cox regression and package (dnet)
 #' @param clinical_patient clinical_patient
 #' @param dataGE dataGE
 #' @param Genelist Genelist
