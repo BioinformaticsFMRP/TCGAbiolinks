@@ -68,7 +68,7 @@ The TCGAquery searches TCGA open-access data through a preprocessed table
    to search the data.
 
    TCGAquery will return a matrix with the results found,
-   that will be used in the other function TCGADownload, TCGAPrepare.
+   that will be used in the other function TCGAdownload, TCGAprepare.
 }
 \examples{
 query <- TCGAquery(tumor = "gbm",
@@ -88,10 +88,10 @@ query <- TCGAquery(samples = "TCGA-61-1743-01A-01D-0649-04",
                    level = 3)
 }
 \seealso{
-\code{\link{TCGADownload}} for downloading the data from the
+\code{\link{TCGAdownload}} for downloading the data from the
 search
 
-\code{\link{TCGAPrepare}} for preparing the data for the user into
+\code{\link{TCGAprepare}} for preparing the data for the user into
 a Summarized experiment object, or a matrix.
 
 Other data.functions: \code{\link{TCGAdownload}};
