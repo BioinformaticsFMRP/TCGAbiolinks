@@ -5,17 +5,28 @@ Catharina Olsen, Davide Garolini, Claudia Cava, Isabella Castiglioni,
 Houtan Noushmehr, Gianluca Bontempi, Michele Ceccarelli"
 date: "`r Sys.Date()`"
 output: 
+  BiocStyle::pdf_document:
+    toc: true
+    number_sections: no
+    toc_depth: 2
+    highlight: haddock
+    latex_engine: lualatex
   BiocStyle::html_document:
     toc: true
     number_sections: no
     toc_depth: 2
     highlight: haddock
+fontsize: 10pt
 
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
+
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(dpi = 150)
@@ -448,9 +459,7 @@ TCGAdownload(query, path = "samples")
 GBM_CNV <- TCGAprepare(query, dir = "samples", type = ".hg19.seg.txt")
 ```
 
-
-
-#  `clinic` `&` `TCGAquery_clinicFilt`: Working with clinical data
+#  `TCGAquery_clinic` `&` `TCGAquery_clinicFilt`: Working with clinical data
 You can retrive clinical data using the `clinic` function. The parameters of this
 function are: 
 
