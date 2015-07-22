@@ -2,13 +2,13 @@
 % Please edit documentation in R/TCGADownload.R
 \name{TCGADownload}
 \alias{TCGADownload}
-\title{TCGA Download}
+\title{Download the data from TCGA using as reference the output from TCGAquery}
 \usage{
 TCGADownload(data = NULL, path = ".", type = NULL, samples = NULL,
   quiet = TRUE, force = FALSE)
 }
 \arguments{
-\item{data}{The TCGAQuery output}
+\item{data}{The TCGAquery output}
 
 \item{path}{Directory to save the downloaded data}
 
@@ -27,7 +27,7 @@ Download TCGA data into the given path
 }
 \description{
 The TCGADownload function will download the data using as reference
-     the the lines of the TCGAQuery search result.
+     the the lines of the TCGAquery search result.
 
      There is an option to download the entire tar.gz folder or download
      specific files using the \emph{type} parameter or the \emph{samples}
@@ -41,7 +41,7 @@ The TCGADownload function will download the data using as reference
 }
 \examples{
 samples <- c("TCGA-26-1442-01A-01R-1850-01")
-query <- TCGAQuery(tumor = "gbm",
+query <- TCGAquery(tumor = "gbm",
                    platform = "IlluminaHiSeq_RNASeqV2",
                    level = "3",
                    samples = samples)
@@ -50,7 +50,7 @@ TCGADownload(query,path = "RNA",
              type ="rsem.genes.results")
 }
 \seealso{
-\code{\link{TCGAQuery}} for searching the data to download
+\code{\link{TCGAquery}} for searching the data to download
 
 \code{\link{TCGAPrepare}} for preparing the data for the user into
 a Summarized experiment object, or a matrix.

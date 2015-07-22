@@ -2,7 +2,7 @@
 % Please edit documentation in R/TCGAQuery.R
 \name{TCGAquery}
 \alias{TCGAquery}
-\title{TCGAquery}
+\title{Searches TCGA open-access data providing also latest version of the files.}
 \usage{
 TCGAquery(tumor = NULL, platform = NULL, added.since = NULL,
   added.up.to = NULL, samples = NULL, center = NULL, level = NULL)

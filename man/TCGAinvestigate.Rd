@@ -2,7 +2,7 @@
 % Please edit documentation in R/TCGAinvestigate.R
 \name{TCGAinvestigate}
 \alias{TCGAinvestigate}
-\title{TCGAinvestigate}
+\title{Find most studied TF in pubmed related to a specific cancer, disease, or tissue}
 \usage{
 TCGAinvestigate(tumor, dataDEGsFiltLevelTF, topgenes)
 }
