@@ -2,24 +2,24 @@
 % Please edit documentation in R/TCGAintegrate.R
 \name{TCGAintegrate}
 \alias{TCGAintegrate}
-\title{Filtering common samples among platforms from TCGAQuery for the same tumor}
+\title{Filtering common samples among platforms from TCGAquery for the same tumor}
 \usage{
 TCGAintegrate(query)
 }
 \arguments{
-\item{query}{is the output of TCGAQuery}
+\item{query}{is the output of TCGAquery}
 }
 \value{
-table with common samples among platforms from TCGAQuery
+table with common samples among platforms from TCGAquery
 }
 \description{
 In order to help the user to have an overview of the number of
 samples in commun we created the function `TCGAintegrate` that will receive the
-data frame returned from `TCGAQuery` and produce a matrix n platforms x n platforms
+data frame returned from `TCGAquery` and produce a matrix n platforms x n platforms
 with the values of samples in commum.
 }
 \examples{
-query <- TCGAQuery(tumor = 'brca',level = 3)
+query <- TCGAquery(tumor = 'brca',level = 3)
 matSamples <- TCGAintegrate(query)
 }
 
