@@ -306,13 +306,13 @@ The arguments are:
 data <- TCGAprepare(query, dir = "data", save = TRUE, filename = "myfile.rda")
 ```
 
-```{r,echo=FALSE, results='hide',message=FALSE,warning=FALSE}
+```{r,eval=TRUE,echo=FALSE, results='hide',message=FALSE,warning=FALSE}
 library(SummarizedExperiment)
 query <- TCGAquery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3 )
 TCGAdownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
                              "TCGA-DY-A0XA-01A-11R-A155-07"),
              type = "rsem.genes.normalized_results",path = "../../")
-data <- TCGAprepare(query = query,dir = "../../", type = "rsem.genes.normalized_results")
+READdata <- TCGAprepare(query = query,dir = "../../", type = "rsem.genes.normalized_results")
 ```
 
 As an example, for the platform IlluminaHiSeq_RNASeqV2 we prepared two samples (TCGA-DY-A1DE-01A-11R-A155-07 and TCGA-DY-A0XA-01A-11R-A155-07) for the rsem.genes.normalized_results type. In order to create the object mapped the gene_id 
@@ -320,8 +320,15 @@ to the hg19. The genes_id not found are then removed from the final matrix.
 The default output is a SummarizedExperiment is shown below. 
 
 ```{r, eval = TRUE}
-    data
-    head(assay(data,"raw_counts"))
+library(SummarizedExperiment)
+query <- TCGAquery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3 )
+TCGAdownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
+                             "TCGA-DY-A0XA-01A-11R-A155-07"),
+             type = "rsem.genes.normalized_results",path = "../../")
+READdata <- TCGAprepare(query = query,dir = "../../", type = "rsem.genes.normalized_results")
+
+READdata
+    head(assay(READdata,"raw_counts"))
 ```
 
 In order to create the SummarizedExperiment object we mapped the rows of the 
@@ -330,14 +337,28 @@ experiments into GRanges. In order to map miRNA we used the miRNA from the anota
 In case you prefere to have the raw data. You can get a data frame without any
 modification setting the `summarizedExperiment` to false.
 
-```{r,echo=FALSE, results='hide',message=FALSE,warning=FALSE}
-data <- TCGAprepare(query = query,dir = "../../", type ="rsem.genes.normalized_results", summarizedExperiment = FALSE)
+```{r,eval=TRUE,echo=FALSE, results='hide',message=FALSE,warning=FALSE}
+library(SummarizedExperiment)
+query <- TCGAquery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3 )
+TCGAdownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
+                             "TCGA-DY-A0XA-01A-11R-A155-07"),
+             type = "rsem.genes.normalized_results",path = "../../")
+READdata <- TCGAprepare(query = query,dir = "../../", type = "rsem.genes.normalized_results",
+                        summarizedExperiment = FALSE)
 ```
 
 ```{r, eval = TRUE}
-    class(data)
-    dim(data)
-    head(data)
+library(SummarizedExperiment)
+query <- TCGAquery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3 )
+TCGAdownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
+                             "TCGA-DY-A0XA-01A-11R-A155-07"),
+             type = "rsem.genes.normalized_results",path = "../../")
+READdata <- TCGAprepare(query = query,dir = "../../", type = "rsem.genes.normalized_results",
+                        summarizedExperiment = FALSE)
+
+    class(READdata)
+    dim(READdata)
+    head(READdata)
 ```
 
 
