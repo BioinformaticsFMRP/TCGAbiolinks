@@ -4,11 +4,12 @@
 \alias{TCGAvisualize_meanMethylation}
 \title{Mean methylation boxplot}
 \usage{
-TCGAvisualize_meanMethylation(data, groupCol = NULL, sort = FALSE,
-  filename = "G-CIMP-mean.methylation.pdf", ylab = "Mean DNA methylation",
-  xlab = "DNA Methylation Clusters",
-  title = "Mean DNA methylation by cluster", legend = "Legend",
-  color = c("green", "red", "purple", "orange", "salmon", "grey"))
+TCGAvisualize_meanMethylation(data, groupCol = NULL, subgroupCol = NULL,
+  shapes = NULL, filename = "G-CIMP-mean.methylation.pdf",
+  ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
+  xlab = NULL, title = "Mean DNA methylation", labels = NULL,
+  legend = "Legend", color = c("green", "red", "purple", "orange", "salmon",
+  "grey"))
 }
 \arguments{
 \item{data}{SummarizedExperiment object obtained from TCGAPrepare}
@@ -16,7 +17,10 @@ TCGAvisualize_meanMethylation(data, groupCol = NULL, sort = FALSE,
 \item{groupCol}{Columns in colData(data) that defines the groups. If no
 columns defined a columns called "Patients" will be used}
 
-\item{sort}{Sort by mean methylation? False by default}
+\item{subgroupCol}{Columns in colData(data) that defines the subgroups.}
+
+\item{shapes}{Shape vector of the subgroups. It must have the size of the levels
+of the subgroups. Example: shapes = c(21,23) if for two levels}
 
 \item{filename}{The name of the pdf that will be saved}
 
@@ -25,6 +29,8 @@ columns defined a columns called "Patients" will be used}
 \item{xlab}{x axis text in the plot}
 
 \item{title}{main title in the plot}
+
+\item{labels}{Labels of the groups}
 
 \item{legend}{Caption title}
 
