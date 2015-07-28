@@ -87,7 +87,7 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' @param color Define the colors of the lines.
 #' @param width Image width
 #' @param height Image height
-#' @param pvalue Print pvalue in the plot? Default: TRUE
+#' @param print.value Print pvalue in the plot? Default: TRUE
 #' @importFrom GGally ggsurv
 #' @importFrom survival survfit Surv
 #' @importFrom scales percent
@@ -113,7 +113,7 @@ TCGAanalyze_survival <- function(data,
                                  color = c("green", "firebrick4", "orange3", "blue"),
                                  height=par("din")[2],
                                  width=par("din")[1],
-                                 pvalue=TRUE
+                                 print.value=TRUE
 ) {
     .e <- environment()
     group <- NULL
@@ -150,7 +150,7 @@ TCGAanalyze_survival <- function(data,
                    back.white = TRUE,
                    xlab = xlab, ylab = ylab, main = main)
 
-    if (pvalue){
+    if (print.value){
         surv <- surv + annotate("text",x = -Inf,y = -Inf, hjust = -0.1,
                                 vjust = -1.0, size = 5,
                                 label = paste0("Log-Rank P-value = ",pvalue))
@@ -184,13 +184,16 @@ TCGAanalyze_survival <- function(data,
 #' @param data SummarizedExperiment object obtained from TCGAPrepare
 #' @param groupCol Columns in colData(data) that defines the groups. If no
 #' columns defined a columns called "Patients" will be used
+#' @param subgroupCol Columns in colData(data) that defines the subgroups.
+#' @param shapes Shape vector of the subgroups. It must have the size of the levels
+#' of the subgroups. Example: shapes = c(21,23) if for two levels
 #' @param filename The name of the pdf that will be saved
 #' @param legend Caption title
 #' @param color vector of colors to be used in graph
 #' @param title main title in the plot
 #' @param ylab y axis text in the plot
 #' @param xlab x axis text in the plot
-#' @param sort Sort by mean methylation? False by default
+#' @param labels Labels of the groups
 #' @import ggplot2 stats
 #' @importFrom SummarizedExperiment colData rowRanges assay
 #' @export
@@ -212,50 +215,70 @@ TCGAanalyze_survival <- function(data,
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group",sort=TRUE)
 TCGAvisualize_meanMethylation <- function(data,
                                           groupCol=NULL,
-                                          sort = FALSE,
+                                          subgroupCol=NULL,
+                                          shapes = NULL,
                                           filename = "G-CIMP-mean.methylation.pdf",
-                                          ylab = "Mean DNA methylation",
-                                          xlab = "DNA Methylation Clusters",
-                                          title = "Mean DNA methylation by cluster",
+                                          ylab = expression(
+                                              paste("Mean DNA methylation (",
+                                                    beta,"-values)")),
+                                          xlab = NULL,
+                                          title = "Mean DNA methylation",
+                                          labels = NULL,
                                           legend = "Legend",
                                           color = c("green", "red", "purple",
                                                     "orange", "salmon", "grey")) {
     .e <- environment()
-    mean <- apply(assay(data), 2, mean,na.rm = TRUE)
+    mean <- colMeans(assay(data),na.rm = FALSE)
 
     if (is.null(groupCol)){
         groups <- rep("Patient",length(mean))
     } else {
         groups <- colData(data)[,groupCol]
     }
-    df <- data.frame(mean = mean, groups = groups)
+
+    if (is.null(subgroupCol)){
+        subgroups <- NULL
+    } else {
+        subgroups <- colData(data)[,subgroupCol]
+    }
+
+    if (!is.null(subgroupCol)){
+        df <- data.frame(mean = mean, groups = groups, subgroups = subgroups)
+    } else {
+        df <- data.frame(mean = mean, groups = groups)
+    }
+
+    pvalue <- t.test(mean ~ groups, data = df)$p.value
 
     # Plot for methylation analysis Axis x: LGm clusters Axis y:
     # mean methylation
-    if (sort) {
-        p <- ggplot(df, aes(reorder(factor(df$groups), df$mean),
-                            df$mean),  environment = .e) +
-            geom_boxplot(aes(fill = reorder(factor(df$groups),
-                                            df$mean)),
-                         notchwidth = 0.25) +
-            geom_jitter(height = 0,position = position_jitter(width = 0.1),
-                        size = 3) +
-            scale_fill_manual(values = color,
-                              labels = levels(reorder(factor(df$groups),
-                                                      df$mean)),
-                              name = legend)
-    } else {
-        p <- ggplot(df, aes(factor(df$groups), df$mean),
-                    environment = .e) +
-            geom_boxplot(aes(fill = factor(df$groups)),
-                         notchwidth = 0.25) +
-            geom_jitter(height = 0,
-                        position = position_jitter(width = 0.1),
-                        size = 3) +
-            scale_fill_manual(values = color,
-                              labels = levels(factor(df$groups)),
-                              name = legend)
+    label.add.n <- function(x) {
+        paste0(x, " (n = ",
+               nrow(subset(df,subset = (df$groups == x))), ")")
     }
+
+    if (is.null(labels)) {
+        labels <- levels(factor(df$groups))
+        labels <-  sapply(labels,label.add.n)
+    }
+
+    p <- ggplot(df, aes(factor(df$groups), df$mean),
+                environment = .e) +
+        geom_boxplot(aes(fill = factor(df$groups)),
+                     notchwidth = 0.25, outlier.shape = NA)
+    if(!is.null(subgroupCol)){
+        p <- p + geom_jitter(aes(shape = factor(subgroups), size =  factor(subgroups)),
+                             height = 0,
+                             position = position_jitter(width = 0.1),
+                             size = 3)
+    } else {
+        p <- p +  geom_jitter(height = 0,
+                              position = position_jitter(width = 0.1),
+                              size = 3)
+    }
+
+    p <- p + scale_fill_manual(values = color,labels = labels, name = legend)
+    p <- p + scale_x_discrete(breaks = labels,labels = labels)
     p <- p + ylab(ylab) + xlab(xlab) + labs(title = title) +
         theme(axis.title.x = element_text(face = "bold", size = 20),
               axis.text.x = element_text(angle = 90,
@@ -266,6 +289,17 @@ TCGAvisualize_meanMethylation <- function(data,
               axis.text.y = element_text(size = 16),
               plot.title = element_text(face = "bold", size = 16))
 
+    if (!is.null(shapes)){
+        p <- p + scale_shape_manual(values = shapes)
+    }
+
+    if (pvalue){
+        p <- p + annotate("text",x = -Inf,y = -Inf, hjust = -0.1,
+                          vjust = -1.0, size = 3,
+                          label = paste0("P-value = ",
+                                         format(pvalue,scientific = TRUE,
+                                                digits = 2)))
+    }
     # saving box plot to analyse it
     ggsave(p, filename = filename, width = 10, height = 10, dpi = 600)
     message(paste("Plot saved in: ", file.path(getwd(),filename)))
