@@ -320,15 +320,7 @@ to the hg19. The genes_id not found are then removed from the final matrix.
 The default output is a SummarizedExperiment is shown below. 
 
 ```{r, eval = TRUE}
-library(SummarizedExperiment)
-query <- TCGAquery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3 )
-TCGAdownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
-                             "TCGA-DY-A0XA-01A-11R-A155-07"),
-             type = "rsem.genes.normalized_results",path = "../../")
-READdata <- TCGAprepare(query = query,dir = "../../", type = "rsem.genes.normalized_results")
-
-READdata
-    head(assay(READdata,"raw_counts"))
+head(assay(READdata,"raw_counts"))
 ```
 
 In order to create the SummarizedExperiment object we mapped the rows of the 
@@ -348,17 +340,9 @@ READdata <- TCGAprepare(query = query,dir = "../../", type = "rsem.genes.normali
 ```
 
 ```{r, eval = TRUE}
-library(SummarizedExperiment)
-query <- TCGAquery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3 )
-TCGAdownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
-                             "TCGA-DY-A0XA-01A-11R-A155-07"),
-             type = "rsem.genes.normalized_results",path = "../../")
-READdata <- TCGAprepare(query = query,dir = "../../", type = "rsem.genes.normalized_results",
-                        summarizedExperiment = FALSE)
-
-    class(READdata)
-    dim(READdata)
-    head(READdata)
+class(READdata)
+dim(READdata)
+head(READdata)
 ```
 
 
