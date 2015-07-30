@@ -320,7 +320,7 @@ to the hg19. The genes_id not found are then removed from the final matrix.
 The default output is a SummarizedExperiment is shown below. 
 
 ```{r, eval = TRUE}
-head(assay(READdata,"raw_counts"))
+head(assay(READdata,"normalized_count"))
 ```
 
 In order to create the SummarizedExperiment object we mapped the rows of the 
