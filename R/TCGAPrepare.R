@@ -512,15 +512,15 @@ TCGAprepare <- function(query,
                 if(length(colnames(data))>2){
                     assays <- SimpleList(
                         raw_counts = data.matrix(
-                            subset(merged,select = seq(3,ncol(df),3))
+                            subset(merged,select = seq(3,ncol(df)-1,3))
                         ),
                         scaled_estimate = data.matrix(
-                            subset(merged,select = seq(4,ncol(df),3))
+                            subset(merged,select = seq(4,ncol(df)-1,3))
                         )
                     )
                 } else {
                     assays <- SimpleList(
-                        raw_counts=data.matrix(subset(merged,select=seq(3,ncol(df)))))
+                        raw_counts=data.matrix(subset(merged,select=seq(3,ncol(df)-1))))
                 }
             } else if(grepl("junction",colnames(df)[1])){
                 aux    <- strsplit(df$junction,":")
