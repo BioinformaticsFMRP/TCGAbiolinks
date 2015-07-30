@@ -509,7 +509,7 @@ TCGAprepare <- function(query,
                                      transcript_id=subset(merged,select=5))
                 names(rowRanges) <- as.character(merged$gene_id)
 
-                if(length(colnames(data))>2){
+                if (length(colnames(data))>2){
                     assays <- SimpleList(
                         raw_counts = data.matrix(
                             subset(merged,
@@ -522,9 +522,9 @@ TCGAprepare <- function(query,
                     )
                 } else {
                     assays <- SimpleList(
-                        raw_counts = data.matrix(
+                        normalized_count = data.matrix(
                             subset(merged,
-                                   select = grep("raw_count",colnames(merged))))
+                                   select = grep("normalized_count",colnames(merged))))
                     )
                 }
             } else if(grepl("junction",colnames(df)[1])){
@@ -543,7 +543,7 @@ TCGAprepare <- function(query,
                 names(rowRanges) <- as.character(df$junction)
                 assays <- SimpleList(
                     raw_counts = data.matrix(subset(df,select=2:ncol(df)))
-                    )
+                )
             } else if(grepl("exon",colnames(df)[1])){
                 # exon chr1:11874-12227:+
                 aux       <- strsplit(df$exon,":")
@@ -567,12 +567,12 @@ TCGAprepare <- function(query,
                     median_length_normalized=data.matrix(
                         subset(merged,
                                select = grep("median_length",colnames(merged)))
-                        ),
+                    ),
                     RPKM=data.matrix(
                         subset(merged,
                                select = grep("RPKM",colnames(merged)))
                     ),
-                    )
+                )
             } else if(grepl("isoform",colnames(df)[1])){
                 message("TBD")
             }
