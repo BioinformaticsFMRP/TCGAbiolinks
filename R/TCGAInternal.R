@@ -88,10 +88,12 @@ getFileNames <- function(url) {
             )
         )
     } else {
-        download(url,
-                 "tmp.html",
-                 mode = "wb",
-                 quiet = 1)
+        suppressWarnings(
+            download(url,
+                     "tmp.html",
+                     mode = "wb",
+                     quiet = 1)
+        )
     }
     x <- capture.output(XML::htmlTreeParse("tmp.html"))
     unlink("tmp.html")
