@@ -503,13 +503,13 @@ TCGAprepare <- function(query,
                 rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
                                      ranges = IRanges(start = merged$start_position,
                                                       end = merged$end_position),
-                                     strand=merged$strand,
+                                     strand = merged$strand,
                                      gene_id = merged$external_gene_name,
                                      entrezgene = merged$entrezid,
-                                     transcript_id=subset(merged,select=5))
+                                     transcript_id = subset(merged, select = 5))
                 names(rowRanges) <- as.character(merged$gene_id)
 
-                if (length(colnames(data))>2){
+                if (length(colnames(data)) > 2) {
                     assays <- SimpleList(
                         raw_counts = data.matrix(
                             subset(merged,
@@ -521,6 +521,7 @@ TCGAprepare <- function(query,
                         )
                     )
                 } else {
+                    # case genes.normalized_results
                     assays <- SimpleList(
                         normalized_count = data.matrix(
                             subset(merged,
