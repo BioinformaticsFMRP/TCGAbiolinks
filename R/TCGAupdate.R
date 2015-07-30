@@ -281,7 +281,7 @@ get.GRCh.bioMart <- function(genome="hg19") {
                            path = "/biomart/martservice" ,
                            dataset = "hsapiens_gene_ensembl")
     } else {
-        # for hg39
+        # for hg38
         ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
     }
 
