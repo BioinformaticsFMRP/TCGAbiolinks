@@ -463,16 +463,7 @@ TCGAprepare <- function(query,
             return()
         }
 
-        if(type == "rsem.genes.results")               pat <- "rsem.genes.results"
-        if(type == "rsem.isoforms.results")            pat <- "rsem.isoforms.results"
-        if(type == "rsem.genes.normalized_results")    pat <- "rsem.genes.normalized_results"
-        if(type == "rsem.isoforms.normalized_results") pat <- "rsem.isoforms.normalized_results"
-        if(type == "junction_quantification")          pat <- "junction_quantification"
-        if(type == "bt.exon_quantification")           pat <- "bt.exon_quantification"
-
-
-
-        files <- files[grep(pat,files, perl = TRUE)]
+        files <- files[grep(type,files, perl = TRUE)]
 
         regex <- paste0("[:alnum:]{8}-[:alnum:]{4}",
                         "-[:alnum:]{4}-[:alnum:]{4}-[:alnum:]{12}")
@@ -484,24 +475,23 @@ TCGAprepare <- function(query,
                           stringsAsFactors = FALSE)
             x <- subset(map, uuid == uuid[i])
 
-            if(summarizedExperiment){
+            if (summarizedExperiment) {
                 setnames(data,colnames(data)[2:ncol(data)],
                          paste0(colnames(data)[2:ncol(data)],"_",x$barcode))
             } else {
                 setnames(data,2, as.character(x$barcode))
             }
-            # removing duplicated rows
-            data <- subset(data,subset=(!duplicated(data[,1,with=FALSE])))
+
             if (i == 1) {
                 df <- data
             } else {
-                df <- merge(df, data,by = colnames(df)[1])
+                df <- cbind(df, data[,2:ncol(data),with = FALSE])
             }
             setTxtProgressBar(pb, i)
         }
 
-        if(summarizedExperiment){
-            if(grepl("gene_id",colnames(df)[1])){
+        if (summarizedExperiment){
+            if (grepl("gene_id",colnames(df)[1])){
                 aux <- strsplit(df$gene_id,"\\|")
                 GeneID<-unlist(lapply(aux,function(x) x[2]))
                 df$entrezgene <- as.numeric(GeneID)
@@ -513,14 +503,19 @@ TCGAprepare <- function(query,
                                                       end = merged$end_position),
                                      strand=merged$strand,
                                      gene_id = merged$external_gene_name,
-                                     entrezgene = merged$entrezgene )
+                                     entrezgene = merged$entrezgene,
+                                     transcript_id=subset(merged,select=5))
                 names(rowRanges) <- as.character(merged$gene_id)
 
                 if(length(colnames(data))>2){
                     assays <- SimpleList(
-                        raw_counts=data.matrix(subset(merged,select=seq(3,ncol(df),3))),
-                        scaled_estimate=data.matrix(subset(merged,select=seq(4,ncol(df),3))),
-                        transcript_id=data.matrix(subset(merged,select=seq(5,ncol(df),3))))
+                        raw_counts = data.matrix(
+                            subset(merged,select = seq(3,ncol(df),3))
+                        ),
+                        scaled_estimate = data.matrix(
+                            subset(merged,select = seq(4,ncol(df),3))
+                        )
+                    )
                 } else {
                     assays <- SimpleList(
                         raw_counts=data.matrix(subset(merged,select=seq(3,ncol(df)))))
