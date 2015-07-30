@@ -493,17 +493,19 @@ TCGAprepare <- function(query,
         if (summarizedExperiment){
             if (grepl("gene_id",colnames(df)[1])){
                 aux <- strsplit(df$gene_id,"\\|")
-                GeneID<-unlist(lapply(aux,function(x) x[2]))
-                df$entrezgene <- as.numeric(GeneID)
-                merged <- merge(df,gene.location,by="entrezgene")
+                GeneID <- unlist(lapply(aux,function(x) x[2]))
+                df$entrezid <- as.numeric(GeneID)
+                GeneSymbol <- unlist(lapply(aux,function(x) x[1]))
+                df$external_gene_name <- as.character(GeneSymbol)
 
+                merged <- merge(df,gene.location,by="external_gene_name")
 
                 rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
                                      ranges = IRanges(start = merged$start_position,
                                                       end = merged$end_position),
                                      strand=merged$strand,
                                      gene_id = merged$external_gene_name,
-                                     entrezgene = merged$entrezgene,
+                                     entrezgene = merged$entrezid,
                                      transcript_id=subset(merged,select=5))
                 names(rowRanges) <- as.character(merged$gene_id)
 
