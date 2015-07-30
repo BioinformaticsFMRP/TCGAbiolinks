@@ -512,15 +512,20 @@ TCGAprepare <- function(query,
                 if(length(colnames(data))>2){
                     assays <- SimpleList(
                         raw_counts = data.matrix(
-                            subset(merged,select = seq(3,ncol(df)-1,3))
+                            subset(merged,
+                                   select = grep("raw_count",colnames(merged)))
                         ),
                         scaled_estimate = data.matrix(
-                            subset(merged,select = seq(4,ncol(df)-1,3))
+                            subset(merged,
+                                   select = grep("scaled_estimate",colnames(merged)))
                         )
                     )
                 } else {
                     assays <- SimpleList(
-                        raw_counts=data.matrix(subset(merged,select=seq(3,ncol(df)-1))))
+                        raw_counts = data.matrix(
+                            subset(merged,
+                                   select = grep("raw_count",colnames(merged))))
+                    )
                 }
             } else if(grepl("junction",colnames(df)[1])){
                 aux    <- strsplit(df$junction,":")
@@ -536,7 +541,9 @@ TCGAprepare <- function(query,
                                      ranges = IRanges(start = start, end = end),
                                      strand = strand)
                 names(rowRanges) <- as.character(df$junction)
-                assays <- SimpleList(raw_counts=data.matrix(subset(df,select=2:ncol(df))))
+                assays <- SimpleList(
+                    raw_counts = data.matrix(subset(df,select=2:ncol(df)))
+                    )
             } else if(grepl("exon",colnames(df)[1])){
                 # exon chr1:11874-12227:+
                 aux       <- strsplit(df$exon,":")
@@ -553,9 +560,19 @@ TCGAprepare <- function(query,
                                      strand = strand)
                 names(rowRanges) <- as.character(df$exon)
                 assays <- SimpleList(
-                    raw_counts=data.matrix(subset(df,select=seq(2,ncol(df),3))),
-                    median_length_normalized=data.matrix(subset(df,select=seq(3,ncol(df),3))),
-                    RPKM=data.matrix(subset(df,select=seq(4,ncol(df),3))))
+                    raw_counts = data.matrix(
+                        subset(merged,
+                               select = grep("raw_count",colnames(merged)))
+                    ),
+                    median_length_normalized=data.matrix(
+                        subset(merged,
+                               select = grep("median_length",colnames(merged)))
+                        ),
+                    RPKM=data.matrix(
+                        subset(merged,
+                               select = grep("RPKM",colnames(merged)))
+                    ),
+                    )
             } else if(grepl("isoform",colnames(df)[1])){
                 message("TBD")
             }
