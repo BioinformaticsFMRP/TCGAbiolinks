@@ -5,12 +5,6 @@ Catharina Olsen, Davide Garolini, Claudia Cava, Isabella Castiglioni,
 Houtan Noushmehr, Gianluca Bontempi, Michele Ceccarelli"
 date: "`r Sys.Date()`"
 output: 
-  BiocStyle::pdf_document:
-    toc: true
-    number_sections: no
-    toc_depth: 2
-    highlight: haddock
-    latex_engine: lualatex
   BiocStyle::html_document:
     toc: true
     number_sections: no
