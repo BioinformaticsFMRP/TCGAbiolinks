@@ -308,11 +308,12 @@ data <- TCGAprepare(query, dir = "data", save = TRUE, filename = "myfile.rda")
 
 ```{r,eval=TRUE,echo=FALSE, results='hide',message=FALSE,warning=FALSE}
 library(SummarizedExperiment)
+library(TCGAbiolinks)
 query <- TCGAquery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3 )
 TCGAdownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
                              "TCGA-DY-A0XA-01A-11R-A155-07"),
              type = "rsem.genes.normalized_results",path = "../../")
-READdata <- TCGAprepare(query = query,dir = "../../", type = "rsem.genes.normalized_results")
+READdata <- TCGAprepare(query,dir = "../../", type = "rsem.genes.normalized_results")
 ```
 
 As an example, for the platform IlluminaHiSeq_RNASeqV2 we prepared two samples (TCGA-DY-A1DE-01A-11R-A155-07 and TCGA-DY-A0XA-01A-11R-A155-07) for the rsem.genes.normalized_results type. In order to create the object mapped the gene_id 
@@ -331,11 +332,12 @@ modification setting the `summarizedExperiment` to false.
 
 ```{r,eval=TRUE,echo=FALSE, results='hide',message=FALSE,warning=FALSE}
 library(SummarizedExperiment)
+library(TCGAbiolinks)
 query <- TCGAquery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3 )
 TCGAdownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
                              "TCGA-DY-A0XA-01A-11R-A155-07"),
              type = "rsem.genes.normalized_results",path = "../../")
-READdata <- TCGAprepare(query = query,dir = "../../", type = "rsem.genes.normalized_results",
+READdata <- TCGAprepare(query,dir = "../../", type = "rsem.genes.normalized_results",
                         summarizedExperiment = FALSE)
 ```
 
@@ -1073,7 +1075,7 @@ library(TCGAbiolinks)
 # Getting the data 
 query <- TCGAquery(tumor = "gbm", platform = "HumanMethylation450", level = 3)
 TCGAdownload(query,path=".")
-data <- TCGAprepare(query = query,dir = ".",save = T)
+data <- TCGAprepare(query,dir = ".",save = T)
 clinical <- TCGAquery_clinic("gbm","clinical_patient")
 
 #Preprocessing 
