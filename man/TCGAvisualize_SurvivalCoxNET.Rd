@@ -64,7 +64,7 @@ Only those associations with medium confidence (score>=400) are retained.
 \item color nodes according to communities (identified via a spin-glass model and simulated annealing)
 \item node sizes according to degrees
 \item highlight different communities
-\item visualise the subnetwrok
+\item visualise the subnetwork
 }
 }
 
