@@ -456,9 +456,25 @@ colDataPrepare <- function(barcode){
                     "Primary Xenograft Tissue",
                     "Cell Line Derived Xenograft Tissue")
     aux <- DataFrame(code = code,shortLetterCode,definition)
-    ret <- DataFrame(sample = barcode,code = substr(barcode, 14, 15))
-    ret <- merge(ret,aux, by = "code",sort=F)
-    ret$code <- NULL
+    ret <- DataFrame(sample = barcode,
+                     patient = substr(barcode, 1, 12),
+                     code = substr(barcode, 14, 15))
+    ret <- merge(ret,aux, by = "code", sort = FALSE)
+
     rownames(ret) <- ret$sample
+    ret$code <- NULL
+    ret$sample <- NULL
+    df <- do.call(rbind,
+            lapply(barcode,
+                   function(x) {
+                       query <- TCGAquery(samples = x)
+                       return(data.frame(
+                           disease = unique(query$Disease),
+                           platform = unique(query$Platform),
+                           center = unique(query$Center)
+                       ))
+                   }
+            ))
+    ret <- cbind(ret,df)
     return(DataFrame(ret))
 }
