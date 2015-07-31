@@ -300,14 +300,18 @@ The arguments are:
 data <- TCGAprepare(query, dir = "data", save = TRUE, filename = "myfile.rda")
 ```
 
-```{r,eval=TRUE,echo=FALSE, results='hide',message=FALSE,warning=FALSE}
-library(SummarizedExperiment)
+```{r,eval=FALSE,echo=FALSE,message=FALSE,warning=FALSE}
 library(TCGAbiolinks)
-query <- TCGAquery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3 )
+library(SummarizedExperiment)
+query <- TCGAquery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3,
+                   samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
+                             "TCGA-DY-A0XA-01A-11R-A155-07"))
 TCGAdownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
                              "TCGA-DY-A0XA-01A-11R-A155-07"),
-             type = "rsem.genes.normalized_results",path = "../../")
-READdata <- TCGAprepare(query,dir = "../../", type = "rsem.genes.normalized_results")
+             type = "rsem.genes.normalized_results",path = "../dataREAD")
+dataREAD <- TCGAprepare(query,dir = "../dataREAD", type = "rsem.genes.normalized_results",
+                        samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
+                             "TCGA-DY-A0XA-01A-11R-A155-07"))
 ```
 
 As an example, for the platform IlluminaHiSeq_RNASeqV2 we prepared two samples (TCGA-DY-A1DE-01A-11R-A155-07 and TCGA-DY-A0XA-01A-11R-A155-07) for the rsem.genes.normalized_results type. In order to create the object mapped the gene_id 
@@ -315,7 +319,9 @@ to the hg19. The genes_id not found are then removed from the final matrix.
 The default output is a SummarizedExperiment is shown below. 
 
 ```{r, eval = TRUE}
-head(assay(READdata,"normalized_count"))
+library(TCGAbiolinks)
+library(SummarizedExperiment)
+head(assay(dataREAD,"normalized_count"))
 ```
 
 In order to create the SummarizedExperiment object we mapped the rows of the 
@@ -324,21 +330,26 @@ experiments into GRanges. In order to map miRNA we used the miRNA from the anota
 In case you prefere to have the raw data. You can get a data frame without any
 modification setting the `summarizedExperiment` to false.
 
-```{r,eval=TRUE,echo=FALSE, results='hide',message=FALSE,warning=FALSE}
+```{r,eval=FALSE,echo=FALSE,message=FALSE,warning=FALSE}
 library(SummarizedExperiment)
 library(TCGAbiolinks)
-query <- TCGAquery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3 )
+query <- TCGAquery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3,
+                   samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
+                             "TCGA-DY-A0XA-01A-11R-A155-07"))
 TCGAdownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
                              "TCGA-DY-A0XA-01A-11R-A155-07"),
-             type = "rsem.genes.normalized_results",path = "../../")
-READdata <- TCGAprepare(query,dir = "../../", type = "rsem.genes.normalized_results",
+             type = "rsem.genes.normalized_results",path = "../dataREAD")
+dataREAD_df <- TCGAprepare(query,dir = "../dataREAD", type = "rsem.genes.normalized_results",
+                        samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
+                             "TCGA-DY-A0XA-01A-11R-A155-07"),
                         summarizedExperiment = FALSE)
 ```
 
 ```{r, eval = TRUE}
-class(READdata)
-dim(READdata)
-head(READdata)
+library(TCGAbiolinks)
+class(dataREAD_df)
+dim(dataREAD_df)
+head(dataREAD_df)
 ```
 
 
