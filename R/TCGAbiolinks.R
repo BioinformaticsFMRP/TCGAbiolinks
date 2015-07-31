@@ -70,6 +70,20 @@ NULL
 #' @format A data frame with 20531 rows (genes) and 50 variables (samples)
 NULL
 
+#' TCGA data SummarizedExperiment READ
+#' @docType data
+#' @keywords internal
+#' @name dataREAD
+#' @format A SummarizedExperiment of READ with 2 samples
+NULL
+
+#' TCGA data matrix READ
+#' @docType data
+#' @keywords internal
+#' @name dataREAD_df
+#' @format A data frame with 20531 rows (genes) and 2 variables (samples)
+NULL
+
 #' TCGA data matrix BRCA DEGs
 #' @docType data
 #' @keywords internal
