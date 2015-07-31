@@ -43,6 +43,7 @@ from survival package
 }
 }
 \examples{
+\dontrun{
 clinical_patient_Cancer <- TCGAquery_clinic("brca","clinical_patient")
 dataBRCAcomplete <- log2(BRCA_rnaseqv2)
 # Selecting only 10 genes for example
@@ -55,5 +56,6 @@ tabSurvKM <- tabSurvKM[!duplicated(tabSurvKM$mRNA),]
 rownames(tabSurvKM) <-tabSurvKM$mRNA
 tabSurvKM <- tabSurvKM[,-1]
 tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing=FALSE),]
+}
 }
 
