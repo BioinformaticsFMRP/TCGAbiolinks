@@ -212,7 +212,7 @@ TCGAanalyze_survival <- function(data,
 #'          assays=S4Vectors::SimpleList(counts=counts),
 #'          rowRanges=rowRanges,
 #'          colData=colData)
-#' TCGAvisualize_meanMethylation(data,groupCol  = "group",sort=TRUE)
+#' TCGAvisualize_meanMethylation(data,groupCol  = "group")
 TCGAvisualize_meanMethylation <- function(data,
                                           groupCol=NULL,
                                           subgroupCol=NULL,
