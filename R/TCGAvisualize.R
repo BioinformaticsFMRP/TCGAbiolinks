@@ -42,7 +42,7 @@
 #' \item color nodes according to communities (identified via a spin-glass model and simulated annealing)
 #' \item node sizes according to degrees
 #' \item highlight different communities
-#' \item visualise the subnetwrok
+#' \item visualise the subnetwork
 #' }
 #' @param clinical_patient is a data.frame using function 'clinic' with information
 #' related to barcode / samples such as bcr_patient_barcode, days_to_death ,
