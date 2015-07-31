@@ -230,7 +230,7 @@ TCGAvisualize_meanMethylation <- function(data,
                                           color = c("green", "red", "purple",
                                                     "orange", "salmon", "grey")) {
     .e <- environment()
-    mean <- colMeans(assay(data),na.rm = FALSE)
+    mean <- colMeans(assay(data),na.rm = TRUE)
 
     if (is.null(groupCol)){
         groups <- rep("Patient",length(mean))
