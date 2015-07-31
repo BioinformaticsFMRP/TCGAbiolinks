@@ -96,6 +96,7 @@ TCGAanalyze_Preprocessing<- function(object){
 #' @export
 #' @return table with survival genes pvalues from KM.
 #' @examples
+#' \dontrun{
 #' clinical_patient_Cancer <- TCGAquery_clinic("brca","clinical_patient")
 #' dataBRCAcomplete <- log2(BRCA_rnaseqv2)
 #' # Selecting only 10 genes for example
@@ -108,6 +109,7 @@ TCGAanalyze_Preprocessing<- function(object){
 #' rownames(tabSurvKM) <-tabSurvKM$mRNA
 #' tabSurvKM <- tabSurvKM[,-1]
 #' tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing=FALSE),]
+#' }
 TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,ThreshTop=0.67, ThreshDown=0.33){
     samplesNT <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
     samplesTP <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
