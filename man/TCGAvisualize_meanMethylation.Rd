@@ -5,7 +5,8 @@
 \title{Mean methylation boxplot}
 \usage{
 TCGAvisualize_meanMethylation(data, groupCol = NULL, subgroupCol = NULL,
-  shapes = NULL, filename = "G-CIMP-mean.methylation.pdf",
+  shapes = NULL, print.pvalue = FALSE,
+  filename = "G-CIMP-mean.methylation.pdf",
   ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
   xlab = NULL, title = "Mean DNA methylation", labels = NULL,
   legend = "Legend", color = c("green", "red", "purple", "orange", "salmon",
@@ -21,6 +22,8 @@ columns defined a columns called "Patients" will be used}
 
 \item{shapes}{Shape vector of the subgroups. It must have the size of the levels
 of the subgroups. Example: shapes = c(21,23) if for two levels}
+
+\item{print.pvalue}{Print p-value for two groups}
 
 \item{filename}{The name of the pdf that will be saved}
 

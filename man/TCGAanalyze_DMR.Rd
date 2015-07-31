@@ -8,7 +8,7 @@ TCGAanalyze_DMR(data, groupCol = NULL, group1 = NULL, group2 = NULL,
   filename = "volcano.pdf", ylab = expression(paste(-Log[10],
   " (FDR corrected -P values)")), xlab = "DNA Methylation\\n difference",
   title = "Volcano plot", legend = "Legend", color = c(`1` = "black", `2`
-  = "green", `3` = "red"), label = c(`1` = "Not Significant", `2` =
+  = "red", `3` = "green"), label = c(`1` = "Not Significant", `2` =
   "Hypermethylated", `3` = "Hypomethylated"), xlim = NULL, ylim = NULL,
   p.cut = 0.01, diffmean.cut = 0.2, paired = FALSE, adj.method = "BH",
   overwrite = FALSE)
