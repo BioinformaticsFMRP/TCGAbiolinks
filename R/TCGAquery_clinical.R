@@ -457,7 +457,7 @@ colDataPrepare <- function(barcode){
                     "Cell Line Derived Xenograft Tissue")
     aux <- DataFrame(code = code,shortLetterCode,definition)
     ret <- DataFrame(sample = barcode,code = substr(barcode, 14, 15))
-    ret <- merge(ret,aux, by = "code")
+    ret <- merge(ret,aux, by = "code",sort=F)
     ret$code <- NULL
     rownames(ret) <- ret$sample
     return(DataFrame(ret))
