@@ -15,7 +15,7 @@ TCGAinvestigate(tumor, dataDEGsFiltLevelTF, topgenes)
 where find in pubmed if those genes or TFs are already related to that cancer or disease}
 }
 \value{
-table with number of pubmed related to tfs.
+table with number of pubmed's publications related to tfs and disease selected
 }
 \description{
 Find most studied TF in pubmed related to a specific cancer,
