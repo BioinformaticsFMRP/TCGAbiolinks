@@ -56,6 +56,6 @@ data <- SummarizedExperiment::SummarizedExperiment(
          assays=S4Vectors::SimpleList(counts=counts),
          rowRanges=rowRanges,
          colData=colData)
-TCGAvisualize_meanMethylation(data,groupCol  = "group",sort=TRUE)
+TCGAvisualize_meanMethylation(data,groupCol  = "group")
 }
 
