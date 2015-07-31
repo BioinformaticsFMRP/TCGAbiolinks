@@ -17,7 +17,7 @@
 #' tabDEGsTFPubmed <- TCGAinvestigate("breast", dataDEGsFiltLevelTFs, topgenes = 1)
 #' }
 #' @export
-#' @return table with number of pubmed related to tfs.
+#' @return table with number of pubmed's publications related to tfs and disease selected
 TCGAinvestigate <- function(tumor,dataDEGsFiltLevelTF,topgenes){
     site <- "http://www.ncbi.nlm.nih.gov/pubmed/?term="
 
