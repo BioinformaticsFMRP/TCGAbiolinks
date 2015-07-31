@@ -192,6 +192,7 @@ TCGAanalyze_survival <- function(data,
 #' @param color vector of colors to be used in graph
 #' @param title main title in the plot
 #' @param ylab y axis text in the plot
+#' @param print.pvalue Print p-value for two groups
 #' @param xlab x axis text in the plot
 #' @param labels Labels of the groups
 #' @import ggplot2 stats
@@ -217,6 +218,7 @@ TCGAvisualize_meanMethylation <- function(data,
                                           groupCol=NULL,
                                           subgroupCol=NULL,
                                           shapes = NULL,
+                                          print.pvalue=FALSE,
                                           filename = "G-CIMP-mean.methylation.pdf",
                                           ylab = expression(
                                               paste("Mean DNA methylation (",
@@ -248,8 +250,9 @@ TCGAvisualize_meanMethylation <- function(data,
         df <- data.frame(mean = mean, groups = groups)
     }
 
-    pvalue <- t.test(mean ~ groups, data = df)$p.value
-
+    if(length(levels(df$groups)) == 2) {
+        pvalue <- t.test(mean ~ groups, data = df)$p.value
+    }
     # Plot for methylation analysis Axis x: LGm clusters Axis y:
     # mean methylation
     label.add.n <- function(x) {
@@ -293,7 +296,7 @@ TCGAvisualize_meanMethylation <- function(data,
         p <- p + scale_shape_manual(values = shapes)
     }
 
-    if (pvalue){
+    if (print.pvalue){
         p <- p + annotate("text",x = -Inf,y = -Inf, hjust = -0.1,
                           vjust = -1.0, size = 3,
                           label = paste0("P-value = ",
@@ -494,8 +497,8 @@ TCGAanalyze_DMR <- function(data,
                             xlab = "DNA Methylation\n difference",
                             title = "Volcano plot",
                             legend = "Legend",
-                            color = c("1" = "black", "2" = "green",
-                                      "3" = "red"),
+                            color = c("1" = "black", "2" = "red",
+                                      "3" = "green"),
                             label = c("1" = "Not Significant",
                                       "2" = "Hypermethylated",
                                       "3" = "Hypomethylated"),
@@ -519,6 +522,8 @@ TCGAanalyze_DMR <- function(data,
     } else if (length(unique(colData(data)[,groupCol])) == 2) {
         group1 <- unique(colData(data)[,groupCol])[1]
         group2 <- unique(colData(data)[,groupCol])[2]
+        message(paste0("Group1:", group1))
+        message(paste0("Group2:", group2))
     }
 
     diffcol <- paste("diffmean",group1,group2,sep = ".")
@@ -543,12 +548,12 @@ TCGAanalyze_DMR <- function(data,
     sig <-  values(rowRanges(data))[,pcol] < p.cut
 
     # hypermethylated samples compared to old state
-    hyper <- values(rowRanges(data))[,diffcol] < (-diffmean.cut)
+    hyper <- values(rowRanges(data))[,diffcol]  > diffmean.cut
 
     if (any(hyper & sig)) rowRanges(data)[hyper & sig,]$threshold <- "2"
     if (any(hyper & sig)) values(rowRanges(data))[hyper & sig,statuscol] <- "Hypermethylated"
     # hypomethylated samples compared to old state
-    hypo <-  values(rowRanges(data))[,diffcol]  > diffmean.cut
+    hypo <-  values(rowRanges(data))[,diffcol] < (-diffmean.cut)
     if (any(hypo & sig)) rowRanges(data)[hypo & sig,]$threshold <- "3"
     if (any(hypo & sig)) values(rowRanges(data))[hypo & sig,statuscol] <- "Hypomethylated"
 
@@ -675,9 +680,10 @@ TCGAvisualize_starburst <- function(met,
     }
 
     met <- as.data.frame(rowRanges(met))
-    exp$Gene_Symbol <- row.names(exp)
-    volcano <- merge(met, exp, by = "Gene_Symbol")
 
+    aux <- strsplit(row.names(exp),"\\|")
+    exp$Gene_Symbol  <- unlist(lapply(aux,function(x) x[1]))
+    volcano <- merge(met, exp, by = "Gene_Symbol")
     volcano$ID <- paste(volcano$Gene_Symbol,
                         volcano$probeID, sep = ".")
 
@@ -750,12 +756,24 @@ TCGAvisualize_starburst <- function(met,
 
     size <- c("1", "1", "1", "1", "1", "1", "1","1")
     groups <- c("2", "3", "4", "5", "6", "7","8","9")
+    # return methylation < 0, expressao >0
+    volcano[, "starburst.status"]  <-  "Not Significant"
+    state <- c("Up regulated & Hypo methylated",
+               "Down regulated & Hypo methylated",
+               "hypo methylated",
+               "hyper methylated",
+               "Up regulated",
+               "Down regulated",
+               "Up regulated & Hyper methylated",
+               "Down regulated & Hyper methylated")
+    #print(head(volcano))
     s <- list(a, b, c, d, e, f,g,h)
     for (i in seq_along(s)) {
         idx <- rownames(s[[i]])
         if (length(idx) > 0) {
             volcano[idx, "threshold.starburst"] <- groups[i]
             volcano[idx, "threshold.size"] <- size[i]
+            volcano[idx, "starburst.status"] <-  state[i]
         }
     }
 
@@ -784,6 +802,10 @@ TCGAvisualize_starburst <- function(met,
                    linetype = "dashed")
     ggsave(filename = "starbust.gcimp.pdf", width = 14, height = 10)
 
-    # return methylation < 0, expressao >0
-    return (volcano)
+    volcano = subset(volcano,select = c("Gene_Symbol",
+                                        "probeID",
+                                        "starburst.status",
+                                        "status.LGm2.LGm1")
+                     )
+    return(volcano)
 }
