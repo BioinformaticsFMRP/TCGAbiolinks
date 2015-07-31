@@ -804,8 +804,7 @@ TCGAvisualize_starburst <- function(met,
 
     volcano = subset(volcano,select = c("Gene_Symbol",
                                         "probeID",
-                                        "starburst.status",
-                                        "status.LGm2.LGm1")
+                                        "starburst.status")
                      )
     return(volcano)
 }
