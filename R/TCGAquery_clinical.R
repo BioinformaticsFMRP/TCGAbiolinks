@@ -355,12 +355,12 @@ TCGAquery_clinic <- function(cancer,clinical_data_type){
 #' TCGAquery_clinicFilt(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),clin,
 #' HER="Positive", gender="FEMALE",ER="Positive")
 TCGAquery_clinicFilt <- function(barcode,
-                       clinical_patient_data,
-                       HER=NULL,
-                       ER=NULL,
-                       gender=NULL,
-                       PR=NULL,
-                       stage=NULL){
+                                 clinical_patient_data,
+                                 HER=NULL,
+                                 ER=NULL,
+                                 gender=NULL,
+                                 PR=NULL,
+                                 stage=NULL){
 
     x <- NULL
 
@@ -428,13 +428,13 @@ TCGAquery_clinicFilt <- function(barcode,
 # that will help the users to understand their samples
 # ref: TCGA codeTablesReport - Table: Sample type
 #' @importFrom S4Vectors DataFrame
-colDataPrepare <- function(barcode){
+colDataPrepare <- function(barcode,query){
 
-   code <- c('01','02','03','04','05','06','07','08','09','10','11',
-                    '12','13','14','20','40','50','60','61')
+    code <- c('01','02','03','04','05','06','07','08','09','10','11',
+              '12','13','14','20','40','50','60','61')
     shortLetterCode <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
-                           "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
-                           "CELL","XP","XCL")
+                         "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
+                         "CELL","XP","XCL")
 
     definition <- c("Primary solid Tumor",
                     "Recurrent Solid Tumor",
@@ -464,17 +464,26 @@ colDataPrepare <- function(barcode){
     rownames(ret) <- ret$sample
     ret$code <- NULL
     ret$sample <- NULL
+
+
     df <- do.call(rbind,
-            lapply(barcode,
-                   function(x) {
-                       query <- TCGAquery(samples = x)
-                       return(data.frame(
-                           disease = unique(query$Disease),
-                           platform = unique(query$Platform),
-                           center = unique(query$Center)
-                       ))
-                   }
-            ))
+                  lapply(seq_along(barcode),
+                         function(i) {
+                             idx <- grep(barcode[i],query$barcode)
+                             # exception case: same barcodes!
+                             if (length(idx) > 1) {
+                                 idx2 <- grep(barcode[i],barcode)
+                                 idx <- idx[match(i,idx2)]
+                             }
+                             aux <- query[idx,]
+                             return(data.frame(
+                                 disease = unique(aux$Disease),
+                                 platform = unique(aux$Platform),
+                                 center = unique(aux$Center)
+                             ))
+                         }
+                  ))
+
     ret <- cbind(ret,df)
     return(DataFrame(ret))
 }
