@@ -428,6 +428,7 @@ TCGAquery_clinicFilt <- function(barcode,
 # that will help the users to understand their samples
 # ref: TCGA codeTablesReport - Table: Sample type
 #' @importFrom S4Vectors DataFrame
+#' @importFrom stringr str_match
 colDataPrepare <- function(barcode,query){
 
     code <- c('01','02','03','04','05','06','07','08','09','10','11',
@@ -456,23 +457,30 @@ colDataPrepare <- function(barcode,query){
                     "Primary Xenograft Tissue",
                     "Cell Line Derived Xenograft Tissue")
     aux <- DataFrame(code = code,shortLetterCode,definition)
-    ret <- DataFrame(sample = barcode,
+
+    # in case multiple equal barcode
+    regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
+                    "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
+    samples <- str_match(barcode,regex)[,1]
+
+    ret <- DataFrame(sample = samples,
+                     barcode = barcode,
                      patient = substr(barcode, 1, 12),
                      code = substr(barcode, 14, 15))
     ret <- merge(ret,aux, by = "code", sort = FALSE)
 
-    rownames(ret) <- ret$sample
+    rownames(ret) <- ret$barcode
     ret$code <- NULL
-    ret$sample <- NULL
-
+    ret$barcode <- NULL
 
     df <- do.call(rbind,
-                  lapply(seq_along(barcode),
+                  lapply(seq_along(samples),
                          function(i) {
-                             idx <- grep(barcode[i],query$barcode)
+                             idx <- grep(str_match(samples[i],regex)[1,1],query$barcode)
                              # exception case: same barcodes!
+                             # we will select the correct row
                              if (length(idx) > 1) {
-                                 idx2 <- grep(barcode[i],barcode)
+                                 idx2 <- grep(samples[i],barcode)
                                  idx <- idx[match(i,idx2)]
                              }
                              aux <- query[idx,]
