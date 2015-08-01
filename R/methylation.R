@@ -152,12 +152,17 @@ TCGAanalyze_survival <- function(data,
 
     if (print.value){
         surv <- surv + annotate("text",x = -Inf,y = -Inf, hjust = -0.1,
-                                vjust = -1.0, size = 5,
-                                label = paste0("Log-Rank P-value = ",pvalue))
+                                vjust = -1.0, size = 3,
+                                label = paste0("Log-Rank P-value = ",
+                                               format(pvalue,
+                                                      scientific = TRUE,
+                                                      digits = 2)))
     }
+
     if (cutoff != 0) {
         surv <- surv + ggplot2::coord_cartesian(xlim = c(0, cutoff))
     }
+
     label.add.n <- function(x) {
         paste0(x, " (n = ",
                nrow(subset(data,data[,clusterCol] == x)), ")")
@@ -188,7 +193,8 @@ TCGAanalyze_survival <- function(data,
 #' @param shapes Shape vector of the subgroups. It must have the size of the levels
 #' of the subgroups. Example: shapes = c(21,23) if for two levels
 #' @param filename The name of the pdf that will be saved
-#' @param legend Caption title
+#' @param subgroup.legend Name of the subgroup legend. DEFAULT: subgroupCol
+#' @param group.legend Name of the group legend. DEFAULT: groupCol
 #' @param color vector of colors to be used in graph
 #' @param title main title in the plot
 #' @param ylab y axis text in the plot
@@ -226,7 +232,8 @@ TCGAvisualize_meanMethylation <- function(data,
                                           xlab = NULL,
                                           title = "Mean DNA methylation",
                                           labels = NULL,
-                                          legend = "Legend",
+                                          group.legend = NULL,
+                                          subgroup.legend = NULL,
                                           color = c("green", "red", "purple",
                                                     "orange", "salmon", "grey")) {
     .e <- environment()
@@ -259,6 +266,12 @@ TCGAvisualize_meanMethylation <- function(data,
         paste0(x, " (n = ",
                nrow(subset(df,subset = (df$groups == x))), ")")
     }
+    if (is.null(group.legend)) {
+        group.legend <- groupCol
+    }
+    if (is.null(subgroup.legend)) {
+        subgroup.legend <- subgroupCol
+    }
 
     if (is.null(labels)) {
         labels <- levels(factor(df$groups))
@@ -270,7 +283,9 @@ TCGAvisualize_meanMethylation <- function(data,
         geom_boxplot(aes(fill = factor(df$groups)),
                      notchwidth = 0.25, outlier.shape = NA)
     if(!is.null(subgroupCol)){
-        p <- p + geom_jitter(aes(shape = factor(subgroups), size =  factor(subgroups)),
+
+        p <- p + geom_jitter(aes(shape = subgroups,
+                                 size =  subgroups),
                              height = 0,
                              position = position_jitter(width = 0.1),
                              size = 3)
@@ -280,9 +295,10 @@ TCGAvisualize_meanMethylation <- function(data,
                               size = 3)
     }
 
-    p <- p + scale_fill_manual(values = color,labels = labels, name = legend)
+    p <- p + scale_fill_manual(values = color,labels = labels, name = group.legend)
     p <- p + scale_x_discrete(breaks = labels,labels = labels)
     p <- p + ylab(ylab) + xlab(xlab) + labs(title = title) +
+        labs(shape=subgroup.legend, color=group.legend) +
         theme(axis.title.x = element_text(face = "bold", size = 20),
               axis.text.x = element_text(angle = 90,
                                          vjust = 0.5,
@@ -448,19 +464,22 @@ calculate.pvalues <- function(data,
 #' the name of the group
 #' @param group2 In case our object has more than 2 groups, you should set
 #' the name of the group
-#' @param filename pdf filename
-#' @param legend legend title
+#' @param filename pdf filename. Default: volcano.pdf
+#' @param legend Legend title
 #' @param color vector of colors to be used in graph
-#' @param title main title
+#' @param title main title. If not specified it will be
+#' "Volcano plot (group1 vs group2)
 #' @param ylab y axis text
 #' @param xlab x axis text
 #' @param xlim x limits to cut image
 #' @param ylim y limits to cut image
-#' @param label vector of labels to be used in the figure
-#' @param p.cut p values threshold
-#' @param diffmean.cut diffmean threshold
+#' @param label vector of labels to be used in the figure.
+#' Example: c("1" = "Not Significant", "2" = "Hypermethylated in group1",
+#' "3" = "Hypomethylated in group1"))
+#' @param p.cut p values threshold. Default: 0.01
+#' @param diffmean.cut diffmean threshold. Default: 0.2
 #' @param adj.method Adjusted method for the p-value calculation
-#' @param paired Wilcoxon paired parameter
+#' @param paired Wilcoxon paired parameter. Default: FALSE
 #' @param overwrite Overwrite the pvalues and diffmean values if already in the object
 #' for both groups? Default: FALSE
 #' @import ggplot2
@@ -495,13 +514,11 @@ TCGAanalyze_DMR <- function(data,
                             ylab =  expression(paste(-Log[10],
                                                      " (FDR corrected -P values)")),
                             xlab = "DNA Methylation difference",
-                            title = "Volcano plot",
+                            title = NULL,
                             legend = "Legend",
                             color = c("1" = "black", "2" = "red",
                                       "3" = "green"),
-                            label = c("1" = "Not Significant",
-                                      "2" = "Hypermethylated",
-                                      "3" = "Hypomethylated"),
+                            label = NULL,
                             xlim = NULL,
                             ylim = NULL,
                             p.cut = 0.01,
@@ -524,8 +541,19 @@ TCGAanalyze_DMR <- function(data,
         group2 <- unique(colData(data)[,groupCol])[2]
         message(paste0("Group1:", group1))
         message(paste0("Group2:", group2))
+
+    }
+
+    # defining title and label if not specified by the user
+    if (is.null(title)){
+        title <- paste("Volcano plot", "(", group1, "vs", group2,")")
+    }
+
+    if (is.null(label)){
+        label <- c("1" = "Not Significant",
+                   "2" = "Hypermethylated",
+                   "3" = "Hypomethylated")
         label[2:3] <-  paste(label[2:3], "in", group1)
-        title <- paste(title, "(", group1, "vs", group2,")")
     }
 
     diffcol <- paste("diffmean",group1,group2,sep = ".")
@@ -808,6 +836,6 @@ TCGAvisualize_starburst <- function(met,
     volcano = subset(volcano,select = c("Gene_Symbol",
                                         "probeID",
                                         "starburst.status")
-                     )
+    )
     return(volcano)
 }
