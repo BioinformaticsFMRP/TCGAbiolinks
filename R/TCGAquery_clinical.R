@@ -468,8 +468,9 @@ colDataPrepare <- function(barcode,query){
                      patient = substr(barcode, 1, 12),
                      code = substr(barcode, 14, 15))
     ret <- merge(ret,aux, by = "code", sort = FALSE)
-
+    ret <- ret[match(barcode,ret$barcode),]    
     rownames(ret) <- ret$barcode
+
     ret$code <- NULL
     ret$barcode <- NULL
 
