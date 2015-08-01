@@ -1152,19 +1152,6 @@ After these analysis, we save a volcano plot (x-axis:diff mean methylation,
 y-axis: significance) that will help the user identify the differentially
 methylated CpG sites and return the object with the calculus in the rowRanges.
 
-
-```{r, eval = FALSE}
-data <- TCGAanalyze_DMR(data,groupCol="group")
-```
-
-Volcano plot saved and the given data with the results (diffmean.group1.group2,p.value.group1.group2, p.value.adj.group1.group2,status.group1.group2) in the rowRanges where group1 and group2 are the names of the groups
-
-The output will be an graph such as the figure below. Also, the `TCGAanalyze_DMR` 
-function will return the SummarizedExperiment with the values of p-value,
-p-value adjusted, diffmean and the group it belongs in the graph 
-(non significant, hypomethylated, hypermethylated). 
-This values can be view/acessed using the `rowRanges` acessesor.
-
 The arguments of volcanoPlot are:
 
 *  **data**	 SummarizedExperiment object obtained from `TCGAprepare`
@@ -1188,12 +1175,36 @@ you should set the name of the group
 *  **paired**	Wilcoxon paired parameter
 *  **adj.method**	Adjusted method for the p-value calculation
 
+```{r, eval = FALSE}
+data <- TCGAanalyze_DMR(data,groupCol="group")
+```
+
+The output will be a plot such as the figure below. The green dots are the 
+probes that are hypomethylated in group 1 compared to group 2, 
+while the red dots are the hypermethylated probes in group 1 compared to group 2
+
+
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
 library(png)
 library(grid)
 img <- readPNG("volcano.png")
 grid.raster(img)
 ```
+
+
+Also, the `TCGAanalyze_DMR` 
+function will save the plot as pdf and return the same SummarizedExperiment
+that was given as input with the values of p-value,
+p-value adjusted, diffmean and the group it belongs in the graph 
+(non significant, hypomethylated, hypermethylated) in the rowRanges. 
+The collumns will be (where group1 and group2 are the names of the groups): 
+
+* diffmean.group1.group2 
+* p.value.group1.group2
+* p.value.adj.group1.group2
+* status.group1.group2 
+
+This values can be view/acessed using the `rowRanges` acessesor.
 
 ## `TCGAvisualize_starburst`: Analyzing expression and methylation together 
 

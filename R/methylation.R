@@ -250,7 +250,7 @@ TCGAvisualize_meanMethylation <- function(data,
         df <- data.frame(mean = mean, groups = groups)
     }
 
-    if(length(levels(df$groups)) == 2) {
+    if(length(levels(droplevels(df$groups))) == 2) {
         pvalue <- t.test(mean ~ groups, data = df)$p.value
     }
     # Plot for methylation analysis Axis x: LGm clusters Axis y:
@@ -494,7 +494,7 @@ TCGAanalyze_DMR <- function(data,
                             filename = "volcano.pdf",
                             ylab =  expression(paste(-Log[10],
                                                      " (FDR corrected -P values)")),
-                            xlab = "DNA Methylation\n difference",
+                            xlab = "DNA Methylation difference",
                             title = "Volcano plot",
                             legend = "Legend",
                             color = c("1" = "black", "2" = "red",
@@ -524,6 +524,8 @@ TCGAanalyze_DMR <- function(data,
         group2 <- unique(colData(data)[,groupCol])[2]
         message(paste0("Group1:", group1))
         message(paste0("Group2:", group2))
+        label[2:3] <-  paste(label[2:3], "in", group1)
+        title <- paste(title, "(", group1, "vs", group2,")")
     }
 
     diffcol <- paste("diffmean",group1,group2,sep = ".")
@@ -563,7 +565,7 @@ TCGAanalyze_DMR <- function(data,
                     y = -1 * log10(values(rowRanges(data))[,pcol]),
                     colour = rowRanges(data)$threshold ),
                 environment = .e) + geom_point() +
-        labs(title = title) + ylab(ylab) + xlab(xlab) +
+        ggtitle(title) + ylab(ylab) + xlab(xlab) +
         geom_vline(aes(xintercept = -diffmean.cut),
                    colour = "black",linetype = "dashed") +
         geom_vline(aes(xintercept = diffmean.cut),
@@ -574,6 +576,7 @@ TCGAanalyze_DMR <- function(data,
                            values = color,
                            labels = label,
                            name = legend)
+
     # saving box plot to analyse it
     ggsave(p, filename = filename, width = 10, height = 5, dpi = 600)
     rowRanges(data)$threshold <- NULL
