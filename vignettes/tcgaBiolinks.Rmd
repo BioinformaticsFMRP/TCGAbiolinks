@@ -11,7 +11,6 @@ output:
     toc_depth: 2
     highlight: haddock
 
-
 references:
 - id: ref1
   title: Orchestrating high-throughput genomic analysis with Bioconductor
@@ -783,9 +782,12 @@ Using the clinical data, it is possible to create a survival plot with the
 function `TCGAanalyze_survival` as follows:
 
 ```{r, eval = FALSE}
-# survival using the column group 
-clinical <- TCGAquery_clinic("gbm","clinical_patient")
-TCGAanalyze_survival(clinical,"gender")
+clin.gbm <- TCGAquery_clinic("gbm", "clinical_patient")
+clin.lgg <- TCGAquery_clinic("lgg", "clinical_patient")
+
+TCGAanalyze_survival(plyr::rbind.fill(clin.lgg,clin.gbm),
+                     "radiation_therapy",
+                     main = "TCGA Set\nLGG and GBM",height = 10, width=10)
 ```
 
 The arguments of `TCGAanalyze_survival` are:
@@ -1115,16 +1117,21 @@ TCGAvisualize_meanMethylation(data,"group")
 ```
 The arguments of `TCGAvisualize_meanMethylation` are:
 
-*  **data**	 SummarizedExperiment object obtained from `TCGAprepare`
-*  **groupCol** Columns in colData(data) that defines the groups. 
-If no columns defined a columns called "Patients" will be used
-*  **sort**	Sort by mean methylation? False by default
-*  **filename**	 The name of the pdf that will be save
-*  **legend** Legend title of the figured
-*  **ylab**	y-axis text of the plot
-*  **xlab** x-axis text of the plot
-*  **filename**	 The name of the pdf file
-*  **color** Define the colors of the lines.
+* **data** SummarizedExperiment object obtained from `TCGAPrepare`
+* **groupCol** Columns in colData(data) that defines the groups. If no
+ columns defined a columns called "Patients" will be used
+* **subgroupCol** Columns in colData(data) that defines the subgroups.
+* **shapes** Shape vector of the subgroups. It must have the size of the levels
+of the subgroups. Example: shapes = c(21,23) if for two levels
+* **filename** The name of the pdf that will be saved
+* **subgroup.legend** Name of the subgroup legend. **DEFAULT: subgroupCol**
+* **group.legend** Name of the group legend. **DEFAULT: groupCol**
+* **color** vector of colors to be used in graph
+* **title** main title in the plot
+* **ylab** y axis text in the plot
+* **print.pvalue** Print p-value for two groups in the plot
+* **xlab** x axis text in the plot
+* **labels** Labels of the groups
 
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
@@ -1154,29 +1161,36 @@ methylated CpG sites and return the object with the calculus in the rowRanges.
 
 The arguments of volcanoPlot are:
 
-*  **data**	 SummarizedExperiment object obtained from `TCGAprepare`
-*  **groupCol** Columns in colData(data) that defines the groups. 
-If no columns defined a columns called "Patients" will be used
-*  **group1** In case our object has more than 2 groups, 
-you should set the name of the group
-*  **group2** In case our object has more than 2 groups,
-you should set the name of the group
-*  **filename**	 The name of the pdf that will be save
-*  **legend** Legend title of the figured
-*  **ylab**	y-axis text of the plot
-*  **xlab** x-axis text of the plot
-*  **filename**	 The name of the pdf file
-*  **color** Define the colors of the lines.
-*  **label** vector of labels to be used in the figure
-*  **xlim** x limits to cut image
-*  **ylim** y limits to cut image
-*  **p.cut**	p values threshold
-*  **diffmean.cut**	diffmean threshold
-*  **paired**	Wilcoxon paired parameter
-*  **adj.method**	Adjusted method for the p-value calculation
+* **data** SummarizedExperiment obtained from the TCGAPrepare
+* **groupCol**  Columns with the groups inside the SummarizedExperiment
+  object. (This will be obtained by the function colData(data))
+* **group1 ** In case our object has more than 2 groups, you should set
+ the name of the group
+* **group2 ** In case our object has more than 2 groups, you should set
+ the name of the group
+* **filename ** pdf filename. Default: volcano.pdf
+* **legend ** Legend title
+* **color **vector of colors to be used in graph
+* **title **main title. If not specified it will be
+ "Volcano plot (group1 vs group2)
+* **ylab **y axis text
+* **xlab **x axis text
+* **xlim **x limits to cut image
+* **ylim **y limits to cut image
+* **label **vector of labels to be used in the figure.
+ Example: c("1" = "Not Significant", "2" = "Hypermethylated in group1",
+ "3" = "Hypomethylated in group1"))
+* **p.cut** p values threshold. *Default: 0.01*
+* **diffmean.cut** diffmean threshold. *Default: 0.2*
+* **adj.method** Adjusted method for the p-value calculation
+* **paired** Wilcoxon paired parameter. *Default: FALSE*
+* **overwrite** Overwrite the pvalues and diffmean values if already in the object
+for both groups? *Default: FALSE*
 
 ```{r, eval = FALSE}
-data <- TCGAanalyze_DMR(data,groupCol="group")
+data <- TCGAanalyze_DMR(data, groupCol = "cluster.meth",subgroupCol = "disease",
+                              group.legend  = "Groups", subgroup.legend = "Tumor",
+                              print.pvalue = TRUE)
 ```
 
 The output will be a plot such as the figure below. The green dots are the 
@@ -1204,7 +1218,13 @@ The collumns will be (where group1 and group2 are the names of the groups):
 * p.value.adj.group1.group2
 * status.group1.group2 
 
-This values can be view/acessed using the `rowRanges` acessesor.
+This values can be view/acessed using the `rowRanges` 
+acessesor (`rowRanges(data)`).
+
+**Observation:** Calling the same function again, with the same arguments 
+will only plot the results,  as it was already calculated. 
+With you want to have them recalculated, please set
+`overwrite` to `TRUE` or remove the calculated collumns.
 
 ## `TCGAvisualize_starburst`: Analyzing expression and methylation together 
 
