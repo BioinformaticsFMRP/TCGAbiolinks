@@ -6,11 +6,10 @@
 \usage{
 TCGAanalyze_DMR(data, groupCol = NULL, group1 = NULL, group2 = NULL,
   filename = "volcano.pdf", ylab = expression(paste(-Log[10],
-  " (FDR corrected -P values)")), xlab = "DNA Methylation\\n difference",
-  title = "Volcano plot", legend = "Legend", color = c(`1` = "black", `2`
-  = "red", `3` = "green"), label = c(`1` = "Not Significant", `2` =
-  "Hypermethylated", `3` = "Hypomethylated"), xlim = NULL, ylim = NULL,
-  p.cut = 0.01, diffmean.cut = 0.2, paired = FALSE, adj.method = "BH",
+  " (FDR corrected -P values)")), xlab = "DNA Methylation difference",
+  title = NULL, legend = "Legend", color = c(`1` = "black", `2` = "red",
+  `3` = "green"), label = NULL, xlim = NULL, ylim = NULL, p.cut = 0.01,
+  diffmean.cut = 0.2, paired = FALSE, adj.method = "BH",
   overwrite = FALSE)
 }
 \arguments{
@@ -25,29 +24,32 @@ the name of the group}
 \item{group2}{In case our object has more than 2 groups, you should set
 the name of the group}
 
-\item{filename}{pdf filename}
+\item{filename}{pdf filename. Default: volcano.pdf}
 
 \item{ylab}{y axis text}
 
 \item{xlab}{x axis text}
 
-\item{title}{main title}
+\item{title}{main title. If not specified it will be
+"Volcano plot (group1 vs group2)}
 
-\item{legend}{legend title}
+\item{legend}{Legend title}
 
 \item{color}{vector of colors to be used in graph}
 
-\item{label}{vector of labels to be used in the figure}
+\item{label}{vector of labels to be used in the figure.
+Example: c("1" = "Not Significant", "2" = "Hypermethylated in group1",
+"3" = "Hypomethylated in group1"))}
 
 \item{xlim}{x limits to cut image}
 
 \item{ylim}{y limits to cut image}
 
-\item{p.cut}{p values threshold}
+\item{p.cut}{p values threshold. Default: 0.01}
 
-\item{diffmean.cut}{diffmean threshold}
+\item{diffmean.cut}{diffmean threshold. Default: 0.2}
 
-\item{paired}{Wilcoxon paired parameter}
+\item{paired}{Wilcoxon paired parameter. Default: FALSE}
 
 \item{adj.method}{Adjusted method for the p-value calculation}
 
