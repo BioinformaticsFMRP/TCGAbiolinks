@@ -78,11 +78,17 @@ TCGAprepare <- function(query,
         return(NULL)
     }
 
+
     if (length(unique(query$Platform)) > 1 |
         length(unique(query$Center)) > 2) {
-        message("Sorry! But, for the moment, we can only prepare on type of
+        # This case (27k/450k)accepts two platforms
+        if (all(grepl("HumanMethylation[0-9]{2,3}",unique(query$Platform)))){
+            platform <- "humanMethylation"
+        } else {
+            message("Sorry! But, for the moment, we can only prepare on type of
                 platform per call")
-        return(NULL)
+            return(NULL)
+        }
     } else {
         platform <- unique(query$Platform)
     }
@@ -129,8 +135,6 @@ TCGAprepare <- function(query,
                         "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
         barcode <- str_match(files,regex)
 
-
-
         for (i in seq_along(files)) {
             data <- fread(files[i], header = TRUE, sep = "\t",
                           stringsAsFactors = FALSE,skip = 1,
@@ -169,7 +173,7 @@ TCGAprepare <- function(query,
                                  Gene_Symbol = df$Gene_Symbol)
 
             names(rowRanges) <- as.character(df$Composite.Element.REF)
-            colData <-  colDataPrepare(colnames(df)[5:ncol(df)])
+            colData <-  colDataPrepare(colnames(df)[5:ncol(df)],query)
             assay <- data.matrix(subset(df,select = c(5:ncol(df))))
 
             sset <- SummarizedExperiment(assays = assay,
@@ -315,7 +319,7 @@ TCGAprepare <- function(query,
                     RPKM=data.matrix(subset(df,select=seq(4,ncol(df),3))))
 
             }
-            colData <- colDataPrepare(as.character(barcode))
+            colData <- colDataPrepare(as.character(barcode), query)
             sset <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
                                          colData=colData)
@@ -371,7 +375,7 @@ TCGAprepare <- function(query,
             regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
-            colData <- colDataPrepare(barcode)
+            colData <- colDataPrepare(barcode,query)
 
             assays <- SimpleList(raw_counts=data.matrix(
                 subset(merged,select=seq(3,2+length(barcode)))
@@ -429,7 +433,7 @@ TCGAprepare <- function(query,
             regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
-            colData <- colDataPrepare(barcode)
+            colData <- colDataPrepare(barcode,query)
 
             suppressWarnings(
                 assays <- SimpleList(raw_counts=data.matrix(
@@ -580,7 +584,7 @@ TCGAprepare <- function(query,
             regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
-            colData <- colDataPrepare(barcode)
+            colData <- colDataPrepare(barcode,query)
 
             sset <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
@@ -706,7 +710,7 @@ TCGAprepare <- function(query,
             names(rowRanges) <- as.character(merged$external_gene_name)
 
             idx  <- grep("TCGA",colnames(merged))
-            colData <- colDataPrepare(colnames(merged)[idx])
+            colData <- colDataPrepare(colnames(merged)[idx],query)
             assays <- SimpleList(sum_Segment_Mean=data.matrix(
                 subset(merged,select = idx))
             )
