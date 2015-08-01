@@ -9,8 +9,8 @@ TCGAvisualize_meanMethylation(data, groupCol = NULL, subgroupCol = NULL,
   filename = "G-CIMP-mean.methylation.pdf",
   ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
   xlab = NULL, title = "Mean DNA methylation", labels = NULL,
-  legend = "Legend", color = c("green", "red", "purple", "orange", "salmon",
-  "grey"))
+  group.legend = NULL, subgroup.legend = NULL, color = c("green", "red",
+  "purple", "orange", "salmon", "grey"))
 }
 \arguments{
 \item{data}{SummarizedExperiment object obtained from TCGAPrepare}
@@ -35,7 +35,9 @@ of the subgroups. Example: shapes = c(21,23) if for two levels}
 
 \item{labels}{Labels of the groups}
 
-\item{legend}{Caption title}
+\item{group.legend}{Name of the group legend. DEFAULT: groupCol}
+
+\item{subgroup.legend}{Name of the subgroup legend. DEFAULT: subgroupCol}
 
 \item{color}{vector of colors to be used in graph}
 }
