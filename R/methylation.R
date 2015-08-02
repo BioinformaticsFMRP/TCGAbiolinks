@@ -111,8 +111,8 @@ TCGAanalyze_survival <- function(data,
                                  xlab = "Time since diagnosis (days)",
                                  filename = "survival.pdf",
                                  color = c("green", "firebrick4", "orange3", "blue"),
-                                 height=par("din")[2],
-                                 width=par("din")[1],
+                                 height=8,
+                                 width=12,
                                  print.value=TRUE
 ) {
     .e <- environment()
@@ -637,10 +637,10 @@ TCGAanalyze_DMR <- function(data,
 #' @param xlim x limits to cut image
 #' @param ylim y limits to cut image
 #' @param p.cut p value cut-off
-#' @param group1 In case our object has more than 2 groups, you should set
-#' the name of the group
-#' @param group2 In case our object has more than 2 groups, you should set
-#' the name of the group
+#' @param group1 The name of the group 1
+#' Obs: Column p.value.adj.group1.group2 should exist
+#' @param group2 The name of the group 2.
+#' Obs: Column p.value.adj.group1.group2 should exist
 #' @import ggplot2
 #' @importFrom SummarizedExperiment subsetByOverlaps rowRanges rowRanges<-
 #'             values<-
@@ -821,7 +821,7 @@ TCGAvisualize_starburst <- function(met,
     if (!is.null(ylim)) {
         p <- p + ylim(ylim)
     }
-    p <- p + labs(title) + ylab(ylab) + xlab(xlab)
+    p <- p + ggtitle(title) + ylab(ylab) + xlab(xlab) + guides(size=FALSE)
     p <- p + scale_color_manual(values = color, labels = label, name = legend)
     p <-  p + geom_hline(aes(yintercept = lowerthr), colour = "black",
                          linetype = "dashed") +
