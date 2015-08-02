@@ -84,7 +84,7 @@ getFileNames <- function(url) {
             download(url, "tmp.html",
                      quiet = TRUE,
                      mode = "wb",
-                     method = "wininet"
+                     method = "internal"
             )
         )
     } else {
@@ -92,6 +92,7 @@ getFileNames <- function(url) {
             download(url,
                      "tmp.html",
                      mode = "wb",
+                     method = "internal",
                      quiet = 1)
         )
     }
