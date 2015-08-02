@@ -83,16 +83,14 @@ getFileNames <- function(url) {
         suppressWarnings(
             download(url, "tmp.html",
                      quiet = TRUE,
-                     mode = "wb",
-                     method = "internal"
+                     mode = "wb"
             )
         )
     } else {
         suppressWarnings(
             download(url,
                      "tmp.html",
-                     mode = "wb",
-                     method = "internal",
+                     mode = "wb"
                      quiet = 1)
         )
     }
