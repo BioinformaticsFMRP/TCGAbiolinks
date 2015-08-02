@@ -203,6 +203,7 @@ TCGAanalyze_survival <- function(data,
 #' @param labels Labels of the groups
 #' @import ggplot2 stats
 #' @importFrom SummarizedExperiment colData rowRanges assay
+#' @importFrom gtools combinations
 #' @export
 #' @return Save the pdf survival plot
 #' @examples
@@ -255,6 +256,15 @@ TCGAvisualize_meanMethylation <- function(data,
         df <- data.frame(mean = mean, groups = groups, subgroups = subgroups)
     } else {
         df <- data.frame(mean = mean, groups = groups)
+    }
+
+    comb2by2 <- combinations(length(levels(droplevels(df$groups))),
+                       2,
+                       levels(droplevels(df$groups)))
+    for (i in 1:nrow(comb2by2)){
+        aux <- t.test(mean ~ groups,
+                      data = subset(df,subset=df$groups %in% comb2by2[i,]) )$p.value
+        message(paste("P-value:", paste0(comb2by2[i,], collapse = "-"),"=",aux))
     }
 
     if(length(levels(droplevels(df$groups))) == 2) {
