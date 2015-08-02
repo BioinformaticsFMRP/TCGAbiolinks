@@ -8,8 +8,7 @@ TCGAanalyze_survival(data, clusterCol = NULL, legend = "Legend",
   cutoff = 0, main = "Kaplan-Meier Overall Survival Curves",
   ylab = "Probability of survival", xlab = "Time since diagnosis (days)",
   filename = "survival.pdf", color = c("green", "firebrick4", "orange3",
-  "blue"), height = par("din")[2], width = par("din")[1],
-  print.value = TRUE)
+  "blue"), height = 8, width = 12, print.value = TRUE)
 }
 \arguments{
 \item{data}{TCGA Clinical patient with the information days_to_death}
