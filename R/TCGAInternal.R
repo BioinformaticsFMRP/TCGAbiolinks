@@ -90,7 +90,7 @@ getFileNames <- function(url) {
         suppressWarnings(
             download(url,
                      "tmp.html",
-                     mode = "wb"
+                     mode = "wb",
                      quiet = 1)
         )
     }
