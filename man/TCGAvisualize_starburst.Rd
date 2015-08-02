@@ -25,11 +25,11 @@ Execute volcanoPlot function in order to obtain these values for the object.}
 
 \item{exp}{Object obtained by DEArnaSEQ function}
 
-\item{group1}{In case our object has more than 2 groups, you should set
-the name of the group}
+\item{group1}{The name of the group 1
+Obs: Column p.value.adj.group1.group2 should exist}
 
-\item{group2}{In case our object has more than 2 groups, you should set
-the name of the group}
+\item{group2}{The name of the group 2.
+Obs: Column p.value.adj.group1.group2 should exist}
 
 \item{filename}{pdf filename}
 
