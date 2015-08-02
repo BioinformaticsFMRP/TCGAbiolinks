@@ -201,9 +201,9 @@ TCGAanalyze_survival <- function(data,
 #' @param print.pvalue Print p-value for two groups
 #' @param xlab x axis text in the plot
 #' @param labels Labels of the groups
-#' @import ggplot2 stats
+#' @import ggplot2 stats gtools
 #' @importFrom SummarizedExperiment colData rowRanges assay
-#' @importFrom gtools combinations
+# ' @importFrom gtools combinations
 #' @export
 #' @return Save the pdf survival plot
 #' @examples
