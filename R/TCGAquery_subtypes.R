@@ -11,14 +11,21 @@
 #'LUAD \tab LIHC \tab STAD \tab MESO \tab CNTL
 #'}
 #' @param path Directory to save the downloaded data
-#' @importFrom rvest html
+#' @import magrittr
+#' @importFrom downloader download
+#' @importFrom rvest html html_nodes html_attr
 #' @importFrom stringr str_match
 #' @importFrom xlsx read.xlsx2
 #' @examples
-#' GBM_subtypes <- TCGAquery_subtypes(tumor = "gbm",path ="dataGBM")
+#' library(xlsx)
+#' GBM_path_subtypes <- TCGAquery_subtypes(tumor = "gbm",path ="dataGBM")
+#' GBM_subtypes <- read.xlsx2(GBM_path_subtypes,1,stringsAsFactors = NULL)
 #' @export
 #' @return data.frame with information about molecular cancer subtypes
 TCGAquery_subtypes <- function(tumor = NULL, path = ".") {
+
+    #library(rvest)
+    #library(stringr)
 
     dir.create(path, showWarnings = FALSE, recursive = TRUE)
     root <- "https://tcga-data.nci.nih.gov"
@@ -38,52 +45,36 @@ TCGAquery_subtypes <- function(tumor = NULL, path = ".") {
 
     site2 <- as.character(df[tolower(tumor),"path"])
 
-    tmp <- .DownloadURL(site2)
+   pg2 <- html(site2)
+   pg2 <- pg2 %>% html_nodes("a") %>% html_attr("href")
+   pg3 <- pg2[grep("xls",pg2)]
 
-    tmp2 <- tmp[grep("xls",tolower(tmp))]
+   pgyear <- as.character(df[tolower(tumor),"year"])
 
-    if(length(grep("subtype", tmp)) > 1){
-        tmp2 <- tmp[grep("subtype",tolower(tmp))]
-    }
+   if( length(pg3)!=1){ pg4 <- pg3[1] }
+   if( length(pg3)==1){ pg4 <- pg3}
 
-    tmp3 <- tmp2[grep("xls",tolower(tmp2))]
+       FileSubtypes <- paste0(df[tolower(tumor),"path"],pg4)
+       filetoDown <- paste0(path, "/", gsub("/","_",pg4))
 
-    if( length(tmp3)!=1){
-        tmp3 <- tmp3[1]
-    }
-
-    tmp3 <- gsub("<li>","",tmp3)
-    tmp4 <- unlist(strsplit(tmp3,">"))[1]
-    tmp5 <- unlist(strsplit(tmp4,"<a href="))[2]
-    tmp6 <- unlist(strsplit(tmp5,"xlsx"))[1]
-
-    Filelocation <-  unlist(strsplit(tmp6,df[tolower(tumor),"year"]))[2]
-    if( !is.na(Filelocation)){
-        Filelocation <- substr(Filelocation,2,nchar(Filelocation))
-    }
-
-    if( is.na(Filelocation)){
-        Filelocation <- substr(tmp6,2,nchar(tmp6))
-    }
-
-
-    FileSubtypes <- paste0(df[tolower(tumor),"path"],Filelocation,"xlsx")
-
-    file <- paste0(path, "/", gsub("/","_",Filelocation) ,"xlsx")
+   if( length(grep("subtype",pg3))==1){
+       pg4 <- pg3[grep("subtype",pg3)]
+       FileSubtypes <- pg4
+       pg5 <- unlist(strsplit(pg4, pgyear))[2]
+       filetoDown <- paste0(path, "/", gsub("/","_",substr(pg5,2,nchar(pg5))))
+  }
 
     if(is.windows()){
         suppressWarnings(
-            downloader::download(FileSubtypes,file, quiet = TRUE, method = "wininet")
+            downloader::download(FileSubtypes,filetoDown, quiet = TRUE, method = "wininet")
         )
     } else {
         suppressWarnings(
-            downloader::download(FileSubtypes,file, quiet = TRUE)
+            downloader::download(FileSubtypes,filetoDown, quiet = TRUE)
         )
     }
-
-    table <- read.xlsx2(file,1,stringsAsFactors = NULL)
-
-    return(table)
+    #table <- read.xlsx2(file,1,stringsAsFactors = NULL)
+    return(filetoDown)
 }
 
 
