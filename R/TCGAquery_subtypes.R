@@ -62,7 +62,11 @@ TCGAquery_subtypes <- function(tumor = NULL, path = ".") {
     }
 
     suppressWarnings(
+<<<<<<< HEAD
         downloader::download(FileSubtypes,filetoDown, quiet = TRUE,mode ="wb")
+=======
+        download(FileSubtypes,filetoDown, quiet = TRUE,  mode="wb")
+>>>>>>> origin/master
     )
     #table <- read.xlsx2(file,1,stringsAsFactors = NULL)
     return(filetoDown)
