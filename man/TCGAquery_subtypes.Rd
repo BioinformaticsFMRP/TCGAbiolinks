@@ -27,6 +27,8 @@ data.frame with information about molecular cancer subtypes
 Retrieve multiple molecular subtypes according last publications
 }
 \examples{
-GBM_subtypes <- TCGAquery_subtypes(tumor = "gbm",path ="dataGBM")
+library(xlsx)
+GBM_path_subtypes <- TCGAquery_subtypes(tumor = "gbm",path ="dataGBM")
+GBM_subtypes <- read.xlsx2(GBM_path_subtypes,1,stringsAsFactors = NULL)
 }
 
