@@ -261,7 +261,7 @@ TCGAvisualize_meanMethylation <- function(data,
     #comb2by2 <- combinations(length(levels(droplevels(df$groups))),
      #                  2,
       #                 levels(droplevels(df$groups)))
-    comb2by2 <- combn(levels(droplevels(df$groups)),2)
+    comb2by2 <- t(combn(levels(droplevels(df$groups)),2))
 
     for (i in 1:nrow(comb2by2)){
         aux <- t.test(mean ~ groups,
