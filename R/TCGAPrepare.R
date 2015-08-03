@@ -865,17 +865,9 @@ getMage <- function(line){
     if (dim(mage)[1] != 0) {
         file <- file.path(path,basename(mage$deployLocation))
         if ( !file.exists(file)) {
-            if(!is.windows()){
-                suppressWarnings(
-                    download(paste0(root,mage$deployLocation), file,
-                             quiet = TRUE)
-                )
-            } else {
-                suppressWarnings(
-                    download(paste0(root,mage$deployLocation), file,
-                             quiet = TRUE,method="auto")
-                )
-            }
+            suppressWarnings(
+                download(paste0(root,mage$deployLocation), file, quiet = TRUE)
+            )
         }
         folder <- gsub(".tar.gz","",file)
         if ( !file.exists(folder)) {
