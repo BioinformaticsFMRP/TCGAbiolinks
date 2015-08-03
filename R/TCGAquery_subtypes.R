@@ -15,7 +15,7 @@
 #' @importFrom downloader download
 #' @importFrom rvest html html_nodes html_attr
 #' @importFrom stringr str_match
-#' @importFrom xlsx read.xlsx2
+# @importFrom xlsx read.xlsx2
 #' @examples
 #' library(xlsx)
 #' GBM_path_subtypes <- TCGAquery_subtypes(tumor = "gbm",path ="dataGBM")
@@ -23,9 +23,6 @@
 #' @export
 #' @return data.frame with information about molecular cancer subtypes
 TCGAquery_subtypes <- function(tumor = NULL, path = ".") {
-
-    #library(rvest)
-    #library(stringr)
 
     dir.create(path, showWarnings = FALSE, recursive = TRUE)
     root <- "https://tcga-data.nci.nih.gov"
@@ -65,7 +62,7 @@ TCGAquery_subtypes <- function(tumor = NULL, path = ".") {
     }
 
     suppressWarnings(
-        downloader::download(FileSubtypes,filetoDown, quiet = TRUE)
+        downloader::download(FileSubtypes,filetoDown, quiet = TRUE,mode ="wb")
     )
     #table <- read.xlsx2(file,1,stringsAsFactors = NULL)
     return(filetoDown)
