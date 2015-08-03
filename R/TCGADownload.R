@@ -59,7 +59,7 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                 if(is.windows()){
                     suppressWarnings(
                         download(paste0(root, data[i, "deployLocation"]),
-                                 file, quiet = TRUE, method = "wininet")
+                                 file, quiet = TRUE, method = "auto")
                     )
                 } else {
                     suppressWarnings(
