@@ -56,18 +56,11 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             cat(paste0("\nDownloading:",
                        basename(data[i, "deployLocation"]),"\n"))
             if (force || !file.exists(file)) {
-                if(is.windows()){
-                    suppressWarnings(
-                        download(paste0(root, data[i, "deployLocation"]),
-                                 file, quiet = TRUE, method = "auto")
-                    )
-                } else {
-                    suppressWarnings(
-                        download(paste0(root, data[i, "deployLocation"]),
-                                 file, quiet = TRUE)
-                    )
 
-                }
+                suppressWarnings(
+                    download(paste0(root, data[i, "deployLocation"]),
+                             file, quiet = TRUE)
+                )
                 untar(file, exdir = path)
             }
             setTxtProgressBar(pb, i)
@@ -108,20 +101,11 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             for (i in seq_along(files)) {
                 if (force || !file.exists(file.path(path,folder,files[i]))) {
                     message(paste0("[",i,"] ", files[i],"\n"))
-                    if(is.windows()){
-                        suppressWarnings(
-                            download(paste0(root,url,"/",files[i]),
-                                     file.path(path,folder,files[i]),
-                                     quiet = TRUE,method = "wininet"
-                            )
-                        )
-                    } else {
-                        suppressWarnings(
-                            download(paste0(root,url,"/",files[i]),
-                                     file.path(path,folder,files[i]),
-                                     quiet = TRUE)
-                        )
-                    }
+                    suppressWarnings(
+                        download(paste0(root,url,"/",files[i]),
+                                 file.path(path,folder,files[i]),
+                                 quiet = TRUE)
+                    )
                 }
                 setTxtProgressBar(pb, i)
             }
