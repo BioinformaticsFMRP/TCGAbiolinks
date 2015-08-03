@@ -45,34 +45,28 @@ TCGAquery_subtypes <- function(tumor = NULL, path = ".") {
 
     site2 <- as.character(df[tolower(tumor),"path"])
 
-   pg2 <- html(site2)
-   pg2 <- pg2 %>% html_nodes("a") %>% html_attr("href")
-   pg3 <- pg2[grep("xls",pg2)]
+    pg2 <- html(site2)
+    pg2 <- pg2 %>% html_nodes("a") %>% html_attr("href")
+    pg3 <- pg2[grep("xls",pg2)]
 
-   pgyear <- as.character(df[tolower(tumor),"year"])
+    pgyear <- as.character(df[tolower(tumor),"year"])
 
-   if( length(pg3)!=1){ pg4 <- pg3[1] }
-   if( length(pg3)==1){ pg4 <- pg3}
+    if( length(pg3)!=1){ pg4 <- pg3[1] }
+    if( length(pg3)==1){ pg4 <- pg3}
 
-       FileSubtypes <- paste0(df[tolower(tumor),"path"],pg4)
-       filetoDown <- paste0(path, "/", gsub("/","_",pg4))
+    FileSubtypes <- paste0(df[tolower(tumor),"path"],pg4)
+    filetoDown <- paste0(path, "/", gsub("/","_",pg4))
 
-   if( length(grep("subtype",pg3))==1){
-       pg4 <- pg3[grep("subtype",pg3)]
-       FileSubtypes <- pg4
-       pg5 <- unlist(strsplit(pg4, pgyear))[2]
-       filetoDown <- paste0(path, "/", gsub("/","_",substr(pg5,2,nchar(pg5))))
-  }
-
-    if(is.windows()){
-        suppressWarnings(
-            downloader::download(FileSubtypes,filetoDown, quiet = TRUE, method = "wininet")
-        )
-    } else {
-        suppressWarnings(
-            downloader::download(FileSubtypes,filetoDown, quiet = TRUE)
-        )
+    if( length(grep("subtype",pg3))==1){
+        pg4 <- pg3[grep("subtype",pg3)]
+        FileSubtypes <- pg4
+        pg5 <- unlist(strsplit(pg4, pgyear))[2]
+        filetoDown <- paste0(path, "/", gsub("/","_",substr(pg5,2,nchar(pg5))))
     }
+
+    suppressWarnings(
+        downloader::download(FileSubtypes,filetoDown, quiet = TRUE)
+    )
     #table <- read.xlsx2(file,1,stringsAsFactors = NULL)
     return(filetoDown)
 }

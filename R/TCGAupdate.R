@@ -164,18 +164,9 @@ tcgaGetTable <- function(url, max = 0) {
     while (!is.na(next.url)) {
         # As we have a limitation of 1000 connections
         # every 3 minutes, we need to verify it
-        if(is.windows()){
-            suppressWarnings(
-                download(next.url, "tcga.html",
-                         quiet = TRUE,
-                         method = "auto"
-                )
-            )
-        } else {
-            download(next.url,
-                     "tcga.html",
-                     quiet = TRUE)
-        }
+        download(next.url,
+                 "tcga.html",
+                 quiet = TRUE)
 
         html <- readLines("tcga.html")
         match <- str_match(html, regex)

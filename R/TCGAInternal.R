@@ -79,21 +79,9 @@ load.tcga <- function(env) {
 # Get all files in the ftp directory @keywords internal
 getFileNames <- function(url) {
 
-    if(is.windows()){
-        suppressWarnings(
-            download(url, "tmp.html",
-                     quiet = TRUE,
-                     mode = "wb"
-            )
-        )
-    } else {
-        suppressWarnings(
-            download(url,
-                     "tmp.html",
-                     mode = "wb",
-                     quiet = 1)
-        )
-    }
+    suppressWarnings(
+        download(url, "tmp.html", quiet = TRUE)
+    )
     x <- capture.output(XML::htmlTreeParse("tmp.html"))
     unlink("tmp.html")
     x <- x[grep("href", x)]
