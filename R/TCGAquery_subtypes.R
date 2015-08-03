@@ -11,11 +11,10 @@
 #'LUAD \tab LIHC \tab STAD \tab MESO \tab CNTL
 #'}
 #' @param path Directory to save the downloaded data
-#' @import magrittr
 #' @importFrom downloader download
 #' @importFrom rvest html html_nodes html_attr
 #' @importFrom stringr str_match
-# @importFrom xlsx read.xlsx2
+#' @importFrom xlsx read.xlsx2
 #' @examples
 #' library(xlsx)
 #' GBM_path_subtypes <- TCGAquery_subtypes(tumor = "gbm",path ="dataGBM")
@@ -26,9 +25,12 @@ TCGAquery_subtypes <- function(tumor = NULL, path = ".") {
 
     dir.create(path, showWarnings = FALSE, recursive = TRUE)
     root <- "https://tcga-data.nci.nih.gov"
-
     pg <- html("https://tcga-data.nci.nih.gov/docs/publications/")
-    pg <- pg %>% html_nodes("a") %>% html_attr("href")
+
+    pg_nodes <- html_nodes(x = pg, css = "a")
+    pg <- as.character(html_attr(x = pg_nodes, name = "href"))
+
+    #pg <- pg %>% html_nodes("a") %>% html_attr("href")
     pg <- pg[grep("https://tcga-data.nci.nih.gov/docs/publications/",pg)]
     year <- str_match(pg, "[0-9]{4}")
     cancer <- gsub("_","",str_match(pg, "[a-z]{3,4}\\_"))
@@ -41,9 +43,11 @@ TCGAquery_subtypes <- function(tumor = NULL, path = ".") {
     rownames(df) <- tolower(df$cancer)
 
     site2 <- as.character(df[tolower(tumor),"path"])
-
     pg2 <- html(site2)
-    pg2 <- pg2 %>% html_nodes("a") %>% html_attr("href")
+    pg_nodes2 <- html_nodes(x = pg2, css = "a")
+    pg2 <- as.character(html_attr(x = pg_nodes2, name = "href"))
+
+#   pg2 <- pg2 magrittr::%>% html_nodes("a") magrittr::%>% html_attr("href")
     pg3 <- pg2[grep("xls",pg2)]
 
     pgyear <- as.character(df[tolower(tumor),"year"])
