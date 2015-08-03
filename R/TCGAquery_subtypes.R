@@ -14,11 +14,14 @@
 #' @importFrom downloader download
 #' @importFrom rvest html html_nodes html_attr
 #' @importFrom stringr str_match
-#' @importFrom xlsx read.xlsx2
+# @importFrom xlsx read.xlsx2
 #' @examples
-#' library(xlsx)
+#' \dontrun{
 #' GBM_path_subtypes <- TCGAquery_subtypes(tumor = "gbm",path ="dataGBM")
-#' GBM_subtypes <- read.xlsx2(GBM_path_subtypes,1,stringsAsFactors = NULL)
+#' # to prepare run:
+#' # require(xlsx)
+#' # GBM_subtypes <- read.xlsx2(GBM_path_subtypes,1,stringsAsFactors = NULL)
+#' }
 #' @export
 #' @return data.frame with information about molecular cancer subtypes
 TCGAquery_subtypes <- function(tumor = NULL, path = ".") {
@@ -68,8 +71,6 @@ TCGAquery_subtypes <- function(tumor = NULL, path = ".") {
     suppressWarnings(
         download(FileSubtypes,filetoDown, quiet = TRUE,  mode="wb")
     )
-    #table <- read.xlsx2(file,1,stringsAsFactors = NULL)
+    #table <- xlsx::read.xlsx2(file,1,stringsAsFactors = NULL)
     return(filetoDown)
 }
-
-
