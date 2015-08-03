@@ -201,7 +201,7 @@ TCGAanalyze_survival <- function(data,
 #' @param print.pvalue Print p-value for two groups
 #' @param xlab x axis text in the plot
 #' @param labels Labels of the groups
-#' @import ggplot2 stats gtools
+#' @import ggplot2 stats
 #' @importFrom SummarizedExperiment colData rowRanges assay
 # ' @importFrom gtools combinations
 #' @export
@@ -258,9 +258,11 @@ TCGAvisualize_meanMethylation <- function(data,
         df <- data.frame(mean = mean, groups = groups)
     }
 
-    comb2by2 <- combinations(length(levels(droplevels(df$groups))),
-                       2,
-                       levels(droplevels(df$groups)))
+    #comb2by2 <- combinations(length(levels(droplevels(df$groups))),
+     #                  2,
+      #                 levels(droplevels(df$groups)))
+    comb2by2 <- combn(levels(droplevels(df$groups)),2)
+
     for (i in 1:nrow(comb2by2)){
         aux <- t.test(mean ~ groups,
                       data = subset(df,subset=df$groups %in% comb2by2[i,]) )$p.value
