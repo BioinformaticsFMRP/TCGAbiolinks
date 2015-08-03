@@ -92,7 +92,7 @@ TCGAquery <- function(tumor = NULL, platform = NULL, added.since = NULL,
                         ncol = 8))
                 )
                 print(knitr::kable(df, col.names = NULL, format = "pandoc",
-                            caption = "TCGA tumors"))
+                                   caption = "TCGA tumors"))
                 cat("=======================================================\n")
                 cat("ERROR: Disease not found. Select from the table above.\n")
                 cat("=======================================================\n")
@@ -111,7 +111,7 @@ TCGAquery <- function(tumor = NULL, platform = NULL, added.since = NULL,
                         ncol = 3))
                 )
                 print(knitr::kable(df, col.names = NULL, format = "pandoc",
-                            caption = "TCGA Platforms"))
+                                   caption = "TCGA Platforms"))
                 cat("=======================================================\n")
                 cat("ERROR: Platform not found. Select from the table above.\n")
                 cat("=======================================================\n")
@@ -127,7 +127,7 @@ TCGAquery <- function(tumor = NULL, platform = NULL, added.since = NULL,
                                            ncol = 3))
             )
             print(knitr::kable(df, col.names = NULL, format = "pandoc",
-                        caption = "TCGA Centers"))
+                               caption = "TCGA Centers"))
             cat("=======================================================\n")
             cat("ERROR: Center not found. Select from the table above.\n")
             cat("=======================================================\n")
@@ -276,13 +276,7 @@ getBarcode <- function(table){
                         next
                     }
                     if ( !file.exists(maf)) {
-                        if(!is.windows()){
-                            download(paste0(root,folder,"/",maf), maf,
-                                     quiet = TRUE)
-                        } else {
-                            download(paste0(root,folder,"/",maf), maf,
-                                     quiet = TRUE, method="auto")
-                        }
+                        download(paste0(root,folder,"/",maf), maf, quiet = TRUE)
                     }
                     df <- read.delim(file = maf,
                                      sep = "\t", comment.char = "#",
