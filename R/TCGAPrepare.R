@@ -339,13 +339,13 @@ TCGAprepare <- function(query,
         }
 
         for (i in seq_along(files)) {
-            data <- fread(files[i], header = TRUE, sep = "\t", skip= 1,
-                          stringsAsFactors = FALSE)
+            data <- fread(files[i], header = TRUE, sep = "\t", skip = 1,
+                          stringsAsFactors = FALSE, data.table = FALSE)
 
             if (i == 1) {
                 df <- data
             } else {
-                df <- merge(df, data, colnames(data)[1])
+                df <- cbind(df, data[,2])
             }
             setTxtProgressBar(pb, i)
         }
@@ -361,7 +361,8 @@ TCGAprepare <- function(query,
 
         if(summarizedExperiment){
             # TODO create GRanges
-            df$external_gene_name <-  alias2SymbolTable(df$`Composite Element REF`)
+            #df$external_gene_name <-  alias2SymbolTable(df$`Composite Element REF`)
+            df$external_gene_name <-  df$`Composite Element REF`
             merged <- merge(df,gene.location,by="external_gene_name")
             rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
                                  ranges = IRanges(start = merged$start_position,
