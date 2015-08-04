@@ -67,6 +67,11 @@ devtools::load_all(".")
 
 Motivation: The Cancer Genome Atlas (TCGA) provides us with an enormous collection of data sets, not only spanning a large number of cancers but also a large number of experimental platforms. Even though the data can be accessed and downloaded from the database, the possibility to analyse these downloaded data directly in one single R package has not yet been available. 
 
+This vignette shows a complete workflow of the TCGAbiolinks package. The code is divide 
+in the step:
+* Step 1: search/download/prepare data
+* Step 2: classify the samples (no covered in this vignette)
+* Step 3: Analysis (DEA,DMR,Starbursplot)
 
 
 # Parameters definition
@@ -82,9 +87,10 @@ library(SummarizedExperiment)
 library(TCGAbiolinks)
 ```
 
-# Example of use # `TCGAquery`, `TCGAdownload` and `TCGAprepare` with LGG and GBM rnaseqV2
 
-# Step 1: Query, download and prepare data LGG and GBM
+# Step 1: Query, download and prepare data LGG and GBM  
+
+## Step 1.1: Query, download and prepare data LGG and GBM  rnaseqV2
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(TCGAbiolinks)
@@ -126,7 +132,30 @@ LGG_matrix <- CancerPreprocess("lgg" ,PlatformCancer ,pathLGG)
 save(GBM_matrix, LGG_matrix, file =  "./dataLGG_GBM.Rdata")
 ```
 
-# Step 2: Normalization and Differentially expression analysis
+## Step 1.2: Query, download and prepare data LGG and GBM  rnaseqV2
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+#-----------------------------------
+# STEP 1: Search, download, prepare |
+#-----------------------------------
+# 1.1 - Methylation
+# ----------------------------------
+query.met <- TCGAquery(tumor = c("gbm","lgg"),
+                       platform = c("HumanMethylation27",
+                                    "HumanMethylation450"),
+                       level = 3, version = list(c("HumanMethylation450","GBM",5)))
+
+TCGAdownload(query.met, path = "/dados/ibm/comparing/biolinks/gbmlgg/")
+
+met.gbm.lgg.27.450 <- TCGAprepare(query = query.met,
+                                  dir = "/dados/ibm/comparing/biolinks/gbmlgg/",
+                                  save = TRUE, filename = "gbmlgg.rda")
+```
+
+
+# Step 2: Analysis
+## Step 2.1: Normalization and Differentially expression analysis
+
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 dataCancer <- cbind(GBM_matrix, LGG_matrix)
 
@@ -141,6 +170,36 @@ dataDEGs <- TCGAanalyze_DEA(dataFilt[,colnames(GBM_matrix)],
                             "GBM", "LGG",method = "glmLRT")
 
 save(dataDEGs, file ="./LGG_GBM_DEGs.Rdata")
+```
+
+## Step 2.2: mean Methylation by samples, DMR analysis, Starburst plot
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+#--------------------------------------------
+# STEP 2: Analysis
+#--------------------------------------------
+# 2.1 - Mean methylation per patien
+# -------------------------------------------
+TCGAvisualize_meanMethylation(aux,
+                              groupCol = "cluster.meth",subgroupCol = "disease",
+                              group.legend  = "Groups", subgroup.legend = "Tumor",
+                              print.pvalue = TRUE)
+
+#------------------------------------------
+# 2.2 - Volcano plot
+# -----------------------------------------
+
+# na.omit
+aux <- subset(aux,subset = (rowSums(is.na(assay(aux))) == 0))
+
+# Volcano plot
+aux <- TCGAanalyze_DMR(aux, groupCol = "cluster.meth", p.cut = 10^-10, diffmean.cut = 0.25)
+save(aux,file = "gbmlggwithpvalues.rda")
+
+#------------------------------------------
+# 2.3 - Starburst plot
+# -----------------------------------------
+startburst <- TCGAvisualize_starburst(aux, dataDEGs,"LGm1","LGm2", p.cut = 10^-10)
 ```
 
 
