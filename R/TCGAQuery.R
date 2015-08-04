@@ -75,7 +75,7 @@
 #'                        c("HumanMethylation450","LGG",9)))
 #' @export
 #' @importFrom downloader download
-#' @importFrom stringr str_sub
+#' @importFrom stringr str_sub str_locate str_sub
 # @importFrom knitr kable
 #' @seealso
 #'  \code{\link{TCGAdownload}} for downloading the data from the
