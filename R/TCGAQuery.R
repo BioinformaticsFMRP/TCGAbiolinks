@@ -228,8 +228,8 @@ TCGAquery <- function(tumor = NULL,
     # the path to get old version of that tumor/platform
     if( !is.null(version)) {
         for(i in 1:length(version)){
-            idx <- intersect(grep(version[[i]][1],db$baseName),
-                             grep(version[[i]][2],db$baseName))
+            idx <- intersect(grep(version[[i]][1],db$baseName,ignore.case = TRUE),
+                             grep(version[[i]][2],db$baseName,ignore.case = TRUE))
             a <- str_locate(db[idx,"deployLocation"],"([0-9]){1,2}\\.0")
             b <- str_locate(db[idx,"name"],"([0-9]){1,2}\\.0")
 
