@@ -2,13 +2,9 @@
 #' @description Retrieve multiple molecular subtypes according last publications
 #' @param tumor is character such as cancer from TCGA. Examples:
 #' \tabular{lllll}{
-#'OV   \tab BRCA \tab CESC \tab ESCA \tab PCPG\cr
-#'LUSC \tab LGG  \tab SKCM \tab KICH \tab CHOL\cr
-#'GBM  \tab UCEC \tab PRAD \tab PAAD \tab THYM\cr
-#'KIRC \tab THCA \tab SARC \tab LAML \tab TGCT\cr
-#'COAD \tab KIRP \tab HNSC \tab ACC  \tab UVM \cr
-#'READ \tab BLCA \tab DLBC \tab UCS  \tab FPPP\cr
-#'LUAD \tab LIHC \tab STAD \tab MESO \tab CNTL
+#' blca \tab gbm  \tab hnsc \tab kich \tab kirc\cr
+#' laml \tab lgg  \tab luad \tab skcm \tab stad\cr
+#' thca \tab ucec
 #'}
 #' @param path Directory to save the downloaded data
 #' @importFrom downloader download
