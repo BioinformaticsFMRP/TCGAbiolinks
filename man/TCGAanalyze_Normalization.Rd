@@ -4,13 +4,15 @@
 \alias{TCGAanalyze_Normalization}
 \title{normalization mRNA transcripts and miRNA using EDASeq package.}
 \usage{
-TCGAanalyze_Normalization(TCGA_RnaseqTable, geneInfo)
+TCGAanalyze_Normalization(TCGA_RnaseqTable, geneInfo, method = "geneLength")
 }
 \arguments{
 \item{TCGA_RnaseqTable}{Rnaseq numeric matrix, each row represents a gene,
 each column represents a sample}
 
 \item{geneInfo}{Information matrix of 20531 genes about geneLength and gcContent}
+
+\item{method}{is method of normalization such as 'gcContent' or 'geneLength'}
 }
 \value{
 Rnaseq matrix normalized with counts slot holds the count data as a matrix
