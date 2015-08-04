@@ -5,7 +5,8 @@
 \title{Searches TCGA open-access data providing also latest version of the files.}
 \usage{
 TCGAquery(tumor = NULL, platform = NULL, added.since = NULL,
-  added.up.to = NULL, samples = NULL, center = NULL, level = NULL)
+  added.up.to = NULL, samples = NULL, center = NULL, level = NULL,
+  version = NULL)
 }
 \arguments{
 \item{tumor}{Disease Examples:
@@ -55,6 +56,8 @@ IlluminaHiSeq_RNASeqV2            \tab Mixed_DNASeq_Cont
 \item{center}{center name}
 
 \item{level}{'1' '2' '3'}
+
+\item{version}{List of vector with tumor/plaform/version to get old samples,}
 }
 \value{
 A dataframe with the results of the query
@@ -86,6 +89,13 @@ query <- TCGAquery(samples = "TCGA-61-1743-01A-01D-0649-04",
                    tumor = "OV",
                    platform = "CGH-1x1M_G4447A",
                    level = 3)
+ # Get all gbm/lgg 450k/27k data, but change 450k lgg to revision 5
+ # and 450k gbm to version 5
+ query <- TCGAquery(tumor = c("gbm","lgg"),
+                       platform = c("HumanMethylation27",
+                                    "HumanMethylation450"),
+                       level = 3, version = list(c("HumanMethylation450","GBM",5),
+                       c("HumanMethylation450","LGG",9)))
 }
 \seealso{
 \code{\link{TCGAdownload}} for downloading the data from the
