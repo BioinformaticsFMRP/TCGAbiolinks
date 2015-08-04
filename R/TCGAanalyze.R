@@ -349,11 +349,9 @@ TCGAanalyze_Filtering <- function(TableRnaseq,QuantileThresh ){
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 TCGAanalyze_Normalization <- function(TCGA_RnaseqTable,geneInfo,method = "geneLength"){
 
-    TCGA_RnaseqTable <- cbind(GBM_matrix,LGG_matrix)
-
-    TCGA_RnaseqTable <- TCGA_RnaseqTable[ !(TCGAbiolinks:::GenesCutID(as.matrix(rownames(TCGA_RnaseqTable))) == "?"),]
-    TCGA_RnaseqTable <- TCGA_RnaseqTable[ !(TCGAbiolinks:::GenesCutID(as.matrix(rownames(TCGA_RnaseqTable))) == "SLC35E2"),]
-    rownames(TCGA_RnaseqTable) <- TCGAbiolinks:::GenesCutID(as.matrix(rownames(TCGA_RnaseqTable)))
+    TCGA_RnaseqTable <- TCGA_RnaseqTable[ !(GenesCutID(as.matrix(rownames(TCGA_RnaseqTable))) == "?"),]
+    TCGA_RnaseqTable <- TCGA_RnaseqTable[ !(GenesCutID(as.matrix(rownames(TCGA_RnaseqTable))) == "SLC35E2"),]
+    rownames(TCGA_RnaseqTable) <- GenesCutID(as.matrix(rownames(TCGA_RnaseqTable)))
     TCGA_RnaseqTable <- TCGA_RnaseqTable[rownames(TCGA_RnaseqTable) != "?", ]
     TCGA_RnaseqTable <- TCGA_RnaseqTable[!duplicated(rownames(TCGA_RnaseqTable)), !duplicated(colnames(TCGA_RnaseqTable))]
     #TCGA_RnaseqTable <- TCGA_RnaseqTable[, which(substr(colnames(TCGA_RnaseqTable), 14, 15) != "02")]
