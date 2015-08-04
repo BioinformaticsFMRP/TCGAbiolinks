@@ -49,6 +49,7 @@
 #' @param added.up.to 04/14/2010
 #' @param center center name
 #' @param samples List of samples. Ex:c('TCGA-04-06','TCGA-61-1743-01A-01D-0649-04')
+#' @param version List of vector with tumor/plaform/version to get old samples,
 #' @examples
 #' query <- TCGAquery(tumor = "gbm",
 #'                    added.since = "01/01/2013",
@@ -65,8 +66,16 @@
 #'                    tumor = "OV",
 #'                    platform = "CGH-1x1M_G4447A",
 #'                    level = 3)
+#'  # Get all gbm/lgg 450k/27k data, but change 450k lgg to revision 5
+#'  # and 450k gbm to version 5
+#'  query <- TCGAquery(tumor = c("gbm","lgg"),
+#'                        platform = c("HumanMethylation27",
+#'                                     "HumanMethylation450"),
+#'                        level = 3, version = list(c("HumanMethylation450","GBM",5),
+#'                        c("HumanMethylation450","LGG",9)))
 #' @export
 #' @importFrom downloader download
+#' @importFrom stringr str_sub
 # @importFrom knitr kable
 #' @seealso
 #'  \code{\link{TCGAdownload}} for downloading the data from the
@@ -77,9 +86,14 @@
 #' @return A dataframe with the results of the query
 #'        (lastest version of the files)
 #' @family data functions
-TCGAquery <- function(tumor = NULL, platform = NULL, added.since = NULL,
-                      added.up.to = NULL, samples = NULL, center = NULL,
-                      level = NULL) {
+TCGAquery <- function(tumor = NULL,
+                      platform = NULL,
+                      added.since = NULL,
+                      added.up.to = NULL,
+                      samples = NULL,
+                      center = NULL,
+                      level = NULL,
+                      version = NULL) {
 
     db <- tcga.db
     if (!is.null(tumor)) {
@@ -208,6 +222,25 @@ TCGAquery <- function(tumor = NULL, platform = NULL, added.since = NULL,
         }
         db <- db[idx,]
     }
+
+    # This is a workaround for working with old levels
+    # The user should specify the tumor and disease and we will change
+    # the path to get old version of that tumor/platform
+    if( !is.null(version)) {
+        for(i in 1:length(version)){
+            idx <- intersect(grep(version[[i]][1],db$baseName),
+                             grep(version[[i]][2],db$baseName))
+            a <- str_locate(db[idx,"deployLocation"],"([0-9]){1,2}\\.0")
+            b <- str_locate(db[idx,"name"],"([0-9]){1,2}\\.0")
+
+            for (j in 1:nrow(a)){
+                str_sub(db[idx[j],"deployLocation"], a[j,1], a[j,2]) <- paste0(version[[i]][3],".0")
+                str_sub(db[idx[j],"name"], b[j,1], b[j,2]) <- paste0(version[[i]][3],".0")
+                db[idx[j],"revision"] <- version[[i]][3]
+            }
+        }
+    }
+
     return(db)
 }
 
