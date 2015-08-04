@@ -1,0 +1,154 @@
+---
+title: "Working with TCGAbiolinks package"
+author: " Antonio Colaprico, Tiago Chedraoui Silva, Luciano Garofano, 
+Catharina Olsen, Davide Garolini, Claudia Cava, Isabella Castiglioni,
+Houtan Noushmehr, Gianluca Bontempi, Michele Ceccarelli"
+date: "`r Sys.Date()`"
+output: 
+  BiocStyle::html_document:
+    toc: true
+    number_sections: no
+    toc_depth: 2
+    highlight: haddock
+
+references:
+- id: ref1
+  title: Orchestrating high-throughput genomic analysis with Bioconductor
+  author: 
+  - family: Huber, Wolfgang and Carey, Vincent J and Gentleman, Robert and Anders, Simon and Carlson, Marc and Carvalho, Benilton S and Bravo, Hector Corrada and Davis, Sean and Gatto, Laurent and Girke, Thomas and others
+    given:
+  journal: Nature methods
+  volume: 12
+  number: 2
+  pages: 115-121
+  issued:
+    year: 2015
+
+- id: ref2
+  title: GC-content normalization for RNA-Seq data
+  author: 
+  - family: Risso, Davide and Schwartz, Katja and Sherlock, Gavin and Dudoit, Sandrine
+    given:
+  journal: BMC bioinformatics
+  volume: 12
+  number: 1
+  pages: 480
+  issued:
+    year: 2011 
+    
+- id: ref3
+  title: Evaluation of statistical methods for normalization and differential expression in mRNA-Seq experiments
+  author: 
+  - family: Bullard, James H and Purdom, Elizabeth and Hansen, Kasper D and Dudoit, Sandrine
+    given:
+  journal: BMC bioinformatics
+  volume: 11
+  number: 1
+  pages: 94
+  issued:
+    year: 2010 
+
+
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dpi = 150)
+```
+
+```{r, echo = FALSE,hide=TRUE, message=FALSE}
+devtools::load_all(".")
+```
+
+# Introduction 
+
+Motivation: The Cancer Genome Atlas (TCGA) provides us with an enormous collection of data sets, not only spanning a large number of cancers but also a large number of experimental platforms. Even though the data can be accessed and downloaded from the database, the possibility to analyse these downloaded data directly in one single R package has not yet been available. 
+
+
+
+# Parameters definition
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
+dataType <- "rsem.genes.results"
+pathGBM<- "../dataGBM"
+pathLGG <- "../dataLGG"
+
+library(BiocInstaller)
+useDevel()  # we need Devel for SummarizedExperiment package
+library(SummarizedExperiment)
+library(TCGAbiolinks)
+```
+
+# Example of use # `TCGAquery`, `TCGAdownload` and `TCGAprepare` with LGG and GBM rnaseqV2
+
+# Step 1: Query, download and prepare data LGG and GBM
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+library(TCGAbiolinks)
+library(SummarizedExperiment)
+
+# CancerPreprocess is a function that integrates query, download and prepare
+
+CancerPreprocess <- function(cancer,PlatformCancer,pathCancer, nsamples = 0){
+    query <- TCGAquery(tumor = cancer, platform = PlatformCancer, level = "3")
+    listSamples <- TCGAquery_samplesfilter(query)
+    listSamplesTP <- TCGAquery_SampleTypes(listSamples$IlluminaHiSeq_RNASeqV2,"TP") 
+    
+    if( nsamples!=0) {listSamplestoDown <- listSamplesTP[1:nsamples]}
+    else{listSamplestoDown <- listSamplesTP}
+   
+    TCGAdownload(query, path = pathCancer, type = dataType,
+             samples =listSamplestoDown )
+  
+    Cancer_assay <- TCGAprepare(query,dir = pathCancer,type = dataType, save = TRUE, 
+                    filename = paste(cancer,"_",PlatformCancer,".rda",sep=""),
+                    summarizedExperiment = FALSE)
+      Cancer_matrix <- Cancer_assay[,listSamplesTP]
+    # Cancer_matrix <- SummarizedExperiment::assay(Cancer_assay,"raw_counts")
+return(Cancer_matrix)
+}
+
+```
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+library(TCGAbiolinks)
+library(SummarizedExperiment)
+
+# To test the functions use nsamples = 10 or 5
+# GBM_matrix <- CancerPreprocess("gbm" ,PlatformCancer ,pathGBM,nsamples = 100)
+# LGG_matrix <- CancerPreprocess("lgg" ,PlatformCancer ,pathLGG,nsamples = 20)
+
+GBM_matrix <- CancerPreprocess("gbm" ,PlatformCancer ,pathGBM)
+LGG_matrix <- CancerPreprocess("lgg" ,PlatformCancer ,pathLGG)
+save(GBM_matrix, LGG_matrix, file =  "./dataLGG_GBM.Rdata")
+```
+
+# Step 2: Normalization and Differentially expression analysis
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+dataCancer <- cbind(GBM_matrix, LGG_matrix)
+
+dataNorm <- TCGAanalyze_Normalization(dataCancer, geneInfo,method = "gcContent")
+#dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
+> dim(dataNorm)
+[1] 20500   672
+
+dataFilt <- dataNorm
+dataDEGs <- TCGAanalyze_DEA(dataFilt[,colnames(GBM_matrix)], 
+                            dataFilt[,colnames(LGG_matrix)],
+                            "GBM", "LGG",method = "glmLRT")
+
+save(dataDEGs, file ="./LGG_GBM_DEGs.Rdata")
+```
+
+
+******
+### Session Information
+******
+```{r sessionInfo}
+sessionInfo()
+```
+
+# References
