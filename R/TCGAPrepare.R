@@ -127,7 +127,7 @@ TCGAprepare <- function(query,
 
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     df <- NULL
-    sset <- NULL
+    rse <- NULL
 
     if (grepl("humanmethylation",tolower(platform))) {
 
@@ -176,7 +176,7 @@ TCGAprepare <- function(query,
             colData <-  colDataPrepare(colnames(df)[5:ncol(df)],query)
             assay <- data.matrix(subset(df,select = c(5:ncol(df))))
 
-            sset <- SummarizedExperiment(assays = assay,
+            rse <- SummarizedExperiment(assays = assay,
                                          rowRanges = rowRanges,
                                          colData = colData)
 
@@ -320,7 +320,7 @@ TCGAprepare <- function(query,
 
             }
             colData <- colDataPrepare(as.character(barcode), query)
-            sset <- SummarizedExperiment(assays=assays,
+            rse <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
                                          colData=colData)
         }else {
@@ -383,7 +383,7 @@ TCGAprepare <- function(query,
             )
             )
 
-            sset <- SummarizedExperiment(assays=assays,
+            rse <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
                                          colData=colData)
         }
@@ -441,7 +441,7 @@ TCGAprepare <- function(query,
                     subset(merged,select=seq(3,2+length(barcode)))))
             )
 
-            sset <- SummarizedExperiment(assays=assays,
+            rse <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
                                          colData=colData)
         }
@@ -587,7 +587,7 @@ TCGAprepare <- function(query,
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
             colData <- colDataPrepare(barcode,query)
 
-            sset <- SummarizedExperiment(assays=assays,
+            rse <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
                                          colData=colData)
         } else {
@@ -716,7 +716,7 @@ TCGAprepare <- function(query,
                 subset(merged,select = idx))
             )
 
-            sset <- SummarizedExperiment(assays = assays,
+            rse <- SummarizedExperiment(assays = assays,
                                          rowRanges = rowRanges,
                                          colData = colData)
 
@@ -728,8 +728,8 @@ TCGAprepare <- function(query,
         if (is.null(filename)) {
             filename <- paste0(platform,"_",gsub(" ","_",Sys.time()),".rda")
         }
-        if (!is.null(sset)) {
-            save(sset,file = filename)
+        if (!is.null(rse)) {
+            save(rse,file = filename)
         } else {
             save(df,file = filename)
         }
@@ -738,8 +738,29 @@ TCGAprepare <- function(query,
     if (!is.null(toPackage) && !summarizedExperiment) {
         df <- prepareToPackage(df, platform,toPackage)
     }
-    if (!is.null(sset)) {
-        return(sset)
+    if (!is.null(rse)) {
+        message("Adding metadata to the rse object...")
+
+        finf <- c()
+        for (i in seq_along(dirs)) {
+            print(dir(file.path(dir,dirs[i]), recursive = TRUE))
+            print(files)
+            aux <-  dir(file.path(dir,dirs[i]), recursive = TRUE,full.names = T)
+            info <- file.info(files)
+            finf <- rbind(finf, info )
+        }
+        rownames(finf) <- basename(rownames(finf))
+        finf <- finf[,c("mtime","ctime")]
+
+        metadata(rse) <- list("Query:"=list(query),
+                              "TCGAprepareParameters"=c("dir"=dir,
+                                                        "samples"=samples,
+                                                        "type"=type,
+                                                        "save"=save,
+                                                        "filename"=filename,
+                                                        "toPackage"=toPackage),
+                              "FilesInfo:"=list(finf))
+        return(rse)
     }
     return(df)
 }
