@@ -81,10 +81,9 @@ This document describes how to search, download and analyze TCGA data using the
 * **tumor** Tumor or list of tumors. The list of tumor is shown in the examples. 
 * **platform** Platform or list of tumors. The list of platforms is shown in the examples.
 * **samples** List of TCGA barcodes
-* **added.since** (format: mm/dd/YYYY)
-* **added.up.to** (format: mm/dd/YYYY)
 * **level**  Options: 1,2,3,"mage-tab"
 * **center**
+* **version** List of Platform/Tumor/Version to be changed
 
 ### Searching by tumor
 You can filter the search by tumor using the tumor parameter.
@@ -375,11 +374,11 @@ This section will show how to integrate `TCGAbiolinks` with other packages.
 Our intention is to provide as many integrations as possible.
 
 The example below shows how to use `TCGAbiolinks` with `ELMER` package 
-(expression/methylation analysis). The TCGAprepare for the methylation data 
+(expression/methylation analysis). The TCGAprepare for the DNA methylation data 
 will Removing probes with NA values in more than 0.80% samples and remove the 
 anottation data, fot the expression data it will take the log2(expression + 1)
 of the expression matrix in order to To linearize the relation between 
-methylation and expressionm also it will prepare the rownames as the 
+DNA methylation and expressionm also it will prepare the rownames as the 
 specified by the package.
 
 ```{r, eval = FALSE}
@@ -1074,9 +1073,9 @@ grid.raster(img)
 ```
 
 
-## TCGA downstream methylation analysis
+## TCGA downstream DNA methylation analysis
 
-Some downstream analysis from methylation data can be done with `TCGAbiolinks`.
+Some downstream analysis from DNA methylation data can be done with `TCGAbiolinks`.
 An example is shown below. Firstly, we search, download and prepare data from the 
 HumanMethylation450 platform for the GBM tumor and also get the clinical information
 from the patients. In this step, we will have a 
@@ -1094,14 +1093,8 @@ data <- TCGAprepare(query,dir = ".",save = T)
 clinical <- TCGAquery_clinic("gbm","clinical_patient")
 
 #Preprocessing 
-## We will remove probes with NA level
+# Remove probes with NA level
 data <- subset(data,subset=(rowSums(is.na(assay(data)))==0))
-
-# For the analysis we remove X and Y chromosome, because gender
-# should not influentiate the analysis
-# We will remove the rs probes that should not be used in the methylation analysis
-idx <- !(grepl("chrX|chrY|chrNA",as.vector(seqnames(data))))
-data <- subset(data,subset=idx)
 ```
 
 As an example, we divided the data into groups in order to analyze the data. 
@@ -1115,9 +1108,9 @@ clinical$group <- c(rep("group1",nrow(clinical)/4),
  colData(data)$group <- c(rep("group1",ncol(data)/2), rep("group2",ncol(data)/2))
 ```
 
-## `TCGAvisualize_meanMethylation`: Mean Methylation Analysis
-Using the data and calculating the mean methylation per group, it is possible 
-to create a mean methylation boxplot with the function `TCGAvisualize_meanMethylation`
+## `TCGAvisualize_meanMethylation`: Sample Mean DNA Methylation Analysis
+Using the data and calculating the mean DNA methylation per group, it is possible 
+to create a mean DNA methylation boxplot with the function `TCGAvisualize_meanMethylation`
 as follows:
 
 ```{r, eval = FALSE}
@@ -1155,7 +1148,7 @@ We will search for differentially methylated CpG sites using the `TCGAanalyze_DM
 function. In order to find these regions we use the beta-values 
 (methylation values ranging from 0.0 to 1.0) to compare two groups. 
 
-Firstly, it calculates the difference between the mean methylation of each group
+Firstly, it calculates the difference between the mean DNA methylation of each group
 for each probes. 
 
 Secondly, it calculates the p-value using the wilcoxon test 
