@@ -429,6 +429,7 @@ TCGAquery_clinicFilt <- function(barcode,
 # ref: TCGA codeTablesReport - Table: Sample type
 #' @importFrom S4Vectors DataFrame
 #' @importFrom stringr str_match
+#' @importFrom xlsx read.xlsx2
 colDataPrepare <- function(barcode,query){
 
     code <- c('01','02','03','04','05','06','07','08','09','10','11',
@@ -468,11 +469,7 @@ colDataPrepare <- function(barcode,query){
                      patient = substr(barcode, 1, 12),
                      code = substr(barcode, 14, 15))
     ret <- merge(ret,aux, by = "code", sort = FALSE)
-    ret <- ret[match(barcode,ret$barcode),]    
-    rownames(ret) <- ret$barcode
-
-    ret$code <- NULL
-    ret$barcode <- NULL
+    ret <- ret[match(barcode,ret$barcode),]
 
     df <- do.call(rbind,
                   lapply(seq_along(samples),
@@ -494,5 +491,33 @@ colDataPrepare <- function(barcode,query){
                   ))
 
     ret <- cbind(ret,df)
+
+    if("GBM" %in% query$Disease){
+        message("Adding subytpes information for GBM samples")
+        message("Source: https://tcga-data.nci.nih.gov/docs/publications/")
+        subtypes <- TCGAquery_subtypes(tumor = "gbm",path ="subtypeInfo")
+        subtypes <- read.xlsx2(subtypes,1,
+                               stringsAsFactors = FALSE,
+                               header = T,startRow = 3)
+        colnames(subtypes)[1] <- "patient"
+        ret <- merge(ret,subtypes, all.x = TRUE ,sort = FALSE, by = "patient")
+    }
+
+    if ("LGG" %in% query$Disease){
+        message("Adding subytpes information for LGG samples")
+        message("Source: https://tcga-data.nci.nih.gov/docs/publications/")
+        subtypes <- TCGAquery_subtypes(tumor = "lgg",path ="subtypeInfo")
+        subtypes <- read.xlsx2(subtypes,1,
+                               stringsAsFactors = FALSE,
+                               header = T,startRow = 1)
+        colnames(subtypes)[1] <- "patient"
+        ret <- merge(ret,subtypes, all.x = TRUE ,sort = FALSE, by = "patient")
+    }
+    ret <- ret[match(barcode,ret$barcode),]
+
+    rownames(ret) <- ret$barcode
+    ret$code <- NULL
+    ret$barcode <- NULL
+
     return(DataFrame(ret))
 }
