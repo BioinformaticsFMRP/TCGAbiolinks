@@ -284,7 +284,8 @@ rsem.isoforms.normalized_results, bt.exon_quantification
 
 # `TCGAprepare`: Preparing the data
 You can easily read the downloaded data using the `TCGAprepare` function.
-This function will prepare the data into a [SummarizedExperiment](http://www.nature.com/nmeth/journal/v12/n2/abs/nmeth.3252.html) 
+This function will prepare the data into a 
+[SummarizedExperiment](http://www.nature.com/nmeth/journal/v12/n2/abs/nmeth.3252.html) 
 [@ref1] object for downstream analysis. 
 For the moment this function is working only with data level 3.
 
@@ -293,10 +294,20 @@ The arguments are:
 * **query**	Data frame as the one returned from TCGAquery
 * **dir**	Directory with the files
 * **type**	File to prepare.
+* **samples**	List of samples to prepare.
 * **save**	Save a rda object with the prepared object? Default: FALSE
 * **filename** Name of the rda object that will be saved if `save` is `TRUE`
 * **toPackage** Name of the package to prepare the data specific to that package. 
 * **summarizedExperiment** Should the output be a SummarizedExperiment object? Default: `TRUE`
+
+In order to add useful information to reasearches we added in the colData of the 
+summarizedExperiment the subtypes classification for the LGG and GBM samples 
+that can be found in the [TCGA publication section](https://tcga-data.nci.nih.gov/docs/publications/)
+We intend to add more tumor types in the future.
+
+Also in the  metadata of the objet we added the parameters used in TCGAprepare,
+the query matrix used for preparing, and file information (name,creation time and modification time)
+in order to help the user know which samples, versions, and parameters they used.
 
 ### Example of use
 ```{r, eval = FALSE}
