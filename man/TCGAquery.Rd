@@ -4,9 +4,8 @@
 \alias{TCGAquery}
 \title{Searches TCGA open-access data providing also latest version of the files.}
 \usage{
-TCGAquery(tumor = NULL, platform = NULL, added.since = NULL,
-  added.up.to = NULL, samples = NULL, center = NULL, level = NULL,
-  version = NULL)
+TCGAquery(tumor = NULL, platform = NULL, samples = NULL, center = NULL,
+  level = NULL, version = NULL)
 }
 \arguments{
 \item{tumor}{Disease Examples:
@@ -46,10 +45,6 @@ tissue_images                     \tab Mixed_DNASeq_automated         \cr
 HumanMethylation27                \tab Mixed_DNASeq_Cont_curated      \cr
 IlluminaHiSeq_RNASeqV2            \tab Mixed_DNASeq_Cont
 }}
-
-\item{added.since}{04/14/2010}
-
-\item{added.up.to}{04/14/2010}
 
 \item{samples}{List of samples. Ex:c('TCGA-04-06','TCGA-61-1743-01A-01D-0649-04')}
 
