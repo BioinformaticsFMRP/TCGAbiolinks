@@ -724,6 +724,24 @@ TCGAprepare <- function(query,
     }
     close(pb)
 
+    if (!is.null(rse)) {
+        message("Adding metadata to the rse object...")
+
+        finf <- c()
+        finf <- file.info(files)
+        rownames(finf) <- basename(rownames(finf))
+        finf <- finf[,c("mtime","ctime")]
+
+        metadata(rse) <- list("Query:"=list(query),
+                              "TCGAprepareParameters"=c("dir"=dir,
+                                                        "samples"=samples,
+                                                        "type"=type,
+                                                        "save"=save,
+                                                        "filename"=filename,
+                                                        "toPackage"=toPackage),
+                              "FilesInfo:"=list(finf))
+    }
+
     if (save) {
         if (is.null(filename)) {
             filename <- paste0(platform,"_",gsub(" ","_",Sys.time()),".rda")
@@ -739,28 +757,7 @@ TCGAprepare <- function(query,
         df <- prepareToPackage(df, platform,toPackage)
     }
     if (!is.null(rse)) {
-        message("Adding metadata to the rse object...")
-
-        finf <- c()
-        for (i in seq_along(dirs)) {
-            print(dir(file.path(dir,dirs[i]), recursive = TRUE))
-            print(files)
-            aux <-  dir(file.path(dir,dirs[i]), recursive = TRUE,full.names = T)
-            info <- file.info(files)
-            finf <- rbind(finf, info )
-        }
-        rownames(finf) <- basename(rownames(finf))
-        finf <- finf[,c("mtime","ctime")]
-
-        metadata(rse) <- list("Query:"=list(query),
-                              "TCGAprepareParameters"=c("dir"=dir,
-                                                        "samples"=samples,
-                                                        "type"=type,
-                                                        "save"=save,
-                                                        "filename"=filename,
-                                                        "toPackage"=toPackage),
-                              "FilesInfo:"=list(finf))
-        return(rse)
+       return(rse)
     }
     return(df)
 }
