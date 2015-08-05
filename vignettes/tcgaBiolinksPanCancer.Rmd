@@ -65,7 +65,7 @@ devtools::load_all(".")
 
 # Introduction 
 
-Motivation: The Cancer Genome Atlas (TCGA) provides us with an enormous collection of data sets, not only spanning a large number of cancers but also a large number of experimental platforms. Even though the data can be accessed and downloaded from the database, the possibility to analyse these downloaded data directly in one single R package has not yet been available. 
+Pan Cancer downstream analysis LGG GBM
 
 This vignette shows a complete workflow of the TCGAbiolinks package. The code is divide 
 in the step:
