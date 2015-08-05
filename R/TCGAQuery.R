@@ -229,26 +229,36 @@ TCGAquery <- function(tumor = NULL,
     if( !is.null(version)) {
         message("Retrieving old version information, please wait...")
 
-        # This section will change the number mannualy and update date and barcode
-        # Most of them using the name, the ones using mage/maf files are not working yet
-        # If the batch does not exists we label it ERROR and remove it
+        root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?query=Archive"
+
+        # This function will get the version using the api and add the barcode
         for(i in 1:length(version)){
             idx <- intersect(grep(version[[i]][1],db$baseName,ignore.case = TRUE),
                              grep(version[[i]][2],db$baseName,ignore.case = TRUE))
-            a <- str_locate(db[idx,"deployLocation"],"([0-9]){1,2}\\.0")
-            b <- str_locate(db[idx,"name"],"([0-9]){1,2}\\.0")
 
-            for (j in 1:nrow(a)){
-                str_sub(db[idx[j],"deployLocation"], a[j,1], a[j,2]) <- paste0(version[[i]][3],".0")
-                str_sub(db[idx[j],"name"], b[j,1], b[j,2]) <- paste0(version[[i]][3],".0")
-                db[idx[j],"revision"] <- version[[i]][3]
-                db[idx[j],"barcode"] <- updatebarcode(db[idx[j],])
+            if (length(idx > 0 )) {
+                db <- db[-idx,]
             }
 
-        }
-        idx <- grep("ERROR", db$barcode)
-        if(length(idx > 0 )) {
-            db <- db[-idx,]
+            extra <- paste0("[revision=",version[[i]][3],"]",
+                            "[baseName=*",version[[i]][2],"*]",
+                            "[deployLocation=*",version[[i]][1],"*]")
+
+            if(!is.null(level)){
+                extra <- paste0(extra, "[name=*Level_",level,"*]")
+            }
+
+            url <- paste0(root, extra)
+            print(url)
+            new <- tcgaGetTable(url)
+            new <- new[, 1:9]
+            new$addedDate <- as.Date(new$addedDate, "%m-%d-%Y")
+            new <- tcgaDbAddCol(new)
+            new <- new[order(new$Disease,new$Platform,new$Center),]
+            for (j in 1:nrow(new)){
+                new[idx[j],"barcode"] <- updatebarcode(new[idx[j],])
+            }
+            db <- rbind(db,new)
         }
     }
 
