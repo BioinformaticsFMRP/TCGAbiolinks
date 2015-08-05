@@ -10,7 +10,7 @@
 #' @importFrom downloader download
 #' @importFrom rvest html html_nodes html_attr
 #' @importFrom stringr str_match
-# @importFrom xlsx read.xlsx2
+#' @importFrom xlsx read.xlsx2
 #' @examples
 #' \dontrun{
 #' GBM_path_subtypes <- TCGAquery_subtypes(tumor = "gbm",path ="dataGBM")
