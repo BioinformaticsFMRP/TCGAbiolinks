@@ -110,15 +110,6 @@ query <- TCGAquery(tumor = "gbm", level = 1)
 query <- TCGAquery(tumor = "gbm", level = "mage-tab")
 ```
 
-### Searching by date
-You can filter the search by date using the added.since and added.up.to parameters.
-For the moment, the format of date accepted is mm/dd/YYYY.
-
-```{r, eval = TRUE}
-# Get all gbm data produced in 2013
-query <- TCGAquery(tumor = "gbm", added.since = "01/01/2013", added.up.to = "12/31/2013")
-```
-
 ### Searching by platform
 You can filter the search by platform using the platform parameter.
 
@@ -167,12 +158,29 @@ query <- TCGAquery(samples = listSamples)
 query <- TCGAquery(samples = "TCGA-61-1743-01A")
 ```
 
+### Searching old versions
+
+The results from TCGAquery are always the last one from the TCGA data portal.
+As we have a preprocessed table you should always update `TCGAbiolinks` package.
+We intent to update the database constantly.
+
+In case you want an old version of the files we have the version parameter 
+that should be a list of triple values(platform,tumor,version).
+For example the code below will get the LGG and GBM tumor for platform 
+HumanMethylation450 but for the LGG/HumanMethylation450, we want the version 5
+of the files instead of the latest. This could take some seconds.
+
+```{r, eval = FALSE}
+query <- TCGAquery(tumor = c("LGG","GBM"),platform = c("HumanMethylation450"),
+                     level = 3,
+                      version = list(c("HumanMethylation450","LGG",1)))
+```
+
+
 ### Examples
 
 Some search examples are shown below:
 ```{r, eval = TRUE}
-query <- TCGAquery(tumor = "gbm", added.since = "01/01/2013", added.up.to = "12/31/2013")
-
 query <- TCGAquery(tumor = c("gbm","lgg"), 
                     platform = c("HumanMethylation450","HumanMethylation27"))
 
