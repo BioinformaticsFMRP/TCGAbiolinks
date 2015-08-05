@@ -45,15 +45,11 @@
 #'IlluminaHiSeq_RNASeqV2            \tab Mixed_DNASeq_Cont
 #'}
 #' @param level '1' '2' '3'
-#' @param added.since 04/14/2010
-#' @param added.up.to 04/14/2010
 #' @param center center name
 #' @param samples List of samples. Ex:c('TCGA-04-06','TCGA-61-1743-01A-01D-0649-04')
 #' @param version List of vector with tumor/plaform/version to get old samples,
 #' @examples
-#' query <- TCGAquery(tumor = "gbm",
-#'                    added.since = "01/01/2013",
-#'                    added.up.to = "12/31/2013")
+#' query <- TCGAquery(tumor = "gbm")
 #'
 #' query <- TCGAquery(tumor = c("gbm","lgg"),
 #'                    platform = c("HumanMethylation450","HumanMethylation27"))
@@ -88,8 +84,6 @@
 #' @family data functions
 TCGAquery <- function(tumor = NULL,
                       platform = NULL,
-                      added.since = NULL,
-                      added.up.to = NULL,
                       samples = NULL,
                       center = NULL,
                       level = NULL,
@@ -155,19 +149,6 @@ TCGAquery <- function(tumor = NULL,
         }
     }
 
-    if (!is.null(added.since)) {
-        d <- try(as.Date(added.since, format = "%m/%d/%Y"))
-        if (class(d) == "try-error" || is.na(d)) {
-            print("Date format should be mm/dd/YYYY")
-        }
-    }
-    if (!is.null(added.up.to)) {
-        d <- try(as.Date(added.up.to, format = "%m/%d/%Y"))
-        if (class(d) == "try-error" || is.na(d)) {
-            print("Date format should be mm/dd/YYYY")
-        }
-    }
-
     if (!is.null(tumor)) {
         id <- sapply(tumor, function(x){
             grepl(x, db$Disease, ignore.case = TRUE)
@@ -202,15 +183,6 @@ TCGAquery <- function(tumor = NULL,
             message("Sorry! No files with this level were found")
             return(NULL)
         }
-    }
-
-    if (!is.null(added.since)) {
-        db <- subset(db, as.Date(db$addedDate) > as.Date(added.since,
-                                                         "%m/%d/%Y"))
-    }
-    if (!is.null(added.up.to)) {
-        db <- subset(db, as.Date(db$addedDate) < as.Date(added.up.to,
-                                                         "%m/%d/%Y"))
     }
 
     # to be improved
@@ -254,10 +226,10 @@ TCGAquery <- function(tumor = NULL,
             new$addedDate <- as.Date(new$addedDate, "%m-%d-%Y")
             new <- tcgaDbAddCol(new)
             new <- new[order(new$Disease,new$Platform,new$Center),]
-
+            colnames(new)[4] <- "barcode"
             for (j in 1:nrow(new)){
                 message(paste0("Updating barcode for: ",new[j,]$name))
-                new[idx[j],"barcode"] <- updatebarcode(new[j,])
+                new[j,"barcode"] <- updatebarcode(new[j,])
             }
             db <- rbind(db,new)
         }
