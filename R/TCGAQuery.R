@@ -249,14 +249,15 @@ TCGAquery <- function(tumor = NULL,
             }
 
             url <- paste0(root, extra)
-            print(url)
             new <- tcgaGetTable(url)
             new <- new[, 1:9]
             new$addedDate <- as.Date(new$addedDate, "%m-%d-%Y")
             new <- tcgaDbAddCol(new)
             new <- new[order(new$Disease,new$Platform,new$Center),]
+
             for (j in 1:nrow(new)){
-                new[idx[j],"barcode"] <- updatebarcode(new[idx[j],])
+                message(paste0("Updating barcode for: ",new[j,]$name))
+                new[idx[j],"barcode"] <- updatebarcode(new[j,])
             }
             db <- rbind(db,new)
         }
