@@ -2,7 +2,8 @@
 title: "Working with TCGAbiolinks package"
 author: " Antonio Colaprico, Tiago Chedraoui Silva, Luciano Garofano, 
 Catharina Olsen, Davide Garolini, Claudia Cava, Isabella Castiglioni,
-Houtan Noushmehr, Gianluca Bontempi, Michele Ceccarelli"
+Thais, Tathiane, Stefano Pagnotta, Michele Ceccarelli
+Houtan Noushmehr, Gianluca Bontempi"
 date: "`r Sys.Date()`"
 output: 
   BiocStyle::html_document:
@@ -330,6 +331,10 @@ setdiff(TableSubTypes_filt_LGG$id, LGG_subtypes$Tumor)
 
 LGG_clinic <- TCGAquery_clinic(cancer = "LGG",clinical_data_type = "clinical_patient")
 # table(LGG_clinic$ldh1_mutation_found)
+
+
+STAD_path_subtypes <- TCGAquery_subtypes(tumor = "stad",path ="../dataSTAD")
+STAD_subtypes <- as.data.frame(read.xlsx2(STAD_path_subtypes,1,stringsAsFactors = NULL))
 ```
 
 
@@ -556,29 +561,33 @@ mee.gbm.glial.with.exp <- fetch.mee(meth = gbm.glial.m,
 ```
 
 
-# Downstream Analysis Examples `TCGAquery`, `TCGAdownload`, `TCGAprepare`
+## `TCGAprepare`: Preparing the data with CNV data (Genome_Wide_SNP_6)
 
-## Gene Expression IlluminaHiSeq_RNASeq
 You can easily search TCGA samples, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
-# Query platform IlluminaHiSeq_RNASeq withot a list of barcode 
-query <- TCGAquery(tumor = "brca", platform = "IlluminaHiSeq_RNASeq", level = "3")
 
-# You can define a list of samples to query and download providing relative TCGA barcodes.
-listSamples <- TCGAquery_samplesfilter(query)
+# Define a list of samples to query and download providing relative TCGA barcodes.
+samplesList <- c("TCGA-02-0046-10A-01D-0182-01", 
+                "TCGA-02-0052-01A-01D-0182-01", 
+                "TCGA-02-0033-10A-01D-0182-01", 
+                "TCGA-02-0034-01A-01D-0182-01", 
+                "TCGA-02-0007-01A-01D-0182-01")
 
-# Download only first 5 samples for test.
+# Query platform Genome_Wide_SNP_6 with a list of barcode 
+query <- TCGAquery(tumor = "gbm", level = 3, platform = "Genome_Wide_SNP_6")
 
-TCGAdownload(query, path = "dataBrca", type = "gene.quantification",
-             samples = listSamples$IlluminaHiSeq_RNASeq[1:5])
+# Download a list of barcodes with platform Genome_Wide_SNP_6
+TCGAdownload(query, path = "samples")
 
-# Prepare expression matrix with gene id in rows and samples (barcode) in columns
-# rsem.genes.results as values
-BRCAMatrix <- TCGAprepare(query,"dataBrca",type = "gene.quantification")
+# Prepare matrix 
+GBM_CNV <- TCGAprepare(query, dir = "samples", type = ".hg19.seg.txt")
 ```
 
+# `TCGAanalyze`: Analyze data from TCGA. 
+You can easily analyze data using following functions:
 
-## Gene Expression IlluminaHiSeq_RNASeqV2
+## `TCGAanalyze_Preprocessing` Preprocessing of Gene Expression data (IlluminaHiSeq_RNASeqV2).
+
 You can easily search TCGA samples, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
 
@@ -632,70 +641,6 @@ img <- readPNG("PreprocessingOutput.png")
 grid.raster(img)
 ```
 
-## CNV
-You can easily search TCGA samples, download and prepare a matrix of gene expression.
-```{r, eval = FALSE}
-
-# Define a list of samples to query and download providing relative TCGA barcodes.
-samplesList <- c("TCGA-02-0046-10A-01D-0182-01", 
-                "TCGA-02-0052-01A-01D-0182-01", 
-                "TCGA-02-0033-10A-01D-0182-01", 
-                "TCGA-02-0034-01A-01D-0182-01", 
-                "TCGA-02-0007-01A-01D-0182-01")
-
-# Query platform Genome_Wide_SNP_6 with a list of barcode 
-query <- TCGAquery(tumor = "gbm", level = 3, platform = "Genome_Wide_SNP_6")
-
-# Download a list of barcodes with platform Genome_Wide_SNP_6
-TCGAdownload(query, path = "samples")
-
-# Prepare matrix 
-GBM_CNV <- TCGAprepare(query, dir = "samples", type = ".hg19.seg.txt")
-```
-
-
-
-# TCGA Downstream Analysis
-After preparing the gene expression from TCGA data using the `TCGAprepare`
-function, you can do a normalization of genes using the 
-function `TCGAanalyze_Normalization`, do a quantile filter of genes with
-the `TCGAanalyze_Filtering` function. 
-
-TCGAanalyze_Normalization allows user to normalize mRNA transcripts and miRNA, 
-using R \Biocpkg{EDASeq} package. Normalization for RNA-Seq Numerical and graphical summaries of RNA-Seq read data. Within-lane normalization procedures to adjust for GC-content effect (or other gene-level effects) on read counts: loess robust local regression, global-scaling, and full-quantile normalization [@ref2]. Between-lane normalization procedures to adjust for distributional differences between lanes (e.g., sequencing depth): global-scaling and full-quantile normalization [@ref3].
-
-For istance returns all mRNA or miRNA with mean across all samples, higher than the threshold defined quantile mean across all samples.
-
-
-Also, in order to classify your samples (barcode) 
-you can use the `TCGAquery_SampleTypes` function, the typeSample "NT" will return 
-the  "Solid Tissue Normal"" samples, while the typeSample "TP" will return 
-"Primary Solid Tumor"" samples.
- 
-```{r, eval = FALSE}
-# Downstream analysis using gene expression data  
-# TCGA samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
-
-library(TCGAbiolinks)
-
-# dataBRCA in TCGAbiolinks package is a table from TCGA BRCA [10 samples] and comes from 
-# BRCAMatrix <- TCGAprepare(query,"dataBrca") from above example
-# dataBRCA <- BRCAMatrix
-
-# normalization of genes
-dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
-
-# quantile filter of genes
-dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
-
-# selection of normal samples "NT"
-samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
-
-# selection of tumor samples "TP"
-samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
-
-
-```
 
 ## `TCGAanalyze_DEA` `&` `TCGAanalyze_LevelTab` Differential expression analysis (DEA)
 
@@ -788,45 +733,7 @@ img <- readPNG("EAplot.png")
 grid.raster(img)
 ```
 
-## `TCGAvisualize_PCA`: Principal Component Analysis plot for differentially expressed genes
-
-In order to understand better our genes, we can perform a PCA to reduce the
-number of dimensions of our gene set. The function `TCGAvisualize_PCA` will plot
-the PCA for different groups.
-
-The parameters of this function are:
-
-* **dataFilt** The expression matrix after normalization and quantile filter
-* **dataDEGsFiltLevel** The TCGAanalyze_LevelTab output
-* **ntopgenes** number of DEGs genes to plot in PCA
-
-```{r, eval = FALSE}
-library(TCGAbiolinks)
-
-# normalization of genes
-dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
-
-# quantile filter of genes
-dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
-
-# Principal Component Analysis plot for ntop selected DEGs
-TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
-
-# boxplot of normalized data
-#sampleGenes <- rownames(dataDEGsFilt[dataDEGsFilt$logFC >=1,])[1:20]
-#boxplot(log(dataBRCA[sampleGenes,]), las = 2)
-#boxplot(log(dataFilt[sampleGenes,]), las = 2)
-```
-
-The result is shown below:
-```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-library(png)
-library(grid)
-img <- readPNG("PCAtop200DEGs.png")
-grid.raster(img)
-```
-
-## Survival Analysis: `TCGAanalyze_survival`, Cox Regression and dnet package
+## `TCGAanalyze_survival` Survival Analysis: Cox Regression and dnet package
 When analyzing survival times, different problems come up than the ones dis-
 cussed so far. One question is how do we deal with subjects dropping out of a
 study. For example, assume that we test a new cancer drug. While some subjects
@@ -908,7 +815,49 @@ knitr::kable(tabSurvKMcompleteDEGs[1:10,],
             row.names = TRUE)
 ```
 
-### Survival Analysis Cox Regression and dnet package
+# `TCGAvisualize`: Visualize results from analysis functions with TCGA's data. 
+You can easily visualize results from soome following functions:
+
+## `TCGAvisualize_PCA`: Principal Component Analysis plot for differentially expressed genes
+
+In order to understand better our genes, we can perform a PCA to reduce the
+number of dimensions of our gene set. The function `TCGAvisualize_PCA` will plot
+the PCA for different groups.
+
+The parameters of this function are:
+
+* **dataFilt** The expression matrix after normalization and quantile filter
+* **dataDEGsFiltLevel** The TCGAanalyze_LevelTab output
+* **ntopgenes** number of DEGs genes to plot in PCA
+
+```{r, eval = FALSE}
+library(TCGAbiolinks)
+
+# normalization of genes
+dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
+
+# quantile filter of genes
+dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
+
+# Principal Component Analysis plot for ntop selected DEGs
+TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
+
+# boxplot of normalized data
+#sampleGenes <- rownames(dataDEGsFilt[dataDEGsFilt$logFC >=1,])[1:20]
+#boxplot(log(dataBRCA[sampleGenes,]), las = 2)
+#boxplot(log(dataFilt[sampleGenes,]), las = 2)
+```
+
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("PCAtop200DEGs.png")
+grid.raster(img)
+```
+
+## `TCGAvisualize_SurvivalCoxNET` Survival Analysis: Cox Regression and dnet package
+
 TCGAvisualize_SurvivalCoxNET can help an user to identify a group of survival genes that are significant from univariate Kaplan Meier Analysis and also for Cox Regression.
 It shows in the end a network build with community of genes with similar range of pvalues from
 Cox regression (same color) and that interaction among those genes is already validated in
@@ -967,8 +916,71 @@ img <- readPNG("SurvivalCoxNETOutput.png")
 grid.raster(img)
 ```
 
+# TCGA Downstream Analysis some workflows and pipelines
 
-## TCGA Downstream Analysis Integration 
+## Downstream Analysis n.1
+After preparing the gene expression from TCGA data using the `TCGAprepare`
+function, you can do a normalization of genes using the 
+function `TCGAanalyze_Normalization`, do a quantile filter of genes with
+the `TCGAanalyze_Filtering` function. 
+
+TCGAanalyze_Normalization allows user to normalize mRNA transcripts and miRNA, 
+using R \Biocpkg{EDASeq} package. Normalization for RNA-Seq Numerical and graphical summaries of RNA-Seq read data. Within-lane normalization procedures to adjust for GC-content effect (or other gene-level effects) on read counts: loess robust local regression, global-scaling, and full-quantile normalization [@ref2]. Between-lane normalization procedures to adjust for distributional differences between lanes (e.g., sequencing depth): global-scaling and full-quantile normalization [@ref3].
+
+For istance returns all mRNA or miRNA with mean across all samples, higher than the threshold defined quantile mean across all samples.
+
+
+Also, in order to classify your samples (barcode) 
+you can use the `TCGAquery_SampleTypes` function, the typeSample "NT" will return 
+the  "Solid Tissue Normal"" samples, while the typeSample "TP" will return 
+"Primary Solid Tumor"" samples.
+ 
+```{r, eval = FALSE}
+# Downstream analysis using gene expression data  
+# TCGA samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
+
+library(TCGAbiolinks)
+
+# dataBRCA in TCGAbiolinks package is a table from TCGA BRCA [10 samples] and comes from 
+# BRCAMatrix <- TCGAprepare(query,"dataBrca") from above example
+# dataBRCA <- BRCAMatrix
+
+# normalization of genes
+dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
+
+# quantile filter of genes
+dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
+
+# selection of normal samples "NT"
+samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
+
+# selection of tumor samples "TP"
+samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
+
+
+```
+
+## Downstream Analysis n.2 IlluminaHiSeq_RNASeq data
+
+You can easily search TCGA samples, download and prepare a matrix of gene expression.
+```{r, eval = FALSE}
+# Query platform IlluminaHiSeq_RNASeq withot a list of barcode 
+query <- TCGAquery(tumor = "brca", platform = "IlluminaHiSeq_RNASeq", level = "3")
+
+# You can define a list of samples to query and download providing relative TCGA barcodes.
+listSamples <- TCGAquery_samplesfilter(query)
+
+# Download only first 5 samples for test.
+
+TCGAdownload(query, path = "dataBrca", type = "gene.quantification",
+             samples = listSamples$IlluminaHiSeq_RNASeq[1:5])
+
+# Prepare expression matrix with gene id in rows and samples (barcode) in columns
+# rsem.genes.results as values
+BRCAMatrix <- TCGAprepare(query,"dataBrca",type = "gene.quantification")
+```
+
+## Downstream Analysis n.3  LGG and GBM Integration (Heatmap and Cluster)
 
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
@@ -1121,8 +1133,7 @@ img <- readPNG("BRCA_heatmap.png")
 grid.raster(img)
 ```
 
-
-## TCGA downstream DNA methylation analysis
+## Downstream Analysis n.4 DNA methylation analysis
 
 Some downstream analysis from DNA methylation data can be done with `TCGAbiolinks`.
 An example is shown below. Firstly, we search, download and prepare data from the 
@@ -1323,7 +1334,8 @@ img <- readPNG("starburst.png")
 grid.raster(img)
 ```
 
-# Searching questions, answers and literature 
+
+# `TCGAinvestigate`: Searching questions, answers and literature 
 
 ## `TCGAinvestigate`: Find most studied TFs in pubmed 
 Find most studied TFs in pubmed related to a specific cancer, disease, or tissue
@@ -1355,11 +1367,11 @@ knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF 
 #LatexPrintTableforPresentation(Table = tabDEGsTFPubmed,rowsForPage = nrow(tabDEGsTFPubmed), TableTitle = "tabDEGsTFPubmed", LabelTitle = "tabDEGsTFPubmed", withrows = T)
 ```
 
-## `TCGAsocial`: Searching questions,answers and literature
+# `TCGAsocial`: Searching questions,answers and literature
 The `TCGAsocial` function has two type of searches, one that searches for
 most downloaded packages in CRAN or BioConductor and one that searches the most related question in biostar. 
 
-### `TCGAsocial` with BioConductor
+## `TCGAsocial` with BioConductor
 Find most downloaded packages in CRAN or BioConductor
  
 ```{r, eval = FALSE}
@@ -1388,7 +1400,7 @@ knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in s
 
 ```
 
-### `TCGAsocial` with Biostar
+## `TCGAsocial` with Biostar
 Find most related question in biostar.
  
 ```{r, eval = FALSE}
