@@ -60,7 +60,7 @@ vignette: >
 knitr::opts_chunk$set(dpi = 150)
 ```
 
-```{r, echo = FALSE,hide=TRUE, message=FALSE}
+```{r, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
 devtools::load_all(".")
 ```
 
