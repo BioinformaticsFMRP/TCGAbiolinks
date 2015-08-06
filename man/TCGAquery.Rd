@@ -69,9 +69,7 @@ The TCGAquery searches TCGA open-access data through a preprocessed table
    that will be used in the other function TCGAdownload, TCGAprepare.
 }
 \examples{
-query <- TCGAquery(tumor = "gbm",
-                   added.since = "01/01/2013",
-                   added.up.to = "12/31/2013")
+query <- TCGAquery(tumor = "gbm")
 
 query <- TCGAquery(tumor = c("gbm","lgg"),
                    platform = c("HumanMethylation450","HumanMethylation27"))
