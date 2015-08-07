@@ -255,6 +255,7 @@ TCGAUpdate <- function(){
     use_data(platform.table, disease.table, tcga.db, center.table,
              DAVID_BP_matrix,DAVID_CC_matrix,DAVID_MF_matrix,
              EAGenes,gene.location,listEA_pathways,
+             lgg.subtype, gbm.subtype, luad.subtype, stad.subtype,
              internal = TRUE,overwrite = TRUE)
 }
 
