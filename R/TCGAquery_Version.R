@@ -84,16 +84,22 @@ TCGAquery_Version <- function(tumor = NULL, platform = NULL) {
     message("============================================")
     ret <- ret [ order( substr(gsub("-","",ret$Date),1,8),decreasing =F ), ]
 
+    BarcodeList <- vector("list",length(colnames(nrow(ret))))
+    names(BarcodeList) <- ret$Version
+
     for( idx in 1: nrow(ret)){
         queryVers <- TCGAquery(tumor = c(tumor),
                                platform = c(platform),
                                level = 3,
                                version = list(c(platform,tumor,idx-1)))
         listSamplesVer <- TCGAquery_samplesfilter(queryVers)
+        BarcodeList[[idx]] <- unlist(listSamplesVer)
         ret[idx,"Samples"] <- length(unlist(listSamplesVer))
     }
 
-    return(ret)
+    ans <- list(TableVersion = ret, BarcodeList = BarcodeList)
+
+    return(ans)
 }
 
 getTotalSize <- function(sizeList) {
