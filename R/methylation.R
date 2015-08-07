@@ -259,8 +259,8 @@ TCGAvisualize_meanMethylation <- function(data,
     }
 
     #comb2by2 <- combinations(length(levels(droplevels(df$groups))),
-     #                  2,
-      #                 levels(droplevels(df$groups)))
+    #                  2,
+    #                 levels(droplevels(df$groups)))
     comb2by2 <- t(combn(levels(droplevels(df$groups)),2))
 
     for (i in 1:nrow(comb2by2)){
@@ -557,11 +557,11 @@ TCGAanalyze_DMR <- function(data,
     }
 
     # defining title and label if not specified by the user
-    if (is.null(title)){
+    if (is.null(title)) {
         title <- paste("Volcano plot", "(", group1, "vs", group2,")")
     }
 
-    if (is.null(label)){
+    if (is.null(label)) {
         label <- c("1" = "Not Significant",
                    "2" = "Hypermethylated",
                    "3" = "Hypomethylated")
@@ -582,6 +582,18 @@ TCGAanalyze_DMR <- function(data,
         if (!(pcol %in% colnames(values(rowRanges(data))))) stop("Error!")
     }
 
+    log <- paste0("TCGAanalyze_DMR.",group1,".",group2)
+    assign(log,c("groupCol" = groupCol,
+                 "group1" = group1,
+                 "group2" = group2,
+                 "filename" = filename,
+                 "xlim" = xlim,
+                 "ylim" = ylim,
+                 "p.cut" = p.cut,
+                 "diffmean.cut" = diffmean.cut,
+                 "paired" = "paired",
+                 "adj.method" = adj.method))
+    metadata(data)[[log]] <- (eval(as.symbol(log)))
     statuscol <- paste("status",group1,group2,sep = ".")
     values(rowRanges(data))[,statuscol] <-  "Not Significant"
     rowRanges(data)$threshold <- "1"
