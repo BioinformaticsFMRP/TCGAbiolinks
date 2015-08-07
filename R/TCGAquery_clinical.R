@@ -492,26 +492,16 @@ colDataPrepare <- function(barcode,query){
 
     ret <- cbind(ret,df)
 
-    if("GBM" %in% query$Disease){
-        message("Adding subytpes information for GBM samples")
-        message("Source: https://tcga-data.nci.nih.gov/docs/publications/")
-        subtypes <- TCGAquery_subtypes(tumor = "gbm",path ="subtypeInfo")
-        subtypes <- read.xlsx2(subtypes,1,
-                               stringsAsFactors = FALSE,
-                               header = T,startRow = 3)
-        colnames(subtypes)[1] <- "patient"
-        ret <- merge(ret,subtypes, all.x = TRUE ,sort = FALSE, by = "patient")
-    }
-
-    if ("LGG" %in% query$Disease){
-        message("Adding subytpes information for LGG samples")
-        message("Source: https://tcga-data.nci.nih.gov/docs/publications/")
-        subtypes <- TCGAquery_subtypes(tumor = "lgg",path ="subtypeInfo")
-        subtypes <- read.xlsx2(subtypes,1,
-                               stringsAsFactors = FALSE,
-                               header = T,startRow = 1)
-        colnames(subtypes)[1] <- "patient"
-        ret <- merge(ret,subtypes, all.x = TRUE ,sort = FALSE, by = "patient")
+    for (i in unique(query$Disease)) {
+        if (grepl("lgg|gbm|luad|stad", i,ignore.case = TRUE)) {
+            subtype <- get(paste0(tolower(i),".subtype"))
+            if (any(barcode %in% subtype$patient)) {
+                ret <- merge(ret, subtype,
+                             all.x = TRUE ,
+                             sort = FALSE,
+                             by = "patient")
+            }
+        }
     }
     ret <- ret[match(barcode,ret$barcode),]
 
@@ -520,4 +510,55 @@ colDataPrepare <- function(barcode,query){
     ret$barcode <- NULL
 
     return(DataFrame(ret))
+}
+
+#' @importFrom xlsx read.xlsx2
+getsubtypes <- function(tumor = NULL, path = ".") {
+
+    dir.create(path, showWarnings = FALSE, recursive = TRUE)
+    root <- "https://tcga-data.nci.nih.gov/docs/publications/"
+
+    if(grepl("lgg",tumor,ignore.case = TRUE)){
+        link <- paste0(root,"lgg_2015/S1.Table.Revision.xlsx")
+    }
+    if(grepl("gbm",tumor,ignore.case = TRUE)){
+        link <- paste0(root,"gbm_2013/supplement/Molecular_subtype_classification.xlsx")
+    }
+
+    if(grepl("luad",tumor,ignore.case = TRUE)){
+        link <- paste0(root,"luad_2014/tcga.luad.gene.expression.subtypes.20121025.csv")
+    }
+
+    if(grepl("stad",tumor,ignore.case = TRUE)){
+        link <- paste0(root,"stad_2014/STAD%20Master%20Patient%20Table%2020140207.xlsx")
+    }
+
+    fname <- paste0(path, "/", basename(link))
+    fname <- gsub(" ","_",fname)
+    link <- gsub(" ","%20",link)
+
+    suppressWarnings(
+        if (!file.exists(fname)) {
+            download(link,fname, quiet = TRUE,  mode = "wb")
+        }
+    )
+
+    if(grepl("lgg",tumor,ignore.case = TRUE)){
+        subtype <- read.xlsx2(fname,1,stringAsFactor=FALSE, header=TRUE)
+    }
+    if(grepl("gbm",tumor,ignore.case = TRUE)){
+        subtype <- read.xlsx2(fname,1,stringAsFactor=FALSE, header=TRUE, startRow = 3)
+    }
+    if(grepl("luad",tumor,ignore.case = TRUE)){
+        subtype <- read.csv(fname)
+    }
+    if(grepl("stad",tumor,ignore.case = TRUE)){
+        subtype <- read.xlsx2(fname,1,stringAsFactor=FALSE, header=TRUE)
+    }
+    colnames(subtype)[1] <- "patient"
+
+    message("Adding subytpes information for", tumor, "samples")
+    message(paste0("Source:", link))
+
+    return(subtype)
 }
