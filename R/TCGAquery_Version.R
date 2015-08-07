@@ -84,7 +84,7 @@ TCGAquery_Version <- function(tumor = NULL, platform = NULL) {
     message("============================================")
     ret <- ret [ order( substr(gsub("-","",ret$Date),1,8),decreasing =F ), ]
 
-    BarcodeList <- vector("list",length(colnames(nrow(ret))))
+    BarcodeList <- vector("list",nrow(ret))
     names(BarcodeList) <- ret$Version
 
     for( idx in 1: nrow(ret)){
