@@ -82,7 +82,17 @@ TCGAquery_Version <- function(tumor = NULL, platform = NULL) {
     message("Level 3 versions: ", length(grep("Level_3", ret$Version)))
     message("Mage versions: ", length(grep("mage-tab", ret$Version)))
     message("============================================")
-    # ret <- ret[order(ret$SizeMbyte,decreasing=TRUE),]
+    ret <- ret [ order( substr(gsub("-","",ret$Date),1,8),decreasing =F ), ]
+
+    for( idx in 1: nrow(ret)){
+        queryVers <- TCGAquery(tumor = c(tumor),
+                               platform = c(platform),
+                               level = 3,
+                               version = list(c(platform,tumor,idx-1)))
+        listSamplesVer <- TCGAquery_samplesfilter(queryVers)
+        ret[idx,"Samples"] <- length(unlist(listSamplesVer))
+    }
+
     return(ret)
 }
 
