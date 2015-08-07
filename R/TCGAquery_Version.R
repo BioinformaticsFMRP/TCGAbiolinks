@@ -83,7 +83,7 @@ TCGAquery_Version <- function(tumor = NULL, platform = NULL) {
     message("Mage versions: ", length(grep("mage-tab", ret$Version)))
     message("============================================")
     ret <- ret [ order( substr(gsub("-","",ret$Date),1,8),decreasing =F ), ]
-
+    rownames(ret) <- NULL
     BarcodeList <- vector("list",nrow(ret))
     names(BarcodeList) <- ret$Version
 
@@ -93,7 +93,7 @@ TCGAquery_Version <- function(tumor = NULL, platform = NULL) {
                                level = 3,
                                version = list(c(platform,tumor,idx-1)))
         listSamplesVer <- TCGAquery_samplesfilter(queryVers)
-        BarcodeList[[idx]] <- unlist(listSamplesVer)
+        BarcodeList[[idx]] <- as.character(unlist(listSamplesVer))
         ret[idx,"Samples"] <- length(unlist(listSamplesVer))
     }
 
