@@ -50,7 +50,7 @@
 #' data <- TCGAprepare(query, dir="exampleData")
 #' @export
 #' @importFrom stringr str_match str_trim str_detect str_match_all
-#' @importFrom SummarizedExperiment SummarizedExperiment
+#' @importFrom SummarizedExperiment SummarizedExperiment metadata<-
 #' @importFrom S4Vectors DataFrame SimpleList
 #' @importFrom limma alias2SymbolTable
 #' @importFrom GenomicFeatures microRNAs
