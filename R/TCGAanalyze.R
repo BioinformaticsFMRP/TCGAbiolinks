@@ -349,20 +349,29 @@ TCGAanalyze_Filtering <- function(TableRnaseq,QuantileThresh ){
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 TCGAanalyze_Normalization <- function(TCGA_RnaseqTable,geneInfo,method = "geneLength"){
 
-    TCGA_RnaseqTable <- TCGA_RnaseqTable[ !(GenesCutID(as.matrix(rownames(TCGA_RnaseqTable))) == "?"),]
-    TCGA_RnaseqTable <- TCGA_RnaseqTable[ !(GenesCutID(as.matrix(rownames(TCGA_RnaseqTable))) == "SLC35E2"),]
-    rownames(TCGA_RnaseqTable) <- GenesCutID(as.matrix(rownames(TCGA_RnaseqTable)))
-    TCGA_RnaseqTable <- TCGA_RnaseqTable[rownames(TCGA_RnaseqTable) != "?", ]
-    TCGA_RnaseqTable <- TCGA_RnaseqTable[!duplicated(rownames(TCGA_RnaseqTable)), !duplicated(colnames(TCGA_RnaseqTable))]
-    #TCGA_RnaseqTable <- TCGA_RnaseqTable[, which(substr(colnames(TCGA_RnaseqTable), 14, 15) != "02")]
-    TCGA_RnaseqTable <- TCGA_RnaseqTable[rownames(TCGA_RnaseqTable) %in% rownames(geneInfo),]
-    TCGA_RnaseqTable <- as.matrix(TCGA_RnaseqTable)
-
     if(method == "gcContent"){
-        rawCounts<- TCGA_RnaseqTable
-    wwhich <- which(rownames(geneInfo) %in% rownames(rawCounts))
-    geneInfo <- geneInfo[wwhich,]
-    geneInfo <- geneInfo[rownames(rawCounts),]
+
+        tmp <- as.character(rownames(TCGA_RnaseqTable))
+        tmp <- strsplit(tmp, "\\|")
+        geneNames <- matrix("", ncol = 2, nrow = length(tmp))
+        j <- 1
+        while(j <= length(tmp)) {
+            geneNames[j, 1] <- tmp[[j]][1]
+            geneNames[j, 2] <- tmp[[j]][2]
+            j <- j + 1
+        }
+        tmp <- which(geneNames[, 1] == "?")
+        geneNames[tmp, 1] <- geneNames[tmp, 2]
+        tmp <- table(geneNames[,1])
+        tmp <- which(geneNames[,1] == names(tmp[which(tmp > 1)]))
+        geneNames[tmp, 1] <- paste(geneNames[tmp, 1], geneNames[tmp, 2], sep = ".")
+        tmp <- table(geneNames[,1])
+        rownames(TCGA_RnaseqTable) <- geneNames[,1]
+
+    rawCounts<- TCGA_RnaseqTable
+    commonGenes <- intersect(rownames(geneInfo), rownames(rawCounts))
+    geneInfo <- geneInfo[commonGenes,]
+    rawCounts <- rawCounts[commonGenes,]
 
     timeEstimated <- format(ncol(TCGA_RnaseqTable)*nrow(TCGA_RnaseqTable)/80000,digits = 2)
     print(messageEstimation <- paste("I Need about ", timeEstimated,
@@ -372,7 +381,7 @@ TCGAanalyze_Normalization <- function(TCGA_RnaseqTable,geneInfo,method = "geneLe
     ffData  <- as.data.frame(geneInfo)
     rawCounts <- floor(rawCounts)
     print("Step 1 of 4: newSeqExpressionSet ...")
-    tmp <- newSeqExpressionSet(rawCounts, featureData = ffData)
+    tmp <- newSeqExpressionSet(as.matrix(rawCounts), featureData = ffData)
 
     #fData(tmp)[, "gcContent"] <- as.numeric(geneInfo[, "gcContent"])
 
@@ -388,6 +397,15 @@ TCGAanalyze_Normalization <- function(TCGA_RnaseqTable,geneInfo,method = "geneLe
     }
 
     if(method == "geneLength"){
+
+        TCGA_RnaseqTable <- TCGA_RnaseqTable[ !(GenesCutID(as.matrix(rownames(TCGA_RnaseqTable))) == "?"),]
+        TCGA_RnaseqTable <- TCGA_RnaseqTable[ !(GenesCutID(as.matrix(rownames(TCGA_RnaseqTable))) == "SLC35E2"),]
+        rownames(TCGA_RnaseqTable) <- GenesCutID(as.matrix(rownames(TCGA_RnaseqTable)))
+        TCGA_RnaseqTable <- TCGA_RnaseqTable[rownames(TCGA_RnaseqTable) != "?", ]
+        TCGA_RnaseqTable <- TCGA_RnaseqTable[!duplicated(rownames(TCGA_RnaseqTable)), !duplicated(colnames(TCGA_RnaseqTable))]
+        TCGA_RnaseqTable <- TCGA_RnaseqTable[rownames(TCGA_RnaseqTable) %in% rownames(geneInfo),]
+        TCGA_RnaseqTable <- as.matrix(TCGA_RnaseqTable)
+
     geneInfo <- geneInfo[rownames(geneInfo) %in% rownames(TCGA_RnaseqTable), ]
     geneInfo <- geneInfo[!duplicated(rownames(geneInfo)), ]
     toKeep <- which(geneInfo[, "geneLength"] != 0)
