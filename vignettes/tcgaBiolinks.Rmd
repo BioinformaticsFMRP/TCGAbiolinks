@@ -1255,8 +1255,8 @@ data <- TCGAanalyze_DMR(data, groupCol = "cluster.meth",subgroupCol = "disease",
 ```
 
 The output will be a plot such as the figure below. The green dots are the 
-probes that are hypomethylated in group 1 compared to group 2, 
-while the red dots are the hypermethylated probes in group 1 compared to group 2
+probes that are hypomethylated in group 2 compared to group 1, 
+while the red dots are the hypermethylated probes in group 2 compared to group 1
 
 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
@@ -1274,10 +1274,12 @@ p-value adjusted, diffmean and the group it belongs in the graph
 (non significant, hypomethylated, hypermethylated) in the rowRanges. 
 The collumns will be (where group1 and group2 are the names of the groups): 
 
-* diffmean.group1.group2 
+* diffmean.group1.group2 (mean.group2 - mean.group1) 
+* diffmean.group2.group1 (mean.group1 - mean.group2)
 * p.value.group1.group2
 * p.value.adj.group1.group2
-* status.group1.group2 
+* status.group1.group2 (Status of probes in group2 in relation to group1) 
+* status.group2.group1 (Status of probes in group1 in relation to group2) 
 
 This values can be view/acessed using the `rowRanges` 
 acessesor (`rowRanges(data)`).
