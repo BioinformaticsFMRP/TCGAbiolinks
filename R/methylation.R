@@ -42,7 +42,8 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
          is.null(group1) && is.null(group2)) {
         message("Please, set the group1 and group2 parameters")
         return(NULL)
-    } else if (length(unique(colData(data)[,groupCol])) == 2) {
+    } else if (length(unique(colData(data)[,groupCol])) == 2 &&
+               is.null(group1) && is.null(group2)) {
         group1 <- unique(colData(data)[,groupCol])[1]
         group2 <- unique(colData(data)[,groupCol])[2]
     }
@@ -53,12 +54,13 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
     idx2 <- which(colData(data)[,groupCol] == group2)
     mean.g1 <- rowMeans(m[,idx1], na.rm = TRUE)
     mean.g2 <- rowMeans(m[,idx2], na.rm = TRUE)
-    diffmean <- mean.g1 - mean.g2
+    diffmean <- mean.g2 - mean.g1
 
     # Saves the result
     values(rowRanges(data))[,paste0("mean.",group1)] <-  mean.g1
     values(rowRanges(data))[,paste0("mean.",group2)] <-  mean.g2
     values(rowRanges(data))[,paste0("diffmean.",group1,".",group2)] <-  diffmean
+    values(rowRanges(data))[,paste0("diffmean.",group2,".",group1)] <-  -diffmean
 
     # Ploting a histogram to evaluate the data
     message("Saved histogram_diffmean.png...")
@@ -256,6 +258,10 @@ TCGAvisualize_meanMethylation <- function(data,
         df <- data.frame(mean = mean, groups = groups, subgroups = subgroups)
     } else {
         df <- data.frame(mean = mean, groups = groups)
+    }
+
+    for(i in unique(df$groups)){
+        message(paste("Mean group ",i,":",mean(subset(df, groups==i)$mean)))
     }
 
     #comb2by2 <- combinations(length(levels(droplevels(df$groups))),
@@ -548,24 +554,25 @@ TCGAanalyze_DMR <- function(data,
          is.null(group1) && is.null(group2)) {
         message("Please, set the group1 and group2 parameters")
         return(NULL)
-    } else if (length(unique(colData(data)[,groupCol])) == 2) {
+    } else if (length(unique(colData(data)[,groupCol])) == 2  && (
+               is.null(group1) || is.null(group2)) ) {
         group1 <- unique(colData(data)[,groupCol])[1]
         group2 <- unique(colData(data)[,groupCol])[2]
+    } else {
         message(paste0("Group1:", group1))
         message(paste0("Group2:", group2))
-
     }
 
     # defining title and label if not specified by the user
     if (is.null(title)) {
-        title <- paste("Volcano plot", "(", group1, "vs", group2,")")
+        title <- paste("Volcano plot", "(", group2, "vs", group1,")")
     }
 
     if (is.null(label)) {
         label <- c("1" = "Not Significant",
                    "2" = "Hypermethylated",
                    "3" = "Hypomethylated")
-        label[2:3] <-  paste(label[2:3], "in", group1)
+        label[2:3] <-  paste(label[2:3], "in", group2)
     }
 
     diffcol <- paste("diffmean",group1,group2,sep = ".")
@@ -573,8 +580,11 @@ TCGAanalyze_DMR <- function(data,
         data <- diffmean(data,groupCol, group1 = group1, group2 = group2)
         if (!(diffcol %in% colnames(values(rowRanges(data))))) stop("Error!")
     }
-    pcol <- paste("p.value.adj",group1,group2,sep = ".")
-    if (!(pcol %in% colnames(values(rowRanges(data)))) || overwrite) {
+    pcol <- paste("p.value.adj",group2,group1,sep = ".")
+    if(!(pcol %in% colnames(values(rowRanges(data))))){
+        pcol <- paste("p.value.adj",group1,group2,sep = ".")
+    }
+    if (!(pcol %in% colnames(values(rowRanges(data)))) | overwrite) {
         data <- calculate.pvalues(data,groupCol, group1, group2,
                                   paired = paired,method = adj.method)
         # An error should not happen, if it happens (probably due to an incorret
@@ -595,7 +605,9 @@ TCGAanalyze_DMR <- function(data,
                  "adj.method" = adj.method))
     metadata(data)[[log]] <- (eval(as.symbol(log)))
     statuscol <- paste("status",group1,group2,sep = ".")
+    statuscol2 <- paste("status",group2,group1,sep = ".")
     values(rowRanges(data))[,statuscol] <-  "Not Significant"
+    values(rowRanges(data))[,statuscol2] <-  "Not Significant"
     rowRanges(data)$threshold <- "1"
 
     # get significant data
@@ -606,10 +618,13 @@ TCGAanalyze_DMR <- function(data,
 
     if (any(hyper & sig)) rowRanges(data)[hyper & sig,]$threshold <- "2"
     if (any(hyper & sig)) values(rowRanges(data))[hyper & sig,statuscol] <- "Hypermethylated"
+    if (any(hyper & sig)) values(rowRanges(data))[hyper & sig,statuscol2] <- "Hypomethylated"
+
     # hypomethylated samples compared to old state
     hypo <-  values(rowRanges(data))[,diffcol] < (-diffmean.cut)
     if (any(hypo & sig)) rowRanges(data)[hypo & sig,]$threshold <- "3"
     if (any(hypo & sig)) values(rowRanges(data))[hypo & sig,statuscol] <- "Hypomethylated"
+    if (any(hypo & sig)) values(rowRanges(data))[hypo & sig,statuscol2] <- "Hypermethylated"
 
     # Plot a volcano plot
     p <- ggplot(data = as.data.frame(rowRanges(data)),
@@ -734,6 +749,14 @@ TCGAvisualize_starburst <- function(met,
         return(NULL)
     }
 
+    # Preparing methylation
+    pcol <- paste("p.value.adj",group1,group2,sep = ".")
+    if(!(pcol %in%  colnames(values(met)))){
+        pcol <- paste("p.value.adj",group2,group1,sep = ".")
+    }
+    if(!(pcol %in%  colnames(values(met)))){
+        stop("Error! p-values adjusted not found. Please, run TCGAanalyze_DMR")
+    }
     met <- as.data.frame(rowRanges(met))
 
     aux <- strsplit(row.names(exp),"\\|")
@@ -748,8 +771,7 @@ TCGAvisualize_starburst <- function(met,
     volcano[volcano$logFC > 0, "geFDR2"] <-
         -1 * volcano[volcano$logFC > 0, "geFDR"]
 
-    # Preparing methylation
-    pcol <- paste("p.value.adj",group1,group2,sep = ".")
+
     diffcol <- paste("diffmean",group1,group2,sep = ".")
     volcano$meFDR <- log10(volcano[,pcol])
     volcano$meFDR2 <- volcano$meFDR
@@ -762,8 +784,8 @@ TCGAvisualize_starburst <- function(met,
     # subseting by regulation (geFDR) and methylation level
     # (meFDR) down regulated up regulated lowerthr
     # |||||||||||||||| upperthr hypomethylated hipermethylated
-    lowerthr <- log10(p.cut)  # - 1.30103
-    upperthr <- (-lowerthr)  # +1.30103
+    lowerthr <- log10(p.cut)
+    upperthr <- (-lowerthr)
 
     # Group 2:up regulated and hypomethylated
     a <- subset(volcano,
@@ -855,7 +877,7 @@ TCGAvisualize_starburst <- function(met,
                    linetype = "dashed") +
         geom_vline(aes(xintercept = upperthr), colour = "black",
                    linetype = "dashed")
-    ggsave(filename = "starbust.gcimp.pdf", width = 14, height = 10)
+    ggsave(filename = filename, width = 14, height = 10)
 
     volcano = subset(volcano,select = c("Gene_Symbol",
                                         "probeID",
