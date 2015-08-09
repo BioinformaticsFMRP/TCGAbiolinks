@@ -228,7 +228,7 @@ TCGAvisualize_meanMethylation <- function(data,
                                           subgroupCol=NULL,
                                           shapes = NULL,
                                           print.pvalue=FALSE,
-                                          filename = "G-CIMP-mean.methylation.pdf",
+                                          filename = "sampleMeanMethylationByGroups.pdf",
                                           ylab = expression(
                                               paste("Mean DNA methylation (",
                                                     beta,"-values)")),
@@ -712,7 +712,7 @@ TCGAvisualize_starburst <- function(met,
                                     exp,
                                     group1=NULL,
                                     group2=NULL,
-                                    filename = "volcano.pdf",
+                                    filename = "starburst.pdf",
                                     ylab = expression(atop("Gene Expression",
                                                            paste(Log[10],
                                                                  " (FDR corrected P values)"))),
@@ -879,9 +879,12 @@ TCGAvisualize_starburst <- function(met,
                    linetype = "dashed")
     ggsave(filename = filename, width = 14, height = 10)
 
-    volcano = subset(volcano,select = c("Gene_Symbol",
-                                        "probeID",
+    statuscol <- paste("status", group1, group2, sep = ".")
+
+    volcano <- subset(volcano,select = c("Gene_Symbol",
+                                        "probeID",statuscol,
                                         "starburst.status")
     )
+
     return(volcano)
 }
