@@ -5,7 +5,7 @@
 \title{Create starburst plot}
 \usage{
 TCGAvisualize_starburst(met, exp, group1 = NULL, group2 = NULL,
-  filename = "volcano.pdf", ylab = expression(atop("Gene Expression",
+  filename = "starburst.pdf", ylab = expression(atop("Gene Expression",
   paste(Log[10], " (FDR corrected P values)"))),
   xlab = expression(atop("DNA Methylation", paste(Log[10],
   " (FDR corrected P values)"))), title = "Starburst Plot",
