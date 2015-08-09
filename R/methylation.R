@@ -502,6 +502,7 @@ calculate.pvalues <- function(data,
 #' for both groups? Default: FALSE
 #' @import ggplot2
 #' @importFrom SummarizedExperiment colData rowRanges assay rowRanges<- values<-
+#' @importFrom S4Vectors metadata
 #' @export
 #' @return Volcano plot saved and the given data with the results
 #' (diffmean.group1.group2,p.value.group1.group2,
