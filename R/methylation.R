@@ -386,6 +386,7 @@ TCGAvisualize_meanMethylation <- function(data,
 #'          colData=colData)
 #' data <- calculate.pvalues(data,"group")
 #' }
+#' @importFrom plyr adply
 #' @keywords internal
 calculate.pvalues <- function(data,
                               groupCol = NULL,
@@ -412,26 +413,27 @@ calculate.pvalues <- function(data,
     idx1 <- which(colData(data)[,groupCol] == group1)
     idx2 <- which(colData(data)[,groupCol] == group2)
 
+    if(!is.factor(colData(data)[,groupCol])) {
+        colData(data)[,groupCol] <- factor(
+            colData(data)[,groupCol]
+        )
+    }
+
     if(!paired){
-        p.value <- apply(assay(data),1,
+        p.value <- adply(assay(data),1,
                          function(x) {
-                             if(!is.factor(colData(data)[,groupCol])) {
-                                 colData(data)[,groupCol] <- factor(
-                                     colData(data)[,groupCol]
-                                 )
-                             }
                              aux <-data.frame(beta=x[c(idx1,idx2)],
                                               cluster=droplevels(colData(data)[c(idx1,idx2),groupCol]))
                              pvalue(wilcox_test(beta ~ cluster, data=aux, distribution = "exact"))
-                         }
+                         }, .progress = "text"
         )
     } else {
-        p.value <- apply(assay(data),1,
+        p.value <- adply(assay(data),1,
                          function(x) {
                              aux <-data.frame(beta=x[c(idx1,idx2)],
                                               cluster=droplevels(colData(data)[c(idx1,idx2),groupCol]))
                              pvalue(wilcoxsign_test(beta ~ cluster, data=aux, distribution = exact()))
-                         }
+                         }, .progress = "text"
         )
     }
     ## Plot a histogram
@@ -556,7 +558,7 @@ TCGAanalyze_DMR <- function(data,
         message("Please, set the group1 and group2 parameters")
         return(NULL)
     } else if (length(unique(colData(data)[,groupCol])) == 2  && (
-               is.null(group1) || is.null(group2)) ) {
+        is.null(group1) || is.null(group2)) ) {
         group1 <- unique(colData(data)[,groupCol])[1]
         group2 <- unique(colData(data)[,groupCol])[2]
     } else {
@@ -883,8 +885,8 @@ TCGAvisualize_starburst <- function(met,
     statuscol <- paste("status", group1, group2, sep = ".")
 
     volcano <- subset(volcano,select = c("Gene_Symbol",
-                                        "probeID",statuscol,
-                                        "starburst.status")
+                                         "probeID",statuscol,
+                                         "starburst.status")
     )
 
     return(volcano)
