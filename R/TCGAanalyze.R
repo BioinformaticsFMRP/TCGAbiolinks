@@ -349,6 +349,12 @@ TCGAanalyze_Filtering <- function(TableRnaseq,QuantileThresh ){
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 TCGAanalyze_Normalization <- function(TCGA_RnaseqTable,geneInfo,method = "geneLength"){
 
+    geneInfo <- geneInfo[!is.na(geneInfo[,1]),]
+    geneInfo <-as.data.frame(geneInfo)
+    geneInfo$geneLength <- as.numeric(as.character(geneInfo$geneLength))
+    geneInfo$gcContent <- as.numeric(as.character(geneInfo$gcContent))
+
+
     if(method == "gcContent"){
 
         tmp <- as.character(rownames(TCGA_RnaseqTable))
