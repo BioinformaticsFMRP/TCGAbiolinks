@@ -6,7 +6,7 @@
  for downstream analysis into a SummarizedExperiment object.}
 \usage{
 TCGAprepare(query, dir = NULL, samples = NULL, type = NULL,
-  save = FALSE, filename = NULL, toPackage = NULL,
+  save = FALSE, filename = NULL, toPackage = NULL, reannotate = FALSE,
   summarizedExperiment = TRUE)
 }
 \arguments{
@@ -25,6 +25,9 @@ Default: \code{FALSE}}
 
 \item{toPackage}{For whihc package are you preparing the data?
 Default: NULL. Options: "ELMER"}
+
+\item{reannotate}{Reannotate genes?  Source http://grch37.ensembl.org/.
+DEFAULT: FALSE. (For the moment only working for methylation data)}
 
 \item{summarizedExperiment}{Output as SummarizedExperiment?
 Default: \code{FALSE}}
