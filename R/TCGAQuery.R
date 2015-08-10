@@ -62,13 +62,11 @@
 #'                    tumor = "OV",
 #'                    platform = "CGH-1x1M_G4447A",
 #'                    level = 3)
-#'  # Get all gbm/lgg 450k/27k data, but change 450k lgg to revision 5
-#'  # and 450k gbm to version 5
-#'  query <- TCGAquery(tumor = c("gbm","lgg"),
-#'                        platform = c("HumanMethylation27",
-#'                                     "HumanMethylation450"),
-#'                        level = 3, version = list(c("HumanMethylation450","GBM",5),
-#'                        c("HumanMethylation450","LGG",9)))
+#'
+#' # Get all LGG IlluminaHiSeq_RNASeqV2 data, but change with data version 11
+#'
+#' query <- TCGAquery(tumor = "LGG", platform = "IlluminaHiSeq_RNASeqV2", level = "3",
+#'                    version = list(c("IlluminaHiSeq_RNASeqV2","LGG",11)))
 #' @export
 #' @importFrom downloader download
 #' @importFrom stringr str_sub str_locate str_sub<-
