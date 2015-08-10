@@ -682,7 +682,12 @@ TCGAanalyze_DMR <- function(data,
 #' @param xlab x axis text
 #' @param xlim x limits to cut image
 #' @param ylim y limits to cut image
-#' @param p.cut p value cut-off
+#' @param met.p.cut methylation p value cut-off
+#' @param exp.p.cut expression p value cut-off
+#' @param diffmean.cut If set, the probes with diffmean higher than methylation cut-off will be
+#'  highlighted in the plot. And the data frame return will be subseted.
+#' @param FC.cut If set, the probes with expression fold change higher than methylation cut-off will be
+#'  highlighted in the plot. And the data frame return will be subseted.
 #' @param group1 The name of the group 1
 #' Obs: Column p.value.adj.group1.group2 should exist
 #' @param group2 The name of the group 2.
@@ -714,11 +719,15 @@ TCGAanalyze_DMR <- function(data,
 #' SummarizedExperiment::rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
 #' SummarizedExperiment::rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
 #' SummarizedExperiment::rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
-#' result <- TCGAvisualize_starburst(met,exp,p.cut = 0.05,"g1","g2")
+#' result <- TCGAvisualize_starburst(met,exp,exp.p.cut = 0.05,met.p.cut = 0.05,"g1","g2")
 TCGAvisualize_starburst <- function(met,
                                     exp,
                                     group1=NULL,
                                     group2=NULL,
+                                    exp.p.cut = 0.01,
+                                    met.p.cut = 0.01,
+                                    diffmean.cut = 0,
+                                    logFC.cut = 0,
                                     filename = "starburst.pdf",
                                     ylab = expression(atop("Gene Expression",
                                                            paste(Log[10],
@@ -729,12 +738,12 @@ TCGAvisualize_starburst <- function(met,
                                     title = "Starburst Plot",
                                     legend = "Methylation/Expression Relation",
                                     color = c("1" = "black",
-                                              "2" = "purple",
+                                              "2" = "coral",
                                               "3" = "darkgreen",
                                               "4" = "blue",
                                               "5" = "darkred",
                                               "6" = "red",
-                                              "7" = "green",
+                                              "7" = "brown",
                                               "8" = "yellow",
                                               "9" = "orange"),
                                     label = c("1" = "Not Significant",
@@ -746,7 +755,7 @@ TCGAvisualize_starburst <- function(met,
                                               "7" = "Down regulated",
                                               "8" = "Up regulated & Hyper methylated",
                                               "9" = "Down regulated & Hyper methylated"),
-                                    xlim = NULL, ylim = NULL, p.cut = 0.01
+                                    xlim = NULL, ylim = NULL
 )
 {
     .e <- environment()
@@ -785,63 +794,80 @@ TCGAvisualize_starburst <- function(met,
     volcano[volcano[,diffcol] > 0, "meFDR2"] <-
         -1 * volcano[volcano[,diffcol] > 0, "meFDR"]
 
-    volcano$threshold.starburst <- "1"
-    volcano$threshold.size <- "1"
 
     # subseting by regulation (geFDR) and methylation level
     # (meFDR) down regulated up regulated lowerthr
     # |||||||||||||||| upperthr hypomethylated hipermethylated
-    lowerthr <- log10(p.cut)
-    upperthr <- (-lowerthr)
+    met.lowerthr <- log10(met.p.cut)
+    met.upperthr <- (-met.lowerthr)
+
+    exp.lowerthr <- log10(exp.p.cut)
+    exp.upperthr <- (-exp.lowerthr)
 
     # Group 2:up regulated and hypomethylated
     a <- subset(volcano,
-                volcano$geFDR2 > upperthr &
-                    volcano$meFDR2 < lowerthr)
+                volcano$geFDR2 > exp.upperthr &
+                    volcano$meFDR2 < met.lowerthr)
+
+    a.sig <- subset(a, abs(a[,diffcol]) > diffmean.cut &
+                      abs(a$logFC) > logFC.cut)
 
     # Group 3: down regulated and hypomethylated
     b <- subset(volcano,
-                volcano$geFDR2 < lowerthr &
-                    volcano$meFDR2 < lowerthr)
+                volcano$geFDR2 < exp.lowerthr &
+                    volcano$meFDR2 < met.lowerthr)
+
+    b.sig <- subset(b, abs(b[,diffcol]) > diffmean.cut &
+                        abs(b$logFC) > logFC.cut)
 
     # Group 4: hypomethylated
     c <- subset(volcano,
-                volcano$geFDR2 > lowerthr &
-                    volcano$geFDR2 < upperthr &
-                    volcano$meFDR2 < lowerthr)
+                volcano$geFDR2 > exp.lowerthr &
+                    volcano$geFDR2 < exp.upperthr &
+                    volcano$meFDR2 < met.lowerthr)
 
     # Group 5: hypermethylated
     d <- subset(volcano,
-                volcano$geFDR2 > lowerthr &
-                    volcano$geFDR2 < upperthr &
-                    volcano$meFDR2 > upperthr)
+                volcano$geFDR2 > exp.lowerthr &
+                    volcano$geFDR2 < exp.upperthr &
+                    volcano$meFDR2 > met.upperthr)
 
     # Group 6: upregulated
     e <- subset(volcano,
-                volcano$geFDR2 > upperthr &
-                    volcano$meFDR2 < upperthr &
-                    volcano$meFDR2 > lowerthr)
+                volcano$geFDR2 > exp.upperthr &
+                    volcano$meFDR2 < met.upperthr &
+                    volcano$meFDR2 > met.lowerthr)
 
     # Group 7: downregulated
     f <- subset(volcano,
-                volcano$geFDR2 < lowerthr &
-                    volcano$meFDR2 < upperthr &
-                    volcano$meFDR2 > lowerthr)
+                volcano$geFDR2 < exp.lowerthr &
+                    volcano$meFDR2 < met.upperthr &
+                    volcano$meFDR2 > met.lowerthr)
 
     # Group 8: upregulated and hypermethylated
     g <- subset(volcano,
-                volcano$geFDR2 > upperthr &
-                    volcano$meFDR2 > upperthr)
+                volcano$geFDR2 > exp.upperthr &
+                    volcano$meFDR2 > met.upperthr)
+
+    g.sig <- subset(g, abs(g[,diffcol]) > diffmean.cut &
+                        abs(g$logFC) > logFC.cut)
 
     # Group 9: downregulated and hypermethylated
     h <- subset(volcano,
-                volcano$geFDR2 < lowerthr &
-                    volcano$meFDR2 > upperthr)
+                volcano$geFDR2 < exp.lowerthr &
+                    volcano$meFDR2 > met.upperthr)
 
-    size <- c("1", "1", "1", "1", "1", "1", "1","1")
-    groups <- c("2", "3", "4", "5", "6", "7","8","9")
+    h.sig <- subset(h, abs(h[,diffcol]) > diffmean.cut &
+                        abs(h$logFC) > logFC.cut)
+
+    groups <- as.character(seq(2,9))
+
     # return methylation < 0, expressao >0
-    volcano[, "starburst.status"]  <-  "Not Significant"
+    volcano$starburst.status  <-  "Not Significant"
+    volcano$shape <- "1"
+    volcano$threshold.starburst <- "1"
+    volcano$threshold.size <- "1"
+
     state <- c("Up regulated & Hypo methylated",
                "Down regulated & Hypo methylated",
                "hypo methylated",
@@ -850,14 +876,25 @@ TCGAvisualize_starburst <- function(met,
                "Down regulated",
                "Up regulated & Hyper methylated",
                "Down regulated & Hyper methylated")
-    #print(head(volcano))
-    s <- list(a, b, c, d, e, f,g,h)
+
+    s <- list(a, b, c, d, e, f, g, h)
     for (i in seq_along(s)) {
         idx <- rownames(s[[i]])
         if (length(idx) > 0) {
             volcano[idx, "threshold.starburst"] <- groups[i]
-            volcano[idx, "threshold.size"] <- size[i]
             volcano[idx, "starburst.status"] <-  state[i]
+        }
+    }
+
+    size <- rep(2,4)
+    shape <-  as.character(rep(2,4))
+
+    s <- list(a.sig,b.sig,g.sig,h.sig)
+    for (i in seq_along(s)) {
+        idx <- rownames(s[[i]])
+        if (length(idx) > 0) {
+            volcano[idx, "threshold.size"] <- size[i]
+            volcano[idx, "shape"] <-  shape[i]
         }
     }
 
@@ -866,8 +903,10 @@ TCGAvisualize_starburst <- function(met,
                 aes(x = volcano$meFDR2,
                     y = volcano$geFDR2,
                     colour = volcano$threshold.starburst,
-                    size = volcano$threshold.size)) +
-        geom_point()
+                    size = volcano$threshold.size,
+                    shape= volcano$shape)) +
+        geom_point() + guides(shape=FALSE)
+
     if (!is.null(xlim)) {
         p <- p + xlim(xlim)
     }
@@ -876,13 +915,13 @@ TCGAvisualize_starburst <- function(met,
     }
     p <- p + ggtitle(title) + ylab(ylab) + xlab(xlab) + guides(size=FALSE)
     p <- p + scale_color_manual(values = color, labels = label, name = legend)
-    p <-  p + geom_hline(aes(yintercept = lowerthr), colour = "black",
+    p <-  p + geom_hline(aes(yintercept = exp.lowerthr), colour = "black",
                          linetype = "dashed") +
-        geom_hline(aes(yintercept = upperthr), colour = "black",
+        geom_hline(aes(yintercept = exp.upperthr), colour = "black",
                    linetype = "dashed") +
-        geom_vline(aes(xintercept = lowerthr), colour = "black",
+        geom_vline(aes(xintercept = met.lowerthr), colour = "black",
                    linetype = "dashed") +
-        geom_vline(aes(xintercept = upperthr), colour = "black",
+        geom_vline(aes(xintercept = met.upperthr), colour = "black",
                    linetype = "dashed")
     ggsave(filename = filename, width = 14, height = 10)
 
@@ -892,6 +931,19 @@ TCGAvisualize_starburst <- function(met,
     #                                     "probeID",statuscol,
     #                                     "starburst.status")
     #)
+    volcano$shape <- NULL
+    volcano$threshold.starburst <- NULL
+    volcano$threshold.size <- NULL
+
+    volcano <- subset(volcano, volcano$geFDR <= exp.lowerthr &
+                          volcano$meFDR <= met.lowerthr)
+
+    if (diffmean.cut != 0) {
+        volcano <- subset(volcano, abs(volcano[,diffcol]) > diffmean.cut)
+    }
+    if (logFC.cut != 0){
+        volcano <- subset(volcano, abs(volcano$logFC) >= logFC.cut)
+    }
 
     return(volcano)
 }
