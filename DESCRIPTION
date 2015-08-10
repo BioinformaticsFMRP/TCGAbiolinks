@@ -32,6 +32,7 @@ Imports:
     edgeR (>= 3.0.0),
     rjson,
     plyr,
+    xlsx,
     biomaRt,
     coin,
     ggplot2,
