@@ -686,7 +686,7 @@ TCGAanalyze_DMR <- function(data,
 #' @param exp.p.cut expression p value cut-off
 #' @param diffmean.cut If set, the probes with diffmean higher than methylation cut-off will be
 #'  highlighted in the plot. And the data frame return will be subseted.
-#' @param FC.cut If set, the probes with expression fold change higher than methylation cut-off will be
+#' @param logFC.cut If set, the probes with expression fold change higher than methylation cut-off will be
 #'  highlighted in the plot. And the data frame return will be subseted.
 #' @param group1 The name of the group 1
 #' Obs: Column p.value.adj.group1.group2 should exist
