@@ -495,7 +495,7 @@ colDataPrepare <- function(barcode,query){
     for (i in unique(query$Disease)) {
         if (grepl("lgg|gbm|luad|stad", i,ignore.case = TRUE)) {
             subtype <- get(paste0(tolower(i),".subtype"))
-            if (any(barcode %in% subtype$patient)) {
+            if (any(ret$patient %in% subtype$patient)) {
                 ret <- merge(ret, subtype,
                              all.x = TRUE ,
                              sort = FALSE,
