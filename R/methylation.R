@@ -427,6 +427,7 @@ calculate.pvalues <- function(data,
                              pvalue(wilcox_test(beta ~ cluster, data=aux, distribution = "exact"))
                          }, .progress = "text"
         )
+        p.value <- p.value[,2]
     } else {
         p.value <- adply(assay(data),1,
                          function(x) {
@@ -435,6 +436,7 @@ calculate.pvalues <- function(data,
                              pvalue(wilcoxsign_test(beta ~ cluster, data=aux, distribution = exact()))
                          }, .progress = "text"
         )
+        p.value <- p.value[,2]
     }
     ## Plot a histogram
     message("Saved histogram_pvalues.png...")
