@@ -81,7 +81,10 @@ TCGAprepare <- function(query,
         return(NULL)
     }
 
-
+    if(!is.null(toPackage)){
+        message("toPackage argument was set, changing summarizedExperiment to FALSE")
+        summarizedExperiment <- FALSE
+    }
     if (length(unique(query$Platform)) > 1 |
         length(unique(query$Center)) > 2) {
         # This case (27k/450k)accepts two platforms
@@ -762,8 +765,7 @@ TCGAprepare <- function(query,
                                                         "samples"=samples,
                                                         "type"=type,
                                                         "save"=save,
-                                                        "filename"=filename,
-                                                        "toPackage"=toPackage),
+                                                        "filename"=filename),
                               "FilesInfo:"=list(finf))
     }
 
