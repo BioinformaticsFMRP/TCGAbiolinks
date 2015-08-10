@@ -423,7 +423,9 @@ calculate.pvalues <- function(data,
         p.value <- adply(assay(data),1,
                          function(x) {
                              aux <-data.frame(beta=x[c(idx1,idx2)],
-                                              cluster=droplevels(colData(data)[c(idx1,idx2),groupCol]))
+                                              cluster=droplevels(
+                                                  colData(data)[c(idx1,idx2),
+                                                                groupCol]))
                              pvalue(wilcox_test(beta ~ cluster, data=aux, distribution = "exact"))
                          }, .progress = "text"
         )
@@ -884,12 +886,12 @@ TCGAvisualize_starburst <- function(met,
                    linetype = "dashed")
     ggsave(filename = filename, width = 14, height = 10)
 
-    statuscol <- paste("status", group1, group2, sep = ".")
+    #statuscol <- paste("status", group1, group2, sep = ".")
 
-    volcano <- subset(volcano,select = c("Gene_Symbol",
-                                         "probeID",statuscol,
-                                         "starburst.status")
-    )
+    #volcano <- subset(volcano,select = c("Gene_Symbol",
+    #                                     "probeID",statuscol,
+    #                                     "starburst.status")
+    #)
 
     return(volcano)
 }

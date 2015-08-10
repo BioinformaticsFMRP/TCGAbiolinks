@@ -41,6 +41,8 @@
 #' @param filename Name of the saved file
 #' @param toPackage For whihc package are you preparing the data?
 #' Default: NULL. Options: "ELMER"
+#' @param reannotate Reannotate genes?  Source http://grch37.ensembl.org/.
+#' DEFAULT: FALSE. (For the moment only working for methylation data)
 #' @param summarizedExperiment Output as SummarizedExperiment?
 #' Default: \code{FALSE}
 #' @examples
@@ -55,7 +57,7 @@
 #' @importFrom limma alias2SymbolTable
 #' @importFrom GenomicFeatures microRNAs
 #' @importFrom BiocGenerics as.data.frame
-#' @importFrom GenomicRanges GRanges
+#' @importFrom GenomicRanges GRanges distanceToNearest
 #' @importFrom IRanges IRanges
 #' @import utils data.table TxDb.Hsapiens.UCSC.hg19.knownGene
 #' @seealso  \code{\link{TCGAquery}} for searching the data to download
@@ -70,6 +72,7 @@ TCGAprepare <- function(query,
                         save = FALSE,
                         filename = NULL,
                         toPackage = NULL,
+                        reannotate = FALSE,
                         summarizedExperiment = TRUE){
 
     if (is.null(dir)) {
@@ -175,6 +178,28 @@ TCGAprepare <- function(query,
             names(rowRanges) <- as.character(df$Composite.Element.REF)
             colData <-  colDataPrepare(colnames(df)[5:ncol(df)],query)
             assay <- data.matrix(subset(df,select = c(5:ncol(df))))
+
+            if(reannotate){
+                message("Reannotating genes Source:http://grch37.ensembl.org/")
+                gene.location <- gene.location[gene.location$chromosome_name %in% c(1:22,"X","Y"),]
+                gene.location <- gene.location[!is.na (gene.location$entrezgene),]
+                gene.location <- gene.location[!duplicated(gene.location$entrezgene),]
+
+                gene.GR <- GRanges(seqnames = paste0("chr",gene.location$chromosome_name),
+                                   ranges = IRanges(start = gene.location$start_position,
+                                                    end=gene.location$end_position),
+                                   strand = gene.location$strand,
+                                   symbol = gene.location$external_gene_name,
+                                   EntrezID = gene.location$entrezgene)
+
+                probe.info  <- rowRanges
+                distance <- as.data.frame(distanceToNearest(rowRanges ,gene.GR))
+                gene.order.by.distance <- gene.location[distance$subjectHits,]
+                gene.order.by.distance$distance <- as.matrix(distance$distance)
+                rowRanges$distance <- gene.order.by.distance[,c("distance")]
+                rowRanges$Gene_Symbol <- gene.order.by.distance[,c("external_gene_name")]
+                rowRanges$entrezgene <- gene.order.by.distance[,c("entrezgene")]
+            }
 
             rse <- SummarizedExperiment(assays = assay,
                                          rowRanges = rowRanges,
