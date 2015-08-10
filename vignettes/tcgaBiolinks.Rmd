@@ -815,6 +815,96 @@ knitr::kable(tabSurvKMcompleteDEGs[1:10,],
             row.names = TRUE)
 ```
 
+
+## `TCGAanalyze_DMR`: Differentially methylated regions Analysis
+
+We will search for differentially methylated CpG sites using the `TCGAanalyze_DMR`
+function. In order to find these regions we use the beta-values 
+(methylation values ranging from 0.0 to 1.0) to compare two groups. 
+
+Firstly, it calculates the difference between the mean DNA methylation of each group
+for each probes. 
+
+Secondly, it calculates the p-value using the wilcoxon test 
+adjusting by the Benjamini-Hochberg method. The default parameters was set to
+ require a minimum absolute beta-values difference of 0.2 and a p-value adjusted
+ of < 0.01. 
+
+After these analysis, we save a volcano plot (x-axis:diff mean methylation,
+y-axis: significance) that will help the user identify the differentially
+methylated CpG sites and return the object with the calculus in the rowRanges.
+
+The arguments of volcanoPlot are:
+
+* **data** SummarizedExperiment obtained from the TCGAPrepare
+* **groupCol**  Columns with the groups inside the SummarizedExperiment
+  object. (This will be obtained by the function colData(data))
+* **group1 ** In case our object has more than 2 groups, you should set
+ the name of the group
+* **group2 ** In case our object has more than 2 groups, you should set
+ the name of the group
+* **filename ** pdf filename. Default: volcano.pdf
+* **legend ** Legend title
+* **color **vector of colors to be used in graph
+* **title **main title. If not specified it will be
+ "Volcano plot (group1 vs group2)
+* **ylab **y axis text
+* **xlab **x axis text
+* **xlim **x limits to cut image
+* **ylim **y limits to cut image
+* **label **vector of labels to be used in the figure.
+ Example: c("1" = "Not Significant", "2" = "Hypermethylated in group1",
+ "3" = "Hypomethylated in group1"))
+* **p.cut** p values threshold. *Default: 0.01*
+* **diffmean.cut** diffmean threshold. *Default: 0.2*
+* **adj.method** Adjusted method for the p-value calculation
+* **paired** Wilcoxon paired parameter. *Default: FALSE*
+* **overwrite** Overwrite the pvalues and diffmean values if already in the object
+for both groups? *Default: FALSE*
+
+```{r, eval = FALSE}
+data <- TCGAanalyze_DMR(data, groupCol = "cluster.meth",subgroupCol = "disease",
+                              group.legend  = "Groups", subgroup.legend = "Tumor",
+                              print.pvalue = TRUE)
+```
+
+The output will be a plot such as the figure below. The green dots are the 
+probes that are hypomethylated in group 2 compared to group 1, 
+while the red dots are the hypermethylated probes in group 2 compared to group 1
+
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("volcano.png")
+grid.raster(img)
+```
+
+
+Also, the `TCGAanalyze_DMR` 
+function will save the plot as pdf and return the same SummarizedExperiment
+that was given as input with the values of p-value,
+p-value adjusted, diffmean and the group it belongs in the graph 
+(non significant, hypomethylated, hypermethylated) in the rowRanges. 
+The collumns will be (where group1 and group2 are the names of the groups): 
+
+* diffmean.group1.group2 (mean.group2 - mean.group1) 
+* diffmean.group2.group1 (mean.group1 - mean.group2)
+* p.value.group1.group2
+* p.value.adj.group1.group2
+* status.group1.group2 (Status of probes in group2 in relation to group1) 
+* status.group2.group1 (Status of probes in group1 in relation to group2) 
+
+This values can be view/acessed using the `rowRanges` 
+acessesor (`rowRanges(data)`).
+
+**Observation:** Calling the same function again, with the same arguments 
+will only plot the results,  as it was already calculated. 
+With you want to have them recalculated, please set
+`overwrite` to `TRUE` or remove the calculated collumns.
+
+
+
 # `TCGAvisualize`: Visualize results from analysis functions with TCGA's data. 
 You can easily visualize results from soome following functions:
 
@@ -916,9 +1006,183 @@ img <- readPNG("SurvivalCoxNETOutput.png")
 grid.raster(img)
 ```
 
+## `TCGAvisualize_meanMethylation`: Sample Mean DNA Methylation Analysis
+Using the data and calculating the mean DNA methylation per group, it is possible 
+to create a mean DNA methylation boxplot with the function `TCGAvisualize_meanMethylation`
+as follows:
+
+```{r, eval = FALSE}
+TCGAvisualize_meanMethylation(data,"group")
+```
+The arguments of `TCGAvisualize_meanMethylation` are:
+
+* **data** SummarizedExperiment object obtained from `TCGAPrepare`
+* **groupCol** Columns in colData(data) that defines the groups. If no
+ columns defined a columns called "Patients" will be used
+* **subgroupCol** Columns in colData(data) that defines the subgroups.
+* **shapes** Shape vector of the subgroups. It must have the size of the levels
+of the subgroups. Example: shapes = c(21,23) if for two levels
+* **filename** The name of the pdf that will be saved
+* **subgroup.legend** Name of the subgroup legend. **DEFAULT: subgroupCol**
+* **group.legend** Name of the group legend. **DEFAULT: groupCol**
+* **color** vector of colors to be used in graph
+* **title** main title in the plot
+* **ylab** y axis text in the plot
+* **print.pvalue** Print p-value for two groups in the plot
+* **xlab** x axis text in the plot
+* **labels** Labels of the groups
+
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("meanmet.png")
+grid.raster(img)
+```
+
+
+## `TCGAvisualize_starburst`: Analyzing expression and methylation together 
+
+ The starburst plot is proposed to combine information from two volcano plots, 
+ and is applied for a study of DNA methylation and gene expression. In order to
+ reproduce this plot, we will use the `TCGAvisualize_starburst` function.
+ 
+The function creates Starburst plot for comparison of DNA methylation
+and gene expression. The log10 (FDR-corrected P value) is plotted for beta 
+value for DNA methylation (x axis) and gene expression (y axis) for each gene. 
+The black dashed line shows the FDR-adjusted P value of 0.01.
+
+The parameters of this function are:
+
+* **met** SummarizedExperiment with methylation data obtained from the 
+`TCGAprepare` and processed by `TCGAanalyze_DMR` function. 
+Expected colData columns: diffmean and p.value.adj 
+* **exp** Matrix with expression data obtained from the `TCGAanalyze_DEA` function. 
+Expected colData columns: logFC, FDR
+* **filename**  pdf filename
+* **legend**  legend title
+* **color**  vector of colors to be used in graph
+* **label**  vector of labels to be used in graph
+* **title**  main title
+* **ylab**  y axis text
+* **xlab**  x axis text
+* **xlim**  x limits to cut image
+* **ylim**  y limits to cut image
+* **p.cut**  p value cut-off
+* **group1**  The name of the group 1  Obs: Column p.value.adj.group1.group2 should exist
+* **group2**  The name of the group 2. Obs: Column p.value.adj.group1.group2 should exist
+
+```{r, eval = FALSE}
+resut <- TCGAvisualize_starburst(met,exp,"g1","g2",p.cut = 0.02)
+```
+
+As result the function will a plot the figure below and return a matrix with 
+The Gene_symbol and it status in relation to expression(up regulated/down regulated) and 
+methylation (Hyper/Hypo methylated).
+
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("starburst.png")
+grid.raster(img)
+```
+
+
+# `TCGAinvestigate`: Searching questions, answers and literature 
+
+## `TCGAinvestigate`: Find most studied TFs in pubmed 
+Find most studied TFs in pubmed related to a specific cancer, disease, or tissue
+ 
+```{r, eval = FALSE}
+# First perform DEGs with TCGAanalyze
+# See previous section 
+library(TCGAbiolinks)
+
+# Select only transcription factors (TFs) from DEGs
+TFs <- EAGenes[EAGenes$Family =="transcription regulator",]
+TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
+dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
+
+# Order table DEGs TFs according to Delta decrease
+dataDEGsFiltLevelTFs <- dataDEGsFiltLevelTFs[order(dataDEGsFiltLevelTFs$Delta,decreasing = TRUE),]
+
+# Find Pubmed of TF studied related to cancer
+tabDEGsTFPubmed <- TCGAinvestigate("breast", dataDEGsFiltLevelTFs, topgenes = 10)
+                 
+```
+
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+library(TCGAbiolinks)
+knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF in pubmed related to a specific cancer",row.names = FALSE)
+
+#LatexPrintTableforPresentation(Table = tabDEGsTFPubmed,rowsForPage = nrow(tabDEGsTFPubmed), TableTitle = "tabDEGsTFPubmed", LabelTitle = "tabDEGsTFPubmed", withrows = T)
+```
+
+# `TCGAsocial`: Searching questions,answers and literature
+The `TCGAsocial` function has two type of searches, one that searches for
+most downloaded packages in CRAN or BioConductor and one that searches the most related question in biostar. 
+
+## `TCGAsocial` with BioConductor
+Find most downloaded packages in CRAN or BioConductor
+ 
+```{r, eval = FALSE}
+library(TCGAbiolinks)
+
+# Define a list of package to find number of downloads
+listPackage <-c("limma","edgeR","survcomp")
+
+tabPackage <- TCGAsocial(siteToFind ="bioconductor.org",listPackage)
+
+
+# define a keyword to find in support.bioconductor.org returing a table with suggested packages
+tabPackageKey <- TCGAsocial(siteToFind ="support.bioconductor.org" ,KeyInfo = "tcga")
+```
+
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+library(TCGAbiolinks)
+listPackage <- c("limma","edgeR","survcomp")
+tabPackage <- TCGAsocial(siteToFind = "bioconductor.org", listPackage)
+
+knitr::kable(head(tabPackage), digits = 2, caption = "Table with number of downloads about a list of packages",row.names = FALSE)
+
+knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in support.bioconductor.org with keyword = tcga",row.names = FALSE)
+
+```
+
+## `TCGAsocial` with Biostar
+Find most related question in biostar.
+ 
+```{r, eval = FALSE}
+library(TCGAbiolinks)
+
+# Find most related question in biostar with TCGA
+tabPackage1 <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "TCGA")
+
+# Find most related question in biostar with package
+tabPackage2 <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "package")
+
+```
+
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+library(TCGAbiolinks)
+# Find most related question in biostar with TCGA
+#tabPackage <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "package")
+
+knitr::kable(head(tabPackage1), digits = 2, caption = "Find most related question in biostar with TCGA",row.names = FALSE)
+
+knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in biostar with package",row.names = FALSE)
+```
+
 # TCGA Downstream Analysis some workflows and pipelines
 
-## Downstream Analysis n.1
+## Downstream Analysis n.1 IlluminaHiSeq_RNASeqV2 data
 After preparing the gene expression from TCGA data using the `TCGAprepare`
 function, you can do a normalization of genes using the 
 function `TCGAanalyze_Normalization`, do a quantile filter of genes with
@@ -1168,265 +1432,8 @@ clinical$group <- c(rep("group1",nrow(clinical)/4),
  colData(data)$group <- c(rep("group1",ncol(data)/2), rep("group2",ncol(data)/2))
 ```
 
-## `TCGAvisualize_meanMethylation`: Sample Mean DNA Methylation Analysis
-Using the data and calculating the mean DNA methylation per group, it is possible 
-to create a mean DNA methylation boxplot with the function `TCGAvisualize_meanMethylation`
-as follows:
-
-```{r, eval = FALSE}
-TCGAvisualize_meanMethylation(data,"group")
-```
-The arguments of `TCGAvisualize_meanMethylation` are:
-
-* **data** SummarizedExperiment object obtained from `TCGAPrepare`
-* **groupCol** Columns in colData(data) that defines the groups. If no
- columns defined a columns called "Patients" will be used
-* **subgroupCol** Columns in colData(data) that defines the subgroups.
-* **shapes** Shape vector of the subgroups. It must have the size of the levels
-of the subgroups. Example: shapes = c(21,23) if for two levels
-* **filename** The name of the pdf that will be saved
-* **subgroup.legend** Name of the subgroup legend. **DEFAULT: subgroupCol**
-* **group.legend** Name of the group legend. **DEFAULT: groupCol**
-* **color** vector of colors to be used in graph
-* **title** main title in the plot
-* **ylab** y axis text in the plot
-* **print.pvalue** Print p-value for two groups in the plot
-* **xlab** x axis text in the plot
-* **labels** Labels of the groups
-
-The result is shown below:
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
-library(png)
-library(grid)
-img <- readPNG("meanmet.png")
-grid.raster(img)
-```
-
-## `TCGAanalyze_DMR`: Differentially methylated regions Analysis
-
-We will search for differentially methylated CpG sites using the `TCGAanalyze_DMR`
-function. In order to find these regions we use the beta-values 
-(methylation values ranging from 0.0 to 1.0) to compare two groups. 
-
-Firstly, it calculates the difference between the mean DNA methylation of each group
-for each probes. 
-
-Secondly, it calculates the p-value using the wilcoxon test 
-adjusting by the Benjamini-Hochberg method. The default parameters was set to
- require a minimum absolute beta-values difference of 0.2 and a p-value adjusted
- of < 0.01. 
-
-After these analysis, we save a volcano plot (x-axis:diff mean methylation,
-y-axis: significance) that will help the user identify the differentially
-methylated CpG sites and return the object with the calculus in the rowRanges.
-
-The arguments of volcanoPlot are:
-
-* **data** SummarizedExperiment obtained from the TCGAPrepare
-* **groupCol**  Columns with the groups inside the SummarizedExperiment
-  object. (This will be obtained by the function colData(data))
-* **group1 ** In case our object has more than 2 groups, you should set
- the name of the group
-* **group2 ** In case our object has more than 2 groups, you should set
- the name of the group
-* **filename ** pdf filename. Default: volcano.pdf
-* **legend ** Legend title
-* **color **vector of colors to be used in graph
-* **title **main title. If not specified it will be
- "Volcano plot (group1 vs group2)
-* **ylab **y axis text
-* **xlab **x axis text
-* **xlim **x limits to cut image
-* **ylim **y limits to cut image
-* **label **vector of labels to be used in the figure.
- Example: c("1" = "Not Significant", "2" = "Hypermethylated in group1",
- "3" = "Hypomethylated in group1"))
-* **p.cut** p values threshold. *Default: 0.01*
-* **diffmean.cut** diffmean threshold. *Default: 0.2*
-* **adj.method** Adjusted method for the p-value calculation
-* **paired** Wilcoxon paired parameter. *Default: FALSE*
-* **overwrite** Overwrite the pvalues and diffmean values if already in the object
-for both groups? *Default: FALSE*
-
-```{r, eval = FALSE}
-data <- TCGAanalyze_DMR(data, groupCol = "cluster.meth",subgroupCol = "disease",
-                              group.legend  = "Groups", subgroup.legend = "Tumor",
-                              print.pvalue = TRUE)
-```
-
-The output will be a plot such as the figure below. The green dots are the 
-probes that are hypomethylated in group 2 compared to group 1, 
-while the red dots are the hypermethylated probes in group 2 compared to group 1
 
 
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
-library(png)
-library(grid)
-img <- readPNG("volcano.png")
-grid.raster(img)
-```
-
-
-Also, the `TCGAanalyze_DMR` 
-function will save the plot as pdf and return the same SummarizedExperiment
-that was given as input with the values of p-value,
-p-value adjusted, diffmean and the group it belongs in the graph 
-(non significant, hypomethylated, hypermethylated) in the rowRanges. 
-The collumns will be (where group1 and group2 are the names of the groups): 
-
-* diffmean.group1.group2 (mean.group2 - mean.group1) 
-* diffmean.group2.group1 (mean.group1 - mean.group2)
-* p.value.group1.group2
-* p.value.adj.group1.group2
-* status.group1.group2 (Status of probes in group2 in relation to group1) 
-* status.group2.group1 (Status of probes in group1 in relation to group2) 
-
-This values can be view/acessed using the `rowRanges` 
-acessesor (`rowRanges(data)`).
-
-**Observation:** Calling the same function again, with the same arguments 
-will only plot the results,  as it was already calculated. 
-With you want to have them recalculated, please set
-`overwrite` to `TRUE` or remove the calculated collumns.
-
-## `TCGAvisualize_starburst`: Analyzing expression and methylation together 
-
- The starburst plot is proposed to combine information from two volcano plots, 
- and is applied for a study of DNA methylation and gene expression. In order to
- reproduce this plot, we will use the `TCGAvisualize_starburst` function.
- 
-The function creates Starburst plot for comparison of DNA methylation
-and gene expression. The log10 (FDR-corrected P value) is plotted for beta 
-value for DNA methylation (x axis) and gene expression (y axis) for each gene. 
-The black dashed line shows the FDR-adjusted P value of 0.01.
-
-The parameters of this function are:
-
-* **met** SummarizedExperiment with methylation data obtained from the 
-`TCGAprepare` and processed by `TCGAanalyze_DMR` function. 
-Expected colData columns: diffmean and p.value.adj 
-* **exp** Matrix with expression data obtained from the `TCGAanalyze_DEA` function. 
-Expected colData columns: logFC, FDR
-* **filename**  pdf filename
-* **legend**  legend title
-* **color**  vector of colors to be used in graph
-* **label**  vector of labels to be used in graph
-* **title**  main title
-* **ylab**  y axis text
-* **xlab**  x axis text
-* **xlim**  x limits to cut image
-* **ylim**  y limits to cut image
-* **p.cut**  p value cut-off
-* **group1**  The name of the group 1  Obs: Column p.value.adj.group1.group2 should exist
-* **group2**  The name of the group 2. Obs: Column p.value.adj.group1.group2 should exist
-
-```{r, eval = FALSE}
-resut <- TCGAvisualize_starburst(met,exp,"g1","g2",p.cut = 0.02)
-```
-
-As result the function will a plot the figure below and return a matrix with 
-The Gene_symbol and it status in relation to expression(up regulated/down regulated) and 
-methylation (Hyper/Hypo methylated).
-
-
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
-library(png)
-library(grid)
-img <- readPNG("starburst.png")
-grid.raster(img)
-```
-
-
-# `TCGAinvestigate`: Searching questions, answers and literature 
-
-## `TCGAinvestigate`: Find most studied TFs in pubmed 
-Find most studied TFs in pubmed related to a specific cancer, disease, or tissue
- 
-```{r, eval = FALSE}
-# First perform DEGs with TCGAanalyze
-# See previous section 
-library(TCGAbiolinks)
-
-# Select only transcription factors (TFs) from DEGs
-TFs <- EAGenes[EAGenes$Family =="transcription regulator",]
-TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
-dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
-
-# Order table DEGs TFs according to Delta decrease
-dataDEGsFiltLevelTFs <- dataDEGsFiltLevelTFs[order(dataDEGsFiltLevelTFs$Delta,decreasing = TRUE),]
-
-# Find Pubmed of TF studied related to cancer
-tabDEGsTFPubmed <- TCGAinvestigate("breast", dataDEGsFiltLevelTFs, topgenes = 10)
-                 
-```
-
-The result is shown below:
-
-```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
-knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF in pubmed related to a specific cancer",row.names = FALSE)
-
-#LatexPrintTableforPresentation(Table = tabDEGsTFPubmed,rowsForPage = nrow(tabDEGsTFPubmed), TableTitle = "tabDEGsTFPubmed", LabelTitle = "tabDEGsTFPubmed", withrows = T)
-```
-
-# `TCGAsocial`: Searching questions,answers and literature
-The `TCGAsocial` function has two type of searches, one that searches for
-most downloaded packages in CRAN or BioConductor and one that searches the most related question in biostar. 
-
-## `TCGAsocial` with BioConductor
-Find most downloaded packages in CRAN or BioConductor
- 
-```{r, eval = FALSE}
-library(TCGAbiolinks)
-
-# Define a list of package to find number of downloads
-listPackage <-c("limma","edgeR","survcomp")
-
-tabPackage <- TCGAsocial(siteToFind ="bioconductor.org",listPackage)
-
-
-# define a keyword to find in support.bioconductor.org returing a table with suggested packages
-tabPackageKey <- TCGAsocial(siteToFind ="support.bioconductor.org" ,KeyInfo = "tcga")
-```
-
-The result is shown below:
-
-```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
-listPackage <- c("limma","edgeR","survcomp")
-tabPackage <- TCGAsocial(siteToFind = "bioconductor.org", listPackage)
-
-knitr::kable(head(tabPackage), digits = 2, caption = "Table with number of downloads about a list of packages",row.names = FALSE)
-
-knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in support.bioconductor.org with keyword = tcga",row.names = FALSE)
-
-```
-
-## `TCGAsocial` with Biostar
-Find most related question in biostar.
- 
-```{r, eval = FALSE}
-library(TCGAbiolinks)
-
-# Find most related question in biostar with TCGA
-tabPackage1 <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "TCGA")
-
-# Find most related question in biostar with package
-tabPackage2 <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "package")
-
-```
-
-The result is shown below:
-
-```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
-# Find most related question in biostar with TCGA
-#tabPackage <- TCGAsocial(siteToFind ="biostars.org",KeyInfo = "package")
-
-knitr::kable(head(tabPackage1), digits = 2, caption = "Find most related question in biostar with TCGA",row.names = FALSE)
-
-knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in biostar with package",row.names = FALSE)
-```
 
 ******
 ### Session Information
