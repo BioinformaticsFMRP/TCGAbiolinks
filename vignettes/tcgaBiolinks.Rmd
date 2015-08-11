@@ -449,7 +449,7 @@ As an example, for the platform IlluminaHiSeq_RNASeqV2 we prepared two samples (
 to the hg19. The genes_id not found are then removed from the final matrix.
 The default output is a SummarizedExperiment is shown below. 
 
-```{r, eval = TRUE}
+```{r, eval = TRUE,message=FALSE,warning=FALSE}
 library(TCGAbiolinks)
 library(SummarizedExperiment)
 head(assay(dataREAD,"normalized_count"))
@@ -1097,6 +1097,8 @@ The result is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
 library(TCGAbiolinks)
+library(stringr)
+tabDEGsTFPubmed$PMID <- str_sub(tabDEGsTFPubmed$PMID,0,30)
 knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF in pubmed related to a specific cancer",row.names = FALSE)
 
 #LatexPrintTableforPresentation(Table = tabDEGsTFPubmed,rowsForPage = nrow(tabDEGsTFPubmed), TableTitle = "tabDEGsTFPubmed", LabelTitle = "tabDEGsTFPubmed", withrows = T)
@@ -1131,7 +1133,7 @@ tabPackage <- TCGAsocial(siteToFind = "bioconductor.org", listPackage)
 
 knitr::kable(head(tabPackage), digits = 2, caption = "Table with number of downloads about a list of packages",row.names = FALSE)
 
-knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in support.bioconductor.org with keyword = tcga",row.names = FALSE)
+knitr::kable(tabPackage2[c(1,4,5,7),], digits = 2, caption = "Find most related question in support.bioconductor.org with keyword = tcga",row.names = FALSE)
 
 ```
 
@@ -1158,7 +1160,7 @@ library(TCGAbiolinks)
 
 knitr::kable(head(tabPackage1), digits = 2, caption = "Find most related question in biostar with TCGA",row.names = FALSE)
 
-knitr::kable(tabPackage2, digits = 2, caption = "Find most related question in biostar with package",row.names = FALSE)
+knitr::kable(tabPackage2[c(1,5,7),], digits = 2, caption = "Find most related question in biostar with package",row.names = FALSE)
 ```
 
 # TCGA Downstream Analysis some workflows and pipelines
