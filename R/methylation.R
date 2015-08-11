@@ -237,8 +237,7 @@ TCGAvisualize_meanMethylation <- function(data,
                                           labels = NULL,
                                           group.legend = NULL,
                                           subgroup.legend = NULL,
-                                          color = c("green", "red", "purple",
-                                                    "orange", "salmon", "grey")) {
+                                          color = NULL) {
     .e <- environment()
     mean <- colMeans(assay(data),na.rm = TRUE)
 
@@ -262,6 +261,8 @@ TCGAvisualize_meanMethylation <- function(data,
 
     for(i in unique(df$groups)){
         message(paste("Mean group ",i,":",mean(subset(df, groups==i)$mean)))
+    if(is.null(color)){
+        color <- rainbow(length(unique(groups)))
     }
 
     #comb2by2 <- combinations(length(levels(droplevels(df$groups))),
