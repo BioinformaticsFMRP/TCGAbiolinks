@@ -1,0 +1,30 @@
+Package: TCGAbiolinks
+Type: Package
+Title: TCGAbiolinks: An R package to query, download, analyze,
+        visualize, integrate and socialize data from TCGA
+Version: 0.99.1
+Date: 2015-07-21
+Author: Antonio Colaprico, Tiago Chedraoui Silva, Luciano Garofano,
+        Catharina Olsen, Davide Garolini, Claudia Cava, Isabella
+        Castiglioni, Houtan Noushmehr, Gianluca Bontempi, Michele
+        Ceccarelli
+Maintainer: Antonio Colaprico <antonio.colaprico@ulb.ac.be>
+Depends: R (>= 3.2)
+Imports: downloader (>= 0.4), GGally, grDevices, graphics,
+        GenomicRanges, XML, data.table, EDASeq (>= 2.0.0), grid (>=
+        3.0.0), RCurl, edgeR (>= 3.0.0), rjson, plyr, biomaRt, coin,
+        ggplot2, survival, stringr (>= 1.0.0), IRanges, scales, rvest,
+        stats, utils, dnet, igraph, supraHex, S4Vectors,
+        SummarizedExperiment, BiocGenerics, GenomicFeatures,
+        TxDb.Hsapiens.UCSC.hg19.knownGene, limma, devtools
+Description: Query the latest version of files by tumor, center, date,
+        barcode, level and platform. Also Download and Preprocess data
+        from TCGA portal.
+License: GPL (>= 3)
+biocViews: DNAMethylation, DifferentialMethylation, GeneRegulation,
+        GeneExpression, MethylationArray, DifferentialExpression,
+        Pathways, Network, Survival
+Suggests: testthat, png, BiocStyle, knitr, rmarkdown
+VignetteBuilder: knitr
+LazyData: true
+NeedsCompilation: no
