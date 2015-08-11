@@ -299,42 +299,16 @@ print(female_erpos_herpos)
 ## `TCGAquery_subtypes`: Working with molecular subtypes data.
 
 ```{r, eval = FALSE}
-# Check with subtypes from TCGAquery
+# Check with subtypes from TCGAprepare and update examples
 require(xlsx)
+
 GBM_path_subtypes <- TCGAquery_subtypes(tumor = "gbm",path ="../dataGBM")
-GBM_subtypes <- as.data.frame(read.xlsx2(GBM_path_subtypes,1,stringsAsFactors = NULL))
-GBM_subtypes <- GBM_subtypes[,c(1:10)]
-GBM_subtypes <- GBM_subtypes[-1,]
-colnames(GBM_subtypes) <- gsub(" ","_",as.matrix(GBM_subtypes[1,]))
-GBM_subtypes <- GBM_subtypes[-1,]
-GBM_subtypes <- GBM_subtypes[!duplicated(GBM_subtypes$sample_id),]
-rownames(GBM_subtypes) <- GBM_subtypes$sample_id
-dim(GBM_subtypes)
-# [1] 559  10
 
-# starting find difference in subtypes
-
-TableSubTypes_filt_GBM <- TableSubTypes_filt[TableSubTypes_filt$tumor.type == "GBM",]
-setdiff(TableSubTypes_filt_GBM$id, GBM_subtypes$sample_id)
-# [1] "TCGA-19-4065"
-
-require(xlsx)
 LGG_path_subtypes <- TCGAquery_subtypes(tumor = "lgg",path ="../dataLGG")
-LGG_subtypes <- as.data.frame(read.xlsx2(LGG_path_subtypes,1,stringsAsFactors = NULL))
-rownames(LGG_subtypes) <- LGG_subtypes$Tumor
-dim(LGG_subtypes)
-# [1] 293   9
-
-TableSubTypes_filt_LGG <- TableSubTypes_filt[TableSubTypes_filt$tumor.type == "LGG",]
-setdiff(TableSubTypes_filt_LGG$id, LGG_subtypes$Tumor)
-# [223] "TCGA-QH-A6CS"
 
 LGG_clinic <- TCGAquery_clinic(cancer = "LGG",clinical_data_type = "clinical_patient")
 # table(LGG_clinic$ldh1_mutation_found)
 
-
-STAD_path_subtypes <- TCGAquery_subtypes(tumor = "stad",path ="../dataSTAD")
-STAD_subtypes <- as.data.frame(read.xlsx2(STAD_path_subtypes,1,stringsAsFactors = NULL))
 ```
 
 
