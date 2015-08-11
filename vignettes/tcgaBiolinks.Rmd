@@ -437,6 +437,8 @@ The arguments are:
 * **filename** Name of the rda object that will be saved if `save` is `TRUE`
 * **toPackage** Name of the package to prepare the data specific to that package. 
 * **summarizedExperiment** Should the output be a SummarizedExperiment object? Default: `TRUE`
+* **reannotate** Reannotate genes? Source http://grch37.ensembl.org/. 
+Default: `FALSE`. (For the moment only working for methylation data)
 
 In order to add useful information to reasearches we added in the colData of the 
 summarizedExperiment the subtypes classification for the LGG and GBM samples 
@@ -1071,9 +1073,14 @@ Expected colData columns: logFC, FDR
 * **p.cut**  p value cut-off
 * **group1**  The name of the group 1  Obs: Column p.value.adj.group1.group2 should exist
 * **group2**  The name of the group 2. Obs: Column p.value.adj.group1.group2 should exist
+* **exp.p.cut** expression p value cut-off
+* **met.p.cut**	methylation p value cut-off
+* **diffmean.cut**	If set, the probes with diffmean higher than methylation cut-off will be highlighted in the plot. And the data frame return will be subseted.
+* **logFC.cut** If set, the probes with expression fold change higher than methylation cut-off will be highlighted in the plot. And the data frame return will be subseted.
+
 
 ```{r, eval = FALSE}
-resut <- TCGAvisualize_starburst(met,exp,"g1","g2",p.cut = 0.02)
+resut <- TCGAvisualize_starburst(met,exp,"g1","g2",met.p.cut = 10^-10)
 ```
 
 As result the function will a plot the figure below and return a matrix with 
@@ -1396,43 +1403,6 @@ library(grid)
 img <- readPNG("BRCA_heatmap.png")
 grid.raster(img)
 ```
-
-## Downstream Analysis n.4 DNA methylation analysis
-
-Some downstream analysis from DNA methylation data can be done with `TCGAbiolinks`.
-An example is shown below. Firstly, we search, download and prepare data from the 
-HumanMethylation450 platform for the GBM tumor and also get the clinical information
-from the patients. In this step, we will have a 
-SummarizedExperiment object, where the rows are the probes and the columns the 
-samples. For more information about this object you can take a look in the 
-documentation with the command `?SummarizedExperiment`.
-
-```{r, eval = FALSE}
-library(TCGAbiolinks)
-
-# Getting the data 
-query <- TCGAquery(tumor = "gbm", platform = "HumanMethylation450", level = 3)
-TCGAdownload(query,path=".")
-data <- TCGAprepare(query,dir = ".",save = T)
-clinical <- TCGAquery_clinic("gbm","clinical_patient")
-
-#Preprocessing 
-# Remove probes with NA level
-data <- subset(data,subset=(rowSums(is.na(assay(data)))==0))
-```
-
-As an example, we divided the data into groups in order to analyze the data. 
-```{r, eval = FALSE}
-# random split of pacients into groups
-clinical$group <- c(rep("group1",nrow(clinical)/4),
-                    rep("group2",nrow(clinical)/4),
-                    rep("group3",nrow(clinical)/4),
-                    rep("group4",nrow(clinical)-3*(floor(nrow(clinical)/4))))
-
- colData(data)$group <- c(rep("group1",ncol(data)/2), rep("group2",ncol(data)/2))
-```
-
-
 
 
 ******
