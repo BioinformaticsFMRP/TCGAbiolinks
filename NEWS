@@ -1,0 +1,32 @@
+  TCGAbiolinks 0.99.1
+----------------------------------------------------------------
+  FIRST VERSION - FEATURES
+
+* TCGAanalyze_DEA	Differentially expression analysis (DEA) using edgeR package.
+* TCGAanalyze_DMR	Differentially methylated regions Analysis
+* TCGAanalyze_EA	Enrichment analysis of a gene-set with GO [BP,MF,CC] and pathways.
+* TCGAanalyze_EAcomplete	Enrichment analysis for Gene Ontology (GO) [BP,MF,CC] and Pathways
+* TCGAanalyze_Filtering	Filtering mRNA transcripts and miRNA selecting a threshold.
+* TCGAanalyze_LevelTab	Adding information related to DEGs genes from DEA as mean values in two conditions.
+* TCGAanalyze_Normalization	normalization mRNA transcripts and miRNA using EDASeq package.
+* TCGAanalyze_Preprocessing	Array Array Intensity correlation (AAIC) and correlation boxplot to define outlier
+* TCGAanalyze_survival	Creates survival analysis
+* TCGAanalyze_SurvivalKM	survival analysis (SA) univariate with Kaplan-Meier (KM) method.
+* TCGAbiolinks	Download data of samples from * TCGA
+* TCGAdownload	Download the data from * TCGA using as reference the output from * TCGAquery
+* TCGAintegrate	Filtering common samples among platforms from * TCGAquery for the same tumor
+* TCGAinvestigate	Find most studied TF in pubmed related to a specific cancer, disease, or tissue
+* TCGAprepare	Read the data from level 3 the experiments and prepare it for downstream analysis into a SummarizedExperiment object.
+* TCGAquery	Searches * TCGA open-access data providing also latest version of the files.
+* TCGAquery_clinic	Get the clinical information
+* TCGAquery_clinicFilt	Filter samples using clinical data
+* TCGAquery_MatchedCoupledSampleTypes	Retrieve multiple tissue types from the same patients.
+* TCGAquery_samplesfilter	Filtering sample output from * TCGAquery
+* TCGAquery_SampleTypes	Retrieve multiple tissue types not from the same patients.
+* TCGAquery_Version	Shows a summary (version, date, number of samples, size of the data) of all versions of data for a given tumor and platform.
+* TCGAsocial	Finds the number of downloads of a package on CRAN or BIOC and find questions in website ("bioconductor.org", "biostars.org", "stackoverflow).
+* TCGAvisualize_EAbarplot	barPlot for a complete Enrichment Analysis
+* TCGAvisualize_meanMethylation	Mean methylation boxplot
+* TCGAvisualize_PCA	Principal components analysis (PCA) plot
+* TCGAvisualize_starburst	Create starburst plot
+* TCGAvisualize_SurvivalCoxNET	Survival analysis with univariate Cox regression package (dnet)
