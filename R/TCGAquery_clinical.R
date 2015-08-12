@@ -562,3 +562,13 @@ getsubtypes <- function(tumor = NULL, path = ".") {
 
     return(subtype)
 }
+
+
+#' @export
+TCGAquery_subtype <- function(tumor){
+    if (grepl("lgg|gbm|luad|stad", tumor,ignore.case = TRUE)) {
+        return(get(paste0(tolower(tumor),".subtype")))
+    } else {
+        stop("For the moment we have only subtype for LGG, GBM, STAD and LUAD")
+    }
+}
