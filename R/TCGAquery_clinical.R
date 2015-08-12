@@ -493,8 +493,8 @@ colDataPrepare <- function(barcode,query){
     ret <- cbind(ret,df)
 
     for (i in unique(query$Disease)) {
-        if (grepl("lgg|gbm|luad|stad", i,ignore.case = TRUE)) {
-            subtype <- get(paste0(tolower(i),".subtype"))
+        if (grepl("lgg|gbm|luad|stad|coad|read", i,ignore.case = TRUE)) {
+            subtype <- TCGAquery_subtype(i)
             if (any(ret$patient %in% subtype$patient)) {
                 ret <- merge(ret, subtype,
                              all.x = TRUE ,
@@ -502,7 +502,7 @@ colDataPrepare <- function(barcode,query){
                              by = "patient")
             }
         } else if (grepl("brca", i,ignore.case = TRUE)) {
-            subtype <- get(paste0(tolower(i),".subtype"))
+            subtype <- TCGAquery_subtype(i)
             if (any(ret$sample %in% subtype$sample)) {
                 ret <- merge(ret, subtype,
                              all.x = TRUE ,
@@ -546,6 +546,9 @@ getsubtypes <- function(tumor = NULL, path = ".") {
         link <- paste0(root,"brca_2012/BRCA.547.PAM50.SigClust.Subtypes.txt")
     }
 
+    # COAD and READ are in the zip file inside
+    #http://www.nature.com/nature/journal/v487/n7407/full/nature11252.html#supplementary-information
+
     fname <- paste0(path, "/", basename(link))
     fname <- gsub(" ","_",fname)
     link <- gsub(" ","%20",link)
@@ -585,9 +588,12 @@ getsubtypes <- function(tumor = NULL, path = ".") {
 
 #' @export
 TCGAquery_subtype <- function(tumor){
-    if (grepl("lgg|gbm|luad|stad|brca", tumor,ignore.case = TRUE)) {
+    if (grepl("lgg|gbm|luad|stad|brca|coad|read", tumor,ignore.case = TRUE)) {
+        # COAD and READ are in the same object
+        #
+        if(tolower(tumor) == "read") tumor <- "coad"
         return(get(paste0(tolower(tumor),".subtype")))
     } else {
-        stop("For the moment we have only subtype for LGG, GBM, STAD, BRCA and LUAD")
+        stop("For the moment we have only subtype for: LGG, GBM, STAD, BRCA, READ, COAD and LUAD")
     }
 }
