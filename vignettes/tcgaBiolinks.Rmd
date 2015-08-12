@@ -6,11 +6,12 @@ Thais Sabedot, Tathiane Malta, Stefano Pagnotta, Michele Ceccarelli
 Houtan Noushmehr, Gianluca Bontempi"
 date: "`r Sys.Date()`"
 output: 
-  BiocStyle::html_document:
-    toc: true
-    number_sections: yes
-    toc_depth: 2
-    highlight: haddock
+    BiocStyle::pdf_document:
+        toc: true
+        number_sections: no
+        toc_depth: 2
+        highlight: default
+        latex_engine: lualatex
 
 references:
 - id: ref1
@@ -280,7 +281,10 @@ SSS <- TCGAquery_MatchedCoupledSampleTypes(bar,c("NT","TP"))
 
 # Get clinical data
 clinical_brca_data <- TCGAquery_clinic("brca","clinical_patient")
-female_erpos_herpos <- TCGAquery_clinicFilt(bar,clinical_brca_data, HER="Positive", gender="FEMALE", ER="Positive")
+female_erpos_herpos <- TCGAquery_clinicFilt(bar,clinical_brca_data, 
+                                            HER="Positive", 
+                                            gender="FEMALE", 
+                                            ER="Positive")
 ```
 
 The result is shown below:
@@ -452,7 +456,9 @@ head(assay(dataREAD,"normalized_count"))
 ```
 
 In order to create the SummarizedExperiment object we mapped the rows of the 
-experiments into GRanges. In order to map miRNA we used the miRNA from the anotation database TxDb.Hsapiens.UCSC.hg19.knownGene, this will exclude the miRNA from viruses and bacteria. In order to map genes, genes alias, we used the biomart hg19 database (hsapiens_gene_ensembl from grch37.ensembl.org).
+experiments into GRanges. In order to map miRNA we used the miRNA from the anotation database TxDb.Hsapiens.UCSC.hg19.knownGene, this will exclude the miRNA from viruses and bacteria. 
+In order to map genes, genes alias, we used the biomart hg19 database 
+(hsapiens_gene_ensembl from grch37.ensembl.org).
 
 In case you prefere to have the raw data. You can get a data frame without any
 modification setting the `summarizedExperiment` to false.
@@ -466,7 +472,9 @@ query <- TCGAquery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 
 TCGAdownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
                              "TCGA-DY-A0XA-01A-11R-A155-07"),
              type = "rsem.genes.normalized_results",path = "../dataREAD")
-dataREAD_df <- TCGAprepare(query,dir = "../dataREAD", type = "rsem.genes.normalized_results",
+
+dataREAD_df <- TCGAprepare(query,dir = "../dataREAD", 
+                           type = "rsem.genes.normalized_results",
                         samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
                              "TCGA-DY-A0XA-01A-11R-A155-07"),
                         summarizedExperiment = FALSE)
@@ -742,7 +750,7 @@ That means, that patients with days_to_deth > cutoff will be set to Alive.
 *  **color** Define the colors of the lines.
 
  The result is shown below:
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
 img <- readPNG("survival.png")
@@ -783,11 +791,11 @@ tabSurvKMcompleteDEGs <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% data
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
 tabSurvKMcompleteDEGs$pvalue <- format(tabSurvKMcompleteDEGs$pvalue, scientific = TRUE)
-knitr::kable(tabSurvKMcompleteDEGs[1:4,], 
+knitr::kable(tabSurvKMcompleteDEGs[1:10,1:4], 
             digits = 2,
             caption = "Table KM-survival genes after SA",
             row.names = TRUE)
-knitr::kable(tabSurvKMcompleteDEGs[5:10,], 
+knitr::kable(tabSurvKMcompleteDEGs[1:10,5:7], 
             digits = 2,
             row.names = TRUE)
 ```
@@ -850,7 +858,7 @@ probes that are hypomethylated in group 2 compared to group 1,
 while the red dots are the hypermethylated probes in group 2 compared to group 1
 
 
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
 img <- readPNG("volcano.png")
@@ -1010,7 +1018,7 @@ of the subgroups. Example: shapes = c(21,23) if for two levels
 * **labels** Labels of the groups
 
 The result is shown below:
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
 img <- readPNG("meanmet.png")
@@ -1063,7 +1071,7 @@ The Gene_symbol and it status in relation to expression(up regulated/down regula
 methylation (Hyper/Hypo methylated).
 
 
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center"}
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
 img <- readPNG("starburst.png")
