@@ -267,7 +267,7 @@ SSS <- TCGAquery_MatchedCoupledSampleTypes(bar,c("NT","TP"))
 
 # Get clinical data
 clinical_brca_data <- TCGAquery_clinic("brca","clinical_patient")
-female_erpos_herpos <- TCGAquery_clinicFilt(bar,clin, HER="Positive", gender="FEMALE", ER="Positive")
+female_erpos_herpos <- TCGAquery_clinicFilt(bar,clinical_brca_data, HER="Positive", gender="FEMALE", ER="Positive")
 ```
 
 The result is shown below:
@@ -324,7 +324,7 @@ Some search examples are shown below
 ```{r, eval = TRUE}
 query <- TCGAquery(tumor = "brca",level = 3)
 matSamples <- TCGAquery_integrate(query)
-
+matSamples[c(1,4,9),c(1,4,9)]
 ```
 
 The result of the 3 platforms  of `TCGAquery_integrate` result is shown below:
