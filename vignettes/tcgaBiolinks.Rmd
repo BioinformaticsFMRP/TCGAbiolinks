@@ -338,7 +338,7 @@ data frame returned from `TCGAquery` and produce a matrix n platforms x n platfo
 with the values of samples in commum.
 
 Some search examples are shown below
-```{r, eval = TRUE}
+```{r, eval = FALSE,echo=FALSE,message=FALSE,warning=FALSE}
 query <- TCGAquery(tumor = "brca",level = 3)
 matSamples <- TCGAquery_integrate(query)
 matSamples[c(1,4,9),c(1,4,9)]
@@ -347,6 +347,9 @@ matSamples[c(1,4,9),c(1,4,9)]
 The result of the 3 platforms  of `TCGAquery_integrate` result is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
+query <- TCGAquery(tumor = "brca",level = 3)
+matSamples <- TCGAquery_integrate(query)
+matSamples[c(1,4,9),c(1,4,9)]
 knitr::kable(matSamples[c(1,4,9),c(1,4,9)], digits = 2, 
              caption = "Table common samples among platforms from TCGAquery",
              row.names = TRUE)
@@ -585,9 +588,6 @@ listSamples <- c("TCGA-E9-A1NG-11A-52R-A14M-07","TCGA-BH-A1FC-11A-32R-A13Q-07",
 query <- TCGAquery(tumor = "brca", samples = listSamples, 
   platform = "IlluminaHiSeq_RNASeqV2", level = "3")
 
-# dont run
-#TCGAdownload(query, path = "dataBrca", type = "gene.quantification",samples = listSamples)
-
 # Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
 TCGAdownload(query, path = "../dataBrca", type = "rsem.genes.results",samples = listSamples)
 
@@ -599,9 +599,7 @@ BRCAMatrix <- assay(BRCARnaseq_assay,"raw_counts")
 
 # For gene expression if you need to see a boxplot correlation and AAIC plot 
 # to define outliers you can run
-
 BRCARnaseq_CorOutliers <- TCGAanalyze_Preprocessing(BRCARnaseq_assay)
-
 ```
 
 The result is shown below:
