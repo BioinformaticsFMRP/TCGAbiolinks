@@ -6,12 +6,12 @@ Thais Sabedot, Tathiane Malta, Stefano Pagnotta, Michele Ceccarelli
 Houtan Noushmehr, Gianluca Bontempi"
 date: "`r Sys.Date()`"
 output: 
-    BiocStyle::pdf_document:
+    BiocStyle::html_document:
         toc: true
-        number_sections: no
+        number_sections: false
         toc_depth: 2
-        highlight: default
-        latex_engine: lualatex
+        highlight: haddock
+
 
 references:
 - id: ref1
@@ -270,6 +270,7 @@ Ex: clinical_patient_data <- TCGAquery_clinic("LGG","clinical_patient")
  "stage_IIIC", "stage_IV" -
 * **ER** Estrogen receptor status: "Positive" or "Negative"
 
+An example of the function is below:
 
 ```{r, eval = FALSE}
 bar <- c("TCGA-G9-6378-02A-11R-1789-07", "TCGA-CH-5767-04A-11R-1789-07",  
@@ -318,7 +319,6 @@ bar <- c("TCGA-G9-6378-02A-11R-1789-07", "TCGA-CH-5767-04A-11R-1789-07",
         "TCGA-G9-7036-11A-11R-1789-07", "TCGA-G9-7036-03A-11R-1789-07",
         "TCGA-G9-7036-10A-11R-1789-07", "TCGA-BH-A1ES-10A-11R-1789-07",
         "TCGA-BH-A1F0-10A-11R-1789-07", "TCGA-BH-A0BZ-02A-11R-1789-07",
-        "TCGA-B6-A0WY-04A-11R-1789-07", "TCGA-BH-A1FG-04A-11R-1789-08",
         "TCGA-D8-A1JS-04A-11R-2089-08", "TCGA-AN-A0FN-11A-11R-8789-08",
         "TCGA-AR-A2LQ-12A-11R-8799-08", "TCGA-AR-A2LH-03A-11R-1789-07",
         "TCGA-BH-A1F8-04A-11R-5789-07", "TCGA-AR-A24T-04A-55R-1789-07",
@@ -333,19 +333,30 @@ print(female_erpos_herpos)
 ```
 
 
-## `TCGAquery_subtypes`: Working with molecular subtypes data.
+## `TCGAquery_subtype`: Working with molecular subtypes data.
+
+The Cancer Genome Atlas (TCGA) Research Network has reported integrated genome-wide 
+studies of various diseases. We have added some of the subtypes defined by these
+report in our package. The LGG, GBM, STAD, BRCA, READ, COAD and LUAD  tumors 
+has data added. These subtypes will be automatically added in the summarizedExperiment
+object through TCGAprepare. But you can also use the `TCGAquery_subtype` function
+to retrive that information.
 
 ```{r, eval = FALSE}
 # Check with subtypes from TCGAprepare and update examples
-require(xlsx)
+GBM_path_subtypes <- TCGAquery_subtype(tumor = "gbm")
 
-GBM_path_subtypes <- TCGAquery_subtypes(tumor = "gbm",path ="../dataGBM")
-
-LGG_path_subtypes <- TCGAquery_subtypes(tumor = "lgg",path ="../dataLGG")
+LGG_path_subtypes <- TCGAquery_subtype(tumor = "lgg")
 
 LGG_clinic <- TCGAquery_clinic(cancer = "LGG",clinical_data_type = "clinical_patient")
-# table(LGG_clinic$ldh1_mutation_found)
+```
 
+A subset of the lgg subytpe is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+knitr::kable(lgg.subtype[1:10,c(1,2,3,4)], digits = 2, 
+             caption = "Table common samples among platforms from TCGAquery",
+             row.names = TRUE)
 ```
 
 
@@ -369,7 +380,7 @@ The result of the 3 platforms  of `TCGAquery_integrate` result is shown below:
 ```{r, eval = TRUE, echo = FALSE}
 query <- TCGAquery(tumor = "brca",level = 3)
 matSamples <- TCGAquery_integrate(query)
-knitr::kable(matSamples[c(4,9),c(4,9)], digits = 2, 
+knitr::kable(matSamples[c(1,4,9),c(1,4,9)], digits = 2, 
              caption = "Table common samples among platforms from TCGAquery",
              row.names = TRUE)
 ```
