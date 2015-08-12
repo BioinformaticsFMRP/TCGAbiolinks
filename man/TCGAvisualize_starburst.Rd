@@ -39,6 +39,9 @@ Obs: Column p.value.adj.group1.group2 should exist}
 \item{diffmean.cut}{If set, the probes with diffmean higher than methylation cut-off will be
 highlighted in the plot. And the data frame return will be subseted.}
 
+\item{logFC.cut}{If set, the probes with expression fold change higher than methylation cut-off will be
+highlighted in the plot. And the data frame return will be subseted.}
+
 \item{filename}{pdf filename}
 
 \item{ylab}{y axis text}
@@ -56,9 +59,6 @@ highlighted in the plot. And the data frame return will be subseted.}
 \item{xlim}{x limits to cut image}
 
 \item{ylim}{y limits to cut image}
-
-\item{FC.cut}{If set, the probes with expression fold change higher than methylation cut-off will be
-highlighted in the plot. And the data frame return will be subseted.}
 }
 \value{
 Save a starburst plot
