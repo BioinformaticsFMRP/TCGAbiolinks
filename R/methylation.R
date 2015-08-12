@@ -261,6 +261,7 @@ TCGAvisualize_meanMethylation <- function(data,
 
     for(i in unique(df$groups)){
         message(paste("Mean group ",i,":",mean(subset(df, groups==i)$mean)))
+    }
     if(is.null(color)){
         color <- rainbow(length(unique(groups)))
     }
@@ -811,7 +812,7 @@ TCGAvisualize_starburst <- function(met,
                     volcano$meFDR2 < met.lowerthr)
 
     a.sig <- subset(a, abs(a[,diffcol]) > diffmean.cut &
-                      abs(a$logFC) > logFC.cut)
+                        abs(a$logFC) > logFC.cut)
 
     # Group 3: down regulated and hypomethylated
     b <- subset(volcano,
@@ -945,6 +946,5 @@ TCGAvisualize_starburst <- function(met,
     if (logFC.cut != 0){
         volcano <- subset(volcano, abs(volcano$logFC) >= logFC.cut)
     }
-
     return(volcano)
 }
