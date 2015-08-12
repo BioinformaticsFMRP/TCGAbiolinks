@@ -493,16 +493,25 @@ colDataPrepare <- function(barcode,query){
     ret <- cbind(ret,df)
 
     for (i in unique(query$Disease)) {
-        if (grepl("lgg|gbm|luad|stad", i,ignore.case = TRUE)) {
-            subtype <- get(paste0(tolower(i),".subtype"))
+        if (grepl("lgg|gbm|luad|stad|coad|read", i,ignore.case = TRUE)) {
+            subtype <- TCGAquery_subtype(i)
             if (any(ret$patient %in% subtype$patient)) {
                 ret <- merge(ret, subtype,
                              all.x = TRUE ,
                              sort = FALSE,
                              by = "patient")
             }
+        } else if (grepl("brca", i,ignore.case = TRUE)) {
+            subtype <- TCGAquery_subtype(i)
+            if (any(ret$sample %in% subtype$sample)) {
+                ret <- merge(ret, subtype,
+                             all.x = TRUE ,
+                             sort = FALSE,
+                             by = "sample")
+            }
         }
     }
+
     ret <- ret[match(barcode,ret$barcode),]
 
     rownames(ret) <- ret$barcode
@@ -525,13 +534,20 @@ getsubtypes <- function(tumor = NULL, path = ".") {
         link <- paste0(root,"gbm_2013/supplement/Molecular_subtype_classification.xlsx")
     }
 
-    if(grepl("luad",tumor,ignore.case = TRUE)){
+    if (grepl("luad",tumor,ignore.case = TRUE)){
         link <- paste0(root,"luad_2014/tcga.luad.gene.expression.subtypes.20121025.csv")
     }
 
-    if(grepl("stad",tumor,ignore.case = TRUE)){
+    if (grepl("stad",tumor,ignore.case = TRUE)){
         link <- paste0(root,"stad_2014/STAD%20Master%20Patient%20Table%2020140207.xlsx")
     }
+
+    if (grepl("brca",tumor,ignore.case = TRUE)){
+        link <- paste0(root,"brca_2012/BRCA.547.PAM50.SigClust.Subtypes.txt")
+    }
+
+    # COAD and READ are in the zip file inside
+    #http://www.nature.com/nature/journal/v487/n7407/full/nature11252.html#supplementary-information
 
     fname <- paste0(path, "/", basename(link))
     fname <- gsub(" ","_",fname)
@@ -543,22 +559,41 @@ getsubtypes <- function(tumor = NULL, path = ".") {
         }
     )
 
-    if(grepl("lgg",tumor,ignore.case = TRUE)){
-        subtype <- read.xlsx2(fname,1,stringAsFactor=FALSE, header=TRUE)
-    }
-    if(grepl("gbm",tumor,ignore.case = TRUE)){
-        subtype <- read.xlsx2(fname,1,stringAsFactor=FALSE, header=TRUE, startRow = 3)
-    }
-    if(grepl("luad",tumor,ignore.case = TRUE)){
-        subtype <- read.csv(fname)
-    }
-    if(grepl("stad",tumor,ignore.case = TRUE)){
-        subtype <- read.xlsx2(fname,1,stringAsFactor=FALSE, header=TRUE)
-    }
-    colnames(subtype)[1] <- "patient"
-
     message("Adding subytpes information for", tumor, "samples")
     message(paste0("Source:", link))
 
+    if (grepl("lgg",tumor,ignore.case = TRUE)){
+        subtype <- read.xlsx2(fname,1,stringAsFactor=FALSE, header=TRUE)
+    }
+    if (grepl("gbm",tumor,ignore.case = TRUE)){
+        subtype <- read.xlsx2(fname,1,stringAsFactor=FALSE, header=TRUE, startRow = 3)
+    }
+    if (grepl("luad",tumor,ignore.case = TRUE)){
+        subtype <- read.csv(fname)
+    }
+    if (grepl("stad",tumor,ignore.case = TRUE)){
+        subtype <- read.xlsx2(fname,1,stringAsFactor=FALSE, header=TRUE)
+    }
+
+    if (grepl("brca",tumor,ignore.case = TRUE)){
+        subtype <- fread(link,header = T)
+        setnames(subtype,1,"sample")
+        return(subtype)
+    }
+    colnames(subtype)[1] <- "patient"
+
     return(subtype)
+}
+
+
+#' @export
+TCGAquery_subtype <- function(tumor){
+    if (grepl("lgg|gbm|luad|stad|brca|coad|read", tumor,ignore.case = TRUE)) {
+        # COAD and READ are in the same object
+        #
+        if(tolower(tumor) == "read") tumor <- "coad"
+        return(get(paste0(tolower(tumor),".subtype")))
+    } else {
+        stop("For the moment we have only subtype for: LGG, GBM, STAD, BRCA, READ, COAD and LUAD")
+    }
 }
