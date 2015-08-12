@@ -2,7 +2,7 @@
 title: "Working with TCGAbiolinks package"
 author: " Antonio Colaprico, Tiago Chedraoui Silva, Luciano Garofano, 
 Catharina Olsen, Davide Garolini, Claudia Cava, Isabella Castiglioni,
-Thais, Tathiane, Stefano Pagnotta, Michele Ceccarelli
+Thais Sabedot, Tathiane Malta, Stefano Pagnotta, Michele Ceccarelli
 Houtan Noushmehr, Gianluca Bontempi"
 date: "`r Sys.Date()`"
 output: 
@@ -74,6 +74,9 @@ This document describes how to search, download and analyze TCGA data using the
 `TCGAbiolinks` package.
 
 # `TCGAquery`: Searching TCGA open-access data  
+
+## `TCGAquery`: Searching TCGA open-access data for download 
+
  You can easily search TCGA samples using the `TCGAquery` function.
  Using a summary of filters as used in the TCGA portal, the function works
  with the following 
@@ -86,7 +89,17 @@ This document describes how to search, download and analyze TCGA data using the
 * **center**
 * **version** List of Platform/Tumor/Version to be changed
 
-## `TCGAquery`: some filtering examples  
+
+The next subsections will detail each of the search parameters.
+Below, we show some search examples:
+```{r, eval = FALSE}
+query <- TCGAquery(tumor = c("LGG","GBM"), level = 3,
+                   platform = c("HumanMethylation450","HumanMethylation27"),
+                   samples = c("TCGA-19-4065","TCGA-E1-5322-01A-01D-1467-05"), 
+                   version = list(c("HumanMethylation450","LGG",1),
+                                  c("HumanMethylation450","GBM",5)))
+```
+
 ### `TCGAquery`: Searching by tumor
 You can filter the search by tumor using the tumor parameter.
 
@@ -159,7 +172,7 @@ query <- TCGAquery(samples = listSamples)
 query <- TCGAquery(samples = "TCGA-61-1743-01A")
 ```
 
-## `TCGAquery_version`: Retrieve versions of the data in TCGA 
+## `TCGAquery_version`: Retrieve versions information of the data in TCGA 
 
 Query version for a specific platform for example IlluminaHiSeq_RNASeqV2
 ```{r, eval = FALSE}
@@ -336,23 +349,6 @@ knitr::kable(matSamples[c(1,4,9),c(1,4,9)], digits = 2,
 ```
 
 
-## `TCGAquery`: some examples
-
-Some search examples are shown below:
-```{r, eval = TRUE}
-query <- TCGAquery(tumor = c("gbm","lgg"), 
-                    platform = c("HumanMethylation450","HumanMethylation27"))
-
-query <- TCGAquery(tumor = "gbm", platform = "HumanMethylation450", level = "3")
-
-query <- TCGAquery(samples = "TCGA-61-1743-01A-01D")
-
-query <- TCGAquery(samples = "TCGA-61-1743-01A-01D-0649-04", level = 3)
-
-query <- TCGAquery(samples = "TCGA-61-1743-01A-01D-0649-04", 
-                   tumor = "OV", platform = "CGH-1x1M_G4447A")
-```
-
 
 
 # `TCGAdownload`: Downloading open-access data  
@@ -366,7 +362,7 @@ The arguments are:
 *  **samples**	List of samples to download
 *  **force**	Download again if file already exists? Default: FALSE
 
-## `TCGAdownload`: Example of use
+### `TCGAdownload`: Example of use
 ```{r, eval = FALSE}
 # get all samples from the query and save them in the TCGA folder
 # samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
@@ -386,7 +382,7 @@ TCGAdownload(query, path = "dataBrca", type = "rsem.genes.results",
 Comment: The function will structure the folders to save the data as:
 _Path given by the user/Experiment folder_
 
-## `TCGAdownload`: Table of types available for downloading
+### `TCGAdownload`: Table of types available for downloading
 
 *  **RNASeqV2:** junction_quantification,rsem.genes.results,
 rsem.isoforms.results, rsem.genes.normalized_results, 
@@ -423,7 +419,7 @@ Also in the  metadata of the objet we added the parameters used in TCGAprepare,
 the query matrix used for preparing, and file information (name,creation time and modification time)
 in order to help the user know which samples, versions, and parameters they used.
 
-## `TCGAprepare`: Example of use
+### Example of use
 ```{r, eval = FALSE}
 # get all samples from the query and save them in the TCGA folder
 # samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
@@ -483,7 +479,29 @@ dim(dataREAD_df)
 head(dataREAD_df)
 ```
 
-## `TCGAprepare`: Table of `types` available for the `TCGAprepare`
+### Example of use: Preparing the data with CNV data (Genome_Wide_SNP_6)
+
+You can easily search TCGA samples, download and prepare a matrix of gene expression.
+```{r, eval = FALSE}
+
+# Define a list of samples to query and download providing relative TCGA barcodes.
+samplesList <- c("TCGA-02-0046-10A-01D-0182-01", 
+                "TCGA-02-0052-01A-01D-0182-01", 
+                "TCGA-02-0033-10A-01D-0182-01", 
+                "TCGA-02-0034-01A-01D-0182-01", 
+                "TCGA-02-0007-01A-01D-0182-01")
+
+# Query platform Genome_Wide_SNP_6 with a list of barcode 
+query <- TCGAquery(tumor = "gbm", level = 3, platform = "Genome_Wide_SNP_6")
+
+# Download a list of barcodes with platform Genome_Wide_SNP_6
+TCGAdownload(query, path = "samples")
+
+# Prepare matrix 
+GBM_CNV <- TCGAprepare(query, dir = "samples", type = ".hg19.seg.txt")
+```
+
+### Table of `types` available for the `TCGAprepare`
 
 *  **RNASeqV2:** junction_quantification,rsem.genes.results,
 rsem.isoforms.results, rsem.genes.normalized_results, 
@@ -491,7 +509,7 @@ rsem.isoforms.normalized_results, bt.exon_quantification
 *  **RNASeq:** exon.quantification,spljxn.quantification, gene.quantification
 *  **genome_wide_snp_6:** hg18.seg,hg19.seg,nocnv_hg18.seg,nocnv_hg19.seg
 
-## `TCGAprepare`: Preparing the data with parameter - toPackage 
+## Preparing the data with parameter - toPackage 
 This section will show how to integrate `TCGAbiolinks` with other packages.
 Our intention is to provide as many integrations as possible.
 
@@ -537,27 +555,7 @@ mee.gbm.glial.with.exp <- fetch.mee(meth = gbm.glial.m,
 ```
 
 
-## `TCGAprepare`: Preparing the data with CNV data (Genome_Wide_SNP_6)
 
-You can easily search TCGA samples, download and prepare a matrix of gene expression.
-```{r, eval = FALSE}
-
-# Define a list of samples to query and download providing relative TCGA barcodes.
-samplesList <- c("TCGA-02-0046-10A-01D-0182-01", 
-                "TCGA-02-0052-01A-01D-0182-01", 
-                "TCGA-02-0033-10A-01D-0182-01", 
-                "TCGA-02-0034-01A-01D-0182-01", 
-                "TCGA-02-0007-01A-01D-0182-01")
-
-# Query platform Genome_Wide_SNP_6 with a list of barcode 
-query <- TCGAquery(tumor = "gbm", level = 3, platform = "Genome_Wide_SNP_6")
-
-# Download a list of barcodes with platform Genome_Wide_SNP_6
-TCGAdownload(query, path = "samples")
-
-# Prepare matrix 
-GBM_CNV <- TCGAprepare(query, dir = "samples", type = ".hg19.seg.txt")
-```
 
 # `TCGAanalyze`: Analyze data from TCGA. 
 You can easily analyze data using following functions:
@@ -600,12 +598,12 @@ BRCARnaseq_CorOutliers <- TCGAanalyze_Preprocessing(BRCARnaseq_assay)
 
 The result is shown below:
 
-```{r, eval = TRUE, echo = FALSE}
+```{r, eval = TRUE, echo = FALSE,size = 8}
 library(TCGAbiolinks)
 dataGE <- dataBRCA[sample(rownames(dataBRCA),10),sample(colnames(dataBRCA),7)]
 
-knitr::kable(dataGE, digits = 2, 
-            caption = "Example of a matrix of gene expression (10 genes in rows and 7 samples in columns)",
+knitr::kable(dataGE[1:10,2:3], digits = 2, 
+            caption = "Example of a matrix of gene expression (10 genes in rows and 2 samples in columns)",
             row.names = TRUE)
 ```
 
@@ -785,9 +783,12 @@ tabSurvKMcompleteDEGs <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% data
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
 tabSurvKMcompleteDEGs$pvalue <- format(tabSurvKMcompleteDEGs$pvalue, scientific = TRUE)
-knitr::kable(tabSurvKMcompleteDEGs[1:10,], 
+knitr::kable(tabSurvKMcompleteDEGs[1:4,], 
             digits = 2,
             caption = "Table KM-survival genes after SA",
+            row.names = TRUE)
+knitr::kable(tabSurvKMcompleteDEGs[5:10,], 
+            digits = 2,
             row.names = TRUE)
 ```
 
@@ -1070,9 +1071,8 @@ grid.raster(img)
 ```
 
 
-# `TCGAinvestigate`: Searching questions, answers and literature 
+# `TCGAinvestigate`: Find most studied TFs in pubmed 
 
-## `TCGAinvestigate`: Find most studied TFs in pubmed 
 Find most studied TFs in pubmed related to a specific cancer, disease, or tissue
  
 ```{r, eval = FALSE}
