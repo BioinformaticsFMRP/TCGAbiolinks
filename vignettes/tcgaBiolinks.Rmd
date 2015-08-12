@@ -74,6 +74,17 @@ Motivation: The Cancer Genome Atlas (TCGA) provides us with an enormous collecti
 This document describes how to search, download and analyze TCGA data using the
 `TCGAbiolinks` package.
 
+## Installation
+
+For the moment the package is in the devel branch of bioconductor repository.
+To install use the code below.
+
+```{r, eval = FALSE}
+source("http://bioconductor.org/biocLite.R")
+useDevel()
+biocLite("TCGAbiolinks")
+```
+
 # `TCGAquery`: Searching TCGA open-access data  
 
 ## `TCGAquery`: Searching TCGA open-access data for download 
@@ -108,12 +119,10 @@ You can filter the search by tumor using the tumor parameter.
 query <- TCGAquery(tumor = "gbm")
 ```
 
-If you don't remember the tumor name, or if you have incorrectly typed it. 
-It will provide you with all the tumor names in TCGA.  Also the names can be seen in the
-help pages `?TCGAquery`
-
-```{r, eval = TRUE}
-query <- TCGAquery(tumor = "")
+The list of tumors is show below:
+```{r, eval = TRUE, echo = FALSE}
+knitr::kable(disease.table, digits = 2,
+             caption = "List of tumors",row.names = FALSE)
 ```
 
 ### `TCGAquery`: Searching by level
@@ -132,12 +141,10 @@ You can filter the search by platform using the platform parameter.
 query <- TCGAquery(tumor = "gbm", platform = "IlluminaHiSeq_RNASeqV2")
 ```
 
-If you don't remember the platform, or if you have incorrectly typed it. 
-It will provide you with all the platforms names in TCGA. Also the names can be seen in the
-help pages `?TCGAquery`
-
-```{r, eval = TRUE}
-query <- TCGAquery(tumor = "gbm", platform = "")
+The list of platforms is show below:
+```{r, eval = TRUE, echo = FALSE}
+knitr::kable(platform.table[,2:4], digits = 2,
+             caption = "List of tumors",row.names = FALSE)
 ```
 
 ### `TCGAquery`: Searching by center
@@ -150,8 +157,10 @@ query <- TCGAquery(tumor = "gbm", center = "mskcc.org")
 If you don't remember the center or if you have incorrectly typed it. 
 It will provide you with all the center names in TCGA. 
 
-```{r, eval = TRUE}
-query <- TCGAquery(tumor = "gbm", center = "")
+The list of centers is show below:
+```{r, eval = TRUE, echo = FALSE}
+knitr::kable(center.table, digits = 2,
+             caption = "List of tumors",row.names = FALSE)
 ```
 
 ### `TCGAquery`: Searching by samples
@@ -173,9 +182,20 @@ query <- TCGAquery(samples = listSamples)
 query <- TCGAquery(samples = "TCGA-61-1743-01A")
 ```
 
-## `TCGAquery_version`: Retrieve versions information of the data in TCGA 
+## `TCGAquery_Version`: Retrieve versions information of the data in TCGA 
 
-Query version for a specific platform for example IlluminaHiSeq_RNASeqV2
+In case the user want to have an overview of the size and number of samples and
+date of old versions, you can use the `TCGAquery_Version` function.
+
+The parameters of this function are:
+
+* tumor 
+* platform 
+
+
+For example, the code below queries the version history for the 
+IlluminaHiSeq_RNASeqV2 platform .
+
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 
@@ -338,7 +358,7 @@ data frame returned from `TCGAquery` and produce a matrix n platforms x n platfo
 with the values of samples in commum.
 
 Some search examples are shown below
-```{r, eval = FALSE,echo=FALSE,message=FALSE,warning=FALSE}
+```{r, eval = FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 query <- TCGAquery(tumor = "brca",level = 3)
 matSamples <- TCGAquery_integrate(query)
 matSamples[c(1,4,9),c(1,4,9)]
@@ -349,8 +369,7 @@ The result of the 3 platforms  of `TCGAquery_integrate` result is shown below:
 ```{r, eval = TRUE, echo = FALSE}
 query <- TCGAquery(tumor = "brca",level = 3)
 matSamples <- TCGAquery_integrate(query)
-matSamples[c(1,4,9),c(1,4,9)]
-knitr::kable(matSamples[c(1,4,9),c(1,4,9)], digits = 2, 
+knitr::kable(matSamples[c(4,9),c(4,9)], digits = 2, 
              caption = "Table common samples among platforms from TCGAquery",
              row.names = TRUE)
 ```
@@ -1185,7 +1204,7 @@ For istance returns all mRNA or miRNA with mean across all samples, higher than 
 
 Also, in order to classify your samples (barcode) 
 you can use the `TCGAquery_SampleTypes` function, the typeSample "NT" will return 
-the  "Solid Tissue Normal"" samples, while the typeSample "TP" will return 
+the  "Solid Tissue Normal" samples, while the typeSample "TP" will return 
 "Primary Solid Tumor"" samples.
  
 ```{r, eval = FALSE}
