@@ -99,19 +99,22 @@ PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
 dataType <- "rsem.genes.results"
 pathCancer <- paste0("../data",cancer)
 
-datQuery <- TCGAquery(tumor = cancer, platform = PlatformCancer, level = "3")
+# Result....Function.....parameters...p1...pn..................................time execution
+
+datQuery <- TCGAquery(tumor = cancer, platform = PlatformCancer, level = "3")  # time = 0.093s
 lsSample <- TCGAquery_samplesfilter(datQuery)
 dataSubt <- TCGAquery_subtype(tumor = cancer)
-dataSmTP <- TCGAquery_SampleTypes(lsSample$IlluminaHiSeq_RNASeqV2,"TP")[1:50]
-dataSmTN <- TCGAquery_SampleTypes(lsSample$IlluminaHiSeq_RNASeqV2,"NT")[1:50]
+dataSmTP <- TCGAquery_SampleTypes(lsSample$IlluminaHiSeq_RNASeqV2,"TP")
+dataSmTN <- TCGAquery_SampleTypes(lsSample$IlluminaHiSeq_RNASeqV2,"NT")
 dataClin <- TCGAquery_clinic("brca","clinical_patient")
 
-            TCGAdownload(query, path = pathCancer, type = dataType,
+            TCGAdownload(datQuery, path = pathCancer, type = dataType,
                          samples =c(dataSmTP,dataSmTN))
 
-dataAssy <- TCGAprepare(query,dir = pathCancer,type = dataType, save = TRUE,
-                    filename = paste(cancer,"_",PlatformCancer,".rda",sep=""),
-                    summarizedExperiment = TRUE,samples = c(dataSmTP,dataSmTN))
+dataAssy <- TCGAprepare(query = datQuery, dir = pathCancer, type = dataType, 
+                        save = TRUE, summarizedExperiment = TRUE, 
+                        samples = c(dataSmTP,dataSmTN),
+                        filename = paste0(cancer,"_",PlatformCancer,".rda"))
 
 dataPrep <- TCGAanalyze_Preprocessing(dataAssy)
 dataNorm <- TCGAanalyze_Normalization(assay(dataAssy), geneInfo,method = "gcContent")
@@ -119,9 +122,6 @@ dataFilt <- TCGAanalyze_Filtering(TableRnaseq = dataNorm,QuantileThresh = 0.25)
 dataDEGs <- TCGAanalyze_DEA(dataFilt[,listSamplesNT], 
                             dataFilt[,listSamplesTP],
                             "Normal", "Tumor",method = "glmLRT")
-dataFDRs <- cbind(dataDEGs$table, FDR = p.adjust(dataDEGs$table$PValue, "fdr"))
-dataFDRs <- dataFDRs[dataFDRs$FDR < 0.01,]
-dataFDRs <- dataFDRs[abs(dataFDRs$logFC) > 1,]
 
 library( "genefilter")
 library("RColorBrewer")
