@@ -5,18 +5,19 @@
 \title{Create starburst plot}
 \usage{
 TCGAvisualize_starburst(met, exp, group1 = NULL, group2 = NULL,
-  filename = "volcano.pdf", ylab = expression(atop("Gene Expression",
+  exp.p.cut = 0.01, met.p.cut = 0.01, diffmean.cut = 0, logFC.cut = 0,
+  filename = "starburst.pdf", ylab = expression(atop("Gene Expression",
   paste(Log[10], " (FDR corrected P values)"))),
   xlab = expression(atop("DNA Methylation", paste(Log[10],
   " (FDR corrected P values)"))), title = "Starburst Plot",
   legend = "Methylation/Expression Relation", color = c(`1` = "black", `2` =
-  "purple", `3` = "darkgreen", `4` = "blue", `5` = "darkred", `6` = "red", `7` =
-  "green", `8` = "yellow", `9` = "orange"), label = c(`1` = "Not Significant",
+  "coral", `3` = "darkgreen", `4` = "blue", `5` = "darkred", `6` = "red", `7` =
+  "brown", `8` = "yellow", `9` = "orange"), label = c(`1` = "Not Significant",
   `2` = "Up regulated & Hypo methylated", `3` =
   "Down regulated & Hypo methylated", `4` = "hypo methylated", `5` =
   "hyper methylated", `6` = "Up regulated", `7` = "Down regulated", `8` =
   "Up regulated & Hyper methylated", `9` = "Down regulated & Hyper methylated"),
-  xlim = NULL, ylim = NULL, p.cut = 0.01)
+  xlim = NULL, ylim = NULL)
 }
 \arguments{
 \item{met}{SummarizedExperiment with methylation data obtained from the
@@ -30,6 +31,16 @@ Obs: Column p.value.adj.group1.group2 should exist}
 
 \item{group2}{The name of the group 2.
 Obs: Column p.value.adj.group1.group2 should exist}
+
+\item{exp.p.cut}{expression p value cut-off}
+
+\item{met.p.cut}{methylation p value cut-off}
+
+\item{diffmean.cut}{If set, the probes with diffmean higher than methylation cut-off will be
+highlighted in the plot. And the data frame return will be subseted.}
+
+\item{logFC.cut}{If set, the probes with expression fold change higher than methylation cut-off will be
+highlighted in the plot. And the data frame return will be subseted.}
 
 \item{filename}{pdf filename}
 
@@ -48,8 +59,6 @@ Obs: Column p.value.adj.group1.group2 should exist}
 \item{xlim}{x limits to cut image}
 
 \item{ylim}{y limits to cut image}
-
-\item{p.cut}{p value cut-off}
 }
 \value{
 Save a starburst plot
@@ -86,6 +95,6 @@ exp <- data.frame(row.names=sprintf("ID\%03d", 1:20000),
 SummarizedExperiment::rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
 SummarizedExperiment::rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
 SummarizedExperiment::rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
-result <- TCGAvisualize_starburst(met,exp,p.cut = 0.05,"g1","g2")
+result <- TCGAvisualize_starburst(met,exp,exp.p.cut = 0.05,met.p.cut = 0.05,"g1","g2")
 }
 
