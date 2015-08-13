@@ -212,7 +212,6 @@ TCGAprepare <- function(query,
             setDF(df)
             rownames(df) <- df$Composite.Element.REF
             df$Composite.Element.REF <- NULL
-            df[,3:ncol(df)] <- sapply(df[,3:ncol(df)], as.numeric)
         }
     }
 
@@ -770,6 +769,8 @@ TCGAprepare <- function(query,
     }
 
     if (save) {
+        message("Saving the data...")
+
         if (is.null(filename)) {
             filename <- paste0(platform,"_",gsub(" ","_",Sys.time()),".rda")
         }
@@ -778,9 +779,11 @@ TCGAprepare <- function(query,
         } else {
             save(df,file = filename)
         }
+        message(paste("Data saved in:",filename))
     }
 
     if (!is.null(toPackage) && !summarizedExperiment) {
+        message(" Starting to preparing the data")
         df <- prepareToPackage(df, platform,toPackage)
     }
     if (!is.null(rse)) {
