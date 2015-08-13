@@ -585,8 +585,18 @@ getsubtypes <- function(tumor = NULL, path = ".") {
     return(subtype)
 }
 
-
+#' @title Retrieve molecular subtypes for a given tumor
+#' @description
+#'   TCGAquery_subtype Retrieve molecular subtypes for a given tumor
+#' @param tumor is a cancer Examples:
+#' \tabular{lllll}{
+#' lgg   \tab gbm \tab luad \tab stad \tab brca\cr
+#' coad \tab read \tab  \tab  \tab
+#'}
 #' @export
+#' @examples
+#' dataSubt <- TCGAquery_subtype(tumor = "lgg")
+#' @return a data.frame with barcode and molecular subtypes
 TCGAquery_subtype <- function(tumor){
     if (grepl("lgg|gbm|luad|stad|brca|coad|read", tumor,ignore.case = TRUE)) {
         # COAD and READ are in the same object
