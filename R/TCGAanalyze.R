@@ -472,6 +472,8 @@ TCGAanalyze_Normalization <- function(TCGA_RnaseqTable,geneInfo,method = "geneLe
 #' the read counts for each gene
 #' (2) Compute genewise exact tests for differences in the means between
 #' two groups of negative-binomially distributed counts.
+#' @param  fdr.cut is a threshold to filter DEGs according their p-value corrected
+#' @param logFC.cut is a threshold to filter DEGs according their logFC
 #' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags estimateGLMCommonDisp
 #' estimateGLMTagwiseDisp glmFit glmLRT
 #' @export
@@ -483,7 +485,8 @@ TCGAanalyze_Normalization <- function(TCGA_RnaseqTable,geneInfo,method = "geneLe
 #' dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT],
 #'                       dataFilt[,samplesTP],"Normal", "Tumor")
 #' @return table with DEGs containing for each gene logFC, logCPM, pValue,and FDR
-TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type,method = "exactTest") {
+TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type,method = "exactTest",
+                            fdr.cut = 1, logFC.cut = 0) {
 
     TOC <- cbind(mat1,mat2)
     Cond1num <- ncol(mat1)
@@ -515,6 +518,8 @@ TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type,method = "exactTest") 
     # Results visualization
     logFC_table <- tested$table
     tableDEA <- edgeR::topTags(tested,n = nrow(tested$table))$table
+    tableDEA <- tableDEA[tableDEA$FDR < fdr.cut,]
+    tableDEA <- tableDEA[abs(tableDEA$logFC) > logFC.cut,]
     }
 
     if (method == "glmLRT"){
@@ -527,7 +532,10 @@ TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type,method = "exactTest") 
     aGlmFit <- edgeR::glmFit(aDGEList, design, dispersion = aDGEList$tagwise.dispersion,
                              prior.count.total=0)
     aGlmLRT <- edgeR::glmLRT(aGlmFit, coef = 2)
-    tableDEA <- aGlmLRT
+
+    tableDEA <- cbind(aGlmLRT$table, FDR = p.adjust(aGlmLRT$table$PValue, "fdr"))
+    tableDEA <- tableDEA[tableDEA$FDR < fdr.cut,]
+    tableDEA <- tableDEA[abs(tableDEA$logFC) > logFC.cut,]
     }
 
     return(tableDEA)
