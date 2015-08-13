@@ -102,13 +102,16 @@ pathCancer <- paste0("../data",cancer)
 # Result....Function.....parameters...p1...pn..................................time execution
 
 datQuery <- TCGAquery(tumor = cancer, platform = PlatformCancer, level = "3")  # time = 0.093s
-lsSample <- TCGAquery_samplesfilter(datQuery)
+lsSample <- TCGAquery_samplesfilter(query = datQuery)
 dataSubt <- TCGAquery_subtype(tumor = cancer)
-dataSmTP <- TCGAquery_SampleTypes(lsSample$IlluminaHiSeq_RNASeqV2,"TP")
-dataSmTN <- TCGAquery_SampleTypes(lsSample$IlluminaHiSeq_RNASeqV2,"NT")
-dataClin <- TCGAquery_clinic("brca","clinical_patient")
+dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
+                                  typesample = "TP")[1:50]
+dataSmTN <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
+                                  typesample ="NT")[1:50]
+dataClin <- TCGAquery_clinic(cancer = "brca",
+                             clinical_data_type = "clinical_patient")
 
-            TCGAdownload(datQuery, path = pathCancer, type = dataType,
+            TCGAdownload(data = datQuery, path = pathCancer, type = dataType,
                          samples =c(dataSmTP,dataSmTN))
 
 dataAssy <- TCGAprepare(query = datQuery, dir = pathCancer, type = dataType, 
@@ -116,9 +119,11 @@ dataAssy <- TCGAprepare(query = datQuery, dir = pathCancer, type = dataType,
                         samples = c(dataSmTP,dataSmTN),
                         filename = paste0(cancer,"_",PlatformCancer,".rda"))
 
-dataPrep <- TCGAanalyze_Preprocessing(dataAssy)
-dataNorm <- TCGAanalyze_Normalization(assay(dataAssy), geneInfo,method = "gcContent")
-dataFilt <- TCGAanalyze_Filtering(TableRnaseq = dataNorm,QuantileThresh = 0.25)
+dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,cor.cut = 0.6)
+dataNorm <- TCGAanalyze_Normalization(TCGA_RnaseqTable = dataPrep, 
+                                      geneInfo,method = "gcContent")
+dataFilt <- TCGAanalyze_Filtering(TableRnaseq = dataNorm,
+                                QuantileThresh = 0.25)
 dataDEGs <- TCGAanalyze_DEA(dataFilt[,listSamplesNT], 
                             dataFilt[,listSamplesTP],
                             "Normal", "Tumor",method = "glmLRT")
