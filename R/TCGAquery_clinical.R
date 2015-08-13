@@ -576,7 +576,7 @@ getsubtypes <- function(tumor = NULL, path = ".") {
     }
 
     if (grepl("brca",tumor,ignore.case = TRUE)){
-        subtype <- fread(link,header = T)
+        subtype <- fread(link,header = TRUE)
         setnames(subtype,1,"sample")
         return(subtype)
     }
