@@ -45,14 +45,11 @@
 #'IlluminaHiSeq_RNASeqV2            \tab Mixed_DNASeq_Cont
 #'}
 #' @param level '1' '2' '3'
-#' @param added.since 04/14/2010
-#' @param added.up.to 04/14/2010
 #' @param center center name
 #' @param samples List of samples. Ex:c('TCGA-04-06','TCGA-61-1743-01A-01D-0649-04')
+#' @param version List of vector with tumor/plaform/version to get old samples,
 #' @examples
-#' query <- TCGAquery(tumor = "gbm",
-#'                    added.since = "01/01/2013",
-#'                    added.up.to = "12/31/2013")
+#' query <- TCGAquery(tumor = "gbm")
 #'
 #' query <- TCGAquery(tumor = c("gbm","lgg"),
 #'                    platform = c("HumanMethylation450","HumanMethylation27"))
@@ -65,8 +62,14 @@
 #'                    tumor = "OV",
 #'                    platform = "CGH-1x1M_G4447A",
 #'                    level = 3)
+#'
+#' # Get all LGG IlluminaHiSeq_RNASeqV2 data, but change with data version 11
+#'
+#' query <- TCGAquery(tumor = "LGG", platform = "IlluminaHiSeq_RNASeqV2", level = "3",
+#'                    version = list(c("IlluminaHiSeq_RNASeqV2","LGG",11)))
 #' @export
 #' @importFrom downloader download
+#' @importFrom stringr str_sub str_locate str_sub<-
 # @importFrom knitr kable
 #' @seealso
 #'  \code{\link{TCGAdownload}} for downloading the data from the
@@ -77,9 +80,12 @@
 #' @return A dataframe with the results of the query
 #'        (lastest version of the files)
 #' @family data functions
-TCGAquery <- function(tumor = NULL, platform = NULL, added.since = NULL,
-                      added.up.to = NULL, samples = NULL, center = NULL,
-                      level = NULL) {
+TCGAquery <- function(tumor = NULL,
+                      platform = NULL,
+                      samples = NULL,
+                      center = NULL,
+                      level = NULL,
+                      version = NULL) {
 
     db <- tcga.db
     if (!is.null(tumor)) {
@@ -141,19 +147,6 @@ TCGAquery <- function(tumor = NULL, platform = NULL, added.since = NULL,
         }
     }
 
-    if (!is.null(added.since)) {
-        d <- try(as.Date(added.since, format = "%m/%d/%Y"))
-        if (class(d) == "try-error" || is.na(d)) {
-            print("Date format should be mm/dd/YYYY")
-        }
-    }
-    if (!is.null(added.up.to)) {
-        d <- try(as.Date(added.up.to, format = "%m/%d/%Y"))
-        if (class(d) == "try-error" || is.na(d)) {
-            print("Date format should be mm/dd/YYYY")
-        }
-    }
-
     if (!is.null(tumor)) {
         id <- sapply(tumor, function(x){
             grepl(x, db$Disease, ignore.case = TRUE)
@@ -190,15 +183,6 @@ TCGAquery <- function(tumor = NULL, platform = NULL, added.since = NULL,
         }
     }
 
-    if (!is.null(added.since)) {
-        db <- subset(db, as.Date(db$addedDate) > as.Date(added.since,
-                                                         "%m/%d/%Y"))
-    }
-    if (!is.null(added.up.to)) {
-        db <- subset(db, as.Date(db$addedDate) < as.Date(added.up.to,
-                                                         "%m/%d/%Y"))
-    }
-
     # to be improved
     idx <- c()
     if(!is.null(samples)){
@@ -208,8 +192,122 @@ TCGAquery <- function(tumor = NULL, platform = NULL, added.since = NULL,
         }
         db <- db[idx,]
     }
+
+    # This is a workaround for working with old levels
+    # The user should specify the tumor and disease and we will change
+    # the path to get old version of that tumor/platform
+    if( !is.null(version)) {
+        message("Retrieving old version information, please wait...")
+
+        root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?query=Archive"
+
+        # This function will get the version using the api and add the barcode
+        for(i in 1:length(version)){
+            idx <- intersect(grep(version[[i]][1],db$baseName,ignore.case = TRUE),
+                             grep(version[[i]][2],db$baseName,ignore.case = TRUE))
+
+            if (length(idx > 0 )) {
+                db <- db[-idx,]
+            }
+
+            extra <- paste0("[revision=",version[[i]][3],"]",
+                            "[baseName=*",version[[i]][2],"*]",
+                            "[deployLocation=*",version[[i]][1],"*]")
+
+            if(!is.null(level)){
+                extra <- paste0(extra, "[name=*Level_",level,"*]")
+            }
+
+            url <- paste0(root, extra)
+            new <- tcgaGetTable(url)
+            new <- new[, 1:9]
+            new$addedDate <- as.Date(new$addedDate, "%m-%d-%Y")
+            new <- tcgaDbAddCol(new)
+            new <- new[order(new$Disease,new$Platform,new$Center),]
+            colnames(new)[4] <- "barcode"
+            for (j in 1:nrow(new)){
+                message(paste0("Updating barcode for: ",new[j,]$name))
+                new[j,"barcode"] <- updatebarcode(new[j,])
+            }
+            db <- rbind(db,new)
+        }
+    }
+
     return(db)
 }
+
+
+
+# Filter files by barcode
+updatebarcode <- function(data){
+
+    root <- "https://tcga-data.nci.nih.gov"
+    url <- gsub(".tar.gz","",data$deployLocation)
+    # maybe the folder does not exists, so this should be removed
+    if (!url.exists(paste0(root,url))) return("ERROR")
+    files <- getFileNames(paste0(root,url))
+    idx <- grep("MANIFEST|README|CHANGES|DESCRIPTION|DATA_USE|Name|Size|Parent|Last",files)
+    files <- files[-idx]
+
+    barcodeName <- paste("IlluminaHiSeq_RNASeq",
+                         "humanmethylation",
+                         "H-miRNA_8x15K",
+                         "images",
+                         "SOLiD_DNASeq",
+                         "pathology_reports",
+                         "IlluminaDNAMethylation",
+                         "HG-CGH-244A",
+                         "HG-CGH-415K_G4124A",
+                         "HG-U133_Plus_2",
+                         "IlluminaGA_DNASeq_automated",
+                         "IlluminaGA_miRNASeq",
+                         "IlluminaGA_mRNA_DGE",
+                         "IlluminaGA_RNASeq",
+                         "IlluminaHiSeq_DNASeqC",
+                         "IlluminaHiSeq_miRNASeq",
+                         "IlluminaHiSeq_RNASeq", sep = "|")
+
+    uuidName <- paste("RNASeqV2",
+                      "MDA_RPPA_Core",
+                      sep = "|")
+
+    mageName <-  paste("AgilentG4502A",
+                       "CGH-1x1M_G4447A",
+                       "Genome_Wide_SNP_6",
+                       "HT_HG-U133A",
+                       "IlluminaHiSeq_WGBS",
+                       sep = "|")
+
+
+    if (grepl(uuidName,data$Platform, ignore.case = TRUE)) {
+        # case uuid in name file
+        regex <- paste0("[[:alnum:]]{8}-[[:alnum:]]{4}",
+                        "-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}")
+        uuid <- str_match(files,regex)[,1]
+        map <- mapuuidbarcode(unique(na.omit(uuid)))
+        ret <- paste0(map$barcode,collapse = ",")
+    } else if (grepl("IlluminaGA_DNASeq_curated|illuminaga_dnaseq_automated",data$Platform) & data$Center == "broad.mit.edu") {
+        # Exception - two uuids in the name
+        # case uuid in name file
+        regex <- paste0("[[:alnum:]]{8}-[[:alnum:]]{4}",
+                        "-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}")
+        files <- files[grep(regex,files)]
+        uuid <- unlist(str_match_all(files,regex))
+        map <- mapuuidbarcode(unique(na.omit(uuid)))
+        ret <- paste0(map$barcode,collapse = ",")
+    } else if(grepl(barcodeName, data$Platform, ignore.case = TRUE)) {
+        regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
+                        "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
+        barcode <- unlist(str_match_all(files,regex))
+        ret <- paste0(barcode,collapse = ",")
+    } else if(grepl(mageName, data$Platform, ignore.case = TRUE)) {
+        ## TO BE IMPROVED
+        mage <- getMage(data)
+        ret <- paste0(mage$Comment..TCGA.Barcode.,collapse = ",")
+    }
+    return(ret)
+}
+
 
 #' @import utils
 getBarcode <- function(table){

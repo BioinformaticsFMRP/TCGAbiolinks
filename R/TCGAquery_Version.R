@@ -16,7 +16,7 @@
 #' @importFrom rvest html html_text
 #' @importFrom stringr str_split str_trim
 #' @examples
-#' TCGAquery_Version('LGG','agilentg4502a_07_3')
+#' TCGAquery_Version('GBM','illuminahiseq_rnaseqv2')
 #' @export
 #' @return Data frame with version, date, number of samples,size of
 #'         the platform and tumor
@@ -82,8 +82,24 @@ TCGAquery_Version <- function(tumor = NULL, platform = NULL) {
     message("Level 3 versions: ", length(grep("Level_3", ret$Version)))
     message("Mage versions: ", length(grep("mage-tab", ret$Version)))
     message("============================================")
-    # ret <- ret[order(ret$SizeMbyte,decreasing=TRUE),]
-    return(ret)
+    ret <- ret[ order( substr(gsub("-","",ret$Date),1,8),decreasing = FALSE ), ]
+    rownames(ret) <- NULL
+    BarcodeList <- vector("list",nrow(ret))
+    names(BarcodeList) <- ret$Version
+
+    for (idx in 1:nrow(ret)) {
+        queryVers <- TCGAquery(tumor = c(tumor),
+                               platform = c(platform),
+                               level = 3,
+                               version = list(c(platform,tumor,idx - 1)))
+        listSamplesVer <- TCGAquery_samplesfilter(queryVers)
+        BarcodeList[[idx]] <- as.character(unlist(listSamplesVer))
+        ret[idx,"Samples"] <- length(unlist(listSamplesVer))
+    }
+
+    ans <- list(TableVersion = ret, BarcodeList = BarcodeList)
+
+    return(ans)
 }
 
 getTotalSize <- function(sizeList) {

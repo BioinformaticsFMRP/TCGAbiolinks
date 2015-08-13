@@ -6,11 +6,10 @@
 \usage{
 TCGAvisualize_meanMethylation(data, groupCol = NULL, subgroupCol = NULL,
   shapes = NULL, print.pvalue = FALSE,
-  filename = "G-CIMP-mean.methylation.pdf",
+  filename = "sampleMeanMethylationByGroups.pdf",
   ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
   xlab = NULL, title = "Mean DNA methylation", labels = NULL,
-  group.legend = NULL, subgroup.legend = NULL, color = c("green", "red",
-  "purple", "orange", "salmon", "grey"))
+  group.legend = NULL, subgroup.legend = NULL, color = NULL)
 }
 \arguments{
 \item{data}{SummarizedExperiment object obtained from TCGAPrepare}
