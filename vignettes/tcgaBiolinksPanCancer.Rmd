@@ -65,14 +65,13 @@ devtools::load_all(".")
 
 # Introduction 
 
-Pan Cancer downstream analysis LGG GBM
+This vignette shows a complete workflow of the TCGAbiolinks package. 
+The code is divided in 4 case study:
 
-This vignette shows a complete workflow of the TCGAbiolinks package. The code is divide 
-in the step:
-* Step 1: search/download/prepare data
-* Step 2: classify the samples (no covered in this vignette)
-* Step 3: Analysis (DEA,DMR,Starbursplot)
-
+* 1. Expression pipeline (BRCA)
+* 2. Expression pipeline (GBM)
+* 3. Methylation pipeline - LGG/OV
+* 4. Elmer pipeline - KIRC
 
 # Parameters definition
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
@@ -86,6 +85,55 @@ useDevel()  # we need Devel for SummarizedExperiment package
 library(SummarizedExperiment)
 library(TCGAbiolinks)
 ```
+
+# TCGAbiolinks Case study n. 1: Pan Cancer downstream analysis BRCA
+
+## Step 1.1: Query, download and prepare data BRCA rnaseqV2
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+library(TCGAbiolinks)
+library(SummarizedExperiment)
+
+cancer <- "BRCA"
+PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
+dataType <- "rsem.genes.results"
+pathCancer <- paste0("../data",cancer)
+
+datQuery <- TCGAquery(tumor = cancer, platform = PlatformCancer, level = "3")
+lsSample <- TCGAquery_samplesfilter(datQuery)
+dataSubt <- TCGAquery_subtype(tumor = cancer)
+dataSmTP <- TCGAquery_SampleTypes(lsSample$IlluminaHiSeq_RNASeqV2,"TP")[1:50]
+dataSmTN <- TCGAquery_SampleTypes(lsSample$IlluminaHiSeq_RNASeqV2,"NT")[1:50]
+dataClin <- TCGAquery_clinic("brca","clinical_patient")
+
+            TCGAdownload(query, path = pathCancer, type = dataType,
+                         samples =c(dataSmTP,dataSmTN))
+
+dataAssy <- TCGAprepare(query,dir = pathCancer,type = dataType, save = TRUE,
+                    filename = paste(cancer,"_",PlatformCancer,".rda",sep=""),
+                    summarizedExperiment = TRUE,samples = c(dataSmTP,dataSmTN))
+
+dataPrep <- TCGAanalyze_Preprocessing(dataAssy)
+dataNorm <- TCGAanalyze_Normalization(assay(dataAssy), geneInfo,method = "gcContent")
+dataFilt <- TCGAanalyze_Filtering(TableRnaseq = dataNorm,QuantileThresh = 0.25)
+dataDEGs <- TCGAanalyze_DEA(dataFilt[,listSamplesNT], 
+                            dataFilt[,listSamplesTP],
+                            "Normal", "Tumor",method = "glmLRT")
+dataFDRs <- cbind(dataDEGs$table, FDR = p.adjust(dataDEGs$table$PValue, "fdr"))
+dataFDRs <- dataFDRs[dataFDRs$FDR < 0.01,]
+dataFDRs <- dataFDRs[abs(dataFDRs$logFC) > 1,]
+
+library( "genefilter")
+library("RColorBrewer")
+library(gplots)
+
+topVarGenes <- head( order( rowVars( dataFilt[rownames(dataFDRs),]), decreasing=TRUE ), 20 )
+
+heatmap.2( as.matrix(dataFilt[ topVarGenes, ], scale="row",
+        trace="none", dendrogram="column",
+        col = colorRampPalette( rev(brewer.pal(9, "RdBu")) )(255)))
+```
+
 
 
 # Step 1: Query, download and prepare data LGG and GBM  
