@@ -4,10 +4,13 @@
 \alias{TCGAanalyze_Preprocessing}
 \title{Array Array Intensity correlation (AAIC) and correlation boxplot to define outlier}
 \usage{
-TCGAanalyze_Preprocessing(object)
+TCGAanalyze_Preprocessing(object, cor.cut = 0)
 }
 \arguments{
 \item{object}{of gene expression of class RangedSummarizedExperiment from TCGAprepare}
+
+\item{cor.cut}{is a threshold to filter samples according their spearman correlation in
+samples by samples. default cor.cut is 0}
 }
 \value{
 Plot with array array intensity correlation and boxplot of correlation samples by samples
