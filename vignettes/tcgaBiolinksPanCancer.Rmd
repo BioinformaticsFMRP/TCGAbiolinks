@@ -114,26 +114,43 @@ dataClin <- TCGAquery_clinic(cancer = "brca",
             TCGAdownload(data = datQuery, path = pathCancer, type = dataType,
                          samples =c(dataSmTP,dataSmTN))
 
-dataAssy <- TCGAprepare(query = datQuery, dir = pathCancer, type = dataType, 
-                        save = TRUE, summarizedExperiment = TRUE, 
+dataAssy <- TCGAprepare(query = datQuery, 
+                        dir = pathCancer, 
+                        type = dataType, 
+                        save = TRUE, 
+                        summarizedExperiment = TRUE, 
                         samples = c(dataSmTP,dataSmTN),
                         filename = paste0(cancer,"_",PlatformCancer,".rda"))
 
 dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,cor.cut = 0.6)
-dataNorm <- TCGAanalyze_Normalization(TCGA_RnaseqTable = dataPrep, 
-                                      geneInfo,method = "gcContent")
-dataFilt <- TCGAanalyze_Filtering(TableRnaseq = dataNorm,
-                                QuantileThresh = 0.25)
-dataDEGs <- TCGAanalyze_DEA(dataFilt[,listSamplesNT], 
-                            dataFilt[,listSamplesTP],
-                            "Normal", "Tumor",method = "glmLRT")
+dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
+                                      geneInfo = geneInfo,
+                                      method = "gcContent")
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm, qnt.cut = 0.25)
+dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmTN],
+                            mat2 = dataFilt[,dataSmTP],
+                            Cond1type = "Normal",
+                            Cond2type = "Tumor",
+                            fdr.cut = 0.01 ,
+                            logFC.cut = 1,
+                            method = "glmLRT")
 
-library( "genefilter")
+dataSurv<-TCGAanalyze_SurvivalKM(clinical_patient = clinical_patient_Cancer,
+                                 dataGE = dataFilt,
+                                 
+dataSurv<-TCGAanalyze_SurvivalKM(clinical_patient = dataClin,
+                                dataGE = dataFilt,
+                                Genelist = rownames(dataDEGs)[1:50],
+                                Survresult = FALSE,
+                                ThreshTop = 0.67,
+                                ThreshDown = 0.33)
+
+
+         
+library("genefilter")
 library("RColorBrewer")
 library(gplots)
-
 topVarGenes <- head( order( rowVars( dataFilt[rownames(dataFDRs),]), decreasing=TRUE ), 20 )
-
 heatmap.2( as.matrix(dataFilt[ topVarGenes, ], scale="row",
         trace="none", dendrogram="column",
         col = colorRampPalette( rev(brewer.pal(9, "RdBu")) )(255)))
