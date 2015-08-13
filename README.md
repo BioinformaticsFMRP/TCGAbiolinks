@@ -1,39 +1,9 @@
-# TCGAbiolinks
+# TCGAbiolinks - An R/Bioconductor package for integrativ eanalysis with TCGA data
 
-### How do I get set up? ###
-
-* Installing dependencies
+### Installation ###
 ```R
-install.packages(c("downloader","RCurl","httr","devtools","stringr",
-                    "exactRankTests","XML","GGally","parallel","ggplot2",
-                    "survival","biomaRt","rjson","ggbiplot","dnet","igraph",
-                    "rvest"))
 source("http://bioconductor.org/biocLite.R")
-biocLite(c("GenomicRanges","edgeR","EDASeq","Rgraphviz","biomaRt","supraHex",
-            "SummarizedExperiment","limma","TxDb.Hsapiens.UCSC.hg19.knownGene"))
+useDevel()
+biocLite("TCGAbiolinks")
 ```
 
-* Creating roxygen documentation
-```r
-devtools::document()
-```
-* Building the package
-```r
-devtools::build()
-```
- 
-* Summary of set up
-```r
-install.packages(path_to_package, repos = NULL, type="source")
-```
-
-### Main structure of the repository ###
-| Folder  | Description |
-| ------------- | ------------- |
-| R	  | main R files
-| man	| Manual files (can be created by roxygen with devtools::document())
-| demo	| Example of how to run the code
-| inst	| Files that should be acessed by the installed package
-| DESCRIPTION	| Package description
-| NAMESPACE	| Package namespace (can be created by roxygen with devtools::document())
-| README.md | Project readme
