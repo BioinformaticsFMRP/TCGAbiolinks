@@ -4,13 +4,13 @@
 \alias{TCGAanalyze_Filtering}
 \title{Filtering mRNA transcripts and miRNA selecting a threshold.}
 \usage{
-TCGAanalyze_Filtering(TableRnaseq, QuantileThresh)
+TCGAanalyze_Filtering(tabDF, qnt.cut)
 }
 \arguments{
-\item{TableRnaseq}{is a dataframe or numeric matrix, each row represents a gene,
+\item{tabDF}{is a dataframe or numeric matrix, each row represents a gene,
 each column represents a sample come from TCGAPrepare}
 
-\item{QuantileThresh}{is threshold selected as mean for filtering}
+\item{qnt.cut}{is threshold selected as mean for filtering}
 }
 \value{
 A filtered dataframe or numeric matrix where each row represents a gene,

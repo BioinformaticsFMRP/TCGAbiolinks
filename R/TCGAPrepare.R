@@ -41,6 +41,8 @@
 #' @param filename Name of the saved file
 #' @param toPackage For whihc package are you preparing the data?
 #' Default: NULL. Options: "ELMER"
+#' @param reannotate Reannotate genes?  Source http://grch37.ensembl.org/.
+#' DEFAULT: FALSE. (For the moment only working for methylation data)
 #' @param summarizedExperiment Output as SummarizedExperiment?
 #' Default: \code{FALSE}
 #' @examples
@@ -50,12 +52,12 @@
 #' data <- TCGAprepare(query, dir="exampleData")
 #' @export
 #' @importFrom stringr str_match str_trim str_detect str_match_all
-#' @importFrom SummarizedExperiment SummarizedExperiment
+#' @importFrom SummarizedExperiment SummarizedExperiment metadata<-
 #' @importFrom S4Vectors DataFrame SimpleList
 #' @importFrom limma alias2SymbolTable
 #' @importFrom GenomicFeatures microRNAs
 #' @importFrom BiocGenerics as.data.frame
-#' @importFrom GenomicRanges GRanges
+#' @importFrom GenomicRanges GRanges distanceToNearest
 #' @importFrom IRanges IRanges
 #' @import utils data.table TxDb.Hsapiens.UCSC.hg19.knownGene
 #' @seealso  \code{\link{TCGAquery}} for searching the data to download
@@ -70,6 +72,7 @@ TCGAprepare <- function(query,
                         save = FALSE,
                         filename = NULL,
                         toPackage = NULL,
+                        reannotate = FALSE,
                         summarizedExperiment = TRUE){
 
     if (is.null(dir)) {
@@ -78,7 +81,10 @@ TCGAprepare <- function(query,
         return(NULL)
     }
 
-
+    if(!is.null(toPackage)){
+        message("toPackage argument was set, changing summarizedExperiment to FALSE")
+        summarizedExperiment <- FALSE
+    }
     if (length(unique(query$Platform)) > 1 |
         length(unique(query$Center)) > 2) {
         # This case (27k/450k)accepts two platforms
@@ -127,7 +133,7 @@ TCGAprepare <- function(query,
 
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     df <- NULL
-    sset <- NULL
+    rse <- NULL
 
     if (grepl("humanmethylation",tolower(platform))) {
 
@@ -176,7 +182,29 @@ TCGAprepare <- function(query,
             colData <-  colDataPrepare(colnames(df)[5:ncol(df)],query)
             assay <- data.matrix(subset(df,select = c(5:ncol(df))))
 
-            sset <- SummarizedExperiment(assays = assay,
+            if(reannotate){
+                message("Reannotating genes Source:http://grch37.ensembl.org/")
+                gene.location <- gene.location[gene.location$chromosome_name %in% c(1:22,"X","Y"),]
+                gene.location <- gene.location[!is.na (gene.location$entrezgene),]
+                gene.location <- gene.location[!duplicated(gene.location$entrezgene),]
+
+                gene.GR <- GRanges(seqnames = paste0("chr",gene.location$chromosome_name),
+                                   ranges = IRanges(start = gene.location$start_position,
+                                                    end=gene.location$end_position),
+                                   strand = gene.location$strand,
+                                   symbol = gene.location$external_gene_name,
+                                   EntrezID = gene.location$entrezgene)
+
+                probe.info  <- rowRanges
+                distance <- as.data.frame(distanceToNearest(rowRanges ,gene.GR))
+                gene.order.by.distance <- gene.location[distance$subjectHits,]
+                gene.order.by.distance$distance <- as.matrix(distance$distance)
+                rowRanges$distance <- gene.order.by.distance[,c("distance")]
+                rowRanges$Gene_Symbol <- gene.order.by.distance[,c("external_gene_name")]
+                rowRanges$entrezgene <- gene.order.by.distance[,c("entrezgene")]
+            }
+
+            rse <- SummarizedExperiment(assays = assay,
                                          rowRanges = rowRanges,
                                          colData = colData)
 
@@ -184,7 +212,6 @@ TCGAprepare <- function(query,
             setDF(df)
             rownames(df) <- df$Composite.Element.REF
             df$Composite.Element.REF <- NULL
-            df[,3:ncol(df)] <- sapply(df[,3:ncol(df)], as.numeric)
         }
     }
 
@@ -320,7 +347,7 @@ TCGAprepare <- function(query,
 
             }
             colData <- colDataPrepare(as.character(barcode), query)
-            sset <- SummarizedExperiment(assays=assays,
+            rse <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
                                          colData=colData)
         }else {
@@ -339,13 +366,13 @@ TCGAprepare <- function(query,
         }
 
         for (i in seq_along(files)) {
-            data <- fread(files[i], header = TRUE, sep = "\t", skip= 1,
-                          stringsAsFactors = FALSE)
+            data <- fread(files[i], header = TRUE, sep = "\t", skip = 1,
+                          stringsAsFactors = FALSE, data.table = FALSE)
 
             if (i == 1) {
                 df <- data
             } else {
-                df <- merge(df, data, colnames(data)[1])
+                df <- cbind(df, data[,2])
             }
             setTxtProgressBar(pb, i)
         }
@@ -361,7 +388,8 @@ TCGAprepare <- function(query,
 
         if(summarizedExperiment){
             # TODO create GRanges
-            df$external_gene_name <-  alias2SymbolTable(df$`Composite Element REF`)
+            #df$external_gene_name <-  alias2SymbolTable(df$`Composite Element REF`)
+            df$external_gene_name <-  df$`Composite Element REF`
             merged <- merge(df,gene.location,by="external_gene_name")
             rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
                                  ranges = IRanges(start = merged$start_position,
@@ -382,7 +410,7 @@ TCGAprepare <- function(query,
             )
             )
 
-            sset <- SummarizedExperiment(assays=assays,
+            rse <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
                                          colData=colData)
         }
@@ -440,7 +468,7 @@ TCGAprepare <- function(query,
                     subset(merged,select=seq(3,2+length(barcode)))))
             )
 
-            sset <- SummarizedExperiment(assays=assays,
+            rse <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
                                          colData=colData)
         }
@@ -586,7 +614,7 @@ TCGAprepare <- function(query,
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
             colData <- colDataPrepare(barcode,query)
 
-            sset <- SummarizedExperiment(assays=assays,
+            rse <- SummarizedExperiment(assays=assays,
                                          rowRanges=rowRanges,
                                          colData=colData)
         } else {
@@ -715,7 +743,7 @@ TCGAprepare <- function(query,
                 subset(merged,select = idx))
             )
 
-            sset <- SummarizedExperiment(assays = assays,
+            rse <- SummarizedExperiment(assays = assays,
                                          rowRanges = rowRanges,
                                          colData = colData)
 
@@ -723,22 +751,43 @@ TCGAprepare <- function(query,
     }
     close(pb)
 
+    if (!is.null(rse)) {
+        message("Adding metadata to the rse object...")
+
+        finf <- c()
+        finf <- file.info(files)
+        rownames(finf) <- basename(rownames(finf))
+        finf <- finf[,c("mtime","ctime")]
+
+        metadata(rse) <- list("Query:"=list(query),
+                              "TCGAprepareParameters"=c("dir"=dir,
+                                                        "samples"=samples,
+                                                        "type"=type,
+                                                        "save"=save,
+                                                        "filename"=filename),
+                              "FilesInfo:"=list(finf))
+    }
+
     if (save) {
+        message("Saving the data...")
+
         if (is.null(filename)) {
             filename <- paste0(platform,"_",gsub(" ","_",Sys.time()),".rda")
         }
-        if (!is.null(sset)) {
-            save(sset,file = filename)
+        if (!is.null(rse)) {
+            save(rse,file = filename)
         } else {
             save(df,file = filename)
         }
+        message(paste("Data saved in:",filename))
     }
 
     if (!is.null(toPackage) && !summarizedExperiment) {
+        message(" Starting to preparing the data")
         df <- prepareToPackage(df, platform,toPackage)
     }
-    if (!is.null(sset)) {
-        return(sset)
+    if (!is.null(rse)) {
+       return(rse)
     }
     return(df)
 }
