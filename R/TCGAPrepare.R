@@ -768,6 +768,11 @@ TCGAprepare <- function(query,
                               "FilesInfo:"=list(finf))
     }
 
+    if (!is.null(toPackage) && !summarizedExperiment) {
+        message(" Starting to preparing the data")
+        df <- prepareToPackage(df, platform,toPackage)
+    }
+
     if (save) {
         message("Saving the data...")
 
@@ -782,10 +787,6 @@ TCGAprepare <- function(query,
         message(paste("Data saved in:",filename))
     }
 
-    if (!is.null(toPackage) && !summarizedExperiment) {
-        message(" Starting to preparing the data")
-        df <- prepareToPackage(df, platform,toPackage)
-    }
     if (!is.null(rse)) {
        return(rse)
     }
@@ -821,6 +822,7 @@ prepareToPackage <- function(df, platform, toPackage){
                           "NA values in more than 0.80% samples")
             message(msg)
             df <- df[rowMeans(is.na(df))<0.2,]
+            df <- data.matrix(df)
         }
     }
 
