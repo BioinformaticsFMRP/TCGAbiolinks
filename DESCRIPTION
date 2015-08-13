@@ -1,21 +1,20 @@
 Package: TCGAbiolinks
 Type: Package
 Title:
-    TCGAbiolinks: An R package to query, download,
-    analyze, visualize, integrate and socialize data from TCGA
-Version: 0.99.1
-Date: 2015-07-21
+    TCGAbiolinks: An R/Bioconductor package for integrative analysis with TCGA data
+Version: 0.99.2
+Date: 2015-12-13
 Author:
     Antonio Colaprico,
     Tiago Chedraoui Silva,
-    Luciano Garofano,
     Catharina Olsen,
+    Luciano Garofano,
     Davide Garolini,
     Claudia Cava,
     Isabella Castiglioni,
+    Michele Ceccarelli,
     Houtan Noushmehr,
-    Gianluca Bontempi,
-    Michele Ceccarelli
+    Gianluca Bontempi
 Maintainer: Antonio Colaprico <antonio.colaprico@ulb.ac.be>
 Depends: R (>= 3.2)
 Imports:
