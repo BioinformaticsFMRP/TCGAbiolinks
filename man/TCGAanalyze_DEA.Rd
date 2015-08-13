@@ -4,7 +4,8 @@
 \alias{TCGAanalyze_DEA}
 \title{Differentially expression analysis (DEA) using edgeR package.}
 \usage{
-TCGAanalyze_DEA(mat1, mat2, Cond1type, Cond2type)
+TCGAanalyze_DEA(mat1, mat2, Cond1type, Cond2type, method = "exactTest",
+  fdr.cut = 1, logFC.cut = 0)
 }
 \arguments{
 \item{mat1}{numeric matrix, each row represents a gene,
@@ -18,6 +19,16 @@ each column represents a sample with Cond2type}
 
 \item{Cond2type}{a string containing the class label of the samples in mat2
 (e.g., case group)}
+
+\item{method}{is 'glmLRT' (1) or 'exactTest' (2).
+(1) Fit a negative binomial generalized log-linear model to
+the read counts for each gene
+(2) Compute genewise exact tests for differences in the means between
+two groups of negative-binomially distributed counts.}
+
+\item{fdr.cut}{is a threshold to filter DEGs according their p-value corrected}
+
+\item{logFC.cut}{is a threshold to filter DEGs according their logFC}
 }
 \value{
 table with DEGs containing for each gene logFC, logCPM, pValue,and FDR

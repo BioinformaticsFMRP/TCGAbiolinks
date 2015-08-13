@@ -4,8 +4,8 @@
 \alias{TCGAquery}
 \title{Searches TCGA open-access data providing also latest version of the files.}
 \usage{
-TCGAquery(tumor = NULL, platform = NULL, added.since = NULL,
-  added.up.to = NULL, samples = NULL, center = NULL, level = NULL)
+TCGAquery(tumor = NULL, platform = NULL, samples = NULL, center = NULL,
+  level = NULL, version = NULL)
 }
 \arguments{
 \item{tumor}{Disease Examples:
@@ -46,15 +46,13 @@ HumanMethylation27                \tab Mixed_DNASeq_Cont_curated      \cr
 IlluminaHiSeq_RNASeqV2            \tab Mixed_DNASeq_Cont
 }}
 
-\item{added.since}{04/14/2010}
-
-\item{added.up.to}{04/14/2010}
-
 \item{samples}{List of samples. Ex:c('TCGA-04-06','TCGA-61-1743-01A-01D-0649-04')}
 
 \item{center}{center name}
 
 \item{level}{'1' '2' '3'}
+
+\item{version}{List of vector with tumor/plaform/version to get old samples,}
 }
 \value{
 A dataframe with the results of the query
@@ -71,9 +69,7 @@ The TCGAquery searches TCGA open-access data through a preprocessed table
    that will be used in the other function TCGAdownload, TCGAprepare.
 }
 \examples{
-query <- TCGAquery(tumor = "gbm",
-                   added.since = "01/01/2013",
-                   added.up.to = "12/31/2013")
+query <- TCGAquery(tumor = "gbm")
 
 query <- TCGAquery(tumor = c("gbm","lgg"),
                    platform = c("HumanMethylation450","HumanMethylation27"))
@@ -86,6 +82,11 @@ query <- TCGAquery(samples = "TCGA-61-1743-01A-01D-0649-04",
                    tumor = "OV",
                    platform = "CGH-1x1M_G4447A",
                    level = 3)
+
+# Get all LGG IlluminaHiSeq_RNASeqV2 data, but change with data version 11
+
+query <- TCGAquery(tumor = "LGG", platform = "IlluminaHiSeq_RNASeqV2", level = "3",
+                   version = list(c("IlluminaHiSeq_RNASeqV2","LGG",11)))
 }
 \seealso{
 \code{\link{TCGAdownload}} for downloading the data from the
