@@ -4,10 +4,12 @@
 #' According this matrix and boxplot of correlation samples by samples it is possible
 #' to find samples with low correlation that can be identified as possible outliers.
 #' @param object of gene expression of class RangedSummarizedExperiment from TCGAprepare
+#' @param cor.cut is a threshold to filter samples according their spearman correlation in
+#' samples by samples. default cor.cut is 0
 #' @importFrom grDevices dev.list
 #' @export
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
-TCGAanalyze_Preprocessing<- function(object){
+TCGAanalyze_Preprocessing<- function(object, cor.cut = 0){
 
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 
@@ -61,11 +63,13 @@ TCGAanalyze_Preprocessing<- function(object){
     axis(2, labels = as.list(pretty(c, 10)), at = seq(0, 1, by = (1/(length(pretty(c,  10)) - 1))))
     abline(h = seq((1/(length(pretty(c, 10)) - 1))/2, 1 - (1/(length(pretty(c, 10)) - 1)), by = (1/(length(pretty(c, 10)) - 1))))
 
-    boxplot(c, outline = FALSE,las =2, lwd = 6,col = tabGroupCol$Color, main ="Boxplot of correlation samples by samples after RMA")
+    boxplot(c, outline = FALSE,las =2, lwd = 6,col = tabGroupCol$Color, main ="Boxplot of correlation samples by samples after normalization")
+
+    samplesCor <- rowMeans(c)
+    objectWO <-  assay(object,"raw_counts")[, samplesCor > cor.cut]
 
     dev.off()
-
-    return(c)
+    return(objectWO)
 }
 
 #' @title survival analysis (SA) univariate with Kaplan-Meier (KM) method.
@@ -295,19 +299,19 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,Th
 #'    TCGAanalyze_Filtering allows user to filter mRNA transcripts and miRNA,
 #'    selecting a threshold. For istance returns all mRNA or miRNA with mean across all
 #'    samples, higher than the threshold defined quantile mean across all samples.
-#' @param TableRnaseq is a dataframe or numeric matrix, each row represents a gene,
+#' @param tabDF is a dataframe or numeric matrix, each row represents a gene,
 #' each column represents a sample come from TCGAPrepare
-#' @param QuantileThresh is threshold selected as mean for filtering
+#' @param qnt.cut is threshold selected as mean for filtering
 #' @export
 #' @return A filtered dataframe or numeric matrix where each row represents a gene,
 #' each column represents a sample
 #' @examples
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 #' dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
-TCGAanalyze_Filtering <- function(TableRnaseq,QuantileThresh ){
-    GeneThresh <- as.numeric(quantile(rowMeans(TableRnaseq), QuantileThresh))
-    geneFiltered <- names(which(rowMeans(TableRnaseq) > GeneThresh))
-    Table_Rnaseq_Rawcount_Filt <- TableRnaseq[geneFiltered, ]
+TCGAanalyze_Filtering <- function(tabDF,qnt.cut ){
+    GeneThresh <- as.numeric(quantile(rowMeans(tabDF), qnt.cut))
+    geneFiltered <- names(which(rowMeans(tabDF) > GeneThresh))
+    Table_Rnaseq_Rawcount_Filt <- tabDF[geneFiltered, ]
     return( Table_Rnaseq_Rawcount_Filt)
 }
 
@@ -335,7 +339,7 @@ TCGAanalyze_Filtering <- function(TableRnaseq,QuantileThresh ){
 #'    \item  EDASeq::betweenLaneNormalization
 #'    \item  EDASeq::counts
 #'    }
-#' @param TCGA_RnaseqTable Rnaseq numeric matrix, each row represents a gene,
+#' @param tabDF Rnaseq numeric matrix, each row represents a gene,
 #' each column represents a sample
 #' @param geneInfo Information matrix of 20531 genes about geneLength and gcContent
 #' @param method is method of normalization such as 'gcContent' or 'geneLength'
@@ -347,7 +351,7 @@ TCGAanalyze_Filtering <- function(TableRnaseq,QuantileThresh ){
 #' and one column for each sample.
 #' @examples
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
-TCGAanalyze_Normalization <- function(TCGA_RnaseqTable,geneInfo,method = "geneLength"){
+TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
 
     geneInfo <- geneInfo[!is.na(geneInfo[,1]),]
     geneInfo <-as.data.frame(geneInfo)
@@ -357,7 +361,7 @@ TCGAanalyze_Normalization <- function(TCGA_RnaseqTable,geneInfo,method = "geneLe
 
     if(method == "gcContent"){
 
-        tmp <- as.character(rownames(TCGA_RnaseqTable))
+        tmp <- as.character(rownames(tabDF))
         tmp <- strsplit(tmp, "\\|")
         geneNames <- matrix("", ncol = 2, nrow = length(tmp))
         j <- 1
@@ -372,14 +376,14 @@ TCGAanalyze_Normalization <- function(TCGA_RnaseqTable,geneInfo,method = "geneLe
         tmp <- which(geneNames[,1] == names(tmp[which(tmp > 1)]))
         geneNames[tmp, 1] <- paste(geneNames[tmp, 1], geneNames[tmp, 2], sep = ".")
         tmp <- table(geneNames[,1])
-        rownames(TCGA_RnaseqTable) <- geneNames[,1]
+        rownames(tabDF) <- geneNames[,1]
 
-    rawCounts<- TCGA_RnaseqTable
+    rawCounts<- tabDF
     commonGenes <- intersect(rownames(geneInfo), rownames(rawCounts))
     geneInfo <- geneInfo[commonGenes,]
     rawCounts <- rawCounts[commonGenes,]
 
-    timeEstimated <- format(ncol(TCGA_RnaseqTable)*nrow(TCGA_RnaseqTable)/80000,digits = 2)
+    timeEstimated <- format(ncol(tabDF)*nrow(tabDF)/80000,digits = 2)
     print(messageEstimation <- paste("I Need about ", timeEstimated,
                                      "seconds for this Complete Normalization Upper Quantile",
                                      " [Processing 80k elements /s]  "))
@@ -399,50 +403,50 @@ TCGAanalyze_Normalization <- function(TCGA_RnaseqTable,geneInfo,method = "geneLe
     normCounts <-  floor(exp(normCounts) - .1)
     print("Step 4 of 4: .quantileNormalization ...")
     tmp <- t(.quantileNormalization(t(normCounts)))
-    TCGA_RnaseqTable_norm <- floor(tmp)
+    tabDF_norm <- floor(tmp)
     }
 
     if(method == "geneLength"){
 
-        TCGA_RnaseqTable <- TCGA_RnaseqTable[ !(GenesCutID(as.matrix(rownames(TCGA_RnaseqTable))) == "?"),]
-        TCGA_RnaseqTable <- TCGA_RnaseqTable[ !(GenesCutID(as.matrix(rownames(TCGA_RnaseqTable))) == "SLC35E2"),]
-        rownames(TCGA_RnaseqTable) <- GenesCutID(as.matrix(rownames(TCGA_RnaseqTable)))
-        TCGA_RnaseqTable <- TCGA_RnaseqTable[rownames(TCGA_RnaseqTable) != "?", ]
-        TCGA_RnaseqTable <- TCGA_RnaseqTable[!duplicated(rownames(TCGA_RnaseqTable)), !duplicated(colnames(TCGA_RnaseqTable))]
-        TCGA_RnaseqTable <- TCGA_RnaseqTable[rownames(TCGA_RnaseqTable) %in% rownames(geneInfo),]
-        TCGA_RnaseqTable <- as.matrix(TCGA_RnaseqTable)
+        tabDF <- tabDF[ !(GenesCutID(as.matrix(rownames(tabDF))) == "?"),]
+        tabDF <- tabDF[ !(GenesCutID(as.matrix(rownames(tabDF))) == "SLC35E2"),]
+        rownames(tabDF) <- GenesCutID(as.matrix(rownames(tabDF)))
+        tabDF <- tabDF[rownames(tabDF) != "?", ]
+        tabDF <- tabDF[!duplicated(rownames(tabDF)), !duplicated(colnames(tabDF))]
+        tabDF <- tabDF[rownames(tabDF) %in% rownames(geneInfo),]
+        tabDF <- as.matrix(tabDF)
 
-    geneInfo <- geneInfo[rownames(geneInfo) %in% rownames(TCGA_RnaseqTable), ]
+    geneInfo <- geneInfo[rownames(geneInfo) %in% rownames(tabDF), ]
     geneInfo <- geneInfo[!duplicated(rownames(geneInfo)), ]
     toKeep <- which(geneInfo[, "geneLength"] != 0)
     geneInfo <- geneInfo[toKeep, ]
-    TCGA_RnaseqTable <- TCGA_RnaseqTable[toKeep, ]
+    tabDF <- tabDF[toKeep, ]
     geneInfo <- as.data.frame(geneInfo)
-    TCGA_RnaseqTable <- round(TCGA_RnaseqTable)
-    commonGenes <- intersect(rownames(TCGA_RnaseqTable),rownames(geneInfo))
+    tabDF <- round(tabDF)
+    commonGenes <- intersect(rownames(tabDF),rownames(geneInfo))
 
-    TCGA_RnaseqTable <- TCGA_RnaseqTable[commonGenes,]
+    tabDF <- tabDF[commonGenes,]
     geneInfo <- geneInfo[commonGenes,]
 
-    timeEstimated <- format(ncol(TCGA_RnaseqTable)*nrow(TCGA_RnaseqTable)/80000,digits = 2)
+    timeEstimated <- format(ncol(tabDF)*nrow(tabDF)/80000,digits = 2)
     print(messageEstimation <- paste("I Need about ", timeEstimated,
                                      "seconds for this Complete Normalization Upper Quantile",
                                      " [Processing 80k elements /s]  "))
 
     print("Step 1 of 4: newSeqExpressionSet ...")
-    system.time(TCGA_RnaseqTable_norm <- EDASeq::newSeqExpressionSet(TCGA_RnaseqTable, featureData = geneInfo))
+    system.time(tabDF_norm <- EDASeq::newSeqExpressionSet(tabDF, featureData = geneInfo))
     print("Step 2 of 4: withinLaneNormalization ...")
-    system.time(TCGA_RnaseqTable_norm <- EDASeq::withinLaneNormalization(TCGA_RnaseqTable_norm, "geneLength", which = "upper", offset = FALSE))
+    system.time(tabDF_norm <- EDASeq::withinLaneNormalization(tabDF_norm, "geneLength", which = "upper", offset = FALSE))
     print("Step 3 of 4: betweenLaneNormalization ...")
-    system.time(TCGA_RnaseqTable_norm <- EDASeq::betweenLaneNormalization(TCGA_RnaseqTable_norm, which = "upper", offset = FALSE))
+    system.time(tabDF_norm <- EDASeq::betweenLaneNormalization(tabDF_norm, which = "upper", offset = FALSE))
     print("Step 4 of 4: exprs ...")
 
-    #system.time(TCGA_RnaseqTable_norm <- EDASeq::exprs(TCGA_RnaseqTable_norm))
-    system.time(TCGA_RnaseqTable_norm <- EDASeq::counts(TCGA_RnaseqTable_norm))
+    #system.time(tabDF_norm <- EDASeq::exprs(tabDF_norm))
+    system.time(tabDF_norm <- EDASeq::counts(tabDF_norm))
     }
 
 
-    return(TCGA_RnaseqTable_norm)
+    return(tabDF_norm)
 }
 
 #' @title Differentially expression analysis (DEA) using edgeR package.
