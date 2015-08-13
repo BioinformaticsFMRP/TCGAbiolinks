@@ -205,6 +205,7 @@ TCGAanalyze_survival <- function(data,
 #' @param labels Labels of the groups
 #' @import ggplot2 stats
 #' @importFrom SummarizedExperiment colData rowRanges assay
+#' @importFrom grDevices rainbow
 # ' @importFrom gtools combinations
 #' @export
 #' @return Save the pdf survival plot
