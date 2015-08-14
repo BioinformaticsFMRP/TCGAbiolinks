@@ -673,21 +673,37 @@ This function receives as parameters:
 After, we filter the output of dataDEGs by abs(LogFC) >=1, and uses the
 `TCGAanalyze_LevelTab` function to create a table with DEGs (differentially expressed genes), log Fold Change (FC), false discovery rate (FDR), the gene expression level for samples in Cond1type, and Cond2type, and Delta value (the difference of gene expression between the two conditions multiplied logFC).
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 # Downstream analysis using gene expression data  
 # TCGA samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
 # save(dataBRCA, geneInfo , file = "dataGeneExpression.rda")
 library(TCGAbiolinks)
 
-# Diff.expr.analysis (DEA)
-dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT], dataFilt[,samplesTP],
-                    "Normal", "Tumor")
+# normalization of genes
+dataNorm <- TCGAanalyze_Normalization(tabDF = dataBRCA,geneInfo =  geneInfo)
 
-# DEGs filter by abs(logFC) >=1
-dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
+# quantile filter of genes
+dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
+
+# selection of normal samples "NT"
+samplesNT <- TCGAquery_SampleTypes(barcode = colnames(dataFilt),
+                                   typesample = c("NT"))
+
+# selection of tumor samples "TP"
+samplesTP <- TCGAquery_SampleTypes(barcode = colnames(dataFilt), 
+                                   typesample = c("TP"))
+
+# Diff.expr.analysis (DEA)
+dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,samplesNT],
+                            mat2 = dataFilt[,samplesTP],
+                            Cond1type = "Normal",
+                            Cond2type = "Tumor",
+                            fdr.cut = 0.01 ,
+                            logFC.cut = 1,
+                            method = "glmLRT")
 
 # DEGs table with expression values in normal and tumor samples
-dataDEGsFiltLevel <- TCGAanalyze_LevelTab(dataDEGsFilt,"Tumor","Normal",
+dataDEGsFiltLevel <- TCGAanalyze_LevelTab(dataDEGs,"Tumor","Normal",
                                 dataFilt[,samplesTP],dataFilt[,samplesNT])
 
 ```
@@ -933,7 +949,7 @@ The parameters of this function are:
 * **dataDEGsFiltLevel** The TCGAanalyze_LevelTab output
 * **ntopgenes** number of DEGs genes to plot in PCA
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 library(TCGAbiolinks)
 
 # normalization of genes
@@ -1218,7 +1234,7 @@ you can use the `TCGAquery_SampleTypes` function, the typeSample "NT" will retur
 the  "Solid Tissue Normal" samples, while the typeSample "TP" will return 
 "Primary Solid Tumor"" samples.
  
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 # Downstream analysis using gene expression data  
 # TCGA samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
 
