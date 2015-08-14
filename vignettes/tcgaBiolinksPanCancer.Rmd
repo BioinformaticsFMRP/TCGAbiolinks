@@ -86,7 +86,7 @@ library(SummarizedExperiment)
 library(TCGAbiolinks)
 ```
 
-# TCGAbiolinks Case study n. 1: Pan Cancer downstream analysis BRCA
+# Case study n. 1: Pan Cancer downstream analysis BRCA
 
 ## Step 1.1: Query, download and prepare data BRCA rnaseqV2
 
@@ -272,6 +272,115 @@ save(aux,file = "gbmlggwithpvalues.rda")
 startburst <- TCGAvisualize_starburst(aux, dataDEGs,"LGm1","LGm2", p.cut = 10^-10)
 ```
 
+
+# Case study n. 4: Elmer pipeline - KIRC
+
+One of the biggest problems related to the study data is the preparation phase,
+which often consists of successive 
+steps in order to prepare it to a format acceptable by certain algorithms and software.
+
+With the object of assisting users in this arduous step, TCGAbiolinks offers in 
+data preparation stage, the toPackage argument, which aims to prepare the data 
+in order to obtain the correct format for different packages.
+
+An example of another package to perform analysis is ELMER. We will present this
+case study the study KIRC by TCGAbiolinks and ELMER integration.
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+#-----------------------------------
+# STEP 1: Search, download, prepare |
+#-----------------------------------
+# Step 1.1 download methylation data|
+# -----------------------------------
+path <-  "."
+query <- TCGAquery(tumor = "KIRC",level = 3, platform = "HumanMethylation450")
+TCGAdownload(query, path = path)
+kirc.met <- TCGAprepare(query,dir = path, save = TRUE,
+                        filename = "metKirc.rda",
+                        toPackage = "ELMER")
+
+# Step 1.2 download expression data
+query.rna <- TCGAquery(tumor="KIRC",level=3, platform="IlluminaHiSeq_RNASeqV2")
+TCGAdownload(query.rna,path=path,type = "rsem.genes.normalized_results")
+
+kirc.exp <- TCGAprepare(query.rna, dir=path, save = TRUE,
+                        type = "rsem.genes.normalized_results",
+                        filename = "expKirc.rda",toPackage = "ELMER")
+
+#-----------------------------------
+# STEP 2: ELMER integration         |
+#-----------------------------------
+# Step 2.1 prepare mee object       |
+# -----------------------------------
+library(ELMER)
+library(parallel)
+
+geneAnnot <- txs()
+geneAnnot$GENEID <- paste0("ID",geneAnnot$GENEID)
+geneInfo <- promoters(geneAnnot,upstream = 0, downstream = 0)
+probe <- get.feature.probe()
+mee <- fetch.mee(meth = kirc.met, exp = kirc.exp, TCGA = TRUE,
+                 probeInfo = probe, geneInfo = geneInfo)
+
+#--------------------------------------
+# STEP 3: Analysis                     |
+#--------------------------------------
+# Step 3.1: Get diff methylated probes |
+#--------------------------------------
+Sig.probes <- get.diff.meth(mee ,cores=detectCores(),
+                            dir.out ="kirc",diff.dir="hypo",
+                            pvalue = 0.01)
+
+
+#--------------------------------------------------
+# Step 3.2: Identifying putative probe-gene pairs |
+#--------------------------------------------------
+# Collect nearby 20 genes for Sig.probes
+nearGenes <- GetNearGenes(TRange=getProbeInfo(mee, probe=Sig.probes),
+                          cores=detectCores(),
+                          geneAnnot=getGeneInfo(mee))
+
+# Identify significant probe-gene pairs
+Hypo.pair <- get.pair(mee=mee,
+                      probes=Sig.probes,
+                      nearGenes=nearGenes,
+                      permu.dir="./kirc/permu",
+                      dir.out="./kirc/",
+                      cores=detectCores(),
+                      label= "hypo",
+                      permu.size=10000,
+                      Pe = 0.01)
+
+Sig.probes.paired <- fetch.pair(pair=Hypo.pair,
+                                probeInfo = getProbeInfo(mee),
+                                geneInfo = getGeneInfo(mee))
+
+#-------------------------------------------------------------
+# Step 3.3: Motif enrichment analysis on the selected probes |
+#-------------------------------------------------------------
+enriched.motif <- get.enriched.motif(probes=Sig.probes.paired,
+                                     dir.out="kirc", label="hypo",
+                                     background.probes = probe$name)
+
+#-------------------------------------------------------------
+# Step 3.4: Identifying regulatory TFs                        |
+#-------------------------------------------------------------
+TF <- get.TFs(mee=mee,
+              enriched.motif=enriched.motif,
+              dir.out="kirc",
+              cores=detectCores(), label= "hypo")
+
+```
+
+From this analysis it is possible to verify the relation between a probe 
+and nearby genes. The result of this is show by the ELMER scatter plot.
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("case4_elmer.png")
+grid.raster(img)
+```
 
 ******
 ### Session Information
