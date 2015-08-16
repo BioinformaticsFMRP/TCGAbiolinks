@@ -88,11 +88,8 @@ library(TCGAbiolinks)
 
 # Case study n. 1: Pan Cancer downstream analysis BRCA
 
-## Step 1.1: Query, download and prepare data BRCA rnaseqV2
-
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(TCGAbiolinks)
-library(SummarizedExperiment)
 
 cancer <- "BRCA"
 PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
@@ -105,10 +102,10 @@ datQuery <- TCGAquery(tumor = cancer, platform = PlatformCancer, level = "3")  #
 lsSample <- TCGAquery_samplesfilter(query = datQuery)
 dataSubt <- TCGAquery_subtype(tumor = cancer)
 dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
-                                  typesample = "TP")[1:50]
+                                  typesample = "TP")
 dataSmTN <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
-                                  typesample ="NT")[1:50]
-dataClin <- TCGAquery_clinic(cancer = "brca",
+                                  typesample ="NT")
+dataClin <- TCGAquery_clinic(cancer = cancer,
                              clinical_data_type = "clinical_patient")
 
             TCGAdownload(data = datQuery, path = pathCancer, type = dataType,
@@ -144,16 +141,79 @@ dataSurv<-TCGAanalyze_SurvivalKM(clinical_patient = dataClin,
                                 Survresult = FALSE,
                                 ThreshTop = 0.67,
                                 ThreshDown = 0.33)
+```
 
 
-         
-library("genefilter")
-library("RColorBrewer")
-library(gplots)
-topVarGenes <- head( order( rowVars( dataFilt[rownames(dataFDRs),]), decreasing=TRUE ), 20 )
-heatmap.2( as.matrix(dataFilt[ topVarGenes, ], scale="row",
-        trace="none", dendrogram="column",
-        col = colorRampPalette( rev(brewer.pal(9, "RdBu")) )(255)))
+# Case study n. 2: Pan Cancer downstream analysis LGG
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+library(TCGAbiolinks)
+library(genefilter)
+cancer <- "LGG"
+PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
+dataType <- "rsem.genes.results"
+pathCancer <- paste0("../data",cancer)
+
+# Result....Function.....parameters...p1...pn..................................time execution
+
+datQuery <- TCGAquery(tumor = cancer, platform = PlatformCancer, level = "3")  # time = 0.093s
+lsSample <- TCGAquery_samplesfilter(query = datQuery)
+dataSubt <- TCGAquery_subtype(tumor = cancer)
+dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
+                                  typesample = "TP")
+dataClin <- TCGAquery_clinic(cancer = cancer,
+                             clinical_data_type = "clinical_patient")
+
+            TCGAdownload(data = datQuery, path = pathCancer, type = dataType,
+                         samples = dataSmTP )
+
+dataAssy <- TCGAprepare(query = datQuery, 
+                        dir = pathCancer, 
+                        type = dataType, 
+                        save = TRUE, 
+                        summarizedExperiment = TRUE, 
+                        samples = dataSmTP,
+                        filename = paste0(cancer,"_",PlatformCancer,".rda"))
+
+dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,cor.cut = 0.6)        # time = 13.028s
+dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
+                                      geneInfo = geneInfo,
+                                      method = "gcContent")                  # time = 165.577s 
+dataFilt <- varFilter(dataNorm, var.func = IQR,  
+                      var.cutoff = 0.75,
+                      filterByQuantile = TRUE)
+
+normCounts <- dataFilt
+geData <- t(log(1 + normCounts, 2))
+
+dim(geData)
+
+eta <- .05
+foldChange <- 1
+#  filter n.1
+filter <- apply(geData, 2, function(x) sum(quantile(x, probs = c(1 - eta, eta)) * c(1, -1)))
+fivenum(filter)
+sum(filter > foldChange)
+geData <- geData[, which(filter > foldChange)]
+
+#  filter n.2
+filter <- apply(geData, 2, function(x) prod(quantile(x, probs =  c(1 - eta, eta)) - 10) < 0)
+sum(filter)
+
+geData <- geData[, which(filter)]
+dim(geData)
+genesSelectedForClustering <- colnames(geData)
+
+system.time(sHc <- hclust(ddist <- dist(geData), method = "ward.D2"))      # time = 1.270 )
+
+library("ConsensusClusterPlus")
+
+ans <- ConsensusClusterPlus(ddist, maxK = 7, pItem = 0.9, reps=1000
+                            , title="mc_consensus_k7_1000"
+                            , clusterAlg = "hc"
+                            , innerLinkage = "ward.D2"
+                            , finalLinkage = "complete"
+                            , plot = 'pdf', writeTable = TRUE)
 ```
 
 
