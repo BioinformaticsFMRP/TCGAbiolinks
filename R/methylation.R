@@ -177,7 +177,8 @@ TCGAanalyze_survival <- function(data,
             surv <- surv + geom_point(aes(colour = group),
                                       shape = 3,size = 2)
             surv <- surv + guides(linetype = FALSE) +
-                scale_y_continuous(labels = scales::percent)
+                scale_y_continuous(labels = scales::percent) +
+                theme(legend.justification=c(1,0), legend.position=c(1,0.8))
 
             ggsave(surv, filename = filename, width = width, height = height)
         })
@@ -468,6 +469,59 @@ calculate.pvalues <- function(data,
     return(data)
 }
 
+TCGAVisualize_volcano <- function(x,y,
+                                  filename = "volcano.pdf",
+                                  ylab =  expression(paste(-Log[10],
+                                                           " (FDR corrected -P values)")),
+                                  xlab=NULL, title=NULL, legend=NULL,
+                                  label=NULL, xlim=NULL, ylim=NULL,
+                                  color = c("1" = "black", "2" = "red",
+                                            "3" = "green"),
+                                  names=NULL,
+                                  x.cut=0,
+                                  y.cut=0.01){
+
+    .e <- environment()
+    threshold <- rep("1",length(x))
+
+    # get significant data
+    sig <-  y < y.cut
+
+    # hypermethylated/up regulated samples compared to old state
+    up <- x  > x.cut
+
+    if (any(up & sig)) threshold[up & sig] <- "2"
+
+    # hypomethylated/ down regulated samples compared to old state
+    down <-  x < (-x.cut)
+    if (any(down & sig)) threshold[down & sig] <- "3"
+
+    df <- data.frame(x=x,y=y,threshold=threshold)
+    # Plot a volcano plot
+    p <- ggplot(data=df,
+                aes(x = x , y = -1 * log10(y), colour = threshold ),
+                environment = .e) +
+        geom_point() +
+        ggtitle(title) + ylab(ylab) + xlab(xlab) +
+        geom_vline(aes(xintercept = -x.cut),
+                   colour = "black",linetype = "dashed") +
+        geom_vline(aes(xintercept = x.cut),
+                   colour = "black", linetype = "dashed") +
+        geom_hline(aes(yintercept = -1 * log10(y.cut)),
+                   colour = "black", linetype = "dashed") +
+        scale_color_manual(breaks = c("1", "2", "3"),
+                           values = color,
+                           labels = label,
+                           name = legend) + theme(legend.position="top")
+
+    # Label points with the textxy function from the calibrate plot
+    if(!is.null(names)){
+        idx <- (up & sig) | (down & sig)
+        p <- p + annotate("text", x = x[idx], y =  -1.1 *log10(y[idx]) , label = names[idx],  size = 2.0,  alpha = .6)
+    }
+    ggsave(p, filename = filename, width = 10, height = 5, dpi = 600)
+}
+
 #' @title Differentially methylated regions Analysis
 #' @description
 #'   This function will search for differentially methylated CpG sites,
@@ -538,7 +592,7 @@ TCGAanalyze_DMR <- function(data,
                             groupCol=NULL,
                             group1=NULL,
                             group2=NULL,
-                            filename = "volcano.pdf",
+                            filename = "methylation_volcano.pdf",
                             ylab =  expression(paste(-Log[10],
                                                      " (FDR corrected -P values)")),
                             xlab = "DNA Methylation difference",
@@ -550,6 +604,7 @@ TCGAanalyze_DMR <- function(data,
                             xlim = NULL,
                             ylim = NULL,
                             p.cut = 0.01,
+                            probe.names = FALSE,
                             diffmean.cut = 0.2,
                             paired = FALSE,
                             adj.method="BH",
@@ -618,7 +673,6 @@ TCGAanalyze_DMR <- function(data,
     statuscol2 <- paste("status",group2,group1,sep = ".")
     values(rowRanges(data))[,statuscol] <-  "Not Significant"
     values(rowRanges(data))[,statuscol2] <-  "Not Significant"
-    rowRanges(data)$threshold <- "1"
 
     # get significant data
     sig <-  values(rowRanges(data))[,pcol] < p.cut
@@ -626,37 +680,30 @@ TCGAanalyze_DMR <- function(data,
     # hypermethylated samples compared to old state
     hyper <- values(rowRanges(data))[,diffcol]  > diffmean.cut
 
-    if (any(hyper & sig)) rowRanges(data)[hyper & sig,]$threshold <- "2"
     if (any(hyper & sig)) values(rowRanges(data))[hyper & sig,statuscol] <- "Hypermethylated"
     if (any(hyper & sig)) values(rowRanges(data))[hyper & sig,statuscol2] <- "Hypomethylated"
 
     # hypomethylated samples compared to old state
     hypo <-  values(rowRanges(data))[,diffcol] < (-diffmean.cut)
-    if (any(hypo & sig)) rowRanges(data)[hypo & sig,]$threshold <- "3"
     if (any(hypo & sig)) values(rowRanges(data))[hypo & sig,statuscol] <- "Hypomethylated"
     if (any(hypo & sig)) values(rowRanges(data))[hypo & sig,statuscol2] <- "Hypermethylated"
 
     # Plot a volcano plot
-    p <- ggplot(data = as.data.frame(rowRanges(data)),
-                aes(x = values(rowRanges(data))[,diffcol] ,
-                    y = -1 * log10(values(rowRanges(data))[,pcol]),
-                    colour = rowRanges(data)$threshold ),
-                environment = .e) + geom_point() +
-        ggtitle(title) + ylab(ylab) + xlab(xlab) +
-        geom_vline(aes(xintercept = -diffmean.cut),
-                   colour = "black",linetype = "dashed") +
-        geom_vline(aes(xintercept = diffmean.cut),
-                   colour = "black", linetype = "dashed") +
-        geom_hline(aes(yintercept = -1 * log10(p.cut)),
-                   colour = "black", linetype = "dashed") +
-        scale_color_manual(breaks = c("1", "2", "3"),
-                           values = color,
-                           labels = label,
-                           name = legend)
+    names <- NULL
+    if(probe.names) values(data)$probeID
 
-    # saving box plot to analyse it
-    ggsave(p, filename = filename, width = 10, height = 5, dpi = 600)
-    rowRanges(data)$threshold <- NULL
+    TCGAVisualize_volcano(x = values(rowRanges(data))[,diffcol],
+                          y = values(rowRanges(data))[,pcol],
+                          filename = filename,
+                          ylab =  ylab,
+                          xlab = xlab,
+                          title = title,
+                          legend= legend,
+                          label = label,
+                          names = values(data)$probeID,
+                          x.cut = diffmean.cut,
+                          y.cut = p.cut)
+
     return(data)
 }
 
@@ -731,6 +778,7 @@ TCGAvisualize_starburst <- function(met,
                                     met.p.cut = 0.01,
                                     diffmean.cut = 0,
                                     logFC.cut = 0,
+                                    names = FALSE,
                                     filename = "starburst.pdf",
                                     ylab = expression(atop("Gene Expression",
                                                            paste(Log[10],
@@ -926,7 +974,19 @@ TCGAvisualize_starburst <- function(met,
                    linetype = "dashed") +
         geom_vline(aes(xintercept = met.upperthr), colour = "black",
                    linetype = "dashed")
-    ggsave(filename = filename, width = 14, height = 10)
+
+    if(names == TRUE){
+        message("Adding names to genes")
+        s <- list(a.sig,b.sig,g.sig,h.sig)
+        for (i in s) {
+            if(nrow(i) > 0){
+                p <- p + annotate("text", x = i$meFDR2, y =  1.1 *(i$geFDR2),
+                                  label = i$Gene_Symbol,  size = 2.0,  alpha = .6)
+
+            }
+        }
+    }
+    ggsave(filename = filename, width = 14, height = 10, dpi = 600)
 
     #statuscol <- paste("status", group1, group2, sep = ".")
 
