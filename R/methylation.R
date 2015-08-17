@@ -154,7 +154,7 @@ TCGAanalyze_survival <- function(data,
 
     if (print.value){
         surv <- surv + annotate("text",x = -Inf,y = -Inf, hjust = -0.1,
-                                vjust = -1.0, size = 3,
+                                vjust = -1.0, size = 6,
                                 label = paste0("Log-Rank P-value = ",
                                                format(pvalue,
                                                       scientific = TRUE,
@@ -178,7 +178,10 @@ TCGAanalyze_survival <- function(data,
                                       shape = 3,size = 2)
             surv <- surv + guides(linetype = FALSE) +
                 scale_y_continuous(labels = scales::percent) +
-                theme(legend.justification=c(1,0), legend.position=c(1,0.8))
+                theme(legend.justification=c(1,1), legend.position=c(1,1),
+                      legend.text = element_text(size = 18), legend.title = element_text(size = 18),
+                      axis.text= element_text(size = 22),  axis.title.x= element_text(size = 22),
+                      axis.title.y= element_text(size = 22))
 
             ggsave(surv, filename = filename, width = width, height = height)
         })
@@ -475,14 +478,14 @@ TCGAVisualize_volcano <- function(x,y,
                                                            " (FDR corrected -P values)")),
                                   xlab=NULL, title=NULL, legend=NULL,
                                   label=NULL, xlim=NULL, ylim=NULL,
-                                  color = c("1" = "black", "2" = "red",
-                                            "3" = "green"),
+                                  color = c("black", "red", "green"),
                                   names=NULL,
                                   x.cut=0,
                                   y.cut=0.01){
 
     .e <- environment()
     threshold <- rep("1",length(x))
+    names(color) <- as.character(1:3)
 
     # get significant data
     sig <-  y < y.cut
@@ -509,10 +512,21 @@ TCGAVisualize_volcano <- function(x,y,
                    colour = "black", linetype = "dashed") +
         geom_hline(aes(yintercept = -1 * log10(y.cut)),
                    colour = "black", linetype = "dashed") +
-        scale_color_manual(breaks = c("1", "2", "3"),
+        scale_color_manual(breaks = as.character(1:3),
                            values = color,
                            labels = label,
-                           name = legend) + theme(legend.position="top")
+                           name = legend) +
+        theme_bw() + theme(panel.border = element_blank(),
+                           panel.grid.major = element_blank(),
+                           panel.grid.minor = element_blank(),
+                           axis.line = element_line(colour = "black"),
+                           legend.position="top",
+                           title = element_text(size = 16),
+                           legend.text = element_text(size = 16),
+                           legend.title = element_text(size = 16),
+                           axis.text= element_text(size = 16),
+                           axis.title.x= element_text(size = 16),
+                           axis.title.y= element_text(size = 16))
 
     # Label points with the textxy function from the calibrate plot
     if(!is.null(names)){
@@ -788,28 +802,23 @@ TCGAvisualize_starburst <- function(met,
                                                                  " (FDR corrected P values)"))),
                                     title = "Starburst Plot",
                                     legend = "Methylation/Expression Relation",
-                                    color = c("1" = "black",
-                                              "2" = "coral",
-                                              "3" = "darkgreen",
-                                              "4" = "blue",
-                                              "5" = "darkred",
-                                              "6" = "red",
-                                              "7" = "brown",
-                                              "8" = "yellow",
-                                              "9" = "orange"),
-                                    label = c("1" = "Not Significant",
-                                              "2" = "Up regulated & Hypo methylated",
-                                              "3" = "Down regulated & Hypo methylated",
-                                              "4" = "hypo methylated",
-                                              "5" = "hyper methylated",
-                                              "6" = "Up regulated",
-                                              "7" = "Down regulated",
-                                              "8" = "Up regulated & Hyper methylated",
-                                              "9" = "Down regulated & Hyper methylated"),
+                                    color = c("black", brewer.pal(8,"Dark2")),
+                                    label = c("Not Significant",
+                                              "Up regulated & Hypo methylated",
+                                              "Down regulated & Hypo methylated",
+                                              "hypo methylated",
+                                              "hyper methylated",
+                                              "Up regulated",
+                                              "Down regulated",
+                                              "Up regulated & Hyper methylated",
+                                              "Down regulated & Hyper methylated"),
                                     xlim = NULL, ylim = NULL
 )
 {
     .e <- environment()
+
+    names(color) <- as.character(1:9)
+    names(label) <- as.character(1:9)
 
     if ( is.null(group1) || is.null(group2)) {
         message("Please, set the group1 and group2 parameters")
@@ -973,7 +982,12 @@ TCGAvisualize_starburst <- function(met,
         geom_vline(aes(xintercept = met.lowerthr), colour = "black",
                    linetype = "dashed") +
         geom_vline(aes(xintercept = met.upperthr), colour = "black",
-                   linetype = "dashed")
+                   linetype = "dashed")  +
+        theme_bw() + theme(panel.border = element_blank(),
+                           panel.grid.major = element_blank(),
+                           panel.grid.minor = element_blank(),
+                           axis.line = element_line(colour = "black"),
+                           legend.position="top")
 
     if(names == TRUE){
         message("Adding names to genes")
@@ -981,7 +995,7 @@ TCGAvisualize_starburst <- function(met,
         for (i in s) {
             if(nrow(i) > 0){
                 p <- p + annotate("text", x = i$meFDR2, y =  1.1 *(i$geFDR2),
-                                  label = i$Gene_Symbol,  size = 2.0,  alpha = .6)
+                                  label = i$Gene_Symbol,  size = 4.0,  alpha = .6)
 
             }
         }
