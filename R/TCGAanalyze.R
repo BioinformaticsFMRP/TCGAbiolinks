@@ -1,3 +1,39 @@
+#' @title Hierarchical cluster analysis
+#' @description Hierarchical cluster analysis using several methods such as
+#' ward.D", "ward.D2", "single", "complete", "average" (= UPGMA), "mcquitty" (= WPGMA),
+#' "median" (= WPGMC) or "centroid" (= UPGMC).
+#' @param tabDF is a dataframe or numeric matrix, each row represents a gene,
+#' each column represents a sample come from TCGAPrepare.
+#' @param method is method to be used for generic cluster such as 'hclust' or 'consensus'
+#' @param methodHC is method to be used for Hierarchical cluster.
+#' @importFrom stats hclust
+#' @importFrom ConsensusClusterPlus ConsensusClusterPlus
+#' @export
+#' @return object of class hclust if method selected is 'hclust'.
+#' If method selected is 'Consensus' returns a list of length maxK
+#' (maximum cluster number to evaluate.). Each element is a list containing
+#' consensusMatrix (numerical matrix), consensusTree (hclust), consensusClass
+#' (consensus class asssignments). ConsensusClusterPlus also produces images.
+TCGAanalyze_Clustering<- function(tabDF, method,  methodHC = "ward.D2"){
+
+    if( method == "hclust"){
+        ans <- hclust(ddist <- dist(tabDF), method = methodHC)
+    }
+
+    if( method == "consensus"){
+        sHc <- hclust(ddist <- dist(tabDF), method = methodHC)      # time = 1.270 )
+        ans <- ConsensusClusterPlus(ddist, maxK = 7, pItem = 0.9, reps=1000
+                                    , title="mc_consensus_k7_1000"
+                                    , clusterAlg = "hc"
+                                    , innerLinkage = "ward.D2"
+                                    , finalLinkage = "complete"
+                                    , plot = 'pdf', writeTable = TRUE)
+    }
+
+    return(ans)
+    }
+
+
 #' @title Array Array Intensity correlation (AAIC) and correlation boxplot to define outlier
 #' @description TCGAanalyze_Preprocessing perform Array Array Intensity correlation (AAIC).
 #' It defines a square symmetric matrix of pearson correlation among samples.
@@ -301,7 +337,7 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,Th
 #'    samples, higher than the threshold defined quantile mean across all samples.
 #' @param tabDF is a dataframe or numeric matrix, each row represents a gene,
 #' each column represents a sample come from TCGAPrepare
-#' @param method is method of filtering such as 'quantile', 'varFilter',
+#' @param method is method of filtering such as 'quantile', 'varFilter', 'filter1', 'filter2'
 #' @param qnt.cut is threshold selected as mean for filtering
 #' @param var.func is function used as the per-feature filtering statistic.
 #' See genefilter documentation
@@ -329,26 +365,31 @@ TCGAanalyze_Filtering <- function(tabDF,method,
     }
 
     if(method == "varFilter"){
-        tabDF_Filt <- genefilter::varFilter(dataNorm, var.func,
-                              var.cutoff,
+        tabDF_Filt <- genefilter::varFilter(tabDF, var.func = IQR,
+                              var.cutoff= 0.75,
                               filterByQuantile = TRUE)
     }
 
     if(method == "filter1"){
-    normCounts <- dataNorm
+    normCounts <- tabDF
     geData <- t(log(1 + normCounts, 2))
     filter <- apply(geData, 2, function(x) sum(quantile(x, probs = c(1 - eta, eta)) * c(1, -1)))
     tabDF_Filt <- geData[, which(filter > foldChange)]
     }
 
     if(method == "filter2"){
-    geData <- dataNorm
+    geData <- tabDF
     filter <- apply(geData, 2, function(x) prod(quantile(x, probs =  c(1 - eta, eta)) - 10) < 0)
     tabDF_Filt <- geData[, which(filter)]
     }
 
     return( tabDF_Filt)
 }
+
+
+
+
+
 
 #' @title normalization mRNA transcripts and miRNA using EDASeq package.
 #' @description
