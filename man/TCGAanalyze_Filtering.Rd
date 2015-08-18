@@ -35,6 +35,9 @@ TCGAanalyze_Filtering allows user to filter mRNA transcripts and miRNA,
 }
 \examples{
 dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
+dataNorm <- TCGAanalyze_Normalization(tabDF = dataBRCA,
+geneInfo = geneInfo,
+method = "geneLength")
 dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm, method = "quantile", qnt.cut = 0.25)
 }
 
