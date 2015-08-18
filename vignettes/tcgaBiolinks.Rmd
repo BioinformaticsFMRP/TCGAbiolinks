@@ -58,7 +58,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(dpi = 150)
+knitr::opts_chunk$set(dpi = 300)
 ```
 
 ```{r, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
@@ -231,9 +231,8 @@ HumanMethylation450 but for the LGG/HumanMethylation450, we want the version 5
 of the files instead of the latest. This could take some seconds.
 
 ```{r, eval = FALSE}
-query <- TCGAquery(tumor = c("LGG","GBM"),platform = c("HumanMethylation450"),
-                     level = 3,
-                      version = list(c("HumanMethylation450","LGG",1)))
+query <- TCGAquery(tumor = c("LGG","GBM"), platform = c("HumanMethylation450"), level = 3, 
+                   version = list(c("HumanMethylation450","LGG",1)))
 ```
 
 ## `TCGAquery_clinic` `&` `TCGAquery_clinicFilt`: Working with clinical data.
@@ -907,7 +906,7 @@ while the red dots are the hypermethylated probes in group 2 compared to group 1
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
-img <- readPNG("volcano.png")
+img <- readPNG("figure5met.png")
 grid.raster(img)
 ```
 
@@ -951,9 +950,7 @@ The parameters of this function are:
 * **dataDEGsFiltLevel** The TCGAanalyze_LevelTab output
 * **ntopgenes** number of DEGs genes to plot in PCA
 
-```{r, eval = TRUE}
-library(TCGAbiolinks)
-
+```{r, eval = FALSE}
 # normalization of genes
 dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 
@@ -964,11 +961,6 @@ dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
 
 # Principal Component Analysis plot for ntop selected DEGs
 TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
-
-# boxplot of normalized data
-#sampleGenes <- rownames(dataDEGsFilt[dataDEGsFilt$logFC >=1,])[1:20]
-#boxplot(log(dataBRCA[sampleGenes,]), las = 2)
-#boxplot(log(dataFilt[sampleGenes,]), las = 2)
 ```
 
 The result is shown below:
@@ -1111,18 +1103,25 @@ Expected colData columns: logFC, FDR
 
 
 ```{r, eval = FALSE}
-resut <- TCGAvisualize_starburst(met,exp,"g1","g2",met.p.cut = 10^-10)
+starburst <- TCGAvisualize_starburst(coad.SummarizeExperiment, 
+                                     different.experssion.analysis.data,
+                                     group1 = "CIMP.H",
+                                     group2 = "CIMP.L",
+                                     met.p.cut = 10^-5, 
+                                     exp.p.cut=10^-5,
+                                     names = TRUE)
 ```
 
 As result the function will a plot the figure below and return a matrix with 
 The Gene_symbol and it status in relation to expression(up regulated/down regulated) and 
-methylation (Hyper/Hypo methylated).
+methylation (Hyper/Hypo methylated). The case study 3, shows the complete pipeline
+for creating this figure.
 
 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
-img <- readPNG("starburst.png")
+img <- readPNG("figure5star.png")
 grid.raster(img)
 ```
 
@@ -1286,9 +1285,9 @@ BRCAMatrix <- TCGAprepare(query,"dataBrca",type = "gene.quantification")
 ```
 
 
-## TCGA Downstream Analysis: Case Studies
+# TCGA Downstream Analysis: Case Studies
 
-# Introduction 
+## Introduction 
 
 This vignette shows a complete workflow of the TCGAbiolinks package. 
 The code is divided in 4 case study:
@@ -1298,7 +1297,7 @@ The code is divided in 4 case study:
 * 3. Methylation pipeline - LGG/OV
 * 4. Elmer pipeline - KIRC
 
-# Parameters definition
+## Parameters definition
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
 dataType <- "rsem.genes.results"
@@ -1311,7 +1310,7 @@ library(SummarizedExperiment)
 library(TCGAbiolinks)
 ```
 
-# Case study n. 1: Pan Cancer downstream analysis BRCA
+## Case study n. 1: Pan Cancer downstream analysis BRCA
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(TCGAbiolinks)
@@ -1371,7 +1370,7 @@ dataSurv<-TCGAanalyze_SurvivalKM(clinical_patient = dataClin,
 ```
 
 
-# Case study n. 2: Pan Cancer downstream analysis LGG
+## Case study n. 2: Pan Cancer downstream analysis LGG
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(TCGAbiolinks)
@@ -1574,8 +1573,131 @@ save(aux,file = "gbmlggwithpvalues.rda")
 startburst <- TCGAvisualize_starburst(aux, dataDEGs,"LGm1","LGm2", p.cut = 10^-10)
 ```
 
+## Case study n. 3: Integration of methylation and expression for COAD
 
-# Case study n. 4: Elmer pipeline - KIRC
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+#-----------------------------------
+# STEP 1: Search, download, prepare |
+#-----------------------------------
+# 1.1 - Methylation
+# ----------------------------------
+query.met <- TCGAquery(tumor = c("coad"),
+                       platform = c("HumanMethylation27",
+                                    "HumanMethylation450"),
+                       level = 3)
+
+TCGAdownload(query.met, path = "/dados/ibm/comparing/biolinks/coad/")
+
+coad.met <- TCGAprepare(query = query.met,
+                        dir = "/dados/ibm/comparing/biolinks/coad/",
+                        save = TRUE, filename = "metcoad.rda",reannotate = TRUE)
+
+#-----------------------------------
+# 1.2 - Expression
+# ----------------------------------
+
+coad.query.exp <- TCGAquery(tumor = "coad",
+                       platform = "IlluminaGA_RNASeqV2",
+                       level = 3)
+
+TCGAdownload(coad.query.exp,
+             path = "/dados/ibm/comparing/biolinks/RNA/",
+             type = "rsem.genes.results")
+
+coad.exp <- TCGAprepare(query = coad.query.exp,
+                        dir = "/dados/ibm/comparing/biolinks/RNA/",
+                        type = "rsem.genes.results",
+                        save = T,filename = "coadexp.rda")
+
+
+# removing the samples without classification
+coad.met <- subset(coad.met,select = !(colData(coad.met)$methylation_subtype %in% c(NA)))
+
+#--------------------------------------------
+# STEP 2: Analysis
+#--------------------------------------------
+# 2.1 - Mean methylation of samples
+# -------------------------------------------
+TCGAvisualize_meanMethylation(coad.met,
+                              groupCol = "methylation_subtype",subgroupCol = "hypermutated",
+                              group.legend  = "Groups", subgroup.legend = "hypermutated",
+                              filename = "coad_mean.pdf")
+
+#------------------------------------------
+# 4.2 - Volcano plot
+# -----------------------------------------
+
+coad.aux <- subset(coad.met, select = colData(coad.met)$methylation_subtype %in% c("CIMP.L","CIMP.H"))
+
+# na.omit
+coad.aux <- subset(coad.aux,subset = (rowSums(is.na(assay(coad.aux))) == 0))
+
+# Volcano plot
+coad.aux <- TCGAanalyze_DMR(coad.aux, groupCol = "methylation_subtype",group1 = "CIMP.H",
+                       group2="CIMP.L", p.cut = 10^-8, diffmean.cut = 0.25, legend = "State",
+                       filename = "coad_CIMPHvsCIMPL_metvolcano.pdf")
+
+save(coad.aux,file = "coad_pvalue.rda")
+
+#------------------------------------------
+# 4.4 - Starburst plot
+# -----------------------------------------
+
+coad.exp.aux <- subset(coad.exp, select = colData(coad.exp)$methylation_subtype %in% c("CIMP.H","CIMP.L"))
+
+idx <- colData(coad.exp.aux)$methylation_subtype %in% c("CIMP.H")
+idx2 <- colData(coad.exp.aux)$methylation_subtype %in% c("CIMP.L")
+
+
+dataPrep <- TCGAanalyze_Preprocessing(object = coad.exp.aux,cor.cut = 0.6)
+dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
+                                      geneInfo = geneInfo,
+                                      method = "gcContent")
+
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm, qnt.cut = 0.25)
+
+dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,idx],
+                            mat2 = dataFilt[,idx2],
+                            Cond1type = "Normal",
+                            Cond2type = "Tumor",
+                            method = "glmLRT")
+
+TCGAVisualize_volcano(dataDEGs$logFC,dataDEGs$FDR,
+                      filename="Case3_volcanoexp.pdf",
+                     label= c("1" = "Not Significant",  "2" = "Up regulared",
+                        "3" = "Down regulated"),
+                     x.cut=4, names= rownames(dataDEGs),
+                     xlab =" Log2 fold change",
+                     legend="State",title = "Volcano plot (CIMP.l vs CIMP.H)")
+
+starburst <- TCGAvisualize_starburst(coad.aux, dataDEGs,"CIMP.H","CIMP.L",
+                                     met.p.cut = 10^-5, exp.p.cut=10^-5,
+                                     names = TRUE)
+```
+
+The figures resulted from the code above are shown below.
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("figure5exp.png")
+grid.raster(img)
+```
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("figure5met.png")
+grid.raster(img)
+```
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("figure5star.png")
+grid.raster(img)
+```
+
+## Case study n. 4: Elmer pipeline - KIRC
 
 One of the biggest problems related to the study data is the preparation phase,
 which often consists of successive 
