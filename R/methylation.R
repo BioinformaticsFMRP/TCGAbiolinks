@@ -83,6 +83,7 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' @param cutoff xlim This parameter will be a limit in the x-axis. That means, that
 #' patients with days_to_deth > cutoff will be set to Alive.
 #' @param main main title of the plot
+#' @param labels labels of the plot
 #' @param ylab y axis text of the plot
 #' @param xlab x axis text of the plot
 #' @param filename The name of the pdf file
@@ -107,7 +108,9 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' }
 TCGAanalyze_survival <- function(data,
                                  clusterCol = NULL,
-                                 legend = "Legend", cutoff = 0,
+                                 legend = "Legend",
+                                 labels = NULL,
+                                 cutoff = 0,
                                  main = "Kaplan-Meier Overall Survival Curves",
                                  ylab = "Probability of survival",
                                  xlab = "Time since diagnosis (days)",
@@ -174,9 +177,14 @@ TCGAanalyze_survival <- function(data,
         paste0(x, " (n = ",
                nrow(subset(data,data[,clusterCol] == x)), ")")
     }
+
+    if(is.null(labels)){
+        labels <- sapply(levels(data$type),label.add.n)
+    }
+
     with(data,{
         surv <- surv + scale_colour_manual(name = legend,
-                                           labels = sapply(levels(data$type),label.add.n),
+                                           labels = labels,
                                            values=color
         )
         with(surv,{
