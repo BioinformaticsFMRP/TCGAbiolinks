@@ -5,7 +5,8 @@
 \title{Creates survival analysis}
 \usage{
 TCGAanalyze_survival(data, clusterCol = NULL, legend = "Legend",
-  cutoff = 0, main = "Kaplan-Meier Overall Survival Curves",
+  labels = NULL, cutoff = 0,
+  main = "Kaplan-Meier Overall Survival Curves",
   ylab = "Probability of survival", xlab = "Time since diagnosis (days)",
   filename = "survival.pdf", color = NULL, height = 8, width = 12,
   print.value = TRUE)
@@ -17,6 +18,8 @@ TCGAanalyze_survival(data, clusterCol = NULL, legend = "Legend",
 caption will be based in this column}
 
 \item{legend}{Legend title of the figure}
+
+\item{labels}{labels of the plot}
 
 \item{cutoff}{xlim This parameter will be a limit in the x-axis. That means, that
 patients with days_to_deth > cutoff will be set to Alive.}
