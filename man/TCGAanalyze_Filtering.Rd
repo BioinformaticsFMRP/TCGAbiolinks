@@ -4,13 +4,25 @@
 \alias{TCGAanalyze_Filtering}
 \title{Filtering mRNA transcripts and miRNA selecting a threshold.}
 \usage{
-TCGAanalyze_Filtering(tabDF, qnt.cut)
+TCGAanalyze_Filtering(tabDF, method, qnt.cut = 0.25, var.func = IQR,
+  var.cutoff = 0.75, eta = 0.05, foldChange = 1)
 }
 \arguments{
 \item{tabDF}{is a dataframe or numeric matrix, each row represents a gene,
 each column represents a sample come from TCGAPrepare}
 
+\item{method}{is method of filtering such as 'quantile', 'varFilter',}
+
 \item{qnt.cut}{is threshold selected as mean for filtering}
+
+\item{var.func}{is function used as the per-feature filtering statistic.
+See genefilter documentation}
+
+\item{var.cutoff}{is a numeric value. See genefilter documentation}
+
+\item{eta}{is a paramter for filter1. default eta = 0.05.}
+
+\item{foldChange}{is a paramter for filter2. default foldChange = 1.}
 }
 \value{
 A filtered dataframe or numeric matrix where each row represents a gene,
@@ -23,6 +35,6 @@ TCGAanalyze_Filtering allows user to filter mRNA transcripts and miRNA,
 }
 \examples{
 dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
-dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm, method = "quantile", qnt.cut = 0.25)
 }
 
