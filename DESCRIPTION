@@ -51,7 +51,9 @@ Imports:
     GenomicFeatures,
     TxDb.Hsapiens.UCSC.hg19.knownGene,
     limma,
-    devtools
+    devtools,
+    genefilter,
+    ConsensusClusterPlus
 Description:
     Query the latest version of files by tumor, center, date, barcode,
     level and platform. Also Download and Preprocess data from TCGA portal.
