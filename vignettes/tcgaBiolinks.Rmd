@@ -683,7 +683,9 @@ library(TCGAbiolinks)
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataBRCA,geneInfo =  geneInfo)
 
 # quantile filter of genes
-dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
+                                  method = "quantile", 
+                                  qnt.cut =  0.25)
 
 # selection of normal samples "NT"
 samplesNT <- TCGAquery_SampleTypes(barcode = colnames(dataFilt),
@@ -956,7 +958,9 @@ library(TCGAbiolinks)
 dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 
 # quantile filter of genes
-dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
+                                  method = "quantile", 
+                                  qnt.cut =  0.25)
 
 # Principal Component Analysis plot for ntop selected DEGs
 TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
@@ -1248,7 +1252,9 @@ library(TCGAbiolinks)
 dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 
 # quantile filter of genes
-dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
+                                  method = "quantile", 
+                                  qnt.cut =  0.25)
 
 # selection of normal samples "NT"
 samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
@@ -1342,7 +1348,9 @@ dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,cor.cut = 0.6)
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
                                       geneInfo = geneInfo,
                                       method = "gcContent")
-dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm, qnt.cut = 0.25)
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
+                                  method = "quantile", 
+                                  qnt.cut =  0.25)
 dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmTN],
                             mat2 = dataFilt[,dataSmTP],
                             Cond1type = "Normal",
