@@ -6,7 +6,7 @@
 #' each column represents a sample come from TCGAPrepare.
 #' @param method is method to be used for generic cluster such as 'hclust' or 'consensus'
 #' @param methodHC is method to be used for Hierarchical cluster.
-#' @importFrom stats hclust
+#' @import stats
 #' @importFrom ConsensusClusterPlus ConsensusClusterPlus
 #' @export
 #' @return object of class hclust if method selected is 'hclust'.
