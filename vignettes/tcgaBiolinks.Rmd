@@ -59,7 +59,7 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(dpi = 300)
-knitr::opts_chunk$set(cache=TRUE)
+knitr::opts_chunk$set(cache=FALSE)
 ```
 
 ```{r, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
