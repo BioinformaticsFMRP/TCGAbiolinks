@@ -1417,22 +1417,7 @@ data_Hc2 <- TCGAanalyze_Clustering(tabDF = datFilt,
                                    method = "consensus",
                                    methodHC = "ward.D2")        # time = 207.389 
 
-save(data_Hc2, file = "../LGG_caseStudy/data_Hc2.Rdata", compress = "xz")
-
-
-dataClin <- cbind(dataClin, groupsHC = matrix(0,nrow(dataClin),1))
-rownames(dataClin) <- dataClin$bcr_patient_barcode
-
-for( i in 1: nrow(dataClin)){
-    currSmp <- dataClin$bcr_patient_barcode[i]
-    dataClin[currSmp,"groupsHC"] <- as.character(consensusClusters[currSmp])
-}
-
-TCGAanalyze_survival(plyr::rbind.fill(dataClin),
-                     clusterCol = "groupsHC",
-                     main = "Kaplan meier survival plot from consensus cluster",
-                     height = 10, 
-                     width=10)
+#save(data_Hc2, file = "../LGG_caseStudy/data_Hc2.Rdata", compress = "xz")
 
 ## consensusClusters contains barcodes for 4 groups
 hhc <- data_Hc2[[4]]$consensusTree
@@ -1443,10 +1428,7 @@ consensusClusters <- as.factor(data_Hc2[[4]]$clrs[[1]])
 names(consensusClusters) <- attr(ddist, "Labels")
 names(consensusClusters) <- substr(names(consensusClusters),1,12)
 
-## to integrate in TCGAvisualize_Clustering
-grpsHC <- levels(consensusClusters)
-
-
+# adding information about gropus from consensus Cluster in clinical data
 dataClin <- cbind(dataClin, groupsHC = matrix(0,nrow(dataClin),1))
 rownames(dataClin) <- dataClin$bcr_patient_barcode
 
@@ -1463,7 +1445,8 @@ TCGAanalyze_survival(plyr::rbind.fill(dataClin),
                      color = as.character(levels(consensusClusters)))
 
 
-
+## to integrate in TCGAvisualize_Clustering
+grpsHC <- levels(consensusClusters)
 
 plot(data_Hc1, labels = FALSE, main =paste0(cancer, " cluster dendrogram all samples",
      xlab = "Samples with relative group color"), xlab = "Hierarchical cluster cut k=4")
