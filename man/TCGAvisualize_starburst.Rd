@@ -6,17 +6,15 @@
 \usage{
 TCGAvisualize_starburst(met, exp, group1 = NULL, group2 = NULL,
   exp.p.cut = 0.01, met.p.cut = 0.01, diffmean.cut = 0, logFC.cut = 0,
-  filename = "starburst.pdf", ylab = expression(atop("Gene Expression",
-  paste(Log[10], " (FDR corrected P values)"))),
-  xlab = expression(atop("DNA Methylation", paste(Log[10],
-  " (FDR corrected P values)"))), title = "Starburst Plot",
-  legend = "Methylation/Expression Relation", color = c(`1` = "black", `2` =
-  "coral", `3` = "darkgreen", `4` = "blue", `5` = "darkred", `6` = "red", `7` =
-  "brown", `8` = "yellow", `9` = "orange"), label = c(`1` = "Not Significant",
-  `2` = "Up regulated & Hypo methylated", `3` =
-  "Down regulated & Hypo methylated", `4` = "hypo methylated", `5` =
-  "hyper methylated", `6` = "Up regulated", `7` = "Down regulated", `8` =
-  "Up regulated & Hyper methylated", `9` = "Down regulated & Hyper methylated"),
+  names = FALSE, filename = "starburst.pdf",
+  ylab = expression(atop("Gene Expression", paste(Log[10],
+  " (FDR corrected P values)"))), xlab = expression(atop("DNA Methylation",
+  paste(Log[10], " (FDR corrected P values)"))), title = "Starburst Plot",
+  legend = "Methylation/Expression Relation", color = c("black",
+  brewer.pal(8, "Dark2")), label = c("Not Significant",
+  "Up regulated & Hypo methylated", "Down regulated & Hypo methylated",
+  "hypo methylated", "hyper methylated", "Up regulated", "Down regulated",
+  "Up regulated & Hyper methylated", "Down regulated & Hyper methylated"),
   xlim = NULL, ylim = NULL)
 }
 \arguments{
