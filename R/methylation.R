@@ -586,6 +586,7 @@ TCGAVisualize_volcano <- function(x,y,
 #' Example: c("1" = "Not Significant", "2" = "Hypermethylated in group1",
 #' "3" = "Hypomethylated in group1"))
 #' @param p.cut p values threshold. Default: 0.01
+#' @param probe.names is probe.names
 #' @param diffmean.cut diffmean threshold. Default: 0.2
 #' @param adj.method Adjusted method for the p-value calculation
 #' @param paired Wilcoxon paired parameter. Default: FALSE
@@ -756,6 +757,7 @@ TCGAanalyze_DMR <- function(data,
 #' @param color vector of colors to be used in graph
 #' @param label vector of labels to be used in graph
 #' @param title main title
+#' @param names is names
 #' @param ylab y axis text
 #' @param xlab x axis text
 #' @param xlim x limits to cut image
