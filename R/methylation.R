@@ -106,18 +106,23 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' TCGAanalyze_survival(clinical,"gender", filename = "surv.pdf", legend="Gender")
 #' }
 TCGAanalyze_survival <- function(data,
-                                 clusterCol=NULL,
+                                 clusterCol = NULL,
                                  legend = "Legend", cutoff = 0,
                                  main = "Kaplan-Meier Overall Survival Curves",
                                  ylab = "Probability of survival",
                                  xlab = "Time since diagnosis (days)",
                                  filename = "survival.pdf",
-                                 color = c("green", "firebrick4", "orange3", "blue"),
-                                 height=8,
-                                 width=12,
-                                 print.value=TRUE
+                                 color = NULL,
+                                 height = 8,
+                                 width = 12,
+                                 print.value = TRUE
 ) {
     .e <- environment()
+
+    if(is.null(color)){
+        color <- rainbow(length(unique(data[,clusterCol])))
+    }
+
     group <- NULL
     if (is.null(clusterCol)) {
         message("Please provide the clusterCol argument")
