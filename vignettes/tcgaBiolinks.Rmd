@@ -1398,41 +1398,56 @@ dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,cor.cut = 0.6)        # 
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
                                       geneInfo = geneInfo,
                                       method = "gcContent")                  # time = 165.577s 
-dataFilt <- varFilter(dataNorm, var.func = IQR,  
-                      var.cutoff = 0.75,
-                      filterByQuantile = TRUE)
 
-normCounts <- dataFilt
-geData <- t(log(1 + normCounts, 2))
+#load("../LGG_caseStudy/dataNorm.RData")
 
-dim(geData)
+datFilt1 <- TCGAanalyze_Filtering(tabDF = dataNorm,method = "varFilter")
+datFilt2 <- TCGAanalyze_Filtering(tabDF = datFilt1,method = "filter1")
+datFilt <- TCGAanalyze_Filtering(tabDF = datFilt2,method = "filter2")
 
-eta <- .05
-foldChange <- 1
-#  filter n.1
-filter <- apply(geData, 2, function(x) sum(quantile(x, probs = c(1 - eta, eta)) * c(1, -1)))
-fivenum(filter)
-sum(filter > foldChange)
-geData <- geData[, which(filter > foldChange)]
+data_Hc1 <- TCGAanalyze_Clustering(tabDF = datFilt,method = "hclust", methodHC = "ward.D2")
+data_Hc2 <- TCGAanalyze_Clustering(tabDF = datFilt,
+                                               method = "consensus",
+                                               methodHC = "ward.D2"))        # time = 207.389 
 
-#  filter n.2
-filter <- apply(geData, 2, function(x) prod(quantile(x, probs =  c(1 - eta, eta)) - 10) < 0)
-sum(filter)
+## consensusClusters contains barcodes for 4 groups
+hhc <- data_Hc2[[4]]$consensusTree
+consensusClusters<-data_Hc2[[4]]$consensusClass
+sampleOrder <- consensusClusters[hhc$order]
 
-geData <- geData[, which(filter)]
-dim(geData)
-genesSelectedForClustering <- colnames(geData)
+consensusClusters <- as.factor(data_Hc2[[4]]$clrs[[1]])
+names(consensusClusters) <- attr(ddist, "Labels")
+names(consensusClusters) <- substr(names(consensusClusters),1,12)
 
-system.time(sHc <- hclust(ddist <- dist(geData), method = "ward.D2"))      # time = 1.270 )
+## to integrate in TCGAvisualize_Clustering
+grpsHC <- levels(consensusClusters)
 
-library("ConsensusClusterPlus")
+plot(data_Hc1, labels = FALSE, main =paste0(cancer, " cluster dendrogram all samples",
+     xlab = "Samples with relative group color"), xlab = "Hierarchical cluster cut k=4")
 
-ans <- ConsensusClusterPlus(ddist, maxK = 7, pItem = 0.9, reps=1000
-                            , title="mc_consensus_k7_1000"
-                            , clusterAlg = "hc"
-                            , innerLinkage = "ward.D2"
-                            , finalLinkage = "complete"
-                            , plot = 'pdf', writeTable = TRUE)
+rect.hclust(sHc, k=4, border="red")
+tabCluster <- as.matrix(cutree(sHc, k = 4))
+colnames(tabCluster)<-"Cluster"
+tabCluster<-cbind(Sample = rownames(tabCluster),Color = rownames(tabCluster), tabCluster)
+tabCluster<-as.data.frame(tabCluster)
+tabCluster<-tabCluster[order(tabCluster$Cluster,decreasing = FALSE),]
+tabCluster<-as.data.frame(tabCluster)
+tabCluster$Color<-as.character(tabCluster$Color)
+
+ccol <- levels(consensusClusters)
+
+for( cc in 1:4){
+    tabCluster[tabCluster[, "Cluster"] == cc, "Color"] <- ccol[cc]
+}
+
+tabCluster <- tabCluster[sHc$labels, ]
+
+for( i in 1:length(grpsHC)){
+rug(which(tabCluster[sHc$order, "Color"] == ccol[i]), col = ccol[i], lwd = 3)
+}
+#  to be continued...
+
+
 ```
 
 
