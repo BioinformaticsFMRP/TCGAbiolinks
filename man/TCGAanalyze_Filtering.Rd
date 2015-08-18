@@ -11,7 +11,7 @@ TCGAanalyze_Filtering(tabDF, method, qnt.cut = 0.25, var.func = IQR,
 \item{tabDF}{is a dataframe or numeric matrix, each row represents a gene,
 each column represents a sample come from TCGAPrepare}
 
-\item{method}{is method of filtering such as 'quantile', 'varFilter',}
+\item{method}{is method of filtering such as 'quantile', 'varFilter', 'filter1', 'filter2'}
 
 \item{qnt.cut}{is threshold selected as mean for filtering}
 
