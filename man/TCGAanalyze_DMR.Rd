@@ -5,12 +5,12 @@
 \title{Differentially methylated regions Analysis}
 \usage{
 TCGAanalyze_DMR(data, groupCol = NULL, group1 = NULL, group2 = NULL,
-  filename = "volcano.pdf", ylab = expression(paste(-Log[10],
+  filename = "methylation_volcano.pdf", ylab = expression(paste(-Log[10],
   " (FDR corrected -P values)")), xlab = "DNA Methylation difference",
   title = NULL, legend = "Legend", color = c(`1` = "black", `2` = "red",
   `3` = "green"), label = NULL, xlim = NULL, ylim = NULL, p.cut = 0.01,
-  diffmean.cut = 0.2, paired = FALSE, adj.method = "BH",
-  overwrite = FALSE)
+  probe.names = FALSE, diffmean.cut = 0.2, paired = FALSE,
+  adj.method = "BH", overwrite = FALSE)
 }
 \arguments{
 \item{data}{SummarizedExperiment obtained from the TCGAPrepare}
