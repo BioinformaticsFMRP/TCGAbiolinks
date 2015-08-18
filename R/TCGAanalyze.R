@@ -350,6 +350,9 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,Th
 #' each column represents a sample
 #' @examples
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
+#' dataNorm <- TCGAanalyze_Normalization(tabDF = dataBRCA,
+#' geneInfo = geneInfo,
+#' method = "geneLength")
 #' dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm, method = "quantile", qnt.cut = 0.25)
 TCGAanalyze_Filtering <- function(tabDF,method,
                                   qnt.cut = 0.25,
@@ -559,7 +562,7 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
 #' @export
 #' @examples
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
-#' dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
+#' dataFilt <- TCGAanalyze_Filtering(tabDF = dataBRCA, method = "quantile", qnt.cut =  0.25)
 #' samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
 #' samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 #' dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT],
