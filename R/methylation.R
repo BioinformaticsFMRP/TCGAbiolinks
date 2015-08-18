@@ -175,8 +175,9 @@ TCGAanalyze_survival <- function(data,
                nrow(subset(data,data[,clusterCol] == x)), ")")
     }
     with(data,{
-        surv <- surv + scale_colour_discrete(name = legend,
-                                             labels = sapply(levels(data$type),label.add.n)
+        surv <- surv + scale_colour_manual(name = legend,
+                                           labels = sapply(levels(data$type),label.add.n),
+                                           values=color
         )
         with(surv,{
             surv <- surv + geom_point(aes(colour = group),
