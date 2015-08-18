@@ -301,18 +301,53 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,Th
 #'    samples, higher than the threshold defined quantile mean across all samples.
 #' @param tabDF is a dataframe or numeric matrix, each row represents a gene,
 #' each column represents a sample come from TCGAPrepare
+#' @param method is method of filtering such as 'quantile', 'varFilter',
 #' @param qnt.cut is threshold selected as mean for filtering
+#' @param var.func is function used as the per-feature filtering statistic.
+#' See genefilter documentation
+#' @param var.cutoff is a numeric value. See genefilter documentation
+#' @param eta is a paramter for filter1. default eta = 0.05.
+#' @param foldChange is a paramter for filter2. default foldChange = 1.
+#' @importFrom genefilter varFilter
 #' @export
 #' @return A filtered dataframe or numeric matrix where each row represents a gene,
 #' each column represents a sample
 #' @examples
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
-#' dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
-TCGAanalyze_Filtering <- function(tabDF,qnt.cut ){
+#' dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm, method = "quantile", qnt.cut = 0.25)
+TCGAanalyze_Filtering <- function(tabDF,method,
+                                  qnt.cut = 0.25,
+                                  var.func = IQR,
+                                  var.cutoff = 0.75,
+                                  eta = 0.05,
+                                  foldChange = 1){
+
+    if(method == "quantile"){
     GeneThresh <- as.numeric(quantile(rowMeans(tabDF), qnt.cut))
     geneFiltered <- names(which(rowMeans(tabDF) > GeneThresh))
-    Table_Rnaseq_Rawcount_Filt <- tabDF[geneFiltered, ]
-    return( Table_Rnaseq_Rawcount_Filt)
+    tabDF_Filt <- tabDF[geneFiltered, ]
+    }
+
+    if(method == "varFilter"){
+        tabDF_Filt <- genefilter::varFilter(dataNorm, var.func,
+                              var.cutoff,
+                              filterByQuantile = TRUE)
+    }
+
+    if(method == "filter1"){
+    normCounts <- dataNorm
+    geData <- t(log(1 + normCounts, 2))
+    filter <- apply(geData, 2, function(x) sum(quantile(x, probs = c(1 - eta, eta)) * c(1, -1)))
+    tabDF_Filt <- geData[, which(filter > foldChange)]
+    }
+
+    if(method == "filter2"){
+    geData <- dataNorm
+    filter <- apply(geData, 2, function(x) prod(quantile(x, probs =  c(1 - eta, eta)) - 10) < 0)
+    tabDF_Filt <- geData[, which(filter)]
+    }
+
+    return( tabDF_Filt)
 }
 
 #' @title normalization mRNA transcripts and miRNA using EDASeq package.
