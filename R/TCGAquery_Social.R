@@ -8,8 +8,8 @@
 #' @export
 #' @return table with number of downloads about a package
 #' @examples
-#' TCGAsocial("bioconductor.org","BiocCheck")
-TCGAsocial <- function(siteToFind=NULL, listPackage=NULL,KeyInfo=NULL){
+#' TCGAquery_Social("bioconductor.org","BiocCheck")
+TCGAquery_Social <- function(siteToFind=NULL, listPackage=NULL,KeyInfo=NULL){
 
 
     # Find all packages in bioconductor
@@ -31,7 +31,7 @@ TCGAsocial <- function(siteToFind=NULL, listPackage=NULL,KeyInfo=NULL){
         if(is.null(listPackage)) {
             msg  <- paste0(
                 "\nPlease, provide a listofPackage argument\n",
-                "Example:  TCGAsocial('bioconductor.org','BiocCheck')")
+                "Example:  TCGAquery_Social('bioconductor.org','BiocCheck')")
             stop(msg)
         }
 
@@ -63,7 +63,7 @@ TCGAsocial <- function(siteToFind=NULL, listPackage=NULL,KeyInfo=NULL){
         if(is.null(KeyInfo)) {
             msg  <- paste0(
                 "\nPlease, provide a KeyInfo argument\n",
-                "Example: TCGAsocial('biostars.org', KeyInfo='methylation')")
+                "Example: TCGAquery_Social('biostars.org', KeyInfo='methylation')")
             stop(msg)
         }
 
@@ -124,7 +124,7 @@ TCGAsocial <- function(siteToFind=NULL, listPackage=NULL,KeyInfo=NULL){
         if(is.null(KeyInfo)) {
             msg  <- paste0(
                 "\nPlease, provide a KeyInfo argument\n",
-                "Example: TCGAsocial('support.bioconductor.org', KeyInfo='TCGA')")
+                "Example: TCGAquery_Social('support.bioconductor.org', KeyInfo='TCGA')")
             stop(msg)
         }
 
