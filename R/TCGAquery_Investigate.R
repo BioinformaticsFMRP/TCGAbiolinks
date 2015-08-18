@@ -14,11 +14,11 @@
 #  # Order table DEGs TFs according to Delta decrease
 #' dataDEGsFiltLevelTFs <- dataDEGsFiltLevelTFs[order(dataDEGsFiltLevelTFs$Delta,decreasing = TRUE),]
 #' # Find Pubmed of TF studied related to cancer
-#' tabDEGsTFPubmed <- TCGAinvestigate("breast", dataDEGsFiltLevelTFs, topgenes = 1)
+#' tabDEGsTFPubmed <- TCGAquery_Investigate("breast", dataDEGsFiltLevelTFs, topgenes = 1)
 #' }
 #' @export
 #' @return table with number of pubmed's publications related to tfs and disease selected
-TCGAinvestigate <- function(tumor,dataDEGsFiltLevelTF,topgenes){
+TCGAquery_Investigate <- function(tumor,dataDEGsFiltLevelTF,topgenes){
     site <- "http://www.ncbi.nlm.nih.gov/pubmed/?term="
 
     # GenesTofix <- c("JUN","HR","HOMEZ",
