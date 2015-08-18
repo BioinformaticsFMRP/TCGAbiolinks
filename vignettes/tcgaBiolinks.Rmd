@@ -1375,7 +1375,6 @@ dataSurv<-TCGAanalyze_SurvivalKM(clinical_patient = dataClin,
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(TCGAbiolinks)
-library(genefilter)
 cancer <- "LGG"
 PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
 dataType <- "rsem.genes.results"
@@ -1407,8 +1406,6 @@ dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
                                       geneInfo = geneInfo,
                                       method = "gcContent")                  # time = 165.577s 
 
-#load("../LGG_caseStudy/dataNorm.RData")
-
 datFilt1 <- TCGAanalyze_Filtering(tabDF = dataNorm,method = "varFilter")
 datFilt2 <- TCGAanalyze_Filtering(tabDF = datFilt1,method = "filter1")
 datFilt <- TCGAanalyze_Filtering(tabDF = datFilt2,method = "filter2")
@@ -1417,10 +1414,12 @@ data_Hc1 <- TCGAanalyze_Clustering(tabDF = datFilt,method = "hclust", methodHC =
 data_Hc2 <- TCGAanalyze_Clustering(tabDF = datFilt,
                                    method = "consensus",
                                    methodHC = "ward.D2")        # time = 207.389 
-
-#save(data_Hc2, file = "../LGG_caseStudy/data_Hc2.Rdata", compress = "xz")
+# deciding number of tree to cuts
+cut.tree <-4
+paste0(c("EC"),(1:cut.tree))
 
 ## consensusClusters contains barcodes for 4 groups
+ans <- hclust(ddist <- dist(datFilt), method = "ward.D2")
 hhc <- data_Hc2[[4]]$consensusTree
 consensusClusters<-data_Hc2[[4]]$consensusClass
 sampleOrder <- consensusClusters[hhc$order]
@@ -1438,44 +1437,40 @@ for( i in 1: nrow(dataClin)){
     dataClin[currSmp,"groupsHC"] <- as.character(consensusClusters[currSmp])
 }
 
-TCGAanalyze_survival(plyr::rbind.fill(dataClin),
-                     "groupsHC",
+TCGAanalyze_survival(data = dataClin,
+                     clusterCol = "groupsHC",
                      main = "TCGA kaplan meier survival plot from consensus cluster",
                      height = 10, 
                      width=10,
-                     color = as.character(levels(consensusClusters)))
-
-
-## to integrate in TCGAvisualize_Clustering
-grpsHC <- levels(consensusClusters)
-
-plot(data_Hc1, labels = FALSE, main =paste0(cancer, " cluster dendrogram all samples",
-     xlab = "Samples with relative group color"), xlab = "Hierarchical cluster cut k=4")
-
-rect.hclust(sHc, k=4, border="red")
-tabCluster <- as.matrix(cutree(sHc, k = 4))
-colnames(tabCluster)<-"Cluster"
-tabCluster<-cbind(Sample = rownames(tabCluster),Color = rownames(tabCluster), tabCluster)
-tabCluster<-as.data.frame(tabCluster)
-tabCluster<-tabCluster[order(tabCluster$Cluster,decreasing = FALSE),]
-tabCluster<-as.data.frame(tabCluster)
-tabCluster$Color<-as.character(tabCluster$Color)
-
-ccol <- levels(consensusClusters)
-
-for( cc in 1:4){
-    tabCluster[tabCluster[, "Cluster"] == cc, "Color"] <- ccol[cc]
-}
-
-tabCluster <- tabCluster[sHc$labels, ]
-
-for( i in 1:length(grpsHC)){
-rug(which(tabCluster[sHc$order, "Color"] == ccol[i]), col = ccol[i], lwd = 3)
-}
-#  to be continued...
-
+                     legend = "RNA Group",
+                     labels=paste0(c("EC"),(1:cut.tree)),
+                     color = as.character(levels(consensusClusters)),
+                     filename = "figure4surv.png")
 
 ```
+
+The figures resulted from the code above are shown below.
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("figure4cluster.png")
+grid.raster(img)
+```
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("figure4surv.png")
+grid.raster(img)
+```
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("figure4heatmap.png")
+grid.raster(img)
+```
+
 
 ## Case study n. 3: Integration of methylation and expression for COAD
 
