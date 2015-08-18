@@ -47,6 +47,8 @@ Example: c("1" = "Not Significant", "2" = "Hypermethylated in group1",
 
 \item{p.cut}{p values threshold. Default: 0.01}
 
+\item{probe.names}{is probe.names}
+
 \item{diffmean.cut}{diffmean threshold. Default: 0.2}
 
 \item{paired}{Wilcoxon paired parameter. Default: FALSE}
