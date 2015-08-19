@@ -53,7 +53,8 @@ Imports:
     limma,
     devtools,
     genefilter,
-    ConsensusClusterPlus
+    ConsensusClusterPlus,
+    RColorBrewer
 Description:
     Query the latest version of files by tumor, center, date, barcode,
     level and platform. Also Download and Preprocess data from TCGA portal.
