@@ -1474,6 +1474,35 @@ grid.raster(img)
 
 ## Case study n. 3: Integration of methylation and expression for COAD
 
+In recent years, it was discovered that there is a relationship between 
+DNA methylation and gene expression. The study of the relationship between the 
+two is often difficult to accomplish.
+
+This case study will show the steps to conduct a study of the relationship
+between the two types of data.
+
+First we downloaded COAD methylation data for HumanMethylation27k and HumanMethylation450k
+platforms, and COAD expresison data for IlluminaGA_RNASeqV2. 
+
+TCGAbiolinks adds by default the classifations already published by researchers.
+We will use this classification to do our examples. 
+We selected the groups CIMP.L and CIMP.H to do a expression and DNA methylation comparison.
+
+Firstly, we do a DMR (different methylated region) analysis, which will give the 
+difference of DNA methylation for the probes of the groups and their significance value.
+The ouput can be seen by a volcano plot.
+
+Secondly, we do a DEA (diffential expression analysis) which will give the fold change 
+of gene expression and their significance value.
+
+Finally, using both previous analysis we do a starburst plot to select the genes 
+that  are Candidate Biologically Significant.
+
+Observation: over the time, the number of samples has increased and the clinical data updated.
+We used only the samples that had a classification in the examples.
+
+
+
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 #-----------------------------------
 # STEP 1: Search, download, prepare |
