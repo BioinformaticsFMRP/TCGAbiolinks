@@ -486,16 +486,41 @@ calculate.pvalues <- function(data,
     return(data)
 }
 
+#' @title Plot volcano plot for DNA methylation or expression
+#' @details
+#'    Creates a volcano plot from the expression and methylation analysis.
+#'    Please see the vignette for more information
+#'    Observation: This function automatically is called by TCGAanalyse_DMR
+#' @param x x-axis data
+#' @param y y-axis data
+#' @param filename Filename. Default: volcano.pdf, volcano.svg, volcano.png
+#' @param legend Legend title
+#' @param color vector of colors to be used in graph
+#' @param title main title. If not specified it will be
+#' "Volcano plot (group1 vs group2)
+#' @param ylab y axis text
+#' @param xlab x axis text
+#' @param xlim x limits to cut image
+#' @param ylim y limits to cut image
+#' @param height Figure height
+#' @param width Figure width
+#' @param names Plot probes/genes names? TRUE/FALSE
+#' @param label vector of labels to be used in the figure.
+#' Example: c("Not Significant","Hypermethylated in group1",
+#' "Hypomethylated in group1"))#'
+#' @export
 TCGAVisualize_volcano <- function(x,y,
                                   filename = "volcano.pdf",
                                   ylab =  expression(paste(-Log[10],
                                                            " (FDR corrected -P values)")),
                                   xlab=NULL, title=NULL, legend=NULL,
                                   label=NULL, xlim=NULL, ylim=NULL,
-                                  color = c("black", "red", "green"),
-                                  names=NULL,
+                                  color = c("black", "red", "darkgreen"),
+                                  names=FALSE,
                                   x.cut=0,
-                                  y.cut=0.01){
+                                  y.cut=0.01,
+                                  height=5,
+                                  width=10){
 
     .e <- environment()
     threshold <- rep("1",length(x))
@@ -534,20 +559,15 @@ TCGAVisualize_volcano <- function(x,y,
                            panel.grid.major = element_blank(),
                            panel.grid.minor = element_blank(),
                            axis.line = element_line(colour = "black"),
-                           legend.position="top",
-                           title = element_text(size = 16),
-                           legend.text = element_text(size = 16),
-                           legend.title = element_text(size = 16),
-                           axis.text= element_text(size = 16),
-                           axis.title.x= element_text(size = 16),
-                           axis.title.y= element_text(size = 16))
+                           legend.position="top")
 
     # Label points with the textxy function from the calibrate plot
-    if(!is.null(names)){
+    if(names){
         idx <- (up & sig) | (down & sig)
-        p <- p + annotate("text", x = x[idx], y =  -1.1 *log10(y[idx]) , label = names[idx],  size = 2.0,  alpha = .6)
+        p <- p + annotate("text", x = x[idx], y =  -1.1 *log10(y[idx]) ,
+                          label = names[idx],  size = 2.0,  alpha = .6)
     }
-    ggsave(p, filename = filename, width = 10, height = 5, dpi = 600)
+    ggsave(p, filename = filename, width = width, height = height, dpi = 600)
 }
 
 #' @title Differentially methylated regions Analysis
@@ -573,7 +593,7 @@ TCGAVisualize_volcano <- function(x,y,
 #' the name of the group
 #' @param group2 In case our object has more than 2 groups, you should set
 #' the name of the group
-#' @param filename pdf filename. Default: volcano.pdf
+#' @param filename Filename. Default: volcano.pdf, volcano.svg, volcano.png
 #' @param legend Legend title
 #' @param color vector of colors to be used in graph
 #' @param title main title. If not specified it will be
@@ -583,8 +603,8 @@ TCGAVisualize_volcano <- function(x,y,
 #' @param xlim x limits to cut image
 #' @param ylim y limits to cut image
 #' @param label vector of labels to be used in the figure.
-#' Example: c("1" = "Not Significant", "2" = "Hypermethylated in group1",
-#' "3" = "Hypomethylated in group1"))
+#' Example: c("Not Significant","Hypermethylated in group1",
+#' "Hypomethylated in group1"))
 #' @param p.cut p values threshold. Default: 0.01
 #' @param probe.names is probe.names
 #' @param diffmean.cut diffmean threshold. Default: 0.2
