@@ -504,11 +504,17 @@ calculate.pvalues <- function(data,
 #' @param ylim y limits to cut image
 #' @param height Figure height
 #' @param width Figure width
-#' @param names Plot probes/genes names? TRUE/FALSE
+#' @param names Names to be ploted if significant.
+#' Should be the same size of x and y
 #' @param label vector of labels to be used in the figure.
 #' Example: c("Not Significant","Hypermethylated in group1",
 #' "Hypomethylated in group1"))#'
 #' @export
+#' @return Saves the volcano plot in the current folder
+#' @examples
+#' x <- runif(200, 1e5, 1e6)
+#' y <- runif(200, 1e5, 1e6)
+#' TCGAVisualize_volcano(x,y)
 TCGAVisualize_volcano <- function(x,y,
                                   filename = "volcano.pdf",
                                   ylab =  expression(paste(-Log[10],
@@ -516,7 +522,7 @@ TCGAVisualize_volcano <- function(x,y,
                                   xlab=NULL, title=NULL, legend=NULL,
                                   label=NULL, xlim=NULL, ylim=NULL,
                                   color = c("black", "red", "darkgreen"),
-                                  names=FALSE,
+                                  names=NULL,
                                   x.cut=0,
                                   y.cut=0.01,
                                   height=5,
@@ -562,7 +568,7 @@ TCGAVisualize_volcano <- function(x,y,
                            legend.position="top")
 
     # Label points with the textxy function from the calibrate plot
-    if(names){
+    if(!is.null(names)){
         idx <- (up & sig) | (down & sig)
         p <- p + annotate("text", x = x[idx], y =  -1.1 *log10(y[idx]) ,
                           label = names[idx],  size = 2.0,  alpha = .6)
@@ -647,8 +653,7 @@ TCGAanalyze_DMR <- function(data,
                             xlab = "DNA Methylation difference",
                             title = NULL,
                             legend = "Legend",
-                            color = c("1" = "black", "2" = "red",
-                                      "3" = "green"),
+                            color = c("black",  "red", "darkgreen"),
                             label = NULL,
                             xlim = NULL,
                             ylim = NULL,
@@ -659,6 +664,8 @@ TCGAanalyze_DMR <- function(data,
                             adj.method="BH",
                             overwrite=FALSE) {
     .e <- environment()
+
+    names(color) <- as.character(1:3)
 
     if (is.null(groupCol)) {
         message("Please, set the groupCol parameter")
@@ -795,6 +802,7 @@ TCGAanalyze_DMR <- function(data,
 #' @import ggplot2
 #' @importFrom SummarizedExperiment subsetByOverlaps rowRanges rowRanges<-
 #'             values<-
+#' @importFrom RColorBrewer brewer.pal
 #' @export
 #' @return Save a starburst plot
 #' @examples
