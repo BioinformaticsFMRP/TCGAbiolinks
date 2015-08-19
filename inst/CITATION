@@ -13,6 +13,7 @@ citEntry(entry = "Article",
                                    as.person("Houtan Noushmehr"),
                                    as.person("Gianluca Bontempi")
          ),
+         journal = "manuscript in preparation",
          year         = "2015",
          textVersion  =
              paste("Antonio Colaprico, Tiago Chedraoui Silva, Catharina Olsen,",
