@@ -24,7 +24,7 @@ the name of the group}
 \item{group2}{In case our object has more than 2 groups, you should set
 the name of the group}
 
-\item{filename}{pdf filename. Default: volcano.pdf}
+\item{filename}{Filename. Default: volcano.pdf, volcano.svg, volcano.png}
 
 \item{ylab}{y axis text}
 
@@ -38,8 +38,8 @@ the name of the group}
 \item{color}{vector of colors to be used in graph}
 
 \item{label}{vector of labels to be used in the figure.
-Example: c("1" = "Not Significant", "2" = "Hypermethylated in group1",
-"3" = "Hypomethylated in group1"))}
+Example: c("Not Significant","Hypermethylated in group1",
+"Hypomethylated in group1"))}
 
 \item{xlim}{x limits to cut image}
 
