@@ -1733,6 +1733,36 @@ library(grid)
 img <- readPNG("case4_elmer.png")
 grid.raster(img)
 ```
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("elmer1.png")
+grid.raster(img)
+```
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("elmer2.png")
+grid.raster(img)
+```
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("elmer3.png")
+grid.raster(img)
+```
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("elmer4.png")
+grid.raster(img)
+```
+
+
 ******
 ### Session Information
 ******
