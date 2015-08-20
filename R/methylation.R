@@ -864,7 +864,7 @@ TCGAvisualize_starburst <- function(met,
     .e <- environment()
 
     if(is.null(color)) color <- c("#000000", "#E69F00","#56B4E9", "#009E73",
-                                  "#F0E442", "#0072B2","#D55E00", "#CC79A7",
+                                  "red", "#0072B2","#D55E00", "#CC79A7",
                                   "purple")
     names(color) <- as.character(1:9)
     names(label) <- as.character(1:9)
@@ -1016,6 +1016,19 @@ TCGAvisualize_starburst <- function(met,
                     shape= volcano$shape)) +
         geom_point() #+ guides(shape=FALSE)
 
+    if(names == TRUE){
+        message("Adding names to genes")
+        s <- list(a.sig,b.sig,g.sig,h.sig)
+        for (i in s) {
+            if(nrow(i) > 0){
+                p <- p + annotate("text", x = i$meFDR2, y =  1.1 *(i$geFDR2),
+                                  label = i$Gene_Symbol,  size = 4.0,  alpha = .6)
+
+            }
+        }
+    }
+
+
     if (!is.null(xlim)) {
         p <- p + xlim(xlim)
     }
@@ -1023,7 +1036,8 @@ TCGAvisualize_starburst <- function(met,
         p <- p + ylim(ylim)
     }
     p <- p + ggtitle(title) + ylab(ylab) + xlab(xlab) + guides(size=FALSE)
-    p <- p + scale_color_manual(values = color, labels = label, name = legend)
+    p <- p + scale_color_manual(values = color, labels = label, name = legend) +
+        guides(col = guide_legend(nrow = 2))
     p <- p + scale_shape_discrete(
                                 labels = c("None",
                                            "Candidate Biologically Significant"),
@@ -1042,19 +1056,7 @@ TCGAvisualize_starburst <- function(met,
                            axis.line = element_line(colour = "black"),
                            legend.position="top",
                            legend.key = element_rect(colour = 'white')) +
-        guides(fill=guide_legend(ncol=2))
 
-    if(names == TRUE){
-        message("Adding names to genes")
-        s <- list(a.sig,b.sig,g.sig,h.sig)
-        for (i in s) {
-            if(nrow(i) > 0){
-                p <- p + annotate("text", x = i$meFDR2, y =  1.1 *(i$geFDR2),
-                                  label = i$Gene_Symbol,  size = 4.0,  alpha = .6)
-
-            }
-        }
-    }
     ggsave(filename = filename, width = 14, height = 10, dpi = 600)
 
     #statuscol <- paste("status", group1, group2, sep = ".")
