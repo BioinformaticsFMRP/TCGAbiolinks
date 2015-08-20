@@ -1392,11 +1392,11 @@ save(dataSurv, file = "../dataBRCA/dataSurvFull.Rdata")
 load("../dataBrca/dataSurvFull.Rdata")
 
 load("/Users/antoniocolaprico/Downloads/org.Hs.string.RData")
-TabCoxNet <- TCGAvisualize_SurvivalCoxNET(dataClin,dataFilt,
+system.time(TabCoxNet <- TCGAvisualize_SurvivalCoxNET(dataClin,dataFilt,
                                           Genelist = rownames(dataSurv),
                                           scoreConfidence = 700,
-                                          titlePlot = "TCGAvisualize_SurvivalCoxNET Example")
-```
+                                          titlePlot = "TCGAvisualize_SurvivalCoxNET Example"))
+ ```
 
 ## Case study n. 2: Pan Cancer downstream analysis LGG
 
