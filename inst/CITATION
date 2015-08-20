@@ -15,6 +15,7 @@ citEntry(entry = "Article",
          ),
          journal = "manuscript in preparation",
          year         = "2015",
+         journal      = "Nucleic Acids Research",
          textVersion  =
              paste("Antonio Colaprico, Tiago Chedraoui Silva, Catharina Olsen,",
                    "Luciano Garofano,Claudia Cava, Davide Garolini,",

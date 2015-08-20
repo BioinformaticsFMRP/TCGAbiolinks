@@ -65,10 +65,15 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,dataGE,Genelist,
                                          scoreConfidence = 700,
                                          titlePlot = "TCGAvisualize_SurvivalCoxNET Example"){
 
+    #clinical_patient<- dataClin
+    #dataGE <- dataFilt
+    #Genelist <- rownames(dataSurv)
+    #scoreConfidence = 700
+
     combined_score <- NULL
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 
-    png("SurvivalCoxNETOutput.png", width = 800, height = 800)
+    pdf("SurvivalCoxNETOutput.pdf", width = 15, height = 10)
 
     ## fit a Cox proportional hazards model for age, gender, tumor type
     cfu<-clinical_patient[clinical_patient[,"bcr_patient_barcode"] %in% substr(colnames(dataGE),1,12),]
@@ -133,11 +138,13 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,dataGE,Genelist,
     # An igraph object that contains a functional protein association network
     # in human. The network is extracted from the STRING database (version 9.1).
     # Only those associations with medium confidence (score>=400) are retained.
-    org.Hs.string <- dRDataLoader(RData='org.Hs.string')
+  #  org.Hs.string <- dRDataLoader(RData='org.Hs.string')
     # restrict to those edges with high confidence (score>=700)
-    with(org.Hs.string,{
-        network <- subgraph.edges(org.Hs.string, eids=E(org.Hs.string)[combined_score>=scoreConfidence])})
-    network
+   # with(org.Hs.string,{
+    #    network <- subgraph.edges(org.Hs.string, eids=E(org.Hs.string)[combined_score>=scoreConfidence])})
+    #network
+    network <- subgraph.edges(org.Hs.string, eids=E(org.Hs.string)[combined_score>=scoreConfidence])
+
 
     # extract network that only contains genes in pvals
     ind <- match(V(network)$symbol, names(pvals))
@@ -146,13 +153,10 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,dataGE,Genelist,
     network <- dNetInduce(g=network, nodes_query=nodes_mapped, knn=0,
                           remove.loops=FALSE, largest.comp=TRUE)
     V(network)$name <- V(network)$symbol
-    network
 
     # Identification of gene-active network
     net <- dNetPipeline(g=network, pval=pvals, method="customised",
                         significance.threshold=5e-02)
-    net
-
     # visualisation of the gene-active network itself
     ## the layout of the network visualisation (fixed in different visuals)
     glayout <- layout.fruchterman.reingold(net)
@@ -181,7 +185,7 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,dataGE,Genelist,
            edge.color=edge.color, newpage=FALSE, vertex.label.color="blue",
            vertex.label.dist=0.4, vertex.label.font=2, main = titlePlot)
     legend_name <- paste("C",1:length(mcolors)," (n=",com$csize,", pval=",signif(com$significance,digits=2),")",sep='')
-    legend("topright", legend=legend_name, fill=mcolors, bty="n", cex=1.4)
+    legend("topleft", legend=legend_name, fill=mcolors, bty="n", cex=1.4)
 
     dev.off()
 
@@ -295,6 +299,9 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #'          nBar = 10)
 #'}
 TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
+
+    pdf("TCGAvisualize_EAbarplot_Output.pdf", width = 15, height = 15)
+
     splitFun <- function(tf, Tab, nBar){
         tmp <- lapply(Tab[tf, ], function(x) strsplit(x, ";"))
         names(tmp) <- NULL
@@ -376,6 +383,8 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
 
     mainLab <- paste(tf, " (nRG = ", nRG, ")", sep = "")
     mtext(mainLab, side = 3, line = -1, outer = TRUE, font = 2)
-}
+
+    dev.off()
+    }
 
 
