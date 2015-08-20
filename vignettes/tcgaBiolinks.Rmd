@@ -1298,19 +1298,6 @@ The code is divided in 4 case study:
 * 3. Methylation pipeline - LGG/OV
 * 4. Elmer pipeline - KIRC
 
-## Parameters definition
-```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
-dataType <- "rsem.genes.results"
-pathGBM<- "../dataGBM"
-pathLGG <- "../dataLGG"
-
-library(BiocInstaller)
-useDevel()  # we need Devel for SummarizedExperiment package
-library(SummarizedExperiment)
-library(TCGAbiolinks)
-```
-
 ## Case study n. 1: Pan Cancer downstream analysis BRCA
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
@@ -1325,51 +1312,91 @@ pathCancer <- paste0("../data",cancer)
 
 datQuery <- TCGAquery(tumor = cancer, platform = PlatformCancer, level = "3")  # time = 0.093s
 lsSample <- TCGAquery_samplesfilter(query = datQuery)
-dataSubt <- TCGAquery_subtype(tumor = cancer)
-dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
-                                  typesample = "TP")
-dataSmTN <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
-                                  typesample ="NT")
 dataClin <- TCGAquery_clinic(cancer = cancer,
-                             clinical_data_type = "clinical_patient")
+                             clinical_data_type = "clinical_patient")          # time = 1.060s
 
-            TCGAdownload(data = datQuery, path = pathCancer, type = dataType,
-                         samples =c(dataSmTP,dataSmTN))
+# selection of normal samples "NT"
+samplesNT <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
+                                   typesample = c("NT"))
+# selection of tumor samples "TP"
+samplesTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
+                                   typesample = c("TP"))
 
-dataAssy <- TCGAprepare(query = datQuery, 
-                        dir = pathCancer, 
-                        type = dataType, 
-                        save = TRUE, 
-                        summarizedExperiment = TRUE, 
-                        samples = c(dataSmTP,dataSmTN),
-                        filename = paste0(cancer,"_",PlatformCancer,".rda"))
+TCGAdownload(data = datQuery, path = pathCancer, type = dataType,
+             samples =c(samplesNT,samplesTP))
 
-dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,cor.cut = 0.6)
+system.time(dataAssy <- TCGAprepare(query = datQuery,
+                        dir = pathCancer,
+                        type = dataType,
+                        save = TRUE,
+                        summarizedExperiment = TRUE,
+                        samples = c(samplesNT,samplesTP),
+                        filename = paste0(cancer,"_",PlatformCancer,".rda")))    # time = 1204.519s
+
+save(dataAssy, file =paste0(pathCancer,("/dataAssyFull.Rdata")))
+
+#load("../dataBrca/dataAssyFull.Rdata")
+
+system.time(dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,cor.cut = 0.6))   # time = 48.423s
+
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
                                       geneInfo = geneInfo,
-                                      method = "gcContent")
+                                      method = "gcContent")                  # time = 165.577s
+save(dataNorm, file = "../dataBRCA/dataNormFull.Rdata")
+
+load("../dataBrca/dataNormFull.Rdata")
+
 dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
-                                  method = "quantile", 
+                                  method = "quantile",
                                   qnt.cut =  0.25)
-dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmTN],
-                            mat2 = dataFilt[,dataSmTP],
-                            Cond1type = "Normal",
-                            Cond2type = "Tumor",
+
+datSmpNT <- intersect(samplesNT,colnames(dataFilt) )
+datSmpTP <- intersect(samplesTP,colnames(dataFilt) )
+
+system.time(dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,datSmpNT],
+                            mat2 = dataFilt[,datSmpTP],
+                            Cond1type = "Tumor",
+                            Cond2type = "Normal",
                             fdr.cut = 0.01 ,
                             logFC.cut = 1,
-                            method = "glmLRT")
+                            method = "glmLRT"))                              # time = 223.936s
 
-dataSurv<-TCGAanalyze_SurvivalKM(clinical_patient = clinical_patient_Cancer,
-                                 dataGE = dataFilt,
-                                 
+save(dataDEGs, file = "../dataBRCA/dataDEGsFull.Rdata")
+load("../dataBrca/dataDEGsFull.Rdata")
+
+# Enrichment Analysis EA
+# Gene Ontology (GO) and Pathway enrichment by DEGs list
+Genelist <- rownames(dataDEGs)
+ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist)    # time = 60.750s
+
+# Enrichment Analysis EA (TCGAVisualize)
+# Gene Ontology (GO) and Pathway enrichment barPlot
+
+TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
+                        GOBPTab = ansEA$ResBP,
+                        GOCCTab = ansEA$ResCC,
+                        GOMFTab = ansEA$ResMF,
+                        PathTab = ansEA$ResPat,
+                        nRGTab = Genelist,
+                        nBar = 20)
+
 dataSurv<-TCGAanalyze_SurvivalKM(clinical_patient = dataClin,
-                                dataGE = dataFilt,
-                                Genelist = rownames(dataDEGs)[1:50],
-                                Survresult = FALSE,
-                                ThreshTop = 0.67,
-                                ThreshDown = 0.33)
-```
+                                 dataGE = dataFilt,
+                                 Genelist = rownames(dataDEGs),
+                                 Survresult = FALSE,
+                                 ThreshTop = 0.67,
+                                 ThreshDown = 0.33,
+                                 p.cut = 0.05)       # time = 203.142s
 
+save(dataSurv, file = "../dataBRCA/dataSurvFull.Rdata")
+load("../dataBrca/dataSurvFull.Rdata")
+
+load("/Users/antoniocolaprico/Downloads/org.Hs.string.RData")
+TabCoxNet <- TCGAvisualize_SurvivalCoxNET(dataClin,dataFilt,
+                                          Genelist = rownames(dataSurv),
+                                          scoreConfidence = 700,
+                                          titlePlot = "TCGAvisualize_SurvivalCoxNET Example")
+```
 
 ## Case study n. 2: Pan Cancer downstream analysis LGG
 
@@ -1406,6 +1433,8 @@ dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
                                       geneInfo = geneInfo,
                                       method = "gcContent")                  # time = 165.577s 
 
+load("/Users/antoniocolaprico/Documents/gitHub/LGG_caseStudy/dataNorm.RData")
+
 datFilt1 <- TCGAanalyze_Filtering(tabDF = dataNorm,method = "varFilter")
 datFilt2 <- TCGAanalyze_Filtering(tabDF = datFilt1,method = "filter1")
 datFilt <- TCGAanalyze_Filtering(tabDF = datFilt2,method = "filter2")
@@ -1414,6 +1443,9 @@ data_Hc1 <- TCGAanalyze_Clustering(tabDF = datFilt,method = "hclust", methodHC =
 data_Hc2 <- TCGAanalyze_Clustering(tabDF = datFilt,
                                    method = "consensus",
                                    methodHC = "ward.D2")        # time = 207.389 
+
+load("/Users/antoniocolaprico/Documents/gitHub/LGG_caseStudy/data_Hc2.Rdata")
+
 # deciding number of tree to cuts
 cut.tree <-4
 paste0(c("EC"),(1:cut.tree))
@@ -1437,6 +1469,8 @@ for( i in 1: nrow(dataClin)){
     dataClin[currSmp,"groupsHC"] <- as.character(consensusClusters[currSmp])
 }
 
+# plotting survival for groups EC1, EC2, EC3, EC4
+
 TCGAanalyze_survival(data = dataClin,
                      clusterCol = "groupsHC",
                      main = "TCGA kaplan meier survival plot from consensus cluster",
@@ -1446,6 +1480,31 @@ TCGAanalyze_survival(data = dataClin,
                      labels=paste0(c("EC"),(1:cut.tree)),
                      color = as.character(levels(consensusClusters)),
                      filename = "figure4surv.png")
+
+TCGAvisualize_BarPlot(DFfilt = datFilt,
+                      DFclin = dataClin,
+                      DFsubt = dataSubt,
+                      data_Hc2 = data_Hc2,
+                      Subtype = "IDH.1p19q.Subtype",
+                      cbPalette = c("cyan","tomato","gold"),
+                      filename = "figure4Idh.png")
+
+TCGAvisualize_BarPlot(DFfilt = datFilt,
+                      DFclin = dataClin,
+                      DFsubt = dataSubt,
+                      data_Hc2 = data_Hc2,
+                      Subtype = "MethylationCluster",
+                      cbPalette = c("black","orchid3","palegreen4","sienna3", "steelblue4"),
+                      filename = "figure4Met.png")
+
+TCGAvisualize_BarPlot(DFfilt = datFilt,
+                      DFclin = dataClin,
+                      DFsubt = dataSubt,
+                      data_Hc2 = data_Hc2,
+                      Subtype = "AGE",
+                      cbPalette = c("yellow2","yellow3","yellow4"),
+                      filename = "figure4Age.png")
+
 
 ```
 
