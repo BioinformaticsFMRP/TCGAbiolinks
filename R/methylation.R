@@ -532,6 +532,13 @@ TCGAVisualize_volcano <- function(x,y,
     threshold <- rep("1",length(x))
     names(color) <- as.character(1:3)
 
+    if(is.null(label)) {
+        label = c("1" = "Not Significant",
+                  "2" = "Up regulared",
+                  "3" = "Down regulated")
+    } else  {
+        names(label) <- as.character(1:3)
+    }
     # get significant data
     sig <-  y < y.cut
 
@@ -692,9 +699,9 @@ TCGAanalyze_DMR <- function(data,
     }
 
     if (is.null(label)) {
-        label <- c("1" = "Not Significant",
-                   "2" = "Hypermethylated",
-                   "3" = "Hypomethylated")
+        label <- c("Not Significant",
+                   "Hypermethylated",
+                   "Hypomethylated")
         label[2:3] <-  paste(label[2:3], "in", group2)
     }
 
