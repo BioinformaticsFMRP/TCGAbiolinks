@@ -521,7 +521,7 @@ TCGAVisualize_volcano <- function(x,y,
                                                            " (FDR corrected -P values)")),
                                   xlab=NULL, title=NULL, legend=NULL,
                                   label=NULL, xlim=NULL, ylim=NULL,
-                                  color = c("black", "red", "darkgreen"),
+                                  color = c("black", "red", "green"),
                                   names=NULL,
                                   x.cut=0,
                                   y.cut=0.01,
@@ -565,8 +565,8 @@ TCGAVisualize_volcano <- function(x,y,
                            panel.grid.major = element_blank(),
                            panel.grid.minor = element_blank(),
                            axis.line = element_line(colour = "black"),
-                           legend.position="top")
-
+                           legend.position="top",
+        legend.key = element_rect(colour = 'white'))
     # Label points with the textxy function from the calibrate plot
     if(!is.null(names)){
         idx <- (up & sig) | (down & sig)
@@ -650,7 +650,9 @@ TCGAanalyze_DMR <- function(data,
                             filename = "methylation_volcano.pdf",
                             ylab =  expression(paste(-Log[10],
                                                      " (FDR corrected -P values)")),
-                            xlab = "DNA Methylation difference",
+                            xlab =  expression(paste(
+                                "DNA Methylation difference (",beta,"-values)")
+                            ),
                             title = NULL,
                             legend = "Legend",
                             color = c("black",  "red", "darkgreen"),
@@ -846,7 +848,7 @@ TCGAvisualize_starburst <- function(met,
                                                                  " (FDR corrected P values)"))),
                                     title = "Starburst Plot",
                                     legend = "Methylation/Expression Relation",
-                                    color = c("black", brewer.pal(8,"Dark2")),
+                                    color = NULL,
                                     label = c("Not Significant",
                                               "Up regulated & Hypo methylated",
                                               "Down regulated & Hypo methylated",
@@ -861,6 +863,9 @@ TCGAvisualize_starburst <- function(met,
 {
     .e <- environment()
 
+    if(is.null(color)) color <- c("#000000", "#E69F00","#56B4E9", "#009E73",
+                                  "#F0E442", "#0072B2","#D55E00", "#CC79A7",
+                                  "purple")
     names(color) <- as.character(1:9)
     names(label) <- as.character(1:9)
 
@@ -1009,7 +1014,7 @@ TCGAvisualize_starburst <- function(met,
                     colour = volcano$threshold.starburst,
                     size = volcano$threshold.size,
                     shape= volcano$shape)) +
-        geom_point() + guides(shape=FALSE)
+        geom_point() #+ guides(shape=FALSE)
 
     if (!is.null(xlim)) {
         p <- p + xlim(xlim)
@@ -1019,6 +1024,10 @@ TCGAvisualize_starburst <- function(met,
     }
     p <- p + ggtitle(title) + ylab(ylab) + xlab(xlab) + guides(size=FALSE)
     p <- p + scale_color_manual(values = color, labels = label, name = legend)
+    p <- p + scale_shape_discrete(
+                                labels = c("None",
+                                           "Candidate Biologically Significant"),
+                                name = "Biological importance")
     p <-  p + geom_hline(aes(yintercept = exp.lowerthr), colour = "black",
                          linetype = "dashed") +
         geom_hline(aes(yintercept = exp.upperthr), colour = "black",
@@ -1031,7 +1040,9 @@ TCGAvisualize_starburst <- function(met,
                            panel.grid.major = element_blank(),
                            panel.grid.minor = element_blank(),
                            axis.line = element_line(colour = "black"),
-                           legend.position="top")
+                           legend.position="top",
+                           legend.key = element_rect(colour = 'white')) +
+        guides(fill=guide_legend(ncol=2))
 
     if(names == TRUE){
         message("Adding names to genes")
