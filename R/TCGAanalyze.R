@@ -132,6 +132,7 @@ TCGAanalyze_Preprocessing<- function(object, cor.cut = 0){
 #' @param Survresult is a parameter (default = FALSE) if is TRUE will show KM plot and results.
 #' @param ThreshTop is a quantile threshold to identify samples with high expression of a gene
 #' @param ThreshDown is a quantile threshold to identify samples with low expression of a gene
+#' @param p.cut p.values threshold. Default: 0.05
 #' @importFrom survival Surv survdiff survfit
 #' @export
 #' @return table with survival genes pvalues from KM.
@@ -143,14 +144,9 @@ TCGAanalyze_Preprocessing<- function(object, cor.cut = 0){
 #' dataBRCAcomplete <- dataBRCAcomplete[1:10,]
 #' tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,dataBRCAcomplete,
 #' Genelist = rownames(dataBRCAcomplete), Survresult = FALSE,ThreshTop=0.67,ThreshDown=0.33)
-#' # Filtering by pvalue < 0.01
-#' tabSurvKM <- tabSurvKM[tabSurvKM$pvalue < 0.01,]
-#' tabSurvKM <- tabSurvKM[!duplicated(tabSurvKM$mRNA),]
-#' rownames(tabSurvKM) <-tabSurvKM$mRNA
-#' tabSurvKM <- tabSurvKM[,-1]
-#' tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing=FALSE),]
 #' }
-TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,ThreshTop=0.67, ThreshDown=0.33){
+TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
+                                 ThreshTop=0.67, ThreshDown=0.33,p.cut=0.05){
     samplesNT <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
     samplesTP <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
     Genelist <- intersect(rownames(dataGE),Genelist)
@@ -166,10 +162,10 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,Th
     Survresult<-FALSE
 
     #FC_FDR_table_mRNA
-    mRNAselected_surv_results_Matrix<-matrix(0,nrow(as.matrix(rownames(dataNormal))),8)
-    colnames(mRNAselected_surv_results_Matrix)<-c("mRNA","pvalue","Cancer Deaths","Cancer Deaths with Top","Cancer Deaths with Down","Mean Tumor Top","Mean Tumor Down","Mean Normal")
+    tabSurv_Matrix<-matrix(0,nrow(as.matrix(rownames(dataNormal))),8)
+    colnames(tabSurv_Matrix)<-c("mRNA","pvalue","Cancer Deaths","Cancer Deaths with Top","Cancer Deaths with Down","Mean Tumor Top","Mean Tumor Down","Mean Normal")
 
-    mRNAselected_surv_results_Matrix<-as.data.frame(mRNAselected_surv_results_Matrix)
+    tabSurv_Matrix<-as.data.frame(tabSurv_Matrix)
 
     cfu$days_to_death<-as.numeric(as.character(cfu$days_to_death))
     cfu$days_to_last_followup<-as.numeric(as.character(cfu$days_to_last_followup))
@@ -182,7 +178,7 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,Th
         cat(paste( (ngenes-i),".",sep=""))
 
         mRNAselected<-as.matrix(rownames(dataNormal))[i]
-        mRNAselected_surv_results_Matrix[i,"mRNA"]<-mRNAselected
+        tabSurv_Matrix[i,"mRNA"]<-mRNAselected
 
         mRNAselected_values<-dataCancer[rownames(dataCancer) == mRNAselected,]
         mRNAselected_values_normal<-dataNormal[rownames(dataNormal) == mRNAselected,]
@@ -250,11 +246,11 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,Th
 
 
             #print(paste("deaths =",deads_complete))
-            mRNAselected_surv_results_Matrix[i,"Cancer Deaths"]<-deads_complete
-            mRNAselected_surv_results_Matrix[i,"Cancer Deaths with Top"]<- deads_top
-            mRNAselected_surv_results_Matrix[i,"Cancer Deaths with Down"]<- deads_down
+            tabSurv_Matrix[i,"Cancer Deaths"]<-deads_complete
+            tabSurv_Matrix[i,"Cancer Deaths with Top"]<- deads_top
+            tabSurv_Matrix[i,"Cancer Deaths with Down"]<- deads_down
 
-            mRNAselected_surv_results_Matrix[i,"Mean Normal"]<-  mean(mRNAselected_values_normal)
+            tabSurv_Matrix[i,"Mean Normal"]<-  mean(mRNAselected_values_normal)
 
 
 
@@ -268,8 +264,8 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,Th
             dataCancer_onlyDown_sample_mRNASelected<- dataCancer_onlyDown_sample[rownames(dataCancer_onlyDown_sample) == mRNAselected,]
 
 
-            mRNAselected_surv_results_Matrix[i,"Mean Tumor Top"]<- mean(dataCancer_onlyTop_sample_mRNASelected)
-            mRNAselected_surv_results_Matrix[i,"Mean Tumor Down"]<- mean(dataCancer_onlyDown_sample_mRNASelected)
+            tabSurv_Matrix[i,"Mean Tumor Top"]<- mean(dataCancer_onlyTop_sample_mRNASelected)
+            tabSurv_Matrix[i,"Mean Tumor Down"]<- mean(dataCancer_onlyDown_sample_mRNASelected)
 
             ttime[!status] <- as.numeric(cfu[!status, "days_to_last_followup"])
             #ttime[!status] <- cfu[!status, "days_to_last_followup"]
@@ -298,19 +294,19 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,Th
 
 
 
-            mRNAselected_surv_results<-survdiff(ttime  ~ c(rep("top", nrow(cfu_onlyTOP)), rep("down", nrow(cfu_onlyDOWN)) ))
-            mRNAselected_surv_results_chis<-unlist(mRNAselected_surv_results)$chisq
+            tabSurv<-survdiff(ttime  ~ c(rep("top", nrow(cfu_onlyTOP)), rep("down", nrow(cfu_onlyDOWN)) ))
+            tabSurv_chis<-unlist(tabSurv)$chisq
 
-            mRNAselected_surv_results_pvalue <- as.numeric(1 - pchisq(abs(mRNAselected_surv_results$chisq), df = 1))
+            tabSurv_pvalue <- as.numeric(1 - pchisq(abs(tabSurv$chisq), df = 1))
             #miRselected_surv_results_pvalue <- as.numeric(round(as.numeric(1 - pchisq(abs(miRselected_surv_results$chisq), df = 1)),6))
 
-            mRNAselected_surv_results_Matrix[i,"pvalue"]<-mRNAselected_surv_results_pvalue
+            tabSurv_Matrix[i,"pvalue"]<-tabSurv_pvalue
 
 
-            #print(paste(i,"....",mRNAselected,"pvalue=",mRNAselected_surv_results_pvalue))
+            #print(paste(i,"....",mRNAselected,"pvalue=",tabSurv_pvalue))
 
             if (Survresult ==TRUE) {
-                titlePlot<- paste("Kaplan-Meier Survival analysis, pvalue=",mRNAselected_surv_results_pvalue )
+                titlePlot<- paste("Kaplan-Meier Survival analysis, pvalue=",tabSurv_pvalue )
 
 
                 plot(survfit(ttime ~ c(rep("low", nrow(cfu_onlyTOP)), rep("high", nrow(cfu_onlyDOWN)))), col = c("green", "red"),main= titlePlot,xlab="Days",ylab="Survival")
@@ -318,15 +314,25 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,Th
 
                 legend(100, 1, legend = c(legendLow,legendHigh), col = c("green", "red"), text.col = c("green", "red"), pch = 15)
 
-                print(mRNAselected_surv_results)
+                print(tabSurv)
             }
         } #end if
 
     } #end for
 
-    mRNAselected_surv_results_Matrix[mRNAselected_surv_results_Matrix=="-Inf"]<-0
+    tabSurv_Matrix[tabSurv_Matrix=="-Inf"]<-0
 
-    return(mRNAselected_surv_results_Matrix)
+
+    tabSurvKM <- tabSurv_Matrix
+
+   # Filtering by selected pvalue < 0.01
+    tabSurvKM <- tabSurvKM[tabSurvKM$pvalue < p.cut,]
+    tabSurvKM <- tabSurvKM[!duplicated(tabSurvKM$mRNA),]
+    rownames(tabSurvKM) <-tabSurvKM$mRNA
+    tabSurvKM <- tabSurvKM[,-1]
+    tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing=FALSE),]
+
+    return(tabSurv_Matrix)
 }
 
 
