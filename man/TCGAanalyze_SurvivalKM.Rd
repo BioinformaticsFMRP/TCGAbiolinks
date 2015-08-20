@@ -5,7 +5,7 @@
 \title{survival analysis (SA) univariate with Kaplan-Meier (KM) method.}
 \usage{
 TCGAanalyze_SurvivalKM(clinical_patient, dataGE, Genelist, Survresult,
-  ThreshTop = 0.67, ThreshDown = 0.33)
+  ThreshTop = 0.67, ThreshDown = 0.33, p.cut = 0.05)
 }
 \arguments{
 \item{clinical_patient}{is a data.frame using function 'clinic' with information
@@ -21,6 +21,8 @@ days_to_last_followup , vital_status, etc}
 \item{ThreshTop}{is a quantile threshold to identify samples with high expression of a gene}
 
 \item{ThreshDown}{is a quantile threshold to identify samples with low expression of a gene}
+
+\item{p.cut}{p.values threshold. Default: 0.05}
 }
 \value{
 table with survival genes pvalues from KM.
@@ -50,12 +52,6 @@ dataBRCAcomplete <- log2(BRCA_rnaseqv2)
 dataBRCAcomplete <- dataBRCAcomplete[1:10,]
 tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,dataBRCAcomplete,
 Genelist = rownames(dataBRCAcomplete), Survresult = FALSE,ThreshTop=0.67,ThreshDown=0.33)
-# Filtering by pvalue < 0.01
-tabSurvKM <- tabSurvKM[tabSurvKM$pvalue < 0.01,]
-tabSurvKM <- tabSurvKM[!duplicated(tabSurvKM$mRNA),]
-rownames(tabSurvKM) <-tabSurvKM$mRNA
-tabSurvKM <- tabSurvKM[,-1]
-tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing=FALSE),]
 }
 }
 
