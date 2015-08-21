@@ -573,7 +573,7 @@ TCGAVisualize_volcano <- function(x,y,
                            panel.grid.minor = element_blank(),
                            axis.line = element_line(colour = "black"),
                            legend.position="top",
-        legend.key = element_rect(colour = 'white'))
+                           legend.key = element_rect(colour = 'white'))
     # Label points with the textxy function from the calibrate plot
     if(!is.null(names)){
         idx <- (up & sig) | (down & sig)
@@ -854,7 +854,7 @@ TCGAvisualize_starburst <- function(met,
                                                            paste(Log[10],
                                                                  " (FDR corrected P values)"))),
                                     title = "Starburst Plot",
-                                    legend = "Methylation/Expression Relation",
+                                    legend = "DNA Methylation/Expression Relation",
                                     color = NULL,
                                     label = c("Not Significant",
                                               "Up regulated & Hypo methylated",
@@ -993,6 +993,8 @@ TCGAvisualize_starburst <- function(met,
                "Up regulated & Hyper methylated",
                "Down regulated & Hyper methylated")
 
+
+
     s <- list(a, b, c, d, e, f, g, h)
     for (i in seq_along(s)) {
         idx <- rownames(s[[i]])
@@ -1004,24 +1006,31 @@ TCGAvisualize_starburst <- function(met,
 
     size <- rep(2,4)
     shape <-  as.character(rep(2,4))
-
+    volcano_normal <- volcano
+    significant <- NULL
     s <- list(a.sig,b.sig,g.sig,h.sig)
     for (i in seq_along(s)) {
         idx <- rownames(s[[i]])
         if (length(idx) > 0) {
             volcano[idx, "threshold.size"] <- size[i]
             volcano[idx, "shape"] <-  shape[i]
+            significant <-  rbind(significant,volcano[idx,])
         }
     }
 
     ## starburst plot
-    p <- ggplot(data = volcano, environment = .e,
-                aes(x = volcano$meFDR2,
-                    y = volcano$geFDR2,
-                    colour = volcano$threshold.starburst,
-                    size = volcano$threshold.size,
-                    shape= volcano$shape)) +
-        geom_point() #+ guides(shape=FALSE)
+    p <- ggplot(data = volcano_normal, environment = .e,
+                aes(x = meFDR2,
+                    y = geFDR2,
+                    colour = threshold.starburst)) +
+        geom_point()
+        p <- p + geom_point( data = significant,
+                             aes(x = meFDR2,
+                                 y = geFDR2), color = "black", shape=1, size = 8,show_guide = FALSE)
+    #p <- p + scale_shape_discrete(
+    #    labels = c("Candidate Biologically Significant"),
+    #    name = "Biological importance")
+
 
     if(names == TRUE){
         message("Adding names to genes")
@@ -1035,7 +1044,6 @@ TCGAvisualize_starburst <- function(met,
         }
     }
 
-
     if (!is.null(xlim)) {
         p <- p + xlim(xlim)
     }
@@ -1045,10 +1053,7 @@ TCGAvisualize_starburst <- function(met,
     p <- p + ggtitle(title) + ylab(ylab) + xlab(xlab) + guides(size=FALSE)
     p <- p + scale_color_manual(values = color, labels = label, name = legend) +
         guides(col = guide_legend(nrow = 2))
-    p <- p + scale_shape_discrete(
-                                labels = c("None",
-                                           "Candidate Biologically Significant"),
-                                name = "Biological importance")
+
     p <-  p + geom_hline(aes(yintercept = exp.lowerthr), colour = "black",
                          linetype = "dashed") +
         geom_hline(aes(yintercept = exp.upperthr), colour = "black",
@@ -1062,9 +1067,15 @@ TCGAvisualize_starburst <- function(met,
                            panel.grid.minor = element_blank(),
                            axis.line = element_line(colour = "black"),
                            legend.position="top",
-                           legend.key = element_rect(colour = 'white')) +
+                           legend.key = element_rect(colour = 'white'))
+    #p <- p + geom_point( data = significant,
+    #                     aes(x = meFDR2,
+    #                         y = geFDR2), shape=1, size = 10,show_guide = FALSE)
+    #    p <- p + scale_shape_discrete(
+    #        labels = c("Candidate Biologically Significant"),
+    #        name = "Biological importance")
 
-    ggsave(filename = filename, width = 14, height = 10, dpi = 600)
+        ggsave(filename = filename, width = 14, height = 10, dpi = 600)
 
     #statuscol <- paste("status", group1, group2, sep = ".")
 
