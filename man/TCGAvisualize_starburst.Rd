@@ -4,18 +4,17 @@
 \alias{TCGAvisualize_starburst}
 \title{Create starburst plot}
 \usage{
-TCGAvisualize_starburst(met, exp, group1 = NULL, group2 = NULL,
-  exp.p.cut = 0.01, met.p.cut = 0.01, diffmean.cut = 0, logFC.cut = 0,
-  names = FALSE, filename = "starburst.pdf",
-  ylab = expression(atop("Gene Expression", paste(Log[10],
-  " (FDR corrected P values)"))), xlab = expression(atop("DNA Methylation",
-  paste(Log[10], " (FDR corrected P values)"))), title = "Starburst Plot",
-  legend = "Methylation/Expression Relation", color = c("black",
-  brewer.pal(8, "Dark2")), label = c("Not Significant",
-  "Up regulated & Hypo methylated", "Down regulated & Hypo methylated",
-  "hypo methylated", "hyper methylated", "Up regulated", "Down regulated",
-  "Up regulated & Hyper methylated", "Down regulated & Hyper methylated"),
-  xlim = NULL, ylim = NULL)
+TCGAvisualize_starburst(met,
+                        exp,
+                        group1,
+                        group2,
+                        exp.p.cut = 0.01,
+                        met.p.cut = 0.01,
+                        diffmean.cut = 0,
+                        logFC.cut = 0,
+                        names = FALSE,
+                        filename = "starburst.pdf",
+                        ...)
 }
 \arguments{
 \item{met}{SummarizedExperiment with methylation data obtained from the
@@ -34,15 +33,17 @@ Obs: Column p.value.adj.group1.group2 should exist}
 
 \item{met.p.cut}{methylation p value cut-off}
 
-\item{diffmean.cut}{If set, the probes with diffmean higher than methylation cut-off will be
-highlighted in the plot. And the data frame return will be subseted.}
+\item{diffmean.cut}{If set, the probes with diffmean higher
+than methylation cut-off will be
+ highlighted in the plot. And the data frame return will be subseted.}
 
-\item{logFC.cut}{If set, the probes with expression fold change higher than methylation cut-off will be
-highlighted in the plot. And the data frame return will be subseted.}
+\item{logFC.cut}{If set, the probes with expression fold
+change higher than methylation cut-off will be
+ highlighted in the plot. And the data frame return will be subseted.}
 
-\item{names}{is names}
+\item{names}{Add the names of the significant genes? Default: FALSE}
 
-\item{filename}{pdf filename}
+\item{filename}{The filename of the file (it can be pdf, svg, png, etc)}
 
 \item{ylab}{y axis text}
 
@@ -67,7 +68,16 @@ Save a starburst plot
 Create Starburst plot for comparison of DNA methylation and gene expression.
    The log10 (FDR-corrected P value) is plotted for beta value for DNA
    methylation (x axis) and gene expression (y axis) for each gene.
+
    The black dashed line shows the FDR-adjusted P value of 0.01.
+
+   You can set names to TRUE to get the names of the significant genes.
+
+   Candidate biologically significant genes will be circled in the plot.
+
+   Candidate biologically significant are the genes that respect the
+   expression (logFC.cut), DNA methylation (diffmean.cut) and
+   significance thresholds (exp.p.cut, met.p.cut)
 }
 \details{
 Input: data with gene expression/methylation expression
@@ -95,6 +105,6 @@ exp <- data.frame(row.names=sprintf("ID\%03d", 1:20000),
 SummarizedExperiment::rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
 SummarizedExperiment::rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
 SummarizedExperiment::rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
-result <- TCGAvisualize_starburst(met,exp,exp.p.cut = 0.05,met.p.cut = 0.05,"g1","g2")
+result <- TCGAvisualize_starburst(met,exp,exp.p.cut = 0.05,met.p.cut = 0.05,"g1","g2",diffmean.cut=0.8,names=TRUE)
 }
 
