@@ -95,6 +95,12 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' @importFrom survival survfit Surv
 #' @importFrom scales percent
 #' @export
+#' @usage
+#' TCGAanalyze_survival(data,
+#'                      clusterCol,
+#'                      filename = "survival.pdf",
+#'                      print.value = TRUE,
+#'                      ...)
 #' @return Survival plot
 #' @examples
 #' days_to_death <- floor(runif(200, 1, 1000))
@@ -192,9 +198,17 @@ TCGAanalyze_survival <- function(data,
                                       shape = 3,size = 2)
             surv <- surv + guides(linetype = FALSE) +
                 scale_y_continuous(labels = scales::percent) +
-                theme(legend.justification=c(1,1), legend.position=c(1,1),
-                      legend.text = element_text(size = 18), legend.title = element_text(size = 18),
-                      axis.text= element_text(size = 22),  axis.title.x= element_text(size = 22),
+                theme_bw() +
+                theme(panel.border = element_blank(),
+                      panel.grid.major = element_blank(),
+                      panel.grid.minor = element_blank(),
+                      axis.line = element_line(colour = "black"),
+                      legend.key = element_rect(colour = 'white'),
+                      legend.justification=c(1,1), legend.position=c(1,1),
+                      legend.text = element_text(size = 18),
+                      legend.title = element_text(size = 18),
+                      axis.text= element_text(size = 22),
+                      axis.title.x= element_text(size = 22),
                       axis.title.y= element_text(size = 22))
 
             ggsave(surv, filename = filename, width = width, height = height)
@@ -205,7 +219,11 @@ TCGAanalyze_survival <- function(data,
 }
 #' @title Mean methylation boxplot
 #' @description
-#'   Creates a mean methylation boxplot divided in by groups
+#'   Creates a mean methylation boxplot for groups (groupCol),
+#'   subgroups will be highlited  as shapes if the subgroupCol was set.
+#'
+#'   Observation: Data is a summarizedExperiment.
+#'
 #' @param data SummarizedExperiment object obtained from TCGAPrepare
 #' @param groupCol Columns in colData(data) that defines the groups. If no
 #' columns defined a columns called "Patients" will be used
@@ -226,6 +244,13 @@ TCGAanalyze_survival <- function(data,
 #' @importFrom grDevices rainbow
 # ' @importFrom gtools combinations
 #' @export
+#' @usage
+#' TCGAvisualize_meanMethylation (data,
+#'                                groupCol
+#'                                subgroupCol,
+#'                                print.pvalue=FALSE,
+#'                                filename = "groupMeanMet.pdf",
+#'                                ...)
 #' @return Save the pdf survival plot
 #' @examples
 #' nrows <- 200; ncols <- 21
@@ -247,7 +272,7 @@ TCGAvisualize_meanMethylation <- function(data,
                                           subgroupCol=NULL,
                                           shapes = NULL,
                                           print.pvalue=FALSE,
-                                          filename = "sampleMeanMethylationByGroups.pdf",
+                                          filename = "groupMeanMet.pdf",
                                           ylab = expression(
                                               paste("Mean DNA methylation (",
                                                     beta,"-values)")),
@@ -338,6 +363,7 @@ TCGAvisualize_meanMethylation <- function(data,
     p <- p + scale_x_discrete(breaks = labels,labels = labels)
     p <- p + ylab(ylab) + xlab(xlab) + labs(title = title) +
         labs(shape=subgroup.legend, color=group.legend) +
+        theme_bw() +
         theme(axis.title.x = element_text(face = "bold", size = 20),
               axis.text.x = element_text(angle = 90,
                                          vjust = 0.5,
@@ -345,13 +371,16 @@ TCGAvisualize_meanMethylation <- function(data,
               axis.title.y = element_text(face = "bold",
                                           size = 20),
               axis.text.y = element_text(size = 16),
-              plot.title = element_text(face = "bold", size = 16)) +
-    theme_bw() + theme(panel.border = element_blank(),
-                       panel.grid.major = element_blank(),
-                       panel.grid.minor = element_blank(),
-                       axis.line = element_line(colour = "black"),
-                       legend.position="top",
-                       legend.key = element_rect(colour = 'white'))
+              plot.title = element_text(face = "bold", size = 16),
+              legend.text = element_text(size = 14),
+              legend.title = element_text(size = 14),
+              axis.text= element_text(size = 22),
+              panel.border = element_blank(),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              axis.line = element_line(colour = "black"),
+              legend.position="top",
+              legend.key = element_rect(colour = 'white'))
 
     if (!is.null(shapes)){
         p <- p + scale_shape_manual(values = shapes)
@@ -495,7 +524,9 @@ calculate.pvalues <- function(data,
 #' @title Plot volcano plot for DNA methylation or expression
 #' @details
 #'    Creates a volcano plot from the expression and methylation analysis.
+#'
 #'    Please see the vignette for more information
+#'
 #'    Observation: This function automatically is called by TCGAanalyse_DMR
 #' @param x x-axis data
 #' @param y y-axis data
@@ -594,17 +625,25 @@ TCGAVisualize_volcano <- function(x,y,
 #'   This function will search for differentially methylated CpG sites,
 #'   which are regarded as possible functional regions involved
 #'   in gene transcriptional regulation.
+#'
 #'   In order to find these regions we use the beta-values (methylation values
 #'   ranging from 0.0 to 1.0) to compare two groups.
+#'
 #'   Firstly, it calculates the difference between the mean methylation of each
 #'   group for each probes. Secondly, it calculates the p-value using the
 #'   wilcoxon test using the Benjamini-Hochberg adjustment method.
 #'   The default parameters will require a minimum absolute beta values delta
 #'   of 0.2 and a false discovery rate (FDR)-adjusted Wilcoxon rank-sum P-value
-#'   of <0.01 for the difference.
+#'   of < 0.01 for the difference.
+#'
 #'   After these analysis, we save a volcano plot (x-axis:diff mean methylation,
 #'   y-axis: significance) that will help the user identify the differentially
 #'   methylated CpG sites and return the object with the calculus in the rowRanges.
+#'
+#'   If the calculus already exists in the object it will not recalculated.
+#'   You should set overwrite parameter to TRUE to force it, or remove the
+#'   collumns with the results from the object.
+#'
 #' @param data  SummarizedExperiment obtained from the TCGAPrepare
 #' @param groupCol  Columns with the groups inside the SummarizedExperiment
 #'  object. (This will be obtained by the function colData(data))
@@ -635,6 +674,19 @@ TCGAVisualize_volcano <- function(x,y,
 #' @importFrom SummarizedExperiment colData rowRanges assay rowRanges<- values<-
 #' @importFrom S4Vectors metadata
 #' @export
+#' @usage
+#' TCGAanalyze_DMR (data,
+#'                  groupCol,
+#'                  group1,
+#'                  group2,
+#'                  filename = "methylation_volcano.pdf",
+#'                  p.cut = 0.01,
+#'                  probe.names = FALSE,
+#'                  diffmean.cut = 0.2,
+#'                  paired = FALSE,
+#'                  adj.method="BH",
+#'                  overwrite=FALSE,
+#'                  ...)
 #' @return Volcano plot saved and the given data with the results
 #' (diffmean.group1.group2,p.value.group1.group2,
 #' p.value.adj.group1.group2,status.group1.group2)
@@ -784,7 +836,16 @@ TCGAanalyze_DMR <- function(data,
 #'   Create Starburst plot for comparison of DNA methylation and gene expression.
 #'    The log10 (FDR-corrected P value) is plotted for beta value for DNA
 #'    methylation (x axis) and gene expression (y axis) for each gene.
+#'
 #'    The black dashed line shows the FDR-adjusted P value of 0.01.
+#'
+#'    You can set names to TRUE to get the names of the significant genes.
+#'
+#'    Candidate biologically significant genes will be circled in the plot.
+#'
+#'    Candidate biologically significant are the genes that respect the
+#'    expression (logFC.cut), DNA methylation (diffmean.cut) and
+#'    significance thresholds (exp.p.cut, met.p.cut)
 #'
 #' @details
 #'    Input: data with gene expression/methylation expression
@@ -794,26 +855,40 @@ TCGAanalyze_DMR <- function(data,
 #' TCGAPrepare. Expected colData columns: diffmean,  p.value.adj  and p.value
 #' Execute volcanoPlot function in order to obtain these values for the object.
 #' @param exp Object obtained by DEArnaSEQ function
-#' @param filename pdf filename
+#' @param filename The filename of the file (it can be pdf, svg, png, etc)
 #' @param legend legend title
 #' @param color vector of colors to be used in graph
 #' @param label vector of labels to be used in graph
 #' @param title main title
-#' @param names is names
+#' @param names Add the names of the significant genes? Default: FALSE
 #' @param ylab y axis text
 #' @param xlab x axis text
 #' @param xlim x limits to cut image
 #' @param ylim y limits to cut image
 #' @param met.p.cut methylation p value cut-off
 #' @param exp.p.cut expression p value cut-off
-#' @param diffmean.cut If set, the probes with diffmean higher than methylation cut-off will be
+#' @param diffmean.cut If set, the probes with diffmean higher
+#' than methylation cut-off will be
 #'  highlighted in the plot. And the data frame return will be subseted.
-#' @param logFC.cut If set, the probes with expression fold change higher than methylation cut-off will be
+#' @param logFC.cut If set, the probes with expression fold
+#' change higher than methylation cut-off will be
 #'  highlighted in the plot. And the data frame return will be subseted.
 #' @param group1 The name of the group 1
 #' Obs: Column p.value.adj.group1.group2 should exist
 #' @param group2 The name of the group 2.
 #' Obs: Column p.value.adj.group1.group2 should exist
+#' @usage
+#' TCGAvisualize_starburst(met,
+#'                         exp,
+#'                         group1,
+#'                         group2,
+#'                         exp.p.cut = 0.01,
+#'                         met.p.cut = 0.01,
+#'                         diffmean.cut = 0,
+#'                         logFC.cut = 0,
+#'                         names = FALSE,
+#'                         filename = "starburst.pdf",
+#'                         ...)
 #' @import ggplot2
 #' @importFrom SummarizedExperiment subsetByOverlaps rowRanges rowRanges<-
 #'             values<-
@@ -842,7 +917,7 @@ TCGAanalyze_DMR <- function(data,
 #' SummarizedExperiment::rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
 #' SummarizedExperiment::rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
 #' SummarizedExperiment::rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
-#' result <- TCGAvisualize_starburst(met,exp,exp.p.cut = 0.05,met.p.cut = 0.05,"g1","g2")
+#' result <- TCGAvisualize_starburst(met,exp,exp.p.cut = 0.05,met.p.cut = 0.05,"g1","g2",diffmean.cut=0.8,names=TRUE)
 TCGAvisualize_starburst <- function(met,
                                     exp,
                                     group1=NULL,
@@ -1030,13 +1105,16 @@ TCGAvisualize_starburst <- function(met,
                     y = geFDR2,
                     colour = threshold.starburst)) +
         geom_point()
-        p <- p + geom_point( data = significant,
-                             aes(x = meFDR2,
-                                 y = geFDR2), color = "black", shape=1, size = 8,show_guide = FALSE)
     #p <- p + scale_shape_discrete(
     #    labels = c("Candidate Biologically Significant"),
     #    name = "Biological importance")
 
+    if(!is.null(significant)){
+        p <- p + geom_point( data = significant,
+                             aes(x = meFDR2,
+                                 y = geFDR2),
+                             color = "black", shape=1, size = 8,show_guide = FALSE)
+    }
 
     if(names == TRUE){
         message("Adding names to genes")
@@ -1058,7 +1136,7 @@ TCGAvisualize_starburst <- function(met,
     }
     p <- p + ggtitle(title) + ylab(ylab) + xlab(xlab) + guides(size=FALSE)
     p <- p + scale_color_manual(values = color, labels = label, name = legend) +
-        guides(col = guide_legend(nrow = 2))
+        guides(col = guide_legend(nrow = 3))
 
     p <-  p + geom_hline(aes(yintercept = exp.lowerthr), colour = "black",
                          linetype = "dashed") +
@@ -1068,12 +1146,23 @@ TCGAvisualize_starburst <- function(met,
                    linetype = "dashed") +
         geom_vline(aes(xintercept = met.upperthr), colour = "black",
                    linetype = "dashed")  +
-        theme_bw() + theme(panel.border = element_blank(),
-                           panel.grid.major = element_blank(),
-                           panel.grid.minor = element_blank(),
-                           axis.line = element_line(colour = "black"),
-                           legend.position="top",
-                           legend.key = element_rect(colour = 'white'))
+        theme_bw() +
+        theme(panel.border = element_blank(),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              axis.line = element_line(colour = "black"),
+              legend.position="top",
+              legend.key = element_rect(colour = 'white'),
+              plot.title = element_text(face = "bold", size = 16),
+              legend.text = element_text(size = 14),
+              legend.title = element_text(size = 14),
+              axis.text= element_text(size = 14),
+              axis.title.x = element_text(face = "bold", size = 14),
+              axis.text.x = element_text(vjust = 0.5,
+                                         size = 14),
+              axis.title.y = element_text(face = "bold",
+                                          size = 14),
+              axis.text.y = element_text(size = 14))
     #p <- p + geom_point( data = significant,
     #                     aes(x = meFDR2,
     #                         y = geFDR2), shape=1, size = 10,show_guide = FALSE)
@@ -1081,7 +1170,7 @@ TCGAvisualize_starburst <- function(met,
     #        labels = c("Candidate Biologically Significant"),
     #        name = "Biological importance")
 
-        ggsave(filename = filename, width = 14, height = 10, dpi = 600)
+    ggsave(filename = filename, width = 14, height = 10, dpi = 600)
 
     #statuscol <- paste("status", group1, group2, sep = ".")
 

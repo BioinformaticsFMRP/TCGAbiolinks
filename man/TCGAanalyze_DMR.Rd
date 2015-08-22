@@ -4,13 +4,18 @@
 \alias{TCGAanalyze_DMR}
 \title{Differentially methylated regions Analysis}
 \usage{
-TCGAanalyze_DMR(data, groupCol = NULL, group1 = NULL, group2 = NULL,
-  filename = "methylation_volcano.pdf", ylab = expression(paste(-Log[10],
-  " (FDR corrected -P values)")), xlab = "DNA Methylation difference",
-  title = NULL, legend = "Legend", color = c("black", "red", "darkgreen"),
-  label = NULL, xlim = NULL, ylim = NULL, p.cut = 0.01,
-  probe.names = FALSE, diffmean.cut = 0.2, paired = FALSE,
-  adj.method = "BH", overwrite = FALSE)
+TCGAanalyze_DMR (data,
+                 groupCol,
+                 group1,
+                 group2,
+                 filename = "methylation_volcano.pdf",
+                 p.cut = 0.01,
+                 probe.names = FALSE,
+                 diffmean.cut = 0.2,
+                 paired = FALSE,
+                 adj.method="BH",
+                 overwrite=FALSE,
+                 ...)
 }
 \arguments{
 \item{data}{SummarizedExperiment obtained from the TCGAPrepare}
@@ -68,17 +73,24 @@ in the rowRanges where group1 and group2 are the names of the groups
 This function will search for differentially methylated CpG sites,
   which are regarded as possible functional regions involved
   in gene transcriptional regulation.
+
   In order to find these regions we use the beta-values (methylation values
   ranging from 0.0 to 1.0) to compare two groups.
+
   Firstly, it calculates the difference between the mean methylation of each
   group for each probes. Secondly, it calculates the p-value using the
   wilcoxon test using the Benjamini-Hochberg adjustment method.
   The default parameters will require a minimum absolute beta values delta
   of 0.2 and a false discovery rate (FDR)-adjusted Wilcoxon rank-sum P-value
-  of <0.01 for the difference.
+  of < 0.01 for the difference.
+
   After these analysis, we save a volcano plot (x-axis:diff mean methylation,
   y-axis: significance) that will help the user identify the differentially
   methylated CpG sites and return the object with the calculus in the rowRanges.
+
+  If the calculus already exists in the object it will not recalculated.
+  You should set overwrite parameter to TRUE to force it, or remove the
+  collumns with the results from the object.
 }
 \examples{
 nrows <- 200; ncols <- 20
