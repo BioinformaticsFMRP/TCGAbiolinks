@@ -95,12 +95,6 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' @importFrom survival survfit Surv
 #' @importFrom scales percent
 #' @export
-#' @usage
-#' TCGAanalyze_survival(data,
-#'                      clusterCol,
-#'                      filename = "survival.pdf",
-#'                      print.value = TRUE,
-#'                      ...)
 #' @return Survival plot
 #' @examples
 #' days_to_death <- floor(runif(200, 1, 1000))
@@ -244,13 +238,6 @@ TCGAanalyze_survival <- function(data,
 #' @importFrom grDevices rainbow
 # ' @importFrom gtools combinations
 #' @export
-#' @usage
-#' TCGAvisualize_meanMethylation (data,
-#'                                groupCol
-#'                                subgroupCol,
-#'                                print.pvalue=FALSE,
-#'                                filename = "groupMeanMet.pdf",
-#'                                ...)
 #' @return Save the pdf survival plot
 #' @examples
 #' nrows <- 200; ncols <- 21
@@ -674,19 +661,6 @@ TCGAVisualize_volcano <- function(x,y,
 #' @importFrom SummarizedExperiment colData rowRanges assay rowRanges<- values<-
 #' @importFrom S4Vectors metadata
 #' @export
-#' @usage
-#' TCGAanalyze_DMR (data,
-#'                  groupCol,
-#'                  group1,
-#'                  group2,
-#'                  filename = "methylation_volcano.pdf",
-#'                  p.cut = 0.01,
-#'                  probe.names = FALSE,
-#'                  diffmean.cut = 0.2,
-#'                  paired = FALSE,
-#'                  adj.method="BH",
-#'                  overwrite=FALSE,
-#'                  ...)
 #' @return Volcano plot saved and the given data with the results
 #' (diffmean.group1.group2,p.value.group1.group2,
 #' p.value.adj.group1.group2,status.group1.group2)
@@ -877,18 +851,6 @@ TCGAanalyze_DMR <- function(data,
 #' Obs: Column p.value.adj.group1.group2 should exist
 #' @param group2 The name of the group 2.
 #' Obs: Column p.value.adj.group1.group2 should exist
-#' @usage
-#' TCGAvisualize_starburst(met,
-#'                         exp,
-#'                         group1,
-#'                         group2,
-#'                         exp.p.cut = 0.01,
-#'                         met.p.cut = 0.01,
-#'                         diffmean.cut = 0,
-#'                         logFC.cut = 0,
-#'                         names = FALSE,
-#'                         filename = "starburst.pdf",
-#'                         ...)
 #' @import ggplot2
 #' @importFrom SummarizedExperiment subsetByOverlaps rowRanges rowRanges<-
 #'             values<-
@@ -917,7 +879,11 @@ TCGAanalyze_DMR <- function(data,
 #' SummarizedExperiment::rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
 #' SummarizedExperiment::rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
 #' SummarizedExperiment::rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
-#' result <- TCGAvisualize_starburst(met,exp,exp.p.cut = 0.05,met.p.cut = 0.05,"g1","g2",diffmean.cut=0.8,names=TRUE)
+#' result <- TCGAvisualize_starburst(met,exp,
+#'                                   exp.p.cut = 0.05, met.p.cut = 0.05,
+#'                                   group1="g1",group2="g2",
+#'                                   diffmean.cut=0.8,
+#'                                   names=TRUE)
 TCGAvisualize_starburst <- function(met,
                                     exp,
                                     group1=NULL,
