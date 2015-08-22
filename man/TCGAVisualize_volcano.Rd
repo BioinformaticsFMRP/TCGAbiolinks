@@ -7,7 +7,7 @@
 TCGAVisualize_volcano(x, y, filename = "volcano.pdf",
   ylab = expression(paste(-Log[10], " (FDR corrected -P values)")),
   xlab = NULL, title = NULL, legend = NULL, label = NULL, xlim = NULL,
-  ylim = NULL, color = c("black", "red", "darkgreen"), names = NULL,
+  ylim = NULL, color = c("black", "red", "green"), names = NULL,
   x.cut = 0, y.cut = 0.01, height = 5, width = 10)
 }
 \arguments{
@@ -51,7 +51,9 @@ Plot volcano plot for DNA methylation or expression
 }
 \details{
 Creates a volcano plot from the expression and methylation analysis.
+
    Please see the vignette for more information
+
    Observation: This function automatically is called by TCGAanalyse_DMR
 }
 \examples{
