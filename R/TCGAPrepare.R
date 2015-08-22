@@ -39,8 +39,6 @@
 #' @param save Save a rda object with the prepared object?
 #'  Default: \code{FALSE}
 #' @param filename Name of the saved file
-#' @param toPackage For whihc package are you preparing the data?
-#' Default: NULL. Options: "ELMER"
 #' @param reannotate Reannotate genes?  Source http://grch37.ensembl.org/.
 #' DEFAULT: FALSE. (For the moment only working for methylation data)
 #' @param summarizedExperiment Output as SummarizedExperiment?
@@ -71,7 +69,6 @@ TCGAprepare <- function(query,
                         type = NULL,
                         save = FALSE,
                         filename = NULL,
-                        toPackage = NULL,
                         reannotate = FALSE,
                         summarizedExperiment = TRUE){
 
@@ -81,10 +78,6 @@ TCGAprepare <- function(query,
         return(NULL)
     }
 
-    if(!is.null(toPackage)){
-        message("toPackage argument was set, changing summarizedExperiment to FALSE")
-        summarizedExperiment <- FALSE
-    }
     if (length(unique(query$Platform)) > 1 |
         length(unique(query$Center)) > 2) {
         # This case (27k/450k)accepts two platforms
@@ -768,11 +761,6 @@ TCGAprepare <- function(query,
                               "FilesInfo:"=list(finf))
     }
 
-    if (!is.null(toPackage) && !summarizedExperiment) {
-        message(" Starting to preparing the data")
-        df <- prepareToPackage(df, platform,toPackage)
-    }
-
     if (save) {
         message("Saving the data...")
 
@@ -793,51 +781,56 @@ TCGAprepare <- function(query,
     return(df)
 }
 
-# This function will help the user to prepare the data to an specific package
-prepareToPackage <- function(df, platform, toPackage){
+#' @title Prepare the data for ELEMR package
+#' @description Prepare the data for ELEMR package
+#' @return Matrix prepared for fetch.mee function
+#' @param df data frame from TCGAPrepare setting summarizedExperiment to FALSE
+#' @param platform platform of the data
+#' @param na.cut Define the percentage of NA that the line should have to
+#'  remove the probes
+#' @export
+#' @examples
+#' df <- data.frame(runif(200, 1e5, 1e6),runif(200, 1e5, 1e6))
+#' rownames(df) <- sprintf("?|%03d", 1:200)
+#' TCGAprepare_elmer(df,platform="IlluminaHiSeq_RNASeqV2")
+TCGAprepare_elmer <- function(df,
+                              platform = NULL,
+                              met.na.cut = 0.2,
+                              save = FALSE){
+    # parameters veryfication
+    if (class(df) != class(data.frame())) stop("df should be a data frame")
+    if (is.null(df))  stop("Please set the data parameter")
+    if (is.null(platform))  stop("Please set the platform parameter")
 
-    if(grepl("elmer", toPackage, ignore.case = TRUE)){
+    if (grepl("illuminahiseq_rnaseqv2|illuminahiseq_totalrnaseqv2",
+              platform, ignore.case = TRUE)) {
+        message("============ Pre-pocessing expression data =============")
+        message(paste0("1 - expression = log2(expression + 1): ",
+                       "To linearize \n    relation between ",
+                       "methylation and expression"))
+        df <- log2(df+1)
+        message("2 - rownames  (gene|loci) => ('ID'loci) ")
+        aux <- strsplit(rownames(df),"\\|")
+        GeneID <- unlist(lapply(aux,function(x) x[2]))
+        row.names(df) <- paste0("ID",GeneID)
+        Exp <- data.matrix(df)
 
-        if (grepl("illuminahiseq_rnaseqv2|illuminahiseq_totalrnaseqv2",
-                  platform, ignore.case = TRUE)){
-            message("============ Pre-pocessing expression data =============")
-            message(paste0("1 - expression = log2(expression + 1): ",
-                           "To linearize \n    relation between ",
-                           "methylation and expression"))
-            df <- log2(df+1)
-            message("2 - rownames  (gene|loci) => ('ID'loci) ")
-            aux <- strsplit(rownames(df),"\\|")
-            GeneID <- unlist(lapply(aux,function(x) x[2]))
-            row.names(df) <- paste0("ID",GeneID)
-            df <- data.matrix(df)
-        }
-
-        if (grepl("humanmethylation", platform, ignore.case = TRUE)) {
-            message("============ Pre-pocessing methylation data =============")
-            msg <- paste0("1 - Removing Columns: \n  * Gene_Symbol  \n",
-                          "  * Chromosome  \n  * Genomic_Coordinate")
-            message(msg)
-            df <- subset(df,select = 4:ncol(df))
-            msg <- paste0("2 - Removing probes with ",
-                          "NA values in more than 0.80% samples")
-            message(msg)
-            df <- df[rowMeans(is.na(df))<0.2,]
-            df <- data.matrix(df)
-        }
+        if (save)  save(Exp,file = "Exp_elmer.rda")
     }
 
-    if(grepl("limma", toPackage, ignore.case = TRUE)){
-        message("TBD")
+    if (grepl("humanmethylation", platform, ignore.case = TRUE)) {
+        message("============ Pre-pocessing methylation data =============")
+        msg <- paste0("1 - Removing Columns: \n  * Gene_Symbol  \n",
+                      "  * Chromosome  \n  * Genomic_Coordinate")
+        message(msg)
+        df <- subset(df,select = 4:ncol(df))
+        msg <- paste0("2 - Removing probes with ",
+                      "NA values in more than 20% samples")
+        message(msg)
+        df <- df[rowMeans(is.na(df)) < met.na.cut,]
+        Met <- data.matrix(df)
+        if (save)  save(Met,file = "Met_elmer.rda")
     }
-
-    if(grepl("methylmix", toPackage, ignore.case = TRUE)){
-        message("TBD")
-    }
-
-    if(grepl("biomics", toPackage, ignore.case = TRUE)){
-        message("TBD")
-    }
-    return(df)
 }
 
 #  Internal function
