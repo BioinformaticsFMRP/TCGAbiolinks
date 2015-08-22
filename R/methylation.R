@@ -345,7 +345,13 @@ TCGAvisualize_meanMethylation <- function(data,
               axis.title.y = element_text(face = "bold",
                                           size = 20),
               axis.text.y = element_text(size = 16),
-              plot.title = element_text(face = "bold", size = 16))
+              plot.title = element_text(face = "bold", size = 16)) +
+    theme_bw() + theme(panel.border = element_blank(),
+                       panel.grid.major = element_blank(),
+                       panel.grid.minor = element_blank(),
+                       axis.line = element_line(colour = "black"),
+                       legend.position="top",
+                       legend.key = element_rect(colour = 'white'))
 
     if (!is.null(shapes)){
         p <- p + scale_shape_manual(values = shapes)
