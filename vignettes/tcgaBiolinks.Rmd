@@ -442,7 +442,6 @@ The arguments are:
 * **samples**	List of samples to prepare.
 * **save**	Save a rda object with the prepared object? Default: FALSE
 * **filename** Name of the rda object that will be saved if `save` is `TRUE`
-* **toPackage** Name of the package to prepare the data specific to that package. 
 * **summarizedExperiment** Should the output be a SummarizedExperiment object? Default: `TRUE`
 * **reannotate** Reannotate genes? Source http://grch37.ensembl.org/. 
 Default: `FALSE`. (For the moment only working for methylation data)
@@ -550,13 +549,13 @@ rsem.isoforms.normalized_results, bt.exon_quantification
 *  **RNASeq:** exon.quantification,spljxn.quantification, gene.quantification
 *  **genome_wide_snp_6:** hg18.seg,hg19.seg,nocnv_hg18.seg,nocnv_hg19.seg
 
-## Preparing the data with parameter - toPackage 
+## Preparing the data for other packages
 This section will show how to integrate `TCGAbiolinks` with other packages.
 Our intention is to provide as many integrations as possible.
 
 The example below shows how to use `TCGAbiolinks` with `ELMER` package 
-(expression/methylation analysis). The TCGAprepare for the DNA methylation data 
-will Removing probes with NA values in more than 0.80% samples and remove the 
+(expression/methylation analysis). The `TCGAprepare_elmer` for the DNA methylation data 
+will Removing probes with NA values in more than 20% samples and remove the 
 anottation data, fot the expression data it will take the log2(expression + 1)
 of the expression matrix in order to To linearize the relation between 
 DNA methylation and expressionm also it will prepare the rownames as the 
@@ -565,38 +564,43 @@ specified by the package.
 ```{r, eval = FALSE}
 ############## Get tumor samples with TCGAbiolinks
 library(TCGAbiolinks)
-query <- TCGAquery(tumor = "GBM",level = 3, platform = "HumanMethylation450")
-# This function will take a lot of time depens on internet connection
-TCGAdownload(query,path = "TCGA/450k")
-met <- TCGAprepare(query,dir = "TCGA/450k",
-                   save = TRUE,
-                   filename = "met.rda",
-                   toPackage = "ELMER")
+path <- "kirc"query <- TCGAquery(tumor = "KIRC",level = 3, platform = "HumanMethylation450")
+TCGAdownload(query, path =path)
 
-query.rna <- TCGAquery(tumor="GBM",level=3, platform="IlluminaHiSeq_RNASeqV2")
-TCGAdownload(query.rna,path="TCGA/rna",type = "rsem.genes.normalized_results")
-exp <- TCGAprepare(query.rna, dir="TCGA/rna", save = TRUE, 
-                    filename = "exp.rda",toPackage = "ELMER")
+kirc.met <- TCGAprepare(query,dir = path,
+                        save = TRUE,
+                        filename = "metKirc.rda",
+                        summarizedExperiment = FALSE)
 
-############# To EMLER
+kirc.met <- TCGAprepare_elmer(kirc.met,
+                              platform = "HumanMethylation450",
+                              save = TRUE,
+                              met.na.cut = 0.2)
+
+# Step 1.2 download expression data
+query.rna <- TCGAquery(tumor="KIRC",level=3, platform="IlluminaHiSeq_RNASeqV2")
+TCGAdownload(query.rna,path=path,type = "rsem.genes.normalized_results")
+
+kirc.exp <- TCGAprepare(query.rna, dir=path, save = TRUE,
+                        type = "rsem.genes.normalized_results",
+                        filename = "expKirc.rda", summarizedExperiment = FALSE)
+
+kirc.exp <- TCGAprepare_elmer(kirc.exp,
+                              save = TRUE,
+                              platform = "IlluminaHiSeq_RNASeqV2")
+
+# Step 2 prepare mee object
 library(ELMER)
+library(parallel)
 
-########## gene annotation
 geneAnnot <- txs()
 geneAnnot$GENEID <- paste0("ID",geneAnnot$GENEID)
 geneInfo <- promoters(geneAnnot,upstream = 0, downstream = 0)
-############ probe
 probe <- get.feature.probe()
-
-mee.gbm.glial.with.exp <- fetch.mee(meth = gbm.glial.m,
-                                exp = exp,
-                                probeInfo = probe,
-                                TCGA = TRUE,
-                                geneInfo = geneInfo)
+mee <- fetch.mee(meth = kirc.met, exp = kirc.exp, TCGA = TRUE,
+                 probeInfo = probe, geneInfo = geneInfo)
+save(mee,file="case4mee.rda")
 ```
-
-
-
 
 # `TCGAanalyze`: Analyze data from TCGA. 
 You can easily analyze data using following functions:
@@ -1219,76 +1223,10 @@ knitr::kable(head(tabPackage1), digits = 2, caption = "Find most related questio
 knitr::kable(tabPackage2[c(1,5,7),], digits = 2, caption = "Find most related question in biostar with package",row.names = FALSE)
 ```
 
-## TCGA Downstream Analysis some workflows and pipelines.
-
-# Downstream Analysis n.1 IlluminaHiSeq_RNASeqV2 data
-After preparing the gene expression from TCGA data using the `TCGAprepare`
-function, you can do a normalization of genes using the 
-function `TCGAanalyze_Normalization`, do a quantile filter of genes with
-the `TCGAanalyze_Filtering` function. 
-
-TCGAanalyze_Normalization allows user to normalize mRNA transcripts and miRNA, 
-using R \Biocpkg{EDASeq} package. Normalization for RNA-Seq Numerical and graphical summaries of RNA-Seq read data. Within-lane normalization procedures to adjust for GC-content effect (or other gene-level effects) on read counts: loess robust local regression, global-scaling, and full-quantile normalization [@ref2]. Between-lane normalization procedures to adjust for distributional differences between lanes (e.g., sequencing depth): global-scaling and full-quantile normalization [@ref3].
-
-For istance returns all mRNA or miRNA with mean across all samples, higher than the threshold defined quantile mean across all samples.
-
-
-Also, in order to classify your samples (barcode) 
-you can use the `TCGAquery_SampleTypes` function, the typeSample "NT" will return 
-the  "Solid Tissue Normal" samples, while the typeSample "TP" will return 
-"Primary Solid Tumor"" samples.
- 
-```{r, eval = TRUE}
-# Downstream analysis using gene expression data  
-# TCGA samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
-
-library(TCGAbiolinks)
-
-# dataBRCA in TCGAbiolinks package is a table from TCGA BRCA [10 samples] and comes from 
-# BRCAMatrix <- TCGAprepare(query,"dataBrca") from above example
-# dataBRCA <- BRCAMatrix
-
-# normalization of genes
-dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
-
-# quantile filter of genes
-dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
-                                  method = "quantile", 
-                                  qnt.cut =  0.25)
-
-# selection of normal samples "NT"
-samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
-
-# selection of tumor samples "TP"
-samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
-
-
-```
-
-## Downstream Analysis n.2 IlluminaHiSeq_RNASeq data
-
-You can easily search TCGA samples, download and prepare a matrix of gene expression.
-```{r, eval = FALSE}
-# Query platform IlluminaHiSeq_RNASeq withot a list of barcode 
-query <- TCGAquery(tumor = "brca", platform = "IlluminaHiSeq_RNASeq", level = "3")
-
-# You can define a list of samples to query and download providing relative TCGA barcodes.
-listSamples <- TCGAquery_samplesfilter(query)
-
-# Download only first 5 samples for test.
-
-TCGAdownload(query, path = "dataBrca", type = "gene.quantification",
-             samples = listSamples$IlluminaHiSeq_RNASeq[1:5])
-
-# Prepare expression matrix with gene id in rows and samples (barcode) in columns
-# rsem.genes.results as values
-BRCAMatrix <- TCGAprepare(query,"dataBrca",type = "gene.quantification")
-```
-
 
 # TCGA Downstream Analysis: Case Studies
 
-## Introduction 
+### Introduction 
 
 This vignette shows a complete workflow of the TCGAbiolinks package. 
 The code is divided in 4 case study:
@@ -1610,9 +1548,9 @@ TCGAvisualize_meanMethylation(coad.met,
                               group.legend  = "Groups", subgroup.legend = "hypermutated",
                               filename = "coad_mean.pdf")
 
-#------------------------------------------
-# 4.2 - Volcano plot
-# -----------------------------------------
+#-------------------------------------------------
+# 4.2 - DMR - Methylation analysis - volcano plot
+# ------------------------------------------------
 
 coad.aux <- subset(coad.met, select = colData(coad.met)$methylation_subtype %in% c("CIMP.L","CIMP.H"))
 
@@ -1626,22 +1564,25 @@ coad.aux <- TCGAanalyze_DMR(coad.aux, groupCol = "methylation_subtype",group1 = 
 
 save(coad.aux,file = "coad_pvalue.rda")
 
-#------------------------------------------
-# 4.4 - Starburst plot
-# -----------------------------------------
+#------------------------------------------------
+# 4.4 - DEA - Expression analysis - volcano plot
+# -----------------------------------------------
 
 coad.exp.aux <- subset(coad.exp, select = colData(coad.exp)$methylation_subtype %in% c("CIMP.H","CIMP.L"))
 
 idx <- colData(coad.exp.aux)$methylation_subtype %in% c("CIMP.H")
 idx2 <- colData(coad.exp.aux)$methylation_subtype %in% c("CIMP.L")
 
+dataPrep <- TCGAanalyze_Preprocessing(object = coad.exp.aux,
+                                      cor.cut = 0.6)
 
-dataPrep <- TCGAanalyze_Preprocessing(object = coad.exp.aux,cor.cut = 0.6)
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
                                       geneInfo = geneInfo,
                                       method = "gcContent")
 
-dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm, qnt.cut = 0.25)
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm, 
+                                  qnt.cut = 0.25,
+                                  method='quantile')
 
 dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,idx],
                             mat2 = dataFilt[,idx2],
@@ -1650,16 +1591,19 @@ dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,idx],
                             method = "glmLRT")
 
 TCGAVisualize_volcano(dataDEGs$logFC,dataDEGs$FDR,
-                      filename="Case3_volcanoexp.pdf",
-                     label= c("1" = "Not Significant",  "2" = "Up regulared",
-                        "3" = "Down regulated"),
-                     x.cut=4, names= rownames(dataDEGs),
-                     xlab =" Log2 fold change",
-                     legend="State",title = "Volcano plot (CIMP.l vs CIMP.H)")
+                      filename="Case3_volcanoexp.png",
+                      x.cut=5, names= rownames(dataDEGs),
+                      xlab =" Gene expression fold change (Log2)",
+                      legend="State",title = "Volcano plot (CIMP.l vs CIMP.H)")
 
+#------------------------------------------
+# 4.4 - Starburst plot
+# -----------------------------------------
 starburst <- TCGAvisualize_starburst(coad.aux, dataDEGs,"CIMP.H","CIMP.L",
+                                     filename = "starburst.png",
                                      met.p.cut = 10^-5, exp.p.cut=10^-5,
                                      names = TRUE)
+
 ```
 
 The figures resulted from the code above are shown below.
@@ -1695,7 +1639,8 @@ data preparation stage, the toPackage argument, which aims to prepare the data
 in order to obtain the correct format for different packages.
 
 An example of another package to perform analysis is ELMER. We will present this
-case study the study KIRC by TCGAbiolinks and ELMER integration.
+case study the study KIRC by TCGAbiolinks and ELMER integration. For more information,
+please consult ELMER package.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 #-----------------------------------
@@ -1706,18 +1651,27 @@ case study the study KIRC by TCGAbiolinks and ELMER integration.
 path <-  "."
 query <- TCGAquery(tumor = "KIRC",level = 3, platform = "HumanMethylation450")
 TCGAdownload(query, path = path)
-kirc.met <- TCGAprepare(query,dir = path, save = TRUE,
+kirc.met <- TCGAprepare(query,dir = path,
+                        save = TRUE,
                         filename = "metKirc.rda",
-                        toPackage = "ELMER")
+                        summarizedExperiment = FALSE)
+
+kirc.met <- TCGAprepare_elmer(kirc.met,
+                              platform = "HumanMethylation450",
+                              save = TRUE,
+                              met.na.cut = 0.2)
+
 
 # Step 1.2 download expression data
 query.rna <- TCGAquery(tumor="KIRC",level=3, platform="IlluminaHiSeq_RNASeqV2")
 TCGAdownload(query.rna,path=path,type = "rsem.genes.normalized_results")
-
 kirc.exp <- TCGAprepare(query.rna, dir=path, save = TRUE,
                         type = "rsem.genes.normalized_results",
-                        filename = "expKirc.rda",toPackage = "ELMER")
+                        filename = "expKirc.rda", summarizedExperiment = FALSE)
 
+kirc.exp <- TCGAprepare_elmer(kirc.exp,
+                              save = TRUE,
+                              platform = "IlluminaHiSeq_RNASeqV2")
 #-----------------------------------
 # STEP 2: ELMER integration         |
 #-----------------------------------
@@ -1793,6 +1747,7 @@ img <- readPNG("case4_elmer.png")
 grid.raster(img)
 ```
 
+Each scatter plot showing the average methylation level of sites with the AP1 motif in all KIRC samples plotted against the expression of the transcription factor CEBPB and GFI1 respectively.
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
@@ -1800,12 +1755,15 @@ img <- readPNG("elmer1.png")
 grid.raster(img)
 ```
 
+The schematic plot shows probe colored in blue and the location of nearby 20 genes, The genes significantly linked to the probe were shown in red.
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
 img <- readPNG("elmer2.png")
 grid.raster(img)
 ```
+
+The plot shows the odds ratio (x axis) for the selected motifs with OR above 1.3 and lower boundary of OR above 1.3. The range shows the 95% confidence interval for each Odds Ratio.
 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
