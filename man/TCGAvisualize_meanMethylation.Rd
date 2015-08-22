@@ -4,12 +4,11 @@
 \alias{TCGAvisualize_meanMethylation}
 \title{Mean methylation boxplot}
 \usage{
-TCGAvisualize_meanMethylation (data,
-                               groupCol
-                               subgroupCol,
-                               print.pvalue=FALSE,
-                               filename = "groupMeanMet.pdf",
-                               ...)
+TCGAvisualize_meanMethylation(data, groupCol = NULL, subgroupCol = NULL,
+  shapes = NULL, print.pvalue = FALSE, filename = "groupMeanMet.pdf",
+  ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
+  xlab = NULL, title = "Mean DNA methylation", labels = NULL,
+  group.legend = NULL, subgroup.legend = NULL, color = NULL)
 }
 \arguments{
 \item{data}{SummarizedExperiment object obtained from TCGAPrepare}

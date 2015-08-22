@@ -4,17 +4,17 @@
 \alias{TCGAvisualize_starburst}
 \title{Create starburst plot}
 \usage{
-TCGAvisualize_starburst(met,
-                        exp,
-                        group1,
-                        group2,
-                        exp.p.cut = 0.01,
-                        met.p.cut = 0.01,
-                        diffmean.cut = 0,
-                        logFC.cut = 0,
-                        names = FALSE,
-                        filename = "starburst.pdf",
-                        ...)
+TCGAvisualize_starburst(met, exp, group1 = NULL, group2 = NULL,
+  exp.p.cut = 0.01, met.p.cut = 0.01, diffmean.cut = 0, logFC.cut = 0,
+  names = FALSE, filename = "starburst.pdf",
+  ylab = expression(atop("Gene Expression", paste(Log[10],
+  " (FDR corrected P values)"))), xlab = expression(atop("DNA Methylation",
+  paste(Log[10], " (FDR corrected P values)"))), title = "Starburst Plot",
+  legend = "DNA Methylation/Expression Relation", color = NULL,
+  label = c("Not Significant", "Up regulated & Hypo methylated",
+  "Down regulated & Hypo methylated", "hypo methylated", "hyper methylated",
+  "Up regulated", "Down regulated", "Up regulated & Hyper methylated",
+  "Down regulated & Hyper methylated"), xlim = NULL, ylim = NULL)
 }
 \arguments{
 \item{met}{SummarizedExperiment with methylation data obtained from the
@@ -105,6 +105,10 @@ exp <- data.frame(row.names=sprintf("ID\%03d", 1:20000),
 SummarizedExperiment::rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
 SummarizedExperiment::rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
 SummarizedExperiment::rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
-result <- TCGAvisualize_starburst(met,exp,exp.p.cut = 0.05,met.p.cut = 0.05,"g1","g2",diffmean.cut=0.8,names=TRUE)
+result <- TCGAvisualize_starburst(met,exp,
+                                  exp.p.cut = 0.05, met.p.cut = 0.05,
+                                  group1="g1",group2="g2",
+                                  diffmean.cut=0.8,
+                                  names=TRUE)
 }
 
