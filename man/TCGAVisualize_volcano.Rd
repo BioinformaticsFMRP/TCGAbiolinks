@@ -39,6 +39,10 @@ Example: c("Not Significant","Hypermethylated in group1",
 \item{names}{Names to be ploted if significant.
 Should be the same size of x and y}
 
+\item{x.cut}{x-axis threshold. Default: 0.0}
+
+\item{y.cut}{p-values threshold. Default: 0.01}
+
 \item{height}{Figure height}
 
 \item{width}{Figure width}
