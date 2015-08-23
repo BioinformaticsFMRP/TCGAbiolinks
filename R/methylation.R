@@ -303,13 +303,18 @@ TCGAvisualize_meanMethylation <- function(data,
     comb2by2 <- t(combn(levels(droplevels(df$groups)),2))
 
     for (i in 1:nrow(comb2by2)){
-        aux <- t.test(mean ~ groups,
-                      data = subset(df,subset=df$groups %in% comb2by2[i,]) )$p.value
-        message(paste("P-value:", paste0(comb2by2[i,], collapse = "-"),"=",aux))
+        try({
+            aux <- t.test(mean ~ groups,
+                          data = subset(df,subset=df$groups %in% comb2by2[i,]) )$p.value;
+            message(paste("P-value:", paste0(comb2by2[i,], collapse = "-"),"=",aux))},
+            silent = TRUE
+        )
     }
 
-    if(length(levels(droplevels(df$groups))) == 2) {
+    if(print.pvalue & length(levels(droplevels(df$groups))) == 2) {
         pvalue <- t.test(mean ~ groups, data = df)$p.value
+    } else {
+        print.pvalue <- FALSE
     }
     # Plot for methylation analysis Axis x: LGm clusters Axis y:
     # mean methylation
@@ -404,6 +409,7 @@ TCGAvisualize_meanMethylation <- function(data,
 #' @param paired  Do a paired wilcoxon test? Default: True
 #' @param exact  Do a exact wilcoxon test? Default: True
 #' @param  method P-value adjustment method. Default:"BH" Benjamini-Hochberg
+#' @param cores Number of cores to be used
 #' @return Data frame with cols p values/p values adjusted
 #' @import graphics
 #' @importFrom grDevices png dev.off pdf
@@ -430,6 +436,7 @@ TCGAvisualize_meanMethylation <- function(data,
 #' data <- calculate.pvalues(data,"group")
 #' }
 #' @importFrom plyr adply
+#' @importFrom doMC registerDoMC
 #' @keywords internal
 calculate.pvalues <- function(data,
                               groupCol = NULL,
@@ -437,7 +444,21 @@ calculate.pvalues <- function(data,
                               group2 = NULL,
                               paired = FALSE,
                               method = "BH",
-                              exact = TRUE) {
+                              exact = TRUE,
+                              cores = 1) {
+
+    parallel <- FALSE
+    if (cores > 1){
+        if(is.windows()){
+            cores <- 1
+            message("Sorry, windows can only work with one core")
+        } else {
+            if (cores > detectCores()) cores <- detectCores()
+            registerDoMC(cores)
+            parallel = TRUE
+        }
+    }
+
 
     if (is.null(groupCol)) {
         message("Please, set the groupCol parameter")
@@ -465,21 +486,31 @@ calculate.pvalues <- function(data,
     if(!paired){
         p.value <- adply(assay(data),1,
                          function(x) {
-                             aux <-data.frame(beta=x[c(idx1,idx2)],
-                                              cluster=droplevels(
-                                                  colData(data)[c(idx1,idx2),
-                                                                groupCol]))
-                             pvalue(wilcox_test(beta ~ cluster, data=aux, distribution = "exact"))
-                         }, .progress = "text"
+                             aux <- data_frame(beta=x[c(idx1,idx2)],
+                                               cluster=droplevels(
+                                                   colData(data)[c(idx1,idx2),
+                                                                 groupCol]))
+                             aux <- na.omit(aux)
+                             if(nrow(aux) == 0) return (NaN)
+                             pvalue(wilcox_test(beta ~ cluster,
+                                                data=aux,
+                                                distribution = "exact"))
+                         }, .progress = "text", .parallel = parallel
         )
         p.value <- p.value[,2]
     } else {
         p.value <- adply(assay(data),1,
                          function(x) {
-                             aux <-data.frame(beta=x[c(idx1,idx2)],
-                                              cluster=droplevels(colData(data)[c(idx1,idx2),groupCol]))
-                             pvalue(wilcoxsign_test(beta ~ cluster, data=aux, distribution = exact()))
-                         }, .progress = "text"
+                             aux <- data_frame(beta=x[c(idx1,idx2)],
+                                               cluster=droplevels(
+                                                   colData(data)[c(idx1,idx2),
+                                                                 groupCol]))
+                             aux <- na.omit(aux)
+                             if(nrow(aux) == 0) return (NaN)
+                             pvalue(wilcoxsign_test(beta ~ cluster,
+                                                    data=aux,
+                                                    distribution = exact()))
+                         }, .progress = "text", .parallel = parallel
         )
         p.value <- p.value[,2]
     }
@@ -503,6 +534,10 @@ calculate.pvalues <- function(data,
     colp <- paste("p.value", group1, group2, sep = ".")
     values(rowRanges(data))[,colp] <-  p.value
     coladj <- paste("p.value.adj",group1,group2, sep = ".")
+    values(rowRanges(data))[,coladj] <-  p.value.adj
+    colp <- paste("p.value", group2, group1, sep = ".")
+    values(rowRanges(data))[,colp] <-  p.value
+    coladj <- paste("p.value.adj",group2,group1, sep = ".")
     values(rowRanges(data))[,coladj] <-  p.value.adj
 
     return(data)
@@ -567,14 +602,15 @@ TCGAVisualize_volcano <- function(x,y,
     }
     # get significant data
     sig <-  y < y.cut
-
+    sig[is.na(sig)] <- FALSE
     # hypermethylated/up regulated samples compared to old state
     up <- x  > x.cut
-
+    up[is.na(up)] <- FALSE
     if (any(up & sig)) threshold[up & sig] <- "2"
 
     # hypomethylated/ down regulated samples compared to old state
     down <-  x < (-x.cut)
+    down[is.na(down)] <- FALSE
     if (any(down & sig)) threshold[down & sig] <- "3"
 
     df <- data.frame(x=x,y=y,threshold=threshold)
@@ -640,7 +676,7 @@ TCGAVisualize_volcano <- function(x,y,
 #' the name of the group
 #' @param group2 In case our object has more than 2 groups, you should set
 #' the name of the group
-#' @param filename Filename. Default: volcano.pdf, volcano.svg, volcano.png
+#' @param plot.filename Filename. Default: volcano.pdf, volcano.svg, volcano.png
 #' @param legend Legend title
 #' @param color vector of colors to be used in graph
 #' @param title main title. If not specified it will be
@@ -659,9 +695,13 @@ TCGAVisualize_volcano <- function(x,y,
 #' @param paired Wilcoxon paired parameter. Default: FALSE
 #' @param overwrite Overwrite the pvalues and diffmean values if already in the object
 #' for both groups? Default: FALSE
+#' @param save Save object with results? Default: TRUE
+#' @param filename Name of the file to save the object.
+#' Default = groupCol.group1.group2.rda
 #' @import ggplot2
 #' @importFrom SummarizedExperiment colData rowRanges assay rowRanges<- values<-
 #' @importFrom S4Vectors metadata
+#' @importFrom dplyr data_frame
 #' @export
 #' @return Volcano plot saved and the given data with the results
 #' (diffmean.group1.group2,p.value.group1.group2,
@@ -688,7 +728,7 @@ TCGAanalyze_DMR <- function(data,
                             groupCol=NULL,
                             group1=NULL,
                             group2=NULL,
-                            filename = "methylation_volcano.pdf",
+                            plot.filename = "methylation_volcano.pdf",
                             ylab =  expression(paste(-Log[10],
                                                      " (FDR corrected -P values)")),
                             xlab =  expression(paste(
@@ -705,7 +745,10 @@ TCGAanalyze_DMR <- function(data,
                             diffmean.cut = 0.2,
                             paired = FALSE,
                             adj.method="BH",
-                            overwrite=FALSE) {
+                            overwrite=FALSE,
+                            cores = 1,
+                            save=TRUE,
+                            filename=NULL) {
     .e <- environment()
 
     names(color) <- as.character(1:3)
@@ -745,22 +788,24 @@ TCGAanalyze_DMR <- function(data,
         if (!(diffcol %in% colnames(values(rowRanges(data))))) stop("Error!")
     }
     pcol <- paste("p.value.adj",group2,group1,sep = ".")
-    if(!(pcol %in% colnames(values(rowRanges(data))))){
+    if(!(pcol %in% colnames(values(data)))){
         pcol <- paste("p.value.adj",group1,group2,sep = ".")
     }
-    if (!(pcol %in% colnames(values(rowRanges(data)))) | overwrite) {
-        data <- calculate.pvalues(data,groupCol, group1, group2,
-                                  paired = paired,method = adj.method)
+    if (!(pcol %in% colnames(values(data))) | overwrite) {
+        data <- calculate.pvalues(data, groupCol, group1, group2,
+                                  paired = paired,
+                                  method = adj.method,
+                                  cores = cores)
+        print(colnames(values(data)))
         # An error should not happen, if it happens (probably due to an incorret
         # user input) we will stop
-        if (!(pcol %in% colnames(values(rowRanges(data))))) stop("Error!")
+        if (!(pcol %in% colnames(values(data)))) stop("Error!")
     }
-
     log <- paste0("TCGAanalyze_DMR.",group1,".",group2)
     assign(log,c("groupCol" = groupCol,
                  "group1" = group1,
                  "group2" = group2,
-                 "filename" = filename,
+                 "plot.filename" = plot.filename,
                  "xlim" = xlim,
                  "ylim" = ylim,
                  "p.cut" = p.cut,
@@ -770,30 +815,32 @@ TCGAanalyze_DMR <- function(data,
     metadata(data)[[log]] <- (eval(as.symbol(log)))
     statuscol <- paste("status",group1,group2,sep = ".")
     statuscol2 <- paste("status",group2,group1,sep = ".")
-    values(rowRanges(data))[,statuscol] <-  "Not Significant"
-    values(rowRanges(data))[,statuscol2] <-  "Not Significant"
+    values(data)[,statuscol] <-  "Not Significant"
+    values(data)[,statuscol2] <-  "Not Significant"
 
     # get significant data
-    sig <-  values(rowRanges(data))[,pcol] < p.cut
-
+    sig <-  values(data)[,pcol] < p.cut
+    sig[is.na(sig)] <- FALSE
     # hypermethylated samples compared to old state
-    hyper <- values(rowRanges(data))[,diffcol]  > diffmean.cut
-
-    if (any(hyper & sig)) values(rowRanges(data))[hyper & sig,statuscol] <- "Hypermethylated"
-    if (any(hyper & sig)) values(rowRanges(data))[hyper & sig,statuscol2] <- "Hypomethylated"
+    hyper <- values(data)[,diffcol]  > diffmean.cut
+    hyper[is.na(hyper)] <- FALSE
+    if (any(hyper & sig)) values(data)[hyper & sig,statuscol] <- "Hypermethylated"
+    if (any(hyper & sig)) values(data)[hyper & sig,statuscol2] <- "Hypomethylated"
 
     # hypomethylated samples compared to old state
-    hypo <-  values(rowRanges(data))[,diffcol] < (-diffmean.cut)
-    if (any(hypo & sig)) values(rowRanges(data))[hypo & sig,statuscol] <- "Hypomethylated"
-    if (any(hypo & sig)) values(rowRanges(data))[hypo & sig,statuscol2] <- "Hypermethylated"
+    hypo <-  values(data)[,diffcol] < (-diffmean.cut)
+    hypo[is.na(hypo)] <- FALSE
+
+    if (any(hypo & sig)) values(data)[hypo & sig,statuscol] <- "Hypomethylated"
+    if (any(hypo & sig)) values(data)[hypo & sig,statuscol2] <- "Hypermethylated"
 
     # Plot a volcano plot
     names <- NULL
     if(probe.names) values(data)$probeID
 
-    TCGAVisualize_volcano(x = values(rowRanges(data))[,diffcol],
-                          y = values(rowRanges(data))[,pcol],
-                          filename = filename,
+    TCGAVisualize_volcano(x = values(data)[,diffcol],
+                          y = values(data)[,pcol],
+                          filename = plot.filename,
                           ylab =  ylab,
                           xlab = xlab,
                           title = title,
@@ -802,7 +849,8 @@ TCGAanalyze_DMR <- function(data,
                           names = values(data)$probeID,
                           x.cut = diffmean.cut,
                           y.cut = p.cut)
-
+    if(is.null(filename)) filename <- paste(groupCol,group1,group2, "rda", sep = ".")
+    if(save) save(data,file = filename)
     return(data)
 }
 
@@ -956,8 +1004,9 @@ TCGAvisualize_starburst <- function(met,
     diffcol <- paste("diffmean",group1,group2,sep = ".")
     volcano$meFDR <- log10(volcano[,pcol])
     volcano$meFDR2 <- volcano$meFDR
-    volcano[volcano[,diffcol] > 0, "meFDR2"] <-
-        -1 * volcano[volcano[,diffcol] > 0, "meFDR"]
+    idx <- volcano[,diffcol] > 0
+    idx[is.na(idx)] <- FALSE # handling NAs
+    volcano[idx, "meFDR2"] <- -1 * volcano[idx, "meFDR"]
 
 
     # subseting by regulation (geFDR) and methylation level
@@ -1081,7 +1130,10 @@ TCGAvisualize_starburst <- function(met,
         p <- p + geom_point( data = significant,
                              aes(x = meFDR2,
                                  y = geFDR2),
-                             color = "black", shape=1, size = 8,show_guide = FALSE)
+                             color = "black",
+                             shape=1,
+                             size = 8,
+                             show_guide = FALSE)
     }
 
     if(names == TRUE){

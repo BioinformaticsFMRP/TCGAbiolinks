@@ -5,7 +5,7 @@
 \title{Calculate pvalues}
 \usage{
 calculate.pvalues(data, groupCol = NULL, group1 = NULL, group2 = NULL,
-  paired = FALSE, method = "BH", exact = TRUE)
+  paired = FALSE, method = "BH", exact = TRUE, cores = 1)
 }
 \arguments{
 \item{data}{SummarizedExperiment obtained from the TCGAPrepare}
@@ -24,6 +24,8 @@ groups}
 \item{method}{P-value adjustment method. Default:"BH" Benjamini-Hochberg}
 
 \item{exact}{Do a exact wilcoxon test? Default: True}
+
+\item{cores}{Number of cores to be used}
 }
 \value{
 Data frame with cols p values/p values adjusted
