@@ -5,13 +5,14 @@
 \title{Differentially methylated regions Analysis}
 \usage{
 TCGAanalyze_DMR(data, groupCol = NULL, group1 = NULL, group2 = NULL,
-  filename = "methylation_volcano.pdf", ylab = expression(paste(-Log[10],
-  " (FDR corrected -P values)")),
+  plot.filename = "methylation_volcano.pdf",
+  ylab = expression(paste(-Log[10], " (FDR corrected -P values)")),
   xlab = expression(paste("DNA Methylation difference (", beta, "-values)")),
   title = NULL, legend = "Legend", color = c("black", "red", "darkgreen"),
   label = NULL, xlim = NULL, ylim = NULL, p.cut = 0.01,
   probe.names = FALSE, diffmean.cut = 0.2, paired = FALSE,
-  adj.method = "BH", overwrite = FALSE)
+  adj.method = "BH", overwrite = FALSE, cores = 1, save = TRUE,
+  filename = NULL)
 }
 \arguments{
 \item{data}{SummarizedExperiment obtained from the TCGAPrepare}
@@ -25,7 +26,7 @@ the name of the group}
 \item{group2}{In case our object has more than 2 groups, you should set
 the name of the group}
 
-\item{filename}{Filename. Default: volcano.pdf, volcano.svg, volcano.png}
+\item{plot.filename}{Filename. Default: volcano.pdf, volcano.svg, volcano.png}
 
 \item{ylab}{y axis text}
 
@@ -58,6 +59,11 @@ Example: c("Not Significant","Hypermethylated in group1",
 
 \item{overwrite}{Overwrite the pvalues and diffmean values if already in the object
 for both groups? Default: FALSE}
+
+\item{save}{Save object with results? Default: TRUE}
+
+\item{filename}{Name of the file to save the object.
+Default = groupCol.group1.group2.rda}
 }
 \value{
 Volcano plot saved and the given data with the results
