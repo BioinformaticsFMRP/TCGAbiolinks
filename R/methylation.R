@@ -517,6 +517,8 @@ calculate.pvalues <- function(data,
 #'    Observation: This function automatically is called by TCGAanalyse_DMR
 #' @param x x-axis data
 #' @param y y-axis data
+#' @param y.cut p-values threshold. Default: 0.01
+#' @param x.cut  x-axis threshold. Default: 0.0
 #' @param filename Filename. Default: volcano.pdf, volcano.svg, volcano.png
 #' @param legend Legend title
 #' @param color vector of colors to be used in graph
@@ -1067,9 +1069,9 @@ TCGAvisualize_starburst <- function(met,
 
     ## starburst plot
     p <- ggplot(data = volcano_normal, environment = .e,
-                aes(x = meFDR2,
-                    y = geFDR2,
-                    colour = threshold.starburst)) +
+                aes(x = volcano_normal$meFDR2,
+                    y = volcano_normal$geFDR2,
+                    colour = volcano_normal$threshold.starburst)) +
         geom_point()
     #p <- p + scale_shape_discrete(
     #    labels = c("Candidate Biologically Significant"),
