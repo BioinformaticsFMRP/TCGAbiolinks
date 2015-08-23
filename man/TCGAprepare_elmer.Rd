@@ -11,8 +11,11 @@ TCGAprepare_elmer(df, platform = NULL, met.na.cut = 0.2, save = FALSE)
 
 \item{platform}{platform of the data}
 
-\item{na.cut}{Define the percentage of NA that the line should have to
-remove the probes}
+\item{met.na.cut}{Define the percentage of NA that the line should have to
+remove the probes for humanmethylation platforms.}
+
+\item{save}{Save object? Default: FALSE.
+Names of the files will be: "Exp_elmer.rda" and   "Met_elmer.rda"}
 }
 \value{
 Matrix prepared for fetch.mee function

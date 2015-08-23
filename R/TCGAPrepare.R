@@ -786,8 +786,10 @@ TCGAprepare <- function(query,
 #' @return Matrix prepared for fetch.mee function
 #' @param df data frame from TCGAPrepare setting summarizedExperiment to FALSE
 #' @param platform platform of the data
-#' @param na.cut Define the percentage of NA that the line should have to
-#'  remove the probes
+#' @param met.na.cut Define the percentage of NA that the line should have to
+#'  remove the probes for humanmethylation platforms.
+#' @param save Save object? Default: FALSE.
+#' Names of the files will be: "Exp_elmer.rda" and   "Met_elmer.rda"
 #' @export
 #' @examples
 #' df <- data.frame(runif(200, 1e5, 1e6),runif(200, 1e5, 1e6))
