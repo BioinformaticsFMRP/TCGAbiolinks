@@ -1,8 +1,8 @@
 #' @title Prepare CEL files into an AffyBatch.
 #' @description Prepare CEL files into an AffyBatch.
-#' @param ClinData
-#' @param PathFolder
-#' @param TabCel
+#' @param ClinData write
+#' @param PathFolder write
+#' @param TabCel write
 #' @importFrom affy ReadAffy
 #' @importFrom affy rma
 #' @importFrom Biobase exprs

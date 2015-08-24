@@ -1320,17 +1320,15 @@ dataSurv<-TCGAanalyze_SurvivalKM(clinical_patient = dataClin,
                                              ThreshDown = 0.33,
                                              p.cut = 0.05)               # time = 59.062s
 
-load("/Users/antoniocolaprico/Downloads/org.Hs.string.RData")
-
 require(dnet)  # to change
 org.Hs.string <- dRDataLoader(RData = "org.Hs.string")
 
-
-TabCoxNet <- TCGAvisualize_SurvivalCoxNET(dataClin,
+system.time(TabCoxNet <- TCGAvisualize_SurvivalCoxNET(dataClin,
                                           dataFilt, 
                                           Genelist = rownames(dataSurv),
                                           scoreConfidence = 700,
-                                          titlePlot = "TCGAvisualize_SurvivalCoxNET Example")
+                                          org.Hs.string = org.Hs.string,
+                                          titlePlot = "TCGAvisualize_SurvivalCoxNET Example"))
 ```
 
 The figures resulted from the code above are shown below.
