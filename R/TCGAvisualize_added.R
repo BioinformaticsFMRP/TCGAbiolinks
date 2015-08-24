@@ -145,7 +145,7 @@ TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPa
 
     orderCL <- as.character(substr(names(sampleOrder),1,12))
     orderCL <- intersect(orderCL, rownames(DFfilt))
-    GE <- t(TCGAbiolinks:::.quantileNormalization(t(DFfilt)))
+    GE <- t(.quantileNormalization(t(DFfilt)))
     rownames(GE) <- substr(rownames(GE),1,12)
 
     oGE<- GE[orderCL,]  #ordering according cluster
