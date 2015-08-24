@@ -49,6 +49,8 @@
 #' days_to_last_followup , vital_status, etc
 #' @param dataGE is a matrix of Gene expression (genes in rows, samples in cols) from TCGAprepare
 #' @param Genelist is a list of gene symbols where perform survival KM.
+#' @param org.Hs.string an igraph object that contains a functional protein association network
+#' in human. The network is extracted from the STRING database (version 10).
 #' @param scoreConfidence restrict to those edges with high confidence (eg. score>=700)
 #' @param titlePlot is the title to show in the final plot.
 #' @importFrom survival coxph
@@ -61,7 +63,10 @@
 #' @export
 #' @return net IGRAPH with related Cox survival genes in community (same pval and color) and with
 #' interactions from STRING database.
-TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,dataGE,Genelist,
+TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
+                                         dataGE,
+                                         Genelist,
+                                         org.Hs.string,
                                          scoreConfidence = 700,
                                          titlePlot = "TCGAvisualize_SurvivalCoxNET Example"){
 
