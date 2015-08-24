@@ -491,8 +491,8 @@ calculate.pvalues <- function(data,
                                                cluster=droplevels(
                                                    colData(data)[c(idx1,idx2),
                                                                  groupCol]))
-                             aux <- na.omit(aux)
-                             if(nrow(aux) == 0) return (NaN)
+                             #aux <- na.omit(aux)
+                             #if(nrow(aux) == 0) return (NaN)
                              pvalue(wilcox_test(beta ~ cluster,
                                                 data=aux,
                                                 distribution = "exact"))
@@ -506,8 +506,8 @@ calculate.pvalues <- function(data,
                                                cluster=droplevels(
                                                    colData(data)[c(idx1,idx2),
                                                                  groupCol]))
-                             aux <- na.omit(aux)
-                             if(nrow(aux) == 0) return (NaN)
+                             #aux <- na.omit(aux)
+                             #if(nrow(aux) == 0) return (NaN)
                              pvalue(wilcoxsign_test(beta ~ cluster,
                                                     data=aux,
                                                     distribution = exact()))
