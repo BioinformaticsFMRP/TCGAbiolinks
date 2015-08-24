@@ -5,8 +5,7 @@
 \title{Mean methylation boxplot}
 \usage{
 TCGAvisualize_meanMethylation(data, groupCol = NULL, subgroupCol = NULL,
-  shapes = NULL, print.pvalue = FALSE,
-  filename = "sampleMeanMethylationByGroups.pdf",
+  shapes = NULL, print.pvalue = FALSE, filename = "groupMeanMet.pdf",
   ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
   xlab = NULL, title = "Mean DNA methylation", labels = NULL,
   group.legend = NULL, subgroup.legend = NULL, color = NULL)
@@ -44,7 +43,10 @@ of the subgroups. Example: shapes = c(21,23) if for two levels}
 Save the pdf survival plot
 }
 \description{
-Creates a mean methylation boxplot divided in by groups
+Creates a mean methylation boxplot for groups (groupCol),
+  subgroups will be highlited  as shapes if the subgroupCol was set.
+
+  Observation: Data is a summarizedExperiment.
 }
 \examples{
 nrows <- 200; ncols <- 21
