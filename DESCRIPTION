@@ -58,7 +58,10 @@ Imports:
     devtools,
     genefilter,
     ConsensusClusterPlus,
-    RColorBrewer
+    RColorBrewer,
+    doMC,
+    dplyr,
+    parallel
 Description:
     The aim of TCGAbiolinks is :
     i) facilitate the TCGA open-acess data retrieval,
