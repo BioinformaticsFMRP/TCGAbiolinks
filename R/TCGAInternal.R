@@ -161,7 +161,7 @@ tcga.get.barcode <- function(data){
         return(x)
     }
 
-heatmap.plus.sm <- function (x, dendrogram, Rowv = NULL, Colv = if (symm) "Rowv" else NULL,
+.heatmap.plus.sm <- function (x, dendrogram, Rowv = NULL, Colv = if (symm) "Rowv" else NULL,
                              distfun = dist, hclustfun = hclust, reorderfun = function(d,
                                                                                        w) reorder(d, w), add.expr, symm = FALSE, revC = identical(Colv,
                                                                                                                                                   "Rowv"), scale = c("row", "column", "none"), na.rm = TRUE,
@@ -365,7 +365,7 @@ heatmap.plus.sm <- function (x, dendrogram, Rowv = NULL, Colv = if (symm) "Rowv"
               xaxt = "n", yaxt = "n")
         par(usr = c(0, 1, 0, 1))
         lv <- pretty(breaks)
-        xv <- scale01(as.numeric(lv), min.raw, max.raw)
+        xv <- .scale01(as.numeric(lv), min.raw, max.raw)
         axis(1, at = xv, labels = lv)
         if (scale == "row")
             mtext(side = 1, "Row Z-Score", line = 2)
@@ -380,7 +380,7 @@ heatmap.plus.sm <- function (x, dendrogram, Rowv = NULL, Colv = if (symm) "Rowv"
             omit <- dens$x < min(breaks) | dens$x > max(breaks)
             dens$x <- dens$x[-omit]
             dens$y <- dens$y[-omit]
-            dens$x <- scale01(dens$x, min.raw, max.raw)
+            dens$x <- .scale01(dens$x, min.raw, max.raw)
             denscol <- NULL #for global variable
 
             lines(dens$x, dens$y/max(dens$y) * 0.95, col = denscol,
@@ -392,7 +392,7 @@ heatmap.plus.sm <- function (x, dendrogram, Rowv = NULL, Colv = if (symm) "Rowv"
         }
         else if (density.info == "histogram") {
             h <- hist(x, plot = FALSE, breaks = breaks)
-            hx <- scale01(breaks, min.raw, max.raw)
+            hx <- .scale01(breaks, min.raw, max.raw)
             hy <- c(h$counts, h$counts[length(h$counts)])
             lines(hx, hy/max(hy) * 0.95, lwd = 1, type = "s",
                   col = denscol)
@@ -416,9 +416,9 @@ heatmap.plus.sm <- function (x, dendrogram, Rowv = NULL, Colv = if (symm) "Rowv"
 
 }
 
-scale01 <- function(x) {
-    rng <- range(x, na.rm = TRUE)
-    (x - rng[1]) / (rng[2] - rng[1])
+.scale01 <- function(x, low = min(x), high = max(x)) {
+    x <- (x - low)/(high - low)
+    x
 }
 
 .quantileNormalization <-
