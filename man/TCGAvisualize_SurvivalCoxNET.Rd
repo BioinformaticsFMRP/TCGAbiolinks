@@ -26,6 +26,7 @@ in human. The network is extracted from the STRING database (version 10).}
 \value{
 net IGRAPH with related Cox survival genes in community (same pval and color) and with
 interactions from STRING database.
+query <- TCGAquery(tumor = "lgg")
 }
 \description{
 TCGAvisualize_SurvivalCoxNET can help an user to identify a group of survival genes that are
