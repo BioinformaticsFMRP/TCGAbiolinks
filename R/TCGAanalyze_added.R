@@ -17,6 +17,8 @@
 #' @export
 #' @return List of list with tables in 2 by 2 comparison
 #' of the top-ranked genes from a linear model fitted by DEA's limma
+#' @examples
+#' query <- TCGAquery(tumor = "lgg")
 TCGAanalyze_DEA_Affy <- function(Pdatatable, AffySet, PathFolder, FC.cut = 0.01){
 
     f <- factor(Pdatatable$Disease)
@@ -66,7 +68,7 @@ TCGAanalyze_DEA_Affy <- function(Pdatatable, AffySet, PathFolder, FC.cut = 0.01)
 
                     sigI <- limma::topTable(fit2,coef=1, adjust.method="BH", sort.by="B", p.value = 0.05, lfc = FC.cut, number = 50000)
 
-                    sigIbis <- sigI[order(abs(as.numeric(sigI$logFC)), decreasing=T),]
+                    sigIbis <- sigI[order(abs(as.numeric(sigI$logFC)), decreasing=TRUE),]
                     names(CompleteList)[k]<-gsub("-","_",Comparison)
                     CompleteList[[k]]<-sigIbis
                     k<-k+1
