@@ -4,13 +4,22 @@
 \alias{TCGAanalyze_Preprocessing}
 \title{Array Array Intensity correlation (AAIC) and correlation boxplot to define outlier}
 \usage{
-TCGAanalyze_Preprocessing(object, cor.cut = 0)
+TCGAanalyze_Preprocessing(object, cor.cut = 0, path = NULL, cancer = NULL,
+  width = 500, height = 500)
 }
 \arguments{
 \item{object}{of gene expression of class RangedSummarizedExperiment from TCGAprepare}
 
 \item{cor.cut}{is a threshold to filter samples according their spearman correlation in
 samples by samples. default cor.cut is 0}
+
+\item{path}{Directory to save the output pdf file}
+
+\item{cancer}{tumor selected for the analysis}
+
+\item{width}{Image width}
+
+\item{height}{Image height}
 }
 \value{
 Plot with array array intensity correlation and boxplot of correlation samples by samples
@@ -20,5 +29,8 @@ TCGAanalyze_Preprocessing perform Array Array Intensity correlation (AAIC).
 It defines a square symmetric matrix of pearson correlation among samples.
 According this matrix and boxplot of correlation samples by samples it is possible
 to find samples with low correlation that can be identified as possible outliers.
+}
+\examples{
+query <- TCGAquery(tumor = "lgg")
 }
 

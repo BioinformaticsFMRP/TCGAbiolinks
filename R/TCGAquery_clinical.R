@@ -564,6 +564,7 @@ getsubtypes <- function(tumor = NULL, path = ".") {
 
     if (grepl("lgg",tumor,ignore.case = TRUE)){
         subtype <- read.xlsx2(fname,1,stringAsFactor=FALSE, header=TRUE)
+        subtype <- merge(subtype,read.xlsx2(fname,2,stringAsFactor=FALSE, header=TRUE))
     }
     if (grepl("gbm",tumor,ignore.case = TRUE)){
         subtype <- read.xlsx2(fname,1,stringAsFactor=FALSE, header=TRUE, startRow = 3)
