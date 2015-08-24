@@ -24,9 +24,8 @@ TCGAvisualize_PCA performs a principal components analysis (PCA) on the given da
 }
 \examples{
 # normalization of genes
-dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(tabDF = dataBRCA ,
-geneInfo = geneInfo ,
-method = "geneLength)
+dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(tabDF = dataBRCA, geneInfo = geneInfo,
+method = "geneLength")
 # quantile filter of genes
 dataFilt <- TCGAanalyze_Filtering(tabDF = dataBRCA, method = "quantile", qnt.cut =  0.25)
 # Principal Component Analysis plot for ntop selected DEGs
