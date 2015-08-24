@@ -60,10 +60,12 @@ Example: c("Not Significant","Hypermethylated in group1",
 \item{overwrite}{Overwrite the pvalues and diffmean values if already in the object
 for both groups? Default: FALSE}
 
+\item{cores}{Number of cores to be used in the non-parametric test
+Default = groupCol.group1.group2.rda}
+
 \item{save}{Save object with results? Default: TRUE}
 
-\item{filename}{Name of the file to save the object.
-Default = groupCol.group1.group2.rda}
+\item{filename}{Name of the file to save the object.}
 }
 \value{
 Volcano plot saved and the given data with the results
