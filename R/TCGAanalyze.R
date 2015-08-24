@@ -43,7 +43,7 @@ TCGAanalyze_Clustering<- function(tabDF, method,  methodHC = "ward.D2"){
 #' @param cor.cut is a threshold to filter samples according their spearman correlation in
 #' samples by samples. default cor.cut is 0
 #' @param path Directory to save the output pdf file
-#' @param cancer selected for the analysis
+#' @param cancer tumor selected for the analysis
 #' @param width Image width
 #' @param height Image height
 #' @importFrom grDevices dev.list
