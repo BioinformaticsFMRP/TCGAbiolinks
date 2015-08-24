@@ -796,7 +796,7 @@ TCGAanalyze_DMR <- function(data,
                                   paired = paired,
                                   method = adj.method,
                                   cores = cores)
-        print(colnames(values(data)))
+
         # An error should not happen, if it happens (probably due to an incorret
         # user input) we will stop
         if (!(pcol %in% colnames(values(data)))) stop("Error!")
