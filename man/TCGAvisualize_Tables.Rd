@@ -4,7 +4,7 @@
 \alias{TCGAvisualize_Tables}
 \title{Visaulize results in format of latex tables.}
 \usage{
-TCGAvisualize_Tables(Table, rowsForPage, TableTitle, LabelTitle, withrows)
+TCGAvisualize_Tables(Table, rowsForPage, TableTitle, LabelTitle, withrows, size)
 }
 \arguments{
 \item{Table}{write}
