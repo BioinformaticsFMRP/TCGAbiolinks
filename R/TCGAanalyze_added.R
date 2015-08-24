@@ -1,8 +1,8 @@
 #' @title Differentially expression analysis (DEA) using limma package.
 #' @description Differentially expression analysis (DEA) using limma package.
-#' @param Pdatatable
-#' @param PathFolder
-#' @param FC.cut
+#' @param Pdatatable write
+#' @param PathFolder write
+#' @param FC.cut write
 #' @param AffySet A matrix-like data object containing log-ratios or log-expression values
 #' for a series of arrays, with rows corresponding to genes and columns to samples
 #' @importFrom limma lmFit
@@ -64,7 +64,7 @@ TCGAanalyze_DEA_Affy <- function(Pdatatable, AffySet, PathFolder, FC.cut = 0.01)
 
 
 
-                    sigI <- topTable(fit2,coef=1, adjust.method="BH", sort.by="B", p.value = 0.05, lfc = FC.cut, number = 50000)
+                    sigI <- limma::topTable(fit2,coef=1, adjust.method="BH", sort.by="B", p.value = 0.05, lfc = FC.cut, number = 50000)
 
                     sigIbis <- sigI[order(abs(as.numeric(sigI$logFC)), decreasing=T),]
                     names(CompleteList)[k]<-gsub("-","_",Comparison)
