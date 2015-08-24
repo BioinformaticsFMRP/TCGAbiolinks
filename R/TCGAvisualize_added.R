@@ -87,6 +87,7 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' }
 #' @export
 #' @return Heatmap plotted in pdf or png file.
+#' query <- TCGAquery(tumor = "lgg")
 TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPalette, filename =NULL){
 
     rownames(DFsubt) <- DFsubt$patient
