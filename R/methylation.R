@@ -414,6 +414,7 @@ TCGAvisualize_meanMethylation <- function(data,
 #' @import graphics
 #' @importFrom grDevices png dev.off pdf
 #' @import stats
+#' @importFrom parallel detectCores
 #' @importFrom coin wilcox_test wilcoxsign_test pvalue
 #' @importFrom SummarizedExperiment colData rowRanges rowRanges<- colData<-
 #' @return Data frame with two cols
@@ -697,6 +698,7 @@ TCGAVisualize_volcano <- function(x,y,
 #' for both groups? Default: FALSE
 #' @param save Save object with results? Default: TRUE
 #' @param filename Name of the file to save the object.
+#' @param cores Number of cores to be used in the non-parametric test
 #' Default = groupCol.group1.group2.rda
 #' @import ggplot2
 #' @importFrom SummarizedExperiment colData rowRanges assay rowRanges<- values<-
@@ -1128,8 +1130,8 @@ TCGAvisualize_starburst <- function(met,
 
     if(!is.null(significant)){
         p <- p + geom_point( data = significant,
-                             aes(x = meFDR2,
-                                 y = geFDR2),
+                             aes(x = significant$meFDR2,
+                                 y = significant$geFDR2),
                              color = "black",
                              shape=1,
                              size = 8,
