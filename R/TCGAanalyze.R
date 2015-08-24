@@ -42,14 +42,19 @@ TCGAanalyze_Clustering<- function(tabDF, method,  methodHC = "ward.D2"){
 #' @param object of gene expression of class RangedSummarizedExperiment from TCGAprepare
 #' @param cor.cut is a threshold to filter samples according their spearman correlation in
 #' samples by samples. default cor.cut is 0
+#' @param path Directory to save the output pdf file
+#' @param cancer selected for the analysis
+#' @param width Image width
+#' @param height Image height
 #' @importFrom grDevices dev.list
 #' @export
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
-TCGAanalyze_Preprocessing<- function(object, cor.cut = 0){
+TCGAanalyze_Preprocessing<- function(object, cor.cut = 0, path = NULL, cancer = NULL,
+                                     width = 500,height =500 ){
 
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 
-    png("PreprocessingOutput.png", width = 1200, height = 1200)
+    png(paste0(path,"/",cancer,"_PreprocessingOutput.png"), width = width, height = height)
 
     # array array IC after RMA
     #object <-BRCARnaseq_assay
