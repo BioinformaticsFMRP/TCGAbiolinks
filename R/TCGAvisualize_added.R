@@ -238,9 +238,6 @@ TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPa
     cc.col <- as.matrix(cc.col)
     oGE<- oGE[rownames(cc.col),]
 
-    #source('~/Downloads/heatmap.plus2.R')
-    #take from here https://github.com/mercutio22/kate/blob/master/heatmap.plus.R
-
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 
     curDate <- as.character(unlist(strsplit(gsub(" ","_h",
@@ -249,7 +246,7 @@ TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPa
 
     pdf(file=paste0(curDate,"_",cancer,"_heatmap_with_subtypes_withHeatmapPlus.pdf"))
 
-    heatmap.plus.sm(
+    .heatmap.plus.sm(
         t(oGE),
         na.rm=TRUE,
         scale="none",
