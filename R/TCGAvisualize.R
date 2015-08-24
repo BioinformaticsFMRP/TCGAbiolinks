@@ -212,19 +212,21 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
 #' @return principal components analysis (PCA) plot of PC1 and PC2
 #' @examples
 #' # normalization of genes
-#' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(tabDF = dataBRCA ,
-#' geneInfo = geneInfo ,
-#' method = "geneLength)
+#' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(tabDF = dataBRCA, geneInfo = geneInfo,
+#' method = "geneLength")
 #' # quantile filter of genes
 #' dataFilt <- TCGAanalyze_Filtering(tabDF = dataBRCA, method = "quantile", qnt.cut =  0.25)
 #' # Principal Component Analysis plot for ntop selected DEGs
 #' TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
-#'
 TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
     ComparisonSelected <- "Normal vs Tumor"
     TitlePlot <- paste0("PCA ", "top ", ntopgenes,
                         " Up and down diff.expr genes between ",
                         ComparisonSelected)
+
+
+    dataFilt <- dataFilt[!duplicated(GenesCutID(rownames(dataFilt))),]
+    rownames(dataFilt) <- GenesCutID(rownames(dataFilt))
 
     Genelist <- rownames(dataDEGsFiltLevel)[1:ntopgenes]
     commonGenes <- intersect(Genelist, rownames(dataFilt) )
