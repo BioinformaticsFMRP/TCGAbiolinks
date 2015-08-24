@@ -15,7 +15,7 @@ samples by samples. default cor.cut is 0}
 
 \item{path}{Directory to save the output pdf file}
 
-\item{cancer}{selected for the analysis}
+\item{cancer}{tumor selected for the analysis}
 
 \item{width}{Image width}
 
