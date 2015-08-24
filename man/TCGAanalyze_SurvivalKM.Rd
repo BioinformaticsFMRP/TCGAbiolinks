@@ -45,6 +45,7 @@ from survival package
 }
 }
 \examples{
+query <- TCGAquery(tumor = "lgg")
 \dontrun{
 clinical_patient_Cancer <- TCGAquery_clinic("brca","clinical_patient")
 dataBRCAcomplete <- log2(BRCA_rnaseqv2)
