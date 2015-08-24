@@ -7,11 +7,11 @@
 TCGAprepare_Affy(ClinData, PathFolder, TabCel)
 }
 \arguments{
-\item{ClinData}{}
+\item{ClinData}{write}
 
-\item{PathFolder}{}
+\item{PathFolder}{write}
 
-\item{TabCel}{}
+\item{TabCel}{write}
 }
 \value{
 Normalizd Expression data from Affy eSets
