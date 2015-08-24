@@ -147,6 +147,8 @@ TCGAanalyze_Preprocessing<- function(object, cor.cut = 0){
 #' }
 TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
                                  ThreshTop=0.67, ThreshDown=0.33,p.cut=0.05){
+
+
     samplesNT <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
     samplesTP <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
     Genelist <- intersect(rownames(dataGE),Genelist)
@@ -157,6 +159,9 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
     cfu <- as.data.frame(subset(cfu, select=c("bcr_patient_barcode","days_to_death","days_to_last_followup","vital_status"))  )
     cfu[which(cfu$vital_status=="Alive"),"days_to_death"]<-"-Inf"
     cfu[which(cfu$vital_status=="Dead"),"days_to_last_followup"]<-"-Inf"
+
+    cfu <- cfu[ !(is.na(cfu[,"days_to_last_followup"])),]
+    cfu <- cfu[ !(is.na(cfu[,"days_to_death"])),]
 
     followUpLevel<-FALSE
     Survresult<-FALSE
@@ -170,6 +175,10 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
     cfu$days_to_death<-as.numeric(as.character(cfu$days_to_death))
     cfu$days_to_last_followup<-as.numeric(as.character(cfu$days_to_last_followup))
     rownames(cfu) <- cfu[, "bcr_patient_barcode" ] #mod1
+
+    cfu <- cfu[ !(is.na(cfu[,"days_to_last_followup"])),]
+    cfu <- cfu[ !(is.na(cfu[,"days_to_death"])),]
+
     cfu_complete<-cfu
     ngenes<-nrow(as.matrix(rownames(dataNormal)))
 
@@ -332,7 +341,7 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
     tabSurvKM <- tabSurvKM[,-1]
     tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing=FALSE),]
 
-    return(tabSurv_Matrix)
+    return(tabSurvKM)
 }
 
 
