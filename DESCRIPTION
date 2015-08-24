@@ -26,6 +26,7 @@ Imports:
     XML,
     Biobase,
     affy,
+    doMC,
     heatmap.plus,
     xtable,
     data.table,
