@@ -4,10 +4,12 @@
 \alias{TCGAvisualize_Heatmap}
 \title{Heatmap with more sensible behavior using heatmap.plus}
 \usage{
-TCGAvisualize_Heatmap(DFfilt, DFclin, DFsubt, data_Hc2, cbPalette,
+TCGAvisualize_Heatmap(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPalette,
   filename = NULL)
 }
 \arguments{
+\item{cancer}{tumor selected for the analysis}
+
 \item{DFfilt}{write}
 
 \item{DFclin}{write}
@@ -19,8 +21,6 @@ TCGAvisualize_Heatmap(DFfilt, DFclin, DFsubt, data_Hc2, cbPalette,
 \item{cbPalette}{write}
 
 \item{filename}{write. default = NULL}
-
-\item{Subtype}{write}
 }
 \value{
 Heatmap plotted in pdf or png file.

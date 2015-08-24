@@ -5,17 +5,18 @@
 #' @param TableTitle write
 #' @param LabelTitle write
 #' @param withrows write
+#' @param size size selected for font, 'small', 'tiny'
 #' @importFrom xtable xtable
+#' @importFrom gplots greenred
 #' @examples
-#' \dontrun{
 #' library(stringr)
 #' tabDEGsTFPubmed$PMID <- str_sub(tabDEGsTFPubmed$PMID,0,30)
 #' TCGAvisualize_Tables(Table = tabDEGsTFPubmed,
 #' rowsForPage = 5,
 #' TableTitle = "pip",
 #' LabelTitle = "pip2",
-#' withrows = FALSE)
-#' }
+#' withrows = FALSE,
+#' size = "small")
 #' @export
 #' @return table in latex format to use in beamer presentation or sweave files
 TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, withrows){
@@ -36,7 +37,7 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
        if (round(nrow(Table)/rowsForPage) == 1 ) {
 
             Table_current<-Table[i:nrow(Table),]
-            tablePrint_Table_current<-xtable(Table_current, caption = paste(TableTitle,"(",i,")"),label = gsub(" ","",paste(LabelTitle,".",i)) , size=small)
+            tablePrint_Table_current<-xtable(Table_current, caption = paste(TableTitle,"(",i,")"),label = gsub(" ","",paste(LabelTitle,".",i)) , size= size)
             print(tablePrint_Table_current,include.rownames = withrows)
         }
 
@@ -44,18 +45,18 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
             print(i)
             if( i == 1 ) {
                 Table_current<-Table[i:vectorFirst[i],]
-                tablePrint_Table_current<-xtable(Table_current, caption = paste(TableTitle,"(",i,")"),label = gsub(" ","",paste(LabelTitle,".",i)) , size=small)
+                tablePrint_Table_current<-xtable(Table_current, caption = paste(TableTitle,"(",i,")"),label = gsub(" ","",paste(LabelTitle,".",i)) , size=size)
                 print(tablePrint_Table_current,include.rownames = withrows)
             }
 
             else if (i==numberOfprint) {
                 Table_current<-Table[vectorLast[i-1]:nrow(Table),]
-                tablePrint_Table_current<-xtable(Table_current, caption = paste(TableTitle,"(",i,")"),label = gsub(" ","",paste(LabelTitle,".",i)) , size=small)
+                tablePrint_Table_current<-xtable(Table_current, caption = paste(TableTitle,"(",i,")"),label = gsub(" ","",paste(LabelTitle,".",i)) , size= size)
                 print(tablePrint_Table_current,include.rownames = withrows)
             }
             else{
                 Table_current<-Table[vectorLast[i-1]:vectorFirst[i],]
-                tablePrint_Table_current<-xtable(Table_current, caption = paste(TableTitle,"(",i,")"),label = gsub(" ","",paste(LabelTitle,".",i)) , size=small)
+                tablePrint_Table_current<-xtable(Table_current, caption = paste(TableTitle,"(",i,")"),label = gsub(" ","",paste(LabelTitle,".",i)) , size= size)
                 print(tablePrint_Table_current,include.rownames = withrows)
             }
         }
@@ -65,11 +66,11 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 
 #' @title Heatmap with more sensible behavior using heatmap.plus
 #' @description Heatmap with more sensible behavior using heatmap.plus
+#' @param cancer tumor selected for the analysis
 #' @param DFfilt write
 #' @param DFclin write
 #' @param DFsubt write
 #' @param data_Hc2 write
-#' @param Subtype write
 #' @param cbPalette write
 #' @param filename write. default = NULL
 #' @importFrom heatmap.plus heatmap.plus
@@ -88,7 +89,7 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' }
 #' @export
 #' @return Heatmap plotted in pdf or png file.
-TCGAvisualize_Heatmap <- function(DFfilt, DFclin, DFsubt, data_Hc2, cbPalette, filename =NULL){
+TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPalette, filename =NULL){
 
     rownames(DFsubt) <- DFsubt$patient
     rownames(DFclin) <- DFclin$patient
@@ -256,7 +257,7 @@ TCGAvisualize_Heatmap <- function(DFfilt, DFclin, DFsubt, data_Hc2, cbPalette, f
         scale="none",
         #RowSideColor=probe.cc,
         #ColSideColors=cc.col,
-        col=greenred(75),
+        col=gplots::greenred(75),
         key=FALSE,  #changed
         symkey=FALSE,
         density.info="none",

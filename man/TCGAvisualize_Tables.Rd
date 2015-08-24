@@ -16,6 +16,8 @@ TCGAvisualize_Tables(Table, rowsForPage, TableTitle, LabelTitle, withrows)
 \item{LabelTitle}{write}
 
 \item{withrows}{write}
+
+\item{size}{size selected for font, 'small', 'tiny'}
 }
 \value{
 table in latex format to use in beamer presentation or sweave files
@@ -24,14 +26,13 @@ table in latex format to use in beamer presentation or sweave files
 Visaulize results in format of latex tables.
 }
 \examples{
-\dontrun{
 library(stringr)
 tabDEGsTFPubmed$PMID <- str_sub(tabDEGsTFPubmed$PMID,0,30)
 TCGAvisualize_Tables(Table = tabDEGsTFPubmed,
 rowsForPage = 5,
 TableTitle = "pip",
 LabelTitle = "pip2",
-withrows = FALSE)
-}
+withrows = FALSE,
+size = "small")
 }
 
