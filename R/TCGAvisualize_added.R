@@ -19,9 +19,7 @@
 #' size = "small")
 #' @export
 #' @return table in latex format to use in beamer presentation or sweave files
-TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, withrows){
-    require(xtable)
-
+TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, withrows, size){
     numberOfprint<-ceiling(nrow(Table)/rowsForPage)
     vectorFirst<-matrix(0,numberOfprint,1)
     vectorLast<-matrix(0,numberOfprint,1)
