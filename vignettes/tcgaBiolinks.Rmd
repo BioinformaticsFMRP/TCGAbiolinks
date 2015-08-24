@@ -1285,10 +1285,11 @@ dataAssy <- TCGAprepare(query = datQuery,
 dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,cor.cut = 0.6)
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
                                       geneInfo = geneInfo,
-                                      method = "gcContent")
+
 dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
                                   method = "quantile", 
                                   qnt.cut =  0.25)
+
 dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmTN],
                             mat2 = dataFilt[,dataSmTP],
                             Cond1type = "Normal",
@@ -1297,15 +1298,43 @@ dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmTN],
                             logFC.cut = 1,
                             method = "glmLRT")
 
-dataSurv<-TCGAanalyze_SurvivalKM(clinical_patient = clinical_patient_Cancer,
-                                 dataGE = dataFilt,
-                                 
 dataSurv<-TCGAanalyze_SurvivalKM(clinical_patient = dataClin,
-                                dataGE = dataFilt,
-                                Genelist = rownames(dataDEGs)[1:50],
-                                Survresult = FALSE,
-                                ThreshTop = 0.67,
-                                ThreshDown = 0.33)
+                                             dataGE = dataFilt,
+                                             Genelist = rownames(dataDEGs),
+                                             Survresult = FALSE,
+                                             ThreshTop = 0.67,
+                                             ThreshDown = 0.33,
+                                             p.cut = 0.05)               # time = 59.062s
+
+load("/Users/antoniocolaprico/Downloads/org.Hs.string.RData")
+
+TabCoxNet <- TCGAvisualize_SurvivalCoxNET(dataClin,
+                                          dataFilt, 
+                                          Genelist = rownames(dataSurv),
+                                          scoreConfidence = 700,
+                                          titlePlot = "TCGAvisualize_SurvivalCoxNET Example")
+```
+
+The figures resulted from the code above are shown below.
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("figure4cluster.png")
+grid.raster(img)
+```
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("figure4surv.png")
+grid.raster(img)
+```
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("figure4heatmap.png")
+grid.raster(img)
 ```
 
 
