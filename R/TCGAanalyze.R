@@ -49,6 +49,8 @@ TCGAanalyze_Clustering<- function(tabDF, method,  methodHC = "ward.D2"){
 #' @importFrom grDevices dev.list
 #' @export
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
+#' @examples
+#' query <- TCGAquery(tumor = "lgg")
 TCGAanalyze_Preprocessing<- function(object, cor.cut = 0, path = NULL, cancer = NULL,
                                      width = 500,height =500 ){
 
@@ -142,6 +144,7 @@ TCGAanalyze_Preprocessing<- function(object, cor.cut = 0, path = NULL, cancer = 
 #' @export
 #' @return table with survival genes pvalues from KM.
 #' @examples
+#' query <- TCGAquery(tumor = "lgg")
 #' \dontrun{
 #' clinical_patient_Cancer <- TCGAquery_clinic("brca","clinical_patient")
 #' dataBRCAcomplete <- log2(BRCA_rnaseqv2)
