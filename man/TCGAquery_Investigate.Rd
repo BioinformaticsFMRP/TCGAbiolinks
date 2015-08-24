@@ -22,6 +22,7 @@ Find most studied TF in pubmed related to a specific cancer,
  disease, or tissue
 }
 \examples{
+query <- TCGAquery(tumor = "lgg")
 \dontrun{
 TFs <- EAGenes[EAGenes$Family =="transcription regulator",]
 TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
