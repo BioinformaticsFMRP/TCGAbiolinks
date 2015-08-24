@@ -4,7 +4,7 @@
 \alias{TCGAvisualize_SurvivalCoxNET}
 \title{Survival analysis with univariate Cox regression package (dnet)}
 \usage{
-TCGAvisualize_SurvivalCoxNET(clinical_patient, dataGE, Genelist,
+TCGAvisualize_SurvivalCoxNET(clinical_patient, dataGE, Genelist, org.Hs.string,
   scoreConfidence = 700, titlePlot = "TCGAvisualize_SurvivalCoxNET Example")
 }
 \arguments{
@@ -15,6 +15,9 @@ days_to_last_followup , vital_status, etc}
 \item{dataGE}{is a matrix of Gene expression (genes in rows, samples in cols) from TCGAprepare}
 
 \item{Genelist}{is a list of gene symbols where perform survival KM.}
+
+\item{org.Hs.string}{an igraph object that contains a functional protein association network
+in human. The network is extracted from the STRING database (version 10).}
 
 \item{scoreConfidence}{restrict to those edges with high confidence (eg. score>=700)}
 

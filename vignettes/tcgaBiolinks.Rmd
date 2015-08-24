@@ -1253,7 +1253,6 @@ library(TCGAbiolinks)
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(TCGAbiolinks)
-
 cancer <- "BRCA"
 PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
 dataType <- "rsem.genes.results"
@@ -1282,7 +1281,11 @@ dataAssy <- TCGAprepare(query = datQuery,
                         samples = c(dataSmTP,dataSmTN),
                         filename = paste0(cancer,"_",PlatformCancer,".rda"))
 
-dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,cor.cut = 0.6)
+dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,
+                                      cor.cut = 0.6,
+                                      path = pathCancer,
+                                      cancer = cancer )
+
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
                                       geneInfo = geneInfo,
 
@@ -1297,6 +1300,17 @@ dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmTN],
                             fdr.cut = 0.01 ,
                             logFC.cut = 1,
                             method = "glmLRT")
+ 
+ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",
+                                RegulonList = rownames(dataDEGs))    # time = 60.750s
+
+TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
+                        GOBPTab = ansEA$ResBP,
+                        GOCCTab = ansEA$ResCC,
+                        GOMFTab = ansEA$ResMF,
+                        PathTab = ansEA$ResPat,
+                        nRGTab = rownames(dataDEGs),
+                        nBar = 20)
 
 dataSurv<-TCGAanalyze_SurvivalKM(clinical_patient = dataClin,
                                              dataGE = dataFilt,
@@ -1307,6 +1321,10 @@ dataSurv<-TCGAanalyze_SurvivalKM(clinical_patient = dataClin,
                                              p.cut = 0.05)               # time = 59.062s
 
 load("/Users/antoniocolaprico/Downloads/org.Hs.string.RData")
+
+require(dnet)  # to change
+org.Hs.string <- dRDataLoader(RData = "org.Hs.string")
+
 
 TabCoxNet <- TCGAvisualize_SurvivalCoxNET(dataClin,
                                           dataFilt, 

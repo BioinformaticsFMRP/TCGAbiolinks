@@ -3,6 +3,8 @@
 #' @param Pdatatable
 #' @param PathFolder
 #' @param FC.cut
+#' @param AffySet A matrix-like data object containing log-ratios or log-expression values
+#' for a series of arrays, with rows corresponding to genes and columns to samples
 #' @importFrom limma lmFit
 #' @importFrom limma eBayes
 #' @importFrom limma makeContrasts
@@ -15,7 +17,7 @@
 #' @export
 #' @return List of list with tables in 2 by 2 comparison
 #' of the top-ranked genes from a linear model fitted by DEA's limma
-TCGAanalyze_DEA_Affy <- function(Pdatatable, PathFolder, FC.cut = 0.01){
+TCGAanalyze_DEA_Affy <- function(Pdatatable, AffySet, PathFolder, FC.cut = 0.01){
 
     f <- factor(Pdatatable$Disease)
     groupColors<-names(table(f))
