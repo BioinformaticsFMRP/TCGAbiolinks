@@ -24,6 +24,7 @@ TCGAvisualize_Heatmap(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPalette,
 }
 \value{
 Heatmap plotted in pdf or png file.
+query <- TCGAquery(tumor = "lgg")
 }
 \description{
 Heatmap with more sensible behavior using heatmap.plus
