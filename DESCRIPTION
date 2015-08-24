@@ -39,6 +39,7 @@ Imports:
     xlsx,
     biomaRt,
     coin,
+    gplots,
     ggplot2,
     survival,
     stringr (>= 1.0.0),
