@@ -1,3 +1,39 @@
+#' @title Hierarchical cluster analysis
+#' @description Hierarchical cluster analysis using several methods such as
+#' ward.D", "ward.D2", "single", "complete", "average" (= UPGMA), "mcquitty" (= WPGMA),
+#' "median" (= WPGMC) or "centroid" (= UPGMC).
+#' @param tabDF is a dataframe or numeric matrix, each row represents a gene,
+#' each column represents a sample come from TCGAPrepare.
+#' @param method is method to be used for generic cluster such as 'hclust' or 'consensus'
+#' @param methodHC is method to be used for Hierarchical cluster.
+#' @import stats
+#' @importFrom ConsensusClusterPlus ConsensusClusterPlus
+#' @export
+#' @return object of class hclust if method selected is 'hclust'.
+#' If method selected is 'Consensus' returns a list of length maxK
+#' (maximum cluster number to evaluate.). Each element is a list containing
+#' consensusMatrix (numerical matrix), consensusTree (hclust), consensusClass
+#' (consensus class asssignments). ConsensusClusterPlus also produces images.
+TCGAanalyze_Clustering<- function(tabDF, method,  methodHC = "ward.D2"){
+
+    if( method == "hclust"){
+        ans <- hclust(ddist <- dist(tabDF), method = methodHC)
+    }
+
+    if( method == "consensus"){
+        sHc <- hclust(ddist <- dist(tabDF), method = methodHC)      # time = 1.270 )
+        ans <- ConsensusClusterPlus(ddist, maxK = 7, pItem = 0.9, reps=1000
+                                    , title="mc_consensus_k7_1000"
+                                    , clusterAlg = "hc"
+                                    , innerLinkage = "ward.D2"
+                                    , finalLinkage = "complete"
+                                    , plot = 'pdf', writeTable = TRUE)
+    }
+
+    return(ans)
+    }
+
+
 #' @title Array Array Intensity correlation (AAIC) and correlation boxplot to define outlier
 #' @description TCGAanalyze_Preprocessing perform Array Array Intensity correlation (AAIC).
 #' It defines a square symmetric matrix of pearson correlation among samples.
@@ -6,14 +42,21 @@
 #' @param object of gene expression of class RangedSummarizedExperiment from TCGAprepare
 #' @param cor.cut is a threshold to filter samples according their spearman correlation in
 #' samples by samples. default cor.cut is 0
+#' @param path Directory to save the output pdf file
+#' @param cancer tumor selected for the analysis
+#' @param width Image width
+#' @param height Image height
 #' @importFrom grDevices dev.list
 #' @export
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
-TCGAanalyze_Preprocessing<- function(object, cor.cut = 0){
+#' @examples
+#' query <- TCGAquery(tumor = "lgg")
+TCGAanalyze_Preprocessing<- function(object, cor.cut = 0, path = NULL, cancer = NULL,
+                                     width = 500,height =500 ){
 
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 
-    png("PreprocessingOutput.png", width = 1200, height = 1200)
+    png(paste0(path,"/",cancer,"_PreprocessingOutput.png"), width = width, height = height)
 
     # array array IC after RMA
     #object <-BRCARnaseq_assay
@@ -96,10 +139,12 @@ TCGAanalyze_Preprocessing<- function(object, cor.cut = 0){
 #' @param Survresult is a parameter (default = FALSE) if is TRUE will show KM plot and results.
 #' @param ThreshTop is a quantile threshold to identify samples with high expression of a gene
 #' @param ThreshDown is a quantile threshold to identify samples with low expression of a gene
+#' @param p.cut p.values threshold. Default: 0.05
 #' @importFrom survival Surv survdiff survfit
 #' @export
 #' @return table with survival genes pvalues from KM.
 #' @examples
+#' query <- TCGAquery(tumor = "lgg")
 #' \dontrun{
 #' clinical_patient_Cancer <- TCGAquery_clinic("brca","clinical_patient")
 #' dataBRCAcomplete <- log2(BRCA_rnaseqv2)
@@ -107,14 +152,11 @@ TCGAanalyze_Preprocessing<- function(object, cor.cut = 0){
 #' dataBRCAcomplete <- dataBRCAcomplete[1:10,]
 #' tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,dataBRCAcomplete,
 #' Genelist = rownames(dataBRCAcomplete), Survresult = FALSE,ThreshTop=0.67,ThreshDown=0.33)
-#' # Filtering by pvalue < 0.01
-#' tabSurvKM <- tabSurvKM[tabSurvKM$pvalue < 0.01,]
-#' tabSurvKM <- tabSurvKM[!duplicated(tabSurvKM$mRNA),]
-#' rownames(tabSurvKM) <-tabSurvKM$mRNA
-#' tabSurvKM <- tabSurvKM[,-1]
-#' tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing=FALSE),]
 #' }
-TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,ThreshTop=0.67, ThreshDown=0.33){
+TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
+                                 ThreshTop=0.67, ThreshDown=0.33,p.cut=0.05){
+
+
     samplesNT <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
     samplesTP <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
     Genelist <- intersect(rownames(dataGE),Genelist)
@@ -126,18 +168,25 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,Th
     cfu[which(cfu$vital_status=="Alive"),"days_to_death"]<-"-Inf"
     cfu[which(cfu$vital_status=="Dead"),"days_to_last_followup"]<-"-Inf"
 
+    cfu <- cfu[ !(is.na(cfu[,"days_to_last_followup"])),]
+    cfu <- cfu[ !(is.na(cfu[,"days_to_death"])),]
+
     followUpLevel<-FALSE
     Survresult<-FALSE
 
     #FC_FDR_table_mRNA
-    mRNAselected_surv_results_Matrix<-matrix(0,nrow(as.matrix(rownames(dataNormal))),8)
-    colnames(mRNAselected_surv_results_Matrix)<-c("mRNA","pvalue","Cancer Deaths","Cancer Deaths with Top","Cancer Deaths with Down","Mean Tumor Top","Mean Tumor Down","Mean Normal")
+    tabSurv_Matrix<-matrix(0,nrow(as.matrix(rownames(dataNormal))),8)
+    colnames(tabSurv_Matrix)<-c("mRNA","pvalue","Cancer Deaths","Cancer Deaths with Top","Cancer Deaths with Down","Mean Tumor Top","Mean Tumor Down","Mean Normal")
 
-    mRNAselected_surv_results_Matrix<-as.data.frame(mRNAselected_surv_results_Matrix)
+    tabSurv_Matrix<-as.data.frame(tabSurv_Matrix)
 
     cfu$days_to_death<-as.numeric(as.character(cfu$days_to_death))
     cfu$days_to_last_followup<-as.numeric(as.character(cfu$days_to_last_followup))
     rownames(cfu) <- cfu[, "bcr_patient_barcode" ] #mod1
+
+    cfu <- cfu[ !(is.na(cfu[,"days_to_last_followup"])),]
+    cfu <- cfu[ !(is.na(cfu[,"days_to_death"])),]
+
     cfu_complete<-cfu
     ngenes<-nrow(as.matrix(rownames(dataNormal)))
 
@@ -146,7 +195,7 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,Th
         cat(paste( (ngenes-i),".",sep=""))
 
         mRNAselected<-as.matrix(rownames(dataNormal))[i]
-        mRNAselected_surv_results_Matrix[i,"mRNA"]<-mRNAselected
+        tabSurv_Matrix[i,"mRNA"]<-mRNAselected
 
         mRNAselected_values<-dataCancer[rownames(dataCancer) == mRNAselected,]
         mRNAselected_values_normal<-dataNormal[rownames(dataNormal) == mRNAselected,]
@@ -214,11 +263,11 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,Th
 
 
             #print(paste("deaths =",deads_complete))
-            mRNAselected_surv_results_Matrix[i,"Cancer Deaths"]<-deads_complete
-            mRNAselected_surv_results_Matrix[i,"Cancer Deaths with Top"]<- deads_top
-            mRNAselected_surv_results_Matrix[i,"Cancer Deaths with Down"]<- deads_down
+            tabSurv_Matrix[i,"Cancer Deaths"]<-deads_complete
+            tabSurv_Matrix[i,"Cancer Deaths with Top"]<- deads_top
+            tabSurv_Matrix[i,"Cancer Deaths with Down"]<- deads_down
 
-            mRNAselected_surv_results_Matrix[i,"Mean Normal"]<-  mean(mRNAselected_values_normal)
+            tabSurv_Matrix[i,"Mean Normal"]<-  mean(mRNAselected_values_normal)
 
 
 
@@ -232,8 +281,8 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,Th
             dataCancer_onlyDown_sample_mRNASelected<- dataCancer_onlyDown_sample[rownames(dataCancer_onlyDown_sample) == mRNAselected,]
 
 
-            mRNAselected_surv_results_Matrix[i,"Mean Tumor Top"]<- mean(dataCancer_onlyTop_sample_mRNASelected)
-            mRNAselected_surv_results_Matrix[i,"Mean Tumor Down"]<- mean(dataCancer_onlyDown_sample_mRNASelected)
+            tabSurv_Matrix[i,"Mean Tumor Top"]<- mean(dataCancer_onlyTop_sample_mRNASelected)
+            tabSurv_Matrix[i,"Mean Tumor Down"]<- mean(dataCancer_onlyDown_sample_mRNASelected)
 
             ttime[!status] <- as.numeric(cfu[!status, "days_to_last_followup"])
             #ttime[!status] <- cfu[!status, "days_to_last_followup"]
@@ -262,19 +311,19 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,Th
 
 
 
-            mRNAselected_surv_results<-survdiff(ttime  ~ c(rep("top", nrow(cfu_onlyTOP)), rep("down", nrow(cfu_onlyDOWN)) ))
-            mRNAselected_surv_results_chis<-unlist(mRNAselected_surv_results)$chisq
+            tabSurv<-survdiff(ttime  ~ c(rep("top", nrow(cfu_onlyTOP)), rep("down", nrow(cfu_onlyDOWN)) ))
+            tabSurv_chis<-unlist(tabSurv)$chisq
 
-            mRNAselected_surv_results_pvalue <- as.numeric(1 - pchisq(abs(mRNAselected_surv_results$chisq), df = 1))
+            tabSurv_pvalue <- as.numeric(1 - pchisq(abs(tabSurv$chisq), df = 1))
             #miRselected_surv_results_pvalue <- as.numeric(round(as.numeric(1 - pchisq(abs(miRselected_surv_results$chisq), df = 1)),6))
 
-            mRNAselected_surv_results_Matrix[i,"pvalue"]<-mRNAselected_surv_results_pvalue
+            tabSurv_Matrix[i,"pvalue"]<-tabSurv_pvalue
 
 
-            #print(paste(i,"....",mRNAselected,"pvalue=",mRNAselected_surv_results_pvalue))
+            #print(paste(i,"....",mRNAselected,"pvalue=",tabSurv_pvalue))
 
             if (Survresult ==TRUE) {
-                titlePlot<- paste("Kaplan-Meier Survival analysis, pvalue=",mRNAselected_surv_results_pvalue )
+                titlePlot<- paste("Kaplan-Meier Survival analysis, pvalue=",tabSurv_pvalue )
 
 
                 plot(survfit(ttime ~ c(rep("low", nrow(cfu_onlyTOP)), rep("high", nrow(cfu_onlyDOWN)))), col = c("green", "red"),main= titlePlot,xlab="Days",ylab="Survival")
@@ -282,15 +331,25 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,Th
 
                 legend(100, 1, legend = c(legendLow,legendHigh), col = c("green", "red"), text.col = c("green", "red"), pch = 15)
 
-                print(mRNAselected_surv_results)
+                print(tabSurv)
             }
         } #end if
 
     } #end for
 
-    mRNAselected_surv_results_Matrix[mRNAselected_surv_results_Matrix=="-Inf"]<-0
+    tabSurv_Matrix[tabSurv_Matrix=="-Inf"]<-0
 
-    return(mRNAselected_surv_results_Matrix)
+
+    tabSurvKM <- tabSurv_Matrix
+
+   # Filtering by selected pvalue < 0.01
+    tabSurvKM <- tabSurvKM[tabSurvKM$pvalue < p.cut,]
+    tabSurvKM <- tabSurvKM[!duplicated(tabSurvKM$mRNA),]
+    rownames(tabSurvKM) <-tabSurvKM$mRNA
+    tabSurvKM <- tabSurvKM[,-1]
+    tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing=FALSE),]
+
+    return(tabSurvKM)
 }
 
 
@@ -301,19 +360,62 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,Th
 #'    samples, higher than the threshold defined quantile mean across all samples.
 #' @param tabDF is a dataframe or numeric matrix, each row represents a gene,
 #' each column represents a sample come from TCGAPrepare
+#' @param method is method of filtering such as 'quantile', 'varFilter', 'filter1', 'filter2'
 #' @param qnt.cut is threshold selected as mean for filtering
+#' @param var.func is function used as the per-feature filtering statistic.
+#' See genefilter documentation
+#' @param var.cutoff is a numeric value. See genefilter documentation
+#' @param eta is a paramter for filter1. default eta = 0.05.
+#' @param foldChange is a paramter for filter2. default foldChange = 1.
+#' @importFrom genefilter varFilter
 #' @export
 #' @return A filtered dataframe or numeric matrix where each row represents a gene,
 #' each column represents a sample
 #' @examples
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
-#' dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
-TCGAanalyze_Filtering <- function(tabDF,qnt.cut ){
+#' dataNorm <- TCGAanalyze_Normalization(tabDF = dataBRCA,
+#' geneInfo = geneInfo,
+#' method = "geneLength")
+#' dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm, method = "quantile", qnt.cut = 0.25)
+TCGAanalyze_Filtering <- function(tabDF,method,
+                                  qnt.cut = 0.25,
+                                  var.func = IQR,
+                                  var.cutoff = 0.75,
+                                  eta = 0.05,
+                                  foldChange = 1){
+
+    if(method == "quantile"){
     GeneThresh <- as.numeric(quantile(rowMeans(tabDF), qnt.cut))
     geneFiltered <- names(which(rowMeans(tabDF) > GeneThresh))
-    Table_Rnaseq_Rawcount_Filt <- tabDF[geneFiltered, ]
-    return( Table_Rnaseq_Rawcount_Filt)
+    tabDF_Filt <- tabDF[geneFiltered, ]
+    }
+
+    if(method == "varFilter"){
+        tabDF_Filt <- genefilter::varFilter(tabDF, var.func = IQR,
+                              var.cutoff= 0.75,
+                              filterByQuantile = TRUE)
+    }
+
+    if(method == "filter1"){
+    normCounts <- tabDF
+    geData <- t(log(1 + normCounts, 2))
+    filter <- apply(geData, 2, function(x) sum(quantile(x, probs = c(1 - eta, eta)) * c(1, -1)))
+    tabDF_Filt <- geData[, which(filter > foldChange)]
+    }
+
+    if(method == "filter2"){
+    geData <- tabDF
+    filter <- apply(geData, 2, function(x) prod(quantile(x, probs =  c(1 - eta, eta)) - 10) < 0)
+    tabDF_Filt <- geData[, which(filter)]
+    }
+
+    return( tabDF_Filt)
 }
+
+
+
+
+
 
 #' @title normalization mRNA transcripts and miRNA using EDASeq package.
 #' @description
@@ -483,7 +585,7 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
 #' @export
 #' @examples
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
-#' dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
+#' dataFilt <- TCGAanalyze_Filtering(tabDF = dataBRCA, method = "quantile", qnt.cut =  0.25)
 #' samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
 #' samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 #' dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT],
@@ -569,7 +671,7 @@ TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type,method = "exactTest",
 #' conditions multiplied logFC)
 #' @examples
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
-#' dataFilt <- TCGAanalyze_Filtering(dataNorm, 0.25)
+#' dataFilt <- TCGAanalyze_Filtering(tabDF = dataBRCA, method = "quantile", qnt.cut =  0.25)
 #' samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
 #' samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 #' dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT], dataFilt[,samplesTP],

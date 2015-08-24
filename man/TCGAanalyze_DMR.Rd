@@ -5,12 +5,14 @@
 \title{Differentially methylated regions Analysis}
 \usage{
 TCGAanalyze_DMR(data, groupCol = NULL, group1 = NULL, group2 = NULL,
-  filename = "volcano.pdf", ylab = expression(paste(-Log[10],
-  " (FDR corrected -P values)")), xlab = "DNA Methylation difference",
-  title = NULL, legend = "Legend", color = c(`1` = "black", `2` = "red",
-  `3` = "green"), label = NULL, xlim = NULL, ylim = NULL, p.cut = 0.01,
-  diffmean.cut = 0.2, paired = FALSE, adj.method = "BH",
-  overwrite = FALSE)
+  plot.filename = "methylation_volcano.pdf",
+  ylab = expression(paste(-Log[10], " (FDR corrected -P values)")),
+  xlab = expression(paste("DNA Methylation difference (", beta, "-values)")),
+  title = NULL, legend = "Legend", color = c("black", "red", "darkgreen"),
+  label = NULL, xlim = NULL, ylim = NULL, p.cut = 0.01,
+  probe.names = FALSE, diffmean.cut = 0.2, paired = FALSE,
+  adj.method = "BH", overwrite = FALSE, cores = 1, save = TRUE,
+  filename = NULL)
 }
 \arguments{
 \item{data}{SummarizedExperiment obtained from the TCGAPrepare}
@@ -24,7 +26,7 @@ the name of the group}
 \item{group2}{In case our object has more than 2 groups, you should set
 the name of the group}
 
-\item{filename}{pdf filename. Default: volcano.pdf}
+\item{plot.filename}{Filename. Default: volcano.pdf, volcano.svg, volcano.png}
 
 \item{ylab}{y axis text}
 
@@ -38,14 +40,16 @@ the name of the group}
 \item{color}{vector of colors to be used in graph}
 
 \item{label}{vector of labels to be used in the figure.
-Example: c("1" = "Not Significant", "2" = "Hypermethylated in group1",
-"3" = "Hypomethylated in group1"))}
+Example: c("Not Significant","Hypermethylated in group1",
+"Hypomethylated in group1"))}
 
 \item{xlim}{x limits to cut image}
 
 \item{ylim}{y limits to cut image}
 
 \item{p.cut}{p values threshold. Default: 0.01}
+
+\item{probe.names}{is probe.names}
 
 \item{diffmean.cut}{diffmean threshold. Default: 0.2}
 
@@ -55,6 +59,13 @@ Example: c("1" = "Not Significant", "2" = "Hypermethylated in group1",
 
 \item{overwrite}{Overwrite the pvalues and diffmean values if already in the object
 for both groups? Default: FALSE}
+
+\item{cores}{Number of cores to be used in the non-parametric test
+Default = groupCol.group1.group2.rda}
+
+\item{save}{Save object with results? Default: TRUE}
+
+\item{filename}{Name of the file to save the object.}
 }
 \value{
 Volcano plot saved and the given data with the results
@@ -66,17 +77,24 @@ in the rowRanges where group1 and group2 are the names of the groups
 This function will search for differentially methylated CpG sites,
   which are regarded as possible functional regions involved
   in gene transcriptional regulation.
+
   In order to find these regions we use the beta-values (methylation values
   ranging from 0.0 to 1.0) to compare two groups.
+
   Firstly, it calculates the difference between the mean methylation of each
   group for each probes. Secondly, it calculates the p-value using the
   wilcoxon test using the Benjamini-Hochberg adjustment method.
   The default parameters will require a minimum absolute beta values delta
   of 0.2 and a false discovery rate (FDR)-adjusted Wilcoxon rank-sum P-value
-  of <0.01 for the difference.
+  of < 0.01 for the difference.
+
   After these analysis, we save a volcano plot (x-axis:diff mean methylation,
   y-axis: significance) that will help the user identify the differentially
   methylated CpG sites and return the object with the calculus in the rowRanges.
+
+  If the calculus already exists in the object it will not recalculated.
+  You should set overwrite parameter to TRUE to force it, or remove the
+  collumns with the results from the object.
 }
 \examples{
 nrows <- 200; ncols <- 20
