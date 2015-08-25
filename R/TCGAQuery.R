@@ -183,16 +183,6 @@ TCGAquery <- function(tumor = NULL,
         }
     }
 
-    # to be improved
-    idx <- c()
-    if(!is.null(samples)){
-        for(i in seq_along(samples)){
-            aux <- grep(samples[i],db$barcode)
-            idx <- union(idx, aux)
-        }
-        db <- db[idx,]
-    }
-
     # This is a workaround for working with old levels
     # The user should specify the tumor and disease and we will change
     # the path to get old version of that tumor/platform
@@ -231,6 +221,16 @@ TCGAquery <- function(tumor = NULL,
             }
             db <- rbind(db,new)
         }
+    }
+
+    # to be improved
+    idx <- c()
+    if(!is.null(samples)){
+        for(i in seq_along(samples)){
+            aux <- grep(samples[i],db$barcode)
+            idx <- union(idx, aux)
+        }
+        db <- db[idx,]
     }
 
     return(db)
