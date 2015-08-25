@@ -201,7 +201,7 @@ IlluminaHiSeq_RNASeqV2 platform .
 library(TCGAbiolinks)
 
 BRCA_RNASeqV2_version <- TCGAquery_Version(tumor = "brca", 
-                                     platform = "illuminahiseq_rnaseqv2")
+                                           platform = "illuminahiseq_rnaseqv2")
 
 ```
 
@@ -327,8 +327,11 @@ bar <- c("TCGA-G9-6378-02A-11R-1789-07", "TCGA-CH-5767-04A-11R-1789-07",
         "TCGA-AO-A0J5-01A-11R-1789-07", "TCGA-G9-6336-11A-11R-1789-07",
         "TCGA-G9-6380-11A-11R-1789-07", "TCGA-G9-6380-01A-11R-1789-07",
         "TCGA-G9-6340-01A-11R-1789-07","TCGA-G9-6340-11A-11R-1789-07")
-female_erpos_herpos <- TCGAquery_clinicFilt(bar, clinBRCA, HER = "Positive", 
-                                gender = "FEMALE", ER = "Positive")
+female_erpos_herpos <- TCGAquery_clinicFilt(bar, 
+                                            clinBRCA, 
+                                            HER = "Positive", 
+                                            gender = "FEMALE", 
+                                            ER = "Positive")
 print(female_erpos_herpos)
 ```
 
@@ -348,7 +351,8 @@ GBM_path_subtypes <- TCGAquery_subtype(tumor = "gbm")
 
 LGG_path_subtypes <- TCGAquery_subtype(tumor = "lgg")
 
-LGG_clinic <- TCGAquery_clinic(cancer = "LGG",clinical_data_type = "clinical_patient")
+LGG_clinic <- TCGAquery_clinic(cancer = "LGG", 
+                               clinical_data_type = "clinical_patient")
 ```
 
 A subset of the lgg subytpe is shown below:
@@ -385,9 +389,6 @@ knitr::kable(matSamples[c(1,4,9),c(1,4,9)], digits = 2,
              row.names = TRUE)
 ```
 
-
-
-
 # `TCGAdownload`: Downloading open-access data  
 You can easily download data using the `TCGAdownload` function.
 
@@ -404,16 +405,13 @@ The arguments are:
 # get all samples from the query and save them in the TCGA folder
 # samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
 # samples to normalize later
-
 TCGAdownload(query, path = "data", type = "rsem.genes.results")
 
 TCGAdownload(query, path = "data", type = "rsem.isoforms.normalized_results")
 
-
 TCGAdownload(query, path = "dataBrca", type = "rsem.genes.results",
              samples = c("TCGA-E9-A1NG-11A-52R-A14M-07",
-                         "TCGA-BH-A1FC-11A-32R-A13Q-07")
-             )
+                         "TCGA-BH-A1FC-11A-32R-A13Q-07"))
 ```
 
 Comment: The function will structure the folders to save the data as:
@@ -564,7 +562,8 @@ specified by the package.
 ```{r, eval = FALSE}
 ############## Get tumor samples with TCGAbiolinks
 library(TCGAbiolinks)
-path <- "kirc"query <- TCGAquery(tumor = "KIRC",level = 3, platform = "HumanMethylation450")
+path <- "kirc"
+query <- TCGAquery(tumor = "KIRC", level = 3, platform = "HumanMethylation450")
 TCGAdownload(query, path =path)
 
 kirc.met <- TCGAprepare(query,dir = path,
@@ -684,7 +683,7 @@ After, we filter the output of dataDEGs by abs(LogFC) >=1, and uses the
 library(TCGAbiolinks)
 
 # normalization of genes
-dataNorm <- TCGAanalyze_Normalization(tabDF = dataBRCA,geneInfo =  geneInfo)
+dataNorm <- TCGAanalyze_Normalization(tabDF = dataBRCA, geneInfo =  geneInfo)
 
 # quantile filter of genes
 dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
@@ -823,9 +822,12 @@ for( i in 1: round(nrow(dataBRCAcomplete)/100)){
 message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
 tokenStart <- tokenStop
 tokenStop <-100*i
-tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,dataBRCAcomplete,
+tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
+                                dataBRCAcomplete,
                                 Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
-                                        Survresult = F,ThreshTop=0.67,ThreshDown=0.33)
+                                Survresult = F,
+                                ThreshTop=0.67,
+                                ThreshDown=0.33)
 
 tabSurvKMcomplete <- rbind(tabSurvKMcomplete,tabSurvKM)
 }
@@ -836,7 +838,9 @@ rownames(tabSurvKMcomplete) <-tabSurvKMcomplete$mRNA
 tabSurvKMcomplete <- tabSurvKMcomplete[,-1]
 tabSurvKMcomplete <- tabSurvKMcomplete[order(tabSurvKMcomplete$pvalue, decreasing=F),]
     
-tabSurvKMcompleteDEGs <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% dataDEGsFiltLevel$mRNA,]
+tabSurvKMcompleteDEGs <- tabSurvKMcomplete[
+    rownames(tabSurvKMcomplete) %in% dataDEGsFiltLevel$mRNA,
+    ]
 ```
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
@@ -1538,7 +1542,8 @@ TCGAvisualize_meanMethylation(coad.met,
 # 4.2 - DMR - Methylation analysis - volcano plot
 # ------------------------------------------------
 
-coad.aux <- subset(coad.met, select = colData(coad.met)$methylation_subtype %in% c("CIMP.L","CIMP.H"))
+coad.aux <- subset(coad.met, 
+                   select = colData(coad.met)$methylation_subtype %in% c("CIMP.L","CIMP.H"))
 
 # na.omit
 coad.aux <- subset(coad.aux,subset = (rowSums(is.na(assay(coad.aux))) == 0))
@@ -1554,7 +1559,8 @@ save(coad.aux,file = "coad_pvalue.rda")
 # 4.4 - DEA - Expression analysis - volcano plot
 # -----------------------------------------------
 
-coad.exp.aux <- subset(coad.exp, select = colData(coad.exp)$methylation_subtype %in% c("CIMP.H","CIMP.L"))
+coad.exp.aux <- subset(coad.exp, 
+                       select = colData(coad.exp)$methylation_subtype %in% c("CIMP.H","CIMP.L"))
 
 idx <- colData(coad.exp.aux)$methylation_subtype %in% c("CIMP.H")
 idx2 <- colData(coad.exp.aux)$methylation_subtype %in% c("CIMP.L")
