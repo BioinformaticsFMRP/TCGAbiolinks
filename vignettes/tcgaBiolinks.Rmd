@@ -335,7 +335,6 @@ female_erpos_herpos <- TCGAquery_clinicFilt(bar,
 print(female_erpos_herpos)
 ```
 
-
 ## `TCGAquery_subtype`: Working with molecular subtypes data.
 
 The Cancer Genome Atlas (TCGA) Research Network has reported integrated genome-wide 
@@ -363,7 +362,6 @@ knitr::kable(lgg.subtype[1:10,c(1,2,3,4)], digits = 2,
              row.names = TRUE)
 ```
 
-
 ## `TCGAquery_integrate`: Summary of the common numbers of patient samples in different platforms 
 
 Some times researches would like to use samples from different platforms 
@@ -387,6 +385,98 @@ matSamples <- TCGAquery_integrate(query)
 knitr::kable(matSamples[c(1,4,9),c(1,4,9)], digits = 2, 
              caption = "Table common samples among platforms from TCGAquery",
              row.names = TRUE)
+```
+
+## `TCGAquery_investigate`: Find most studied TFs in pubmed 
+
+Find most studied TFs in pubmed related to a specific cancer, disease, or tissue
+ 
+```{r, eval = FALSE}
+# First perform DEGs with TCGAanalyze
+# See previous section 
+library(TCGAbiolinks)
+
+# Select only transcription factors (TFs) from DEGs
+TFs <- EAGenes[EAGenes$Family =="transcription regulator",]
+TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
+dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
+
+# Order table DEGs TFs according to Delta decrease
+dataDEGsFiltLevelTFs <- dataDEGsFiltLevelTFs[order(dataDEGsFiltLevelTFs$Delta,decreasing = TRUE),]
+
+# Find Pubmed of TF studied related to cancer
+tabDEGsTFPubmed <- TCGAquery_investigate("breast", dataDEGsFiltLevelTFs, topgenes = 10)
+                 
+```
+
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+library(TCGAbiolinks)
+library(stringr)
+tabDEGsTFPubmed$PMID <- str_sub(tabDEGsTFPubmed$PMID,0,30)
+knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF in pubmed related to a specific cancer",row.names = FALSE)
+
+#LatexPrintTableforPresentation(Table = tabDEGsTFPubmed,rowsForPage = nrow(tabDEGsTFPubmed), TableTitle = "tabDEGsTFPubmed", LabelTitle = "tabDEGsTFPubmed", withrows = T)
+```
+
+## `TCGAquery_Social`: Searching questions,answers and literature
+The `TCGAquery_Social` function has two type of searches, one that searches for
+most downloaded packages in CRAN or BioConductor and one that searches the most related question in biostar. 
+
+### `TCGAquery_Social` with BioConductor
+Find most downloaded packages in CRAN or BioConductor
+ 
+```{r, eval = FALSE}
+library(TCGAbiolinks)
+
+# Define a list of package to find number of downloads
+listPackage <-c("limma","edgeR","survcomp")
+
+tabPackage <- TCGAquery_Social(siteToFind ="bioconductor.org",listPackage)
+
+
+# define a keyword to find in support.bioconductor.org returing a table with suggested packages
+tabPackageKey <- TCGAquery_Social(siteToFind ="support.bioconductor.org" ,KeyInfo = "tcga")
+```
+
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+library(TCGAbiolinks)
+listPackage <- c("limma","edgeR","survcomp")
+tabPackage <- TCGAquery_Social(siteToFind = "bioconductor.org", listPackage)
+
+knitr::kable(head(tabPackage), digits = 2, caption = "Table with number of downloads about a list of packages",row.names = FALSE)
+
+knitr::kable(tabPackage2[c(1,4,5,7),], digits = 2, caption = "Find most related question in support.bioconductor.org with keyword = tcga",row.names = FALSE)
+
+```
+
+### `TCGAquery_Social` with Biostar
+Find most related question in biostar.
+ 
+```{r, eval = FALSE}
+library(TCGAbiolinks)
+
+# Find most related question in biostar with TCGA
+tabPackage1 <- TCGAquery_Social(siteToFind ="biostars.org",KeyInfo = "TCGA")
+
+# Find most related question in biostar with package
+tabPackage2 <- TCGAquery_Social(siteToFind ="biostars.org",KeyInfo = "package")
+
+```
+
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+library(TCGAbiolinks)
+# Find most related question in biostar with TCGA
+#tabPackage <- TCGAquery_Social(siteToFind ="biostars.org",KeyInfo = "package")
+
+knitr::kable(head(tabPackage1), digits = 2, caption = "Find most related question in biostar with TCGA",row.names = FALSE)
+
+knitr::kable(tabPackage2[c(1,5,7),], digits = 2, caption = "Find most related question in biostar with package",row.names = FALSE)
 ```
 
 # `TCGAdownload`: Downloading open-access data  
@@ -654,7 +744,6 @@ img <- readPNG("PreprocessingOutput.png")
 grid.raster(img)
 ```
 
-
 ## `TCGAanalyze_DEA` `&` `TCGAanalyze_LevelTab` Differential expression analysis (DEA)
 
 Perform DEA (Differential expression analysis) to identify differentially expressed genes (DEGs) using the `TCGAanalyze_DEA` function. 
@@ -854,7 +943,6 @@ knitr::kable(tabSurvKMcompleteDEGs[1:10,5:7],
             row.names = TRUE)
 ```
 
-
 ## `TCGAanalyze_DMR`: Differentially methylated regions Analysis
 
 We will search for differentially methylated CpG sites using the `TCGAanalyze_DMR`
@@ -941,8 +1029,6 @@ acessesor (`rowRanges(data)`).
 will only plot the results,  as it was already calculated. 
 With you want to have them recalculated, please set
 `overwrite` to `TRUE` or remove the calculated collumns.
-
-
 
 # `TCGAvisualize`: Visualize results from analysis functions with TCGA's data. 
 You can easily visualize results from soome following functions:
@@ -1074,7 +1160,6 @@ img <- readPNG("meanmet.png")
 grid.raster(img)
 ```
 
-
 ## `TCGAvisualize_starburst`: Analyzing expression and methylation together 
 
  The starburst plot is proposed to combine information from two volcano plots, 
@@ -1134,100 +1219,6 @@ img <- readPNG("figure5star.png")
 grid.raster(img)
 ```
 
-
-# `TCGAquery_investigate`: Find most studied TFs in pubmed 
-
-Find most studied TFs in pubmed related to a specific cancer, disease, or tissue
- 
-```{r, eval = FALSE}
-# First perform DEGs with TCGAanalyze
-# See previous section 
-library(TCGAbiolinks)
-
-# Select only transcription factors (TFs) from DEGs
-TFs <- EAGenes[EAGenes$Family =="transcription regulator",]
-TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
-dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
-
-# Order table DEGs TFs according to Delta decrease
-dataDEGsFiltLevelTFs <- dataDEGsFiltLevelTFs[order(dataDEGsFiltLevelTFs$Delta,decreasing = TRUE),]
-
-# Find Pubmed of TF studied related to cancer
-tabDEGsTFPubmed <- TCGAquery_investigate("breast", dataDEGsFiltLevelTFs, topgenes = 10)
-                 
-```
-
-The result is shown below:
-
-```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
-library(stringr)
-tabDEGsTFPubmed$PMID <- str_sub(tabDEGsTFPubmed$PMID,0,30)
-knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF in pubmed related to a specific cancer",row.names = FALSE)
-
-#LatexPrintTableforPresentation(Table = tabDEGsTFPubmed,rowsForPage = nrow(tabDEGsTFPubmed), TableTitle = "tabDEGsTFPubmed", LabelTitle = "tabDEGsTFPubmed", withrows = T)
-```
-
-# `TCGAquery_Social`: Searching questions,answers and literature
-The `TCGAquery_Social` function has two type of searches, one that searches for
-most downloaded packages in CRAN or BioConductor and one that searches the most related question in biostar. 
-
-## `TCGAquery_Social` with BioConductor
-Find most downloaded packages in CRAN or BioConductor
- 
-```{r, eval = FALSE}
-library(TCGAbiolinks)
-
-# Define a list of package to find number of downloads
-listPackage <-c("limma","edgeR","survcomp")
-
-tabPackage <- TCGAquery_Social(siteToFind ="bioconductor.org",listPackage)
-
-
-# define a keyword to find in support.bioconductor.org returing a table with suggested packages
-tabPackageKey <- TCGAquery_Social(siteToFind ="support.bioconductor.org" ,KeyInfo = "tcga")
-```
-
-The result is shown below:
-
-```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
-listPackage <- c("limma","edgeR","survcomp")
-tabPackage <- TCGAquery_Social(siteToFind = "bioconductor.org", listPackage)
-
-knitr::kable(head(tabPackage), digits = 2, caption = "Table with number of downloads about a list of packages",row.names = FALSE)
-
-knitr::kable(tabPackage2[c(1,4,5,7),], digits = 2, caption = "Find most related question in support.bioconductor.org with keyword = tcga",row.names = FALSE)
-
-```
-
-## `TCGAquery_Social` with Biostar
-Find most related question in biostar.
- 
-```{r, eval = FALSE}
-library(TCGAbiolinks)
-
-# Find most related question in biostar with TCGA
-tabPackage1 <- TCGAquery_Social(siteToFind ="biostars.org",KeyInfo = "TCGA")
-
-# Find most related question in biostar with package
-tabPackage2 <- TCGAquery_Social(siteToFind ="biostars.org",KeyInfo = "package")
-
-```
-
-The result is shown below:
-
-```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
-# Find most related question in biostar with TCGA
-#tabPackage <- TCGAquery_Social(siteToFind ="biostars.org",KeyInfo = "package")
-
-knitr::kable(head(tabPackage1), digits = 2, caption = "Find most related question in biostar with TCGA",row.names = FALSE)
-
-knitr::kable(tabPackage2[c(1,5,7),], digits = 2, caption = "Find most related question in biostar with package",row.names = FALSE)
-```
-
-
 # TCGA Downstream Analysis: Case Studies
 
 ### Introduction 
@@ -1272,7 +1263,7 @@ dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
 dataSmTN <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
                                   typesample ="NT")
 dataClin <- TCGAquery_clinic(cancer = cancer,
-                             clinical_data_type = "clinical_patient")
+                             clinical_data_type = "clinical_patient")         # time = 2.606s
 
             TCGAdownload(data = datQuery, path = pathCancer, type = dataType,
                          samples =c(dataSmTP,dataSmTN))
@@ -1283,19 +1274,20 @@ dataAssy <- TCGAprepare(query = datQuery,
                         save = TRUE, 
                         summarizedExperiment = TRUE, 
                         samples = c(dataSmTP,dataSmTN),
-                        filename = paste0(cancer,"_",PlatformCancer,".rda"))
+                        filename = paste0(cancer,"_",PlatformCancer,".rda"))  #time = 1178.353s
 
 dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,
                                       cor.cut = 0.6,
                                       path = pathCancer,
-                                      cancer = cancer )
+                                      cancer = cancer )                      #time = 50.372s
 
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
                                       geneInfo = geneInfo,
+                                      method = "gcContent")                # time = 407.991s
 
 dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
                                   method = "quantile", 
-                                  qnt.cut =  0.25)
+                                  qnt.cut =  0.25)                       # time = 0.833s
 
 dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmTN],
                             mat2 = dataFilt[,dataSmTP],
@@ -1303,10 +1295,10 @@ dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmTN],
                             Cond2type = "Tumor",
                             fdr.cut = 0.01 ,
                             logFC.cut = 1,
-                            method = "glmLRT")
+                            method = "glmLRT")                          #time = 215.273s
  
 ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",
-                                RegulonList = rownames(dataDEGs))    # time = 60.750s
+                                RegulonList = rownames(dataDEGs))    # time = 69.488s 
 
 TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
                         GOBPTab = ansEA$ResBP,
@@ -1316,13 +1308,13 @@ TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
                         nRGTab = rownames(dataDEGs),
                         nBar = 20)
 
-dataSurv<-TCGAanalyze_SurvivalKM(clinical_patient = dataClin,
+system.time(dataSurv<-TCGAanalyze_SurvivalKM(clinical_patient = dataClin,
                                              dataGE = dataFilt,
                                              Genelist = rownames(dataDEGs),
                                              Survresult = FALSE,
                                              ThreshTop = 0.67,
                                              ThreshDown = 0.33,
-                                             p.cut = 0.05)               # time = 59.062s
+                                             p.cut = 0.05))               # time = 59.062s
 
 require(dnet)  # to change
 org.Hs.string <- dRDataLoader(RData = "org.Hs.string")
@@ -1339,21 +1331,14 @@ The figures resulted from the code above are shown below.
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
-img <- readPNG("figure4cluster.png")
+img <- readPNG("case1_EA.png")
 grid.raster(img)
 ```
 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
-img <- readPNG("figure4surv.png")
-grid.raster(img)
-```
-
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
-library(grid)
-img <- readPNG("figure4heatmap.png")
+img <- readPNG("SurvivalCoxNETOutput.png")
 grid.raster(img)
 ```
 
@@ -1457,7 +1442,6 @@ library(grid)
 img <- readPNG("figure4heatmap.png")
 grid.raster(img)
 ```
-
 
 ## Case study n. 3: Integration of methylation and expression for COAD
 
@@ -1780,6 +1764,7 @@ grid.raster(img)
 
 
 ******
+
 ### Session Information
 ******
 ```{r sessionInfo}
