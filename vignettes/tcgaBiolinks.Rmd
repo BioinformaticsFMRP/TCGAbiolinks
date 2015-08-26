@@ -892,14 +892,17 @@ The arguments of volcanoPlot are:
 * **xlim **x limits to cut image
 * **ylim **y limits to cut image
 * **label **vector of labels to be used in the figure.
- Example: c("1" = "Not Significant", "2" = "Hypermethylated in group1",
- "3" = "Hypomethylated in group1"))
+ Example: c("Not Significant", "Hypermethylated in group1", 
+ "Hypomethylated in group1"))
 * **p.cut** p values threshold. *Default: 0.01*
 * **diffmean.cut** diffmean threshold. *Default: 0.2*
 * **adj.method** Adjusted method for the p-value calculation
 * **paired** Wilcoxon paired parameter. *Default: FALSE*
 * **overwrite** Overwrite the pvalues and diffmean values if already in the object
 for both groups? *Default: FALSE*
+* **save **save the object with the results?
+* **cores **use multiple cores for non-parametric test
+
 
 ```{r, eval = FALSE}
 data <- TCGAanalyze_DMR(data, groupCol = "cluster.meth",subgroupCol = "disease",
@@ -1546,6 +1549,10 @@ TCGAvisualize_meanMethylation(coad.met,
 # ------------------------------------------------
 coad.aux <- subset(coad.met, 
                    select = colData(coad.met)$methylation_subtype %in% c("CIMP.L","CIMP.H"))
+
+
+# na.omit
+coad.aux <- subset(coad.aux,subset = (rowSums(is.na(assay(coad.aux))) == 0))
 
 # Volcano plot
 coad.aux <- TCGAanalyze_DMR(coad.aux, groupCol = "methylation_subtype",
