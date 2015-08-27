@@ -1314,17 +1314,29 @@ system.time(dataSurv<-TCGAanalyze_SurvivalKM(clinical_patient = dataClin,
                                              Survresult = FALSE,
                                              ThreshTop = 0.67,
                                              ThreshDown = 0.33,
-                                             p.cut = 0.05))               # time = 59.062s
+                                             p.cut = 0.05))               # time = 175.664s
 
 require(dnet)  # to change
 org.Hs.string <- dRDataLoader(RData = "org.Hs.string")
 
-system.time(TabCoxNet <- TCGAvisualize_SurvivalCoxNET(dataClin,
+TabCoxNet <- TCGAvisualize_SurvivalCoxNET(dataClin,
                                           dataFilt, 
                                           Genelist = rownames(dataSurv),
                                           scoreConfidence = 700,
                                           org.Hs.string = org.Hs.string,
-                                          titlePlot = "TCGAvisualize_SurvivalCoxNET Example"))
+                                          titlePlot = "Case Study n.1 dnet")
+
+# Convert images from pdf to png.
+library(animation)
+ani.options(outdir = getwd())
+
+im.convert("TCGAvisualize_EAbarplot_Output.pdf", 
+           output = "case1_EA.png", 
+           extra.opts="-density 150")
+
+im.convert("SurvivalCoxNETOutput.pdf", 
+           output = "case1_dnet.png", 
+           extra.opts="-density 150")
 ```
 
 The figures resulted from the code above are shown below.
@@ -1338,10 +1350,9 @@ grid.raster(img)
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
-img <- readPNG("SurvivalCoxNETOutput.png")
+img <- readPNG("case1_dnet.png")
 grid.raster(img)
 ```
-
 
 ## Case study n. 2: Pan Cancer downstream analysis LGG
 
