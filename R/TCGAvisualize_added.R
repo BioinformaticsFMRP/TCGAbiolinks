@@ -73,6 +73,7 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @param filename write. default = NULL
 #' @importFrom heatmap.plus heatmap.plus
 #' @examples
+#' query <- TCGAquery(tumor = "lgg")
 #' \dontrun{
 #' # from case study n.2 LGG to test the function
 #' DFfilt <- datFilt
@@ -87,7 +88,6 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' }
 #' @export
 #' @return Heatmap plotted in pdf or png file.
-#' query <- TCGAquery(tumor = "lgg")
 TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPalette, filename =NULL){
 
     rownames(DFsubt) <- DFsubt$patient
@@ -102,9 +102,6 @@ TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPa
     consensusClusters <- as.factor(data_Hc2[[4]]$clrs[[1]])
     names(consensusClusters) <- attr(ddist, "Labels")
     names(consensusClusters) <- substr(names(consensusClusters),1,12)
-
-
-
 
     #DFclin <- DFclin[DFclin$bcr_patient_barcode %in% DFsubt$patient,]
     DFclin_merged <- cbind(DFclin, matrix(0,nrow(DFclin),ncol(DFsubt)))
