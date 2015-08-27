@@ -397,4 +397,95 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
     dev.off()
     }
 
+#' @title Barplot of subtypes and clinical info in groups of gene expression clustered.
+#' @description
+#'   Barplot of subtypes and clinical info in groups of gene expression clustered.
+#' @param DFfilt write
+#' @param DFclin write
+#' @param DFsubt write
+#' @param data_Hc2 write
+#' @param Subtype write
+#' @param cbPalette write
+#' @param filename The name of the pdf file
+#' @param color Define the colors of the lines.
+#' @param width Image width
+#' @param height Image height
+#' @param dpi Image dpi
+#' @import ggplot2
+#' @export
+#' @return barplot image in pdf or png file
+#' @examples
+#' TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
+TCGAvisualize_BarPlot <- function(DFfilt, DFclin, DFsubt, data_Hc2,
+                                  Subtype, cbPalette, filename, width, height,dpi){
+
+    if(Subtype =="AGE"){
+        dataClinNew <- dataClin
+        colnames(dataClin)[which(colnames(dataClin) == "age_at_initial_pathologic_diagnosis")] <- "AGE"
+        dataClin$AGE <- as.numeric(as.character(dataClin$AGE))
+        dataClin <- cbind(dataClin, AGE2 = matrix(0,nrow(dataClin),1))
+        dataClin[ dataClin$AGE <= 32, "AGE2"] <- "<=32 yr"
+        dataClin[ dataClin$AGE >= 41, "AGE2"] <- ">=41 yr"
+        dataClin[ dataClin$AGE2 == 0, "AGE2"] <- "33-40 yr"
+        dataClin$AGE <- as.character(dataClin$AGE2)
+        DFclin <- dataClin
+    }
+
+    ans <- hclust(ddist <- dist(DFfilt), method = "ward.D2")
+    hhc <- data_Hc2[[4]]$consensusTree
+    consensusClusters<-data_Hc2[[4]]$consensusClass
+    sampleOrder <- consensusClusters[hhc$order]
+
+    consensusClusters <- as.factor(data_Hc2[[4]]$clrs[[1]])
+    names(consensusClusters) <- attr(ddist, "Labels")
+    names(consensusClusters) <- substr(names(consensusClusters),1,12)
+
+    # adding information about gropus from consensus Cluster in clinical data
+    DFclin <- cbind(DFclin, groupsHC = matrix(0,nrow(DFclin),1))
+    rownames(DFclin) <- DFclin$bcr_patient_barcode
+
+    for( i in 1: nrow(DFclin)){
+        currSmp <- DFclin$bcr_patient_barcode[i]
+        DFclin[currSmp,"groupsHC"] <- as.character(consensusClusters[currSmp])
+    }
+
+    DFclin_filt <- DFclin[DFclin$bcr_patient_barcode %in% DFsubt$patient,]
+    DFclin_filt <- DFclin_filt[order(DFclin_filt$bcr_patient_barcode),]
+    DFsubt <- DFsubt[order(DFsubt$patient),]
+    DFclin_merged <- cbind(DFclin_filt,DFsubt)
+
+    subtype_sel <- colnames(DFclin_merged) == Subtype
+    DFclin_merged[,Subtype] <- as.character(DFclin_merged[,Subtype])
+    DFclin_merged <- DFclin_merged[!(is.na(DFclin_merged[,Subtype])),]
+    DFclin_merged <- DFclin_merged[DFclin_merged[,Subtype] !="NA",]
+
+    groupsColors <-  levels(as.factor(DFclin_merged$groupsHC))
+    for(j in 1:length(table(DFclin_merged$groupsHC))){
+        curCol <- groupsColors[j]
+        DFclin_merged[DFclin_merged$groupsHC == curCol,"groupsHC"]<-paste0("EC",j)
+    }
+
+    subtypeCluster <- factor(DFclin_merged[,Subtype])
+    pplot <- qplot(factor(DFclin_merged$groupsHC),
+                   data=DFclin_merged, geom="bar",
+                   fill=subtypeCluster , xlab="Expression group") +
+        theme_bw()  +
+        theme(panel.border = element_blank(),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              axis.line = element_line(colour = "black")) +
+        guides(fill=guide_legend(title=Subtype))  +
+        theme(legend.position="top",
+              legend.text = element_text(size = 18),
+              legend.title = element_text(size=18, face="bold")) +
+        theme( legend.text = element_text(size = 18),
+               legend.title = element_text(size = 18),
+               axis.text= element_text(size = 30),
+               axis.title.x= element_text(size = 22),
+               axis.title.y= element_text(size = 30))   +
+        scale_fill_manual(values=cbPalette)
+
+    ggsave(pplot, filename = filename, width = width, height = height, dpi = dpi)
+    message(paste("Plot saved in: ", file.path(getwd(),filename)))
+}
 
