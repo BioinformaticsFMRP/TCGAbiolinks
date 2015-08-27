@@ -1403,11 +1403,11 @@ paste0(c("EC"),(1:cut.tree))
 
 ## consensusClusters contains barcodes for 4 groups
 ans <- hclust(ddist <- dist(datFilt), method = "ward.D2")
-hhc <- data_Hc2[[4]]$consensusTree
-consensusClusters<-data_Hc2[[4]]$consensusClass
+hhc <- data_Hc2[[cut.tree]]$consensusTree
+consensusClusters<-data_Hc2[[cut.tree]]$consensusClass
 sampleOrder <- consensusClusters[hhc$order]
 
-consensusClusters <- as.factor(data_Hc2[[4]]$clrs[[1]])
+consensusClusters <- as.factor(data_Hc2[[cut.tree]]$clrs[[1]])
 names(consensusClusters) <- attr(ddist, "Labels")
 names(consensusClusters) <- substr(names(consensusClusters),1,12)
 
@@ -1420,37 +1420,109 @@ for( i in 1: nrow(dataClin)){
     dataClin[currSmp,"groupsHC"] <- as.character(consensusClusters[currSmp])
 }
 
+# plotting survival for groups EC1, EC2, EC3, EC4
+
 TCGAanalyze_survival(data = dataClin,
                      clusterCol = "groupsHC",
                      main = "TCGA kaplan meier survival plot from consensus cluster",
-                     height = 10, 
+                     height = 10,
                      width=10,
                      legend = "RNA Group",
                      labels=paste0(c("EC"),(1:cut.tree)),
                      color = as.character(levels(consensusClusters)),
-                     filename = "figure4surv.png")
+                     filename = "case2_surv.png")
+dev.off()
+TCGAvisualize_BarPlot(DFfilt = datFilt,
+                      DFclin = dataClin,
+                      DFsubt = dataSubt,
+                      data_Hc2 = data_Hc2,
+                      Subtype = "IDH.1p19q.Subtype",
+                      cbPalette = c("cyan","tomato","gold"),
+                      filename = "case2_Idh.png",
+                      height = 10,
+                      width=10,
+                      dpi =300)
 
+TCGAvisualize_BarPlot(DFfilt = datFilt,
+                      DFclin = dataClin,
+                      DFsubt = dataSubt,
+                      data_Hc2 = data_Hc2,
+                      Subtype = "MethylationCluster",
+                      cbPalette = c("black","orchid3","palegreen4","sienna3", "steelblue4"),
+                      filename = "case2_Met.png",
+                      height = 10,
+                      width=10,
+                      dpi =300)
+
+TCGAvisualize_BarPlot(DFfilt = datFilt,
+                      DFclin = dataClin,
+                      DFsubt = dataSubt,
+                      data_Hc2 = data_Hc2,
+                      Subtype = "AGE",
+                      cbPalette = c("yellow2","yellow3","yellow4"),
+                      filename = "case2_Age.png",
+                      height = 10,
+                      width=10,
+                      dpi =300)
+
+dev.off()
+pdf(file="case2_Heatmap2.pdf")
+TCGAvisualize_Heatmap(DFfilt = datFilt,
+                      DFclin = dataClin,
+                      DFsubt = dataSubt,
+                      data_Hc2= data_Hc2)
+dev.off()
+
+
+# Convert images from pdf to png.
+library(animation)
+ani.options(outdir = getwd())
+
+im.convert("case2_Heatmap2.pdf", 
+           output = "case2_Heatmap2.png", 
+           extra.opts="-density 150")
 ```
 
 The figures resulted from the code above are shown below.
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
-img <- readPNG("figure4cluster.png")
+img <- readPNG("case2_surv.png")
 grid.raster(img)
 ```
 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
-img <- readPNG("figure4surv.png")
+img <- readPNG("case2_Idh.png")
 grid.raster(img)
 ```
 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
-img <- readPNG("figure4heatmap.png")
+img <- readPNG("case2_Met.png")
+grid.raster(img)
+```
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("case2_Met.png")
+grid.raster(img)
+```
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("case2_Age.png")
+grid.raster(img)
+```
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("case2_Heatmap.png")
 grid.raster(img)
 ```
 
