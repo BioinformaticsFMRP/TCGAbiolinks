@@ -838,7 +838,7 @@ TCGAanalyze_DMR <- function(data,
 
     # Plot a volcano plot
     names <- NULL
-    if(probe.names) values(data)$probeID
+    if(probe.names) names <- values(data)$probeID
 
     TCGAVisualize_volcano(x = values(data)[,diffcol],
                           y = values(data)[,pcol],
@@ -848,7 +848,7 @@ TCGAanalyze_DMR <- function(data,
                           title = title,
                           legend= legend,
                           label = label,
-                          names = values(data)$probeID,
+                          names = names,
                           x.cut = diffmean.cut,
                           y.cut = p.cut)
     if(is.null(filename)) filename <- paste(groupCol,group1,group2, "rda", sep = ".")
