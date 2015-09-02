@@ -405,9 +405,8 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
 #' @param DFsubt write
 #' @param data_Hc2 write
 #' @param Subtype write
-#' @param cbPalette write
+#' @param cbPalette Define the colors of the bar.
 #' @param filename The name of the pdf file
-#' @param color Define the colors of the lines.
 #' @param width Image width
 #' @param height Image height
 #' @param dpi Image dpi
@@ -415,7 +414,7 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
 #' @export
 #' @return barplot image in pdf or png file
 #' @examples
-#' TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
+#' query <- TCGAquery(tumor = "lgg")
 TCGAvisualize_BarPlot <- function(DFfilt, DFclin, DFsubt, data_Hc2,
                                   Subtype, cbPalette, filename, width, height,dpi){
 
