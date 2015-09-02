@@ -18,7 +18,7 @@ TCGAvisualize_BarPlot(DFfilt, DFclin, DFsubt, data_Hc2, Subtype, cbPalette,
 
 \item{Subtype}{write}
 
-\item{cbPalette}{write}
+\item{cbPalette}{Define the colors of the bar.}
 
 \item{filename}{The name of the pdf file}
 
@@ -27,8 +27,6 @@ TCGAvisualize_BarPlot(DFfilt, DFclin, DFsubt, data_Hc2, Subtype, cbPalette,
 \item{height}{Image height}
 
 \item{dpi}{Image dpi}
-
-\item{color}{Define the colors of the lines.}
 }
 \value{
 barplot image in pdf or png file
@@ -37,6 +35,6 @@ barplot image in pdf or png file
 Barplot of subtypes and clinical info in groups of gene expression clustered.
 }
 \examples{
-TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
+query <- TCGAquery(tumor = "lgg")
 }
 
