@@ -183,16 +183,6 @@ TCGAquery <- function(tumor = NULL,
         }
     }
 
-    # to be improved
-    idx <- c()
-    if(!is.null(samples)){
-        for(i in seq_along(samples)){
-            aux <- grep(samples[i],db$barcode)
-            idx <- union(idx, aux)
-        }
-        db <- db[idx,]
-    }
-
     # This is a workaround for working with old levels
     # The user should specify the tumor and disease and we will change
     # the path to get old version of that tumor/platform
@@ -231,6 +221,16 @@ TCGAquery <- function(tumor = NULL,
             }
             db <- rbind(db,new)
         }
+    }
+
+    # to be improved
+    idx <- c()
+    if(!is.null(samples)){
+        for(i in seq_along(samples)){
+            aux <- grep(samples[i],db$barcode)
+            idx <- union(idx, aux)
+        }
+        db <- db[idx,]
     }
 
     return(db)
@@ -539,5 +539,409 @@ getBarcode <- function(table){
     unlink(folders, recursive = TRUE)
 
     return(table)
+}
+
+#' @title Finds the number of downloads of a package on CRAN or BIOC and
+#' find questions in website ("bioconductor.org", "biostars.org", "stackoverflow).
+#' @description Finds the number of downloads of a package on CRAN or BIOC
+#' @param siteToFind website ("bioconductor.org", "biostars.org", "stackoverflow)
+#' related to TCGA or a package
+#' @param listPackage list of package to find in bioconductor
+#' @param KeyInfo is a key to find in biostars related to TGGA or package
+#' @export
+#' @return table with number of downloads about a package
+#' @examples
+#' TCGAquery_Social("bioconductor.org","BiocCheck")
+TCGAquery_Social <- function(siteToFind=NULL, listPackage=NULL,KeyInfo=NULL){
+
+
+    # Find all packages in bioconductor
+    site3 <- "http://www.bioconductor.org/packages/3.1/bioc/"
+    tmp <- .DownloadURL(site3)
+    tmpPack <-  tmp[grep(".html",tmp)]
+    tmpPackMatrix <- as.matrix(tmpPack)
+    posA <- grep("bioconductor",tolower(tmpPackMatrix))[1]+1
+    posB <- grep("bioconductor",tolower(tmpPackMatrix))[2]-1
+    tmpPackMatrixNew <- tmpPackMatrix[posA:posB,]
+    tmpPackMatrixNew <- gsub("<td><a","",tmpPackMatrixNew)
+    tmpPck2 <- lapply(tmpPackMatrixNew, function(x) gsub("</a></td>","", as.matrix(unlist(strsplit(x,">")))[2]))
+    tmpPck3 <- as.matrix(unlist(tmpPck2))
+    tmpPck2a <- lapply(tmpPck2, function(x) gsub("</a","", x))
+    BiocPackageList <- as.matrix(unlist(tmpPck2a))
+
+    if( siteToFind == "bioconductor.org"){
+
+        if(is.null(listPackage)) {
+            msg  <- paste0(
+                "\nPlease, provide a listofPackage argument\n",
+                "Example:  TCGAquery_Social('bioconductor.org','BiocCheck')")
+            stop(msg)
+        }
+
+        siteBioC <- "http://www.bioconductor.org/packages/stats/index.html"
+
+        TablePackage <- matrix(0, length(listPackage), 2)
+        rownames(TablePackage)<-listPackage
+        colnames(TablePackage) <- c("Package","NumberDownload")
+        TablePackage <- as.data.frame(TablePackage)
+        TablePackage$Package <- listPackage
+
+        tmp <- .DownloadURL(siteBioC)
+
+        for ( i in 1:nrow(TablePackage)){
+            packagetofind <- listPackage[i]
+            pos <- grep(tolower(packagetofind), tolower(tmp ))
+            pos1 <- pos[1]
+            tmp3 <- tmp[pos1]
+            tmp3a <- gsub("</A></TD></TR>","", as.matrix(unlist(strsplit(tmp3,"&nbsp;")))[2])
+            tmp4 <- as.numeric(substr(as.character(tmp3a),2,nchar(tmp3a)-1))
+            TablePackage[i,"NumberDownload"] <- tmp4
+        }
+
+        TablePackage <- TablePackage[order(TablePackage$NumberDownload,decreasing=TRUE),]
+    }
+
+    if( siteToFind == "biostars.org"){
+
+        if(is.null(KeyInfo)) {
+            msg  <- paste0(
+                "\nPlease, provide a KeyInfo argument\n",
+                "Example: TCGAquery_Social('biostars.org', KeyInfo='methylation')")
+            stop(msg)
+        }
+
+
+        siteBioStar <- "https://www.biostars.org/local/search/page/?page=1&sort=update&limit=all%50time&q="
+        siteQuestions <- "https://www.biostars.org/p"
+        siteBioStarKey <- paste(siteBioStar,KeyInfo,sep="")
+
+        tmp <- .DownloadURL(siteBioStarKey)
+        tmp2 <- tmp[ grep("<h4>",tmp)]
+
+        TableQuestions <- matrix(0, length(tmp2), 3)
+        rownames(TableQuestions)<-paste("q",c(1:length(tmp2)),sep="")
+        colnames(TableQuestions) <- c("question","BiostarsSite","PackageSuggested")
+        TableQuestions <- as.data.frame(TableQuestions)
+
+        for ( i in 1:nrow(TableQuestions)){
+            #print(i)
+            questiontofind <- tmp2[i]
+            questiontofind <- gsub("<h4>","", questiontofind)
+            qst_find_site <-gsub("<a href=","", as.matrix(unlist(strsplit(questiontofind,">")))[1])
+            qst_find_site2 <-gsub("<a href=","", as.matrix(unlist(strsplit(qst_find_site,"p")))[2])
+
+            qst_find_site2_sub <- substr(qst_find_site2,1, 7)
+            TableQuestions[i,"BiostarsSite"] <- qst_find_site2_sub
+            newsite_tofind <- paste(siteQuestions,qst_find_site2_sub,sep="")
+
+            tmpPack <- .DownloadURL(newsite_tofind)
+
+            if( length(grep("package",tolower(tmpPack)))!=0){
+                pos <- grep("package",tolower(tmpPack))
+                if( length(pos)!=1){
+                    pos <- pos[1]
+                }
+                tmpPackage <-  tmpPack[pos]
+
+                PackMat <- sapply(BiocPackageList, grepl, tmpPackage, ignore.case=TRUE)
+                if(sum(PackMat)>=1){
+                    print(which(PackMat == TRUE))
+                    PackageSuggested <- paste(names(PackMat[which(PackMat == TRUE)]),collapse=";")
+                    #TableQuestions[i,"PackageSuggested"] <- PackageSuggested
+                    TableQuestions[i,"PackageSuggested"] <- substr(PackageSuggested,1, 64)
+                }
+                # print(PackageSuggested)
+            }
+
+            tmp3a <- gsub("</a","", as.matrix(unlist(strsplit(questiontofind,">")))[2])
+            tmp3a <- gsub("&#39;", ".", tmp3a)
+            TableQuestions[i,"question"] <- tmp3a
+        }
+
+        TableQuestions <- TableQuestions[order(TableQuestions$PackageSuggested,decreasing=TRUE),]
+        TablePackage <- TableQuestions
+    }
+
+    if( siteToFind == "support.bioconductor.org"){
+
+        if(is.null(KeyInfo)) {
+            msg  <- paste0(
+                "\nPlease, provide a KeyInfo argument\n",
+                "Example: TCGAquery_Social('support.bioconductor.org', KeyInfo='TCGA')")
+            stop(msg)
+        }
+
+        sitesupportBioc_part1 <- "https://support.bioconductor.org/local/search/page/?page="
+        sitesupportBioc_part2 <-"&sort=New%20answers&limit=All%20time&q="
+        TablePackage <-NULL
+
+
+        for( pg in 1:2){
+            message(paste("pag",pg),sep="")
+            #sitesupportBioc <- "https://support.bioconductor.org/local/search/page/?q="
+            sitesupportBioc<- paste(sitesupportBioc_part1,pg,sitesupportBioc_part2,sep="")
+            siteQuestions <- "https://support.bioconductor.org/p"
+            sitesupportBiocKey <- paste(sitesupportBioc,tolower(KeyInfo),sep="")
+
+            tmp <- .DownloadURL(sitesupportBiocKey)
+            tmp2 <- tmp[ grep("<h4>",tmp)]
+
+            TableQuestions <- matrix(0, length(tmp2), 3)
+            rownames(TableQuestions)<-paste("q",c(1:length(tmp2)),sep="")
+            colnames(TableQuestions) <- c("question","supportBiocsSite","PackageSuggested")
+            TableQuestions <- as.data.frame(TableQuestions)
+
+            for ( tbi in 1:nrow(TableQuestions)){
+
+                questiontofind <- tmp2[tbi]
+
+                if(length(grep("MISSING",questiontofind))!=1){
+
+                    questiontofind <- gsub("<h4>","", questiontofind)
+                    qst_find_site <-gsub("<a href=","", as.matrix(unlist(strsplit(questiontofind,">")))[1])
+                    qst_find_site2 <-gsub("<a href=","", as.matrix(unlist(strsplit(qst_find_site,"p")))[2])
+
+                    qst_find_site2_sub <- substr(qst_find_site2,1, 7)
+                    TableQuestions[tbi,"supportBiocsSite"] <- qst_find_site2_sub
+                    newsite_tofind <- paste(siteQuestions,qst_find_site2_sub,sep="")
+
+                    tmpPack <- .DownloadURL(newsite_tofind)
+                    # starting from Question
+                    # and removing similar post inside webpage
+                    tmpPack<-tmpPack[grep("Question",tmpPack)[3]:grep("Similar",tmpPack)]
+
+
+                    if( length(grep("package",tolower(tmpPack)))!=0){
+                        pos <- grep("package",tolower(tmpPack))
+
+                        if( length(pos)==1){
+                            pos <- pos[1]
+                            tmpPackage <-  tmpPack[pos]
+                            PackMat <- sapply(BiocPackageList, grepl, tmpPackage, ignore.case=TRUE)
+                        }
+
+                        if( length(pos)!=1){
+                            PackMatNew <- NULL
+                            for( ip in 1: length(pos)){
+                                tmpPackage <-  tmpPack[pos][ip]
+                                PackMat <- sapply(BiocPackageList, grepl, tmpPackage, ignore.case=TRUE)
+                                PackMatNew <- c(PackMatNew,PackMat)
+                            }
+                            PackMat<-PackMatNew
+                        }
+
+                        if(sum(PackMat)>=1){
+                            print(which(PackMat == TRUE))
+                            PackageSuggested <- paste(names(PackMat[which(PackMat == TRUE)]),collapse=";")
+                            #TableQuestions[tbi,"PackageSuggested"] <- PackageSuggested
+                            # print(PackageSuggested)
+                            TableQuestions[tbi,"PackageSuggested"] <- substr(PackageSuggested,1, 64)
+
+                        }
+                    }
+
+                    tmp3a <- gsub("</a","", as.matrix(unlist(strsplit(questiontofind,">")))[2])
+                    tmp3a <- gsub("&#39;", ".", tmp3a)
+                    TableQuestions[tbi,"question"] <- tmp3a
+                }
+
+                TableQuestions <- TableQuestions[order(TableQuestions$PackageSuggested,decreasing=TRUE),]
+                TablePackage <- rbind(TablePackage,TableQuestions)
+            }
+        }
+        TablePackage <- TablePackage[order(TablePackage$PackageSuggested,decreasing=TRUE),]
+        TablePackage <- TablePackage[!duplicated(TablePackage$supportBiocsSite),]
+    }
+
+    return(TablePackage)
+
+}
+
+#' @title Find most studied TF in pubmed related to a specific cancer, disease, or tissue
+#' @description Find most studied TF in pubmed related to a specific cancer,
+#'  disease, or tissue
+#' @param tumor is character such as cancer, disease, or tissue eg. BRCA or breast
+#' @param dataDEGsFiltLevelTF is a table output from TCGAanalyze_LevelTab with only TFs
+#' @param topgenes is the number of top genes (eg. 10) in the rownames(dataDEGsFiltLevelTF)
+#' where find in pubmed if those genes or TFs are already related to that cancer or disease
+#' @importFrom RCurl url.exists curlVersion
+#' @examples
+#' query <- TCGAquery(tumor = "lgg")
+#' \dontrun{
+#' TFs <- EAGenes[EAGenes$Family =="transcription regulator",]
+#' TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
+#' dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
+#  # Order table DEGs TFs according to Delta decrease
+#' dataDEGsFiltLevelTFs <- dataDEGsFiltLevelTFs[order(dataDEGsFiltLevelTFs$Delta,decreasing = TRUE),]
+#' # Find Pubmed of TF studied related to cancer
+#' tabDEGsTFPubmed <- TCGAquery_Investigate("breast", dataDEGsFiltLevelTFs, topgenes = 1)
+#' }
+#' @export
+#' @return table with number of pubmed's publications related to tfs and disease selected
+TCGAquery_Investigate <- function(tumor,dataDEGsFiltLevelTF,topgenes){
+    site <- "http://www.ncbi.nlm.nih.gov/pubmed/?term="
+
+    # GenesTofix <- c("JUN","HR","HOMEZ",
+    #                 "ANKAR", "REST", "BATF", "MAX", "ECD", "FOS")
+    # dataDEGsFiltLevelTF <- dataDEGsFiltLevelTF[
+    #                        setdiff(dataDEGsFiltLevelTFs$mRNA,GenesTofix),]
+
+    dataDEGsFiltLevelTF <- dataDEGsFiltLevelTF[1:topgenes,]
+    Pubmed <- matrix(0, nrow(dataDEGsFiltLevelTF), 1)
+    PMID <- matrix(0, nrow(dataDEGsFiltLevelTF), 1)
+
+
+    dataDEGsFiltLevelTF <- cbind(dataDEGsFiltLevelTF,Pubmed,PMID)
+    dataDEGsFiltLevelTF<-as.data.frame(dataDEGsFiltLevelTF)
+
+    for (k in 1:nrow( dataDEGsFiltLevelTF)){
+        CurrentGene <- dataDEGsFiltLevelTF$mRNA[k]
+        site2 <- paste(site,CurrentGene, "+", tumor,sep = "")
+
+        if(interactive() && ("ssl" %in% names(curlVersion()$features)) &&
+           url.exists(site2)) {
+            x = tryCatch(RCurl::getURL(site2), error = function(e) {
+                RCurl::getURL(site2, ssl.verifypeer = FALSE) })
+        }
+
+
+
+        if ( length(grep("No items found.",x)) != 1) {
+
+            if (length(grep("Display Settings",x)) == 1) {
+                x6 <- 1
+                dataDEGsFiltLevelTF[k,"PMID"] <- substr(
+                    gsub("</dt> <dd>","",unlist(strsplit(x,"PMID:"))[2]),1,8
+                )
+
+            }
+
+
+            if (length(grep("result_count",x))==1){
+                x2a <- unlist(strsplit(x,"result_count"))[2]
+
+                tmpPMID2 <- unlist(strsplit(x2a,"UidCheckBox"))
+                tmpPMID3 <- tmpPMID2[grep("<span>",tmpPMID2)]
+                dataDEGsFiltLevelTF[k,"PMID"] <- as.character(paste(
+                    substr(tmpPMID3,1,8),collapse="; "))
+
+
+                x3a <-  unlist(strsplit(x2a,"</h2>"))[1]
+
+                if( length(grep("of",x3a))!=1){
+                    x6 <- as.numeric(unlist(strsplit(x3a,": "))[2])
+                } else { x6 <- as.numeric(unlist(strsplit(x3a,"of "))[2]) }
+            }
+
+
+            if (length(grep("following term was not found",x)) == 1) { x6 <- 0 }
+
+            if (length(grep("Search instead for",x)) == 1) { x6 <- 1 }
+
+            if (CurrentGene == "JUN")   { x6 <- 0 }
+            if (CurrentGene == "HR")    { x6 <- 0 }
+            if (CurrentGene == "HOMEZ") { x6 <- 0 }
+            if (CurrentGene == "ANKAR") { x6 <- 0 }
+            if (CurrentGene == "REST")  { x6 <- 0 }
+            if (CurrentGene == "BATF")  { x6 <- 0 }
+            if (CurrentGene == "MAX")   { x6 <- 0 }
+            # if (CurrentGene =="FOS"){       x6 <- 0     }
+            if (CurrentGene == "ECD")   { x6 <- 0 }
+            # HR, HOMEZ, ANKAR, REST
+
+            dataDEGsFiltLevelTF[k,"Pubmed"] <- x6
+            print(paste("Cancer ", tumor, "with TF n. ",k, "of " ,
+                        nrow( dataDEGsFiltLevelTF)," : ", CurrentGene,
+                        "found n. ", x6, "pubmed."))
+
+        }
+
+        else{
+            print(paste("Cancer ", tumor, "with TF n. ",k, "of " ,
+                        nrow( dataDEGsFiltLevelTF)," : ", CurrentGene,
+                        "no item found in pubmed."))
+            dataDEGsFiltLevelTF[k,"Pubmed"] <- 0
+        }
+
+    }
+
+    dataDEGsFiltLevelTF <- dataDEGsFiltLevelTF[order(dataDEGsFiltLevelTF$Pubmed,
+                                                     decreasing = TRUE),]
+
+    if( sum(dataDEGsFiltLevelTF$Pubmed == 1) != 0) {
+        dataDEGsFiltLevelTF[dataDEGsFiltLevelTF$Pubmed == 1,][
+            which( nchar(dataDEGsFiltLevelTF[
+                dataDEGsFiltLevelTF$Pubmed == 1,]$PMID) > 8),"PMID"] <- substr(
+                    dataDEGsFiltLevelTF[dataDEGsFiltLevelTF$Pubmed == 1,][
+                        which( nchar(dataDEGsFiltLevelTF[
+                            dataDEGsFiltLevelTF$Pubmed == 1,]$PMID) > 8),
+                        "PMID"],1,8)
+    }
+    if ( sum(dataDEGsFiltLevelTF$Pubmed == 0) != 0) {
+        dataDEGsFiltLevelTF[dataDEGsFiltLevelTF$Pubmed == 0,"PMID"] <- 0
+    }
+
+    tabDEGsTFPubmed$Tumor <- round(tabDEGsTFPubmed$Tumor)
+    tabDEGsTFPubmed$Normal <- round(tabDEGsTFPubmed$Normal)
+    tabDEGsTFPubmed$Delta <- round(tabDEGsTFPubmed$Delta)
+
+    return(dataDEGsFiltLevelTF)
+}
+
+#' @title Filtering common samples among platforms from TCGAquery for the same tumor
+#' @description In order to help the user to have an overview of the number of
+#' samples in commun we created the function `TCGAquery_integrate` that will receive the
+#' data frame returned from `TCGAquery` and produce a matrix n platforms x n platforms
+#' with the values of samples in commun.
+#' @param query is the output of TCGAquery
+#' @export
+#' @return table with common samples among platforms from TCGAquery
+#' @examples
+#' query <- TCGAquery(tumor = 'brca',level = 3)
+#' matSamples <- TCGAquery_integrate(query)
+TCGAquery_integrate <- function(query) {
+
+    querySamples <- TCGAquery_samplesfilter(query)
+
+    matSamples <- matrix(0, length(querySamples), length(querySamples))
+    colnames(matSamples) <- names(querySamples)
+    rownames(matSamples) <- names(querySamples)
+
+    for (i in 1:nrow(matSamples)) {
+        for (j in 1:nrow(matSamples)) {
+            if (i != j) {
+                x <- as.vector(substr(querySamples[[i]], 1, 12))
+                y <- as.vector(substr(querySamples[[j]], 1, 12))
+                matSamples[i, j] <- length(intersect(x, y))
+            } else {
+                matSamples[i, j] <- length(querySamples[[i]])
+            }
+        }
+    }
+    return(matSamples)
+}
+
+#' @title Filtering sample output from TCGAquery
+#' @description
+#'    Filtering sample output from TCGAquery
+#' @param query metaData output from TCGAquery
+#' @examples query <- TCGAquery(tumor = 'brca',level = 3)
+#' querySamples <- TCGAquery_samplesfilter(query)
+#' @export
+#' @return list of samples for a tumor
+TCGAquery_samplesfilter <- function(query) {
+
+    # Find unique platforms
+    plat <- sort(unique(query$Platform))
+    TumorDataList <- vector("list", length(plat))
+    names(TumorDataList) <- plat
+
+    for (idx in 1:length(TumorDataList)) {
+        currPlatform <- query[query$Platform == names(TumorDataList)[idx], ]
+        TumorDataList[[idx]] <- as.matrix(
+            unlist(strsplit(currPlatform$barcode, ","))
+        )
+    }
+    return(TumorDataList)
 }
 
