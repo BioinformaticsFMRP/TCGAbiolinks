@@ -146,7 +146,7 @@ TCGAprepare <- function(query,
             #setnames(data,2,barcode[i])
 
             data <- read.table(files[i],
-                               header = T,
+                               header = TRUE,
                                sep="\t",
                                skip = 1,
                                stringsAsFactors = FALSE)
