@@ -875,8 +875,6 @@ TCGAanalyze_EA <- function(GeneName,RegulonList,TableEnrichment,
 
 #' @title Differentially expression analysis (DEA) using limma package.
 #' @description Differentially expression analysis (DEA) using limma package.
-#' @param Pdatatable write
-#' @param PathFolder write
 #' @param FC.cut write
 #' @param AffySet A matrix-like data object containing log-ratios or log-expression values
 #' for a series of arrays, with rows corresponding to genes and columns to samples
@@ -894,8 +892,10 @@ TCGAanalyze_EA <- function(GeneName,RegulonList,TableEnrichment,
 #' of the top-ranked genes from a linear model fitted by DEA's limma
 #' @examples
 #' query <- TCGAquery(tumor = "lgg")
-TCGAanalyze_DEA_Affy <- function(Pdatatable, AffySet, PathFolder, FC.cut = 0.01){
+TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01){
 
+    Pdatatable <- pData(AffySet)
+  
     f <- factor(Pdatatable$Disease)
     groupColors<-names(table(f))
 
