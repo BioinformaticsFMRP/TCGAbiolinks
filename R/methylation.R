@@ -438,6 +438,7 @@ TCGAvisualize_meanMethylation <- function(data,
 #' }
 #' @importFrom plyr adply
 #' @importFrom doMC registerDoMC
+#' @importFrom doParallel registerDoParallel
 #' @keywords internal
 calculate.pvalues <- function(data,
                               groupCol = NULL,
@@ -451,8 +452,8 @@ calculate.pvalues <- function(data,
     parallel <- FALSE
     if (cores > 1){
         if(is.windows()){
-            cores <- 1
-            message("Sorry, windows can only work with one core")
+            if (cores > detectCores()) cores <- detectCores()
+            registerDoParallel(cores)
         } else {
             if (cores > detectCores()) cores <- detectCores()
             registerDoMC(cores)
