@@ -4,15 +4,11 @@
 \alias{TCGAanalyze_DEA_Affy}
 \title{Differentially expression analysis (DEA) using limma package.}
 \usage{
-TCGAanalyze_DEA_Affy(Pdatatable, AffySet, PathFolder, FC.cut = 0.01)
+TCGAanalyze_DEA_Affy(AffySet, FC.cut = 0.01)
 }
 \arguments{
-\item{Pdatatable}{write}
-
 \item{AffySet}{A matrix-like data object containing log-ratios or log-expression values
 for a series of arrays, with rows corresponding to genes and columns to samples}
-
-\item{PathFolder}{write}
 
 \item{FC.cut}{write}
 }
