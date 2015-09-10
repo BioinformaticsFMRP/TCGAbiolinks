@@ -64,7 +64,9 @@ Imports:
     ConsensusClusterPlus,
     RColorBrewer,
     doMC,
+    doParallel,
     dplyr,
+    Biobase,
     parallel
 Description:
     The aim of TCGAbiolinks is :
