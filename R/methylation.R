@@ -437,7 +437,6 @@ TCGAvisualize_meanMethylation <- function(data,
 #' data <- calculate.pvalues(data,"group")
 #' }
 #' @importFrom plyr adply
-#' @importFrom doMC registerDoMC
 #' @importFrom doParallel registerDoParallel
 #' @keywords internal
 calculate.pvalues <- function(data,
@@ -456,7 +455,7 @@ calculate.pvalues <- function(data,
             registerDoParallel(cores)
         } else {
             if (cores > detectCores()) cores <- detectCores()
-            registerDoMC(cores)
+            registerDoParallel(cores)
             parallel = TRUE
         }
     }
