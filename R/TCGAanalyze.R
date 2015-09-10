@@ -883,6 +883,7 @@ TCGAanalyze_EA <- function(GeneName,RegulonList,TableEnrichment,
 #' @importFrom limma makeContrasts
 #' @importFrom limma contrasts.fit
 #' @importFrom limma toptable
+#' @importFrom Biobase phenoData
 #' @examples
 #' \dontrun{
 #' to add example
@@ -894,8 +895,8 @@ TCGAanalyze_EA <- function(GeneName,RegulonList,TableEnrichment,
 #' query <- TCGAquery(tumor = "lgg")
 TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01){
 
-    Pdatatable <- pData(AffySet)
-  
+    Pdatatable <- phenoData(AffySet)
+
     f <- factor(Pdatatable$Disease)
     groupColors<-names(table(f))
 
