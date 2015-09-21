@@ -146,7 +146,7 @@ TCGAprepare <- function(query,
             #setnames(data,2,barcode[i])
 
             data <- read.table(files[i],
-                               header = T,
+                               header = TRUE,
                                sep="\t",
                                skip = 1,
                                stringsAsFactors = FALSE)
@@ -948,3 +948,28 @@ getMage <- function(line){
     return(df)
 }
 
+#' @title Prepare CEL files into an AffyBatch.
+#' @description Prepare CEL files into an AffyBatch.
+#' @param ClinData write
+#' @param PathFolder write
+#' @param TabCel write
+#' @importFrom affy ReadAffy
+#' @importFrom affy rma
+#' @importFrom Biobase exprs
+#' @examples
+#' \dontrun{
+#' to add example
+#' }
+#' @export
+#' @return Normalizd Expression data from Affy eSets
+TCGAprepare_Affy <- function(ClinData, PathFolder, TabCel){
+
+    affy_batch <- ReadAffy(filenames=as.character(paste(TabCel$samples, ".CEL", sep="")))
+
+    eset <- rma(affy_batch)
+
+    mat <- exprs(eset)
+
+    return(mat)
+
+}
