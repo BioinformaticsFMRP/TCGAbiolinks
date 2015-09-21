@@ -828,6 +828,7 @@ TCGAprepare_elmer <- function(df,
         Exp <- data.matrix(df)
 
         if (save)  save(Exp,file = "Exp_elmer.rda")
+        return(Exp)
     }
 
     if (grepl("humanmethylation", platform, ignore.case = TRUE)) {
@@ -842,6 +843,7 @@ TCGAprepare_elmer <- function(df,
         df <- df[rowMeans(is.na(df)) < met.na.cut,]
         Met <- data.matrix(df)
         if (save)  save(Met,file = "Met_elmer.rda")
+        return (Met)
     }
 }
 
