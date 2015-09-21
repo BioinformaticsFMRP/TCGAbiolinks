@@ -11,6 +11,9 @@ Author:
     Luciano Garofano,
     Davide Garolini,
     Claudia Cava,
+    Thais Sabedot,
+    Tathiane Malta,
+    Stefano M. Pagnotta,
     Isabella Castiglioni,
     Michele Ceccarelli,
     Houtan Noushmehr,
@@ -60,8 +63,9 @@ Imports:
     genefilter,
     ConsensusClusterPlus,
     RColorBrewer,
-    doMC,
+    doParallel,
     dplyr,
+    Biobase,
     parallel
 Description:
     The aim of TCGAbiolinks is :
