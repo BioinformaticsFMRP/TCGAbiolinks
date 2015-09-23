@@ -25,81 +25,43 @@ TCGAquery_Version <- function(tumor = NULL, platform = NULL) {
     if (is.null(tumor) && is.null(platform)) {
         message("Please provide one tumor and platform")
     }
-    query <- TCGAquery(tumor, platform)
-    root <- "https://tcga-data.nci.nih.gov/"
-    path <- paste0(root, unique(dirname(query$deployLocation)))
-    html <- html(path)
-    text <- html_text(html)
-    lines <- unlist(str_split(text, "\n"))
-    folders <- lines[grep("./", lines)]
-    folders <- folders[-grep("Index of", folders)]
-    folders <- folders[-grep("mage-tab", folders)]
-    ret <- data.frame(Version = NULL, Date = NULL,
-                      Samples = NULL, SizeMB = NULL)
-    message(paste0("Found ", length(folders), " Version of ", platform))
-    for (i in seq_along(folders)) {
-        regex <- "^.*/"
-        Version <- as.character(str_trim(str_match(folders[i], regex)))
-        ret[i, "Version"] <- Version
-        message(Version)
-        regex <- "[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}"
-        ret[i, "Date"] <- as.character(str_match(folders[i], regex))
-        subdir <- html_text(html(file.path(path, Version)))
-        x <- unlist(str_split(subdir, "\n"))
 
-        if (platform == "illuminahiseq_rnaseq") {
-            x <- x[grep("gene.quantification", x)]
-        }
-        if (platform == "agilentg4502a_07_3") {
-            x <- x[grep("tcga_level3", x)]
-        }
-        if (platform == "illuminahiseq_rnaseqv2") {
-            x <- x[grep("rsem.genes.results", x)]
-        }
-        if (platform == "humanmethylation27") {
-            x <- x[grep("HumanMethylation27", x)]
-        }
-        if (platform == "humanmethylation450") {
-            x <- x[grep("HumanMethylation450", x)]
-        }
-        if (platform == "illuminaga_mirnaseq") {
-            x <- x[grep("mirna.quantification", x)]
-        }
-        if (platform == "genome_wide_snp_6") {
-            x <- x[grep("hg19.seg", x)]
-        }
+    # Get last version of files
+    queryLastVersion <- TCGAquery(tumor = c(tumor),
+                                  platform = c(platform),
+                                  level = 3)
+    last_version <- as.numeric(str_sub(queryLastVersion$name[1],-3,-3))
 
-        regex <- "[0-9]+\\.?[0-9]*([K]{1}|[M]{1}|[G]{1})"
-        size <- as.character(str_match(x, regex)[, 1])
-        ret[i, "Samples"] <- length(size)
-        size <- getTotalSize(size)
-        ret[i, "SizeMB"] <- size
-    }
-    message("==================  FOUND ==================")
-    message("Platform: ", platform)
-    message("Level 1 versions: ", length(grep("Level_1", ret$Version)))
-    message("Level 2 versions: ", length(grep("Level_2", ret$Version)))
-    message("Level 3 versions: ", length(grep("Level_3", ret$Version)))
-    message("Mage versions: ", length(grep("mage-tab", ret$Version)))
-    message("============================================")
-    ret <- ret[ order( substr(gsub("-","",ret$Date),1,8),decreasing = FALSE ), ]
-    rownames(ret) <- NULL
-    BarcodeList <- vector("list",nrow(ret))
-    names(BarcodeList) <- ret$Version
+    BarcodeList <- vector("list",last_version)
+    ret <-  queryLastVersion[1,c(1,2,7)]
+    ret$name <- last_version
+    listSamplesVer <- TCGAquery_samplesfilter(queryLastVersion)
+    ret$Samples <- length(unlist(listSamplesVer))
+    ret$BarcodeList <- listSamplesVer
 
-    for (idx in 1:nrow(ret)) {
+    ret <- as.data.frame(ret)
+    colnames(ret) <- c("Date","BaseName","Version","Samples","BarcodeList")
+
+    last_version <- last_version - 1
+    for (idx in last_version:0) {
         queryVers <- TCGAquery(tumor = c(tumor),
                                platform = c(platform),
                                level = 3,
-                               version = list(c(platform,tumor,idx - 1)))
+                               version = list(c(platform,tumor,idx)))
         listSamplesVer <- TCGAquery_samplesfilter(queryVers)
-        BarcodeList[[idx]] <- as.character(unlist(listSamplesVer))
-        ret[idx,"Samples"] <- length(unlist(listSamplesVer))
+        aux <- data.frame(as.character(queryVers[1,1]),
+                          queryVers[1,2],
+                 idx,
+                 length(unlist(listSamplesVer)))
+        aux$BarcodeList <- listSamplesVer
+        list(listSamplesVer)
+        colnames(aux) <- c("Date","BaseName","Version","Samples","BarcodeList")
+        ret <- rbind(ret,aux)
     }
 
-    ans <- list(TableVersion = ret, BarcodeList = BarcodeList)
+    colnames(ret) <- c("Date","BaseName","Version","Samples","BarcodeList")
 
-    return(ans)
+    return(ret)
 }
 
 getTotalSize <- function(sizeList) {
