@@ -27,21 +27,24 @@ TCGAquery_Version <- function(tumor = NULL, platform = NULL) {
     }
 
     # Get last version of files
-    queryLastVersion <- TCGAquery(tumor = c(tumor),
-                                  platform = c(platform),
-                                  level = 3)
-    last_version <- as.numeric(str_sub(queryLastVersion$name[1],-3,-3))
+    query <- TCGAquery(tumor = c(tumor),
+                       platform = c(platform),
+                       level = 3)
+    last_version <- as.numeric(head(tail(
+        unlist(str_split(query$name[1],"\\.")),
+        n = 2),-1)
+    )
 
-    BarcodeList <- vector("list",last_version)
-    ret <-  queryLastVersion[1,c(1,2,7)]
+    ret <-  query[1,c(1,2,7)]
     ret$name <- last_version
-    listSamplesVer <- TCGAquery_samplesfilter(queryLastVersion)
+    listSamplesVer <- TCGAquery_samplesfilter(query)
     ret$Samples <- length(unlist(listSamplesVer))
     ret$BarcodeList <- listSamplesVer
 
     ret <- as.data.frame(ret)
     colnames(ret) <- c("Date","BaseName","Version","Samples","BarcodeList")
 
+    # get the next versions until 0
     last_version <- last_version - 1
     for (idx in last_version:0) {
         queryVers <- TCGAquery(tumor = c(tumor),
@@ -51,8 +54,8 @@ TCGAquery_Version <- function(tumor = NULL, platform = NULL) {
         listSamplesVer <- TCGAquery_samplesfilter(queryVers)
         aux <- data.frame(as.character(queryVers[1,1]),
                           queryVers[1,2],
-                 idx,
-                 length(unlist(listSamplesVer)))
+                          idx,
+                          length(unlist(listSamplesVer)))
         aux$BarcodeList <- listSamplesVer
         list(listSamplesVer)
         colnames(aux) <- c("Date","BaseName","Version","Samples","BarcodeList")
