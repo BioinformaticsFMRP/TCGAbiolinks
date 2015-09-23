@@ -63,7 +63,9 @@ TCGAquery_Version <- function(tumor = NULL, platform = NULL) {
     }
 
     colnames(ret) <- c("Date","BaseName","Version","Samples","BarcodeList")
-
+    ret <- ret[,c(2,1,3,4,5)]
+    last_version <- last_version + 2
+    row.names(ret) <- 1:last_version
     return(ret)
 }
 
