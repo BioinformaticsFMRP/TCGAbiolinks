@@ -2,8 +2,8 @@
 title: "Working with TCGAbiolinks package"
 author: " Antonio Colaprico, Tiago Chedraoui Silva, Luciano Garofano, 
 Catharina Olsen, Davide Garolini, Claudia Cava, Isabella Castiglioni,
-Thais Sabedot, Tathiane Malta, Stefano Pagnotta, Michele Ceccarelli
-Houtan Noushmehr, Gianluca Bontempi"
+Thais Sabedot, Tathiane Malta, Stefano Pagnotta, Michele Ceccarelli,
+Gianluca Bontempi, Houtan Noushmehr"
 date: "`r Sys.Date()`"
 output: 
     BiocStyle::html_document:
@@ -50,6 +50,17 @@ references:
   issued:
     year: 2010 
 
+- id: ref4
+  title: Inferring regulatory element landscapes and transcription factor networks from cancer methylomes
+  author: 
+  - family: Yao, L., Shen, H., Laird, P. W., Farnham, P. J., & Berman, B. P. 
+    given:
+  journal: Genome biology
+  volume: 16
+  number: 1
+  pages: 105
+  issued:
+    year: 2015 
 
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -642,7 +653,7 @@ This section will show how to integrate `TCGAbiolinks` with other packages.
 Our intention is to provide as many integrations as possible.
 
 The example below shows how to use `TCGAbiolinks` with `ELMER` package 
-(expression/methylation analysis). The `TCGAprepare_elmer` for the DNA methylation data 
+(expression/methylation analysis) [@ref4]. The `TCGAprepare_elmer` for the DNA methylation data 
 will Removing probes with NA values in more than 20% samples and remove the 
 anottation data, fot the expression data it will take the log2(expression + 1)
 of the expression matrix in order to To linearize the relation between 
@@ -1711,7 +1722,8 @@ With the object of assisting users in this arduous step, TCGAbiolinks offers in
 data preparation stage, the toPackage argument, which aims to prepare the data 
 in order to obtain the correct format for different packages.
 
-An example of another package to perform analysis is ELMER. We will present this
+An example of package to perform DNA methylation and expression analysis is ELMER [@ref1]. 
+We will present this
 case study the study KIRC by TCGAbiolinks and ELMER integration. For more information,
 please consult ELMER package.
 
@@ -1733,7 +1745,6 @@ kirc.met <- TCGAprepare_elmer(kirc.met,
                               platform = "HumanMethylation450",
                               save = TRUE,
                               met.na.cut = 0.2)
-
 
 # Step 1.2 download expression data
 query.rna <- TCGAquery(tumor="KIRC",level=3, platform="IlluminaHiSeq_RNASeqV2")
@@ -1769,7 +1780,6 @@ Sig.probes <- get.diff.meth(mee ,cores=detectCores(),
                             dir.out ="kirc",diff.dir="hypo",
                             pvalue = 0.01)
 
-
 #--------------------------------------------------
 # Step 3.2: Identifying putative probe-gene pairs |
 #--------------------------------------------------
@@ -1787,7 +1797,7 @@ Hypo.pair <- get.pair(mee=mee,
                       cores=detectCores(),
                       label= "hypo",
                       permu.size=10000,
-                      Pe = 0.01)
+                      Pe = 0.001)
 
 Sig.probes.paired <- fetch.pair(pair=Hypo.pair,
                                 probeInfo = getProbeInfo(mee),
