@@ -220,14 +220,10 @@ The result is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
 library(TCGAbiolinks)
-BRCA_RNASeqV2_version <- BRCA_RNASeqV2_version[
-    order(BRCA_RNASeqV2_version$SizeMbyte,decreasing=TRUE),]
-knitr::kable(BRCA_RNASeqV2_version, digits = 2, 
-             caption = "Table with version, number of samples and size (Mbyte) of BRCA IlluminaHiSeq_RNASeqV2 Level 3", 
+knitr::opts_chunk$set(comment = "", warning = FALSE, message = FALSE, echo = TRUE, tidy = FALSE, size="small")
+knitr::kable(BRCA_RNASeqV2_version[,1:4], digits = 2, 
+             caption = "Table with date, version and number of samples of BRCA IlluminaHiSeq_RNASeqV2", 
              row.names = FALSE)
-
-#LatexPrintTableforPresentation(Table = BRCA_RNASeqV2_version,rowsForPage = nrow(BRCA_RNASeqV2_version), TableTitle = "BRCA_RNASeqV2_version", LabelTitle = "BRCA_RNASeqV2_version", withrows = T)
-
 ```
 
 ### `TCGAquery`: Searching old versions
