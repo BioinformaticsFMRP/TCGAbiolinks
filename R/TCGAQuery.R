@@ -207,14 +207,24 @@ TCGAquery <- function(tumor = NULL,
             if(!is.null(level)){
                 extra <- paste0(extra, "[name=*Level_",level,"*]")
             }
-
             url <- paste0(root, extra)
+
             new <- tcgaGetTable(url)
             new <- new[, 1:9]
             new$addedDate <- as.Date(new$addedDate, "%m-%d-%Y")
             new <- tcgaDbAddCol(new)
             new <- new[order(new$Disease,new$Platform,new$Center),]
+
+            if(any(grepl("Obsolete",new$deployStatus))){
+                message("========== WARNING ==================")
+                message("Some data is obsolete and it is no more available")
+                message("For all version information go to the link below")
+                message(url)
+                message("=====================================")
+                new <- new[grep("Available",new$deployStatus),]
+            }
             colnames(new)[4] <- "barcode"
+
             for (j in 1:nrow(new)){
                 message(paste0("Updating barcode for: ",new[j,]$name))
                 new[j,"barcode"] <- updatebarcode(new[j,])
