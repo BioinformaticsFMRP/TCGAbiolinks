@@ -13,8 +13,8 @@ citEntry(entry = "Article",
                                    as.person("Stefano M. Pagnotta"),
                                    as.person("Isabella Castiglioni"),
                                    as.person("Michele Ceccarelli"),
-                                   as.person("Houtan Noushmehr"),
-                                   as.person("Gianluca Bontempi")
+                                   as.person("Gianluca Bontempi"),
+                                   as.person("Houtan Noushmehr")
          ),
          journal = "manuscript in preparation",
          year         = "2015",
@@ -23,8 +23,8 @@ citEntry(entry = "Article",
              paste("Antonio Colaprico, Tiago Chedraoui Silva, Catharina Olsen,",
                    "Luciano Garofano, Claudia Cava, Davide Garolini,",
                    "Thais Sabedot, Tathiane Malta, Stefano M. Pagnotta,",
-                   "Isabella Castiglioni,Michele Ceccarelli, Houtan Noushmehr,",
-                   "Gianluca Bontempi (2015).",
+                   "Isabella Castiglioni,Michele Ceccarelli, Gianluca Bontempi",
+                   "Houtan Noushmehr (2015).",
                    "TCGAbiolinks: An R/Bioconductor package for integrative analysis with TCGA data",
                    "manuscript in preparation.")
 )
