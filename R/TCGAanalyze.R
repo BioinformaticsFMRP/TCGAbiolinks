@@ -746,6 +746,14 @@ TCGAanalyze_LevelTab <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
 #' }
 TCGAanalyze_EAcomplete <- function(TFname, RegulonList){
 
+    # This is a verification of the input
+    # in case the List is like Gene|ID
+    # we will get only the Gene
+    if(all(grepl("\\|",RegulonList))){
+        RegulonList <- strsplit(RegulonList,"\\|")
+        RegulonList <- unlist(lapply(RegulonList,function(x) x[1]))
+    }
+
     print(paste("I need about ", "1 minute to finish complete ",
                 "Enrichment analysis GO[BP,MF,CC] and Pathways... "))
 
