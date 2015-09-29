@@ -135,28 +135,18 @@ TCGAprepare <- function(query,
         barcode <- str_match(files,regex)
 
         for (i in seq_along(files)) {
-            #data <- fread(files[i], header = TRUE, sep = "\t",
-            #              stringsAsFactors = FALSE,skip = 1,
-            #              colClasses=c("character", # Composite Element REF
-            #                           "numeric",   # beta value
-            #                           "character", # Gene symbol
-            #                           "character",   # Chromosome
-            #                           "integer"))  # Genomic coordinate
-            #setnames(data,gsub(" ", "\\.", colnames(data)))
-            #setnames(data,2,barcode[i])
-
-            data <- read.table(files[i],
-                               header = TRUE,
-                               sep="\t",
-                               skip = 1,
-                               stringsAsFactors = FALSE)
-
-           colnames(data) <- gsub(" ", "\\.", colnames(data))
-           colnames(data)[2] <- barcode[i]
+            data <- fread(files[i], header = TRUE, sep = "\t",
+                          stringsAsFactors = FALSE,skip = 1,
+                          colClasses=c("character", # Composite Element REF
+                                       "numeric",   # beta value
+                                       "character", # Gene symbol
+                                       "character",   # Chromosome
+                                       "integer"))  # Genomic coordinate
+            setnames(data,gsub(" ", "\\.", colnames(data)))
+            setnames(data,2,barcode[i])
 
             if (i == 1) {
-                #setcolorder(data,c(1, 3:5, 2))
-                data <- data[,c(1, 3:5, 2)]
+                setcolorder(data,c(1, 3:5, 2))
                 df <- data
             } else {
                 data <- subset(data,select = c(1,2))
@@ -828,6 +818,7 @@ TCGAprepare_elmer <- function(df,
         Exp <- data.matrix(df)
 
         if (save)  save(Exp,file = "Exp_elmer.rda")
+        return(Exp)
     }
 
     if (grepl("humanmethylation", platform, ignore.case = TRUE)) {
@@ -842,6 +833,7 @@ TCGAprepare_elmer <- function(df,
         df <- df[rowMeans(is.na(df)) < met.na.cut,]
         Met <- data.matrix(df)
         if (save)  save(Met,file = "Met_elmer.rda")
+        return (Met)
     }
 }
 
