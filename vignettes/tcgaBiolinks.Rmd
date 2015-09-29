@@ -2,8 +2,8 @@
 title: "Working with TCGAbiolinks package"
 author: " Antonio Colaprico, Tiago Chedraoui Silva, Luciano Garofano, 
 Catharina Olsen, Davide Garolini, Claudia Cava, Isabella Castiglioni,
-Thais Sabedot, Tathiane Malta, Stefano Pagnotta, Michele Ceccarelli
-Houtan Noushmehr, Gianluca Bontempi"
+Thais Sabedot, Tathiane Malta, Stefano Pagnotta, Michele Ceccarelli,
+Gianluca Bontempi, Houtan Noushmehr"
 date: "`r Sys.Date()`"
 output: 
     BiocStyle::html_document:
@@ -50,6 +50,17 @@ references:
   issued:
     year: 2010 
 
+- id: ref4
+  title: Inferring regulatory element landscapes and transcription factor networks from cancer methylomes
+  author: 
+  - family: Yao, L., Shen, H., Laird, P. W., Farnham, P. J., & Berman, B. P. 
+    given:
+  journal: Genome biology
+  volume: 16
+  number: 1
+  pages: 105
+  issued:
+    year: 2015 
 
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -209,14 +220,10 @@ The result is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
 library(TCGAbiolinks)
-BRCA_RNASeqV2_version <- BRCA_RNASeqV2_version[
-    order(BRCA_RNASeqV2_version$SizeMbyte,decreasing=TRUE),]
-knitr::kable(BRCA_RNASeqV2_version, digits = 2, 
-             caption = "Table with version, number of samples and size (Mbyte) of BRCA IlluminaHiSeq_RNASeqV2 Level 3", 
+knitr::opts_chunk$set(comment = "", warning = FALSE, message = FALSE, echo = TRUE, tidy = FALSE, size="small")
+knitr::kable(BRCA_RNASeqV2_version[,1:4], digits = 2, 
+             caption = "Table with date, version and number of samples of BRCA IlluminaHiSeq_RNASeqV2", 
              row.names = FALSE)
-
-#LatexPrintTableforPresentation(Table = BRCA_RNASeqV2_version,rowsForPage = nrow(BRCA_RNASeqV2_version), TableTitle = "BRCA_RNASeqV2_version", LabelTitle = "BRCA_RNASeqV2_version", withrows = T)
-
 ```
 
 ### `TCGAquery`: Searching old versions
@@ -642,7 +649,7 @@ This section will show how to integrate `TCGAbiolinks` with other packages.
 Our intention is to provide as many integrations as possible.
 
 The example below shows how to use `TCGAbiolinks` with `ELMER` package 
-(expression/methylation analysis). The `TCGAprepare_elmer` for the DNA methylation data 
+(expression/methylation analysis) [@ref4]. The `TCGAprepare_elmer` for the DNA methylation data 
 will Removing probes with NA values in more than 20% samples and remove the 
 anottation data, fot the expression data it will take the log2(expression + 1)
 of the expression matrix in order to To linearize the relation between 
@@ -980,14 +987,17 @@ The arguments of volcanoPlot are:
 * **xlim **x limits to cut image
 * **ylim **y limits to cut image
 * **label **vector of labels to be used in the figure.
- Example: c("1" = "Not Significant", "2" = "Hypermethylated in group1",
- "3" = "Hypomethylated in group1"))
+ Example: c("Not Significant", "Hypermethylated in group1", 
+ "Hypomethylated in group1"))
 * **p.cut** p values threshold. *Default: 0.01*
 * **diffmean.cut** diffmean threshold. *Default: 0.2*
 * **adj.method** Adjusted method for the p-value calculation
 * **paired** Wilcoxon paired parameter. *Default: FALSE*
 * **overwrite** Overwrite the pvalues and diffmean values if already in the object
 for both groups? *Default: FALSE*
+* **save **save the object with the results?
+* **cores **use multiple cores for non-parametric test
+
 
 ```{r, eval = FALSE}
 data <- TCGAanalyze_DMR(data, groupCol = "cluster.meth",subgroupCol = "disease",
@@ -1614,6 +1624,10 @@ TCGAvisualize_meanMethylation(coad.met,
 coad.aux <- subset(coad.met, 
                    select = colData(coad.met)$methylation_subtype %in% c("CIMP.L","CIMP.H"))
 
+
+# na.omit
+coad.aux <- subset(coad.aux,subset = (rowSums(is.na(assay(coad.aux))) == 0))
+
 # Volcano plot
 coad.aux <- TCGAanalyze_DMR(coad.aux, groupCol = "methylation_subtype",
                             group1 = "CIMP.H",
@@ -1704,7 +1718,8 @@ With the object of assisting users in this arduous step, TCGAbiolinks offers in
 data preparation stage, the toPackage argument, which aims to prepare the data 
 in order to obtain the correct format for different packages.
 
-An example of another package to perform analysis is ELMER. We will present this
+An example of package to perform DNA methylation and expression analysis is ELMER [@ref1]. 
+We will present this
 case study the study KIRC by TCGAbiolinks and ELMER integration. For more information,
 please consult ELMER package.
 
@@ -1726,7 +1741,6 @@ kirc.met <- TCGAprepare_elmer(kirc.met,
                               platform = "HumanMethylation450",
                               save = TRUE,
                               met.na.cut = 0.2)
-
 
 # Step 1.2 download expression data
 query.rna <- TCGAquery(tumor="KIRC",level=3, platform="IlluminaHiSeq_RNASeqV2")
@@ -1762,7 +1776,6 @@ Sig.probes <- get.diff.meth(mee ,cores=detectCores(),
                             dir.out ="kirc",diff.dir="hypo",
                             pvalue = 0.01)
 
-
 #--------------------------------------------------
 # Step 3.2: Identifying putative probe-gene pairs |
 #--------------------------------------------------
@@ -1780,7 +1793,7 @@ Hypo.pair <- get.pair(mee=mee,
                       cores=detectCores(),
                       label= "hypo",
                       permu.size=10000,
-                      Pe = 0.01)
+                      Pe = 0.001)
 
 Sig.probes.paired <- fetch.pair(pair=Hypo.pair,
                                 probeInfo = getProbeInfo(mee),
