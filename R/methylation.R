@@ -143,6 +143,7 @@ TCGAanalyze_survival <- function(data,
 
     # Column with groups
     data$type <- as.factor(data[,clusterCol])
+
     # create the formula for survival analysis
     f.m <- formula(Surv(as.numeric(data$days_to_death),event=data$s) ~ data$type)
     fit <- survfit(f.m, data = data)
@@ -185,8 +186,8 @@ TCGAanalyze_survival <- function(data,
     with(data,{
         surv <- surv + scale_colour_manual(name = legend,
                                            labels = labels,
-                                           values=color
-        )
+                                           values=color)
+
         with(surv,{
             surv <- surv + geom_point(aes(colour = group),
                                       shape = 3,size = 2)
@@ -205,11 +206,11 @@ TCGAanalyze_survival <- function(data,
                       axis.title.x= element_text(size = 22),
                       axis.title.y= element_text(size = 22))
 
-            ggsave(surv, filename = filename, width = width, height = height)
+
         })
 
     })
-
+    ggsave(surv, filename = filename, width = width, height = height)
 }
 #' @title Mean methylation boxplot
 #' @description
