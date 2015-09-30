@@ -591,6 +591,12 @@ TCGAVisualize_volcano <- function(x,y,
                                   height=5,
                                   width=10){
 
+    if(!is.null(names)) {
+        if(all(grepl("\\|",names))){
+            names <- strsplit(names,"\\|")
+            names <- unlist(lapply(names,function(x) x[1]))
+        }
+    }
     .e <- environment()
     threshold <- rep("1",length(x))
     names(color) <- as.character(1:3)
