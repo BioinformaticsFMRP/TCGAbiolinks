@@ -1670,7 +1670,8 @@ dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,idx],
 
 TCGAVisualize_volcano(dataDEGs$logFC,dataDEGs$FDR,
                       filename = "Case3_volcanoexp.png",
-                      x.cut = 5,
+                      x.cut = 3,
+                      y.cut = 10^-4,
                       names = rownames(dataDEGs),
                       xlab = " Gene expression fold change (Log2)",
                       legend = "State",
@@ -1682,7 +1683,9 @@ TCGAVisualize_volcano(dataDEGs$logFC,dataDEGs$FDR,
 starburst <- TCGAvisualize_starburst(coad.aux, dataDEGs,"CIMP.H","CIMP.L",
                                      filename = "starburst.png",
                                      met.p.cut = 10^-5,
-                                     exp.p.cut = 10^-5,
+                                     exp.p.cut = 10^-4,
+                                     diffmean.cut = 0.25,
+                                     logFC.cut = 3,
                                      names = TRUE)
 ```
 
