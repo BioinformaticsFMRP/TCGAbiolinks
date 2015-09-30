@@ -18,7 +18,9 @@ Author:
     Michele Ceccarelli,
     Houtan Noushmehr,
     Gianluca Bontempi
-Maintainer: Antonio Colaprico <antonio.colaprico@ulb.ac.be>
+Maintainer:
+    Antonio Colaprico <antonio.colaprico@ulb.ac.be>,
+    Tiago Chedraoui Silva <tiagochst@usp.br>
 Depends: R (>= 3.2)
 Imports:
     downloader (>= 0.4),
