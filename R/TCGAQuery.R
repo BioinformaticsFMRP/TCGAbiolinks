@@ -955,3 +955,41 @@ TCGAquery_samplesfilter <- function(query) {
     return(TumorDataList)
 }
 
+#' @title Get last maf file for the tumor
+#' @description
+#'    Filtering sample output from TCGAquery
+#' @param tumor tumor type
+# @examples query <- TCGAquery(tumor = 'brca',level = 3)
+#' @export
+#' @return list of samples for a tumor
+TCGAquery_maf <- function(tumor = NULL, center = NULL){
+    message("Getting maf tables")
+
+    tables <- read_html("https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files#TCGAMAFFiles-GBM:Glioblastomamultiforme")
+        tables <-    html_table(tables)
+
+    # Table one is junk
+    tables[[1]] <- NULL
+
+    idx <- which(mapply(function(x) {all(grepl(tumor,(x[,1]), ignore.case = T))},tables) == TRUE)
+    print(idx)
+    df <- lapply(idx,function(x) tables[x])
+    message("Reducing")
+    df <- Reduce(function(...) merge(..., all=T), df)
+
+    df <- subset(df, Deploy.Status == "Available" & Protection.Status == "Public")
+
+    df <- df[grepl("IlluminaGA",df[,1]),]
+    df <- df[grepl(center,df[,1]),]
+
+
+    df[,"Deploy.Location"] <- gsub("/dccfiles_prod/tcgafiles/","https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/",
+                                   df[,"Deploy.Location"] )
+
+    nb <- sapply(strsplit(df$Tumor.Samples.Normal.Samples,":"), function(x) x[[1]])
+    df -> df[order(nb,decreasing = F),]
+    message("Downloading maf file")
+    print(df[1,])
+    ret <- fread(df[1,]$Deploy.Location)
+    return(ret)
+}
