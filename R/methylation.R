@@ -454,6 +454,7 @@ calculate.pvalues <- function(data,
         if(is.windows()){
             if (cores > detectCores()) cores <- detectCores()
             registerDoParallel(cores)
+            parallel = TRUE
         } else {
             if (cores > detectCores()) cores <- detectCores()
             registerDoParallel(cores)
