@@ -1238,8 +1238,8 @@ The code is divided in 4 case study:
 
 * 1. Expression pipeline (BRCA)
 * 2. Expression pipeline (GBM)
-* 3. Methylation pipeline - LGG/OV
-* 4. Elmer pipeline - KIRC
+* 3. Methylation and methylation pipeline (COAD)
+* 4. Elmer pipeline (KIRC)
 
 ## Parameters definition
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
