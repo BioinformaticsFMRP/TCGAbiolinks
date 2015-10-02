@@ -959,37 +959,77 @@ TCGAquery_samplesfilter <- function(query) {
 #' @description
 #'    Filtering sample output from TCGAquery
 #' @param tumor tumor type
+#' @importFrom rvest html_table
+#' @importFrom xml2 read_html
 # @examples query <- TCGAquery(tumor = 'brca',level = 3)
 #' @export
 #' @return list of samples for a tumor
-TCGAquery_maf <- function(tumor = NULL, center = NULL){
+TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
     message("Getting maf tables")
+    message("Source: https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files")
+    message("You can also use TCGAquery/TCGAdownload for this:")
+    message("---------------------------------------------------------")
+    message("query <- TCGAquery(tumor,'IlluminaGA_DNASeq', level = 2)")
+    message("TCGAdownload(query,path = '.', type = 'maf' )")
+    message("---------------------------------------------------------")
 
-    tables <- read_html("https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files#TCGAMAFFiles-GBM:Glioblastomamultiforme")
-        tables <-    html_table(tables)
+    tables <- read_html("https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files")
+
+    tables <-  html_table(tables)
 
     # Table one is junk
     tables[[1]] <- NULL
 
-    idx <- which(mapply(function(x) {all(grepl(tumor,(x[,1]), ignore.case = T))},tables) == TRUE)
-    print(idx)
+    # get which tables are from the tumor
+    idx <- which(mapply(function(x) {
+        any(grepl(tumor,(x[,1]), ignore.case = T))
+    },tables) == TRUE)
     df <- lapply(idx,function(x) tables[x])
-    message("Reducing")
-    df <- Reduce(function(...) merge(..., all=T), df)
 
-    df <- subset(df, Deploy.Status == "Available" & Protection.Status == "Public")
+    # merge the data frame in the lists
+    if(length(idx) > 1) {
+        df <- Reduce(function(...) merge(..., all=T), df)
+    } else {
+        df <- unlist(df)
+    }
 
-    df <- df[grepl("IlluminaGA",df[,1]),]
-    df <- df[grepl(center,df[,1]),]
+    # Remove obsolete/protected
+    df <- subset(df, Deploy.Status == "Available")
+    df <- subset(df, Protection.Status == "Public")
+
+    if(!is.null(center)) df <- df[grepl(center,df[,"Archive.Name"],ignore.case = T),]
+    if(!is.null(archive.name)) df <- df[grepl(archive.name,df[,"Archive.Name"],ignore.case = T),]
+
+    message("We found these maf  below")
+    print(df[,c(1,5,7)])
 
 
-    df[,"Deploy.Location"] <- gsub("/dccfiles_prod/tcgafiles/","https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/",
+
+    if(nrow(df) > 1){
+        x <- readline("Which line do you want to download?")
+        df <- df[x,]
+        if(nrow(df) > 1){
+            message("We have more than 1 maf file, please filter by the name")
+            return (NULL)
+        }
+    }
+
+
+    # change the path to be downloaded
+    df[,"Deploy.Location"] <- gsub("/dccfiles_prod/tcgafiles/",
+                                   "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/",
                                    df[,"Deploy.Location"] )
 
-    nb <- sapply(strsplit(df$Tumor.Samples.Normal.Samples,":"), function(x) x[[1]])
-    df -> df[order(nb,decreasing = F),]
+    # We will order to get the file with more samples
+    # we are considering this is the last. Needs to be checked
+    #nb <- sapply(strsplit(df$Tumor.Samples.Normal.Samples,":"), function(x) x[[1]])
+    #df -> df[order(nb,decreasing = F),]
+
     message("Downloading maf file")
-    print(df[1,])
-    ret <- fread(df[1,]$Deploy.Location)
+    if(!file.exists(basename(df[1,]$Deploy.Location)))
+        download(df[1,]$Deploy.Location,basename(df[1,]$Deploy.Location))
+
+    ret <- read.table(basename(df[1,]$Deploy.Location), fill = T,
+                      comment.char = "#", header = T, sep = "\t")
     return(ret)
 }
