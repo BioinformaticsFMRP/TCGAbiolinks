@@ -958,10 +958,15 @@ TCGAquery_samplesfilter <- function(query) {
 #' @title Get last maf file for the tumor
 #' @description
 #'    Filtering sample output from TCGAquery
-#' @param tumor tumor type
+#' @param tumor tumor type to filter the search
+#' @param center Center name to filter the search
+#' @param archive.name Archive name to filter the search
 #' @importFrom rvest html_table
 #' @importFrom xml2 read_html
-# @examples query <- TCGAquery(tumor = 'brca',level = 3)
+#' @examples
+#' \dontrun{
+#'  query <- TCGAquery(tumor = 'lgg')
+#' }
 #' @export
 #' @return list of samples for a tumor
 TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
@@ -982,23 +987,25 @@ TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
 
     # get which tables are from the tumor
     idx <- which(mapply(function(x) {
-        any(grepl(tumor,(x[,1]), ignore.case = T))
+        any(grepl(tumor,(x[,1]), ignore.case = TRUE))
     },tables) == TRUE)
     df <- lapply(idx,function(x) tables[x])
 
     # merge the data frame in the lists
     if(length(idx) > 1) {
-        df <- Reduce(function(...) merge(..., all=T), df)
+        df <- Reduce(function(...) merge(..., all=TRUE), df)
     } else {
         df <- unlist(df)
     }
 
     # Remove obsolete/protected
-    df <- subset(df, Deploy.Status == "Available")
-    df <- subset(df, Protection.Status == "Public")
+    df <- subset(df, df$Deploy.Status == "Available")
+    df <- subset(df, df$Protection.Status == "Public")
 
-    if(!is.null(center)) df <- df[grepl(center,df[,"Archive.Name"],ignore.case = T),]
-    if(!is.null(archive.name)) df <- df[grepl(archive.name,df[,"Archive.Name"],ignore.case = T),]
+    if(!is.null(center)) df <- df[grepl(center,df[,"Archive.Name"],
+                                        ignore.case = TRUE),]
+    if(!is.null(archive.name)) df <- df[grepl(archive.name,df[,"Archive.Name"],
+                                              ignore.case = TRUE),]
 
     message("We found these maf  below")
     print(df[,c(1,5,7)])
@@ -1027,8 +1034,8 @@ TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
     if(!file.exists(basename(df[1,]$Deploy.Location)))
         download(df[1,]$Deploy.Location,basename(df[1,]$Deploy.Location))
 
-    ret <- read.table(basename(df[1,]$Deploy.Location), fill = T,
-                      comment.char = "#", header = T, sep = "\t")
+    ret <- read.table(basename(df[1,]$Deploy.Location), fill = TRUE,
+                      comment.char = "#", header = TRUE, sep = "\t")
 
     x <- readline("Do you want to integrate the clinical data? (y/n)")
 
