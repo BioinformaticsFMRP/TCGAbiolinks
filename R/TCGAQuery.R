@@ -1003,13 +1003,11 @@ TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
     message("We found these maf  below")
     print(df[,c(1,5,7)])
 
-
-
     if(nrow(df) > 1){
-        x <- readline("Which line do you want to download?")
+        x <- readline("Please, select the line that you want to download: ")
         df <- df[x,]
         if(nrow(df) > 1){
-            message("We have more than 1 maf file, please filter by the name")
+            message("Sorry, we have more than 1 maf file, please filter by the name")
             return (NULL)
         }
     }
@@ -1031,5 +1029,14 @@ TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
 
     ret <- read.table(basename(df[1,]$Deploy.Location), fill = T,
                       comment.char = "#", header = T, sep = "\t")
+
+    x <- readline("Do you want to integrate the clinical data? (y/n)")
+
+    if (tolower(x) == "y") {
+        ret$bcr_patient_barcode <- substr(ret$Tumor_Sample_Barcode,1,12)
+        clinical <- TCGAquery_clinic(tumor, "clinical_patient")
+        ret <- merge(ret,clinical, by="bcr_patient_barcode")
+    }
+
     return(ret)
 }
