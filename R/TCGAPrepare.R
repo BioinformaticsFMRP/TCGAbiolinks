@@ -254,7 +254,7 @@ TCGAprepare <- function(query,
         files <- files[idx]
         for (i in seq_along(files)) {
             data <- read.table(files[i], fill = TRUE,
-                              comment.char = "#", header = TRUE, sep = "\t")
+                               comment.char = "#", header = TRUE, sep = "\t")
             if (i == 1) {
                 df <- data
             } else {
@@ -703,10 +703,26 @@ TCGAprepare <- function(query,
     if (grepl("genome_wide_snp_6",tolower(platform))) {
 
         close(pb)
-        message("Preparing h19 files...")
-        idx <- grep("nocnv|hg18", files)
+
+        while(!(type %in% c("nocnv_hg18","nocnv_hg19","cnv_hg18","cnv_hg19"))){
+            type <- readline(
+                paste("Which type do you want?",
+                      "(Options: nocnv_hg19,nocnv_hg18,cnv_hg18,cnv_hg19, cancel)  ")
+            )
+            if(type == "cancel") return(NULL)
+        }
+        if(type == "nocnv_hg18") regex <- "nocnv_hg18"
+        if(type == "cnv_hg18") regex <- "[^no]cnv_hg18"
+        if(type == "nocnv_hg19") regex <- "nocnv_hg19"
+        if(type == "cnv_hg19") regex <- "[^no]cnv_hg19"
+
+        idx <- grep(regex, files)
+
         if (length(idx) > 0){
-            files <- files[-idx]
+            files <- files[idx]
+        } else {
+            message("No files of that type found")
+            return (NULL)
         }
 
         pb <- txtProgressBar(min = 0, max = length(files), style = 3)
@@ -715,6 +731,11 @@ TCGAprepare <- function(query,
             mage <- getMage(query)
         } else {
             mage <- getMage(query[1,])
+        }
+        if (grepl("hg19", type)){
+            gene.db <- gene.location
+        } else {
+            gene.db <- get.GRCh.bioMart("hg18")
         }
 
         genes <- sort(unique(gene.location$external_gene_name))
