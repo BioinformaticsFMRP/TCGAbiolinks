@@ -208,36 +208,37 @@ TCGAprepare <- function(query,
         }
     }
 
+
     if (grepl("mda_rppa_core",tolower(platform))) {
+
+        message(
+            paste("Sorry, but for this platform we haven't prepared",
+                  "the data into a summarizedExperiment object.",
+                  "\nBut we will do it soon! The return is a data frame")
+        )
+
+        regex <- paste0("[:alnum:]{8}-[:alnum:]{4}",
+                        "-[:alnum:]{4}-[:alnum:]{4}-[:alnum:]{12}")
+        uuid <- str_match(files,regex)
+        map <- mapuuidbarcode(uuid)
+
+
         for (i in seq_along(files)) {
-            data <- read.table(files[i], header = TRUE, sep = "\t",
-                               stringsAsFactors = FALSE, check.names = FALSE)
-            sample <- gsub("\\.", "-", colnames(data)[2])
-            colnames(data) <- data[1,]
+            data <- fread(files[i], header = TRUE, sep = "\t", data.table = FALSE)
             data <- data[-1,] # removing Composite Element REF
-            colnames(data)[2] <- sample
+            x <- subset(map, uuid == uuid[i])
+            colnames(data)[2] <- as.character(x$barcode)
 
             if (i == 1) {
                 df <- data
             } else {
-                df <- merge(df, data,by = "Composite Element REF")
+                df <- merge(df, data,by = "Sample REF",all = TRUE )
             }
             setTxtProgressBar(pb, i)
         }
         rownames(df) <- df[,1]
         df[,1] <- NULL
-        # get array_design.txt from mage folder
-        # and change uuid by Barcode
-        uuid <- colnames(df)
-        idx <- grep("Sample|Control",uuid)
-        if(length(idx) > 0){
-            uuid <- uuid[-idx]
-        }
-        map <- mapuuidbarcode(uuid)
-        idx <- which(colnames(df) %in% map$uuid)
-        colnames(df)[idx] <- as.character(map$barcode)
     }
-
 
     if (grepl("illuminadnamethylation_oma",
               platform, ignore.case = TRUE)) {
