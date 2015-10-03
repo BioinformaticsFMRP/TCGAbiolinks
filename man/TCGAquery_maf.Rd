@@ -4,15 +4,24 @@
 \alias{TCGAquery_maf}
 \title{Get last maf file for the tumor}
 \usage{
-TCGAquery_maf(tumor = NULL, center = NULL)
+TCGAquery_maf(tumor = NULL, center = NULL, archive.name = NULL)
 }
 \arguments{
-\item{tumor}{tumor type}
+\item{tumor}{tumor type to filter the search}
+
+\item{center}{Center name to filter the search}
+
+\item{archive.name}{Archive name to filter the search}
 }
 \value{
 list of samples for a tumor
 }
 \description{
 Filtering sample output from TCGAquery
+}
+\examples{
+\dontrun{
+query <- TCGAquery(tumor = 'lgg')
+}
 }
 
