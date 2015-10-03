@@ -965,3 +965,32 @@ TCGAprepare_Affy <- function(ClinData, PathFolder, TabCel){
     return(mat)
 
 }
+
+# This function will preprare the colData for TCGAPrepare
+# The idea is to add usefull information to the object
+# that will help the users to understand their samples
+# ref: TCGA codeTablesReport - Table: Sample type
+#' @importFrom S4Vectors DataFrame
+#' @importFrom stringr str_match
+#' @importFrom xlsx read.xlsx2
+#' @keywords internal
+TCGAquery_mutation <- function(tumor = NULL){
+
+    query <- TCGAquery(tumor,"IlluminaGA_DNASeq", level = 2)
+
+    if (nrow(query) == 0) return (NULL) # no mutation
+
+    if (nrow(query) > 1) {
+        idx <- order(query$addedDate, decreasing = TRUE)
+        query <- query[idx,]
+        query <- query[1,]
+    }
+
+    TCGAdownload(query,path = ".", type = "maf" )
+    file <- dir(gsub(".tar.gz","",basename(query$deployLocation)),
+                full.names = TRUE)
+    print(file)
+    ret <- read.table(file, comment.char = "#",
+                      header = TRUE, sep = "\t",fill = TRUE)
+    return(ret)
+}
