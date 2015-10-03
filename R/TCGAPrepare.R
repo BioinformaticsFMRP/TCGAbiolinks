@@ -981,7 +981,7 @@ TCGAquery_mutation <- function(tumor = NULL){
     if (nrow(query) == 0) return (NULL) # no mutation
 
     if (nrow(query) > 1) {
-        idx <- order(query$addedDate, decreasing = T)
+        idx <- order(query$addedDate, decreasing = TRUE)
         query <- query[idx,]
         query <- query[1,]
     }
