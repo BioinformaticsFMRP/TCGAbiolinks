@@ -119,6 +119,7 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 }
 
 # Filter files by barcode
+#' @importFrom stringr str_extract
 filterFiles <- function(data,samples,files){
 
     # If it if maf it is better to let download all files
@@ -129,7 +130,7 @@ filterFiles <- function(data,samples,files){
     #)
 
     barcodeName <- paste("IlluminaHiSeq_RNASeq",
-                         "humanmethylation",
+                         #"humanmethylation",
                          "H-miRNA_8x15K",
                          "images",
                          "SOLiD_DNASeq",
@@ -158,6 +159,8 @@ filterFiles <- function(data,samples,files){
                        sep = "|")
 
 
+    level <- as.numeric(unique(substr(str_extract(data$name,"Level_[1-3]"),7,7)))
+
     if (grepl(uuidName,data$Platform, ignore.case = TRUE)) {
         # case uuid in name file
         regex <- paste0("[[:alnum:]]{8}-[[:alnum:]]{4}",
@@ -178,7 +181,8 @@ filterFiles <- function(data,samples,files){
         idx <- unique(unlist(lapply(samples, function(x) grep(x,map$barcode))))
         idx <- which(uuid %in% map[idx,]$uuid)
         files <- files[ceiling(idx / 2)]
-    } else if(grepl(barcodeName, data$Platform, ignore.case = TRUE)) {
+    } else if(grepl(barcodeName, data$Platform, ignore.case = TRUE)
+              | (grepl("humanmethylation", data$Platform, ignore.case = TRUE) & level != 1 )) {
         idx <- unique(unlist(lapply(samples, function(x) grep(x,files))))
         files <- files[idx]
     } else if(grepl(mageName, data$Platform, ignore.case = TRUE)) {
