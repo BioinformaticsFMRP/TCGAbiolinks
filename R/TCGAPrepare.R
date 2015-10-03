@@ -198,8 +198,8 @@ TCGAprepare <- function(query,
             }
 
             rse <- SummarizedExperiment(assays = assay,
-                                         rowRanges = rowRanges,
-                                         colData = colData)
+                                        rowRanges = rowRanges,
+                                        colData = colData)
 
         } else {
             setDF(df)
@@ -207,7 +207,6 @@ TCGAprepare <- function(query,
             df$Composite.Element.REF <- NULL
         }
     }
-
 
     if (grepl("mda_rppa_core",tolower(platform))) {
 
@@ -221,7 +220,6 @@ TCGAprepare <- function(query,
                         "-[:alnum:]{4}-[:alnum:]{4}-[:alnum:]{12}")
         uuid <- str_match(files,regex)
         map <- mapuuidbarcode(uuid)
-
 
         for (i in seq_along(files)) {
             data <- fread(files[i], header = TRUE, sep = "\t", data.table = FALSE)
@@ -238,6 +236,32 @@ TCGAprepare <- function(query,
         }
         rownames(df) <- df[,1]
         df[,1] <- NULL
+    }
+
+    if (grepl("illuminaga_dnaseq",tolower(platform))) {
+
+        message(
+            paste("Sorry, but for this platform we haven't prepared",
+                  "the data into a summarizedExperiment object.",
+                  "\nBut we will do it soon! The return is a data frame of the maf file")
+        )
+
+        idx <- grep("maf",files)
+        if (length(idx) == 0) {
+            message("Sorry, we are preparing only maf files")
+            return(NULL)
+        }
+        files <- files[idx]
+        for (i in seq_along(files)) {
+            data <- read.table(files[i], fill = TRUE,
+                              comment.char = "#", header = TRUE, sep = "\t")
+            if (i == 1) {
+                df <- data
+            } else {
+                df <- rbind(df, data)
+            }
+            setTxtProgressBar(pb, i)
+        }
     }
 
     if (grepl("illuminadnamethylation_oma",
@@ -342,8 +366,8 @@ TCGAprepare <- function(query,
             }
             colData <- colDataPrepare(as.character(barcode), query)
             rse <- SummarizedExperiment(assays=assays,
-                                         rowRanges=rowRanges,
-                                         colData=colData)
+                                        rowRanges=rowRanges,
+                                        colData=colData)
         }else {
             setDF(df)
             rownames(df) <- df[,1]
@@ -405,8 +429,8 @@ TCGAprepare <- function(query,
             )
 
             rse <- SummarizedExperiment(assays=assays,
-                                         rowRanges=rowRanges,
-                                         colData=colData)
+                                        rowRanges=rowRanges,
+                                        colData=colData)
         }
     }
 
@@ -463,8 +487,8 @@ TCGAprepare <- function(query,
             )
 
             rse <- SummarizedExperiment(assays=assays,
-                                         rowRanges=rowRanges,
-                                         colData=colData)
+                                        rowRanges=rowRanges,
+                                        colData=colData)
         }
 
     }
@@ -609,8 +633,8 @@ TCGAprepare <- function(query,
             colData <- colDataPrepare(barcode,query)
 
             rse <- SummarizedExperiment(assays=assays,
-                                         rowRanges=rowRanges,
-                                         colData=colData)
+                                        rowRanges=rowRanges,
+                                        colData=colData)
         } else {
             setDF(df)
             rownames(df) <- df[,1]
@@ -681,7 +705,7 @@ TCGAprepare <- function(query,
         close(pb)
         message("Preparing h19 files...")
         idx <- grep("nocnv|hg18", files)
-        if(length(idx)>0){
+        if (length(idx) > 0){
             files <- files[-idx]
         }
 
@@ -705,7 +729,7 @@ TCGAprepare <- function(query,
             ####Check barcodes
             colNames[i] <- data$Sample[1]
 
-            for(j in 1:nrow(data)){
+            for (j in 1:nrow(data)){
                 gg <- sort(unique(gene.location[
                     gene.location$start_position >= data$Start[j]
                     & gene.location$end_position <= data$End[j],
@@ -738,8 +762,8 @@ TCGAprepare <- function(query,
             )
 
             rse <- SummarizedExperiment(assays = assays,
-                                         rowRanges = rowRanges,
-                                         colData = colData)
+                                        rowRanges = rowRanges,
+                                        colData = colData)
 
         }
     }
@@ -777,7 +801,7 @@ TCGAprepare <- function(query,
     }
 
     if (!is.null(rse)) {
-       return(rse)
+        return(rse)
     }
     return(df)
 }
@@ -990,7 +1014,7 @@ TCGAquery_mutation <- function(tumor = NULL){
     TCGAdownload(query,path = ".", type = "maf" )
     file <- dir(gsub(".tar.gz","",basename(query$deployLocation)),
                 full.names = TRUE)
-    print(file)
+
     ret <- read.table(file, comment.char = "#",
                       header = TRUE, sep = "\t",fill = TRUE)
     return(ret)
