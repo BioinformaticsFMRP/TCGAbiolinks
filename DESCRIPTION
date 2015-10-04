@@ -49,7 +49,7 @@ Imports:
     stringr (>= 1.0.0),
     IRanges,
     scales,
-    rvest,
+    rvest (>= 0.3.0),
     stats,
     utils,
     dnet,
