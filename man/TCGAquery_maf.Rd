@@ -21,7 +21,7 @@ Filtering sample output from TCGAquery
 }
 \examples{
 \dontrun{
-query <- TCGAquery(tumor = 'lgg')
+ query <- TCGAquery(tumor = 'lgg')
 }
 }
 
