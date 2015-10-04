@@ -6,8 +6,8 @@
  for downstream analysis into a SummarizedExperiment object.}
 \usage{
 TCGAprepare(query, dir = NULL, samples = NULL, type = NULL,
-  save = FALSE, filename = NULL, reannotate = FALSE,
-  summarizedExperiment = TRUE)
+  save = FALSE, filename = NULL, add.mutation.genes = FALSE,
+  reannotate = FALSE, summarizedExperiment = TRUE)
 }
 \arguments{
 \item{query}{TCGAquery output}
@@ -28,6 +28,8 @@ DEFAULT: FALSE. (For the moment only working for methylation data)}
 
 \item{summarizedExperiment}{Output as SummarizedExperiment?
 Default: \code{FALSE}}
+
+\item{mutation.genes}{Integrate information about genes mutation? DEFAULT: FALSE}
 }
 \value{
 A SummarizedExperiment object (If SummarizedExperiment = \code{FALSE},
