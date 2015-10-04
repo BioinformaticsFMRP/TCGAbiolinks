@@ -39,6 +39,7 @@
 #' @param save Save a rda object with the prepared object?
 #'  Default: \code{FALSE}
 #' @param filename Name of the saved file
+#' @param mutation.genes Integrate information about genes mutation? DEFAULT: FALSE
 #' @param reannotate Reannotate genes?  Source http://grch37.ensembl.org/.
 #' DEFAULT: FALSE. (For the moment only working for methylation data)
 #' @param summarizedExperiment Output as SummarizedExperiment?
@@ -50,7 +51,7 @@
 #' data <- TCGAprepare(query, dir="exampleData")
 #' @export
 #' @importFrom stringr str_match str_trim str_detect str_match_all
-#' @importFrom SummarizedExperiment SummarizedExperiment metadata<-
+#' @importFrom SummarizedExperiment SummarizedExperiment metadata<- colData<-
 #' @importFrom S4Vectors DataFrame SimpleList
 #' @importFrom limma alias2SymbolTable
 #' @importFrom GenomicFeatures microRNAs
@@ -69,6 +70,7 @@ TCGAprepare <- function(query,
                         type = NULL,
                         save = FALSE,
                         filename = NULL,
+                        add.mutation.genes = FALSE,
                         reannotate = FALSE,
                         summarizedExperiment = TRUE){
 
@@ -702,7 +704,6 @@ TCGAprepare <- function(query,
     }
     if (grepl("genome_wide_snp_6",tolower(platform))) {
 
-        close(pb)
 
         while(!(type %in% c("nocnv_hg18","nocnv_hg19","cnv_hg18","cnv_hg19"))){
             type <- readline(
@@ -725,8 +726,6 @@ TCGAprepare <- function(query,
             return (NULL)
         }
 
-        pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-
         if(is.vector(query)){
             mage <- getMage(query)
         } else {
@@ -738,55 +737,18 @@ TCGAprepare <- function(query,
             gene.db <- get.GRCh.bioMart("hg18")
         }
 
-        genes <- sort(unique(gene.location$external_gene_name))
-
-        df <- matrix(0, nrow = length(genes), ncol = length(files))
-        rownames(df) <- genes
-
-        colNames <- rep("", ncol(df)) #check barcode
         for (i in seq_along(files)) {
             data <- fread(files[i], header = TRUE, sep = "\t",
-                          stringsAsFactors = FALSE)
-            ####Check barcodes
-            colNames[i] <- data$Sample[1]
+                          stringsAsFactors = FALSE, data.table = FALSE)
+            if(i == 1) df <- data
+            if(i != 1) df <- rbind(df, data)
 
-            for (j in 1:nrow(data)){
-                gg <- sort(unique(gene.location[
-                    gene.location$start_position >= data$Start[j]
-                    & gene.location$end_position <= data$End[j],
-                    "external_gene_name"]))
-                df[gg, i] <- df[gg, i] + data$Segment_Mean[j]
-            }
             setTxtProgressBar(pb, i)
         }
-        id <- data.frame(id=colNames)
-        names <- merge(id,mage,by.x="id",by.y="Hybridization.Name")
-        colnames(df) <- names$Comment..TCGA.Barcode.
-
-        if (summarizedExperiment){
-            message("Preparing summarizedExperiment")
-            df <- DataFrame(df)
-            df$external_gene_name <- rownames(df)
-            merged <- merge(df,gene.location,by="external_gene_name")
-            rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
-                                 ranges = IRanges(start = merged$start_position,
-                                                  end = merged$end_position),
-                                 strand=merged$strand,
-                                 gene_id = merged$external_gene_name,
-                                 entrezgene = merged$entrezgene)
-            names(rowRanges) <- as.character(merged$external_gene_name)
-
-            idx  <- grep("TCGA",colnames(merged))
-            colData <- colDataPrepare(colnames(merged)[idx],query)
-            assays <- SimpleList(sum_Segment_Mean=data.matrix(
-                subset(merged,select = idx))
-            )
-
-            rse <- SummarizedExperiment(assays = assays,
-                                        rowRanges = rowRanges,
-                                        colData = colData)
-
-        }
+        mage <- mage[,c("Comment..TCGA.Barcode.","Hybridization.Name")]
+        df <- merge(df,mage,
+                    by.x="Sample",by.y="Hybridization.Name", sort=FALSE)
+        colnames(df)[7] <- "barcode"
     }
     close(pb)
 
@@ -803,8 +765,14 @@ TCGAprepare <- function(query,
                                                         "samples"=samples,
                                                         "type"=type,
                                                         "save"=save,
+                                                        "add.mutation.genes"=add.mutation.genes,
                                                         "filename"=filename),
                               "FilesInfo:"=list(finf))
+    }
+
+    if (add.mutation.genes & summarizedExperiment){
+        colData(rse) <- DataFrame(mutation.genes(
+            unique(query$Disease),colData(rse)))
     }
 
     if (save) {
@@ -1024,7 +992,7 @@ TCGAquery_mutation <- function(tumor = NULL){
 
     query <- TCGAquery(tumor,"IlluminaGA_DNASeq", level = 2)
 
-    if (nrow(query) == 0) return (NULL) # no mutation
+    if (nrow(query) == 0) return(NULL) # no mutation
 
     if (nrow(query) > 1) {
         idx <- order(query$addedDate, decreasing = TRUE)
@@ -1039,4 +1007,16 @@ TCGAquery_mutation <- function(tumor = NULL){
     ret <- read.table(file, comment.char = "#",
                       header = TRUE, sep = "\t",fill = TRUE)
     return(ret)
+}
+
+
+mutation.genes <- function(tumor = NULL, data){
+    df <- TCGAquery_maf(tumor)
+    DT <- data.table(df)
+    mutated.genes <- DataFrame(
+        DT[, list(genes = list(as.character(Hugo_Symbol))), by = "bcr_patient_barcode"]
+    )
+    colnames(mutated.genes)[1] <- "patient"
+    df <- merge(data,mutated.genes,all.x = TRUE, sort = FALSE, all.y= FALSE)
+    return(df)
 }
