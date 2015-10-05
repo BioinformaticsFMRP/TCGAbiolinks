@@ -144,9 +144,9 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
     # An igraph object that contains a functional protein association network
     # in human. The network is extracted from the STRING database (version 9.1).
     # Only those associations with medium confidence (score>=400) are retained.
-  #  org.Hs.string <- dRDataLoader(RData='org.Hs.string')
+    #  org.Hs.string <- dRDataLoader(RData='org.Hs.string')
     # restrict to those edges with high confidence (score>=700)
-   # with(org.Hs.string,{
+    # with(org.Hs.string,{
     #    network <- subgraph.edges(org.Hs.string, eids=E(org.Hs.string)[combined_score>=scoreConfidence])})
     #network
     network <- subgraph.edges(org.Hs.string, eids=E(org.Hs.string)[combined_score>=scoreConfidence])
@@ -395,7 +395,7 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
     mtext(mainLab, side = 3, line = -1, outer = TRUE, font = 2)
 
     dev.off()
-    }
+}
 
 #' @title Barplot of subtypes and clinical info in groups of gene expression clustered.
 #' @description
@@ -758,3 +758,110 @@ TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPa
     dev.off()
 }
 
+
+
+#' @title Profile plot
+#' @description Displaty the association between cancer subtypes and any kind of clustering.
+#' @param data A data frame with the cluters and subytpe of cancers
+#' @param subtypeCol Name of the column with the subtype information
+#' @param groupCol Names of tre columns with the cluster information
+#' @param filename Name of the file to save the plot, can be pdf, png, svg etc..
+#' @param na.rm Remove NA groups? Default = FALSE
+#' @importFrom sjPlot sjp.stackfrq
+#' @examples
+#' query <- TCGAquery(tumor = "lgg")
+#' \dontrun{
+#' clin <- TCGAquery_clinic("lgg","clinical_patient")
+#' TCGAvisualize_profilePlot ()
+#' }
+#' @export
+#' @return A plot
+TCGAvisualize_profilePlot <- function (data = NULL,
+                                       groupCol = NULL,
+                                       subtypeCol = NULL,
+                                       colors = NULL,
+                                       filename = NULL,
+                                       na.rm = FALSE) {
+
+    if (is.null(groupCol)) stop("Please provide the groupCol argument")
+    if (is.null(subtypeCol)) stop("Please provide the subtypeCol argument")
+    if (is.null(data)) stop("Please provide the data argument")
+    if (is.null(filename)) filename <- paste0(groupCol,subtypeCol,".pdf")
+
+    if(na.rm){
+        data <- data[!is.na(data[,groupCol]),]
+        data <- data[which(data[,groupCol] != "NA"),]
+    }
+
+    # use https://github.com/cttobin/ggthemr
+    # when it is in cran
+    if(is.null(colors)) colors <- c("#34495e",
+                                    "#3498db",
+                                    "#2ecc71",
+                                    "#f1c40f",
+                                    "#e74c3c",
+                                    "#9b59b6",
+                                    "#1abc9c",
+                                    "#f39c12",
+                                    "#d35400")
+
+    # The ideia is: we have a data frame like this:
+    #----------------------
+    # GROUP COL  SUBTYPE
+    #---------------------
+    # group 1     WT
+    # group 2     NC
+    # group 1     WT
+    # group 3     NC
+    #---------------------
+    # And we need
+    #-------------------
+    # Group 1 Group 2 Group 3
+    #   1       2       2
+    #   1       NA      NA
+    # ---------------------
+    # where 1 is WT and NC 2
+
+    df <- as.data.frame(data)
+    df <- dcast(df, as.formula(paste0(subtypeCol, " ~ ", groupCol)))
+    var.labels <- unique(df[,1]) # get the cluster names
+    m <- max(apply(df[,-1],2,sum)) # get the max number of subtypes in the clusters
+
+    # create a data frame with all values
+    for(i in 2:ncol(df)){
+        x <- c()
+        for(j in 1:nrow(df)){
+            x <- c(x,rep(j,(df[j,i])))
+        }
+        missing <- m-length(x)
+        x <- c(x,rep(NA,missing))
+        if(i == 2) data <- x
+        if(i > 2) data <- cbind(data,x)
+    }
+    colnames(data) <- colnames(df)[-1]
+
+    # create a collumn for all values
+    all <- as.numeric(unlist(data))
+    idx <- length(all) - nrow(data)
+    for( i in 1:idx) {
+        data <- rbind(data, rep(NA,ncol(data)))
+    }
+
+    data <- cbind(all,data)
+    colnames(data)[1] <- "All clusters"
+    data <- as.data.frame(data)
+
+    p <- sjp.stackfrq(data,
+                      legendTitle = subtypeCol,
+                      axisTitle.x = groupCol,
+                      #sort.frq = "last.desc",
+                      expand.grid = FALSE,
+                      legendLabels = as.character(var.labels),
+                      jitterValueLabels = TRUE,
+                      showSeparatorLine = TRUE,
+                      showValueLabels = FALSE,
+                      geom.colors = colors[1:length(var.labels)],
+                      #separatorLineColor = "#6699cc"
+                      printPlot = TRUE)
+    ggsave(p$plot, filename = filename, width = 10, height = 10, dpi = 600)
+}
