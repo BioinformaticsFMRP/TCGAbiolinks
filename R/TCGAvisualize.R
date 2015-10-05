@@ -848,7 +848,7 @@ TCGAvisualize_profilePlot <- function (data = NULL,
     }
 
     data <- cbind(all,data)
-    colnames(data)[1] <- "All clusters"
+    colnames(data)[1] <- subtypeCol
     data <- as.data.frame(data)
 
     p <- sjp.stackfrq(data,
