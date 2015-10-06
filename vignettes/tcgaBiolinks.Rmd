@@ -1407,6 +1407,9 @@ data_Hc1 <- TCGAanalyze_Clustering(tabDF = datFilt,method = "hclust", methodHC =
 data_Hc2 <- TCGAanalyze_Clustering(tabDF = datFilt,
                                    method = "consensus",
                                    methodHC = "ward.D2")        # time = 207.389 
+
+dataClin <- TCGAquery_clinic(cancer = cancer, clinical_data_type = "clinical_patient")
+
 # deciding number of tree to cuts
 cut.tree <-4
 paste0(c("EC"),(1:cut.tree))
@@ -1491,6 +1494,49 @@ ani.options(outdir = getwd())
 im.convert("case2_Heatmap2.pdf", 
            output = "case2_Heatmap2.png", 
            extra.opts="-density 150")
+
+# Adding plot for mutation of a selected gene within Expression Clusters
+
+LGGmut <- TCGAquery_mutation(tumor = "LGG")
+
+mRNAsel <- "ATRX"
+LGGselected <- LGGmut[LGGmut$Hugo_Symbol == mRNAsel,]
+
+dataMut <- cbind(LGGselected, groupsHC = matrix(0,nrow(LGGselected),1))
+dataMut <- dataMut[!duplicated(dataMut$Tumor_Sample_Barcode),]
+dataMut$Tumor_Sample_Barcode <- substr(dataMut$Tumor_Sample_Barcode ,1,12)
+rownames(dataMut) <- dataMut$Tumor_Sample_Barcode
+
+
+for( i in 1: nrow(dataMut)){
+  currSmp <- dataMut$Tumor_Sample_Barcode[i]
+  dataMut[currSmp,"groupsHC"] <- as.character(consensusClusters[currSmp])
+}
+
+
+for( ccols in 1:length(  as.character(levels(consensusClusters)) )){
+  dataMut[dataMut$groupsHC == as.character(levels(consensusClusters))[ccols],"groupsHC"] <- paste0("EC",ccols)
+}
+
+dataMut <- dataMut[dataMut$Variant_Classification!=0,]
+
+table(dataMut$groupsHC,dataMut$Variant_Classification)
+table(dataMut$groupsHC,dataMut$Variant_Type)
+
+
+TCGAvisualize_profilePlot(dataMut, 
+                          groupCol = "groupsHC", 
+                          subtypeCol =  "Variant_Classification",
+                          na.rm = FALSE,
+                          filename = paste0(mRNAsel,"_Mutation_Variant_Classification_in EC clusters.pdf"))
+
+TCGAvisualize_profilePlot(dataMut, 
+                          groupCol = "groupsHC", 
+                          subtypeCol =  "Variant_Type",
+                          na.rm = FALSE,
+                          filename = paste0(mRNAsel,"_Mutation_Variant_Type_in in EC clusters.pdf"))
+
+
 ```
 
 The figures resulted from the code above are shown below.
