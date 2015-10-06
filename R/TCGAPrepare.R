@@ -1010,15 +1010,21 @@ TCGAquery_mutation <- function(tumor = NULL){
 }
 
 
-mutation.genes <- function(tumor = NULL, data){
+mutation.genes <- function(tumor = NULL, data=NULL){
     df <- TCGAquery_maf(tumor)
     DT <- data.table(df)
-    mutated.genes <- DataFrame(
-        DT[, list(genes = list(as.character(DT$Hugo_Symbol))), by = "bcr_patient_barcode"]
-    )
+    mutated.genes <- with(DT, {
+        mutated.genes <- DataFrame(
+            DT[, list(genes = list(as.character(Hugo_Symbol))), by = "bcr_patient_barcode"]
+        )
+    })
     colnames(mutated.genes)[1] <- "patient"
-    df <- merge(data,mutated.genes,all.x = TRUE, sort = FALSE, all.y= FALSE)
-    df <- df[match(data$patient,df$patient),]
 
+    if(!is.null(data)){
+        df <- merge(data,mutated.genes,all.x = TRUE, sort = FALSE, all.y= FALSE)
+        df <- df[match(data$patient,df$patient),]
+    } else {
+        df <- mutated.genes
+    }
     return(df)
 }
