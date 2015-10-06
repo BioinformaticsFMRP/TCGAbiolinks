@@ -988,6 +988,9 @@ TCGAprepare_Affy <- function(ClinData, PathFolder, TabCel){
 #' @importFrom stringr str_match
 #' @importFrom xlsx read.xlsx2
 #' @keywords internal
+#' @export
+#' @examples
+#' LGGmut <- TCGAquery_mutation(tumor = "LGG")
 TCGAquery_mutation <- function(tumor = NULL){
 
     query <- TCGAquery(tumor,"IlluminaGA_DNASeq", level = 2)
