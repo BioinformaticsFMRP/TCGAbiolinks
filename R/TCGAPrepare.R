@@ -731,24 +731,28 @@ TCGAprepare <- function(query,
         } else {
             mage <- getMage(query[1,])
         }
-        if (grepl("hg19", type)){
-            gene.db <- gene.location
-        } else {
-            gene.db <- get.GRCh.bioMart("hg18")
-        }
 
         for (i in seq_along(files)) {
             data <- fread(files[i], header = TRUE, sep = "\t",
-                          stringsAsFactors = FALSE, data.table = FALSE)
+                          stringsAsFactors = FALSE, data.table = FALSE,
+                          colClasses=c("character", # ID
+                                       "character",   # chrom
+                                       "numeric", # start
+                                       "numeric",   # end
+                                       "integer", # num_probes
+                                       "numeric"))  # seg mean
             if(i == 1) df <- data
-            if(i != 1) df <- rbind(df, data)
+            if(i != 1) df <- rbind(df, data, make.row.names = FALSE)
 
             setTxtProgressBar(pb, i)
         }
         mage <- mage[,c("Comment..TCGA.Barcode.","Hybridization.Name")]
         df <- merge(df,mage,
                     by.x="Sample",by.y="Hybridization.Name", sort=FALSE)
-        colnames(df)[7] <- "barcode"
+
+        df[,1] <- df[,7]
+        df[,7] <- NULL
+
     }
     close(pb)
 
