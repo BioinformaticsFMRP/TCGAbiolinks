@@ -876,6 +876,12 @@ TCGAvisualize_profilePlot <- function (data = NULL,
 #' @param geneList List of genes to plot
 #' @param filename Name of the file to save the plot, can be pdf, png, svg etc..
 #' @param threshold plot only if number of mutated genes are higher than threshold
+#' @param by type of plot. Options: "genes" and "cluster".
+#'  By "genes" the axis will receive the genes
+#' and how many samples are mutated. By "cluster" will show the mutations of
+#' only one gene in the cluster.
+#' @param groupCol Must be provided if by is set to "cluster"
+#' @param na.rm Remove NA groups
 #' @importFrom sjPlot sjp.stackfrq
 #' @export
 #' @return A plot
@@ -884,50 +890,19 @@ TCGAvisualize_mutation <- function (data = NULL,
                                     samples = NULL,
                                     geneList = NULL,
                                     filename = NULL,
-                                    threshold = 0) {
+                                    threshold = 0,
+                                    by="genes",
+                                    groupCol=NULL,
+                                    na.rm = TRUE) {
+
+
+    if(na.rm){
+        data <- data[!is.na(data[,groupCol]),]
+        data <- data[which(data[,groupCol] != "NA"),]
+    }
 
     if (is.null(data)) stop("Please provide the data argument")
     if (is.null(filename)) filename <- "mutation_summary.pdf"
-
-    # subset samples
-    if(!is.null(samples)){
-        idx <- which(samples == data$patient)
-        data <- data[idx,]
-    }
-
-
-    # subset samples
-    if(!is.null(geneList)){
-        genes <- geneList
-    } else {
-        genes <- na.omit(unique(unlist(data$genes)))
-    }
-
-    df <-  data.frame(matrix(NA, ncol = length(genes), nrow = nrow(data)))
-    colnames(df) <- genes
-    summary <- table(unlist(data$genes))
-
-    for( i in genes){
-        print(i)
-        count <- summary[i]
-        count <- as.numeric(count)
-
-        if( count < threshold){
-            df[,i] <- NULL
-        } else {
-        print(count)
-            df[,i] <- c(rep(1,as.numeric(count)), rep(2,nrow(data)-count))
-        }
-    }
-
-    if(ncol(df) == 0){
-        stop("No genes found")
-    }
-    if(ncol(df) == 1){
-        df <- as.data.frame(df)
-    }
-
-    print(df)
 
     # use https://github.com/cttobin/ggthemr
     # when it is in cran
@@ -941,35 +916,95 @@ TCGAvisualize_mutation <- function (data = NULL,
                                     "#f39c12",
                                     "#d35400")
 
-    # The ideia is: we have a data frame like this:
-    #----------------------
-    # GROUP COL  SUBTYPE
-    #---------------------
-    # group 1     WT
-    # group 2     NC
-    # group 1     WT
-    # group 3     NC
-    #---------------------
-    # And we need
-    #-------------------
-    # Group 1 Group 2 Group 3
-    #   1       2       2
-    #   1       NA      NA
-    # ---------------------
-    # where 1 is WT and NC 2
+    # subset samples
+    if(!is.null(samples)){
+        idx <- which(samples == data$patient)
+        data <- data[idx,]
+    }
+
+    # subset samples
+    if(!is.null(geneList)){
+        genes <- geneList
+    } else {
+        genes <- na.omit(unique(unlist(data$genes)))
+    }
+
+    if(by == "cluster" & !is.null(groupCol)){
+        if(is.null(groupCol)){
+            stop("Please provide groupCol argument")
+        }
+
+        if(length(geneList) != 1 ){
+            stop("Please geneList in this case must be only one gene")
+        }
+
+        clusters <- unique(data[,groupCol])
+        df <-  data.frame(matrix(NA, ncol = length(clusters), nrow = nrow(data)))
+        colnames(df) <- clusters
+
+        for(j in clusters){
+            idx <-  which(data[,groupCol] == j)
+            aux <- data[idx,]
+            summary <- table(unlist(aux$genes))
+            count <- summary[geneList]
+            df[,j] <- c(rep(1,as.numeric(count)),
+                        rep(2,nrow(aux)-count),
+                        rep(NA,nrow(data)- nrow(aux)))
+        }
+
+        p <- sjp.stackfrq(df,
+                          title = paste0(geneList),
+                          legendTitle = "Status",
+                          #axisTitle.x = groupCol,
+                          #sort.frq = "last.desc",
+                          expand.grid = FALSE,
+                          legendLabels = c("Mutated","Not mutated"),
+                          jitterValueLabels = TRUE,
+                          showSeparatorLine = TRUE,
+                          showValueLabels = FALSE,
+                          geom.colors = colors[1:2],
+                          #separatorLineColor = "#6699cc"
+                          printPlot = TRUE)
 
 
-    p <- sjp.stackfrq(df,
-                      #legendTitle = subtypeCol,
-                      #axisTitle.x = groupCol,
-                      #sort.frq = "last.desc",
-                      expand.grid = FALSE,
-                      legendLabels = c("Mutated","Not mutated"),
-                      jitterValueLabels = TRUE,
-                      showSeparatorLine = TRUE,
-                      showValueLabels = FALSE,
-                      geom.colors = colors[1:2],
-                      #separatorLineColor = "#6699cc"
-                      printPlot = TRUE)
+    } else {
+        df <-  data.frame(matrix(NA, ncol = length(genes), nrow = nrow(data)))
+        colnames(df) <- genes
+        summary <- table(unlist(data$genes))
+
+        for( i in genes){
+            print(i)
+            count <- summary[i]
+            count <- as.numeric(count)
+
+            if( count < threshold){
+                df[,i] <- NULL
+            } else {
+                print(count)
+                df[,i] <- c(rep(1,as.numeric(count)), rep(2,nrow(data)-count))
+            }
+        }
+
+        if(ncol(df) == 0){
+            stop("No genes found")
+        }
+        if(ncol(df) == 1){
+            df <- as.data.frame(df)
+        }
+        p <- sjp.stackfrq(df,
+                          #legendTitle = subtypeCol,
+                          #axisTitle.x = groupCol,
+                          #sort.frq = "last.desc",
+                          expand.grid = FALSE,
+                          legendLabels = c("Mutated","Not mutated"),
+                          jitterValueLabels = TRUE,
+                          showSeparatorLine = TRUE,
+                          showValueLabels = FALSE,
+                          geom.colors = colors[1:2],
+                          #separatorLineColor = "#6699cc"
+                          printPlot = TRUE)
+
+    }
+
     ggsave(p$plot, filename = filename, width = 10, height = 10, dpi = 600)
 }
