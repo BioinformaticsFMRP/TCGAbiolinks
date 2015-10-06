@@ -865,3 +865,111 @@ TCGAvisualize_profilePlot <- function (data = NULL,
                       printPlot = TRUE)
     ggsave(p$plot, filename = filename, width = 10, height = 10, dpi = 600)
 }
+
+
+
+
+#' @title Visualize mutation
+#' @description See % of genes mutated
+#' @param data A data frame with the cluters and subytpe of cancers
+#' @param samples Samples to consider mutation
+#' @param geneList List of genes to plot
+#' @param filename Name of the file to save the plot, can be pdf, png, svg etc..
+#' @param threshold plot only if number of mutated genes are higher than threshold
+#' @importFrom sjPlot sjp.stackfrq
+#' @export
+#' @return A plot
+TCGAvisualize_mutation <- function (data = NULL,
+                                    colors = NULL,
+                                    samples = NULL,
+                                    geneList = NULL,
+                                    filename = NULL,
+                                    threshold = 0) {
+
+    if (is.null(data)) stop("Please provide the data argument")
+    if (is.null(filename)) filename <- "mutation_summary.pdf"
+
+    # subset samples
+    if(!is.null(samples)){
+        idx <- which(samples == data$patient)
+        data <- data[idx,]
+    }
+
+
+    # subset samples
+    if(!is.null(geneList)){
+        genes <- geneList
+    } else {
+        genes <- na.omit(unique(unlist(data$genes)))
+    }
+
+    df <-  data.frame(matrix(NA, ncol = length(genes), nrow = nrow(data)))
+    colnames(df) <- genes
+    summary <- table(unlist(data$genes))
+
+    for( i in genes){
+        print(i)
+        count <- summary[i]
+        count <- as.numeric(count)
+
+        if( count < threshold){
+            df[,i] <- NULL
+        } else {
+        print(count)
+            df[,i] <- c(rep(1,as.numeric(count)), rep(2,nrow(data)-count))
+        }
+    }
+
+    if(ncol(df) == 0){
+        stop("No genes found")
+    }
+    if(ncol(df) == 1){
+        df <- as.data.frame(df)
+    }
+
+    print(df)
+
+    # use https://github.com/cttobin/ggthemr
+    # when it is in cran
+    if(is.null(colors)) colors <- c("#34495e",
+                                    "#3498db",
+                                    "#2ecc71",
+                                    "#f1c40f",
+                                    "#e74c3c",
+                                    "#9b59b6",
+                                    "#1abc9c",
+                                    "#f39c12",
+                                    "#d35400")
+
+    # The ideia is: we have a data frame like this:
+    #----------------------
+    # GROUP COL  SUBTYPE
+    #---------------------
+    # group 1     WT
+    # group 2     NC
+    # group 1     WT
+    # group 3     NC
+    #---------------------
+    # And we need
+    #-------------------
+    # Group 1 Group 2 Group 3
+    #   1       2       2
+    #   1       NA      NA
+    # ---------------------
+    # where 1 is WT and NC 2
+
+
+    p <- sjp.stackfrq(df,
+                      #legendTitle = subtypeCol,
+                      #axisTitle.x = groupCol,
+                      #sort.frq = "last.desc",
+                      expand.grid = FALSE,
+                      legendLabels = c("Mutated","Not mutated"),
+                      jitterValueLabels = TRUE,
+                      showSeparatorLine = TRUE,
+                      showValueLabels = FALSE,
+                      geom.colors = colors[1:2],
+                      #separatorLineColor = "#6699cc"
+                      printPlot = TRUE)
+    ggsave(p$plot, filename = filename, width = 10, height = 10, dpi = 600)
+}
