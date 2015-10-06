@@ -941,7 +941,7 @@ TCGAvisualize_mutation <- function (data = NULL,
         clusters <- unique(data[,groupCol])
         df <-  data.frame(matrix(NA, ncol = length(clusters), nrow = nrow(data)))
         colnames(df) <- clusters
-
+        all <- c()
         for(j in clusters){
             idx <-  which(data[,groupCol] == j)
             aux <- data[idx,]
@@ -950,8 +950,12 @@ TCGAvisualize_mutation <- function (data = NULL,
             df[,j] <- c(rep(1,as.numeric(count)),
                         rep(2,nrow(aux)-count),
                         rep(NA,nrow(data)- nrow(aux)))
+
+            all <- c(all,c(rep(1,as.numeric(count))))
         }
 
+        df[,groupCol] <- c(all,rep(2,nrow(data)-length(all)))
+        df <- df[,rev(colnames(df))]
         p <- sjp.stackfrq(df,
                           title = paste0(geneList),
                           legendTitle = "Status",
