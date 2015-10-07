@@ -69,7 +69,10 @@ Imports:
     dplyr,
     parallel,
     xml2,
-    sjPlot
+    sjPlot,
+    magrittr,
+    CNTools,
+    cghMCR
 Description:
     The aim of TCGAbiolinks is :
     i) facilitate the TCGA open-access data retrieval,
