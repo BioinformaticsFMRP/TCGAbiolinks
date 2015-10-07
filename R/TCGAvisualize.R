@@ -767,7 +767,7 @@ TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPa
 #' @param groupCol Names of tre columns with the cluster information
 #' @param filename Name of the file to save the plot, can be pdf, png, svg etc..
 #' @param na.rm Remove NA groups? Default = FALSE
-#' @importFrom sjPlot sjp.stackfrq
+#' @importFrom sjPlot sjp.stackfrq sjp.setTheme
 #' @importFrom cowplot ggdraw switch_axis_position plot_grid
 #' @examples
 #' query <- TCGAquery(tumor = "lgg")
@@ -783,6 +783,8 @@ TCGAvisualize_profilePlot <- function (data = NULL,
                                        colors = NULL,
                                        filename = NULL,
                                        na.rm = FALSE) {
+
+    sjp.setTheme(theme = theme_classic())
 
     if (is.null(groupCol)) stop("Please provide the groupCol argument")
     if (is.null(subtypeCol)) stop("Please provide the subtypeCol argument")
@@ -937,7 +939,7 @@ TCGAvisualize_profilePlot <- function (data = NULL,
 
     plot(p$plot)
 
-    ggsave(p$plot, filename = filename, width = 10, height = 10, dpi = 600)
+    ggsave(p$plot, filename = filename, width = 20, height = 10, dpi = 600)
 }
 
 
