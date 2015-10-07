@@ -768,6 +768,7 @@ TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPa
 #' @param filename Name of the file to save the plot, can be pdf, png, svg etc..
 #' @param na.rm Remove NA groups? Default = FALSE
 #' @importFrom sjPlot sjp.stackfrq
+#' @importFrom cowplot ggdraw switch_axis_position plot_grid
 #' @examples
 #' query <- TCGAquery(tumor = "lgg")
 #' \dontrun{
