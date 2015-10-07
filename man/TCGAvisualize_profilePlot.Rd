@@ -14,7 +14,7 @@ TCGAvisualize_profilePlot(data = NULL, groupCol = NULL, subtypeCol = NULL,
 
 \item{subtypeCol}{Name of the column with the subtype information}
 
-\item{filename}{Name of the column with the subtype information}
+\item{filename}{Name of the file to save the plot, can be pdf, png, svg etc..}
 
 \item{na.rm}{Remove NA groups? Default = FALSE}
 }
