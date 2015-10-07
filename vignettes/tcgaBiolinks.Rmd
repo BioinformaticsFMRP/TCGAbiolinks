@@ -79,9 +79,20 @@ devtools::load_all(".")
 
 ## Introduction 
 
-Motivation: The Cancer Genome Atlas (TCGA) provides us with an enormous collection of data sets, not only spanning a large number of cancers but also a large number of experimental platforms. Even though the data can be accessed and downloaded from the database, the possibility to analyse these downloaded data directly in one single R package has not yet been available. 
+Motivation: The Cancer Genome Atlas (TCGA) provides us with an enormous collection of data sets,
+not only spanning a large number of cancers but also a large number of experimental platforms. 
+Even though the data can be accessed and downloaded from the database, the possibility to analyse 
+these downloaded data directly in one single R package has not yet been available. 
 
- TCGAbiolinks consists of three parts or levels. Firstly, we provide different options to query and download from TCGA relevant data from all currently platforms and their subsequent pre-processing for commonly used bio-informatics (tools) packages in Bioconductor or CRAN. Secondly, the package allows to integrate different data types and it can be used for different types of analyses dealing with all platforms such as diff.expression, network inference or survival analysis, etc, and then it allows to visualize the obtained results. Thirdly we added a social level where a researcher can found a similar intereset in a bioinformatic community, and allows both to find a validation of results in literature in pubmed and also to retrieve questions and answers from site such as support.bioconductor.org, biostars.org, stackoverflow,etc.
+ TCGAbiolinks consists of three parts or levels. Firstly, we provide different options to query and 
+ download from TCGA relevant data from all currently platforms and their subsequent pre-processing
+ for commonly used bio-informatics (tools) packages in Bioconductor or CRAN. Secondly, the package 
+ allows to integrate different data types and it can be used for different types of analyses dealing 
+ with all platforms such as diff.expression, network inference or survival analysis, etc, and then 
+ it allows to visualize the obtained results. Thirdly we added a social level where a researcher 
+ can found a similar intereset in a bioinformatic community, and allows both to find a validation 
+ of results in literature in pubmed and also to retrieve questions and answers from site such as 
+ support.bioconductor.org, biostars.org, stackoverflow,etc.
 
 This document describes how to search, download and analyze TCGA data using the
 `TCGAbiolinks` package.
@@ -241,6 +252,26 @@ of the files instead of the latest. This could take some seconds.
 ```{r, eval = FALSE}
 query <- TCGAquery(tumor = c("LGG","GBM"), platform = c("HumanMethylation450"), level = 3, 
                    version = list(c("HumanMethylation450","LGG",1)))
+```
+
+## `TCGAquery_maf`: Working with mutation files.
+
+In order to download the Mutation Annotation Format (MAF), we provide the user
+with the `TCGAquery_maf` function. Briefly, it will get the tables from
+https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files, remove the obsolete/protected
+files and ask the user which maf file he wants to download.
+
+
+The parameters that will be used to filter the data are:
+
+* tumor 
+* center
+* archive.name
+
+```{r, eval = TRUE}
+mutation <- TCGAquery_maf (tumor = "lgg", 
+                           archive.name = "IlluminaGA_DNASeq_curated.Level_2.1.4.0")
+head(mutation)
 ```
 
 ## `TCGAquery_clinic` `&` `TCGAquery_clinicFilt`: Working with clinical data.
@@ -540,6 +571,7 @@ The arguments are:
 * **summarizedExperiment** Should the output be a SummarizedExperiment object? Default: `TRUE`
 * **reannotate** Reannotate genes? Source http://grch37.ensembl.org/. 
 Default: `FALSE`. (For the moment only working for methylation data)
+* **mutation.genes** Add List of gene mutation? DEFAULT: `FALSE`
 
 In order to add useful information to reasearches we added in the colData of the 
 summarizedExperiment the subtypes classification for the LGG and GBM samples 
@@ -561,15 +593,22 @@ data <- TCGAprepare(query, dir = "data", save = TRUE, filename = "myfile.rda")
 ```{r,eval=FALSE,echo=FALSE,message=FALSE,warning=FALSE}
 library(TCGAbiolinks)
 library(SummarizedExperiment)
-query <- TCGAquery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3,
-                   samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
-                             "TCGA-DY-A0XA-01A-11R-A155-07"))
-TCGAdownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
-                             "TCGA-DY-A0XA-01A-11R-A155-07"),
-             type = "rsem.genes.normalized_results",path = "../dataREAD")
-dataREAD <- TCGAprepare(query,dir = "../dataREAD", type = "rsem.genes.normalized_results",
-                        samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
-                             "TCGA-DY-A0XA-01A-11R-A155-07"))
+
+samples <- c("TCGA-DY-A1DE-01A-11R-A155-07", "TCGA-DY-A0XA-01A-11R-A155-07")
+
+query <- TCGAquery(tumor = "READ", 
+                   platform = "IlluminaHiSeq_RNASeqV2", 
+                   level = 3,
+                   samples = samples)
+
+TCGAdownload(query,
+             samples = samples,
+             type = "rsem.genes.normalized_results",
+             path = "../dataREAD")
+
+dataREAD <- TCGAprepare(query,dir = "../dataREAD", 
+                        type = "rsem.genes.normalized_results",
+                        samples = samples)
 ```
 
 As an example, for the platform IlluminaHiSeq_RNASeqV2 we prepared two samples (TCGA-DY-A1DE-01A-11R-A155-07 and TCGA-DY-A0XA-01A-11R-A155-07) for the rsem.genes.normalized_results type. In order to create the object mapped the gene_id 
@@ -580,10 +619,15 @@ The default output is a SummarizedExperiment is shown below.
 library(TCGAbiolinks)
 library(SummarizedExperiment)
 head(assay(dataREAD,"normalized_count"))
+metadata(dataREAD)
+rowRanges(dataREAD)
+colData(dataREAD)
 ```
 
 In order to create the SummarizedExperiment object we mapped the rows of the 
-experiments into GRanges. In order to map miRNA we used the miRNA from the anotation database TxDb.Hsapiens.UCSC.hg19.knownGene, this will exclude the miRNA from viruses and bacteria. 
+experiments into GRanges. In order to map miRNA we used the miRNA from the 
+anotation database TxDb.Hsapiens.UCSC.hg19.knownGene, this will exclude the 
+miRNA from viruses and bacteria. 
 In order to map genes, genes alias, we used the biomart hg19 database 
 (hsapiens_gene_ensembl from grch37.ensembl.org).
 
@@ -1228,6 +1272,40 @@ library(grid)
 img <- readPNG("figure5star.png")
 grid.raster(img)
 ```
+
+## `TCGAvisualize_profilePlot`: Analyzing expression and methylation together 
+
+The best way to displaty the association between cancer subtypes 
+and any kind of clustering is using the profilePlot function.
+
+The inputs are:
+* **data** Dataframe with at least two collumns (grupCol and subtypeCol)
+* **groupCol** The name of the collumn with the group information
+* **subtypeCol** The name of the collumn with the subtype information
+* **  colors** A vector of colors 
+* **na.rm** Remove the NA groups? DEAFULT: `FALSE`
+
+```{r, eval = FALSE}
+df <- TCGAquery_subtype("lgg")
+TCGAvisualize_profilePlot(df, 
+                          groupCol = "RNASeqCluster", 
+                          subtypeCol =  "IDH.1p19q.Subtype", 
+                          na.rm = TRUE)
+```
+
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("profilePlot.png")
+grid.raster(img)
+```
+
+Interpretation: if the cluster profiles (conditional distribution 
+of the subtypes given the cluster)  are close to the subtype distribution 
+(last bar) then there is no association between the subtypes and the clustering.
+
+
 
 # TCGA Downstream Analysis: Case Studies
 
