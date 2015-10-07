@@ -976,11 +976,11 @@ TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01){
 #' @importFrom CNTools CNSeg getRS
 #' @importFrom cghMCR plot SGOL
 #' @examples
-#' query <- TCGAquery("acc","genome_wide_snp_6", level = 3)
-#' TCGAdownload(query,"trash", samples = "TCGA-OR-A5JH-01A-11D-A309-01")
-#' segment data <- TCGAprepare(query,"trash",  type = "nocnv_hg19",
+#' query <- TCGAquery("acc", platform = "genome_wide_snp_6", level = 3)
+#' TCGAdownload(query,path = "trash", samples = "TCGA-OR-A5JH-01A-11D-A309-01")
+#' segment_data <- TCGAprepare(query, dir = "trash",  type = "nocnv_hg19",
 #'                     samples = "TCGA-OR-A5JH-01A-11D-A309-01")
-#' TCGAanalyze_copynumber(segment data)
+#' TCGAanalyze_copynumber(segment_data)
 #' @export
 #' @return List of list with tables in 2 by 2 comparison
 #' of the top-ranked genes from a linear model fitted by DEA's limma
@@ -997,8 +997,8 @@ TCGAanalyze_copynumber <- function(data = NULL,  threshold = 0){
                            geneMap = geneInfo,
                            what = "median")
     SGOLScores <- SGOL(convertedData, threshold = c(-0.2, 0.2), method = sum)
-    plot(SGOLScores)
 
+    plot(SGOLScores)
 
     ret <- SGOLScores[union(which(as.numeric(unlist(gol(SGOLScores[, "gains"]))) >=
                                          threshold),
