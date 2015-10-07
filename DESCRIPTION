@@ -72,7 +72,8 @@ Imports:
     sjPlot,
     magrittr,
     CNTools,
-    cghMCR
+    cghMCR,
+    cowplot
 Description:
     The aim of TCGAbiolinks is :
     i) facilitate the TCGA open-access data retrieval,
