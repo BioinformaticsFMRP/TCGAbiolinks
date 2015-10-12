@@ -39,7 +39,7 @@
 #' @param save Save a rda object with the prepared object?
 #'  Default: \code{FALSE}
 #' @param filename Name of the saved file
-#' @param mutation.genes Integrate information about genes mutation? DEFAULT: FALSE
+#' @param add.mutation.genes Integrate information about genes mutation? DEFAULT: FALSE
 #' @param reannotate Reannotate genes?  Source http://grch37.ensembl.org/.
 #' DEFAULT: FALSE. (For the moment only working for methylation data)
 #' @param summarizedExperiment Output as SummarizedExperiment?
