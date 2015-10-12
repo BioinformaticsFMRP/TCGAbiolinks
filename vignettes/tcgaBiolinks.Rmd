@@ -1615,6 +1615,44 @@ TCGAvisualize_profilePlot(dataMut,
                           filename = paste0(mRNAsel,"_Mutation_Variant_Type_in in EC clusters.pdf"))
 
 
+
+#dataMut <- dataMut[!duplicated(dataMut$Tumor_Sample_Barcode),]
+#dataMut$Tumor_Sample_Barcode <- substr(dataMut$Tumor_Sample_Barcode ,1,12)
+#rownames(dataMut) <- dataMut$Tumor_Sample_Barcode
+
+#dataMut <- dataMut[dataMut$patient %in% names(consensusClusters),]
+
+dataMut <- cbind(dataSubt, groupsHC = matrix(0,nrow(dataSubt),1))
+rownames(dataMut) <- dataMut$patient
+dataMut$patient <- as.character(dataMut$patient)
+
+for( i in 1: nrow(dataMut)){
+  currSmp <- as.character(dataMut$patient[i])
+  dataMut[currSmp,"groupsHC"] <- as.character(consensusClusters[currSmp])
+}
+
+dataMut <- dataMut[dataMut$groupsHC!=0,]
+
+dataMut$groupsHC <- as.character(dataMut$groupsHC)
+
+for( ccols in 1:length(  as.character(levels(consensusClusters)) )){
+  dataMut[dataMut$groupsHC == as.character(levels(consensusClusters))[ccols],"groupsHC"] <- paste0("EC",ccols)
+}
+
+
+dataMut$patient <- as.character(dataMut$patient)
+dataMut$groupsHC <- as.factor(dataMut$groupsHC)
+
+TCGAvisualize_profilePlot(colData(coad.exp2), groupCol = "RNASeqCluster", subtypeCol =  "ATRX")
+
+TCGAvisualize_mutation(data = colData(coad.exp2),groupCol = "RNASeqCluster",geneList = "IDH1",filename = "test.pdf",by = "cluster")
+
+TCGAvisualize_mutation(data = dataMut,
+                       groupCol = "groupsHC",
+                       geneList = "ATRX",
+                       filename = "test.pdf",
+                       by = "cluster",na.rm = TRUE)
+
 ```
 
 The figures resulted from the code above are shown below.
