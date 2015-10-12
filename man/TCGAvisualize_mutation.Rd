@@ -11,6 +11,8 @@ TCGAvisualize_mutation(data = NULL, colors = NULL, samples = NULL,
 \arguments{
 \item{data}{A data frame with the cluters and subytpe of cancers}
 
+\item{colors}{Vector of colors for the barplot}
+
 \item{samples}{Samples to consider mutation}
 
 \item{geneList}{List of genes to plot}
