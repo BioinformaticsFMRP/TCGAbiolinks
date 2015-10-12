@@ -974,13 +974,15 @@ TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01){
 #' @param data  Copy number data from TCGAPrepare
 #' @param threshold  Gain/Loss threshold
 #' @importFrom CNTools CNSeg getRS
-#' @importFrom cghMCR plot SGOL
+#' @importFrom cghMCR plot SGOL gol
 #' @examples
-#' query <- TCGAquery("acc", platform = "genome_wide_snp_6", level = 3)
-#' TCGAdownload(query,path = "trash", samples = "TCGA-OR-A5JH-01A-11D-A309-01")
-#' segment_data <- TCGAprepare(query, dir = "trash",  type = "nocnv_hg19",
+#' \dontrun{
+#'  query <- TCGAquery("acc", platform = "genome_wide_snp_6", level = 3)
+#'  TCGAdownload(query,path = "trash", samples = "TCGA-OR-A5JH-01A-11D-A309-01")
+#'  segment_data <- TCGAprepare(query, dir = "trash",  type = "nocnv_hg19",
 #'                     samples = "TCGA-OR-A5JH-01A-11D-A309-01")
-#' TCGAanalyze_copynumber(segment_data)
+#'  TCGAanalyze_copynumber(segment_data)
+#' }
 #' @export
 #' @return List of list with tables in 2 by 2 comparison
 #' of the top-ranked genes from a linear model fitted by DEA's limma

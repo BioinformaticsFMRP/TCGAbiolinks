@@ -766,23 +766,33 @@ TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPa
 #' @param subtypeCol Name of the column with the subtype information
 #' @param groupCol Names of tre columns with the cluster information
 #' @param filename Name of the file to save the plot, can be pdf, png, svg etc..
-#' @param na.rm Remove NA groups? Default = FALSE
+#' @param na.rm Remove NA groups/subtypes? Default = FALSE
+#' @param colors Vector of colors to be used in the bars
+#' @param plot.margin Plot margin for cluster distribution. This can control the size
+#' of the bar if the output is not aligned
 #' @importFrom sjPlot sjp.stackfrq sjp.setTheme
 #' @importFrom cowplot ggdraw switch_axis_position plot_grid
-#' @examples
-#' query <- TCGAquery(tumor = "lgg")
-#' \dontrun{
-#' clin <- TCGAquery_clinic("lgg","clinical_patient")
-#' TCGAvisualize_profilePlot ()
-#' }
+#' @importFrom reshape2 dcast
+#' @importFrom grDevices gray.colors
+#' @import gtable
 #' @export
+#' @examples
+#' cluster <- c(rep("cluster1",30),
+#'              rep("cluster2",30),
+#'              rep("cluster3",30))
+#' subtype <- rep(c(rep("subtype1",10),
+#'            rep("subtype2",10),
+#'            rep("subtype3",10)),3)
+#' df <- data.frame(cluster,subtype)
+#' TCGAvisualize_profilePlot(df, "cluster","subtype")
 #' @return A plot
-TCGAvisualize_profilePlot <- function (data = NULL,
-                                       groupCol = NULL,
-                                       subtypeCol = NULL,
-                                       colors = NULL,
-                                       filename = NULL,
-                                       na.rm = FALSE) {
+TCGAvisualize_profilePlot <- function(data = NULL,
+                                      groupCol = NULL,
+                                      subtypeCol = NULL,
+                                      colors = NULL,
+                                      filename = NULL,
+                                      na.rm = FALSE,
+                                      plot.margin=c(-2.5,-2.5,-0.5,2)) {
 
     sjp.setTheme(theme = theme_classic())
 
@@ -858,8 +868,12 @@ TCGAvisualize_profilePlot <- function (data = NULL,
     data <- as.data.frame(data)
 
     ngroups <- length(unique(groups))
-    nsbutype <- length(unique(all)) - 1 # -1 for NA
+    nsbutype <- length(unique(all))
+    print(unique(all))
+    if(NA %in% unique(all)) nsbutype <- nsbutype - 1
     max <- length(na.omit(data[,1]))
+    message(paste0("Number of subtypes: ", nsbutype))
+    message(paste0("Number of ngroups: ", ngroups))
 
     for(i in 1:ncol(data)){
         if(i == 1) {
@@ -870,18 +884,18 @@ TCGAvisualize_profilePlot <- function (data = NULL,
     }
 
     p <- .mysjp.stackfrq(data,
-                        legendTitle = subtypeCol,
-                        axisTitle.x = groupCol,
-                        #sort.frq = "last.desc",
-                        expand.grid = FALSE,
-                        geom.size = width,
-                        legendLabels = as.character(var.labels),
-                        jitterValueLabels = TRUE,
-                        #showSeparatorLine = TRUE,
-                        showValueLabels = FALSE,
-                        geom.colors = colors[1:length(var.labels)],
-                        #separatorLineColor = "#6699cc"
-                        printPlot = TRUE)
+                         legendTitle = subtypeCol,
+                         axisTitle.x = groupCol,
+                         #sort.frq = "last.desc",
+                         expand.grid = FALSE,
+                         geom.size = width,
+                         legendLabels = as.character(var.labels),
+                         jitterValueLabels = TRUE,
+                         #showSeparatorLine = TRUE,
+                         showValueLabels = FALSE,
+                         geom.colors = colors[1:length(var.labels)],
+                         #separatorLineColor = "#6699cc"
+                         printPlot = TRUE)
     p$plot <-  ggdraw(switch_axis_position(p$plot , axis = 'y'))
 
     j <- 1
@@ -916,19 +930,20 @@ TCGAvisualize_profilePlot <- function (data = NULL,
 
     p2$plot <- p2$plot +
         theme(#legend.position="none",
-              #plot.margin=unit(c(-3.0,4.5,-0.75,5.5), "cm"),
-              plot.margin=unit(c(-3.3,-2.5,-1.0,2), "cm"),
-              axis.line=element_blank(),
-              axis.text.x=element_blank(),
-              #axis.text.y=element_blank(),
-              axis.ticks=element_blank(),
-              #axis.title.x=element_blank(),
-              #axis.title.y=element_blank(),
-              #panel.background=element_blank(),
-              #panel.border=element_blank(),
-              #panel.grid.major=element_blank(),
-              #panel.grid.minor=element_blank(),
-              plot.background=element_blank())
+            #plot.margin=unit(c(-3.0,4.5,-0.75,5.5), "cm"),
+            #plot.margin=unit(c(-3.3,-2.5,-1.0,2), "cm"),
+            plot.margin=unit(plot.margin, "cm"),
+            axis.line=element_blank(),
+            axis.text.x=element_blank(),
+            #axis.text.y=element_blank(),
+            axis.ticks=element_blank(),
+            #axis.title.x=element_blank(),
+            #axis.title.y=element_blank(),
+            #panel.background=element_blank(),
+            #panel.border=element_blank(),
+            #panel.grid.major=element_blank(),
+            #panel.grid.minor=element_blank(),
+            plot.background=element_blank())
 
     p$plot <-  plot_grid(p2$plot,
                          p$plot,
@@ -949,6 +964,7 @@ TCGAvisualize_profilePlot <- function (data = NULL,
 #' @description See % of genes mutated
 #' @param data A data frame with the cluters and subytpe of cancers
 #' @param samples Samples to consider mutation
+#' @param colors Vector of colors for the barplot
 #' @param geneList List of genes to plot
 #' @param filename Name of the file to save the plot, can be pdf, png, svg etc..
 #' @param threshold plot only if number of mutated genes are higher than threshold
@@ -1094,36 +1110,38 @@ TCGAvisualize_mutation <- function (data = NULL,
 }
 
 #' @import magrittr
+#' @keywords internal
+#' @import sjmisc
 .mysjp.stackfrq <- function(items,
-                           legendLabels = NULL,
-                           sort.frq = NULL,
-                           weightBy = NULL,
-                           weightByTitleString = NULL,
-                           hideLegend = FALSE,
-                           title = NULL,
-                           legendTitle = NULL,
-                           includeN = TRUE,
-                           axisLabels.y = NULL,
-                           breakTitleAt = 50,
-                           breakLabelsAt = 30,
-                           breakLegendTitleAt = 30,
-                           breakLegendLabelsAt = 28,
-                           gridBreaksAt = 0.2,
-                           expand.grid = FALSE,
-                           geom.size = 0.5,
-                           geom.colors = "Blues",
-                           axisTitle.x = NULL,
-                           axisTitle.y = NULL,
-                           showValueLabels = TRUE,
-                           labelDigits = 1,
-                           showPercentageAxis = TRUE,
-                           jitterValueLabels = FALSE,
-                           showItemLabels = TRUE,
-                           showSeparatorLine = FALSE,
-                           separatorLineColor = "grey80",
-                           separatorLineSize = 0.3,
-                           coord.flip = TRUE,
-                           printPlot = TRUE) {
+                            legendLabels = NULL,
+                            sort.frq = NULL,
+                            weightBy = NULL,
+                            weightByTitleString = NULL,
+                            hideLegend = FALSE,
+                            title = NULL,
+                            legendTitle = NULL,
+                            includeN = TRUE,
+                            axisLabels.y = NULL,
+                            breakTitleAt = 50,
+                            breakLabelsAt = 30,
+                            breakLegendTitleAt = 30,
+                            breakLegendLabelsAt = 28,
+                            gridBreaksAt = 0.2,
+                            expand.grid = FALSE,
+                            geom.size = 0.5,
+                            geom.colors = "Blues",
+                            axisTitle.x = NULL,
+                            axisTitle.y = NULL,
+                            showValueLabels = TRUE,
+                            labelDigits = 1,
+                            showPercentageAxis = TRUE,
+                            jitterValueLabels = FALSE,
+                            showItemLabels = TRUE,
+                            showSeparatorLine = FALSE,
+                            separatorLineColor = "grey80",
+                            separatorLineSize = 0.3,
+                            coord.flip = TRUE,
+                            printPlot = TRUE) {
     # --------------------------------------------------------
     # check param. if we have a single vector instead of
     # a data frame with several items, convert vector to data frame
@@ -1255,6 +1273,10 @@ TCGAvisualize_mutation <- function (data = NULL,
         } else {
             df <- as.data.frame(prop.table(round(stats::xtabs(weightBy ~ variable), 0)))
         }
+
+        grp <- NULL
+        ypos <- NULL
+
         # give columns names
         names(df) <- c("var", "prc")
         # need to be numeric, so percentage values (see below) are
@@ -1409,7 +1431,7 @@ TCGAvisualize_mutation <- function (data = NULL,
     } else {
         baseplot <- ggplot(mydat, aes(x = grp, y = prc, fill = cat))
     }
-        baseplot <- baseplot +
+    baseplot <- baseplot +
         # plot bar chart
         geom_bar(aes(x = grp, y = prc, fill = cat),stat = "identity",
                  position = "stack", width = 0.98 *geom.size, colour="black")
@@ -1465,4 +1487,14 @@ TCGAvisualize_mutation <- function (data = NULL,
     invisible(structure(class = "sjpstackfrq",
                         list(plot = baseplot,
                              df = mydat)))
+}
+
+
+# unlist labels
+# Help function that unlists a list into a vector
+unlistlabels <- function(lab) {
+    dummy <- unlist(lab)
+    labels <- c()
+    labels <- c(labels, as.character(dummy))
+    return(labels)
 }
