@@ -23,13 +23,13 @@ Default: \code{FALSE}}
 
 \item{filename}{Name of the saved file}
 
+\item{add.mutation.genes}{Integrate information about genes mutation? DEFAULT: FALSE}
+
 \item{reannotate}{Reannotate genes?  Source http://grch37.ensembl.org/.
 DEFAULT: FALSE. (For the moment only working for methylation data)}
 
 \item{summarizedExperiment}{Output as SummarizedExperiment?
 Default: \code{FALSE}}
-
-\item{mutation.genes}{Integrate information about genes mutation? DEFAULT: FALSE}
 }
 \value{
 A SummarizedExperiment object (If SummarizedExperiment = \code{FALSE},
