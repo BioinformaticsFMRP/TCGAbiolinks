@@ -2,22 +2,22 @@ context("Query")
 
 test_that("Results of query by center return only this center", {
     res <- TCGAquery(center = "broad.mit.edu")
-    expect_that(length(unique(res$Center)), equals(1))
-    expect_that(unique(res$Center), equals("broad.mit.edu"))
+    expect_equal(length(unique(res$Center)),1)
+    expect_equal(unique(res$Center), "broad.mit.edu")
 })
 
 test_that("Results of query by platform return only this platform", {
     res <- TCGAquery(platform = "pathology_reports")
-    expect_that(length(unique(res$Platform)), equals(1))
-    expect_that(unique(res$Platform), equals("pathology_reports"))
+    expect_equal(length(unique(res$Platform)), 1)
+    expect_equal(unique(res$Platform), "pathology_reports")
 })
 
 test_that("Results of query by tumor return only this tumor", {
     res <- TCGAquery( tumor = "gbm")
-    expect_that(unique(res$Disease), equals("GBM"))
-    expect_that(length(unique(res$Disease)), equals(1))
+    expect_identical(unique(res$Disease), "GBM")
+    expect_equal(length(unique(res$Disease)),1)
     res <- TCGAquery( tumor = "GBM")
-    expect_that(unique(res$Disease), equals("GBM"))
+    expect_identical(unique(res$Disease), "GBM")
 })
 
 test_that("Results of query by barcode return this barcode", {
@@ -36,19 +36,19 @@ test_that("Results of query by barcode return this barcode", {
 test_that("Results of query by center/platform/disease return only them", {
     res <- TCGAquery(tumor = "gbm", platform = "bio",
                      center = "nationwidechildrens.org")
-    expect_that(unique(res$Disease), equals("GBM"))
-    expect_that(unique(res$Platform), equals("bio"))
-    expect_that(length(unique(res$Disease)), equals(1))
-    expect_that(length(unique(res$Platform)), equals(1))
+    expect_identical(unique(res$Disease), "GBM")
+    expect_identical(unique(res$Platform), "bio")
+    expect_equal(length(unique(res$Disease)), 1)
+    expect_equal(length(unique(res$Platform)), 1)
     expect_identical(unique(res$Center),"nationwidechildrens.org")
-    expect_that(length(unique(res$Center)), equals(1))
+    expect_equal(length(unique(res$Center)), 1)
 })
 
 test_that("Results of query by center/platform/disease does not exist
           return empty data frame", {
               res <- TCGAquery(tumor = "gbm", platform = "bio",
                                center = "jhu-usc.edu")
-              expect_that(nrow(res), equals(0))
+              expect_equal(nrow(res), 0)
           })
 
 test_that("If platform argument is wrong, result is NULL ", {
