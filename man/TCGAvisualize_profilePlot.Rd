@@ -5,7 +5,8 @@
 \title{Profile plot}
 \usage{
 TCGAvisualize_profilePlot(data = NULL, groupCol = NULL, subtypeCol = NULL,
-  colors = NULL, filename = NULL, na.rm = FALSE)
+  colors = NULL, filename = NULL, na.rm = FALSE, plot.margin = c(-2.5,
+  -2.5, -0.5, 2))
 }
 \arguments{
 \item{data}{A data frame with the cluters and subytpe of cancers}
@@ -14,9 +15,14 @@ TCGAvisualize_profilePlot(data = NULL, groupCol = NULL, subtypeCol = NULL,
 
 \item{subtypeCol}{Name of the column with the subtype information}
 
+\item{colors}{Vector of colors to be used in the bars}
+
 \item{filename}{Name of the file to save the plot, can be pdf, png, svg etc..}
 
-\item{na.rm}{Remove NA groups? Default = FALSE}
+\item{na.rm}{Remove NA groups/subtypes? Default = FALSE}
+
+\item{plot.margin}{Plot margin for cluster distribution. This can control the size
+of the bar if the output is not aligned}
 }
 \value{
 A plot
@@ -25,10 +31,13 @@ A plot
 Displaty the association between cancer subtypes and any kind of clustering.
 }
 \examples{
-query <- TCGAquery(tumor = "lgg")
-\dontrun{
-clin <- TCGAquery_clinic("lgg","clinical_patient")
-TCGAvisualize_profilePlot ()
-}
+cluster <- c(rep("cluster1",30),
+             rep("cluster2",30),
+             rep("cluster3",30))
+subtype <- rep(c(rep("subtype1",10),
+           rep("subtype2",10),
+           rep("subtype3",10)),3)
+df <- data.frame(cluster,subtype)
+TCGAvisualize_profilePlot(df, "cluster","subtype")
 }
 
