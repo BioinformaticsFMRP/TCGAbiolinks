@@ -6,8 +6,8 @@
  for downstream analysis into a SummarizedExperiment object.}
 \usage{
 TCGAprepare(query, dir = NULL, samples = NULL, type = NULL,
-  save = FALSE, filename = NULL, reannotate = FALSE,
-  summarizedExperiment = TRUE)
+  save = FALSE, filename = NULL, add.mutation.genes = FALSE,
+  reannotate = FALSE, summarizedExperiment = TRUE)
 }
 \arguments{
 \item{query}{TCGAquery output}
@@ -22,6 +22,8 @@ TCGAprepare(query, dir = NULL, samples = NULL, type = NULL,
 Default: \code{FALSE}}
 
 \item{filename}{Name of the saved file}
+
+\item{add.mutation.genes}{Integrate information about genes mutation? DEFAULT: FALSE}
 
 \item{reannotate}{Reannotate genes?  Source http://grch37.ensembl.org/.
 DEFAULT: FALSE. (For the moment only working for methylation data)}
