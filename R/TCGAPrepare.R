@@ -39,6 +39,7 @@
 #' @param save Save a rda object with the prepared object?
 #'  Default: \code{FALSE}
 #' @param filename Name of the saved file
+#' @param add.mutation.genes Integrate information about genes mutation? DEFAULT: FALSE
 #' @param reannotate Reannotate genes?  Source http://grch37.ensembl.org/.
 #' DEFAULT: FALSE. (For the moment only working for methylation data)
 #' @param summarizedExperiment Output as SummarizedExperiment?
@@ -50,7 +51,7 @@
 #' data <- TCGAprepare(query, dir="exampleData")
 #' @export
 #' @importFrom stringr str_match str_trim str_detect str_match_all
-#' @importFrom SummarizedExperiment SummarizedExperiment metadata<-
+#' @importFrom SummarizedExperiment SummarizedExperiment metadata<- colData<-
 #' @importFrom S4Vectors DataFrame SimpleList
 #' @importFrom limma alias2SymbolTable
 #' @importFrom GenomicFeatures microRNAs
@@ -69,6 +70,7 @@ TCGAprepare <- function(query,
                         type = NULL,
                         save = FALSE,
                         filename = NULL,
+                        add.mutation.genes = FALSE,
                         reannotate = FALSE,
                         summarizedExperiment = TRUE){
 
@@ -198,8 +200,8 @@ TCGAprepare <- function(query,
             }
 
             rse <- SummarizedExperiment(assays = assay,
-                                         rowRanges = rowRanges,
-                                         colData = colData)
+                                        rowRanges = rowRanges,
+                                        colData = colData)
 
         } else {
             setDF(df)
@@ -209,35 +211,60 @@ TCGAprepare <- function(query,
     }
 
     if (grepl("mda_rppa_core",tolower(platform))) {
+
+        message(
+            paste("Sorry, but for this platform we haven't prepared",
+                  "the data into a summarizedExperiment object.",
+                  "\nBut we will do it soon! The return is a data frame")
+        )
+
+        regex <- paste0("[:alnum:]{8}-[:alnum:]{4}",
+                        "-[:alnum:]{4}-[:alnum:]{4}-[:alnum:]{12}")
+        uuid <- str_match(files,regex)
+        map <- mapuuidbarcode(uuid)
+
         for (i in seq_along(files)) {
-            data <- read.table(files[i], header = TRUE, sep = "\t",
-                               stringsAsFactors = FALSE, check.names = FALSE)
-            sample <- gsub("\\.", "-", colnames(data)[2])
-            colnames(data) <- data[1,]
+            data <- fread(files[i], header = TRUE, sep = "\t", data.table = FALSE)
             data <- data[-1,] # removing Composite Element REF
-            colnames(data)[2] <- sample
+            x <- subset(map, uuid == uuid[i])
+            colnames(data)[2] <- as.character(x$barcode)
 
             if (i == 1) {
                 df <- data
             } else {
-                df <- merge(df, data,by = "Composite Element REF")
+                df <- merge(df, data,by = "Sample REF",all = TRUE )
             }
             setTxtProgressBar(pb, i)
         }
         rownames(df) <- df[,1]
         df[,1] <- NULL
-        # get array_design.txt from mage folder
-        # and change uuid by Barcode
-        uuid <- colnames(df)
-        idx <- grep("Sample|Control",uuid)
-        if(length(idx) > 0){
-            uuid <- uuid[-idx]
-        }
-        map <- mapuuidbarcode(uuid)
-        idx <- which(colnames(df) %in% map$uuid)
-        colnames(df)[idx] <- as.character(map$barcode)
     }
 
+    if (grepl("illuminaga_dnaseq",tolower(platform))) {
+
+        message(
+            paste("Sorry, but for this platform we haven't prepared",
+                  "the data into a summarizedExperiment object.",
+                  "\nBut we will do it soon! The return is a data frame of the maf file")
+        )
+
+        idx <- grep("maf",files)
+        if (length(idx) == 0) {
+            message("Sorry, we are preparing only maf files")
+            return(NULL)
+        }
+        files <- files[idx]
+        for (i in seq_along(files)) {
+            data <- read.table(files[i], fill = TRUE,
+                               comment.char = "#", header = TRUE, sep = "\t")
+            if (i == 1) {
+                df <- data
+            } else {
+                df <- rbind(df, data)
+            }
+            setTxtProgressBar(pb, i)
+        }
+    }
 
     if (grepl("illuminadnamethylation_oma",
               platform, ignore.case = TRUE)) {
@@ -341,8 +368,8 @@ TCGAprepare <- function(query,
             }
             colData <- colDataPrepare(as.character(barcode), query)
             rse <- SummarizedExperiment(assays=assays,
-                                         rowRanges=rowRanges,
-                                         colData=colData)
+                                        rowRanges=rowRanges,
+                                        colData=colData)
         }else {
             setDF(df)
             rownames(df) <- df[,1]
@@ -404,8 +431,8 @@ TCGAprepare <- function(query,
             )
 
             rse <- SummarizedExperiment(assays=assays,
-                                         rowRanges=rowRanges,
-                                         colData=colData)
+                                        rowRanges=rowRanges,
+                                        colData=colData)
         }
     }
 
@@ -462,8 +489,8 @@ TCGAprepare <- function(query,
             )
 
             rse <- SummarizedExperiment(assays=assays,
-                                         rowRanges=rowRanges,
-                                         colData=colData)
+                                        rowRanges=rowRanges,
+                                        colData=colData)
         }
 
     }
@@ -608,8 +635,8 @@ TCGAprepare <- function(query,
             colData <- colDataPrepare(barcode,query)
 
             rse <- SummarizedExperiment(assays=assays,
-                                         rowRanges=rowRanges,
-                                         colData=colData)
+                                        rowRanges=rowRanges,
+                                        colData=colData)
         } else {
             setDF(df)
             rownames(df) <- df[,1]
@@ -677,14 +704,27 @@ TCGAprepare <- function(query,
     }
     if (grepl("genome_wide_snp_6",tolower(platform))) {
 
-        close(pb)
-        message("Preparing h19 files...")
-        idx <- grep("nocnv|hg18", files)
-        if(length(idx)>0){
-            files <- files[-idx]
-        }
 
-        pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+        while(!(type %in% c("nocnv_hg18","nocnv_hg19","cnv_hg18","cnv_hg19"))){
+            type <- readline(
+                paste("Which type do you want?",
+                      "(Options: nocnv_hg19,nocnv_hg18,cnv_hg18,cnv_hg19, cancel)  ")
+            )
+            if(type == "cancel") return(NULL)
+        }
+        if(type == "nocnv_hg18") regex <- "nocnv_hg18"
+        if(type == "cnv_hg18") regex <- "[^no]cnv_hg18"
+        if(type == "nocnv_hg19") regex <- "nocnv_hg19"
+        if(type == "cnv_hg19") regex <- "[^no]cnv_hg19"
+
+        idx <- grep(regex, files)
+
+        if (length(idx) > 0){
+            files <- files[idx]
+        } else {
+            message("No files of that type found")
+            return (NULL)
+        }
 
         if(is.vector(query)){
             mage <- getMage(query)
@@ -692,55 +732,27 @@ TCGAprepare <- function(query,
             mage <- getMage(query[1,])
         }
 
-        genes <- sort(unique(gene.location$external_gene_name))
-
-        df <- matrix(0, nrow = length(genes), ncol = length(files))
-        rownames(df) <- genes
-
-        colNames <- rep("", ncol(df)) #check barcode
         for (i in seq_along(files)) {
             data <- fread(files[i], header = TRUE, sep = "\t",
-                          stringsAsFactors = FALSE)
-            ####Check barcodes
-            colNames[i] <- data$Sample[1]
+                          stringsAsFactors = FALSE, data.table = FALSE,
+                          colClasses=c("character", # ID
+                                       "character",   # chrom
+                                       "numeric", # start
+                                       "numeric",   # end
+                                       "integer", # num_probes
+                                       "numeric"))  # seg mean
+            if(i == 1) df <- data
+            if(i != 1) df <- rbind(df, data, make.row.names = FALSE)
 
-            for(j in 1:nrow(data)){
-                gg <- sort(unique(gene.location[
-                    gene.location$start_position >= data$Start[j]
-                    & gene.location$end_position <= data$End[j],
-                    "external_gene_name"]))
-                df[gg, i] <- df[gg, i] + data$Segment_Mean[j]
-            }
             setTxtProgressBar(pb, i)
         }
-        id <- data.frame(id=colNames)
-        names <- merge(id,mage,by.x="id",by.y="Hybridization.Name")
-        colnames(df) <- names$Comment..TCGA.Barcode.
+        mage <- mage[,c("Comment..TCGA.Barcode.","Hybridization.Name")]
+        df <- merge(df,mage,
+                    by.x="Sample",by.y="Hybridization.Name", sort=FALSE)
 
-        if (summarizedExperiment){
-            message("Preparing summarizedExperiment")
-            df <- DataFrame(df)
-            df$external_gene_name <- rownames(df)
-            merged <- merge(df,gene.location,by="external_gene_name")
-            rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
-                                 ranges = IRanges(start = merged$start_position,
-                                                  end = merged$end_position),
-                                 strand=merged$strand,
-                                 gene_id = merged$external_gene_name,
-                                 entrezgene = merged$entrezgene)
-            names(rowRanges) <- as.character(merged$external_gene_name)
+        df[,1] <- df[,7]
+        df[,7] <- NULL
 
-            idx  <- grep("TCGA",colnames(merged))
-            colData <- colDataPrepare(colnames(merged)[idx],query)
-            assays <- SimpleList(sum_Segment_Mean=data.matrix(
-                subset(merged,select = idx))
-            )
-
-            rse <- SummarizedExperiment(assays = assays,
-                                         rowRanges = rowRanges,
-                                         colData = colData)
-
-        }
     }
     close(pb)
 
@@ -757,8 +769,14 @@ TCGAprepare <- function(query,
                                                         "samples"=samples,
                                                         "type"=type,
                                                         "save"=save,
+                                                        "add.mutation.genes"=add.mutation.genes,
                                                         "filename"=filename),
                               "FilesInfo:"=list(finf))
+    }
+
+    if (add.mutation.genes & summarizedExperiment){
+        colData(rse) <- DataFrame(mutation.genes(
+            unique(query$Disease),colData(rse)))
     }
 
     if (save) {
@@ -776,7 +794,7 @@ TCGAprepare <- function(query,
     }
 
     if (!is.null(rse)) {
-       return(rse)
+        return(rse)
     }
     return(df)
 }
@@ -966,31 +984,23 @@ TCGAprepare_Affy <- function(ClinData, PathFolder, TabCel){
 
 }
 
-# This function will preprare the colData for TCGAPrepare
-# The idea is to add usefull information to the object
-# that will help the users to understand their samples
-# ref: TCGA codeTablesReport - Table: Sample type
-#' @importFrom S4Vectors DataFrame
-#' @importFrom stringr str_match
-#' @importFrom xlsx read.xlsx2
-#' @keywords internal
-TCGAquery_mutation <- function(tumor = NULL){
 
-    query <- TCGAquery(tumor,"IlluminaGA_DNASeq", level = 2)
 
-    if (nrow(query) == 0) return (NULL) # no mutation
+mutation.genes <- function(tumor = NULL, data=NULL){
+    df <- TCGAquery_maf(tumor)
+    DT <- data.table(df)
+    mutated.genes <- with(DT, {
+        mutated.genes <- DataFrame(
+            DT[, list(genes = list(as.character(Hugo_Symbol))), by = "bcr_patient_barcode"]
+        )
+    })
+    colnames(mutated.genes)[1] <- "patient"
 
-    if (nrow(query) > 1) {
-        idx <- order(query$addedDate, decreasing = TRUE)
-        query <- query[idx,]
-        query <- query[1,]
+    if(!is.null(data)){
+        df <- merge(data,mutated.genes,all.x = TRUE, sort = FALSE, all.y= FALSE)
+        df <- df[match(data$patient,df$patient),]
+    } else {
+        df <- mutated.genes
     }
-
-    TCGAdownload(query,path = ".", type = "maf" )
-    file <- dir(gsub(".tar.gz","",basename(query$deployLocation)),
-                full.names = TRUE)
-    print(file)
-    ret <- read.table(file, comment.char = "#",
-                      header = TRUE, sep = "\t",fill = TRUE)
-    return(ret)
+    return(df)
 }
