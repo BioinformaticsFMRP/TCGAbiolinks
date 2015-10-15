@@ -144,9 +144,9 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
     # An igraph object that contains a functional protein association network
     # in human. The network is extracted from the STRING database (version 9.1).
     # Only those associations with medium confidence (score>=400) are retained.
-  #  org.Hs.string <- dRDataLoader(RData='org.Hs.string')
+    #  org.Hs.string <- dRDataLoader(RData='org.Hs.string')
     # restrict to those edges with high confidence (score>=700)
-   # with(org.Hs.string,{
+    # with(org.Hs.string,{
     #    network <- subgraph.edges(org.Hs.string, eids=E(org.Hs.string)[combined_score>=scoreConfidence])})
     #network
     network <- subgraph.edges(org.Hs.string, eids=E(org.Hs.string)[combined_score>=scoreConfidence])
@@ -395,7 +395,7 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
     mtext(mainLab, side = 3, line = -1, outer = TRUE, font = 2)
 
     dev.off()
-    }
+}
 
 #' @title Barplot of subtypes and clinical info in groups of gene expression clustered.
 #' @description
@@ -758,3 +758,743 @@ TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPa
     dev.off()
 }
 
+
+
+#' @title Profile plot
+#' @description Displaty the association between cancer subtypes and any kind of clustering.
+#' @param data A data frame with the cluters and subytpe of cancers
+#' @param subtypeCol Name of the column with the subtype information
+#' @param groupCol Names of tre columns with the cluster information
+#' @param filename Name of the file to save the plot, can be pdf, png, svg etc..
+#' @param na.rm Remove NA groups/subtypes? Default = FALSE
+#' @param colors Vector of colors to be used in the bars
+#' @param plot.margin Plot margin for cluster distribution. This can control the size
+#' of the bar if the output is not aligned
+#' @importFrom sjPlot sjp.stackfrq sjp.setTheme
+#' @importFrom cowplot ggdraw switch_axis_position plot_grid
+#' @importFrom reshape2 dcast
+#' @importFrom grDevices gray.colors
+#' @import gtable
+#' @export
+#' @examples
+#' cluster <- c(rep("cluster1",30),
+#'              rep("cluster2",30),
+#'              rep("cluster3",30))
+#' subtype <- rep(c(rep("subtype1",10),
+#'            rep("subtype2",10),
+#'            rep("subtype3",10)),3)
+#' df <- data.frame(cluster,subtype)
+#' TCGAvisualize_profilePlot(df, "cluster","subtype")
+#' @return A plot
+TCGAvisualize_profilePlot <- function(data = NULL,
+                                      groupCol = NULL,
+                                      subtypeCol = NULL,
+                                      colors = NULL,
+                                      filename = NULL,
+                                      na.rm = FALSE,
+                                      plot.margin=c(-2.5,-2.5,-0.5,2)) {
+
+    sjp.setTheme(theme = theme_classic())
+
+    if (is.null(groupCol)) stop("Please provide the groupCol argument")
+    if (is.null(subtypeCol)) stop("Please provide the subtypeCol argument")
+    if (is.null(data)) stop("Please provide the data argument")
+    if (is.null(filename)) filename <- paste0(groupCol,subtypeCol,".pdf")
+
+    if(na.rm){
+        data <- data[!is.na(data[,groupCol]),]
+        data <- data[which(data[,groupCol] != "NA"),]
+    }
+
+    # use https://github.com/cttobin/ggthemr
+    # when it is in cran
+    if(is.null(colors)) colors <- c("#34495e",
+                                    "#3498db",
+                                    "#2ecc71",
+                                    "#f1c40f",
+                                    "#e74c3c",
+                                    "#9b59b6",
+                                    "#1abc9c",
+                                    "#f39c12",
+                                    "#d35400")
+
+    # The ideia is: we have a data frame like this:
+    #----------------------
+    # GROUP COL  SUBTYPE
+    #---------------------
+    # group 1     WT
+    # group 2     NC
+    # group 1     WT
+    # group 3     NC
+    #---------------------
+    # And we need
+    #-------------------
+    # Group 1 Group 2 Group 3
+    #   1       2       2
+    #   1       NA      NA
+    # ---------------------
+    # where 1 is WT and NC 2
+    df <- as.data.frame(data)
+    groups <- df[,groupCol]
+
+    df <- dcast(df, as.formula(paste0(subtypeCol, " ~ ", groupCol)))
+
+    var.labels <- unique(df[,1]) # get the cluster names
+
+    m <- max(apply(df[,-1],2,sum)) # get the max number of subtypes in the clusters
+
+    # create a data frame with all values
+    for(i in 2:ncol(df)){
+        x <- c()
+        for(j in 1:nrow(df)){
+            x <- c(x,rep(j,(df[j,i])))
+        }
+        missing <- m-length(x)
+        x <- c(x,rep(NA,missing))
+        if(i == 2) data <- x
+        if(i > 2) data <- cbind(data,x)
+    }
+    colnames(data) <- colnames(df)[-1]
+
+    # create a collumn for all values
+    all <- as.numeric(unlist(data))
+    idx <- length(all) - nrow(data)
+    for( i in 1:idx) {
+        data <- rbind(data, rep(NA,ncol(data)))
+    }
+
+    data <- cbind(all,data)
+    colnames(data)[1] <- subtypeCol
+    data <- as.data.frame(data)
+
+    ngroups <- length(unique(groups))
+    nsbutype <- length(unique(all))
+    print(unique(all))
+    if(NA %in% unique(all)) nsbutype <- nsbutype - 1
+    max <- length(na.omit(data[,1]))
+    message(paste0("Number of subtypes: ", nsbutype))
+    message(paste0("Number of ngroups: ", ngroups))
+
+    for(i in 1:ncol(data)){
+        if(i == 1) {
+            width = rep(c(0.5),nsbutype)
+        }  else {
+            width <- c(width, rep((ngroups/max) * length(na.omit(data[,i])),nsbutype))
+        }
+    }
+
+    p <- .mysjp.stackfrq(data,
+                         legendTitle = subtypeCol,
+                         axisTitle.x = groupCol,
+                         #sort.frq = "last.desc",
+                         expand.grid = FALSE,
+                         geom.size = width,
+                         legendLabels = as.character(var.labels),
+                         jitterValueLabels = TRUE,
+                         #showSeparatorLine = TRUE,
+                         showValueLabels = FALSE,
+                         geom.colors = colors[1:length(var.labels)],
+                         #separatorLineColor = "#6699cc"
+                         printPlot = TRUE)
+    p$plot <-  ggdraw(switch_axis_position(p$plot , axis = 'y'))
+
+    j <- 1
+    groups <- as.data.frame(groups)
+    groups$x <- 1
+    for( i in sort(unique(groups[,1]))){
+        idx <- which(groups[,1] == i)
+        groups[idx,] <- as.numeric(j)
+        j <- j + 1
+    }
+
+    p2 <- sjp.stackfrq(groups[,2],
+                       #legendTitle = subtypeCol,
+                       axisTitle.y = "Cluster distribution",
+                       #sort.frq = "first.asc",
+                       #expand.grid = TRUE,
+                       legendLabels = as.character(unique(groups[,2])),
+                       coord.flip = FALSE,
+                       #jitterValueLabels = TRUE,
+                       hideLegend = TRUE,
+                       showSeparatorLine = FALSE,
+                       #showValueLabels = FALSE,
+                       includeN = FALSE,
+                       #geom.size = c(0.1,0.2,0.4,0.3),
+                       geom.colors = gray.colors(length(unique(groups[,2])),
+                                                 start = 0.6,
+                                                 end = 0.9,
+                                                 gamma = 2.2,
+                                                 alpha = 0.1),
+                       #separatorLineColor = "#6699cc"
+                       printPlot = TRUE)
+
+    p2$plot <- p2$plot +
+        theme(#legend.position="none",
+            #plot.margin=unit(c(-3.0,4.5,-0.75,5.5), "cm"),
+            #plot.margin=unit(c(-3.3,-2.5,-1.0,2), "cm"),
+            plot.margin=unit(plot.margin, "cm"),
+            axis.line=element_blank(),
+            axis.text.x=element_blank(),
+            #axis.text.y=element_blank(),
+            axis.ticks=element_blank(),
+            #axis.title.x=element_blank(),
+            #axis.title.y=element_blank(),
+            #panel.background=element_blank(),
+            #panel.border=element_blank(),
+            #panel.grid.major=element_blank(),
+            #panel.grid.minor=element_blank(),
+            plot.background=element_blank())
+
+    p$plot <-  plot_grid(p2$plot,
+                         p$plot,
+                         ncol = 2,
+                         scale = c(0.5,1),
+                         rel_heights = c(2,8),
+                         rel_widths = c(0.6,2))
+
+    plot(p$plot)
+
+    ggsave(p$plot, filename = filename, width = 20, height = 10, dpi = 600)
+}
+
+
+
+
+#' @title Visualize mutation
+#' @description See % of genes mutated
+#' @param data A data frame with the cluters and subytpe of cancers
+#' @param samples Samples to consider mutation
+#' @param colors Vector of colors for the barplot
+#' @param geneList List of genes to plot
+#' @param filename Name of the file to save the plot, can be pdf, png, svg etc..
+#' @param threshold plot only if number of mutated genes are higher than threshold
+#' @param by type of plot. Options: "genes" and "cluster".
+#'  By "genes" the axis will receive the genes
+#' and how many samples are mutated. By "cluster" will show the mutations of
+#' only one gene in the cluster.
+#' @param groupCol Must be provided if by is set to "cluster"
+#' @param na.rm Remove NA groups
+#' @importFrom sjPlot sjp.stackfrq sjp.setTheme
+#' @export
+#' @return A plot
+TCGAvisualize_mutation <- function (data = NULL,
+                                    colors = NULL,
+                                    samples = NULL,
+                                    geneList = NULL,
+                                    filename = NULL,
+                                    threshold = 0,
+                                    by="genes",
+                                    groupCol=NULL,
+                                    na.rm = TRUE) {
+
+
+    if(na.rm){
+        data <- data[!is.na(data[,groupCol]),]
+        data <- data[which(data[,groupCol] != "NA"),]
+    }
+
+    if (is.null(data)) stop("Please provide the data argument")
+    if (is.null(filename)) filename <- "mutation_summary.pdf"
+
+    # use https://github.com/cttobin/ggthemr
+    # when it is in cran
+    if(is.null(colors)) colors <- c("#34495e",
+                                    "#3498db",
+                                    "#2ecc71",
+                                    "#f1c40f",
+                                    "#e74c3c",
+                                    "#9b59b6",
+                                    "#1abc9c",
+                                    "#f39c12",
+                                    "#d35400")
+
+    # subset samples
+    if(!is.null(samples)){
+        idx <- which(samples == data$patient)
+        data <- data[idx,]
+    }
+
+    # subset samples
+    if(!is.null(geneList)){
+        genes <- geneList
+    } else {
+        genes <- na.omit(unique(unlist(data$genes)))
+    }
+
+    if(by == "cluster" & !is.null(groupCol)){
+        if(is.null(groupCol)){
+            stop("Please provide groupCol argument")
+        }
+
+        if(length(geneList) != 1 ){
+            stop("Please geneList in this case must be only one gene")
+        }
+
+        clusters <- unique(data[,groupCol])
+        df <-  data.frame(matrix(NA, ncol = length(clusters), nrow = nrow(data)))
+        colnames(df) <- clusters
+        all <- c()
+        for(j in clusters){
+            idx <-  which(data[,groupCol] == j)
+            aux <- data[idx,]
+            summary <- table(unlist(aux$genes))
+            count <- summary[geneList]
+            df[,j] <- c(rep(1,as.numeric(count)),
+                        rep(2,nrow(aux)-count),
+                        rep(NA,nrow(data)- nrow(aux)))
+
+            all <- c(all,c(rep(1,as.numeric(count))))
+        }
+
+        df[,groupCol] <- c(all,rep(2,nrow(data)-length(all)))
+        df <- df[,rev(colnames(df))]
+
+        # add theme when this library is in CRAN
+        # https://github.com/cttobin/ggthemr
+        #sjp.setTheme(theme = "539")
+        p <- sjp.stackfrq(df,
+                          title = paste0(geneList),
+                          legendTitle = "Status",
+                          #axisTitle.x = groupCol,
+                          #sort.frq = "last.desc",
+                          expand.grid = FALSE,
+                          legendLabels = c("Mutated","Not mutated"),
+                          jitterValueLabels = TRUE,
+                          showSeparatorLine = TRUE,
+                          showValueLabels = FALSE,
+                          geom.colors = colors[1:2],
+                          #separatorLineColor = "#6699cc"
+                          printPlot = TRUE)
+
+
+    } else {
+        df <-  data.frame(matrix(NA, ncol = length(genes), nrow = nrow(data)))
+        colnames(df) <- genes
+        summary <- table(unlist(data$genes))
+
+        for( i in genes){
+            print(i)
+            count <- summary[i]
+            count <- as.numeric(count)
+
+            if( count < threshold){
+                df[,i] <- NULL
+            } else {
+                print(count)
+                df[,i] <- c(rep(1,as.numeric(count)), rep(2,nrow(data)-count))
+            }
+        }
+
+        if(ncol(df) == 0){
+            stop("No genes found")
+        }
+        if(ncol(df) == 1){
+            df <- as.data.frame(df)
+        }
+        p <- sjp.stackfrq(df,
+                          #legendTitle = subtypeCol,
+                          #axisTitle.x = groupCol,
+                          #sort.frq = "last.desc",
+                          expand.grid = FALSE,
+                          legendLabels = c("Mutated","Not mutated"),
+                          jitterValueLabels = TRUE,
+                          showSeparatorLine = TRUE,
+                          showValueLabels = FALSE,
+                          geom.colors = colors[1:2],
+                          #separatorLineColor = "#6699cc"
+                          printPlot = TRUE)
+
+    }
+
+    ggsave(p$plot, filename = filename, width = 10, height = 10, dpi = 600)
+}
+
+#' @import magrittr
+#' @keywords internal
+#' @import sjmisc
+.mysjp.stackfrq <- function(items,
+                            legendLabels = NULL,
+                            sort.frq = NULL,
+                            weightBy = NULL,
+                            weightByTitleString = NULL,
+                            hideLegend = FALSE,
+                            title = NULL,
+                            legendTitle = NULL,
+                            includeN = TRUE,
+                            axisLabels.y = NULL,
+                            breakTitleAt = 50,
+                            breakLabelsAt = 30,
+                            breakLegendTitleAt = 30,
+                            breakLegendLabelsAt = 28,
+                            gridBreaksAt = 0.2,
+                            expand.grid = FALSE,
+                            geom.size = 0.5,
+                            geom.colors = "Blues",
+                            axisTitle.x = NULL,
+                            axisTitle.y = NULL,
+                            showValueLabels = TRUE,
+                            labelDigits = 1,
+                            showPercentageAxis = TRUE,
+                            jitterValueLabels = FALSE,
+                            showItemLabels = TRUE,
+                            showSeparatorLine = FALSE,
+                            separatorLineColor = "grey80",
+                            separatorLineSize = 0.3,
+                            coord.flip = TRUE,
+                            printPlot = TRUE) {
+    # --------------------------------------------------------
+    # check param. if we have a single vector instead of
+    # a data frame with several items, convert vector to data frame
+    # --------------------------------------------------------
+    if (!is.data.frame(items) && !is.matrix(items)) items <- as.data.frame(items)
+    # --------------------------------------------------------
+    # check sorting
+    # --------------------------------------------------------
+    if (!is.null(sort.frq)) {
+        if (sort.frq == "first.asc") {
+            sort.frq  <- "first"
+            reverseOrder <- FALSE
+        } else if (sort.frq == "first.desc") {
+            sort.frq  <- "first"
+            reverseOrder <- TRUE
+        } else if (sort.frq == "last.asc") {
+            sort.frq  <- "last"
+            reverseOrder <- TRUE
+        } else if (sort.frq == "last.desc") {
+            sort.frq  <- "last"
+            reverseOrder <- FALSE
+        } else {
+            sort.frq  <- NULL
+            reverseOrder <- FALSE
+        }
+    } else {
+        reverseOrder <- FALSE
+    }
+    # --------------------------------------------------------
+    # try to automatically set labels is not passed as parameter
+    # --------------------------------------------------------
+    if (is.null(legendLabels)) legendLabels <- sjmisc:::autoSetValueLabels(items[[1]])
+    if (is.null(axisLabels.y)) {
+        axisLabels.y <- c()
+        # if yes, iterate each variable
+        for (i in 1:ncol(items)) {
+            # retrieve variable name attribute
+            vn <- sjmisc:::autoSetVariableLabels(items[[i]])
+            # if variable has attribute, add to variableLabel list
+            if (!is.null(vn)) {
+                axisLabels.y <- c(axisLabels.y, vn)
+            } else {
+                # else break out of loop
+                axisLabels.y <- NULL
+                break
+            }
+        }
+    }
+    # --------------------------------------------------------
+    # If axisLabels.y were not defined, simply use column names
+    # --------------------------------------------------------
+    if (is.null(axisLabels.y)) axisLabels.y <- colnames(items)
+    # --------------------------------------------------------
+    # unlist/ unname axis labels
+    # --------------------------------------------------------
+    if (!is.null(axisLabels.y)) {
+        # unlist labels, if necessary, so we have a simple
+        # character vector
+        if (is.list(axisLabels.y)) axisLabels.y <- unlistlabels(axisLabels.y)
+        # unname labels, if necessary, so we have a simple
+        # character vector
+        if (!is.null(names(axisLabels.y))) axisLabels.y <- as.vector(axisLabels.y)
+    }
+    # --------------------------------------------------------
+    # unlist/ unname axis labels
+    # --------------------------------------------------------
+    if (!is.null(legendLabels)) {
+        # unlist labels, if necessary, so we have a simple
+        # character vector
+        if (is.list(legendLabels)) legendLabels <- unlistlabels(legendLabels)
+        # unname labels, if necessary, so we have a simple
+        # character vector
+        if (!is.null(names(legendLabels))) legendLabels <- as.vector(legendLabels)
+    }
+    if (is.null(legendLabels)) {
+        # if we have no legend labels, we iterate all data frame's
+        # columns to find all unique items of the data frame.
+        # In case one item has missing categories, this may be
+        # "compensated" by looking at all items, so we have the
+        # actual values of all items.
+        legendLabels <- as.character(sort(unique(unlist(
+            apply(items, 2, function(x) unique(stats::na.omit(x)))))))
+    }
+    # --------------------------------------------------------
+    # Check whether N of each item should be included into
+    # axis labels
+    # --------------------------------------------------------
+    if (includeN && !is.null(axisLabels.y)) {
+        for (i in 1:length(axisLabels.y)) {
+            axisLabels.y[i] <- paste(axisLabels.y[i],
+                                     sprintf(" (n=%i)", length(stats::na.omit(items[[i]]))),
+                                     sep = "")
+        }
+    }
+    # -----------------------------------------------
+    # if we have legend labels, we know the exact
+    # amount of groups
+    # -----------------------------------------------
+    countlen <- length(legendLabels)
+    # -----------------------------------------------
+    # create cross table for stats, summary etc.
+    # and weight variable. do this for each item that was
+    # passed as parameter
+    #---------------------------------------------------
+    mydat <- c()
+    # ----------------------------
+    # determine minimum value. if 0, add one, because
+    # vector indexing starts with 1
+    # ----------------------------
+    if (any(apply(items, c(1, 2), is.factor)) || any(apply(items, c(1, 2), is.character))) {
+        diff <- ifelse(min(apply(items, c(1, 2), as.numeric), na.rm = TRUE) == 0, 1, 0)
+    } else {
+        diff <- ifelse(min(items, na.rm = TRUE) == 0, 1, 0)
+    }
+    # iterate item-list
+    for (i in 1:ncol(items)) {
+        # get each single items
+        variable <- items[[i]]
+        # -----------------------------------------------
+        # create proportional table so we have the percentage
+        # values that should be used as y-value for the bar charts
+        # We now have a data frame with categories, group-association
+        # and percentage values (i.e. each cell as separate row in the
+        # data frame)
+        # -----------------------------------------------
+        # check whether counts should be weighted or not
+        if (is.null(weightBy)) {
+            df <- as.data.frame(prop.table(table(variable)))
+        } else {
+            df <- as.data.frame(prop.table(round(stats::xtabs(weightBy ~ variable), 0)))
+        }
+
+        grp <- NULL
+        ypos <- NULL
+
+        # give columns names
+        names(df) <- c("var", "prc")
+        # need to be numeric, so percentage values (see below) are
+        # correctly assigned, i.e. missing categories are considered
+        df$var <- sjmisc::to_value(df$var, keep.labels = FALSE) + diff # if categories start with zero, fix this here
+        # Create a vector of zeros
+        prc <- rep(0, countlen)
+        # Replace the values in prc for those indices which equal df$var
+        prc[df$var] <- df$prc
+        # create new data frame. We now have a data frame with all
+        # variable categories abd their related percentages, including
+        # zero counts, but no(!) missings!
+        mydf <- data.frame(grp = i,
+                           cat = 1:countlen,
+                           prc)
+        # now, append data frames
+        mydat <- data.frame(rbind(mydat, mydf))
+    }
+    # ----------------------------
+    # make sure group and count variable
+    # are factor values
+    # ----------------------------
+    mydat$grp <- as.factor(mydat$grp)
+    mydat$cat <- as.factor(mydat$cat)
+    # add half of Percentage values as new y-position for stacked bars
+    mydat <- mydat %>%
+        dplyr::group_by(grp) %>%
+        dplyr::mutate(ypos = cumsum(prc) - 0.5 * prc) %>%
+        dplyr::arrange(grp)
+    # --------------------------------------------------------
+    # Caculate vertical adjustment to avoid overlapping labels
+    # --------------------------------------------------------
+    jvert <- rep(c(1.1, -0.1), length.out = length(unique(mydat$cat)))
+    jvert <- rep(jvert, length.out = nrow(mydat))
+    # --------------------------------------------------------
+    # Prepare and trim legend labels to appropriate size
+    # --------------------------------------------------------
+    # wrap legend text lines
+    legendLabels <- sjmisc::word_wrap(legendLabels, breakLegendLabelsAt)
+    # check whether we have a title for the legend
+    # if yes, wrap legend title line
+    if (!is.null(legendTitle)) legendTitle <- sjmisc::word_wrap(legendTitle, breakLegendTitleAt)
+    # check length of diagram title and split longer string at into new lines
+    # every 50 chars
+    if (!is.null(title)) {
+        # if we have weighted values, say that in diagram's title
+        if (!is.null(weightByTitleString)) title <- paste0(title, weightByTitleString)
+        title <- sjmisc::word_wrap(title, breakTitleAt)
+    }
+    # check length of x-axis-labels and split longer strings at into new lines
+    # every 10 chars, so labels don't overlap
+    if (!is.null(axisLabels.y)) axisLabels.y <- sjmisc::word_wrap(axisLabels.y, breakLabelsAt)
+    # ----------------------------
+    # Check if ordering was requested
+    # ----------------------------
+    if (!is.null(sort.frq)) {
+        # order by first cat
+        if (sort.frq == "first") {
+            facord <- order(mydat$prc[which(mydat$cat == 1)])
+        } else {
+            # order by last cat
+            facord <- order(mydat$prc[which(mydat$cat == countlen)])
+        }
+        # create dummy vectors from 1 to itemlength
+        dummy1 <- dummy2 <- c(1:length(facord))
+        # facords holds the ordered item indices! we now need to
+        # change the original item-index with its ordered position index.
+        # example:
+        # we have 4 items, and they may be ordered like this:
+        # 1 3 4 2
+        # so the first item is the one with the lowest count , item 3 is on second postion,
+        # item 4 is on third position and item 2 is the last item (with highest count)
+        # we now need their order as subsequent vector: 1 4 2 3
+        # (i.e. item 1 is on first pos, item 2 is on fourth pos, item 3 is on
+        # second pos and item 4 is on third pos in order)
+        if (reverseOrder) {
+            dummy2[rev(facord)] <- dummy1
+        } else {
+            dummy2[facord] <- dummy1
+        }
+        # now we have the order of either lowest to highest counts of first
+        # or last category of "items". We now need to repeat these values as
+        # often as we have answer categories
+        orderedrow <- unlist(tapply(dummy2, 1:length(dummy2), function(x) rep(x, countlen)))
+        # replace old grp-order by new order
+        mydat$grp <- as.factor(orderedrow)
+        # reorder axis labels as well
+        axisLabels.y <- axisLabels.y[order(dummy2)]
+    }
+    # --------------------------------------------------------
+    # check if category-oder on x-axis should be reversed
+    # change category label order then
+    # --------------------------------------------------------
+    if (reverseOrder && is.null(sort.frq)) axisLabels.y <- rev(axisLabels.y)
+    # --------------------------------------------------------
+    # define vertical position for labels
+    # --------------------------------------------------------
+    if (coord.flip) {
+        # if we flip coordinates, we have to use other parameters
+        # than for the default layout
+        vert <- 0.35
+    } else {
+        vert <- waiver()
+    }
+    # --------------------------------------------------------
+    # set diagram margins
+    # --------------------------------------------------------
+    if (expand.grid) {
+        expgrid <- waiver()
+    } else {
+        expgrid <- c(0, 0)
+    }
+    # --------------------------------------------------------
+    # Set value labels and label digits
+    # --------------------------------------------------------
+    mydat$labelDigits <- labelDigits
+    if (showValueLabels) {
+        if (jitterValueLabels) {
+            ggvaluelabels <-  geom_text(aes(y = ypos, label = sprintf("%.*f%%", labelDigits, 100 * prc)),
+                                        vjust = jvert)
+        } else {
+            ggvaluelabels <-  geom_text(aes(y = ypos, label = sprintf("%.*f%%", labelDigits, 100 * prc)),
+                                        vjust = vert)
+        }
+    } else {
+        ggvaluelabels <-  geom_text(label = "")
+    }
+    # --------------------------------------------------------
+    # Set up grid breaks
+    # --------------------------------------------------------
+    if (is.null(gridBreaksAt)) {
+        gridbreaks <- waiver()
+    } else {
+        gridbreaks <- c(seq(0, 1, by = gridBreaksAt))
+    }
+    # --------------------------------------------------------
+    # check if category-oder on x-axis should be reversed
+    # change x axis order then
+    # --------------------------------------------------------
+    #geom.size <- c(1,geom.size)
+    l <- length(unique(mydat$cat))
+    w <- geom.size[seq(l +1, length(geom.size),l)]
+    #w <- c(1.5,w)
+    pos <- 0.5 * (cumsum(w) + cumsum(c(0, w[-length(w)])))
+    pos <- pos + 1.4
+    pos <- c(1,pos)
+    mydat$grp <- as.numeric(sort(rep(pos,l)))
+
+
+    if (reverseOrder && is.null(sort.frq)) {
+        baseplot <- ggplot(mydat, aes(x = rev(grp), y = prc, fill = cat))
+    } else {
+        baseplot <- ggplot(mydat, aes(x = grp, y = prc, fill = cat))
+    }
+    baseplot <- baseplot +
+        # plot bar chart
+        geom_bar(aes(x = grp, y = prc, fill = cat),stat = "identity",
+                 position = "stack", width = 0.98 *geom.size, colour="black")
+
+    # --------------------------------------------------------
+    # check whether bars should be visually separated by an
+    # additional separator line
+    # --------------------------------------------------------
+    if (showSeparatorLine) {
+        baseplot <- baseplot +
+            geom_vline(x = c(seq(1.5, length(items), by = 1)),
+                       size = separatorLineSize,
+                       colour = separatorLineColor)
+    }
+    # -----------------
+    # show/hide percentage values on x axis
+    # ----------------------------
+    if (!showPercentageAxis) percent <- NULL
+    baseplot <- baseplot +
+        # show absolute and percentage value of each bar.
+        ggvaluelabels +
+        # no additional labels for the x- and y-axis, only diagram title
+        labs(title = title, x = axisTitle.x, y = axisTitle.y, fill = legendTitle) +
+        # print value labels to the x-axis.
+        # If parameter "axisLabels.y" is NULL, the category numbers (1 to ...)
+        # appear on the x-axis
+        scale_x_continuous(labels = axisLabels.y, breaks = pos) +
+        # set Y-axis, depending on the calculated upper y-range.
+        # It either corresponds to the maximum amount of cases in the data set
+        # (length of var) or to the highest count of var's categories.
+        scale_y_continuous(breaks = gridbreaks,
+                           limits = c(0, 1),
+                           expand = expgrid,
+                           labels = percent)
+    # check whether coordinates should be flipped, i.e.
+    # swap x and y axis
+    if (coord.flip) baseplot <- baseplot + coord_flip()
+    # ---------------------------------------------------------
+    # set geom colors
+    # ---------------------------------------------------------
+    baseplot <- sjPlot:::sj.setGeomColors(baseplot,
+                                          geom.colors,
+                                          length(legendLabels),
+                                          ifelse(hideLegend == TRUE, FALSE, TRUE),
+                                          legendLabels)
+    # ---------------------------------------------------------
+    # Check whether ggplot object should be returned or plotted
+    # ---------------------------------------------------------
+    if (printPlot) plot(baseplot)
+    # -------------------------------------
+    # return results
+    # -------------------------------------
+    invisible(structure(class = "sjpstackfrq",
+                        list(plot = baseplot,
+                             df = mydat)))
+}
+
+
+# unlist labels
+# Help function that unlists a list into a vector
+unlistlabels <- function(lab) {
+    dummy <- unlist(lab)
+    labels <- c()
+    labels <- c(labels, as.character(dummy))
+    return(labels)
+}

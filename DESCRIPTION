@@ -2,7 +2,7 @@ Package: TCGAbiolinks
 Type: Package
 Title:
     TCGAbiolinks: An R/Bioconductor package for integrative analysis with TCGA data
-Version: 1.1.0
+Version: 0.99.6
 Date: 2015-12-13
 Author:
     Antonio Colaprico,
@@ -16,8 +16,8 @@ Author:
     Stefano M. Pagnotta,
     Isabella Castiglioni,
     Michele Ceccarelli,
-    Houtan Noushmehr,
-    Gianluca Bontempi
+    Gianluca Bontempi,
+    Houtan Noushmehr
 Maintainer:
     Antonio Colaprico <antonio.colaprico@ulb.ac.be>,
     Tiago Chedraoui Silva <tiagochst@usp.br>
@@ -49,7 +49,7 @@ Imports:
     stringr (>= 1.0.0),
     IRanges,
     scales,
-    rvest,
+    rvest (>= 0.3.0),
     stats,
     utils,
     dnet,
@@ -68,7 +68,15 @@ Imports:
     doParallel,
     dplyr,
     parallel,
-    xml2
+    xml2,
+    sjPlot,
+    magrittr,
+    CNTools,
+    cghMCR,
+    cowplot,
+    reshape2,
+    gtable,
+    sjmisc
 Description:
     The aim of TCGAbiolinks is :
     i) facilitate the TCGA open-access data retrieval,
