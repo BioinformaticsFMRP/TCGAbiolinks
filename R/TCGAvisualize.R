@@ -961,11 +961,6 @@ TCGAvisualize_profilePlot <- function(data = NULL,
             #panel.grid.minor=element_blank(),
             plot.background=element_blank())
 
-<<<<<<< HEAD
-=======
-
-
->>>>>>> master
     p$plot <-  plot_grid(p2$plot,
                          p$plot,
                          ncol = 2,
