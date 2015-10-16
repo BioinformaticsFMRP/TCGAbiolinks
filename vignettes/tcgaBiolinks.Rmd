@@ -1642,7 +1642,7 @@ for( ccols in 1:length(  as.character(levels(consensusClusters)) )){
 
 dataMut$patient <- as.character(dataMut$patient)
 dataMut$groupsHC <- as.factor(dataMut$groupsHC)
-
+library(TCGAbiolinks)
 TCGAvisualize_profilePlot(colData(coad.exp2), groupCol = "RNASeqCluster", subtypeCol =  "ATRX")
 
 TCGAvisualize_mutation(data = colData(coad.exp2),groupCol = "RNASeqCluster",geneList = "IDH1",filename = "test.pdf",by = "cluster")
@@ -1652,7 +1652,11 @@ TCGAvisualize_mutation(data = dataMut,
                        geneList = "ATRX",
                        filename = "test.pdf",
                        by = "cluster",na.rm = TRUE)
-
+df <- TCGAquery_subtype("lgg")
+TCGAvisualize_profilePlot(df, 
+                          groupCol = "RNASeqCluster", 
+                          subtypeCol =  "IDH.1p19q.Subtype", 
+                          na.rm = TRUE)
 ```
 
 The figures resulted from the code above are shown below.
