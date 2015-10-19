@@ -413,10 +413,16 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
 #' @import ggplot2
 #' @export
 #' @return barplot image in pdf or png file
-#' @examples
-#' query <- TCGAquery(tumor = "lgg")
-TCGAvisualize_BarPlot <- function(DFfilt, DFclin, DFsubt, data_Hc2,
-                                  Subtype, cbPalette, filename, width, height,dpi){
+TCGAvisualize_BarPlot <- function(DFfilt,
+                                  DFclin,
+                                  DFsubt,
+                                  data_Hc2,
+                                  Subtype,
+                                  cbPalette,
+                                  filename,
+                                  width,
+                                  height,
+                                  dpi){
 
     if(Subtype =="AGE"){
         dataClinNew <- dataClin
@@ -797,13 +803,13 @@ TCGAvisualize_profilePlot <- function(data = NULL,
                                       colors = NULL,
                                       filename = NULL,
                                       na.rm = FALSE,
+                                      clusterLabel=NULL,
                                       plot.margin=c(-2.5,-2.5,-0.5,2),
                                       axis.title.size=1.5,
                                       axis.textsize=1.3,
                                       legend.size=1.5,
                                       legend.title.size=1.5,
-                                      geom.label.size = 6.0
-                                      ) {
+                                      geom.label.size = 6.0) {
 
     sjp.setTheme(theme = "scatterw",
                  axis.title.size = axis.title.size,
@@ -856,7 +862,6 @@ TCGAvisualize_profilePlot <- function(data = NULL,
     df <- dcast(df, as.formula(paste0(subtypeCol, " ~ ", groupCol)))
 
     var.labels <- unique(df[,1]) # get the cluster names
-
     m <- max(apply(df[,-1],2,sum)) # get the max number of subtypes in the clusters
 
     # create a data frame with all values
