@@ -4,7 +4,7 @@
 \alias{TCGAanalyze_Preprocessing}
 \title{Array Array Intensity correlation (AAIC) and correlation boxplot to define outlier}
 \usage{
-TCGAanalyze_Preprocessing(object, cor.cut = 0, path = NULL, cancer = NULL,
+TCGAanalyze_Preprocessing(object, cor.cut = 0, filename = NULL,
   width = 500, height = 500)
 }
 \arguments{
@@ -13,9 +13,7 @@ TCGAanalyze_Preprocessing(object, cor.cut = 0, path = NULL, cancer = NULL,
 \item{cor.cut}{is a threshold to filter samples according their spearman correlation in
 samples by samples. default cor.cut is 0}
 
-\item{path}{Directory to save the output pdf file}
-
-\item{cancer}{tumor selected for the analysis}
+\item{filename}{Filename of the image file}
 
 \item{width}{Image width}
 
