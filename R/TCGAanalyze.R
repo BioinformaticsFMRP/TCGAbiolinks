@@ -42,8 +42,7 @@ TCGAanalyze_Clustering<- function(tabDF, method,  methodHC = "ward.D2"){
 #' @param object of gene expression of class RangedSummarizedExperiment from TCGAprepare
 #' @param cor.cut is a threshold to filter samples according their spearman correlation in
 #' samples by samples. default cor.cut is 0
-#' @param path Directory to save the output pdf file
-#' @param cancer tumor selected for the analysis
+#' @param filename Filename of the image file
 #' @param width Image width
 #' @param height Image height
 #' @importFrom grDevices dev.list
@@ -51,12 +50,16 @@ TCGAanalyze_Clustering<- function(tabDF, method,  methodHC = "ward.D2"){
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
 #' @examples
 #' query <- TCGAquery(tumor = "lgg")
-TCGAanalyze_Preprocessing<- function(object, cor.cut = 0, path = NULL, cancer = NULL,
-                                     width = 500,height =500 ){
+TCGAanalyze_Preprocessing<- function(object,
+                                     cor.cut = 0,
+                                     filename = NULL,
+                                     width = 500,
+                                     height =500 ){
 
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 
-    png(paste0(path,"/",cancer,"_PreprocessingOutput.png"), width = width, height = height)
+    if(is.null(filename)) filename <- "PreprocessingOutput.png"
+    png(filename, width = width, height = height)
 
     # array array IC after RMA
     #object <-BRCARnaseq_assay
@@ -81,7 +84,9 @@ TCGAanalyze_Preprocessing<- function(object, cor.cut = 0, path = NULL, cancer = 
     #    pmat <- as.matrix(pData(phenoData(object)))
     pmat <- pmat_new
     phenodepth <- min(ncol(pmat), 3)
-    order <- switch(phenodepth + 1, ArrayIndex, order(pmat[, 1]), order(pmat[, 1], pmat[, 2]), order(pmat[, 1], pmat[, 2], pmat[, 3]))
+    order <- switch(phenodepth + 1, ArrayIndex, order(pmat[, 1]),
+                    order(pmat[, 1], pmat[, 2]), order(pmat[, 1],
+                                                       pmat[, 2], pmat[, 3]))
     arraypos <- (1:length(ArrayIndex)) * (1/(length(ArrayIndex) - 1)) - (1/(length(ArrayIndex) - 1))
     arraypos2 = seq(1:length(ArrayIndex) - 1)
     for (i in 2:length(ArrayIndex)) { arraypos2[i - 1] <- (arraypos[i] + arraypos[i - 1])/2 }
@@ -90,7 +95,10 @@ TCGAanalyze_Preprocessing<- function(object, cor.cut = 0, path = NULL, cancer = 
     #c <- cor(exprs(object)[, order], method = "spearman")
     c <- cor(assay(object,"raw_counts")[, order], method = "spearman")
 
-    image(c, xaxt = "n", yaxt = "n", xlab = "Array Samples", ylab = "Array Samples",  main = "Array-Array Intensity Correlation after RMA")
+    image(c, xaxt = "n", yaxt = "n",
+          xlab = "Array Samples",
+          ylab = "Array Samples",
+          main = "Array-Array Intensity Correlation after RMA")
     #abline(h = arraypos2, v = arraypos2)
 
     for ( i in 1:length(names(table(tabGroupCol$Color)) )){
@@ -102,11 +110,21 @@ TCGAanalyze_Preprocessing<- function(object, cor.cut = 0, path = NULL, cancer = 
     }
 
     m = matrix(pretty(c, 10), nrow = 1, ncol = length(pretty(c, 10)))
-    image(m, xaxt = "n", yaxt = "n", ylab = "Correlation Coefficient")
-    axis(2, labels = as.list(pretty(c, 10)), at = seq(0, 1, by = (1/(length(pretty(c,  10)) - 1))))
-    abline(h = seq((1/(length(pretty(c, 10)) - 1))/2, 1 - (1/(length(pretty(c, 10)) - 1)), by = (1/(length(pretty(c, 10)) - 1))))
 
-    boxplot(c, outline = FALSE,las =2, lwd = 6,col = tabGroupCol$Color, main ="Boxplot of correlation samples by samples after normalization")
+    image(m, xaxt = "n", yaxt = "n", ylab = "Correlation Coefficient")
+
+    axis(2, labels = as.list(pretty(c, 10)),
+         at = seq(0, 1, by = (1/(length(pretty(c,  10)) - 1))))
+
+    abline(h = seq((1/(length(pretty(c, 10)) - 1))/2,
+                   1 - (1/(length(pretty(c, 10)) - 1)),
+                   by = (1/(length(pretty(c, 10)) - 1))))
+
+    boxplot(c, outline = FALSE,
+            las =2,
+            lwd = 6,
+            col = tabGroupCol$Color,
+            main ="Boxplot of correlation samples by samples after normalization")
 
     samplesCor <- rowMeans(c)
     objectWO <-  assay(object,"raw_counts")[, samplesCor > cor.cut]
