@@ -183,33 +183,30 @@ TCGAanalyze_survival <- function(data,
         labels <- sapply(levels(data$type),label.add.n)
     }
 
-    with(data,{
-        surv <- surv + scale_colour_manual(name = legend,
-                                           labels = labels,
-                                           values=color)
 
-        with(surv,{
-            surv <- surv + geom_point(aes(colour = group),
-                                      shape = 3,size = 2)
-            surv <- surv + guides(linetype = FALSE) +
-                scale_y_continuous(labels = scales::percent) +
-                theme_bw() +
-                theme(panel.border = element_blank(),
-                      panel.grid.major = element_blank(),
-                      panel.grid.minor = element_blank(),
-                      axis.line = element_line(colour = "black"),
-                      legend.key = element_rect(colour = 'white'),
-                      legend.justification=c(1,1), legend.position=c(1,1),
-                      legend.text = element_text(size = 18),
-                      legend.title = element_text(size = 18),
-                      axis.text= element_text(size = 22),
-                      axis.title.x= element_text(size = 22),
-                      axis.title.y= element_text(size = 22))
+    surv <- surv + scale_colour_manual(name = legend,
+                                       labels = labels,
+                                       values=color)
+    surv <- surv + geom_point(aes(colour = group),
+                              shape = 3,size = 2)
+    surv <- surv + guides(linetype = FALSE) +
+        scale_y_continuous(labels = scales::percent) +
+        theme_bw() +
+        theme(#panel.border = element_blank(),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              panel.border = element_rect(colour = "black", size= 1.5),
+              legend.key = element_rect(colour = 'white'),
+              legend.justification=c(1,1),
+              legend.background = element_rect(colour = "white"),
+              legend.position=c(1,1),
+              plot.title = element_text(size = rel(2)),
+              legend.text = element_text(size = 18),
+              legend.title = element_text(size = 18),
+              axis.text= element_text(size = 22),
+              axis.title.x= element_text(size = 22),
+              axis.title.y= element_text(size = 22))
 
-
-        })
-
-    })
     ggsave(surv, filename = filename, width = width, height = height)
 }
 #' @title Mean methylation boxplot
