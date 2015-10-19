@@ -770,6 +770,11 @@ TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPa
 #' @param colors Vector of colors to be used in the bars
 #' @param plot.margin Plot margin for cluster distribution. This can control the size
 #' of the bar if the output is not aligned
+#' @param axis.title.size axis.title.size
+#' @param axis.textsize axis.textsize
+#' @param legend.size legend.size
+#' @param legend.title.size legend.title.size
+#' @param geom.label.size geom.label.size
 #' @importFrom sjPlot sjp.stackfrq sjp.setTheme
 #' @importFrom cowplot ggdraw switch_axis_position plot_grid
 #' @importFrom reshape2 dcast
@@ -792,9 +797,20 @@ TCGAvisualize_profilePlot <- function(data = NULL,
                                       colors = NULL,
                                       filename = NULL,
                                       na.rm = FALSE,
-                                      plot.margin=c(-2.5,-2.5,-0.5,2)) {
+                                      plot.margin=c(-2.5,-2.5,-0.5,2),
+                                      axis.title.size=1.5,
+                                      axis.textsize=1.3,
+                                      legend.size=1.5,
+                                      legend.title.size=1.5,
+                                      geom.label.size = 6.0
+                                      ) {
 
-    sjp.setTheme(theme = theme_classic())
+    sjp.setTheme(theme = "scatterw",
+                 axis.title.size = axis.title.size,
+                 axis.textsize = axis.textsize,
+                 legend.size = legend.size,
+                 legend.title.size = legend.title.size,
+                 geom.label.size = geom.label.size)
 
     if (is.null(groupCol)) stop("Please provide the groupCol argument")
     if (is.null(subtypeCol)) stop("Please provide the subtypeCol argument")
@@ -944,6 +960,8 @@ TCGAvisualize_profilePlot <- function(data = NULL,
             #panel.grid.major=element_blank(),
             #panel.grid.minor=element_blank(),
             plot.background=element_blank())
+
+
 
     p$plot <-  plot_grid(p2$plot,
                          p$plot,
