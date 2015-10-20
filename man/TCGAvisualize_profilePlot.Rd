@@ -6,7 +6,8 @@
 \usage{
 TCGAvisualize_profilePlot(data = NULL, groupCol = NULL, subtypeCol = NULL,
   colors = NULL, filename = NULL, na.rm = FALSE, plot.margin = c(-2.5,
-  -2.5, -0.5, 2))
+  -2.5, -0.5, 2), axis.title.size = 1.5, axis.textsize = 1.3,
+  legend.size = 1.5, legend.title.size = 1.5, geom.label.size = 6)
 }
 \arguments{
 \item{data}{A data frame with the cluters and subytpe of cancers}
@@ -23,6 +24,16 @@ TCGAvisualize_profilePlot(data = NULL, groupCol = NULL, subtypeCol = NULL,
 
 \item{plot.margin}{Plot margin for cluster distribution. This can control the size
 of the bar if the output is not aligned}
+
+\item{axis.title.size}{axis.title.size}
+
+\item{axis.textsize}{axis.textsize}
+
+\item{legend.size}{legend.size}
+
+\item{legend.title.size}{legend.title.size}
+
+\item{geom.label.size}{geom.label.size}
 }
 \value{
 A plot
