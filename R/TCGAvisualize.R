@@ -566,7 +566,7 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @param DFsubt write
 #' @param data_Hc2 write
 #' @param cbPalette write
-#' @param filename write. default = NULL
+#' @param filename Filename default "Heatmap.pdf"
 #' @importFrom heatmap.plus heatmap.plus
 #' @examples
 #' query <- TCGAquery(tumor = "lgg")
@@ -584,10 +584,16 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' }
 #' @export
 #' @return Heatmap plotted in pdf or png file.
-TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPalette, filename =NULL){
+TCGAvisualize_Heatmap <- function(cancer,
+                                  DFfilt,
+                                  DFclin,
+                                  DFsubt,
+                                  data_Hc2,
+                                  cbPalette,
+                                  filename ="Heatmap.pdf"){
 
     rownames(DFsubt) <- DFsubt$patient
-    rownames(DFclin) <- DFclin$patient
+    rownames(DFclin) <- DFclin$bcr_patient_barcode
     rownames(DFfilt) <- substr(rownames(DFfilt),1,12)
 
     ans <- hclust(ddist <- dist(DFfilt), method = "ward.D2")
@@ -601,14 +607,14 @@ TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPa
 
     #DFclin <- DFclin[DFclin$bcr_patient_barcode %in% DFsubt$patient,]
     DFclin_merged <- cbind(DFclin, matrix(0,nrow(DFclin),ncol(DFsubt)))
-    colnames(DFclin_merged)[((ncol(DFclin_merged)-ncol(DFsubt))+1) :ncol(DFclin_merged)] <- colnames(DFsubt)
+    colnames(DFclin_merged)[((ncol(DFclin_merged)-ncol(DFsubt))+1):ncol(DFclin_merged)] <- colnames(DFsubt)
     rownames(DFclin_merged) <- DFclin_merged$bcr_patient_barcode
 
-    for( i in 1: ncol(DFsubt)){
+    for( i in 1:ncol(DFsubt)){
         DFsubt[,i] <- as.character(DFsubt[,i])
     }
 
-    for( i in 1: nrow(DFsubt)){
+    for( i in 1:nrow(DFsubt)){
         curSample <- DFsubt$patient[i]
         for( j in 1: ncol(DFsubt)){
             curColumn <- colnames(DFsubt)[j]
@@ -631,11 +637,13 @@ TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPa
 
     for(j in 1:length(table(DFclin_merged$groupsHC))){
         curCol <- groupsColors[j]
-        DFclin_merged[DFclin_merged$groupsHC == curCol,"groupsHC"]<-paste0("EC",j)
+        idx <- DFclin_merged$groupsHC == curCol
+        idx[is.na(idx)] <- FALSE
+        DFclin_merged[idx,"groupsHC"]<-paste0("EC",j)
     }
 
-
-    DFfilt <- DFfilt[rownames(DFclin_merged),]
+    #idx <- rownames(DFclin_merged) %in% rownames(DFfilt)
+    #DFfilt <- DFfilt[idx,]
 
     orderCL <- as.character(substr(names(sampleOrder),1,12))
     orderCL <- intersect(orderCL, rownames(DFfilt))
@@ -704,12 +712,6 @@ TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPa
     oONCO.col <- ONCO.col[orderCL]
 
     oConsensus <- as.character(consensusClusters[hhc$order])
-    #oConsensus <- as.character(consensusClusters[orderCL])
-
-    names(consensusClusters[hhc$order])
-
-
-    #source("heatmap.plus.R")
 
     cc.col <- matrix(c(oHISTOLOGY.col,
                        oSUBTYPE.col,
@@ -738,29 +740,26 @@ TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPa
                                                  gsub("-","_",as.character(Sys.time()))),":"))[1])
 
 
-    pdf(file=paste0(curDate,"_",cancer,"_heatmap_with_subtypes_withHeatmapPlus.pdf"))
+    if(file_ext(filename) == "pdf") pdf(file=filename)
+    if(file_ext(filename) == "svg") svg(file=filename)
+    if(file_ext(filename) == "png") png(file=filename)
 
     .heatmap.plus.sm(
         t(oGE),
         na.rm=TRUE,
         scale="none",
-        #RowSideColor=probe.cc,
-        #ColSideColors=cc.col,
+        #RowSideColor=cc.col,
+        ColSideColors=cc.col,
         col=gplots::greenred(75),
-        key=FALSE,  #changed
-        symkey=FALSE,
-        density.info="none",
-        trace="none",
-        Rowv=FALSE,
+        #Rowv=NA,
         Colv=NA,
-        cexRow=1,
-        cexCol=1.6,
-        keysize=2,
-        dendrogram = "none",
-        main = "Heatmap from consensus cluster",
-        labRow=NA,labCol=NA,
-        #labCol=NA
+        cexRow=0.2,
+        cexCol=0.2,
+        labCol=NA,
+        labRow=NA,
+        main = "Heatmap from consensus cluster"
     )
+
     dev.off()
 }
 
