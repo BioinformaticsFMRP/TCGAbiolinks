@@ -1606,28 +1606,7 @@ data_Hc1 <- TCGAanalyze_Clustering(tabDF = datFilt,
                                    methodHC = "ward.D2")
 data_Hc2 <- TCGAanalyze_Clustering(tabDF = datFilt,
                                    method = "consensus",
-                                   methodHC = "ward.D2") # time = 207.389
-# deciding number of tree to cuts
-cut.tree <-4
-
-# consensusClusters contains barcodes for 4 groups
-ans <- hclust(ddist <- dist(datFilt), method = "ward.D2")
-hhc <- data_Hc2[[cut.tree]]$consensusTree
-consensusClusters<-data_Hc2[[cut.tree]]$consensusClass
-sampleOrder <- consensusClusters[hhc$order]
-
-consensusClusters <- as.factor(data_Hc2[[cut.tree]]$clrs[[1]])
-names(consensusClusters) <- attr(ddist, "Labels")
-
-names(consensusClusters) <- substr(names(consensusClusters),1,12)
-# adding information about gropus from consensus Cluster in clinical data
-dataClin <- cbind(dataClin, groupsHC = matrix(0,nrow(dataClin),1))
-rownames(dataClin) <- dataClin$bcr_patient_barcode
-levels(consensusClusters) <- c("EC1","EC2","EC3","EC4")
-for(i in 1:nrow(dataClin)){
-    currSmp <- dataClin$bcr_patient_barcode[i]
-    dataClin[currSmp,"groupsHC"] <- as.character(consensusClusters[currSmp])
-}
+                                   methodHC = "ward.D2") 
 ```
 
 The next steps will be to visualize the data. Firstly, we created the survival plot.
