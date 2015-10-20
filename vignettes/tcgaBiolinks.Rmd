@@ -268,10 +268,9 @@ The parameters that will be used to filter the data are:
 * center
 * archive.name
 
-```{r, eval = TRUE}
+```{r, eval = FALSE}
 mutation <- TCGAquery_maf (tumor = "lgg", 
                            archive.name = "IlluminaGA_DNASeq_curated.Level_2.1.4.0")
-head(mutation)
 ```
 
 ## `TCGAquery_clinic` `&` `TCGAquery_clinicFilt`: Working with clinical data.
@@ -1444,54 +1443,91 @@ grid.raster(img)
 
 ## Case study n. 2: Pan Cancer downstream analysis LGG
 
+We focused on the analysis of LGG samples. In particular, we used TCGA biolinks to download 293 samples with molecular subtypes. 
+
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(TCGAbiolinks)
+
+#----------- Parameters--------------------
 cancer <- "LGG"
 PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
 dataType <- "rsem.genes.results"
 pathCancer <- paste0("../data",cancer)
+#------------------------------------------
 
-# Result....Function.....parameters...p1...pn..................................time execution
+#----------- DATA --------------------
+datQuery <- TCGAquery(tumor = cancer,
+                      platform = PlatformCancer,
+                      level = "3")
 
-datQuery <- TCGAquery(tumor = cancer, platform = PlatformCancer, level = "3")  # time = 0.093s
 lsSample <- TCGAquery_samplesfilter(query = datQuery)
-dataSubt <- TCGAquery_subtype(tumor = cancer)
 dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
                                   typesample = "TP")
+
+# get subtype information
+dataSubt <- TCGAquery_subtype(tumor = cancer)
+
+# get clinical data
 dataClin <- TCGAquery_clinic(cancer = cancer,
                              clinical_data_type = "clinical_patient")
 
-            TCGAdownload(data = datQuery, path = pathCancer, type = dataType,
-                         samples = dataSmTP )
+TCGAdownload(data = datQuery,
+             path = pathCancer,
+             type = dataType,
+             samples = dataSmTP )
 
-dataAssy <- TCGAprepare(query = datQuery, 
-                        dir = pathCancer, 
-                        type = dataType, 
-                        save = TRUE, 
-                        summarizedExperiment = TRUE, 
+dataAssy <- TCGAprepare(query = datQuery,
+                        dir = pathCancer,
+                        type = dataType,
+                        save = TRUE,
+                        summarizedExperiment = TRUE,
                         samples = dataSmTP,
+                        add.mutation.genes = TRUE,
                         filename = paste0(cancer,"_",PlatformCancer,".rda"))
+```
 
-dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,cor.cut = 0.6)        # time = 13.028s
+
+Firstly, we searched for possible outliers using the TCGAanalyze_Preprocessing 
+function, which performs an Array Array Intensity correlation AAIC.
+We used all samples in expression data with molecular subtypes,  filtering 
+out sampels without molecular information, and using only IDHmut-codel (n=85),
+IDHmut-non-codel (n=141) and IDHwt (n=56), NA (11), to define a square 
+symmetric matrix of pearson correlation among all samples (n=293). 
+According this matrix we found 0 samples with low correlation (cor.cut = 0.6) 
+that can be identified as possible outliers, so we continued our analysis with 70 samples. 
+
+Secondly using the TCGAanalyze_Normalization function we normalized mRNA transcripts and miRNA, using EDASeq package. This function does uses Within-lane normalization procedures to adjust for GC-content effect (or other gene-level effects) on read counts: loess robust local regression, global-scaling, and full-quantile normalization (Risso et al., 2011) and between-lane normalization procedures to adjust for distributional differences between lanes (e.g., sequencing depth): global-scaling and full-quantile normalization (Bullard et al., 2010).
+
+Thirdly using the TCGAanalyze_Filtering function we applied 3 filters removing features / mRNAs with low signal across samples obtaining 4578, 4284, 1187 mRNAs respectively. 
+Then we applied two Hierarchical cluster analysis on 1187 mRNAs after three filters described above, the first cluster using as method ward.D2, and the second with ConsensusClusterPlus.
+After two clusters analysis, with cut.tree =4 we obtained n=4 espression clusters (EC).
+
+<<<<<<< HEAD
+dataPrep <- TCGAanalyze_Preprocessing(path = pathCancer,
+                                      object = dataAssy,
+                                      cancer = cancer,
+                                      cor.cut = 0.6)        # time = 13.028s
+=======
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,cor.cut = 0.6)
+>>>>>>> origin/master
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
                                       geneInfo = geneInfo,
-                                      method = "gcContent")                  # time = 165.577s 
+                                      method = "gcContent")
 
 datFilt1 <- TCGAanalyze_Filtering(tabDF = dataNorm,method = "varFilter")
 datFilt2 <- TCGAanalyze_Filtering(tabDF = datFilt1,method = "filter1")
 datFilt <- TCGAanalyze_Filtering(tabDF = datFilt2,method = "filter2")
 
-data_Hc1 <- TCGAanalyze_Clustering(tabDF = datFilt,method = "hclust", methodHC = "ward.D2")
+data_Hc1 <- TCGAanalyze_Clustering(tabDF = datFilt,
+                                   method = "hclust",
+                                   methodHC = "ward.D2")
 data_Hc2 <- TCGAanalyze_Clustering(tabDF = datFilt,
                                    method = "consensus",
-                                   methodHC = "ward.D2")        # time = 207.389 
-
-dataClin <- TCGAquery_clinic(cancer = cancer, clinical_data_type = "clinical_patient")
-
+                                   methodHC = "ward.D2") # time = 207.389
 # deciding number of tree to cuts
 cut.tree <-4
 paste0(c("EC"),(1:cut.tree))
-
 ## consensusClusters contains barcodes for 4 groups
 ans <- hclust(ddist <- dist(datFilt), method = "ward.D2")
 hhc <- data_Hc2[[cut.tree]]$consensusTree
@@ -1500,82 +1536,121 @@ sampleOrder <- consensusClusters[hhc$order]
 
 consensusClusters <- as.factor(data_Hc2[[cut.tree]]$clrs[[1]])
 names(consensusClusters) <- attr(ddist, "Labels")
-names(consensusClusters) <- substr(names(consensusClusters),1,12)
 
+names(consensusClusters) <- substr(names(consensusClusters),1,12)
 # adding information about gropus from consensus Cluster in clinical data
 dataClin <- cbind(dataClin, groupsHC = matrix(0,nrow(dataClin),1))
 rownames(dataClin) <- dataClin$bcr_patient_barcode
-
+levels(consensusClusters) <- c("EC1","EC2","EC3","EC4")
 for( i in 1: nrow(dataClin)){
     currSmp <- dataClin$bcr_patient_barcode[i]
     dataClin[currSmp,"groupsHC"] <- as.character(consensusClusters[currSmp])
 }
+```
 
+The next steps will be to visualize the data. Firstly, we created the survival plot.
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+#----------- VISUALIZE --------------------
 # plotting survival for groups EC1, EC2, EC3, EC4
-
 TCGAanalyze_survival(data = dataClin,
                      clusterCol = "groupsHC",
                      main = "TCGA kaplan meier survival plot from consensus cluster",
-                     height = 10,
-                     width=10,
                      legend = "RNA Group",
-                     labels=paste0(c("EC"),(1:cut.tree)),
-                     color = as.character(levels(consensusClusters)),
-                     filename = "case2_surv.png")
-dev.off()
-TCGAvisualize_BarPlot(DFfilt = datFilt,
-                      DFclin = dataClin,
-                      DFsubt = dataSubt,
-                      data_Hc2 = data_Hc2,
-                      Subtype = "IDH.1p19q.Subtype",
-                      cbPalette = c("cyan","tomato","gold"),
-                      filename = "case2_Idh.png",
-                      height = 10,
-                      width=10,
-                      dpi =300)
+                     labels=levels(consensusClusters) ,
+                     filename = "case2_surv.pdf")
+```
 
-TCGAvisualize_BarPlot(DFfilt = datFilt,
-                      DFclin = dataClin,
-                      DFsubt = dataSubt,
-                      data_Hc2 = data_Hc2,
-                      Subtype = "MethylationCluster",
-                      cbPalette = c("black","orchid3","palegreen4","sienna3", "steelblue4"),
-                      filename = "case2_Met.png",
-                      height = 10,
-                      width=10,
-                      dpi =300)
 
-TCGAvisualize_BarPlot(DFfilt = datFilt,
-                      DFclin = dataClin,
-                      DFsubt = dataSubt,
-                      data_Hc2 = data_Hc2,
-                      Subtype = "AGE",
-                      cbPalette = c("yellow2","yellow3","yellow4"),
-                      filename = "case2_Age.png",
-                      height = 10,
-                      width=10,
-                      dpi =300)
+The result is showed below:
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("case2_surv.png")
+grid.raster(img)
+```
 
-dev.off()
+Secondly we'll create the profile plot for age, IDH.1p19q.Subtype and methylation cluster
+for the EC groups.
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+dataClin <- cbind(dataClin, AGE2 = matrix(0,nrow(dataClin),1))
+dataClin[ dataClin[,"age_at_initial_pathologic_diagnosis"] <= 32, "AGE2"] <- "<=32 yr"
+dataClin[ dataClin[,"age_at_initial_pathologic_diagnosis"] >= 41, "AGE2"] <- ">=41 yr"
+dataClin[ dataClin$AGE2 == 0, "AGE2"] <- "33-40 yr"
+
+clin_subt <- merge(dataClin,dataSubt, by.x="bcr_patient_barcode", by.y="patient")
+
+TCGAvisualize_profilePlot(clin_subt,
+                          groupCol="groupsHC",
+                          subtypeCol="IDH.1p19q.Subtype",
+                          filename = "case2_Idh_new.svg",
+                          plot.margin = c(-4.0, -2.5, -0.5, 2),
+                          na.rm = TRUE)
+
+TCGAvisualize_profilePlot(clin_subt,
+                          groupCol="groupsHC",
+                          subtypeCol="MethylationCluster",
+                          filename = "case2_Met.svg",
+                          plot.margin = c(-4.0, -2.5, -0.5, 2),
+                          na.rm = TRUE)
+
+TCGAvisualize_profilePlot(clin_subt,
+                          groupCol="groupsHC",
+                          subtypeCol="AGE2",
+                          filename = "case2_age_new.svg",
+                          plot.margin = c(-4.0, -2.5, -0.5, 2),
+                          na.rm = TRUE)
+```
+
+The IDH subgroup profile plot is shown below:
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("case2_Idh.png")
+grid.raster(img)
+```
+
+The Methylation subgroup profile plot is shown below:
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("case2_Met.png")
+grid.raster(img)
+```
+
+The age subgroup profile plot is shown below:
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("case2_Age.png")
+grid.raster(img)
+```
+
+We will also, create a heatmap of the expression.
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+
 pdf(file="case2_Heatmap2.pdf")
-TCGAvisualize_Heatmap(DFfilt = datFilt,
+TCGAvisualize_Heatmap(cancer = cancer,
+                      DFfilt = datFilt,
                       DFclin = dataClin,
                       DFsubt = dataSubt,
-                      data_Hc2= data_Hc2)
+                      data_Hc2= data_Hc2,cancer = "LGG")
 dev.off()
+```
+
+The result is shown below
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("case2_Heatmap.png")
+grid.raster(img)
+```
 
 
-# Convert images from pdf to png.
-library(animation)
-ani.options(outdir = getwd())
-
-im.convert("case2_Heatmap2.pdf", 
-           output = "case2_Heatmap2.png", 
-           extra.opts="-density 150")
-
-# Adding plot for mutation of a selected gene within Expression Clusters
-
-LGGmut <- TCGAquery_mutation(tumor = "LGG")
+Finally, we will take a look in the matation genes.
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+LGGmut <- TCGAquery_maf(tumor = "LGG",
+                        archive.name="LGG.IlluminaGA_DNASeq_curated.Level_2.1.4.0")
 
 mRNAsel <- "ATRX"
 LGGselected <- LGGmut[LGGmut$Hugo_Symbol == mRNAsel,]
@@ -1587,13 +1662,13 @@ rownames(dataMut) <- dataMut$Tumor_Sample_Barcode
 
 
 for( i in 1: nrow(dataMut)){
-  currSmp <- dataMut$Tumor_Sample_Barcode[i]
-  dataMut[currSmp,"groupsHC"] <- as.character(consensusClusters[currSmp])
+    currSmp <- dataMut$Tumor_Sample_Barcode[i]
+    dataMut[currSmp,"groupsHC"] <- as.character(consensusClusters[currSmp])
 }
 
 
 for( ccols in 1:length(  as.character(levels(consensusClusters)) )){
-  dataMut[dataMut$groupsHC == as.character(levels(consensusClusters))[ccols],"groupsHC"] <- paste0("EC",ccols)
+    dataMut[dataMut$groupsHC == as.character(levels(consensusClusters))[ccols],"groupsHC"] <- paste0("EC",ccols)
 }
 
 dataMut <- dataMut[dataMut$Variant_Classification!=0,]
@@ -1602,51 +1677,36 @@ table(dataMut$groupsHC,dataMut$Variant_Classification)
 table(dataMut$groupsHC,dataMut$Variant_Type)
 
 
-TCGAvisualize_profilePlot(dataMut, 
-                          groupCol = "groupsHC", 
+TCGAvisualize_profilePlot(dataMut,
+                          groupCol = "groupsHC",
                           subtypeCol =  "Variant_Classification",
                           na.rm = FALSE,
-                          filename = paste0(mRNAsel,"_Mutation_Variant_Classification_in EC clusters.pdf"))
+                          plot.margin = c(-4.0, -2.5, -0.5, 2),
+                          filename = paste0(mRNAsel,"_Mutation_Variant_Classification_in_EC_clusters.png"))
 
-TCGAvisualize_profilePlot(dataMut, 
-                          groupCol = "groupsHC", 
+TCGAvisualize_profilePlot(dataMut,
+                          groupCol = "groupsHC",
                           subtypeCol =  "Variant_Type",
                           na.rm = FALSE,
-                          filename = paste0(mRNAsel,"_Mutation_Variant_Type_in in EC clusters.pdf"))
+                          plot.margin = c(-4.0, -2.5, -0.5, 2),
+                          filename = paste0(mRNAsel,"_Mutation_Variant_Type_in_EC_clusters.png"))
+
+
+TCGAvisualize_mutation(data = colData(dataAssy),
+                       groupCol = "RNASeqCluster",
+                       geneList = "ATRX",
+                       filename = "mutation_ATRX_RNASeqCluster.png",
+                       by = "cluster")
+
+TCGAvisualize_mutation(data = colData(dataAssy),
+                       groupCol = "RNASeqCluster",
+                       geneList = "IDH1",
+                       filename = "mutation_IDH1_RNASeqCluster.png",
+                       by = "cluster")
 
 
 
-#dataMut <- dataMut[!duplicated(dataMut$Tumor_Sample_Barcode),]
-#dataMut$Tumor_Sample_Barcode <- substr(dataMut$Tumor_Sample_Barcode ,1,12)
-#rownames(dataMut) <- dataMut$Tumor_Sample_Barcode
-
-#dataMut <- dataMut[dataMut$patient %in% names(consensusClusters),]
-
-dataMut <- cbind(dataSubt, groupsHC = matrix(0,nrow(dataSubt),1))
-rownames(dataMut) <- dataMut$patient
-dataMut$patient <- as.character(dataMut$patient)
-
-for( i in 1: nrow(dataMut)){
-  currSmp <- as.character(dataMut$patient[i])
-  dataMut[currSmp,"groupsHC"] <- as.character(consensusClusters[currSmp])
-}
-
-dataMut <- dataMut[dataMut$groupsHC!=0,]
-
-dataMut$groupsHC <- as.character(dataMut$groupsHC)
-
-for( ccols in 1:length(  as.character(levels(consensusClusters)) )){
-  dataMut[dataMut$groupsHC == as.character(levels(consensusClusters))[ccols],"groupsHC"] <- paste0("EC",ccols)
-}
-
-
-dataMut$patient <- as.character(dataMut$patient)
-dataMut$groupsHC <- as.factor(dataMut$groupsHC)
-library(TCGAbiolinks)
-TCGAvisualize_profilePlot(colData(coad.exp2), groupCol = "RNASeqCluster", subtypeCol =  "ATRX")
-
-TCGAvisualize_mutation(data = colData(coad.exp2),groupCol = "RNASeqCluster",geneList = "IDH1",filename = "test.pdf",by = "cluster")
-
+<<<<<<< HEAD
 TCGAvisualize_mutation(data = dataMut,
                        groupCol = "groupsHC",
                        geneList = "ATRX",
@@ -1657,50 +1717,74 @@ TCGAvisualize_profilePlot(df,
                           groupCol = "RNASeqCluster", 
                           subtypeCol =  "IDH.1p19q.Subtype", 
                           na.rm = TRUE)
+
+strsplit(dataMut$ATRX[grep(",",dataMut$ATRX),])
+
+dataMut2 <- dataMut
+dataMut2$ATRX <- as.character(dataMut2$ATRX)
+dataMut2[dataMut2$ATRX!="wt" & dataMut2$ATRX!="NA","ATRX"] <- "Mutation"
+
+
+TCGAvisualize_profilePlot(dataMut, 
+                          groupCol = "groupsHC", 
+                          subtypeCol =  "IDH.1p19q.Subtype",
+                          colors =  c("cyan","tomato","gold","gray"), 
+                          na.rm = FALSE,
+                          filename = "case2_Idh.pdf")
+
+TCGAvisualize_profilePlot(dataMut, 
+                          groupCol = "groupsHC", 
+                          subtypeCol =  "MethylationCluster",
+                          colors =  c("black","orchid3","palegreen4","sienna3", "steelblue4","gray"), 
+                          na.rm = FALSE,
+                          filename = "case2_Met.pdf")
+
+TCGAvisualize_profilePlot(dataMut2, 
+                          groupCol = "groupsHC", 
+                          subtypeCol =  "ATRX",
+                          na.rm = FALSE,
+                          filename = "case2_ATRX.pdf")
+
+=======
+>>>>>>> origin/master
 ```
 
-The figures resulted from the code above are shown below.
+The results are shown below:
+
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
-img <- readPNG("case2_surv.png")
+img <- readPNG("ATRX_Mutation_Variant_Classification_in_EC_clusters.png")
 grid.raster(img)
 ```
 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
-img <- readPNG("case2_Idh.png")
+img <- readPNG("ATRX_Mutation_Variant_Type_in_EC_clusters.png")
+grid.raster(img)
+```
+
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("mutation_ATRX_RNASeqCluster.png")
 grid.raster(img)
 ```
 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
-img <- readPNG("case2_Met.png")
+img <- readPNG("mutation_IDH1_RNASeqCluster.png")
 grid.raster(img)
 ```
 
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
-library(grid)
-img <- readPNG("case2_Met.png")
-grid.raster(img)
-```
 
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
-library(grid)
-img <- readPNG("case2_Age.png")
-grid.raster(img)
-```
 
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
-library(grid)
-img <- readPNG("case2_Heatmap.png")
-grid.raster(img)
-```
+
+
+
 
 ## Case study n. 3: Integration of methylation and expression for COAD
 
