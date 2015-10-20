@@ -34,7 +34,4 @@ barplot image in pdf or png file
 \description{
 Barplot of subtypes and clinical info in groups of gene expression clustered.
 }
-\examples{
-query <- TCGAquery(tumor = "lgg")
-}
 
