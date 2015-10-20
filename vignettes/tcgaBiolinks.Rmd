@@ -61,6 +61,31 @@ references:
   pages: 105
   issued:
     year: 2015 
+    
+- id: ref5
+  title: Evaluation of statistical methods for normalization and differential expression in mRNA-Seq experiments
+  author: 
+  - family:  James H Bullard, Elizabeth Purdom, Kasper D Hansen and Sandrine Dudoit	
+    given:
+  journal: BMC Bioinformatics
+  volume: 11
+  number: 1
+  pages: 94
+  issued:
+    year: 2010 
+
+- id: ref6
+  title: GC-content normalization for RNA-Seq data
+  author: 
+  - family: Risso, D., Schwartz, K., Sherlock, G., & Dudoit, S. 
+    given:
+  journal: BMC Bioinformatics
+  volume: 12
+  number: 1
+  pages: 480
+  issued:
+    year: 2011 
+
 
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -104,7 +129,6 @@ To install use the code below.
 
 ```{r, eval = FALSE}
 source("http://bioconductor.org/biocLite.R")
-useDevel()
 biocLite("TCGAbiolinks")
 ```
 
@@ -570,7 +594,7 @@ The arguments are:
 * **summarizedExperiment** Should the output be a SummarizedExperiment object? Default: `TRUE`
 * **reannotate** Reannotate genes? Source http://grch37.ensembl.org/. 
 Default: `FALSE`. (For the moment only working for methylation data)
-* **mutation.genes** Add List of gene mutation? DEFAULT: `FALSE`
+* **mutation.genes** Add List of genes that are mutated for each patient? DEFAULT: `FALSE`
 
 In order to add useful information to reasearches we added in the colData of the 
 summarizedExperiment the subtypes classification for the LGG and GBM samples 
@@ -776,7 +800,6 @@ BRCARnaseq_CorOutliers <- TCGAanalyze_Preprocessing(BRCARnaseq_assay)
 ```
 
 The result is shown below:
-
 ```{r, eval = TRUE, echo = FALSE,size = 8}
 library(TCGAbiolinks)
 dataGE <- dataBRCA[sample(rownames(dataBRCA),10),sample(colnames(dataBRCA),7)]
@@ -957,18 +980,18 @@ tokenStop<- 1
 
 tabSurvKMcomplete <- NULL
 
-for( i in 1: round(nrow(dataBRCAcomplete)/100)){
-message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
-tokenStart <- tokenStop
-tokenStop <-100*i
-tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
-                                dataBRCAcomplete,
-                                Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
-                                Survresult = F,
-                                ThreshTop=0.67,
-                                ThreshDown=0.33)
+for(i in 1:round(nrow(dataBRCAcomplete)/100)){
+    message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
+    tokenStart <- tokenStop
+    tokenStop <-100 * i
+    tabSurvKM <- TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
+                                       dataBRCAcomplete,
+                                       Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
+                                       Survresult = F,
+                                       ThreshTop=0.67,
+                                       ThreshDown=0.33)
 
-tabSurvKMcomplete <- rbind(tabSurvKMcomplete,tabSurvKM)
+    tabSurvKMcomplete <- rbind(tabSurvKMcomplete,tabSurvKM)
 }
 
 tabSurvKMcomplete <- tabSurvKMcomplete[tabSurvKMcomplete$pvalue < 0.01,]
@@ -977,9 +1000,7 @@ rownames(tabSurvKMcomplete) <-tabSurvKMcomplete$mRNA
 tabSurvKMcomplete <- tabSurvKMcomplete[,-1]
 tabSurvKMcomplete <- tabSurvKMcomplete[order(tabSurvKMcomplete$pvalue, decreasing=F),]
     
-tabSurvKMcompleteDEGs <- tabSurvKMcomplete[
-    rownames(tabSurvKMcomplete) %in% dataDEGsFiltLevel$mRNA,
-    ]
+tabSurvKMcompleteDEGs <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% dataDEGsFiltLevel$mRNA,]
 ```
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
@@ -999,8 +1020,8 @@ We will search for differentially methylated CpG sites using the `TCGAanalyze_DM
 function. In order to find these regions we use the beta-values 
 (methylation values ranging from 0.0 to 1.0) to compare two groups. 
 
-Firstly, it calculates the difference between the mean DNA methylation of each group
-for each probes. 
+Firstly, it calculates the difference between the mean DNA methylation of each
+group for each probes. 
 
 Secondly, it calculates the p-value using the wilcoxon test 
 adjusting by the Benjamini-Hochberg method. The default parameters was set to
@@ -1121,10 +1142,13 @@ grid.raster(img)
 
 ## `TCGAvisualize_SurvivalCoxNET` Survival Analysis: Cox Regression and dnet package
 
-TCGAvisualize_SurvivalCoxNET can help an user to identify a group of survival genes that are significant from univariate Kaplan Meier Analysis and also for Cox Regression.
-It shows in the end a network build with community of genes with similar range of pvalues from
-Cox regression (same color) and that interaction among those genes is already validated in
-literatures using the STRING database (version 9.1).
+TCGAvisualize_SurvivalCoxNET can help an user to identify a group of survival
+genes that are significant from univariate Kaplan Meier Analysis and also for 
+Cox Regression.
+It shows in the end a network build with community of genes with similar 
+range of pvalues from Cox regression (same color) and that interaction among 
+those genes is already validated in literatures using the STRING 
+database (version 9.1).
 
 
 ```{r, eval = FALSE}
@@ -1138,16 +1162,15 @@ tokenStop<- 1
 
 tabSurvKMcomplete <- NULL
 
-for( i in 1: round(nrow(dataBRCAcomplete)/100)){
-message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
-tokenStart <- tokenStop
-tokenStop <-100*i
-tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
-                                dataBRCAcomplete,
-                                Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
-                                Survresult = F,ThreshTop=0.67,ThreshDown=0.33)
-
-tabSurvKMcomplete <- rbind(tabSurvKMcomplete,tabSurvKM)
+for(i in 1: round(nrow(dataBRCAcomplete)/100)){
+    message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
+    tokenStart <- tokenStop
+    tokenStop <-100 * i
+    tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
+                                    dataBRCAcomplete,
+                                    Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
+                                    Survresult = F,ThreshTop=0.67,ThreshDown=0.33)
+    tabSurvKMcomplete <- rbind(tabSurvKMcomplete,tabSurvKM)
 }
 
 tabSurvKMcomplete <- tabSurvKMcomplete[tabSurvKMcomplete$pvalue < 0.01,]
@@ -1333,27 +1356,38 @@ library(TCGAbiolinks)
 
 ## Case study n. 1: Pan Cancer downstream analysis BRCA
 
+In this case study, we downloaded 114 normal and 1097 breast cancer (BRCA) 
+samples using TCGAquery, TCGAdownload and TCGAprepare.  
+
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(TCGAbiolinks)
+
+# defining common parameters
 cancer <- "BRCA"
 PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
 dataType <- "rsem.genes.results"
 pathCancer <- paste0("../data",cancer)
 
-# Result....Function.....parameters...p1...pn..................................time execution
-
-datQuery <- TCGAquery(tumor = cancer, platform = PlatformCancer, level = "3")  # time = 0.093s
+datQuery <- TCGAquery(tumor = cancer, platform = PlatformCancer, level = "3")  
 lsSample <- TCGAquery_samplesfilter(query = datQuery)
+
+# get subtype information
 dataSubt <- TCGAquery_subtype(tumor = cancer)
+
+# Which sampels are primary solid Tumor
 dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
                                   typesample = "TP")
+# Which sampels are Solid Tissue Normal
 dataSmTN <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
                                   typesample ="NT")
+# get clinical data
 dataClin <- TCGAquery_clinic(cancer = cancer,
-                             clinical_data_type = "clinical_patient")         # time = 2.606s
+                             clinical_data_type = "clinical_patient") 
 
-            TCGAdownload(data = datQuery, path = pathCancer, type = dataType,
-                         samples =c(dataSmTP,dataSmTN))
+TCGAdownload(data = datQuery, 
+             path = pathCancer, 
+             type = dataType,
+             samples =c(dataSmTP,dataSmTN))
 
 dataAssy <- TCGAprepare(query = datQuery, 
                         dir = pathCancer, 
@@ -1361,20 +1395,26 @@ dataAssy <- TCGAprepare(query = datQuery,
                         save = TRUE, 
                         summarizedExperiment = TRUE, 
                         samples = c(dataSmTP,dataSmTN),
-                        filename = paste0(cancer,"_",PlatformCancer,".rda"))  #time = 1178.353s
+                        filename = paste0(cancer,"_",PlatformCancer,".rda")) 
+```
+
+Using  `TCGAnalyze_DEA`, we identified 3,390 differentially expression analysis (DEA) (log 
+fold change >=1 and FDR < 1%) between 114 normal and 1097 BRCA samples. In 
+order to understand the underlying biological process from DEGs we performed an 
+enrichment analysis using `TCGAnalyze_EA_complete` function.  
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 
 dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,
-                                      cor.cut = 0.6,
-                                      path = pathCancer,
-                                      cancer = cancer )                      #time = 50.372s
+                                      cor.cut = 0.6)                      
 
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
                                       geneInfo = geneInfo,
-                                      method = "gcContent")                # time = 407.991s
+                                      method = "gcContent")                
 
 dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
                                   method = "quantile", 
-                                  qnt.cut =  0.25)                       # time = 0.833s
+                                  qnt.cut =  0.25)   
 
 dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmTN],
                             mat2 = dataFilt[,dataSmTP],
@@ -1382,10 +1422,18 @@ dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmTN],
                             Cond2type = "Tumor",
                             fdr.cut = 0.01 ,
                             logFC.cut = 1,
-                            method = "glmLRT")                          #time = 215.273s
+                            method = "glmLRT")  
  
+
+```
+
+TCGAbiolinks outputs bar chart with the number of genes for the main categories of 
+three ontologies (GO:biological process, GO:cellular component, and GO:molecular 
+function, respectively). 
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",
-                                RegulonList = rownames(dataDEGs))    # time = 69.488s 
+                                RegulonList = rownames(dataDEGs))  
 
 TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
                         GOBPTab = ansEA$ResBP,
@@ -1394,14 +1442,46 @@ TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
                         PathTab = ansEA$ResPat,
                         nRGTab = rownames(dataDEGs),
                         nBar = 20)
+```
 
-system.time(dataSurv<-TCGAanalyze_SurvivalKM(clinical_patient = dataClin,
-                                             dataGE = dataFilt,
-                                             Genelist = rownames(dataDEGs),
-                                             Survresult = FALSE,
-                                             ThreshTop = 0.67,
-                                             ThreshDown = 0.33,
-                                             p.cut = 0.05))               # time = 175.664s
+
+The figure resulted from the code above is shown below.
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("case1_EA.png")
+grid.raster(img)
+```
+
+
+The Kaplan-Meier analysis was used to compute survival univariate curves, and  
+log-Ratio test was computed to assess the statistical significance by using 
+TCGAanalyze_SurvivalKM function; starting with 3,390 DEGs genes we found 555 
+significantly genes with p.value <0.05. 
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+dataSurv <- TCGAanalyze_SurvivalKM(clinical_patient = dataClin,
+                                   dataGE = dataFilt,
+                                   Genelist = rownames(dataDEGs),
+                                   Survresult = FALSE,
+                                   ThreshTop = 0.67,
+                                   ThreshDown = 0.33,
+                                   p.cut = 0.05)
+```
+
+Cox-regression analysis was used to compute survival multivariate curves, and cox 
+p-value was computed to assess the statistical significance by using 
+TCGAnalyze_SurvivalCoxNET function. Survival multivariate analysis found 160 
+significantly genes according to the cox p-value FDR 5.00e-02. From DEGs that we 
+found to correlate  significantly with survival by both univariate and multivariate 
+analyses we analyzed the following network.
+
+The interactome network graph was generated using STRING.,org.Hs.string version 
+10 (Human functional protein association network). The network graph was resized 
+by dnet package considering only multivariate survival genes, with strong interaction 
+(threshold = 700) we obtained a subgraphsub graph of 24 nodes and 31 edges.
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 
 require(dnet)  # to change
 org.Hs.string <- dRDataLoader(RData = "org.Hs.string")
@@ -1412,28 +1492,9 @@ TabCoxNet <- TCGAvisualize_SurvivalCoxNET(dataClin,
                                           scoreConfidence = 700,
                                           org.Hs.string = org.Hs.string,
                                           titlePlot = "Case Study n.1 dnet")
-
-# Convert images from pdf to png.
-library(animation)
-ani.options(outdir = getwd())
-
-im.convert("TCGAvisualize_EAbarplot_Output.pdf", 
-           output = "case1_EA.png", 
-           extra.opts="-density 150")
-
-im.convert("SurvivalCoxNETOutput.pdf", 
-           output = "case1_dnet.png", 
-           extra.opts="-density 150")
 ```
 
-The figures resulted from the code above are shown below.
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
-library(grid)
-img <- readPNG("case1_EA.png")
-grid.raster(img)
-```
-
+The figure resulted from the code above is shown below.
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
@@ -1443,7 +1504,8 @@ grid.raster(img)
 
 ## Case study n. 2: Pan Cancer downstream analysis LGG
 
-We focused on the analysis of LGG samples. In particular, we used TCGA biolinks to download 293 samples with molecular subtypes. 
+We focused on the analysis of LGG samples. In particular, we used TCGA biolinks
+to download 293 samples with molecular subtypes. 
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(TCGAbiolinks)
@@ -1486,7 +1548,6 @@ dataAssy <- TCGAprepare(query = datQuery,
                         filename = paste0(cancer,"_",PlatformCancer,".rda"))
 ```
 
-
 Firstly, we searched for possible outliers using the TCGAanalyze_Preprocessing 
 function, which performs an Array Array Intensity correlation AAIC.
 We used all samples in expression data with molecular subtypes,  filtering 
@@ -1494,12 +1555,26 @@ out sampels without molecular information, and using only IDHmut-codel (n=85),
 IDHmut-non-codel (n=141) and IDHwt (n=56), NA (11), to define a square 
 symmetric matrix of pearson correlation among all samples (n=293). 
 According this matrix we found 0 samples with low correlation (cor.cut = 0.6) 
-that can be identified as possible outliers, so we continued our analysis with 70 samples. 
+that can be identified as possible outliers, so we continued our analysis 
+with 70 samples. 
 
-Secondly using the TCGAanalyze_Normalization function we normalized mRNA transcripts and miRNA, using EDASeq package. This function does uses Within-lane normalization procedures to adjust for GC-content effect (or other gene-level effects) on read counts: loess robust local regression, global-scaling, and full-quantile normalization (Risso et al., 2011) and between-lane normalization procedures to adjust for distributional differences between lanes (e.g., sequencing depth): global-scaling and full-quantile normalization (Bullard et al., 2010).
+Secondly using the `TCGAanalyze_Normalization` function we normalized mRNA 
+transcripts and miRNA, using EDASeq package. This function does uses 
+Within-lane normalization procedures to adjust for GC-content effect 
+(or other gene-level effects) on read counts: loess robust local regression, 
+global-scaling, and full-quantile normalization [@ref6] and 
+between-lane normalization procedures to adjust for distributional differences 
+between lanes (e.g., sequencing depth): global-scaling and full-quantile 
+normalization [@ref5].
 
-Thirdly using the TCGAanalyze_Filtering function we applied 3 filters removing features / mRNAs with low signal across samples obtaining 4578, 4284, 1187 mRNAs respectively. 
-Then we applied two Hierarchical cluster analysis on 1187 mRNAs after three filters described above, the first cluster using as method ward.D2, and the second with ConsensusClusterPlus.
+Thirdly using the `TCGAanalyze_Filtering` function we applied 3 filters removing 
+features / mRNAs with low signal across samples obtaining 4578, 4284, 
+1187 mRNAs respectively. 
+
+Then we applied two Hierarchical cluster analysis on 1187 mRNAs after three 
+filters described above, the first cluster using as method ward.D2, and the 
+second with ConsensusClusterPlus.
+
 After two clusters analysis, with cut.tree =4 we obtained n=4 espression clusters (EC).
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
@@ -1520,8 +1595,8 @@ data_Hc2 <- TCGAanalyze_Clustering(tabDF = datFilt,
                                    methodHC = "ward.D2") # time = 207.389
 # deciding number of tree to cuts
 cut.tree <-4
-paste0(c("EC"),(1:cut.tree))
-## consensusClusters contains barcodes for 4 groups
+
+# consensusClusters contains barcodes for 4 groups
 ans <- hclust(ddist <- dist(datFilt), method = "ward.D2")
 hhc <- data_Hc2[[cut.tree]]$consensusTree
 consensusClusters<-data_Hc2[[cut.tree]]$consensusClass
@@ -1535,7 +1610,7 @@ names(consensusClusters) <- substr(names(consensusClusters),1,12)
 dataClin <- cbind(dataClin, groupsHC = matrix(0,nrow(dataClin),1))
 rownames(dataClin) <- dataClin$bcr_patient_barcode
 levels(consensusClusters) <- c("EC1","EC2","EC3","EC4")
-for( i in 1: nrow(dataClin)){
+for(i in 1:nrow(dataClin)){
     currSmp <- dataClin$bcr_patient_barcode[i]
     dataClin[currSmp,"groupsHC"] <- as.character(consensusClusters[currSmp])
 }
@@ -1579,20 +1654,6 @@ TCGAvisualize_profilePlot(clin_subt,
                           filename = "case2_Idh_new.svg",
                           plot.margin = c(-4.0, -2.5, -0.5, 2),
                           na.rm = TRUE)
-
-TCGAvisualize_profilePlot(clin_subt,
-                          groupCol="groupsHC",
-                          subtypeCol="MethylationCluster",
-                          filename = "case2_Met.svg",
-                          plot.margin = c(-4.0, -2.5, -0.5, 2),
-                          na.rm = TRUE)
-
-TCGAvisualize_profilePlot(clin_subt,
-                          groupCol="groupsHC",
-                          subtypeCol="AGE2",
-                          filename = "case2_age_new.svg",
-                          plot.margin = c(-4.0, -2.5, -0.5, 2),
-                          na.rm = TRUE)
 ```
 
 The IDH subgroup profile plot is shown below:
@@ -1603,12 +1664,31 @@ img <- readPNG("case2_Idh.png")
 grid.raster(img)
 ```
 
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+TCGAvisualize_profilePlot(clin_subt,
+                          groupCol="groupsHC",
+                          subtypeCol="MethylationCluster",
+                          filename = "case2_Met.svg",
+                          plot.margin = c(-4.0, -2.5, -0.5, 2),
+                          na.rm = TRUE)
+```
+
 The Methylation subgroup profile plot is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
 img <- readPNG("case2_Met.png")
 grid.raster(img)
+```
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+TCGAvisualize_profilePlot(clin_subt,
+                          groupCol="groupsHC",
+                          subtypeCol="AGE2",
+                          filename = "case2_age_new.svg",
+                          plot.margin = c(-4.0, -2.5, -0.5, 2),
+                          na.rm = TRUE)
 ```
 
 The age subgroup profile plot is shown below:
@@ -1630,7 +1710,7 @@ TCGAvisualize_Heatmap(DFfilt = datFilt,
 dev.off()
 ```
 
-The result is shown below
+The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
@@ -1638,12 +1718,14 @@ img <- readPNG("case2_Heatmap.png")
 grid.raster(img)
 ```
 
+Finally, we will take a look in the mutation genes. We will first download the maf file
+with `TCGAquery_maf`. In this example we will investigate the gene "ATRX".
 
-Finally, we will take a look in the matation genes.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 LGGmut <- TCGAquery_maf(tumor = "LGG",
                         archive.name="LGG.IlluminaGA_DNASeq_curated.Level_2.1.4.0")
 
+# Selecting gene
 mRNAsel <- "ATRX"
 LGGselected <- LGGmut[LGGmut$Hugo_Symbol == mRNAsel,]
 
@@ -1652,56 +1734,31 @@ dataMut <- dataMut[!duplicated(dataMut$Tumor_Sample_Barcode),]
 dataMut$Tumor_Sample_Barcode <- substr(dataMut$Tumor_Sample_Barcode ,1,12)
 rownames(dataMut) <- dataMut$Tumor_Sample_Barcode
 
-
+# Adding the Expression Cluster classification found before
 for( i in 1: nrow(dataMut)){
     currSmp <- dataMut$Tumor_Sample_Barcode[i]
     dataMut[currSmp,"groupsHC"] <- as.character(consensusClusters[currSmp])
 }
-
 
 for( ccols in 1:length(  as.character(levels(consensusClusters)) )){
     dataMut[dataMut$groupsHC == as.character(levels(consensusClusters))[ccols],"groupsHC"] <- paste0("EC",ccols)
 }
 
 dataMut <- dataMut[dataMut$Variant_Classification!=0,]
+```
 
-table(dataMut$groupsHC,dataMut$Variant_Classification)
-table(dataMut$groupsHC,dataMut$Variant_Type)
-
-
+You can see the for the groupsHC groups the distribution of the subtypes Variant_Classification of the gene
+ATRX.
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 TCGAvisualize_profilePlot(dataMut,
                           groupCol = "groupsHC",
                           subtypeCol =  "Variant_Classification",
                           na.rm = FALSE,
                           plot.margin = c(-4.0, -2.5, -0.5, 2),
                           filename = paste0(mRNAsel,"_Mutation_Variant_Classification_in_EC_clusters.png"))
-
-TCGAvisualize_profilePlot(dataMut,
-                          groupCol = "groupsHC",
-                          subtypeCol =  "Variant_Type",
-                          na.rm = FALSE,
-                          plot.margin = c(-4.0, -2.5, -0.5, 2),
-                          filename = paste0(mRNAsel,"_Mutation_Variant_Type_in_EC_clusters.png"))
-
-
-TCGAvisualize_mutation(data = colData(dataAssy),
-                       groupCol = "RNASeqCluster",
-                       geneList = "ATRX",
-                       filename = "mutation_ATRX_RNASeqCluster.png",
-                       by = "cluster")
-
-TCGAvisualize_mutation(data = colData(dataAssy),
-                       groupCol = "RNASeqCluster",
-                       geneList = "IDH1",
-                       filename = "mutation_IDH1_RNASeqCluster.png",
-                       by = "cluster")
-
-
-
 ```
 
-The results are shown below:
-
+The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
@@ -1709,6 +1766,20 @@ img <- readPNG("ATRX_Mutation_Variant_Classification_in_EC_clusters.png")
 grid.raster(img)
 ```
 
+
+You can see the for the groupsHC groups the distribution of the subtypes Variant_Type of the gene
+ATRX.
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+TCGAvisualize_profilePlot(dataMut,
+                          groupCol = "groupsHC",
+                          subtypeCol =  "Variant_Type",
+                          na.rm = FALSE,
+                          plot.margin = c(-4.0, -2.5, -0.5, 2),
+                          filename = paste0(mRNAsel,"_Mutation_Variant_Type_in_EC_clusters.png"))
+```
+
+The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
@@ -1716,7 +1787,16 @@ img <- readPNG("ATRX_Mutation_Variant_Type_in_EC_clusters.png")
 grid.raster(img)
 ```
 
+You can see the for the RNASeqCluster groups the percentage of samples that have the ATRX mutated.
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+TCGAvisualize_mutation(data = colData(dataAssy),
+                       groupCol = "RNASeqCluster",
+                       geneList = "ATRX",
+                       filename = "mutation_ATRX_RNASeqCluster.png",
+                       by = "cluster")
+```
 
+The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
@@ -1724,18 +1804,22 @@ img <- readPNG("mutation_ATRX_RNASeqCluster.png")
 grid.raster(img)
 ```
 
+You can see the for the RNASeqCluster groups the percentage of samples that have the IDH1 mutated.
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+TCGAvisualize_mutation(data = colData(dataAssy),
+                       groupCol = "RNASeqCluster",
+                       geneList = "IDH1",
+                       filename = "mutation_IDH1_RNASeqCluster.png",
+                       by = "cluster")
+```
+
+The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
 img <- readPNG("mutation_IDH1_RNASeqCluster.png")
 grid.raster(img)
 ```
-
-
-
-
-
-
 
 ## Case study n. 3: Integration of methylation and expression for COAD
 
@@ -1746,25 +1830,12 @@ is often difficult to accomplish.
 This case study will show the steps to conduct a study of the relationship
 between the two types of data.
 
-First we downloaded COAD methylation data for HumanMethylation27k and HumanMethylation450k
+Firstly, we downloaded COAD methylation data for HumanMethylation27k and HumanMethylation450k
 platforms, and COAD expression data for IlluminaGA_RNASeqV2. 
 
 TCGAbiolinks adds by default the classifications already published by researchers.
 We will use this classification to do our examples. 
-We selected the groups CIMP.L and CIMP.H to do a expression and DNA methylation comparison.
-
-Firstly, we do a DMR (different methylated region) analysis, which will give the 
-difference of DNA methylation for the probes of the groups and their significance value.
-The output can be seen by a volcano plot.
-
-Secondly, we do a DEA (differential expression analysis) which will give the fold change 
-of gene expression and their significance value.
-
-Finally, using both previous analysis we do a starburst plot to select the genes 
-that are Candidate Biologically Significant.
-
-Observation: over the time, the number of samples has increased and the clinical data updated.
-We used only the samples that had a classification in the examples.
+So, selected the groups CIMP.L and CIMP.H to do a expression and DNA methylation comparison.
 
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
@@ -1805,27 +1876,41 @@ coad.exp <- TCGAprepare(query = coad.query.exp,
 
 
 # removing the samples without classification
-coad.met <- subset(coad.met,select = !(colData(coad.met)$methylation_subtype %in% c(NA)))
+coad.aux <- subset(coad.met, 
+                   select = colData(coad.met)$methylation_subtype %in% c("CIMP.L","CIMP.H"))
 
+```
+
+We will first investigate the mean methylation of the methylation groups and highlight 
+the hypermuated subgroup. 
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 #--------------------------------------------
 # STEP 2: Analysis
 #--------------------------------------------
 # 2.1 - Mean methylation of samples
 # -------------------------------------------
-TCGAvisualize_meanMethylation(coad.met,
+TCGAvisualize_meanMethylation(coad.aux,
                               groupCol = "methylation_subtype",
                               subgroupCol = "hypermutated",
                               group.legend  = "Groups",
                               subgroup.legend = "hypermutated",
                               filename = "coad_mean.png")
+```
 
-#-------------------------------------------------
-# 2.2 - DMR - Methylation analysis - volcano plot
-# ------------------------------------------------
-coad.aux <- subset(coad.met, 
-                   select = colData(coad.met)$methylation_subtype %in% c("CIMP.L","CIMP.H"))
+The figure resulted from the code above is shown below:
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("meanmet.png")
+grid.raster(img)
+```
 
+For the methylation analysis, we do a DMR (different methylated region) analysis, which will give the 
+difference of DNA methylation for the probes of the groups and their significance value.
+The output can be seen by a volcano plot.
 
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 # na.omit
 coad.aux <- subset(coad.aux,subset = (rowSums(is.na(assay(coad.aux))) == 0))
 
@@ -1837,13 +1922,23 @@ coad.aux <- TCGAanalyze_DMR(coad.aux, groupCol = "methylation_subtype",
                             diffmean.cut = 0.25,
                             legend = "State",
                             plot.filename = "coad_CIMPHvsCIMPL_metvolcano.png")
+```
 
-save(coad.aux,file = "coad_pvalue.rda")
+The figure resulted from the code above is shown below:
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("figure5met.png")
+grid.raster(img)
+```
 
+
+For the expression analysis, we do a DEA (differential expression analysis) which will give the fold change 
+of gene expression and their significance value.
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 #-------------------------------------------------
 # 2.3 - DEA - Expression analysis - volcano plot
 # ------------------------------------------------
-
 coad.exp.aux <- subset(coad.exp, 
                        select = colData(coad.exp)$methylation_subtype %in% c("CIMP.H","CIMP.L"))
 
@@ -1851,9 +1946,7 @@ idx <- colData(coad.exp.aux)$methylation_subtype %in% c("CIMP.H")
 idx2 <- colData(coad.exp.aux)$methylation_subtype %in% c("CIMP.L")
 
 dataPrep <- TCGAanalyze_Preprocessing(object = coad.exp.aux,
-                                      cor.cut = 0.6,
-                                      cancer = "coad",
-                                      path=".")
+                                      cor.cut = 0.6)
 
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
                                       geneInfo = geneInfo,
@@ -1877,6 +1970,22 @@ TCGAVisualize_volcano(dataDEGs$logFC,dataDEGs$FDR,
                       xlab = " Gene expression fold change (Log2)",
                       legend = "State",
                       title = "Volcano plot (CIMP.l vs CIMP.H)")
+```
+
+The figure resulted from the code above is shown below:
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("figure5exp.png")
+grid.raster(img)
+```
+
+Finally, using both previous analysis we do a starburst plot to select the genes 
+that are Candidate Biologically Significant.
+
+Observation: over the time, the number of samples has increased and the clinical data updated.
+We used only the samples that had a classification in the examples.
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 
 #------------------------------------------
 # 2.4 - Starburst plot
@@ -1890,21 +1999,7 @@ starburst <- TCGAvisualize_starburst(coad.aux, dataDEGs,"CIMP.H","CIMP.L",
                                      names = TRUE)
 ```
 
-The figures resulted from the code above are shown below.
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
-library(grid)
-img <- readPNG("figure5exp.png")
-grid.raster(img)
-```
-
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
-library(grid)
-img <- readPNG("figure5met.png")
-grid.raster(img)
-```
-
+The figure resulted from the code above is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
@@ -1918,16 +2013,42 @@ One of the biggest problems related to the study data is the preparation phase,
 which often consists of successive 
 steps in order to prepare it to a format acceptable by certain algorithms and software.
 
-With the object of assisting users in this arduous step, TCGAbiolinks offers in 
-data preparation stage, the toPackage argument, which aims to prepare the data 
-in order to obtain the correct format for different packages.
+With the object of assisting users in this arduous step, TCGAbiolinks will 
+try to offer to prepare the data  in order to obtain the correct format for different packages.
 
 An example of package to perform DNA methylation and expression analysis is ELMER [@ref1]. 
-We will present this
-case study the study KIRC by TCGAbiolinks and ELMER integration. For more information,
-please consult ELMER package.
+ELMER, which is designed  to combine DNA methylation and gene expression data from human tissues to infer 
+multi-level cis-regulatory networks. ELMER uses DNA methylation to 
+identify enhancers, and correlates enhancer state with expression of nearby genes 
+to identify one or more transcriptional targets. Transcription factor (TF) binding 
+site analysis of enhancers is coupled with expression analysis of all TFs to 
+infer upstream regulators. This package can be easily applied to TCGA public 
+available cancer data sets and custom DNA methylation and gene expression data sets.
 
+ELMER analyses have 5 main steps: 
+
+1. Identify distal enhancer probes on HM450K.
+2. Identify distal enhancer probes with significantly different DNA methyaltion level
+in control group and experiment group.
+3. Identify putative target genes for differentially methylated distal enhancer probes.
+4. Identify enriched motifs for the distal enhancer probes which are significantly 
+differentially methylated and linked to putative target gene.
+5. Identify regulatory TFs whose expression associate with DNA methylation at motifs.
+
+
+We will present this case study the study KIRC by TCGAbiolinks and 
+ELMER integration. For more information, please consult the ELMER package.
+
+For the DNA methylation data we will search the platform HumanMethylation450
+and level 3 data with TCGAquery. After, we will download the data with
+TCGAdownload and the data will be prepared into a data.frame object
+with TCGAprepare. TCGAprepare_elmer will be used to prepare the data frame
+to ELMER.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+library(TCGAbiolinks)
+library(SummarizedExperiment)
+library(ELMER)
+library(parallel)
 #-----------------------------------
 # STEP 1: Search, download, prepare |
 #-----------------------------------
@@ -1945,7 +2066,14 @@ kirc.met <- TCGAprepare_elmer(kirc.met,
                               platform = "HumanMethylation450",
                               save = TRUE,
                               met.na.cut = 0.2)
+```
+For the expression  data we will search the platform IlluminaHiSeq_RNASeqV2
+and level 3 data with TCGAquery. After, we will download the ormalized_results 
+data with TCGAdownload and prepare it into a data.frame object
+with TCGAprepare. TCGAprepare_elmer will be used to prepare the data frame
+to ELMER.
 
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 # Step 1.2 download expression data
 query.rna <- TCGAquery(tumor="KIRC",level=3, platform="IlluminaHiSeq_RNASeqV2")
 TCGAdownload(query.rna,path=path,type = "rsem.genes.normalized_results")
@@ -1956,6 +2084,14 @@ kirc.exp <- TCGAprepare(query.rna, dir=path, save = TRUE,
 kirc.exp <- TCGAprepare_elmer(kirc.exp,
                               save = TRUE,
                               platform = "IlluminaHiSeq_RNASeqV2")
+```
+
+The ELMER input is a mee object that contains the methylation matrix,
+the expression matrix, the probe information, the gene information and 
+a table with a summary of the data.
+
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 #-----------------------------------
 # STEP 2: ELMER integration         |
 #-----------------------------------
@@ -1970,7 +2106,10 @@ geneInfo <- promoters(geneAnnot,upstream = 0, downstream = 0)
 probe <- get.feature.probe()
 mee <- fetch.mee(meth = kirc.met, exp = kirc.exp, TCGA = TRUE,
                  probeInfo = probe, geneInfo = geneInfo)
+```
 
+The code below excute steps 2-5 showed above: 
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 #--------------------------------------
 # STEP 3: Analysis                     |
 #--------------------------------------
@@ -2020,9 +2159,15 @@ TF <- get.TFs(mee=mee,
 
 ```
 
-From this analysis it is possible to verify the relation between a probe 
-and nearby genes. The result of this is show by the ELMER scatter plot.
+From this analysis it is possible to verify the relation between nearby 20 
+gene expression vs DNA methylation at this probe. The result of this is 
+show by the ELMER scatter plot.
 
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+scatter.plot(mee,byProbe=list(probe=c("cg00328720"),geneNum=20), category="TN")
+```
+
+The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
@@ -2030,7 +2175,15 @@ img <- readPNG("case4_elmer.png")
 grid.raster(img)
 ```
 
-Each scatter plot showing the average methylation level of sites with the AP1 motif in all KIRC samples plotted against the expression of the transcription factor CEBPB and GFI1 respectively.
+Each scatter plot showing the average DNA methylation level of sites with the AP1 motif in all 
+KIRC samples plotted against the expression of the transcription factor CEBPB and GFI1 respectively.
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+scatter.plot(mee,byTF = list(TF = c("CEBPB","GFI1"),
+                           probe = enriched.motif[["AP1"]]), category = "TN",
+             save = TRUE, lm_line = TRUE, dir.out = "kirc")
+```
+
+The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
@@ -2038,7 +2191,15 @@ img <- readPNG("elmer1.png")
 grid.raster(img)
 ```
 
-The schematic plot shows probe colored in blue and the location of nearby 20 genes, The genes significantly linked to the probe were shown in red.
+The schematic plot shows probe colored in blue and the location of nearby 20 genes. 
+The genes significantly linked to the probe were shown in red.
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+pair <- fetch.pair(pair="./kirc/getPair.hypo.pairs.significant.csv",
+probeInfo = mee@probeInfo, geneInfo = mee@geneInfo)
+schematic.plot(pair=pair, byProbe="cg14613594",save=FALSE)
+```
+The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
@@ -2046,7 +2207,8 @@ img <- readPNG("elmer2.png")
 grid.raster(img)
 ```
 
-The plot shows the odds ratio (x axis) for the selected motifs with OR above 1.3 and lower boundary of OR above 1.3. The range shows the 95% confidence interval for each Odds Ratio.
+The plot shows the odds ratio (x axis) for the selected motifs with OR above 1.3 and lower boundary of OR above 1.3. 
+The range shows the 95% confidence interval for each Odds Ratio.
 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
