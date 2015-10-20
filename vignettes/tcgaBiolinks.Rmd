@@ -1485,6 +1485,7 @@ dataAssy <- TCGAprepare(query = datQuery,
                         add.mutation.genes = TRUE,
                         filename = paste0(cancer,"_",PlatformCancer,".rda"))
 ```
+<<<<<<< HEAD
 
 
 Firstly, we searched for possible outliers using the TCGAanalyze_Preprocessing 
@@ -1508,6 +1509,27 @@ dataPrep <- TCGAanalyze_Preprocessing(path = pathCancer,
                                       cancer = cancer,
                                       cor.cut = 0.6)        # time = 13.028s
 =======
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,cor.cut = 0.6)
+>>>>>>> origin/master
+=======
+
+
+Firstly, we searched for possible outliers using the TCGAanalyze_Preprocessing 
+function, which performs an Array Array Intensity correlation AAIC.
+We used all samples in expression data with molecular subtypes,  filtering 
+out sampels without molecular information, and using only IDHmut-codel (n=85),
+IDHmut-non-codel (n=141) and IDHwt (n=56), NA (11), to define a square 
+symmetric matrix of pearson correlation among all samples (n=293). 
+According this matrix we found 0 samples with low correlation (cor.cut = 0.6) 
+that can be identified as possible outliers, so we continued our analysis with 70 samples. 
+
+Secondly using the TCGAanalyze_Normalization function we normalized mRNA transcripts and miRNA, using EDASeq package. This function does uses Within-lane normalization procedures to adjust for GC-content effect (or other gene-level effects) on read counts: loess robust local regression, global-scaling, and full-quantile normalization (Risso et al., 2011) and between-lane normalization procedures to adjust for distributional differences between lanes (e.g., sequencing depth): global-scaling and full-quantile normalization (Bullard et al., 2010).
+
+Thirdly using the TCGAanalyze_Filtering function we applied 3 filters removing features / mRNAs with low signal across samples obtaining 4578, 4284, 1187 mRNAs respectively. 
+Then we applied two Hierarchical cluster analysis on 1187 mRNAs after three filters described above, the first cluster using as method ward.D2, and the second with ConsensusClusterPlus.
+After two clusters analysis, with cut.tree =4 we obtained n=4 espression clusters (EC).
+
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,cor.cut = 0.6)
 >>>>>>> origin/master
@@ -1707,6 +1729,7 @@ TCGAvisualize_mutation(data = colData(dataAssy),
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 TCGAvisualize_mutation(data = dataMut,
                        groupCol = "groupsHC",
                        geneList = "ATRX",
@@ -1747,6 +1770,7 @@ TCGAvisualize_profilePlot(dataMut2,
 
 =======
 >>>>>>> origin/master
+=======
 ```
 
 The results are shown below:
@@ -1754,6 +1778,17 @@ The results are shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
+img <- readPNG("ATRX_Mutation_Variant_Classification_in_EC_clusters.png")
+grid.raster(img)
+>>>>>>> origin/master
+```
+
+The results are shown below:
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+<<<<<<< HEAD
 img <- readPNG("ATRX_Mutation_Variant_Classification_in_EC_clusters.png")
 grid.raster(img)
 ```
@@ -1764,6 +1799,12 @@ library(grid)
 img <- readPNG("ATRX_Mutation_Variant_Type_in_EC_clusters.png")
 grid.raster(img)
 ```
+=======
+img <- readPNG("ATRX_Mutation_Variant_Type_in_EC_clusters.png")
+grid.raster(img)
+```
+
+>>>>>>> origin/master
 
 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
