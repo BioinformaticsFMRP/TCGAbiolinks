@@ -1599,6 +1599,10 @@ Then we applied two Hierarchical cluster analysis on 1187 mRNAs after three filt
 After two clusters analysis, with cut.tree =4 we obtained n=4 espression clusters (EC).
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+
+# expression data with molecular subtypes
+dataAssy <- subset(dataAssy, select = colData(dataAssy)$patient %in% dataSubt$patient)
+
 dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,cor.cut = 0.6)
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
                                       geneInfo = geneInfo,
@@ -1616,14 +1620,37 @@ data_Hc2 <- TCGAanalyze_Clustering(tabDF = datFilt,
                                    methodHC = "ward.D2") 
 ```
 
+For the next steps, we will merge the clinical data with with the
+the cluster information and we will add the subtype information. 
+
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+
+#------  Add ckuster information
+cluster <- data.frame("groupsHC" = data_Hc2[[4]]$consensusClass)
+cluster$groupsHC <- paste0("EC",cluster$groupsHC)
+cluster$patient <-  substr(rownames(cluster),1,12)
+# adding information about gropus from consensus Cluster in clinical data
+dataClin <- merge(dataClin,cluster, by.x="bcr_patient_barcode", by.y="patient")
+#---------
+
+dataClin <- cbind(dataClin, AGE2 = matrix(0,nrow(dataClin),1))
+dataClin[ dataClin[,"age_at_initial_pathologic_diagnosis"] <= 32, "AGE2"] <- "<=32 yr"
+dataClin[ dataClin[,"age_at_initial_pathologic_diagnosis"] >= 41, "AGE2"] <- ">=41 yr"
+dataClin[ dataClin$AGE2 == 0, "AGE2"] <- "33-40 yr"
+
+# merge subtype and clinical data
+clin_subt <- merge(dataClin,dataSubt, by.x="bcr_patient_barcode", by.y="patient")
+```
+
 The next steps will be to visualize the data. Firstly, we created the survival plot.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 #----------- VISUALIZE --------------------
 # plotting survival for groups EC1, EC2, EC3, EC4
-TCGAanalyze_survival(data = dataClin,
+TCGAanalyze_survival(data = clin_subt,
                      clusterCol = "groupsHC",
                      main = "TCGA kaplan meier survival plot from consensus cluster",
                      legend = "RNA Group",
+                     color = c("black","red","blue","green3"),
                      labels=levels(consensusClusters) ,
                      filename = "case2_surv.pdf")
 ```
@@ -1641,17 +1668,10 @@ Secondly we'll create the profile plot for age, IDH.1p19q.Subtype and methylatio
 for the EC groups.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-dataClin <- cbind(dataClin, AGE2 = matrix(0,nrow(dataClin),1))
-dataClin[ dataClin[,"age_at_initial_pathologic_diagnosis"] <= 32, "AGE2"] <- "<=32 yr"
-dataClin[ dataClin[,"age_at_initial_pathologic_diagnosis"] >= 41, "AGE2"] <- ">=41 yr"
-dataClin[ dataClin$AGE2 == 0, "AGE2"] <- "33-40 yr"
-
-clin_subt <- merge(dataClin,dataSubt, by.x="bcr_patient_barcode", by.y="patient",all.x = T)
-
 TCGAvisualize_profilePlot(clin_subt,
                           groupCol="groupsHC",
                           subtypeCol="IDH.1p19q.Subtype",
-                          filename = "case2_Idh_new.svg",
+                          filename = "case2_Idh.pdf",
                           plot.margin = c(-4.0, -2.5, -0.5, 2),
                           na.rm = TRUE)
 ```
@@ -1669,7 +1689,7 @@ grid.raster(img)
 TCGAvisualize_profilePlot(clin_subt,
                           groupCol="groupsHC",
                           subtypeCol="MethylationCluster",
-                          filename = "case2_Met.svg",
+                          filename = "case2_Met.png",
                           plot.margin = c(-4.0, -2.5, -0.5, 2),
                           na.rm = TRUE)
 ```
@@ -1686,7 +1706,7 @@ grid.raster(img)
 TCGAvisualize_profilePlot(clin_subt,
                           groupCol="groupsHC",
                           subtypeCol="AGE2",
-                          filename = "case2_age_new.svg",
+                          filename = "case2_age_new.pdf",
                           plot.margin = c(-4.0, -2.5, -0.5, 2),
                           na.rm = TRUE)
 ```
@@ -1703,18 +1723,20 @@ We will also, create a heatmap of the expression.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 TCGAvisualize_Heatmap(data = datFilt,
                       metadata = clin_subt,
-                      consensusClusters= data_Hc2[[4]],
+                      sortCol = "groupsHC",
                       labelCols = c("histological_type",
                                     "IDH.1p19q.Subtype",
                                     "CNCluster",
                                     "COCCluster",
-                                    "OncosignCluster"), 
-                      filename = "a.pdf", 
+                                    "OncosignCluster",
+                                    "groupsHC"), 
+                      filename = "heatmap.pdf", 
                       cbPalette = list(c("cyan","green3","red","purple"),
                                      c("tomato","cyan","gold"),
                                      c("purple","green","red"),
                                      c("purple","green","red"),
-                                     c("red","purple","green","orange","gray")))
+                                     c("red","purple","green","orange","gray"),
+                                     c("black","red","blue","green3")))
 ```
 
 The result is shown below:
