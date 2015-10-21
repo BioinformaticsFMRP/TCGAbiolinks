@@ -624,7 +624,7 @@ TCGAvisualize_Heatmap <- function(data,
                                   filename ="Heatmap.pdf"){
 
 
-    rownames(clin_subt) <- substr(clin_subt$bcr_patient_barcode,1,12)
+    rownames(metadata) <- substr(metadata$bcr_patient_barcode,1,12)
 
     # If a consensus Cluster is set then a bar of the cluster will be drawn
     if(!is.null(consensusClusters)){
