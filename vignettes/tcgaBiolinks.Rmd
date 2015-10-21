@@ -253,8 +253,8 @@ BRCA_RNASeqV2_version <- TCGAquery_Version(tumor = "brca",
 The result is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
-knitr::opts_chunk$set(comment = "", warning = FALSE, message = FALSE, echo = TRUE, tidy = FALSE, size="small")
+knitr::opts_chunk$set(comment = "", warning = FALSE, 
+                      message = FALSE, echo = TRUE, tidy = FALSE, size="small")
 knitr::kable(BRCA_RNASeqV2_version[,1:4], digits = 2, 
              caption = "Table with date, version and number of samples of BRCA IlluminaHiSeq_RNASeqV2", 
              row.names = FALSE)
@@ -472,12 +472,12 @@ tabDEGsTFPubmed <- TCGAquery_investigate("breast", dataDEGsFiltLevelTFs, topgene
 The result is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
 library(stringr)
 tabDEGsTFPubmed$PMID <- str_sub(tabDEGsTFPubmed$PMID,0,30)
-knitr::kable(tabDEGsTFPubmed, digits = 2, caption = "Table with most studied TF in pubmed related to a specific cancer",row.names = FALSE)
-
-#LatexPrintTableforPresentation(Table = tabDEGsTFPubmed,rowsForPage = nrow(tabDEGsTFPubmed), TableTitle = "tabDEGsTFPubmed", LabelTitle = "tabDEGsTFPubmed", withrows = T)
+knitr::kable(tabDEGsTFPubmed, 
+             digits = 2, 
+             caption = "Table with most studied TF in pubmed related to a specific cancer",
+             row.names = FALSE)
 ```
 
 ## `TCGAquery_Social`: Searching questions,answers and literature
@@ -503,11 +503,7 @@ tabPackageKey <- TCGAquery_Social(siteToFind ="support.bioconductor.org" ,KeyInf
 The result is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
-listPackage <- c("limma","edgeR","survcomp")
-tabPackage <- TCGAquery_Social(siteToFind = "bioconductor.org", listPackage)
-
-knitr::kable(head(tabPackage), digits = 2, caption = "Table with number of downloads about a list of packages",row.names = FALSE)
+knitr::kable(head(tabPackage1), digits = 2, caption = "Table with number of downloads about a list of packages",row.names = FALSE)
 
 knitr::kable(tabPackage2[c(1,4,5,7),], digits = 2, caption = "Find most related question in support.bioconductor.org with keyword = tcga",row.names = FALSE)
 
@@ -530,10 +526,6 @@ tabPackage2 <- TCGAquery_Social(siteToFind ="biostars.org",KeyInfo = "package")
 The result is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
-# Find most related question in biostar with TCGA
-#tabPackage <- TCGAquery_Social(siteToFind ="biostars.org",KeyInfo = "package")
-
 knitr::kable(head(tabPackage1), digits = 2, caption = "Find most related question in biostar with TCGA",row.names = FALSE)
 
 knitr::kable(tabPackage2[c(1,5,7),], digits = 2, caption = "Find most related question in biostar with package",row.names = FALSE)
@@ -638,7 +630,6 @@ to the hg19. The genes_id not found are then removed from the final matrix.
 The default output is a SummarizedExperiment is shown below. 
 
 ```{r, eval = TRUE,message=FALSE,warning=FALSE}
-library(TCGAbiolinks)
 library(SummarizedExperiment)
 head(assay(dataREAD,"normalized_count"))
 metadata(dataREAD)
@@ -674,7 +665,6 @@ dataREAD_df <- TCGAprepare(query,dir = "../dataREAD",
 ```
 
 ```{r, eval = TRUE}
-library(TCGAbiolinks)
 class(dataREAD_df)
 dim(dataREAD_df)
 head(dataREAD_df)
@@ -798,15 +788,6 @@ BRCAMatrix <- assay(BRCARnaseq_assay,"raw_counts")
 BRCARnaseq_CorOutliers <- TCGAanalyze_Preprocessing(BRCARnaseq_assay)
 ```
 
-The result is shown below:
-```{r, eval = TRUE, echo = FALSE,size = 8}
-library(TCGAbiolinks)
-dataGE <- dataBRCA[sample(rownames(dataBRCA),10),sample(colnames(dataBRCA),7)]
-
-knitr::kable(dataGE[1:10,2:3], digits = 2, 
-             caption = "Example of a matrix of gene expression (10 genes in rows and 2 samples in columns)",
-             row.names = TRUE)
-```
 
 The result from TCGAanalyze_Preprocessing is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
@@ -837,7 +818,7 @@ This function receives as parameters:
 After, we filter the output of dataDEGs by abs(LogFC) >=1, and uses the
 `TCGAanalyze_LevelTab` function to create a table with DEGs (differentially expressed genes), log Fold Change (FC), false discovery rate (FDR), the gene expression level for samples in Cond1type, and Cond2type, and Delta value (the difference of gene expression between the two conditions multiplied logFC).
 
-```{r, eval = TRUE}
+```{r, eval = FALSE}
 # Downstream analysis using gene expression data  
 # TCGA samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
 # save(dataBRCA, geneInfo , file = "dataGeneExpression.rda")
@@ -876,7 +857,6 @@ dataDEGsFiltLevel <- TCGAanalyze_LevelTab(dataDEGs,"Tumor","Normal",
 The result is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
 dataDEGsFiltLevel$FDR <- format(dataDEGsFiltLevel$FDR, scientific = TRUE)
 knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2,
              caption = "Table DEGs after DEA",row.names = FALSE)
@@ -1105,6 +1085,32 @@ With you want to have them recalculated, please set
 
 # `TCGAvisualize`: Visualize results from analysis functions with TCGA's data. 
 You can easily visualize results from soome following functions:
+
+## `TCGAvisualize_Heatmap`: Create heatmaps with cluster bars
+
+In order to have a better view of clusters, we normally use heatmaps.
+`TCGAvisualize_Heatmap` will plot a heatmap and add to the samples bars representing
+diferent groups.
+
+The parameters of this function are:
+* **data**	The object to with the heatmap data (expression, methylation)
+* **metadata**	Dataframe with the labelCols and rownames with patients ids
+* **consensusClusters**	One item of the returned from Concensus
+* **labelCols**	Vector of columns to add to the heatpmap
+* **cbPalette**	A list of colors, aech one will be used in the labelCols
+* **clusterLabel**	The label of the cluster. Example "Expression Cluster",
+* **filename**	Filename default "Heatmap.pdf"
+
+For more information please take a look on case of study #2.
+
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("case2_Heatmap.png")
+grid.raster(img)
+```
+
 
 ## `TCGAvisualize_PCA`: Principal Component Analysis plot for differentially expressed genes
 
@@ -1704,10 +1710,10 @@ TCGAvisualize_Heatmap(data = datFilt,
                                     "OncosignCluster"), 
                       filename = "a.pdf", 
                       cbPalette = list(c("cyan","green3","red","purple"),
-                                     c("cyan","tomato","gold"),
-                                     c("green","red","purple"),
-                                     c("green","red","purple"),
-                                     c("green","red","purple","orange","gray")))
+                                     c("tomato","cyan","gold"),
+                                     c("purple","green","red"),
+                                     c("purple","green","red"),
+                                     c("red","purple","green","orange","gray")))
 ```
 
 The result is shown below:
