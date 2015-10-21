@@ -562,8 +562,8 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @description Heatmap with more sensible behavior using heatmap.plus
 #' @param data The object to with the heatmap data (expression, methylation)
 #' @param metadata Dataframe with the labelCols and rownames with patients ids
-#' @param consensusClusters One item of the returned from Concensus
 #' @param labelCols Vector of columns to add to the heatpmap
+#' @param sortCol collumn used for sorting
 #' @param cbPalette A list of colors, aech one will be used in the labelCols
 #' @param clusterLabel The label of the cluster. Example "Expression Cluster",
 #' @param filename Filename default "Heatmap.pdf"
@@ -599,139 +599,100 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' # from case study n.2 LGG to test the function
 #' TCGAvisualize_Heatmap(datFilt,
 #'                       clin_subt,
-#'                       data_Hc2[[4]],
 #'                       labelCols = c("histological_type",
 #'                                      "IDH.1p19q.Subtype",
 #'                                      "CNCluster",
 #'                                      "COCCluster",
-#'                                      "OncosignCluster"),
+#'                                      "OncosignCluster",
+#'                                      "groupsHC),
 #'                       filename = "a.png",
 #'                       cbPalette = list(c("cyan","green3","red","purple"),
 #'                                        c("cyan","tomato","gold"),
 #'                                        c("green","red","purple"),
 #'                                        c("green","red","purple"),
-#'                                        c("green","red","purple","orange","gray"))
+#'                                        c("green","red","purple","orange","gray"),
+#'                                        c("grey","purple","blue","red"))
 #'                      )
 #' }
 #' @export
 #' @return Heatmap plotted in pdf or png file.
 TCGAvisualize_Heatmap <- function(data,
                                   metadata,
-                                  consensusClusters = NULL,
+                                  sortCol = NULL,
                                   labelCols=NULL,
                                   cbPalette=NULL,
-                                  clusterLabel = "Cluster",
                                   filename ="Heatmap.pdf"){
 
-
-    rownames(metadata) <- substr(metadata$bcr_patient_barcode,1,12)
-
-    # If a consensus Cluster is set then a bar of the cluster will be drawn
-    if(!is.null(consensusClusters)){
-        tree <- consensusClusters$consensusTree
-        class <- consensusClusters$consensusClass
-        # groups samples in groups
-        sampleOrder <- class[tree$order]
-
-        consensusClusters <- as.factor(consensusClusters$clrs[[1]])
-        names(consensusClusters) <- substr(names(consensusClusters),1,12)
-
-        # adding information about gropus from consensus Cluster in clinical data
-        metadata <- cbind(metadata, groups = matrix(0,nrow(metadata),1))
-
-        for (i in 1:nrow(metadata)){
-            sample <- metadata$bcr_patient_barcode[i]
-            metadata[sample,"groups"] <- as.character(consensusClusters[sample])
-        }
-
-        groupsColors <-  levels(as.factor(metadata$groups))
-        for (j in 1:length(table(metadata$groups))){
-            curCol <- groupsColors[j]
-            idx <- metadata$groups == curCol
-            idx[is.na(idx)] <- FALSE
-            metadata[idx,"groups"] <- paste0("EC",j)
+    if(!all(grepl("TCGA-[0-9A-Z]{2}-[0-9A-Z]{4}$",rownames(metadata)))){
+        if(all(grepl("TCGA-[0-9A-Z]{2}-[0-9A-Z]{4}",rownames(metadata)))) {
+            rownames(metadata) <- substr(rownames(metadata),1,12)
+        } else if (any(grepl("bcr_patient_barcode",colnames(metadata)))){
+            rownames(metadata) <-  substr(metadata$bcr_patient_barcode,1,12)
+        } else {
+            stop("rownames should have a barcode")
         }
     }
 
-    if(!is.null(consensusClusters)){
-        # get patient ids
-        orderCL <- as.character(substr(names(sampleOrder),1,12))
-    } else {
-        orderCL <- substr(rownames(data),1,12)
-    }
-    # which samples do I have in my data? It should be all
-    orderCL <- intersect(orderCL, substr(rownames(data),1,12))
-    if (length(orderCL) != length(substr(rownames(data),1,12))) stop("ERROR")
+    if (!is.null(sortCol)) metadata <- metadata[order(metadata[,sortCol]),]
 
     GE <- t(.quantileNormalization(t(data)))
     rownames(GE) <- substr(rownames(GE),1,12)
+
+    orderCL <- rownames(metadata)
+
+    # heatmap and metadata must have both the samples
+    orderCL <- orderCL[orderCL %in% rownames(GE)]
     oGE <- GE[orderCL,]  #ordering according cluster
-
-    metadata <- metadata[intersect(orderCL, rownames(metadata)),]
-
+    #idx <- match(orderCL, rownames(metadata))
+    #metadata <- metadata[idx,]
     # matrix to color the heatmap
-    x <- length(labelCols)
-    if(!is.null(consensusClusters)) x <- x + 1
 
     colors <- matrix(NA,
                      nrow = nrow(oGE),
-                     ncol = x)
+                     ncol = length(labelCols))
 
-    if (!is.null(labelCols)){
-        for (i in 1:length(labelCols)){
-            # histology
-            aux <- metadata[,labelCols[i]]
-            names(aux) <- rownames(metadata)
+    for (i in 1:length(labelCols)){
+        aux <- metadata[,labelCols[i]]
+        names(aux) <- rownames(metadata)
 
-            idx <-  names(aux) %in% substr(rownames(GE),1,12)
-            aux <- aux[idx]
-            subtype <- unique(as.character(aux))
-            if(any(is.na(subtype) )) subtype <- subtype[!is.na(subtype) ]
-            if(any(subtype == "NA")) subtype <- subtype[- which(subtype == "NA") ]
+        subtype <- unique(as.character(aux))
 
-            color <- rep("white",length(aux))
+        if(any(is.na(subtype) )) subtype <- subtype[!is.na(subtype) ]
+        if(any(subtype == "NA")) subtype <- subtype[- which(subtype == "NA") ]
+        #print(subtype)
 
-            # selecting colors for the bars
-            if(is.null(cbPalette)) {
-                myColors <- rainbow(length(subtype))
-            } else {
-                myColors <- cbPalette[[i]]
-            }
+        color <- rep("white",length(aux))
 
-            message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
-            message(paste0("Label: ",labelCols[i]))
-            for (j in 1:length(subtype)) {
-
-                if (subtype[j] != "NA"){
-                    idx <- aux == as.character(subtype[j])
-                    idx[is.na(idx)] <- FALSE
-                    size <- length(color[idx])
-                    color[idx] <- rep(myColors[j], size)
-                    message(sprintf("Group: %-15s color: %s ",
-                                    subtype[j],myColors[j]))
-                }
-            }
-            message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
-
-            names(color) <- names(aux)
-            color <- color[orderCL]
-            colors[,i] <- color
+        # selecting colors for the bars
+        if(is.null(cbPalette)) {
+            myColors <- rainbow(length(subtype))
+        } else {
+            myColors <- cbPalette[[i]]
         }
-    } else {
-        i <- 0
-    }
-    if(!is.null(consensusClusters)){
-        oConsensus <- as.character(consensusClusters[tree$order])
-        colors[, i + 1] <- oConsensus
-        colnames(colors) <-c(labelCols, clusterLabel)
-    } else {
-        colnames(colors) <- c(labelCols)
+
+        message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
+        message(paste0("Label: ",labelCols[i]))
+        for (j in 1:length(subtype)) {
+
+            if (subtype[j] != "NA"){
+                idx <- aux == as.character(subtype[j])
+                idx[is.na(idx)] <- FALSE
+                size <- length(color[idx])
+                color[idx] <- rep(myColors[j], size)
+                message(sprintf("Group: %-15s color: %s ",
+                                subtype[j],myColors[j]))
+            }
+        }
+        message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
+
+        names(color) <- names(aux)
+        color <- color[orderCL]
+        colors[,i] <- color
     }
 
+    colnames(colors) <- c(labelCols)
     colors <- as.data.frame(colors)
     rownames(colors) <- orderCL
-    if(!is.null(consensusClusters))
-        colors <- colors[order(colors[,clusterLabel]),]
     colors <- as.matrix(colors)
     oGE<- oGE[rownames(colors),]
 
