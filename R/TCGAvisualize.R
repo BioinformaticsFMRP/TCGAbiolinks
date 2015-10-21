@@ -584,161 +584,122 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' }
 #' @export
 #' @return Heatmap plotted in pdf or png file.
-TCGAvisualize_Heatmap <- function(cancer,
-                                  DFfilt,
-                                  DFclin,
-                                  DFsubt,
-                                  data_Hc2,
-                                  cbPalette,
+TCGAvisualize_Heatmap <- function(data,
+                                  metadata,
+                                  consensusClusters = NULL,
+                                  labelCols=NULL,
+                                  cbPalette=NULL,
+                                  clusterLabel = "Cluster",
                                   filename ="Heatmap.pdf"){
 
-    rownames(DFsubt) <- DFsubt$patient
-    rownames(DFclin) <- DFclin$bcr_patient_barcode
-    rownames(DFfilt) <- substr(rownames(DFfilt),1,12)
 
-    ans <- hclust(ddist <- dist(DFfilt), method = "ward.D2")
-    hhc <- data_Hc2[[4]]$consensusTree
-    consensusClusters<-data_Hc2[[4]]$consensusClass
-    sampleOrder <- consensusClusters[hhc$order]
+    rownames(clin_subt) <- clin_subt$bcr_patient_barcode
 
-    consensusClusters <- as.factor(data_Hc2[[4]]$clrs[[1]])
-    names(consensusClusters) <- attr(ddist, "Labels")
-    names(consensusClusters) <- substr(names(consensusClusters),1,12)
+    # If a consensus Cluster is set then a bar of the cluster will be drawn
+    if(!is.null(consensusClusters)){
+        tree <- consensusClusters$consensusTree
+        class <- consensusClusters$consensusClass
+        # groups samples in groups
+        sampleOrder <- class[tree$order]
 
-    #DFclin <- DFclin[DFclin$bcr_patient_barcode %in% DFsubt$patient,]
-    DFclin_merged <- cbind(DFclin, matrix(0,nrow(DFclin),ncol(DFsubt)))
-    colnames(DFclin_merged)[((ncol(DFclin_merged)-ncol(DFsubt))+1):ncol(DFclin_merged)] <- colnames(DFsubt)
-    rownames(DFclin_merged) <- DFclin_merged$bcr_patient_barcode
+        consensusClusters <- as.factor(consensusClusters$clrs[[1]])
+        names(consensusClusters) <- substr(names(consensusClusters),1,12)
 
-    for( i in 1:ncol(DFsubt)){
-        DFsubt[,i] <- as.character(DFsubt[,i])
-    }
+        # adding information about gropus from consensus Cluster in clinical data
+        metadata <- cbind(metadata, groups = matrix(0,nrow(metadata),1))
 
-    for( i in 1:nrow(DFsubt)){
-        curSample <- DFsubt$patient[i]
-        for( j in 1: ncol(DFsubt)){
-            curColumn <- colnames(DFsubt)[j]
-            DFclin_merged[curSample,curColumn] <- DFsubt[curSample,curColumn]
+        for(i in 1:nrow(metadata)){
+            sample <- metadata$bcr_patient_barcode[i]
+            metadata[sample,"groups"] <- as.character(consensusClusters[sample])
+        }
+
+        groupsColors <-  levels(as.factor(metadata$groups))
+        for(j in 1:length(table(metadata$groups))){
+            curCol <- groupsColors[j]
+            idx <- metadata$groups == curCol
+            idx[is.na(idx)] <- FALSE
+            metadata[idx,"groups"] <- paste0("EC",j)
         }
     }
 
-
-    # adding information about gropus from consensus Cluster in clinical data
-    DFclin_merged <- cbind(DFclin_merged, groupsHC = matrix(0,nrow(DFclin_merged),1))
-    rownames(DFclin_merged) <- DFclin_merged$bcr_patient_barcode
-
-    for( i in 1: nrow(DFclin_merged)){
-        currSmp <- DFclin_merged$bcr_patient_barcode[i]
-        DFclin_merged[currSmp,"groupsHC"] <- as.character(consensusClusters[currSmp])
+    if(!is.null(consensusClusters)){
+        # get patient ids
+        orderCL <- as.character(substr(names(sampleOrder),1,12))
+    } else {
+        orderCL <- substr(rownames(data),1,12)
     }
+    # which samples do I have in my data? It should be all
+    orderCL <- intersect(orderCL, substr(rownames(data),1,12))
+    if(length(orderCL) != length(substr(rownames(data),1,12))) stop("ERROR")
 
-    groupsColors <-  levels(as.factor(DFclin_merged$groupsHC))
-
-
-    for(j in 1:length(table(DFclin_merged$groupsHC))){
-        curCol <- groupsColors[j]
-        idx <- DFclin_merged$groupsHC == curCol
-        idx[is.na(idx)] <- FALSE
-        DFclin_merged[idx,"groupsHC"]<-paste0("EC",j)
-    }
-
-    #idx <- rownames(DFclin_merged) %in% rownames(DFfilt)
-    #DFfilt <- DFfilt[idx,]
-
-    orderCL <- as.character(substr(names(sampleOrder),1,12))
-    orderCL <- intersect(orderCL, rownames(DFfilt))
-    GE <- t(.quantileNormalization(t(DFfilt)))
+    GE <- t(.quantileNormalization(t(data)))
     rownames(GE) <- substr(rownames(GE),1,12)
+    oGE <- GE[orderCL,]  #ordering according cluster
 
-    oGE<- GE[orderCL,]  #ordering according cluster
-    DFclin_merged <-DFclin_merged[orderCL,]
+    metadata <- metadata[intersect(orderCL, rownames(metadata)),]
 
-    # histology
-    HISTOLOGY <- DFclin_merged[,"histological_type"]
-    names(HISTOLOGY)<-rownames(DFclin_merged)
-    HISTOLOGY <- HISTOLOGY[rownames(GE)]
-    HISTOLOGY.col <- rep("white",length(HISTOLOGY))
-    HISTOLOGY.col[HISTOLOGY=="Astrocytoma"]<-"red"
-    HISTOLOGY.col[HISTOLOGY=="glioblastoma"]<-"purple"
-    HISTOLOGY.col[HISTOLOGY=="Oligoastrocytoma"]<-"cyan"
-    HISTOLOGY.col[HISTOLOGY=="Oligodendroglioma"]<-"green3"
-    names(HISTOLOGY.col)<-names(HISTOLOGY)
-    oHISTOLOGY.col <- HISTOLOGY.col[orderCL]
+    # matrix to color the heatmap
+    x <- length(labelCols)
+    if(!is.null(consensusClusters)) x <- x + 1
 
-    #subtype
-    SUBTYPE <- DFclin_merged[,"IDH.1p19q.Subtype"]
-    names(SUBTYPE) <- rownames(DFclin_merged)
-    SUBTYPE<-SUBTYPE[rownames(GE)]
-    SUBTYPE.col <- rep("white",length(SUBTYPE))
-    SUBTYPE.col[SUBTYPE=="IDHmut-codel"]<-"cyan"
-    SUBTYPE.col[SUBTYPE=="IDHmut-non-codel"]<-"tomato"
-    SUBTYPE.col[SUBTYPE=="IDHwt"]<-"gold"
-    names(SUBTYPE.col)<-names(SUBTYPE)
-    oSUBTYPE.col <- SUBTYPE.col[orderCL]
+    colors <- matrix(NA,
+                     nrow = nrow(oGE),
+                     ncol = x)
 
-    #clusters CNCluster
-    CNC <- DFclin_merged[,"CNCluster"]
-    names(CNC)<- rownames(DFclin_merged)
-    CNC <- CNC[rownames(GE)]
-    CNC.col <- rep("white",length(CNC))
-    names(CNC.col)<-names(CNC)
-    CNC.col[CNC=="C1"] <- "green"
-    CNC.col[CNC=="C2"] <- "red"
-    CNC.col[CNC=="C3"] <- "purple"
-    oCNC.col <- CNC.col[orderCL]
+    if(!is.null(labelCols)){
+        for(i in 1:length(labelCols)){
+            # histology
+            aux <- metadata[,labelCols[i]]
+            names(aux) <- rownames(metadata)
 
-    #clusters COCluster
-    COC <- DFclin_merged[,"COCCluster"]
-    names(COC)<- rownames(DFclin_merged)
-    COC <- COC[rownames(GE)]
-    COC.col <- rep("white",length(COC))
-    names(COC.col)<-names(COC)
-    COC.col[COC=="coc1"] <- "green"
-    COC.col[COC=="coc2"] <- "red"
-    COC.col[COC=="coc3"] <- "purple"
-    oCOC.col <- COC.col[orderCL]
+            idx <-  names(aux) %in% substr(rownames(GE),1,12)
+            aux <- aux[idx]
+            subtype <- unique(as.character(aux))
+            if(any(subtype == "NA")) subtype <- subtype[- which(subtype == "NA") ]
+            if(any(is.na(subtype) )) subtype <- subtype[!is.na(subtype) ]
 
-    #clusters ONCOluster
-    ONCO <- DFclin_merged[,"OncosignCluster"]
-    names(ONCO)<- rownames(DFclin_merged)
-    ONCO <- ONCO[rownames(GE)]
-    ONCO.col <- rep("white",length(ONCO))
-    names(ONCO.col)<-names(ONCO)
-    ONCO.col[ONCO=="OSC1"] <- "green"
-    ONCO.col[ONCO=="OSC2"] <- "red"
-    ONCO.col[ONCO=="OSC3"] <- "purple"
-    ONCO.col[ONCO=="OSC4"] <- "orange"
-    ONCO.col[ONCO=="Unclassified"] <- "gray"
-    oONCO.col <- ONCO.col[orderCL]
+            color <- rep("white",length(aux))
 
-    oConsensus <- as.character(consensusClusters[hhc$order])
+            # selecting colors for the bars
+            if(is.null(cbPalette)) {
+                myColors <- rainbow(length(subtype))
+            } else {
+                myColors <- cbPalette[[i]]
+            }
 
-    cc.col <- matrix(c(oHISTOLOGY.col,
-                       oSUBTYPE.col,
-                       oCNC.col,
-                       oCOC.col,
-                       oONCO.col,
-                       as.character(oConsensus)),
-                     nrow = nrow(oGE), ncol = 6)
+            for(j in 1:length(subtype)) {
 
-    colnames(cc.col)<-c("Histology",
-                        "Subtype",
-                        "CNCluster",
-                        "COCCluster",
-                        "OncosignCluster",
-                        "Expression Cluster")
+                if(subtype[j] != "NA"){
 
-    cc.col <- as.data.frame(cc.col)
-    rownames(cc.col) <- orderCL
-    cc.col <- cc.col[order(cc.col$`Expression Cluster`),]
-    cc.col <- as.matrix(cc.col)
-    oGE<- oGE[rownames(cc.col),]
+                    idx <- aux == as.character(subtype[j])
+                    idx[is.na(idx)] <- FALSE
+                    size <- length(color[idx])
+                    color[idx] <- rep(myColors[j], size)
+                }
+            }
+            names(color) <- names(aux)
+            color <- color[orderCL]
+            colors[,i] <- color
+        }
+    } else {
+        i <- 0
+    }
+    if(!is.null(consensusClusters)){
+        oConsensus <- as.character(consensusClusters[tree$order])
+        colors[, i + 1] <- oConsensus
+        colnames(colors)<-c(labelCols, clusterLabel)
+    } else {
+        colnames(colors)<-c(labelCols)
+    }
 
-    if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
+    colors <- as.data.frame(colors)
+    rownames(colors) <- orderCL
+    if(!is.null(consensusClusters))
+        colors <- colors[order(colors[,clusterLabel]),]
+    colors <- as.matrix(colors)
+    oGE<- oGE[rownames(colors),]
 
-    curDate <- as.character(unlist(strsplit(gsub(" ","_h",
-                                                 gsub("-","_",as.character(Sys.time()))),":"))[1])
-
+    if (!(is.null(dev.list()["RStudioGD"]))) dev.off()
 
     if(file_ext(filename) == "pdf") pdf(file=filename)
     if(file_ext(filename) == "svg") svg(file=filename)
@@ -749,7 +710,7 @@ TCGAvisualize_Heatmap <- function(cancer,
         na.rm=TRUE,
         scale="none",
         #RowSideColor=cc.col,
-        ColSideColors=cc.col,
+        ColSideColors=colors,
         col=gplots::greenred(75),
         #Rowv=NA,
         Colv=NA,
