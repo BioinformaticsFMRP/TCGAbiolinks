@@ -560,27 +560,58 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 
 #' @title Heatmap with more sensible behavior using heatmap.plus
 #' @description Heatmap with more sensible behavior using heatmap.plus
-#' @param cancer tumor selected for the analysis
-#' @param DFfilt write
-#' @param DFclin write
-#' @param DFsubt write
-#' @param data_Hc2 write
-#' @param cbPalette write
+#' @param data The object to with the heatmap data (expression, methylation)
+#' @param metadata Dataframe with the labelCols and rownames with patients ids
+#' @param consensusClusters One item of the returned from Concensus
+#' @param labelCols Vector of columns to add to the heatpmap
+#' @param cbPalette A list of colors, aech one will be used in the labelCols
+#' @param clusterLabel The label of the cluster. Example "Expression Cluster",
 #' @param filename Filename default "Heatmap.pdf"
 #' @importFrom heatmap.plus heatmap.plus
 #' @examples
-#' query <- TCGAquery(tumor = "lgg")
+#' dat <- matrix(c(0.1,0.2,0.3,
+#'                 0.9,0.8,0.1,
+#'                 0.5,0.4,0.4,
+#'                 0.1,0.76,0.3,
+#'                 0.24,1,0,0.5), nrow = 3, ncol = 5, byrow = TRUE,
+#'                dimnames = list(c("TCGA-DU-6410",
+#'                  "TCGA-DU-A5TS",
+#'                  "TCGA-HT-7688"),
+#'                c("col1", "col2","col3","col4","col5")
+#'              ))
+#'
+#'mdat <- matrix(c("Male","coc1","IDHwt",
+#'                 "Male","coc1","IDHMut-cod",
+#'                 "Famele","coc1","IDHMut-noncod"),
+#'               nrow = 3, ncol = 3, byrow = TRUE,
+#'               dimnames = list(
+#'                   c("TCGA-DU-6410",
+#'                     "TCGA-DU-A5TS",
+#'                     "TCGA-HT-7688"),
+#'                   c("Sex", "COCCluster","IDHtype")))
+#'
+#'TCGAvisualize_Heatmap(dat,mdat,labelCols = c("Sex","COCCluster","IDHtype"),
+#'                      filename = "a.pdf",
+#'                      cbPalette = list(c("red","blue"),
+#'                                       c("orange","black","grey"),
+#'                                      c("cyan","tomato","gold")))
 #' \dontrun{
 #' # from case study n.2 LGG to test the function
-#' DFfilt <- datFilt
-#' DFclin = dataClin
-#' DFsubt = dataSubt
-#' data_Hc2 = data_Hc2
-# end parameter definition
-#' TCGAvisualize_Heatmap(DFfilt,
-#' DFclin,
-#' DFsubt,
-#' data_Hc2)
+#' TCGAvisualize_Heatmap(datFilt,
+#'                       clin_subt,
+#'                       data_Hc2[[4]],
+#'                       labelCols = c("histological_type",
+#'                                      "IDH.1p19q.Subtype",
+#'                                      "CNCluster",
+#'                                      "COCCluster",
+#'                                      "OncosignCluster"),
+#'                       filename = "a.png",
+#'                       cbPalette = list(c("cyan","green3","red","purple"),
+#'                                        c("cyan","tomato","gold"),
+#'                                        c("green","red","purple"),
+#'                                        c("green","red","purple"),
+#'                                        c("green","red","purple","orange","gray"))
+#'                      )
 #' }
 #' @export
 #' @return Heatmap plotted in pdf or png file.
@@ -593,7 +624,7 @@ TCGAvisualize_Heatmap <- function(data,
                                   filename ="Heatmap.pdf"){
 
 
-    rownames(clin_subt) <- clin_subt$bcr_patient_barcode
+    rownames(clin_subt) <- substr(clin_subt$bcr_patient_barcode,1,12)
 
     # If a consensus Cluster is set then a bar of the cluster will be drawn
     if(!is.null(consensusClusters)){
@@ -608,13 +639,13 @@ TCGAvisualize_Heatmap <- function(data,
         # adding information about gropus from consensus Cluster in clinical data
         metadata <- cbind(metadata, groups = matrix(0,nrow(metadata),1))
 
-        for(i in 1:nrow(metadata)){
+        for (i in 1:nrow(metadata)){
             sample <- metadata$bcr_patient_barcode[i]
             metadata[sample,"groups"] <- as.character(consensusClusters[sample])
         }
 
         groupsColors <-  levels(as.factor(metadata$groups))
-        for(j in 1:length(table(metadata$groups))){
+        for (j in 1:length(table(metadata$groups))){
             curCol <- groupsColors[j]
             idx <- metadata$groups == curCol
             idx[is.na(idx)] <- FALSE
@@ -630,7 +661,7 @@ TCGAvisualize_Heatmap <- function(data,
     }
     # which samples do I have in my data? It should be all
     orderCL <- intersect(orderCL, substr(rownames(data),1,12))
-    if(length(orderCL) != length(substr(rownames(data),1,12))) stop("ERROR")
+    if (length(orderCL) != length(substr(rownames(data),1,12))) stop("ERROR")
 
     GE <- t(.quantileNormalization(t(data)))
     rownames(GE) <- substr(rownames(GE),1,12)
@@ -655,8 +686,8 @@ TCGAvisualize_Heatmap <- function(data,
             idx <-  names(aux) %in% substr(rownames(GE),1,12)
             aux <- aux[idx]
             subtype <- unique(as.character(aux))
-            if(any(subtype == "NA")) subtype <- subtype[- which(subtype == "NA") ]
             if(any(is.na(subtype) )) subtype <- subtype[!is.na(subtype) ]
+            if(any(subtype == "NA")) subtype <- subtype[- which(subtype == "NA") ]
 
             color <- rep("white",length(aux))
 
@@ -668,7 +699,7 @@ TCGAvisualize_Heatmap <- function(data,
             }
 
             for(j in 1:length(subtype)) {
-
+print(subtype)
                 if(subtype[j] != "NA"){
 
                     idx <- aux == as.character(subtype[j])

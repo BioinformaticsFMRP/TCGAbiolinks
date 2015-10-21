@@ -4,23 +4,24 @@
 \alias{TCGAvisualize_Heatmap}
 \title{Heatmap with more sensible behavior using heatmap.plus}
 \usage{
-TCGAvisualize_Heatmap(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPalette,
-  filename = NULL)
+TCGAvisualize_Heatmap(data, metadata, consensusClusters = NULL,
+  labelCols = NULL, cbPalette = NULL, clusterLabel = "Cluster",
+  filename = "Heatmap.pdf")
 }
 \arguments{
-\item{cancer}{tumor selected for the analysis}
+\item{data}{The object to with the heatmap data (expression, methylation)}
 
-\item{DFfilt}{write}
+\item{metadata}{Dataframe with the labelCols and rownames with patients ids}
 
-\item{DFclin}{write}
+\item{consensusClusters}{One item of the returned from Concensus}
 
-\item{DFsubt}{write}
+\item{labelCols}{Vector of columns to add to the heatpmap}
 
-\item{data_Hc2}{write}
+\item{cbPalette}{A list of colors, aech one will be used in the labelCols}
 
-\item{cbPalette}{write}
+\item{clusterLabel}{The label of the cluster. Example "Expression Cluster",}
 
-\item{filename}{write. default = NULL}
+\item{filename}{Filename default "Heatmap.pdf"}
 }
 \value{
 Heatmap plotted in pdf or png file.
@@ -29,17 +30,49 @@ Heatmap plotted in pdf or png file.
 Heatmap with more sensible behavior using heatmap.plus
 }
 \examples{
-query <- TCGAquery(tumor = "lgg")
+dat <- matrix(c(0.1,0.2,0.3,
+                0.9,0.8,0.1,
+                0.5,0.4,0.4,
+                0.1,0.76,0.3,
+                0.24,1,0,0.5), nrow = 3, ncol = 5, byrow = TRUE,
+               dimnames = list(c("TCGA-DU-6410",
+                 "TCGA-DU-A5TS",
+                 "TCGA-HT-7688"),
+               c("col1", "col2","col3","col4","col5")
+             ))
+
+mdat <- matrix(c("Male","coc1","IDHwt",
+                "Male","coc1","IDHMut-cod",
+                "Famele","coc1","IDHMut-noncod"),
+              nrow = 3, ncol = 3, byrow = TRUE,
+              dimnames = list(
+                  c("TCGA-DU-6410",
+                    "TCGA-DU-A5TS",
+                    "TCGA-HT-7688"),
+                  c("Sex", "COCCluster","IDHtype")))
+
+TCGAvisualize_Heatmap(dat,mdat,labelCols = c("Sex","COCCluster","IDHtype"),
+                     filename = "a.pdf",
+                     cbPalette = list(c("red","blue"),
+                                      c("orange","black","grey"),
+                                     c("cyan","tomato","gold")))
 \dontrun{
 # from case study n.2 LGG to test the function
-DFfilt <- datFilt
-DFclin = dataClin
-DFsubt = dataSubt
-data_Hc2 = data_Hc2
-TCGAvisualize_Heatmap(DFfilt,
-DFclin,
-DFsubt,
-data_Hc2)
+TCGAvisualize_Heatmap(datFilt,
+                      clin_subt,
+                      data_Hc2[[4]],
+                      labelCols = c("histological_type",
+                                     "IDH.1p19q.Subtype",
+                                     "CNCluster",
+                                     "COCCluster",
+                                     "OncosignCluster"),
+                      filename = "a.png",
+                      cbPalette = list(c("cyan","green3","red","purple"),
+                                       c("cyan","tomato","gold"),
+                                       c("green","red","purple"),
+                                       c("green","red","purple"),
+                                       c("green","red","purple","orange","gray"))
+                     )
 }
 }
 
