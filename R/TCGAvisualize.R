@@ -677,8 +677,8 @@ TCGAvisualize_Heatmap <- function(data,
                      nrow = nrow(oGE),
                      ncol = x)
 
-    if(!is.null(labelCols)){
-        for(i in 1:length(labelCols)){
+    if (!is.null(labelCols)){
+        for (i in 1:length(labelCols)){
             # histology
             aux <- metadata[,labelCols[i]]
             names(aux) <- rownames(metadata)
@@ -698,16 +698,21 @@ TCGAvisualize_Heatmap <- function(data,
                 myColors <- cbPalette[[i]]
             }
 
-            for(j in 1:length(subtype)) {
-print(subtype)
-                if(subtype[j] != "NA"){
+            message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
+            message(paste0("Label: ",labelCols[i]))
+            for (j in 1:length(subtype)) {
 
+                if (subtype[j] != "NA"){
                     idx <- aux == as.character(subtype[j])
                     idx[is.na(idx)] <- FALSE
                     size <- length(color[idx])
                     color[idx] <- rep(myColors[j], size)
+                    message(sprintf("Group: %-15s color: %s ",
+                                    subtype[j],myColors[j]))
                 }
             }
+            message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
+
             names(color) <- names(aux)
             color <- color[orderCL]
             colors[,i] <- color
@@ -718,9 +723,9 @@ print(subtype)
     if(!is.null(consensusClusters)){
         oConsensus <- as.character(consensusClusters[tree$order])
         colors[, i + 1] <- oConsensus
-        colnames(colors)<-c(labelCols, clusterLabel)
+        colnames(colors) <-c(labelCols, clusterLabel)
     } else {
-        colnames(colors)<-c(labelCols)
+        colnames(colors) <- c(labelCols)
     }
 
     colors <- as.data.frame(colors)
