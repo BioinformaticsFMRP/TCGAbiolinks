@@ -4,24 +4,23 @@
 \alias{TCGAvisualize_Heatmap}
 \title{Heatmap with more sensible behavior using heatmap.plus}
 \usage{
-TCGAvisualize_Heatmap(data, metadata, consensusClusters = NULL,
-  labelCols = NULL, cbPalette = NULL, clusterLabel = "Cluster",
-  filename = "Heatmap.pdf")
+TCGAvisualize_Heatmap(data, metadata, sortCol = NULL, labelCols = NULL,
+  cbPalette = NULL, filename = "Heatmap.pdf")
 }
 \arguments{
 \item{data}{The object to with the heatmap data (expression, methylation)}
 
 \item{metadata}{Dataframe with the labelCols and rownames with patients ids}
 
-\item{consensusClusters}{One item of the returned from Concensus}
+\item{sortCol}{collumn used for sorting}
 
 \item{labelCols}{Vector of columns to add to the heatpmap}
 
 \item{cbPalette}{A list of colors, aech one will be used in the labelCols}
 
-\item{clusterLabel}{The label of the cluster. Example "Expression Cluster",}
-
 \item{filename}{Filename default "Heatmap.pdf"}
+
+\item{clusterLabel}{The label of the cluster. Example "Expression Cluster",}
 }
 \value{
 Heatmap plotted in pdf or png file.
@@ -60,18 +59,19 @@ TCGAvisualize_Heatmap(dat,mdat,labelCols = c("Sex","COCCluster","IDHtype"),
 # from case study n.2 LGG to test the function
 TCGAvisualize_Heatmap(datFilt,
                       clin_subt,
-                      data_Hc2[[4]],
                       labelCols = c("histological_type",
                                      "IDH.1p19q.Subtype",
                                      "CNCluster",
                                      "COCCluster",
-                                     "OncosignCluster"),
+                                     "OncosignCluster",
+                                     "groupsHC),
                       filename = "a.png",
                       cbPalette = list(c("cyan","green3","red","purple"),
                                        c("cyan","tomato","gold"),
                                        c("green","red","purple"),
                                        c("green","red","purple"),
-                                       c("green","red","purple","orange","gray"))
+                                       c("green","red","purple","orange","gray"),
+                                       c("grey","purple","blue","red"))
                      )
 }
 }
