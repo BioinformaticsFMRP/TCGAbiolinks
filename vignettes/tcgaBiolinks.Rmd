@@ -1093,6 +1093,7 @@ In order to have a better view of clusters, we normally use heatmaps.
 diferent groups.
 
 The parameters of this function are:
+
 * **data**	The object to with the heatmap data (expression, methylation)
 * **metadata**	Dataframe with the labelCols and rownames with patients ids
 * **consensusClusters**	One item of the returned from Concensus
