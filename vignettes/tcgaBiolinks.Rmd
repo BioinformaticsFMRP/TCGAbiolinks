@@ -1639,7 +1639,7 @@ dataClin[ dataClin[,"age_at_initial_pathologic_diagnosis"] <= 32, "AGE2"] <- "<=
 dataClin[ dataClin[,"age_at_initial_pathologic_diagnosis"] >= 41, "AGE2"] <- ">=41 yr"
 dataClin[ dataClin$AGE2 == 0, "AGE2"] <- "33-40 yr"
 
-clin_subt <- merge(dataClin,dataSubt, by.x="bcr_patient_barcode", by.y="patient")
+clin_subt <- merge(dataClin,dataSubt, by.x="bcr_patient_barcode", by.y="patient",all.x = T)
 
 TCGAvisualize_profilePlot(clin_subt,
                           groupCol="groupsHC",
@@ -1694,13 +1694,20 @@ grid.raster(img)
 
 We will also, create a heatmap of the expression.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-
-pdf(file="case2_Heatmap2.pdf")
-TCGAvisualize_Heatmap(DFfilt = datFilt,
-                      DFclin = dataClin,
-                      DFsubt = dataSubt,
-                      data_Hc2= data_Hc2,cancer = "LGG")
-dev.off()
+TCGAvisualize_Heatmap(data = datFilt,
+                      metadata = clin_subt,
+                      consensusClusters= data_Hc2[[4]],
+                      labelCols = c("histological_type",
+                                    "IDH.1p19q.Subtype",
+                                    "CNCluster",
+                                    "COCCluster",
+                                    "OncosignCluster"), 
+                      filename = "a.pdf", 
+                      cbPalette = list(c("cyan","green3","red","purple"),
+                                     c("cyan","tomato","gold"),
+                                     c("green","red","purple"),
+                                     c("green","red","purple"),
+                                     c("green","red","purple","orange","gray")))
 ```
 
 The result is shown below:
