@@ -971,7 +971,7 @@ That means, that patients with days_to_deth > cutoff will be set to Alive.
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
-img <- readPNG("survival.png")
+img <- readPNG("case2_surv.png")
 grid.raster(img)
 ```
 
@@ -1783,7 +1783,7 @@ The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
-img <- readPNG("ATRX_Mutation_Variant_Classification_in_EC_clusters.png")
+img <- readPNG("ATRX_Mutation_Variant_Classification.png")
 grid.raster(img)
 ```
 
