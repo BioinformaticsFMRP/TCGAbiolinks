@@ -845,7 +845,7 @@ This function receives as arguments:
 Next, we filter the output of dataDEGs by abs(LogFC) >=1, and uses the
 `TCGAanalyze_LevelTab` function to create a table with DEGs (differentially expressed genes), log Fold Change (FC), false discovery rate (FDR), the gene expression level for samples in Cond1type, and Cond2type, and Delta value (the difference of gene expression between the two conditions multiplied logFC).
 
-```{r, eval = TRUE}
+```{r, eval = FALSE}
 # Downstream analysis using gene expression data  
 # TCGA samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
 # save(dataBRCA, geneInfo , file = "dataGeneExpression.rda")
@@ -1647,14 +1647,15 @@ the cluster information and we will add the subtype information.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 
-#------  Add ckuster information
+#------  Add cluster information
 cluster <- data.frame("groupsHC" = data_Hc2[[4]]$consensusClass)
 cluster$groupsHC <- paste0("EC",cluster$groupsHC)
 cluster$patient <-  substr(rownames(cluster),1,12)
-# adding information about gropus from consensus Cluster in clinical data
+
+# Add information about gropus from consensus Cluster in clinical data
 dataClin <- merge(dataClin,cluster, by.x="bcr_patient_barcode", by.y="patient")
 
-# merge subtype and clinical data
+# Merge subtype and clinical data
 clin_subt <- merge(dataClin,dataSubt, by.x="bcr_patient_barcode", by.y="patient")
 clin_subt_all <- merge(dataClin,dataSubt, 
                        by.x="bcr_patient_barcode", by.y="patient", all.x = TRUE)
@@ -1724,7 +1725,7 @@ grid.raster(img)
 We will also, create a heatmap of the expression.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 TCGAvisualize_Heatmap(data = datFilt,
-                      metadata = clin_subt_all,
+                      metadata = clin_subt,
                       sortCol = "groupsHC",
                       labelCols = c("histological_type",
                                     "IDH.1p19q.Subtype",
@@ -1754,18 +1755,15 @@ with `TCGAquery_maf`. In this example we will investigate the gene "ATRX".
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 LGGmut <- TCGAquery_maf(tumor = "LGG",
                         archive.name="LGG.IlluminaGA_DNASeq_curated.Level_2.1.4.0")
-
 # Selecting gene
 mRNAsel <- "ATRX"
 LGGselected <- LGGmut[LGGmut$Hugo_Symbol == mRNAsel,]
 
-dataMut <- cbind(LGGselected, groupsHC = matrix(0,nrow(LGGselected),1))
-dataMut <- dataMut[!duplicated(dataMut$Tumor_Sample_Barcode),]
-dataMut$Tumor_Sample_Barcode <- substr(dataMut$Tumor_Sample_Barcode ,1,12)
-rownames(dataMut) <- dataMut$Tumor_Sample_Barcode
+dataMut <- LGGselected[!duplicated(LGGselected$Tumor_Sample_Barcode),]
+dataMut$Tumor_Sample_Barcode <- substr(dataMut$Tumor_Sample_Barcode,1,12)
 
 # Adding the Expression Cluster classification found before
-dataMut <- merge(dataMut,cluster, by.x="bcr_patient_barcode", by.y="Tumor_Sample_Barcode")
+dataMut <- merge(dataMut, cluster, by.y="patient", by.x="Tumor_Sample_Barcode")
 dataMut <- dataMut[dataMut$Variant_Classification!=0,]
 ```
 
