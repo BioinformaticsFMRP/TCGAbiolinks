@@ -4,10 +4,10 @@
 \alias{TCGAquery_clinic}
 \title{Get the clinical information}
 \usage{
-TCGAquery_clinic(cancer, clinical_data_type)
+TCGAquery_clinic(tumor, clinical_data_type)
 }
 \arguments{
-\item{cancer}{a character vector indicating cancer type Examples:
+\item{tumor}{a character vector indicating cancer type Examples:
 \tabular{lllll}{
 OV   \tab BRCA \tab CESC \tab ESCA \tab PCPG\cr
 LUSC \tab LGG  \tab SKCM \tab KICH \tab CHOL\cr
