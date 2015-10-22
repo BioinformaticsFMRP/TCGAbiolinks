@@ -275,7 +275,7 @@ clinical_data_site_cancer <- function(cancer){
 #' @title Get the clinical information
 #' @description
 #'   Get the clinical information
-#' @param cancer a character vector indicating cancer type Examples:
+#' @param tumor a character vector indicating cancer type Examples:
 #' \tabular{lllll}{
 #'OV   \tab BRCA \tab CESC \tab ESCA \tab PCPG\cr
 #'LUSC \tab LGG  \tab SKCM \tab KICH \tab CHOL\cr
@@ -306,8 +306,8 @@ clinical_data_site_cancer <- function(cancer){
 #' @return clinic data
 #' @examples
 #' data <- TCGAquery_clinic("LGG","clinical_drug")
-TCGAquery_clinic <- function(cancer,clinical_data_type){
-    query <- TCGAquery(tumor = cancer,platform = "bio", level=2)
+TCGAquery_clinic <- function(tumor,clinical_data_type){
+    query <- TCGAquery(tumor = tumor, platform = "bio", level=2)
     TCGAdownload(query,type = clinical_data_type)
     clinical_patient <- TCGAprepare(query,type = clinical_data_type, dir = ".")
     return(clinical_patient)
