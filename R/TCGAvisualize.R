@@ -413,10 +413,16 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
 #' @import ggplot2
 #' @export
 #' @return barplot image in pdf or png file
-#' @examples
-#' query <- TCGAquery(tumor = "lgg")
-TCGAvisualize_BarPlot <- function(DFfilt, DFclin, DFsubt, data_Hc2,
-                                  Subtype, cbPalette, filename, width, height,dpi){
+TCGAvisualize_BarPlot <- function(DFfilt,
+                                  DFclin,
+                                  DFsubt,
+                                  data_Hc2,
+                                  Subtype,
+                                  cbPalette,
+                                  filename,
+                                  width,
+                                  height,
+                                  dpi){
 
     if(Subtype =="AGE"){
         dataClinNew <- dataClin
@@ -554,207 +560,164 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 
 #' @title Heatmap with more sensible behavior using heatmap.plus
 #' @description Heatmap with more sensible behavior using heatmap.plus
-#' @param cancer tumor selected for the analysis
-#' @param DFfilt write
-#' @param DFclin write
-#' @param DFsubt write
-#' @param data_Hc2 write
-#' @param cbPalette write
-#' @param filename write. default = NULL
+#' @param data The object to with the heatmap data (expression, methylation)
+#' @param metadata Dataframe with the labelCols and rownames with patients ids
+#' @param labelCols Vector of columns to add to the heatpmap
+#' @param sortCol collumn used for sorting
+#' @param cbPalette A list of colors, aech one will be used in the labelCols
+#' @param clusterLabel The label of the cluster. Example "Expression Cluster",
+#' @param filename Filename default "Heatmap.pdf"
 #' @importFrom heatmap.plus heatmap.plus
 #' @examples
-#' query <- TCGAquery(tumor = "lgg")
+#' dat <- matrix(c(0.1,0.2,0.3,
+#'                 0.9,0.8,0.1,
+#'                 0.5,0.4,0.4,
+#'                 0.1,0.76,0.3,
+#'                 0.24,1,0,0.5), nrow = 3, ncol = 5, byrow = TRUE,
+#'                dimnames = list(c("TCGA-DU-6410",
+#'                  "TCGA-DU-A5TS",
+#'                  "TCGA-HT-7688"),
+#'                c("col1", "col2","col3","col4","col5")
+#'              ))
+#'
+#'mdat <- matrix(c("Male","coc1","IDHwt",
+#'                 "Male","coc1","IDHMut-cod",
+#'                 "Famele","coc1","IDHMut-noncod"),
+#'               nrow = 3, ncol = 3, byrow = TRUE,
+#'               dimnames = list(
+#'                   c("TCGA-DU-6410",
+#'                     "TCGA-DU-A5TS",
+#'                     "TCGA-HT-7688"),
+#'                   c("Sex", "COCCluster","IDHtype")))
+#'
+#'TCGAvisualize_Heatmap(dat,mdat,labelCols = c("Sex","COCCluster","IDHtype"),
+#'                      filename = "a.pdf",
+#'                      cbPalette = list(c("red","blue"),
+#'                                       c("orange","black","grey"),
+#'                                      c("cyan","tomato","gold")))
 #' \dontrun{
 #' # from case study n.2 LGG to test the function
-#' DFfilt <- datFilt
-#' DFclin = dataClin
-#' DFsubt = dataSubt
-#' data_Hc2 = data_Hc2
-# end parameter definition
-#' TCGAvisualize_Heatmap(DFfilt,
-#' DFclin,
-#' DFsubt,
-#' data_Hc2)
+#' TCGAvisualize_Heatmap(datFilt,
+#'                       clin_subt,
+#'                       labelCols = c("histological_type",
+#'                                      "IDH.1p19q.Subtype",
+#'                                      "CNCluster",
+#'                                      "COCCluster",
+#'                                      "OncosignCluster",
+#'                                      "groupsHC),
+#'                       filename = "a.png",
+#'                       cbPalette = list(c("cyan","green3","red","purple"),
+#'                                        c("cyan","tomato","gold"),
+#'                                        c("green","red","purple"),
+#'                                        c("green","red","purple"),
+#'                                        c("green","red","purple","orange","gray"),
+#'                                        c("grey","purple","blue","red"))
+#'                      )
 #' }
 #' @export
 #' @return Heatmap plotted in pdf or png file.
-TCGAvisualize_Heatmap <- function(cancer, DFfilt, DFclin, DFsubt, data_Hc2, cbPalette, filename =NULL){
+TCGAvisualize_Heatmap <- function(data,
+                                  metadata,
+                                  sortCol = NULL,
+                                  labelCols=NULL,
+                                  cbPalette=NULL,
+                                  filename ="Heatmap.pdf"){
 
-    rownames(DFsubt) <- DFsubt$patient
-    rownames(DFclin) <- DFclin$patient
-    rownames(DFfilt) <- substr(rownames(DFfilt),1,12)
-
-    ans <- hclust(ddist <- dist(DFfilt), method = "ward.D2")
-    hhc <- data_Hc2[[4]]$consensusTree
-    consensusClusters<-data_Hc2[[4]]$consensusClass
-    sampleOrder <- consensusClusters[hhc$order]
-
-    consensusClusters <- as.factor(data_Hc2[[4]]$clrs[[1]])
-    names(consensusClusters) <- attr(ddist, "Labels")
-    names(consensusClusters) <- substr(names(consensusClusters),1,12)
-
-    #DFclin <- DFclin[DFclin$bcr_patient_barcode %in% DFsubt$patient,]
-    DFclin_merged <- cbind(DFclin, matrix(0,nrow(DFclin),ncol(DFsubt)))
-    colnames(DFclin_merged)[((ncol(DFclin_merged)-ncol(DFsubt))+1) :ncol(DFclin_merged)] <- colnames(DFsubt)
-    rownames(DFclin_merged) <- DFclin_merged$bcr_patient_barcode
-
-    for( i in 1: ncol(DFsubt)){
-        DFsubt[,i] <- as.character(DFsubt[,i])
-    }
-
-    for( i in 1: nrow(DFsubt)){
-        curSample <- DFsubt$patient[i]
-        for( j in 1: ncol(DFsubt)){
-            curColumn <- colnames(DFsubt)[j]
-            DFclin_merged[curSample,curColumn] <- DFsubt[curSample,curColumn]
+    if(!all(grepl("TCGA-[0-9A-Z]{2}-[0-9A-Z]{4}$",rownames(metadata)))){
+        if(all(grepl("TCGA-[0-9A-Z]{2}-[0-9A-Z]{4}",rownames(metadata)))) {
+            rownames(metadata) <- substr(rownames(metadata),1,12)
+        } else if (any(grepl("bcr_patient_barcode",colnames(metadata)))){
+            rownames(metadata) <-  substr(metadata$bcr_patient_barcode,1,12)
+        } else {
+            stop("rownames should have a barcode")
         }
     }
 
+    if (!is.null(sortCol)) metadata <- metadata[order(metadata[,sortCol]),]
 
-    # adding information about gropus from consensus Cluster in clinical data
-    DFclin_merged <- cbind(DFclin_merged, groupsHC = matrix(0,nrow(DFclin_merged),1))
-    rownames(DFclin_merged) <- DFclin_merged$bcr_patient_barcode
-
-    for( i in 1: nrow(DFclin_merged)){
-        currSmp <- DFclin_merged$bcr_patient_barcode[i]
-        DFclin_merged[currSmp,"groupsHC"] <- as.character(consensusClusters[currSmp])
-    }
-
-    groupsColors <-  levels(as.factor(DFclin_merged$groupsHC))
-
-
-    for(j in 1:length(table(DFclin_merged$groupsHC))){
-        curCol <- groupsColors[j]
-        DFclin_merged[DFclin_merged$groupsHC == curCol,"groupsHC"]<-paste0("EC",j)
-    }
-
-
-    DFfilt <- DFfilt[rownames(DFclin_merged),]
-
-    orderCL <- as.character(substr(names(sampleOrder),1,12))
-    orderCL <- intersect(orderCL, rownames(DFfilt))
-    GE <- t(.quantileNormalization(t(DFfilt)))
+    GE <- t(.quantileNormalization(t(data)))
     rownames(GE) <- substr(rownames(GE),1,12)
 
-    oGE<- GE[orderCL,]  #ordering according cluster
-    DFclin_merged <-DFclin_merged[orderCL,]
+    orderCL <- rownames(metadata)
 
-    # histology
-    HISTOLOGY <- DFclin_merged[,"histological_type"]
-    names(HISTOLOGY)<-rownames(DFclin_merged)
-    HISTOLOGY <- HISTOLOGY[rownames(GE)]
-    HISTOLOGY.col <- rep("white",length(HISTOLOGY))
-    HISTOLOGY.col[HISTOLOGY=="Astrocytoma"]<-"red"
-    HISTOLOGY.col[HISTOLOGY=="glioblastoma"]<-"purple"
-    HISTOLOGY.col[HISTOLOGY=="Oligoastrocytoma"]<-"cyan"
-    HISTOLOGY.col[HISTOLOGY=="Oligodendroglioma"]<-"green3"
-    names(HISTOLOGY.col)<-names(HISTOLOGY)
-    oHISTOLOGY.col <- HISTOLOGY.col[orderCL]
+    # heatmap and metadata must have both the samples
+    orderCL <- orderCL[orderCL %in% rownames(GE)]
+    oGE <- GE[orderCL,]  #ordering according cluster
+    #idx <- match(orderCL, rownames(metadata))
+    #metadata <- metadata[idx,]
+    # matrix to color the heatmap
 
-    #subtype
-    SUBTYPE <- DFclin_merged[,"IDH.1p19q.Subtype"]
-    names(SUBTYPE) <- rownames(DFclin_merged)
-    SUBTYPE<-SUBTYPE[rownames(GE)]
-    SUBTYPE.col <- rep("white",length(SUBTYPE))
-    SUBTYPE.col[SUBTYPE=="IDHmut-codel"]<-"cyan"
-    SUBTYPE.col[SUBTYPE=="IDHmut-non-codel"]<-"tomato"
-    SUBTYPE.col[SUBTYPE=="IDHwt"]<-"gold"
-    names(SUBTYPE.col)<-names(SUBTYPE)
-    oSUBTYPE.col <- SUBTYPE.col[orderCL]
+    colors <- matrix(NA,
+                     nrow = nrow(oGE),
+                     ncol = length(labelCols))
 
-    #clusters CNCluster
-    CNC <- DFclin_merged[,"CNCluster"]
-    names(CNC)<- rownames(DFclin_merged)
-    CNC <- CNC[rownames(GE)]
-    CNC.col <- rep("white",length(CNC))
-    names(CNC.col)<-names(CNC)
-    CNC.col[CNC=="C1"] <- "green"
-    CNC.col[CNC=="C2"] <- "red"
-    CNC.col[CNC=="C3"] <- "purple"
-    oCNC.col <- CNC.col[orderCL]
+    for (i in 1:length(labelCols)){
+        aux <- metadata[,labelCols[i]]
+        names(aux) <- rownames(metadata)
 
-    #clusters COCluster
-    COC <- DFclin_merged[,"COCCluster"]
-    names(COC)<- rownames(DFclin_merged)
-    COC <- COC[rownames(GE)]
-    COC.col <- rep("white",length(COC))
-    names(COC.col)<-names(COC)
-    COC.col[COC=="coc1"] <- "green"
-    COC.col[COC=="coc2"] <- "red"
-    COC.col[COC=="coc3"] <- "purple"
-    oCOC.col <- COC.col[orderCL]
+        subtype <- unique(as.character(aux))
 
-    #clusters ONCOluster
-    ONCO <- DFclin_merged[,"OncosignCluster"]
-    names(ONCO)<- rownames(DFclin_merged)
-    ONCO <- ONCO[rownames(GE)]
-    ONCO.col <- rep("white",length(ONCO))
-    names(ONCO.col)<-names(ONCO)
-    ONCO.col[ONCO=="OSC1"] <- "green"
-    ONCO.col[ONCO=="OSC2"] <- "red"
-    ONCO.col[ONCO=="OSC3"] <- "purple"
-    ONCO.col[ONCO=="OSC4"] <- "orange"
-    ONCO.col[ONCO=="Unclassified"] <- "gray"
-    oONCO.col <- ONCO.col[orderCL]
+        if(any(is.na(subtype) )) subtype <- subtype[!is.na(subtype) ]
+        if(any(subtype == "NA")) subtype <- subtype[- which(subtype == "NA") ]
+        #print(subtype)
 
-    oConsensus <- as.character(consensusClusters[hhc$order])
-    #oConsensus <- as.character(consensusClusters[orderCL])
+        color <- rep("white",length(aux))
 
-    names(consensusClusters[hhc$order])
+        # selecting colors for the bars
+        if(is.null(cbPalette)) {
+            myColors <- rainbow(length(subtype))
+        } else {
+            myColors <- cbPalette[[i]]
+        }
 
+        message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
+        message(paste0("Label: ",labelCols[i]))
+        for (j in 1:length(subtype)) {
 
-    #source("heatmap.plus.R")
+            if (subtype[j] != "NA"){
+                idx <- aux == as.character(subtype[j])
+                idx[is.na(idx)] <- FALSE
+                size <- length(color[idx])
+                color[idx] <- rep(myColors[j], size)
+                message(sprintf("Group: %-15s color: %s ",
+                                subtype[j],myColors[j]))
+            }
+        }
+        message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
 
-    cc.col <- matrix(c(oHISTOLOGY.col,
-                       oSUBTYPE.col,
-                       oCNC.col,
-                       oCOC.col,
-                       oONCO.col,
-                       as.character(oConsensus)),
-                     nrow = nrow(oGE), ncol = 6)
+        names(color) <- names(aux)
+        color <- color[orderCL]
+        colors[,i] <- color
+    }
 
-    colnames(cc.col)<-c("Histology",
-                        "Subtype",
-                        "CNCluster",
-                        "COCCluster",
-                        "OncosignCluster",
-                        "Expression Cluster")
+    colnames(colors) <- c(labelCols)
+    colors <- as.data.frame(colors)
+    rownames(colors) <- orderCL
+    colors <- as.matrix(colors)
+    oGE<- oGE[rownames(colors),]
 
-    cc.col <- as.data.frame(cc.col)
-    rownames(cc.col) <- orderCL
-    cc.col <- cc.col[order(cc.col$`Expression Cluster`),]
-    cc.col <- as.matrix(cc.col)
-    oGE<- oGE[rownames(cc.col),]
+    if (!(is.null(dev.list()["RStudioGD"]))) dev.off()
 
-    if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
-
-    curDate <- as.character(unlist(strsplit(gsub(" ","_h",
-                                                 gsub("-","_",as.character(Sys.time()))),":"))[1])
-
-
-    pdf(file=paste0(curDate,"_",cancer,"_heatmap_with_subtypes_withHeatmapPlus.pdf"))
+    if(file_ext(filename) == "pdf") pdf(file=filename)
+    if(file_ext(filename) == "svg") svg(file=filename)
+    if(file_ext(filename) == "png") png(file=filename)
 
     .heatmap.plus.sm(
         t(oGE),
         na.rm=TRUE,
         scale="none",
-        #RowSideColor=probe.cc,
-        #ColSideColors=cc.col,
+        #RowSideColor=cc.col,
+        ColSideColors=colors,
         col=gplots::greenred(75),
-        key=FALSE,  #changed
-        symkey=FALSE,
-        density.info="none",
-        trace="none",
-        Rowv=FALSE,
+        #Rowv=NA,
         Colv=NA,
-        cexRow=1,
-        cexCol=1.6,
-        keysize=2,
-        dendrogram = "none",
-        main = "Heatmap from consensus cluster",
-        labRow=NA,labCol=NA,
-        #labCol=NA
+        cexRow=0.2,
+        cexCol=0.2,
+        labCol=NA,
+        labRow=NA,
+        main = "Heatmap from consensus cluster"
     )
+
     dev.off()
 }
 
@@ -797,13 +760,13 @@ TCGAvisualize_profilePlot <- function(data = NULL,
                                       colors = NULL,
                                       filename = NULL,
                                       na.rm = FALSE,
+                                      clusterLabel=NULL,
                                       plot.margin=c(-2.5,-2.5,-0.5,2),
                                       axis.title.size=1.5,
                                       axis.textsize=1.3,
                                       legend.size=1.5,
                                       legend.title.size=1.5,
-                                      geom.label.size = 6.0
-                                      ) {
+                                      geom.label.size = 6.0) {
 
     sjp.setTheme(theme = "scatterw",
                  axis.title.size = axis.title.size,
@@ -856,7 +819,6 @@ TCGAvisualize_profilePlot <- function(data = NULL,
     df <- dcast(df, as.formula(paste0(subtypeCol, " ~ ", groupCol)))
 
     var.labels <- unique(df[,1]) # get the cluster names
-
     m <- max(apply(df[,-1],2,sum)) # get the max number of subtypes in the clusters
 
     # create a data frame with all values
@@ -960,6 +922,8 @@ TCGAvisualize_profilePlot <- function(data = NULL,
             #panel.grid.major=element_blank(),
             #panel.grid.minor=element_blank(),
             plot.background=element_blank())
+
+
 
     p$plot <-  plot_grid(p2$plot,
                          p$plot,
