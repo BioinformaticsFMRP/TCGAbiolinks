@@ -289,26 +289,6 @@ The arguments that will be used to filter the data are:
 * center
 * archive.name
 
-```{r, eval = TRUE}
-mutation <- TCGAquery_maf (tumor = "lgg", 
-                           archive.name = "IlluminaGA_DNASeq_curated.Level_2.1.4.0")
-head(mutation)
-```
-
-## `TCGAquery_maf`: Working with mutation files.
-
-In order to download the Mutation Annotation Format (MAF), we provide the user
-with the `TCGAquery_maf` function. Briefly, it will get the tables from
-https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files, remove the obsolete/protected
-files and ask the user which maf file he wants to download.
-
-
-The parameters that will be used to filter the data are:
-
-* tumor 
-* center
-* archive.name
-
 ```{r, eval = FALSE}
 mutation <- TCGAquery_maf (tumor = "lgg", 
                            archive.name = "IlluminaGA_DNASeq_curated.Level_2.1.4.0")
