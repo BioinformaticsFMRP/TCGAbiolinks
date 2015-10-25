@@ -565,7 +565,6 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @param labelCols Vector of columns to add to the heatpmap
 #' @param sortCol collumn used for sorting
 #' @param cbPalette A list of colors, aech one will be used in the labelCols
-#' @param clusterLabel The label of the cluster. Example "Expression Cluster",
 #' @param filename Filename default "Heatmap.pdf"
 #' @importFrom heatmap.plus heatmap.plus
 #' @examples
@@ -699,8 +698,8 @@ TCGAvisualize_Heatmap <- function(data,
     if (!(is.null(dev.list()["RStudioGD"]))) dev.off()
 
     if(file_ext(filename) == "pdf") pdf(file=filename)
-    if(file_ext(filename) == "svg") svg(file=filename)
-    if(file_ext(filename) == "png") png(file=filename)
+    if(file_ext(filename) == "svg") svg(filename=filename)
+    if(file_ext(filename) == "png") png(filename=filename)
 
     .heatmap.plus.sm(
         t(oGE),
@@ -738,6 +737,7 @@ TCGAvisualize_Heatmap <- function(data,
 #' @param legend.size legend.size
 #' @param legend.title.size legend.title.size
 #' @param geom.label.size geom.label.size
+#' @param clusterLabel The label of the cluster. Example "Expression Cluster",
 #' @importFrom sjPlot sjp.stackfrq sjp.setTheme
 #' @importFrom cowplot ggdraw switch_axis_position plot_grid
 #' @importFrom reshape2 dcast
