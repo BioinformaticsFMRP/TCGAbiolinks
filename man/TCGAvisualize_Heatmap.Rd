@@ -19,8 +19,6 @@ TCGAvisualize_Heatmap(data, metadata, sortCol = NULL, labelCols = NULL,
 \item{cbPalette}{A list of colors, aech one will be used in the labelCols}
 
 \item{filename}{Filename default "Heatmap.pdf"}
-
-\item{clusterLabel}{The label of the cluster. Example "Expression Cluster",}
 }
 \value{
 Heatmap plotted in pdf or png file.
