@@ -23,6 +23,8 @@ TCGAvisualize_profilePlot(data = NULL, groupCol = NULL, subtypeCol = NULL,
 
 \item{na.rm}{Remove NA groups/subtypes? Default = FALSE}
 
+\item{clusterLabel}{The label of the cluster. Example "Expression Cluster",}
+
 \item{plot.margin}{Plot margin for cluster distribution. This can control the size
 of the bar if the output is not aligned}
 
