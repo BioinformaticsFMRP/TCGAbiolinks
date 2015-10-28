@@ -4,23 +4,32 @@
 \alias{TCGAvisualize_Heatmap}
 \title{Heatmap with more sensible behavior using heatmap.plus}
 \usage{
-TCGAvisualize_Heatmap(data, metadata, sortCol = NULL, labelCols = NULL,
-  cbPalette = NULL, filename = "Heatmap.pdf")
+TCGAvisualize_Heatmap(data, col.metadata, row.metadata, sortCol = NULL,
+  sortRow = NULL, col.labels = NULL, row.labels = NULL,
+  col.colors = NULL, row.colors = NULL, type = "expression",
+  filename = "Heatmap.pdf")
 }
 \arguments{
 \item{data}{The object to with the heatmap data (expression, methylation)}
 
-\item{metadata}{Dataframe with the labelCols and rownames with patients ids}
+\item{col.metadata}{Dataframe with the col.label and rownames with patients ids}
+
+\item{row.metadata}{Dataframe with the row.label and rownames as genes (expression) or probes (methylation)}
 
 \item{sortCol}{collumn used for sorting}
 
-\item{labelCols}{Vector of columns to add to the heatpmap}
+\item{col.labels}{Vector of columns to add to the heatpmap col labels}
 
-\item{cbPalette}{A list of colors, aech one will be used in the labelCols}
+\item{row.labels}{Vector of columns to add to the heatpmap row labels}
+
+\item{col.colors}{A list of colors, aech one will be used in the labelCols}
+
+\item{row.colors}{A list of colors, aech one will be used in the labelRows}
+
+\item{type}{Select the colors of the heatmap values.
+Possible values "expression" (default), "methylation"}
 
 \item{filename}{Filename default "Heatmap.pdf"}
-
-\item{clusterLabel}{The label of the cluster. Example "Expression Cluster",}
 }
 \value{
 Heatmap plotted in pdf or png file.
@@ -50,23 +59,23 @@ mdat <- matrix(c("Male","coc1","IDHwt",
                     "TCGA-HT-7688"),
                   c("Sex", "COCCluster","IDHtype")))
 
-TCGAvisualize_Heatmap(dat,mdat,labelCols = c("Sex","COCCluster","IDHtype"),
+TCGAvisualize_Heatmap(dat,mdat,col.labels = c("Sex","COCCluster","IDHtype"),
                      filename = "a.pdf",
-                     cbPalette = list(c("red","blue"),
+                     col.colors = list(c("red","blue"),
                                       c("orange","black","grey"),
                                      c("cyan","tomato","gold")))
 \dontrun{
 # from case study n.2 LGG to test the function
 TCGAvisualize_Heatmap(datFilt,
                       clin_subt,
-                      labelCols = c("histological_type",
+                      col.labels = c("histological_type",
                                      "IDH.1p19q.Subtype",
                                      "CNCluster",
                                      "COCCluster",
                                      "OncosignCluster",
                                      "groupsHC),
                       filename = "a.png",
-                      cbPalette = list(c("cyan","green3","red","purple"),
+                      col.colors = list(c("cyan","green3","red","purple"),
                                        c("cyan","tomato","gold"),
                                        c("green","red","purple"),
                                        c("green","red","purple"),
