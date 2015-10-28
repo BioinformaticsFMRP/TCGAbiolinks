@@ -765,12 +765,13 @@ TCGAvisualize_Heatmap <- function(data,
 
     if (!(is.null(dev.list()["RStudioGD"]))) dev.off()
 
-    if (file_ext(filename) == "pdf") pdf(file=filename)
-    if (file_ext(filename) == "svg") svg(file=filename)
-    if (file_ext(filename) == "png") png(file=filename)
+    if(file_ext(filename) == "pdf") pdf(file=filename)
+    if(file_ext(filename) == "svg") svg(filename=filename)
+    if(file_ext(filename) == "png") png(filename=filename)
 
     if (type == "expression") color <- gplots::greenred(75)
     if (type == "methylation") color <- matlab::jet.colors(75)
+
 
     print(dim(oGE))
     .heatmap.plus.sm(
