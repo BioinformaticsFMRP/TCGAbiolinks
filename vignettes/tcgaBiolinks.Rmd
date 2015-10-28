@@ -289,10 +289,9 @@ The arguments that will be used to filter the data are:
 * center
 * archive.name
 
-```{r, eval = TRUE}
+```{r, eval = FALSE}
 mutation <- TCGAquery_maf (tumor = "lgg", 
                            archive.name = "IlluminaGA_DNASeq_curated.Level_2.1.4.0")
-head(mutation)
 ```
 
 ## `TCGAquery_clinic` `&` `TCGAquery_clinicFilt`: Working with clinical data.
