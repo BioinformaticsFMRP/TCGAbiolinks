@@ -38,15 +38,16 @@ Heatmap plotted in pdf or png file.
 Heatmap with more sensible behavior using heatmap.plus
 }
 \examples{
-dat <- matrix(c(0.1,0.2,0.3,
-                0.9,0.8,0.1,
-                0.5,0.4,0.4,
-                0.1,0.76,0.3,
-                0.24,1,0,0.5), nrow = 3, ncol = 5, byrow = TRUE,
-               dimnames = list(c("TCGA-DU-6410",
+dat <- matrix(c(0.3,0.2,0.3,
+                1,1,0.1,
+                1,1,0,
+                0.8,1,0.7,
+                0.7,0.3,1), nrow = 5, ncol = 3, byrow = TRUE,
+               dimnames = list(
+               c("probe1", "probe2","probe3","probe4","probe5"),
+               c("TCGA-DU-6410",
                  "TCGA-DU-A5TS",
-                 "TCGA-HT-7688"),
-               c("col1", "col2","col3","col4","col5")
+                 "TCGA-HT-7688")
              ))
 
 mdat <- matrix(c("Male","coc1","IDHwt",
@@ -61,8 +62,8 @@ mdat <- matrix(c("Male","coc1","IDHwt",
 
 TCGAvisualize_Heatmap(dat,mdat,col.labels = c("Sex","COCCluster","IDHtype"),
                      filename = "a.pdf",
-                     col.colors = list(c("red","blue"),
-                                      c("orange","black","grey"),
+                     col.colors = list(c("green","pink"),
+                                      c("grey","black","purple"),
                                      c("cyan","tomato","gold")))
 \dontrun{
 # from case study n.2 LGG to test the function
