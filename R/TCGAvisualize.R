@@ -631,34 +631,37 @@ TCGAvisualize_Heatmap <- function(data,
                                   type = "expression",
                                   filename ="Heatmap.pdf"){
 
-    #if(!all(grepl("TCGA-[0-9A-Z]{2}-[0-9A-Z]{4}$",rownames(metadata)))){
-    #    if(all(grepl("TCGA-[0-9A-Z]{2}-[0-9A-Z]{4}",rownames(metadata)))) {
-    #        rownames(metadata) <- substr(rownames(metadata),1,12)
-    #    } else if (any(grepl("bcr_patient_barcode",colnames(metadata)))){
-    #        rownames(metadata) <-  substr(metadata$bcr_patient_barcode,1,12)
-    #    } else {
-    #        stop(" Metada rownames should have a barcode")
-    #    }
-    #}
-    if (!is.null(sortCol)) col.metadata <- col.metadata[order(col.metadata[,sortCol]),]
-    n <- colnames(row.metadata)
-    if (!is.null(sortRow)) row.metadata <- as.matrix(row.metadata[order(row.metadata[,sortRow]),])
-    colnames(row.metadata) <- n
-    #GE <- t(.quantileNormalization(t(data)))
+    # The user has 3 option, only the heatmap, add rowlabel, add collabel
     GE <- t(data)
+
     rownames(GE) <- substr(rownames(GE),1,12)
-    col.order <- rownames(col.metadata)
-    print(head(col.metadata))
 
-    # heatmap and metadata must have both the samples
-    col.order <- col.order[col.order %in% rownames(GE)]
-    oGE <- GE[col.order,]  #ordering according cluster
+    # The first step is to put the patients metadata in the same order as the
+    # data, col.order will have the order of the samples as in the metadata
+    if(!missing(col.metadata)){
+        if (!is.null(sortCol)) {
+            col.metadata <- col.metadata[order(col.metadata[,sortCol]),]
+        }
+        col.order <- rownames(col.metadata)
+        idx <- match(col.order, rownames(GE))
+        GE <- GE[idx,]
+    }
 
-    row.order <- rownames(row.metadata)
+    # samething for the row metadata
+    if (!missing(row.metadata)) {
+        if (!is.null(sortRow)) {
+            n <- colnames(row.metadata)
+            row.metadata <- as.matrix(row.metadata[order(row.metadata[,sortRow]),])
+            colnames(row.metadata) <- n # we lost the header names, the rownames are ok
+        }
+        idx <- match(rownames(row.metadata), colnames(GE))
+        GE <- GE[,idx]
+    }
+
 
     # matrix to color the columns of the heatmap
     if(!is.null(col.labels)){
-        columns.colors <- matrix(NA, nrow = nrow(oGE), ncol = length(col.labels))
+        columns.colors <- matrix(NA, nrow = nrow(GE), ncol = length(col.labels))
     } else {
         columns.colors <- NULL
     }
@@ -668,131 +671,171 @@ TCGAvisualize_Heatmap <- function(data,
     } else {
         rows.colors <- NULL
     }
+    if(!missing(col.metadata)){
+        for (i in 1:length(col.labels)){
+            aux <- col.metadata[,col.labels[i]]
+            names(aux) <- rownames(col.metadata)
 
-    for (i in 1:length(col.labels)){
-        aux <- col.metadata[,col.labels[i]]
-        names(aux) <- rownames(col.metadata)
+            subtype <- unique(as.character(aux))
 
-        subtype <- unique(as.character(aux))
+            if(any(is.na(subtype) )) subtype <- subtype[!is.na(subtype) ]
 
-        if(any(is.na(subtype) )) subtype <- subtype[!is.na(subtype) ]
-        #if(any(subtype == "NA")) subtype <- subtype[- which(subtype == "NA") ]
-        #print(subtype)
+            color <- rep("white",length(aux))
 
-        color <- rep("white",length(aux))
-
-        # selecting colors for the bars
-        if(is.null(col.colors)) {
-            myColors <- rainbow(length(subtype))
-        } else {
-            myColors <- col.colors[[i]]
-        }
-
-        message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
-        message(paste0("Label: ",col.labels[i]))
-        idxColor <- 1
-        for (j in 1:length(subtype)) {
-
-            if (subtype[j] != "NA"){
-                idx <- aux == as.character(subtype[j])
-                idx[is.na(idx)] <- FALSE
-                size <- length(color[idx])
-                color[idx] <- rep(myColors[idxColor], size)
-                message(sprintf("Group: %-15s color: %s ",
-                                subtype[j],myColors[idxColor]))
-                idxColor <- idxColor + 1
+            # selecting colors for the bars
+            if(is.null(col.colors)) {
+                myColors <- rainbow(length(subtype))
             } else {
-                message(sprintf("Group: %-15s color: %s ", subtype[j],"White"))
+                myColors <- col.colors[[i]]
             }
+
+            message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
+            message(paste0("Label: ",col.labels[i]))
+            idxColor <- 1
+            for (j in 1:length(subtype)) {
+
+                if (subtype[j] != "NA"){
+                    idx <- aux == as.character(subtype[j])
+                    idx[is.na(idx)] <- FALSE
+                    size <- length(color[idx])
+                    color[idx] <- rep(myColors[idxColor], size)
+                    message(sprintf("Group: %-15s color: %s ",
+                                    subtype[j],myColors[idxColor]))
+                    idxColor <- idxColor + 1
+                } else {
+                    message(sprintf("Group: %-15s color: %s ", subtype[j],"White"))
+                }
+            }
+            message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
+
+            names(color) <- names(aux)
+            columns.colors[,i] <- color
         }
-        message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
 
-        names(color) <- names(aux)
-        color <- color[col.order]
-        columns.colors[,i] <- color
+        colnames(columns.colors) <- col.labels
+        rownames(columns.colors) <- rownames(GE)
     }
-
-    colnames(columns.colors) <- col.labels
-    rownames(columns.colors) <- col.order
-    #oGE <- oGE[rownames(columns.colors),]
+    if(ncol(columns.colors) == 1) columns.colors <- cbind(columns.colors, "white")
 
     ######### ROW colors
-    #########
-    for (i in 1:length(row.labels)){
-        aux <- row.metadata[,row.labels[i]]
-        names(aux) <- rownames(row.metadata)
+    if(!missing(row.metadata)){
 
-        subtype <- unique(as.character(aux))
+        for (i in 1:length(row.labels)){
+            aux <- row.metadata[,row.labels[i]]
+            names(aux) <- rownames(row.metadata)
 
-        if(any(is.na(subtype) )) subtype <- subtype[!is.na(subtype) ]
-        #if(any(subtype == "NA")) subtype <- subtype[- which(subtype == "NA") ]
-        #print(subtype)
+            subtype <- unique(as.character(aux))
 
-        color <- rep("white",length(aux))
+            if(any(is.na(subtype) )) subtype <- subtype[!is.na(subtype) ]
 
-        # selecting colors for the bars
-        if(is.null(row.colors)) {
-            myColors <- rainbow(length(subtype))
-        } else {
-            myColors <- row.colors[[i]]
-        }
+            color <- rep("white",length(aux))
 
-        message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
-        message(paste0("Label: ",row.labels[i]))
-        idxColor <- 1
-        for (j in 1:length(subtype)) {
-
-            if (subtype[j] != "NA"){
-                idx <- aux == as.character(subtype[j])
-                idx[is.na(idx)] <- FALSE
-                size <- length(color[idx])
-                color[idx] <- rep(myColors[idxColor], size)
-                message(sprintf("Group: %-15s color: %s ",
-                                subtype[j],myColors[idxColor]))
-                idxColor <- idxColor + 1
+            # selecting colors for the bars
+            if(is.null(row.colors)) {
+                myColors <- rainbow(length(subtype))
             } else {
-                message(sprintf("Group: %-15s color: %s ", subtype[j],"White"))
+                myColors <- row.colors[[i]]
             }
+
+            message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
+            message(paste0("Label: ",row.labels[i]))
+            idxColor <- 1
+            for (j in 1:length(subtype)) {
+
+                if (subtype[j] != "NA"){
+                    idx <- aux == as.character(subtype[j])
+                    idx[is.na(idx)] <- FALSE
+                    size <- length(color[idx])
+                    color[idx] <- rep(myColors[idxColor], size)
+                    message(sprintf("Group: %-15s color: %s ",
+                                    subtype[j],myColors[idxColor]))
+                    idxColor <- idxColor + 1
+                } else {
+                    message(sprintf("Group: %-15s color: %s ", subtype[j],"White"))
+                }
+            }
+            message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
+
+            names(color) <- names(aux)
+            rows.colors[,i] <- color
         }
-        message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
-
-        names(color) <- names(aux)
-        color <- color[row.order]
-        rows.colors[,i] <- color
+        colnames(rows.colors) <- row.labels
     }
-
-    colnames(rows.colors) <- row.labels
-
     if (!(is.null(dev.list()["RStudioGD"]))) dev.off()
 
-    if(file_ext(filename) == "pdf") pdf(file=filename)
-    if(file_ext(filename) == "svg") svg(filename=filename)
-    if(file_ext(filename) == "png") png(filename=filename)
+    if (file_ext(filename) == "pdf") pdf(file = filename)
+    if (file_ext(filename) == "svg") svg(filename = filename)
+    if (file_ext(filename) == "png") png(filename = filename)
 
     if (type == "expression") color <- gplots::greenred(75)
     if (type == "methylation") color <- matlab::jet.colors(75)
 
-
-    print(dim(oGE))
-    .heatmap.plus.sm(
-        t(oGE),
-        na.rm=TRUE,
-        scale="none",
-        RowSideColor=rows.colors,
-        ColSideColors=columns.colors,
-        col=color,
-        Rowv=NA,
-        Colv=NA,
-        cexRow=0.2,
-        cexCol=0.2,
-        labCol=NA,
-        labRow=NA,
-        main = "Heatmap from consensus cluster"
-    )
+    if(!missing(col.metadata) & !missing(row.metadata)){
+        .heatmap.plus.sm(
+            t(GE),
+            na.rm = TRUE,
+            scale = "none",
+            RowSideColor = rows.colors,
+            ColSideColors = columns.colors,
+            col = color,
+            Rowv = NA,
+            Colv = NA,
+            cexRow = 0.2,
+            cexCol = 0.2,
+            labCol = NA,
+            labRow = NA,
+            main = "Heatmap from consensus cluster"
+        )
+    }
+    if(!missing(col.metadata) & missing(row.metadata)){
+        .heatmap.plus.sm(
+            t(GE),
+            na.rm = TRUE,
+            scale = "none",
+            ColSideColors = columns.colors,
+            col=color,
+            Rowv = NA,
+            Colv = NA,
+            cexRow = 0.2,
+            cexCol = 0.2,
+            labCol = NA,
+            labRow = NA,
+            main = "Heatmap from consensus cluster"
+        )}
+    if(missing(col.metadata) & !missing(row.metadata)){
+        .heatmap.plus.sm(
+            t(GE),
+            na.rm = TRUE,
+            scale = "none",
+            RowSideColor = rows.colors,
+            col=color,
+            Rowv = NA,
+            Colv = NA,
+            cexRow = 0.2,
+            cexCol = 0.2,
+            labCol = NA,
+            labRow = NA,
+            main = "Heatmap from consensus cluster"
+        )
+    }
+    if(missing(col.metadata) & missing(row.metadata)){
+        .heatmap.plus.sm(
+            t(GE),
+            na.rm = TRUE,
+            scale = "none",
+            col=color,
+            Rowv = NA,
+            Colv = NA,
+            cexRow = 0.2,
+            cexCol = 0.2,
+            labCol = NA,
+            labRow = NA,
+            main = "Heatmap from consensus cluster"
+        )
+    }
 
     dev.off()
 }
-
 
 
 #' @title Profile plot
