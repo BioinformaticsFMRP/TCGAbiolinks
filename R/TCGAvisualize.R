@@ -557,26 +557,31 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
     }
 
 }
-
 #' @title Heatmap with more sensible behavior using heatmap.plus
 #' @description Heatmap with more sensible behavior using heatmap.plus
 #' @param data The object to with the heatmap data (expression, methylation)
-#' @param metadata Dataframe with the labelCols and rownames with patients ids
-#' @param labelCols Vector of columns to add to the heatpmap
+#' @param col.metadata Dataframe with the col.label and rownames with patients ids
+#' @param row.metadata Dataframe with the row.label and rownames as genes (expression) or probes (methylation)
+#' @param row.labels Vector of columns to add to the heatpmap row labels
+#' @param col.labels Vector of columns to add to the heatpmap col labels
 #' @param sortCol collumn used for sorting
-#' @param cbPalette A list of colors, aech one will be used in the labelCols
+#' @param col.colors A list of colors, aech one will be used in the labelCols
+#' @param row.colors A list of colors, aech one will be used in the labelRows
 #' @param filename Filename default "Heatmap.pdf"
+#' @param type Select the colors of the heatmap values.
+#' Possible values "expression" (default), "methylation"
 #' @importFrom heatmap.plus heatmap.plus
 #' @examples
-#' dat <- matrix(c(0.1,0.2,0.3,
-#'                 0.9,0.8,0.1,
-#'                 0.5,0.4,0.4,
-#'                 0.1,0.76,0.3,
-#'                 0.24,1,0,0.5), nrow = 3, ncol = 5, byrow = TRUE,
-#'                dimnames = list(c("TCGA-DU-6410",
+#' dat <- matrix(c(0.3,0.2,0.3,
+#'                 1,1,0.1,
+#'                 1,1,0,
+#'                 0.8,1,0.7,
+#'                 0.7,0.3,1), nrow = 5, ncol = 3, byrow = TRUE,
+#'                dimnames = list(
+#'                c("probe1", "probe2","probe3","probe4","probe5"),
+#'                c("TCGA-DU-6410",
 #'                  "TCGA-DU-A5TS",
-#'                  "TCGA-HT-7688"),
-#'                c("col1", "col2","col3","col4","col5")
+#'                  "TCGA-HT-7688")
 #'              ))
 #'
 #'mdat <- matrix(c("Male","coc1","IDHwt",
@@ -589,23 +594,24 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #'                     "TCGA-HT-7688"),
 #'                   c("Sex", "COCCluster","IDHtype")))
 #'
-#'TCGAvisualize_Heatmap(dat,mdat,labelCols = c("Sex","COCCluster","IDHtype"),
+#'TCGAvisualize_Heatmap(dat,mdat,col.labels = c("Sex","COCCluster","IDHtype"),
 #'                      filename = "a.pdf",
-#'                      cbPalette = list(c("red","blue"),
-#'                                       c("orange","black","grey"),
-#'                                      c("cyan","tomato","gold")))
+#'                      col.colors = list(c("green","pink"),
+#'                                       c("grey","black","purple"),
+#'                                      c("cyan","tomato","gold")),
+#'                                      type = "methylation")
 #' \dontrun{
 #' # from case study n.2 LGG to test the function
 #' TCGAvisualize_Heatmap(datFilt,
 #'                       clin_subt,
-#'                       labelCols = c("histological_type",
+#'                       col.labels = c("histological_type",
 #'                                      "IDH.1p19q.Subtype",
 #'                                      "CNCluster",
 #'                                      "COCCluster",
 #'                                      "OncosignCluster",
 #'                                      "groupsHC),
 #'                       filename = "a.png",
-#'                       cbPalette = list(c("cyan","green3","red","purple"),
+#'                       col.colors = list(c("cyan","green3","red","purple"),
 #'                                        c("cyan","tomato","gold"),
 #'                                        c("green","red","purple"),
 #'                                        c("green","red","purple"),
@@ -614,112 +620,222 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #'                      )
 #' }
 #' @export
+#' @importFrom matlab jet.colors
 #' @return Heatmap plotted in pdf or png file.
 TCGAvisualize_Heatmap <- function(data,
-                                  metadata,
+                                  col.metadata,
+                                  row.metadata,
                                   sortCol = NULL,
-                                  labelCols=NULL,
-                                  cbPalette=NULL,
+                                  sortRow = NULL,
+                                  col.labels=NULL,
+                                  row.labels=NULL,
+                                  col.colors=NULL,
+                                  row.colors=NULL,
+                                  type = "expression",
                                   filename ="Heatmap.pdf"){
 
-    if(!all(grepl("TCGA-[0-9A-Z]{2}-[0-9A-Z]{4}$",rownames(metadata)))){
-        if(all(grepl("TCGA-[0-9A-Z]{2}-[0-9A-Z]{4}",rownames(metadata)))) {
-            rownames(metadata) <- substr(rownames(metadata),1,12)
-        } else if (any(grepl("bcr_patient_barcode",colnames(metadata)))){
-            rownames(metadata) <-  substr(metadata$bcr_patient_barcode,1,12)
-        } else {
-            stop("rownames should have a barcode")
-        }
-    }
+    # The user has 3 option, only the heatmap, add rowlabel, add collabel
+    GE <- t(data)
 
-    if (!is.null(sortCol)) metadata <- metadata[order(metadata[,sortCol]),]
-
-    GE <- t(.quantileNormalization(t(data)))
     rownames(GE) <- substr(rownames(GE),1,12)
 
-    orderCL <- rownames(metadata)
-
-    # heatmap and metadata must have both the samples
-    orderCL <- orderCL[orderCL %in% rownames(GE)]
-    oGE <- GE[orderCL,]  #ordering according cluster
-    #idx <- match(orderCL, rownames(metadata))
-    #metadata <- metadata[idx,]
-    # matrix to color the heatmap
-
-    colors <- matrix(NA,
-                     nrow = nrow(oGE),
-                     ncol = length(labelCols))
-
-    for (i in 1:length(labelCols)){
-        aux <- metadata[,labelCols[i]]
-        names(aux) <- rownames(metadata)
-
-        subtype <- unique(as.character(aux))
-
-        if(any(is.na(subtype) )) subtype <- subtype[!is.na(subtype) ]
-        if(any(subtype == "NA")) subtype <- subtype[- which(subtype == "NA") ]
-        #print(subtype)
-
-        color <- rep("white",length(aux))
-
-        # selecting colors for the bars
-        if(is.null(cbPalette)) {
-            myColors <- rainbow(length(subtype))
-        } else {
-            myColors <- cbPalette[[i]]
+    # The first step is to put the patients metadata in the same order as the
+    # data, col.order will have the order of the samples as in the metadata
+    if(!missing(col.metadata)){
+        if (!is.null(sortCol)) {
+            col.metadata <- col.metadata[order(col.metadata[,sortCol]),]
         }
-
-        message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
-        message(paste0("Label: ",labelCols[i]))
-        for (j in 1:length(subtype)) {
-
-            if (subtype[j] != "NA"){
-                idx <- aux == as.character(subtype[j])
-                idx[is.na(idx)] <- FALSE
-                size <- length(color[idx])
-                color[idx] <- rep(myColors[j], size)
-                message(sprintf("Group: %-15s color: %s ",
-                                subtype[j],myColors[j]))
-            }
+        col.order <- rownames(col.metadata)
+        idx <- match(col.order, rownames(GE))
+        GE <- GE[idx,]
+    }
+    # samething for the row metadata
+    if (!missing(row.metadata)) {
+        if (!is.null(sortRow)) {
+            n <- colnames(row.metadata)
+            row.metadata <- as.matrix(row.metadata[order(row.metadata[,sortRow]),])
+            colnames(row.metadata) <- n # we lost the header names, the rownames are ok
         }
-        message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
-
-        names(color) <- names(aux)
-        color <- color[orderCL]
-        colors[,i] <- color
+        idx <- match(rownames(row.metadata), colnames(GE))
+        GE <- GE[,idx]
     }
 
-    colnames(colors) <- c(labelCols)
-    colors <- as.data.frame(colors)
-    rownames(colors) <- orderCL
-    colors <- as.matrix(colors)
-    oGE<- oGE[rownames(colors),]
 
+    # matrix to color the columns of the heatmap
+    if(!is.null(col.labels)){
+        columns.colors <- matrix(NA, nrow = nrow(GE), ncol = length(col.labels))
+    } else {
+        columns.colors <- NULL
+    }
+    # matrix to color the rows of the heatmap
+    if(!is.null(row.labels)){
+        rows.colors <- matrix(NA, nrow = nrow(row.metadata), ncol = length(row.labels))
+    } else {
+        rows.colors <- NULL
+    }
+    if(!missing(col.metadata)){
+        for (i in 1:length(col.labels)){
+            aux <- col.metadata[,col.labels[i]]
+            names(aux) <- rownames(col.metadata)
+
+            subtype <- unique(as.character(aux))
+
+            if(any(is.na(subtype) )) subtype <- subtype[!is.na(subtype) ]
+
+            color <- rep("white",length(aux))
+
+            # selecting colors for the bars
+            if(is.null(col.colors)) {
+                myColors <- rainbow(length(subtype))
+            } else {
+                myColors <- col.colors[[i]]
+            }
+
+            message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
+            message(paste0("Label: ",col.labels[i]))
+            idxColor <- 1
+            for (j in 1:length(subtype)) {
+
+                if (subtype[j] != "NA"){
+                    idx <- aux == as.character(subtype[j])
+                    idx[is.na(idx)] <- FALSE
+                    size <- length(color[idx])
+                    color[idx] <- rep(myColors[idxColor], size)
+                    message(sprintf("Group: %-15s color: %s ",
+                                    subtype[j],myColors[idxColor]))
+                    idxColor <- idxColor + 1
+                } else {
+                    message(sprintf("Group: %-15s color: %s ", subtype[j],"White"))
+                }
+            }
+            message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
+
+            names(color) <- names(aux)
+            columns.colors[,i] <- color
+        }
+
+        colnames(columns.colors) <- col.labels
+        rownames(columns.colors) <- rownames(GE)
+    }
+    if(ncol(columns.colors) == 1) columns.colors <- cbind(columns.colors, "white")
+
+    ######### ROW colors
+    if(!missing(row.metadata)){
+
+        for (i in 1:length(row.labels)){
+            aux <- row.metadata[,row.labels[i]]
+            names(aux) <- rownames(row.metadata)
+
+            subtype <- unique(as.character(aux))
+
+            if(any(is.na(subtype) )) subtype <- subtype[!is.na(subtype) ]
+
+            color <- rep("white",length(aux))
+
+            # selecting colors for the bars
+            if(is.null(row.colors)) {
+                myColors <- rainbow(length(subtype))
+            } else {
+                myColors <- row.colors[[i]]
+            }
+
+            message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
+            message(paste0("Label: ",row.labels[i]))
+            idxColor <- 1
+            for (j in 1:length(subtype)) {
+
+                if (subtype[j] != "NA"){
+                    idx <- aux == as.character(subtype[j])
+                    idx[is.na(idx)] <- FALSE
+                    size <- length(color[idx])
+                    color[idx] <- rep(myColors[idxColor], size)
+                    message(sprintf("Group: %-15s color: %s ",
+                                    subtype[j],myColors[idxColor]))
+                    idxColor <- idxColor + 1
+                } else {
+                    message(sprintf("Group: %-15s color: %s ", subtype[j],"White"))
+                }
+            }
+            message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
+
+            names(color) <- names(aux)
+            rows.colors[,i] <- color
+        }
+        colnames(rows.colors) <- row.labels
+    }
     if (!(is.null(dev.list()["RStudioGD"]))) dev.off()
 
-    if(file_ext(filename) == "pdf") pdf(file=filename)
-    if(file_ext(filename) == "svg") svg(filename=filename)
-    if(file_ext(filename) == "png") png(filename=filename)
+    if (file_ext(filename) == "pdf") pdf(file = filename)
 
-    .heatmap.plus.sm(
-        t(oGE),
-        na.rm=TRUE,
-        scale="none",
-        #RowSideColor=cc.col,
-        ColSideColors=colors,
-        col=gplots::greenred(75),
-        #Rowv=NA,
-        Colv=NA,
-        cexRow=0.2,
-        cexCol=0.2,
-        labCol=NA,
-        labRow=NA,
-        main = "Heatmap from consensus cluster"
-    )
+    if (type == "expression") color <- gplots::greenred(75)
+    if (type == "methylation") color <- matlab::jet.colors(75)
+
+    if(!missing(col.metadata) & !missing(row.metadata)){
+        .heatmap.plus.sm(
+            t(GE),
+            na.rm = TRUE,
+            scale = "none",
+            RowSideColor = rows.colors,
+            ColSideColors = columns.colors,
+            col = color,
+            Rowv = NA,
+            Colv = NA,
+            cexRow = 0.2,
+            cexCol = 0.2,
+            labCol = NA,
+            labRow = NA,
+            main = "Heatmap from consensus cluster"
+        )
+    }
+    if(!missing(col.metadata) & missing(row.metadata)){
+        .heatmap.plus.sm(
+            t(GE),
+            na.rm = TRUE,
+            scale = "none",
+            ColSideColors = columns.colors,
+            col=color,
+            Rowv = NA,
+            Colv = NA,
+            cexRow = 0.2,
+            cexCol = 0.2,
+            labCol = NA,
+            labRow = NA,
+            main = "Heatmap from consensus cluster"
+        )}
+    if(missing(col.metadata) & !missing(row.metadata)){
+        .heatmap.plus.sm(
+            t(GE),
+            na.rm = TRUE,
+            scale = "none",
+            RowSideColor = rows.colors,
+            col=color,
+            Rowv = NA,
+            Colv = NA,
+            cexRow = 0.2,
+            cexCol = 0.2,
+            labCol = NA,
+            labRow = NA,
+            main = "Heatmap from consensus cluster"
+        )
+    }
+    if(missing(col.metadata) & missing(row.metadata)){
+        .heatmap.plus.sm(
+            t(GE),
+            na.rm = TRUE,
+            scale = "none",
+            col=color,
+            Rowv = NA,
+            Colv = NA,
+            cexRow = 0.2,
+            cexCol = 0.2,
+            labCol = NA,
+            labRow = NA,
+            main = "Heatmap from consensus cluster"
+        )
+    }
 
     dev.off()
 }
-
 
 
 #' @title Profile plot
