@@ -572,15 +572,16 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' Possible values "expression" (default), "methylation"
 #' @importFrom heatmap.plus heatmap.plus
 #' @examples
-#' dat <- matrix(c(0.1,0.2,0.3,
-#'                 0.9,0.8,0.1,
-#'                 0.5,0.4,0.4,
-#'                 0.1,0.76,0.3,
-#'                 0.24,1,0,0.5), nrow = 3, ncol = 5, byrow = TRUE,
-#'                dimnames = list(c("TCGA-DU-6410",
+#' dat <- matrix(c(0.3,0.2,0.3,
+#'                 1,1,0.1,
+#'                 1,1,0,
+#'                 0.8,1,0.7,
+#'                 0.7,0.3,1), nrow = 5, ncol = 3, byrow = TRUE,
+#'                dimnames = list(
+#'                c("probe1", "probe2","probe3","probe4","probe5"),
+#'                c("TCGA-DU-6410",
 #'                  "TCGA-DU-A5TS",
-#'                  "TCGA-HT-7688"),
-#'                c("col1", "col2","col3","col4","col5")
+#'                  "TCGA-HT-7688")
 #'              ))
 #'
 #'mdat <- matrix(c("Male","coc1","IDHwt",
@@ -595,9 +596,10 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #'
 #'TCGAvisualize_Heatmap(dat,mdat,col.labels = c("Sex","COCCluster","IDHtype"),
 #'                      filename = "a.pdf",
-#'                      col.colors = list(c("red","blue"),
-#'                                       c("orange","black","grey"),
-#'                                      c("cyan","tomato","gold")))
+#'                      col.colors = list(c("green","pink"),
+#'                                       c("grey","black","purple"),
+#'                                      c("cyan","tomato","gold")),
+#'                                      type = "methylation")
 #' \dontrun{
 #' # from case study n.2 LGG to test the function
 #' TCGAvisualize_Heatmap(datFilt,
@@ -646,7 +648,6 @@ TCGAvisualize_Heatmap <- function(data,
         idx <- match(col.order, rownames(GE))
         GE <- GE[idx,]
     }
-
     # samething for the row metadata
     if (!missing(row.metadata)) {
         if (!is.null(sortRow)) {
@@ -764,8 +765,6 @@ TCGAvisualize_Heatmap <- function(data,
     if (!(is.null(dev.list()["RStudioGD"]))) dev.off()
 
     if (file_ext(filename) == "pdf") pdf(file = filename)
-    if (file_ext(filename) == "svg") svg(filename = filename)
-    if (file_ext(filename) == "png") png(filename = filename)
 
     if (type == "expression") color <- gplots::greenred(75)
     if (type == "methylation") color <- matlab::jet.colors(75)
