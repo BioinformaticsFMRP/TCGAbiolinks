@@ -620,6 +620,7 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #'                      )
 #' }
 #' @export
+#' @importFrom matlab jet.colors
 #' @return Heatmap plotted in pdf or png file.
 TCGAvisualize_Heatmap <- function(data,
                                   col.metadata,
