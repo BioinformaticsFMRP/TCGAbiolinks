@@ -64,7 +64,8 @@ TCGAvisualize_Heatmap(dat,mdat,col.labels = c("Sex","COCCluster","IDHtype"),
                      filename = "a.pdf",
                      col.colors = list(c("green","pink"),
                                       c("grey","black","purple"),
-                                     c("cyan","tomato","gold")))
+                                     c("cyan","tomato","gold")),
+                                     type = "methylation")
 \dontrun{
 # from case study n.2 LGG to test the function
 TCGAvisualize_Heatmap(datFilt,
