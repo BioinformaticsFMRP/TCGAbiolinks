@@ -76,7 +76,8 @@ Imports:
     cowplot,
     reshape2,
     gtable,
-    sjmisc
+    sjmisc,
+    matlab
 Description:
     The aim of TCGAbiolinks is :
     i) facilitate the TCGA open-access data retrieval,
