@@ -564,7 +564,8 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @param row.metadata Dataframe with the row.label and rownames as genes (expression) or probes (methylation)
 #' @param row.labels Vector of columns to add to the heatpmap row labels
 #' @param col.labels Vector of columns to add to the heatpmap col labels
-#' @param sortCol collumn used for sorting
+#' @param sortCol column used for sorting
+#' @param sortRow column used for sorting
 #' @param col.colors A list of colors, aech one will be used in the labelCols
 #' @param row.colors A list of colors, aech one will be used in the labelRows
 #' @param filename Filename default "Heatmap.pdf"
@@ -775,7 +776,7 @@ TCGAvisualize_Heatmap <- function(data,
             t(GE),
             na.rm = TRUE,
             scale = "none",
-            RowSideColor = rows.colors,
+            RowSideColors = rows.colors,
             ColSideColors = columns.colors,
             col = color,
             Rowv = NA,
@@ -807,7 +808,7 @@ TCGAvisualize_Heatmap <- function(data,
             t(GE),
             na.rm = TRUE,
             scale = "none",
-            RowSideColor = rows.colors,
+            RowSideColors = rows.colors,
             col=color,
             Rowv = NA,
             Colv = NA,
