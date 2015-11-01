@@ -58,7 +58,8 @@
 #' @importFrom BiocGenerics as.data.frame
 #' @importFrom GenomicRanges GRanges distanceToNearest
 #' @importFrom IRanges IRanges
-#' @import utils data.table TxDb.Hsapiens.UCSC.hg19.knownGene
+#' @import utils TxDb.Hsapiens.UCSC.hg19.knownGene
+#' @importFrom data.table fread setnames setcolorder setDF
 #' @seealso  \code{\link{TCGAquery}} for searching the data to download
 #'
 #'  \code{\link{TCGAdownload}} for downloading the data from the
