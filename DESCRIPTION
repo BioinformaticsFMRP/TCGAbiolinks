@@ -1,11 +1,10 @@
 Package: TCGAbiolinks
 Type: Package
-Title:
-    TCGAbiolinks: An R/Bioconductor package for integrative analysis with TCGA data
-Version: 1.1.4
+Title: TCGAbiolinks: An R/Bioconductor package for integrative analysis with
+    TCGA data
+Version: 1.1.5
 Date: 2015-12-13
-Author:
-    Antonio Colaprico,
+Author: Antonio Colaprico,
     Tiago Chedraoui Silva,
     Catharina Olsen,
     Luciano Garofano,
@@ -18,10 +17,10 @@ Author:
     Michele Ceccarelli,
     Gianluca Bontempi,
     Houtan Noushmehr
-Maintainer:
-    Antonio Colaprico <antonio.colaprico@ulb.ac.be>,
+Maintainer: Antonio Colaprico <antonio.colaprico@ulb.ac.be>,
     Tiago Chedraoui Silva <tiagochst@usp.br>
-Depends: R (>= 3.2)
+Depends:
+    R (>= 3.2)
 Imports:
     downloader (>= 0.4),
     GGally,
@@ -78,21 +77,17 @@ Imports:
     gtable,
     sjmisc,
     matlab
-Description:
-    The aim of TCGAbiolinks is :
-    i) facilitate the TCGA open-access data retrieval,
-    ii) prepare the data using the appropriate pre-processing strategies,
-    iii) provide the means to carry out different standard analyses and
-    iv) allow the user to download a specific version of the data and thus
-    to easily reproduce earlier research results.
-    In more detail, the package provides multiple methods for analysis
-    (e.g., differential expression analysis,
-    identifying differentially methylated regions)
-    and methods for visualization (e.g., survival plots, volcano plots, starburst plots)
-    in order to easily develop complete analysis pipelines.
+Description: The aim of TCGAbiolinks is : i) facilitate the TCGA open-access
+    data retrieval, ii) prepare the data using the appropriate pre-processing
+    strategies, iii) provide the means to carry out different standard analyses
+    and iv) allow the user to download a specific version of the data and thus
+    to easily reproduce earlier research results. In more detail, the package
+    provides multiple methods for analysis (e.g., differential expression analysis,
+    identifying differentially methylated regions) and methods for visualization
+    (e.g., survival plots, volcano plots, starburst plots) in order to easily
+    develop complete analysis pipelines.
 License: GPL (>= 3)
-biocViews:
-    DNAMethylation,
+biocViews: DNAMethylation,
     DifferentialMethylation,
     GeneRegulation,
     GeneExpression,
@@ -101,6 +96,12 @@ biocViews:
     Pathways,
     Network,
     Survival
-Suggests: testthat, png, BiocStyle, knitr, rmarkdown
+Suggests:
+    testthat,
+    png,
+    BiocStyle,
+    knitr,
+    rmarkdown
 VignetteBuilder: knitr
 LazyData: true
+RoxygenNote: 5.0.0
