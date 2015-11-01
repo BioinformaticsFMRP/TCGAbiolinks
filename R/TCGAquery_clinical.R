@@ -86,7 +86,8 @@ TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
         if(length(barcode.common) > 0){
         idx1 <- sapply(barcode.common, function(x) grep(x,barcode.1))
         idx2 <- sapply(barcode.common, function(x) grep(x,barcode.2))
-        return(union(barcode.1[idx1], barcode.2[idx2])
+        return(union(barcode.1[idx1], barcode.2[idx2]))
+
         }else{
             return("Error message: there exist no matched samples")
         }
