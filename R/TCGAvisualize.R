@@ -564,7 +564,8 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @param row.metadata Dataframe with the row.label and rownames as genes (expression) or probes (methylation)
 #' @param row.labels Vector of columns to add to the heatpmap row labels
 #' @param col.labels Vector of columns to add to the heatpmap col labels
-#' @param sortCol collumn used for sorting
+#' @param sortCol column used for sorting
+#' @param sortRow column used for sorting
 #' @param col.colors A list of colors, aech one will be used in the labelCols
 #' @param row.colors A list of colors, aech one will be used in the labelRows
 #' @param filename Filename default "Heatmap.pdf"
@@ -572,19 +573,15 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' Possible values "expression" (default), "methylation"
 #' @importFrom heatmap.plus heatmap.plus
 #' @examples
-#' dat <- matrix(c(0.3,0.2,0.3,
-#'                 1,1,0.1,
-#'                 1,1,0,
-#'                 0.8,1,0.7,
-#'                 0.7,0.3,1), nrow = 5, ncol = 3, byrow = TRUE,
+#' dat <- matrix(c(0.3,0.2,0.3,1,1,0.1,1,1,0, 0.8,1,0.7,0.7,0.3,1),
+#'              nrow = 5, ncol = 3, byrow = TRUE,
 #'                dimnames = list(
 #'                c("probe1", "probe2","probe3","probe4","probe5"),
 #'                c("TCGA-DU-6410",
 #'                  "TCGA-DU-A5TS",
-#'                  "TCGA-HT-7688")
-#'              ))
+#'                  "TCGA-HT-7688")))
 #'
-#'mdat <- matrix(c("Male","coc1","IDHwt",
+#' mdat <- matrix(c("Male","coc1","IDHwt",
 #'                 "Male","coc1","IDHMut-cod",
 #'                 "Famele","coc1","IDHMut-noncod"),
 #'               nrow = 3, ncol = 3, byrow = TRUE,
@@ -594,7 +591,7 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #'                     "TCGA-HT-7688"),
 #'                   c("Sex", "COCCluster","IDHtype")))
 #'
-#'TCGAvisualize_Heatmap(dat,mdat,col.labels = c("Sex","COCCluster","IDHtype"),
+#' TCGAvisualize_Heatmap(dat,mdat,col.labels = c("Sex","COCCluster","IDHtype"),
 #'                      filename = "a.pdf",
 #'                      col.colors = list(c("green","pink"),
 #'                                       c("grey","black","purple"),
@@ -609,7 +606,7 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #'                                      "CNCluster",
 #'                                      "COCCluster",
 #'                                      "OncosignCluster",
-#'                                      "groupsHC),
+#'                                      "groupsHC"),
 #'                       filename = "a.png",
 #'                       col.colors = list(c("cyan","green3","red","purple"),
 #'                                        c("cyan","tomato","gold"),
@@ -775,7 +772,7 @@ TCGAvisualize_Heatmap <- function(data,
             t(GE),
             na.rm = TRUE,
             scale = "none",
-            RowSideColor = rows.colors,
+            RowSideColors = rows.colors,
             ColSideColors = columns.colors,
             col = color,
             Rowv = NA,
@@ -807,7 +804,7 @@ TCGAvisualize_Heatmap <- function(data,
             t(GE),
             na.rm = TRUE,
             scale = "none",
-            RowSideColor = rows.colors,
+            RowSideColors = rows.colors,
             col=color,
             Rowv = NA,
             Colv = NA,
@@ -853,7 +850,6 @@ TCGAvisualize_Heatmap <- function(data,
 #' @param legend.size legend.size
 #' @param legend.title.size legend.title.size
 #' @param geom.label.size geom.label.size
-#' @param clusterLabel The label of the cluster. Example "Expression Cluster",
 #' @importFrom sjPlot sjp.stackfrq sjp.setTheme
 #' @importFrom cowplot ggdraw switch_axis_position plot_grid
 #' @importFrom reshape2 dcast
