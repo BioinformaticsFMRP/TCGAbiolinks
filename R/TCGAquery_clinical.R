@@ -81,11 +81,12 @@ TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
         barcode.2 <- barcode[grep(table.code[typesample[2]], string)]
 
 
-        barcode.common <- intersect(substr(barcode.1,1,13),
-                                    substr(barcode.2,1,13))
+        barcode.common <- intersect(substr(barcode.1,1,12),
+                                    substr(barcode.2,1,12))
         if(length(barcode.common) > 0){
-            return(union(barcode.1[grep(barcode.common,barcode.1)],
-                         barcode.2[grep(barcode.common,barcode.2)]))
+        idx1 <- sapply(barcode.common, function(x) grep(x,barcode.1))
+        idx2 <- sapply(barcode.common, function(x) grep(x,barcode.2))
+        return(union(barcode.1[idx1], barcode.2[idx2])
         }else{
             return("Error message: there exist no matched samples")
         }
