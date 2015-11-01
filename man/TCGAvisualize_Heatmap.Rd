@@ -16,7 +16,9 @@ TCGAvisualize_Heatmap(data, col.metadata, row.metadata, sortCol = NULL,
 
 \item{row.metadata}{Dataframe with the row.label and rownames as genes (expression) or probes (methylation)}
 
-\item{sortCol}{collumn used for sorting}
+\item{sortCol}{column used for sorting}
+
+\item{sortRow}{column used for sorting}
 
 \item{col.labels}{Vector of columns to add to the heatpmap col labels}
 
