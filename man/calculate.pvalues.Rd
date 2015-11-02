@@ -33,6 +33,9 @@ Data frame with cols p values/p values adjusted
 Data frame with two cols
         p-values/p-values adjusted
 }
+\description{
+Calculate pvalues using wilcoxon test
+}
 \details{
 Verify if the data is significant between two groups. For the methylation
    we search for probes that have a difference in the mean methylation and
