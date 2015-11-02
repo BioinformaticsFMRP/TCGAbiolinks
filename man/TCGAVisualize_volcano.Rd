@@ -2,7 +2,7 @@
 % Please edit documentation in R/methylation.R
 \name{TCGAVisualize_volcano}
 \alias{TCGAVisualize_volcano}
-\title{Plot volcano plot for DNA methylation or expression}
+\title{Creates a volcano plot for DNA methylation or expression}
 \usage{
 TCGAVisualize_volcano(x, y, filename = "volcano.pdf",
   ylab = expression(paste(-Log[10], " (FDR corrected -P values)")),
@@ -50,11 +50,13 @@ Should be the same size of x and y}
 \value{
 Saves the volcano plot in the current folder
 }
+\description{
+Creates a volcano plot from the
+expression and methylation analysis.
+}
 \details{
 Creates a volcano plot from the expression and methylation analysis.
-
    Please see the vignette for more information
-
    Observation: This function automatically is called by TCGAanalyse_DMR
 }
 \examples{
