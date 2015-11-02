@@ -393,6 +393,7 @@ TCGAvisualize_meanMethylation <- function(data,
 }
 
 #' @title Calculate pvalues
+#' @description Calculate pvalues using wilcoxon test
 #' @details
 #'    Verify if the data is significant between two groups. For the methylation
 #'    we search for probes that have a difference in the mean methylation and
@@ -547,12 +548,12 @@ calculate.pvalues <- function(data,
     return(data)
 }
 
-#' @title Plot volcano plot for DNA methylation or expression
+#' @title Creates a volcano plot for DNA methylation or expression
+#' @description Creates a volcano plot from the
+#' expression and methylation analysis.
 #' @details
 #'    Creates a volcano plot from the expression and methylation analysis.
-#'
 #'    Please see the vignette for more information
-#'
 #'    Observation: This function automatically is called by TCGAanalyse_DMR
 #' @param x x-axis data
 #' @param y y-axis data
