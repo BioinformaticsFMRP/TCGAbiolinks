@@ -652,12 +652,18 @@ TCGAvisualize_Heatmap <- function(data,
     # STEP 3 row labels (right side)
     if(!missing(row.metadata)){
         for( i in 1:ncol(row.metadata)) {
-            color <- row.colors[[i]]
-            print(color)
+            if(!missing(row.colors)) {
+              color <- row.colors[[i]]
             x = Heatmap(row.metadata[,i] ,
                         name = colnames(row.metadata)[i],
                         width = unit(0.5, "cm"),
                         show_row_names = FALSE, col = color )
+            } else {
+              x = Heatmap(row.metadata[,i] ,
+                          name = colnames(row.metadata)[i],
+                          width = unit(0.5, "cm"),
+                          show_row_names = FALSE)
+            }
             heatmap <- add_heatmap(heatmap,x)
         }
     }
