@@ -566,7 +566,6 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @param row.colors A list of named colors
 #' @param type Select the colors of the heatmap values.
 #' Possible values "expression" (default), "methylation"
-#' @import ComplexHeatmap
 #' @examples
 #'  row.mdat <- matrix(c("FALSE","FALSE",
 #'                      "TRUE","TRUE",
@@ -612,6 +611,7 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #'                     show_row_names=T)
 #' @export
 #' @importFrom matlab jet.colors
+#' @import ComplexHeatmap
 #' @return Heatmap plotted in pdf or png file.
 TCGAvisualize_Heatmap <- function(data,
                                   col.metadata,
