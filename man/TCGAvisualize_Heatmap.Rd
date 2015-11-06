@@ -19,8 +19,16 @@ TCGAvisualize_Heatmap(data, col.metadata, row.metadata, col.colors = NULL,
 
 \item{row.colors}{A list of named colors}
 
-\item{type}{Select the colors of the heatmap values.
-Possible values "expression" (default), "methylation"}
+\item{show_column_names}{Show column names names? Dafault: FALSE}
+
+\item{show_row_names}{Show row names? Dafault: FALSE}
+
+\item{cluster_rows}{Cluster rows ? Dafault: FALSE}
+
+\item{cluster_columns}{Cluster columns ? Dafault: FALSE}
+
+\item{type}{Select the colors of the heatmap values. Possible values are
+"expression" (default), "methylation"}
 }
 \value{
 Heatmap plotted in pdf or png file.
