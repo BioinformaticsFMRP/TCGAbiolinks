@@ -564,8 +564,13 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @param row.metadata  Metadata for the rows  genes (expression) or probes (methylation)
 #' @param col.colors A list of names colors
 #' @param row.colors A list of named colors
-#' @param type Select the colors of the heatmap values.
-#' Possible values "expression" (default), "methylation"
+#' @param type Select the colors of the heatmap values. Possible values are
+#'  "expression" (default), "methylation"
+#' @param show_column_names  Show column names names? Dafault: FALSE
+#' @param show_row_names Show row names? Dafault: FALSE
+#' @param cluster_rows Cluster rows ? Dafault: FALSE
+#' @param cluster_columns Cluster columns ? Dafault: FALSE
+
 #' @examples
 #'  row.mdat <- matrix(c("FALSE","FALSE",
 #'                      "TRUE","TRUE",
