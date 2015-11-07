@@ -1731,22 +1731,37 @@ grid.raster(img)
 
 We will also, create a heatmap of the expression.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-TCGAvisualize_Heatmap(data = datFilt,
-                      metadata = clin_subt,
+TCGAvisualize_Heatmap(datFilt,
+                      col.metadata =  clin_subt[,c("bcr_patient_barcode",
+                                                   "groupsHC",
+                                                   "histological_type",
+                                                   "IDH.1p19q.Subtype",
+                                                   "CNCluster",
+                                                   "COCCluster",
+                                                   "OncosignCluster")],
+                      col.colors =  list(
+                          groupsHC = c("EC1"="black",
+                                        "EC2"="red",
+                                        "EC3"="blue",
+                                        "EC4"="green3"),
+                          histological_type=c("Astrocytoma"="cyan",
+                                     "Oligoastrocytoma"="green3",
+                                     "Oligodendroglioma"="red"),
+                         IDH.1p19q.Subtype = c("IDHmut-codel"="tomato",
+                                       "IDHmut-non-codel"="cyan",
+                                       "IDHwt"="gold","NA"="white"),
+                           CNCluster=c("C1"="purple",
+                                       "C2"="green",
+                                       "C3"="red",
+                                       "NA"="white"),
+                           COCCluster=c("coc1"="purple",
+                                        "coc2"="green","coc3"="red"),
+                           OncosignCluster= c("OSC1"="red","OSC2"="purple",
+                                    "OSC3"="green","OSC4"="orange",
+                                    "Unclassified"="gray","NA"="white")),
                       sortCol = "groupsHC",
-                      labelCols = c("histological_type",
-                                    "IDH.1p19q.Subtype",
-                                    "CNCluster",
-                                    "COCCluster",
-                                    "OncosignCluster",
-                                    "groupsHC"), 
-                      filename = "heatmap.pdf", 
-                      cbPalette = list(c("cyan","green3","red","purple"),
-                                     c("tomato","cyan","gold"),
-                                     c("purple","green","red"),
-                                     c("purple","green","red"),
-                                     c("red","purple","green","orange","gray"),
-                                     c("black","red","blue","green3")))
+                      title = "Heatmap from concensus cluster",
+                      cluster_rows = T)
 ```
 
 The result is shown below:
