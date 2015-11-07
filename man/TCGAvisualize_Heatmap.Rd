@@ -6,12 +6,14 @@
 \usage{
 TCGAvisualize_Heatmap(data, col.metadata, row.metadata, col.colors = NULL,
   row.colors = NULL, show_column_names = FALSE, show_row_names = FALSE,
-  cluster_rows = FALSE, cluster_columns = FALSE, type = "expression")
+  cluster_rows = FALSE, cluster_columns = FALSE, sortCol, title,
+  type = "expression")
 }
 \arguments{
 \item{data}{The object to with the heatmap data (expression, methylation)}
 
-\item{col.metadata}{Metadata for the columns (patients)}
+\item{col.metadata}{Metadata for the columns (patients). It should have the
+column bcr_patient_barcode with the patients barcodes.}
 
 \item{row.metadata}{Metadata for the rows  genes (expression) or probes (methylation)}
 
@@ -26,6 +28,10 @@ TCGAvisualize_Heatmap(data, col.metadata, row.metadata, col.colors = NULL,
 \item{cluster_rows}{Cluster rows ? Dafault: FALSE}
 
 \item{cluster_columns}{Cluster columns ? Dafault: FALSE}
+
+\item{sortCol}{Name of the column to be used to sort the columns}
+
+\item{title}{Title of the plot}
 
 \item{type}{Select the colors of the heatmap values. Possible values are
 "expression" (default), "methylation"}
