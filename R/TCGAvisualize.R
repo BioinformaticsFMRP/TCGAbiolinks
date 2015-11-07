@@ -560,7 +560,8 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @title Heatmap with more sensible behavior using heatmap.plus
 #' @description Heatmap with more sensible behavior using heatmap.plus
 #' @param data The object to with the heatmap data (expression, methylation)
-#' @param col.metadata Metadata for the columns (patients)
+#' @param col.metadata Metadata for the columns (patients). It should have the
+#' column bcr_patient_barcode with the patients barcodes.
 #' @param row.metadata  Metadata for the rows  genes (expression) or probes (methylation)
 #' @param col.colors A list of names colors
 #' @param row.colors A list of named colors
@@ -570,7 +571,8 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @param show_row_names Show row names? Dafault: FALSE
 #' @param cluster_rows Cluster rows ? Dafault: FALSE
 #' @param cluster_columns Cluster columns ? Dafault: FALSE
-
+#' @param sortCol Name of the column to be used to sort the columns
+#' @param title Title of the plot
 #' @examples
 #'  row.mdat <- matrix(c("FALSE","FALSE",
 #'                      "TRUE","TRUE",
@@ -627,22 +629,36 @@ TCGAvisualize_Heatmap <- function(data,
                                   show_row_names = FALSE,
                                   cluster_rows = FALSE,
                                   cluster_columns = FALSE,
+                                  sortCol,
+                                  title,
                                   type = "expression"){
 
 
     # STEP 1 add columns labels (top of heatmap)
     if(!missing(col.metadata)) {
-        ha <- HeatmapAnnotation(df = col.metadata,
+        stopifnot("bcr_patient_barcode" %in% colnames(col.metadata))
+        # should be in the same order than the matrix!
+        message(paste0("Reorganizing: col.metadata order should ",
+                       "be the same of the data object"))
+        df <- col.metadata[match(substr(colnames(data),1,12),
+                                 col.metadata$bcr_patient_barcode),]
+        df$bcr_patient_barcode <- NULL
+
+        if(!missing(sortCol)){
+            message(paste0("Sorting columns based on column: ",
+                           sortCol))
+            column_order <- order(df[,sortCol])
+        }
+        ha <- HeatmapAnnotation(df = df,
                                 col = col.colors)
     } else {
-            ha = NULL
+        ha = NULL
     }
 
     # STEP 2 Create heatmap
 
-    if (type == "expression") color <- gplots::greenred(75)
-    if (type == "methylation") color <- matlab::jet.colors(75)
-
+    if (type == "expression") color <- gplots::greenred(200)
+    if (type == "methylation") color <- matlab::jet.colors(200)
 
     heatmap  <- Heatmap(data, name = type,
                         top_annotation = ha,
@@ -652,22 +668,23 @@ TCGAvisualize_Heatmap <- function(data,
                         cluster_rows = cluster_rows,
                         cluster_columns = cluster_columns,
                         show_column_names = show_column_names,
-                        column_title = type)
+                        column_order = column_order,
+                        column_title = title)
 
     # STEP 3 row labels (right side)
     if(!missing(row.metadata)){
         for( i in 1:ncol(row.metadata)) {
             if(!missing(row.colors)) {
-              color <- row.colors[[i]]
-            x = Heatmap(row.metadata[,i] ,
-                        name = colnames(row.metadata)[i],
-                        width = unit(0.5, "cm"),
-                        show_row_names = FALSE, col = color )
+                color <- row.colors[[i]]
+                x = Heatmap(row.metadata[,i] ,
+                            name = colnames(row.metadata)[i],
+                            width = unit(0.5, "cm"),
+                            show_row_names = FALSE, col = color )
             } else {
-              x = Heatmap(row.metadata[,i] ,
-                          name = colnames(row.metadata)[i],
-                          width = unit(0.5, "cm"),
-                          show_row_names = FALSE)
+                x = Heatmap(row.metadata[,i] ,
+                            name = colnames(row.metadata)[i],
+                            width = unit(0.5, "cm"),
+                            show_row_names = FALSE)
             }
             heatmap <- add_heatmap(heatmap,x)
         }
