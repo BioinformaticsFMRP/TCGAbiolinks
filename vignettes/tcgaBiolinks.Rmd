@@ -1119,17 +1119,25 @@ You can easily visualize results from some following functions:
 
 In order to have a better view of clusters, we normally use heatmaps.
 `TCGAvisualize_Heatmap` will plot a heatmap and add to each sample bars representing
-different features.
+different features. This function is a wrapper to the package 
+`complexHeatmap` package,
 
 The arguments of this function are:
 
-* **data**	The object with the heatmap data (expression, methylation)
-* **metadata**	Dataframe with the labelCols and rownames with patients IDs
-* **consensusClusters**	One item returned from Concensus
-* **labelCols**	Vector of columns to add to the heatpmap
-* **cbPalette**	A list of colors, each one will be used in the labelCols
-* **clusterLabel**	The label of the cluster. Example "Expression Cluster",
-* **filename**	Filename default "Heatmap.pdf"
+* **data** The object to with the heatmap data (expression, methylation)
+* **col.metadata: Dataframe with the col.label and rownames with patients ids
+* **row.metadata: Dataframe with the row.label and rownames as genes 
+(expression) or probes (methylation)
+* **col.labels** Vector of columns to add to the heatpmap col labels
+* **row.labels** Vector of columns to add to the heatpmap row labels
+* **col.colors** A list of colors, aech one will be used in the labelCols
+* **row.colors** A list of colors, aech one will be used in the labelRows
+* **type** Select the colors of the heatmap values. Possible values are: 
+"expression" (default), "methylation"
+* **show_column_names** Show colnames names? Dafault: FALSE
+* **show_row_names** Show row names? Dafault: FALSE
+* **cluster_rows** Cluster rows ? Dafault: FALSE
+* **cluster_columns** Cluster columns ? Dafault: FALSE
 
 For more information please take a look on case study #2.
 
@@ -1723,22 +1731,37 @@ grid.raster(img)
 
 We will also, create a heatmap of the expression.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-TCGAvisualize_Heatmap(data = datFilt,
-                      metadata = clin_subt,
+TCGAvisualize_Heatmap(datFilt,
+                      col.metadata =  clin_subt[,c("bcr_patient_barcode",
+                                                   "groupsHC",
+                                                   "histological_type",
+                                                   "IDH.1p19q.Subtype",
+                                                   "CNCluster",
+                                                   "COCCluster",
+                                                   "OncosignCluster")],
+                      col.colors =  list(
+                          groupsHC = c("EC1"="black",
+                                        "EC2"="red",
+                                        "EC3"="blue",
+                                        "EC4"="green3"),
+                          histological_type=c("Astrocytoma"="cyan",
+                                     "Oligoastrocytoma"="green3",
+                                     "Oligodendroglioma"="red"),
+                         IDH.1p19q.Subtype = c("IDHmut-codel"="tomato",
+                                       "IDHmut-non-codel"="cyan",
+                                       "IDHwt"="gold","NA"="white"),
+                           CNCluster=c("C1"="purple",
+                                       "C2"="green",
+                                       "C3"="red",
+                                       "NA"="white"),
+                           COCCluster=c("coc1"="purple",
+                                        "coc2"="green","coc3"="red"),
+                           OncosignCluster= c("OSC1"="red","OSC2"="purple",
+                                    "OSC3"="green","OSC4"="orange",
+                                    "Unclassified"="gray","NA"="white")),
                       sortCol = "groupsHC",
-                      labelCols = c("histological_type",
-                                    "IDH.1p19q.Subtype",
-                                    "CNCluster",
-                                    "COCCluster",
-                                    "OncosignCluster",
-                                    "groupsHC"), 
-                      filename = "heatmap.pdf", 
-                      cbPalette = list(c("cyan","green3","red","purple"),
-                                     c("tomato","cyan","gold"),
-                                     c("purple","green","red"),
-                                     c("purple","green","red"),
-                                     c("red","purple","green","orange","gray"),
-                                     c("black","red","blue","green3")))
+                      title = "Heatmap from concensus cluster",
+                      cluster_rows = T)
 ```
 
 The result is shown below:
