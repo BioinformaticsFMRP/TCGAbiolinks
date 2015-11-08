@@ -4,34 +4,37 @@
 \alias{TCGAvisualize_Heatmap}
 \title{Heatmap with more sensible behavior using heatmap.plus}
 \usage{
-TCGAvisualize_Heatmap(data, col.metadata, row.metadata, sortCol = NULL,
-  sortRow = NULL, col.labels = NULL, row.labels = NULL,
-  col.colors = NULL, row.colors = NULL, type = "expression",
-  filename = "Heatmap.pdf")
+TCGAvisualize_Heatmap(data, col.metadata, row.metadata, col.colors = NULL,
+  row.colors = NULL, show_column_names = FALSE, show_row_names = FALSE,
+  cluster_rows = FALSE, cluster_columns = FALSE, sortCol, title,
+  type = "expression")
 }
 \arguments{
 \item{data}{The object to with the heatmap data (expression, methylation)}
 
-\item{col.metadata}{Dataframe with the col.label and rownames with patients ids}
+\item{col.metadata}{Metadata for the columns (patients). It should have the
+column bcr_patient_barcode with the patients barcodes.}
 
-\item{row.metadata}{Dataframe with the row.label and rownames as genes (expression) or probes (methylation)}
+\item{row.metadata}{Metadata for the rows  genes (expression) or probes (methylation)}
 
-\item{sortCol}{column used for sorting}
+\item{col.colors}{A list of names colors}
 
-\item{sortRow}{column used for sorting}
+\item{row.colors}{A list of named colors}
 
-\item{col.labels}{Vector of columns to add to the heatpmap col labels}
+\item{show_column_names}{Show column names names? Dafault: FALSE}
 
-\item{row.labels}{Vector of columns to add to the heatpmap row labels}
+\item{show_row_names}{Show row names? Dafault: FALSE}
 
-\item{col.colors}{A list of colors, aech one will be used in the labelCols}
+\item{cluster_rows}{Cluster rows ? Dafault: FALSE}
 
-\item{row.colors}{A list of colors, aech one will be used in the labelRows}
+\item{cluster_columns}{Cluster columns ? Dafault: FALSE}
 
-\item{type}{Select the colors of the heatmap values.
-Possible values "expression" (default), "methylation"}
+\item{sortCol}{Name of the column to be used to sort the columns}
 
-\item{filename}{Filename default "Heatmap.pdf"}
+\item{title}{Title of the plot}
+
+\item{type}{Select the colors of the heatmap values. Possible values are
+"expression" (default), "methylation"}
 }
 \value{
 Heatmap plotted in pdf or png file.
@@ -40,6 +43,16 @@ Heatmap plotted in pdf or png file.
 Heatmap with more sensible behavior using heatmap.plus
 }
 \examples{
+ row.mdat <- matrix(c("FALSE","FALSE",
+                     "TRUE","TRUE",
+                     "FALSE","FALSE",
+                     "TRUE","FALSE",
+                     "FALSE","TRUE"
+                ),
+              nrow = 5, ncol = 2, byrow = TRUE,
+              dimnames = list(
+                  c("probe1", "probe2","probe3","probe4","probe5"),
+                  c("duplicated", "Enhancer region")))
 dat <- matrix(c(0.3,0.2,0.3,1,1,0.1,1,1,0, 0.8,1,0.7,0.7,0.3,1),
              nrow = 5, ncol = 3, byrow = TRUE,
                dimnames = list(
@@ -58,30 +71,19 @@ mdat <- matrix(c("Male","coc1","IDHwt",
                     "TCGA-HT-7688"),
                   c("Sex", "COCCluster","IDHtype")))
 
-TCGAvisualize_Heatmap(dat,mdat,col.labels = c("Sex","COCCluster","IDHtype"),
-                     filename = "a.pdf",
-                     col.colors = list(c("green","pink"),
-                                      c("grey","black","purple"),
-                                     c("cyan","tomato","gold")),
-                                     type = "methylation")
-\dontrun{
-# from case study n.2 LGG to test the function
-TCGAvisualize_Heatmap(datFilt,
-                      clin_subt,
-                      col.labels = c("histological_type",
-                                     "IDH.1p19q.Subtype",
-                                     "CNCluster",
-                                     "COCCluster",
-                                     "OncosignCluster",
-                                     "groupsHC"),
-                      filename = "a.png",
-                      col.colors = list(c("cyan","green3","red","purple"),
-                                       c("cyan","tomato","gold"),
-                                       c("green","red","purple"),
-                                       c("green","red","purple"),
-                                       c("green","red","purple","orange","gray"),
-                                       c("grey","purple","blue","red"))
-                     )
-}
+TCGAvisualize_Heatmap(dat,
+                    col.metadata = mdat,
+                    row.metadata = row.mdat,
+                    row.colors = list(duplicated = c("FALSE" = "pink",
+                                                     "TRUE"="green"),
+                                     "Enhancer region" = c("FALSE" = "purple",
+                                                            "TRUE"="grey")),
+                    col.colors = list(Sex = c("Male" = "blue", "Famele"="red"),
+                                      COCCluster=c("coc1"="grey"),
+                                      IDHtype=c("IDHwt"="cyan",
+                                      "IDHMut-cod"="tomato"
+                                      ,"IDHMut-noncod"="gold")),
+                    type = "methylation",
+                    show_row_names=T)
 }
 
