@@ -659,6 +659,7 @@ TCGAvisualize_Heatmap <- function(data,
 
     if (type == "expression") color <- gplots::greenred(200)
     if (type == "methylation") color <- matlab::jet.colors(200)
+    if(missing(title)) title <- type
 
     heatmap  <- Heatmap(data, name = type,
                         top_annotation = ha,
@@ -672,10 +673,10 @@ TCGAvisualize_Heatmap <- function(data,
                         column_title = title)
 
     # STEP 3 row labels (right side)
-    if(!missing(row.metadata)){
-        for( i in 1:ncol(row.metadata)) {
-            if(!missing(row.colors)) {
-                color <- row.colors[[i]]
+    if (!missing(row.metadata)) {
+        for (i in 1:ncol(row.metadata)) {
+            if (!missing(row.colors) && !is.null(row.colors[[colnames(row.metadata)[i]]])) {
+                color <- row.colors[[colnames(row.metadata)[i]]]
                 x = Heatmap(row.metadata[,i] ,
                             name = colnames(row.metadata)[i],
                             width = unit(0.5, "cm"),
