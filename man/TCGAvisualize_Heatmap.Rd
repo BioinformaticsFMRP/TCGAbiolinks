@@ -13,7 +13,7 @@ TCGAvisualize_Heatmap(data, col.metadata, row.metadata, col.colors = NULL,
 \item{data}{The object to with the heatmap data (expression, methylation)}
 
 \item{col.metadata}{Metadata for the columns (patients). It should have the
-column bcr_patient_barcode with the patients barcodes.}
+column bcr_patient_barcode or patient or ID with the patients barcodes.}
 
 \item{row.metadata}{Metadata for the rows  genes (expression) or probes (methylation)}
 
