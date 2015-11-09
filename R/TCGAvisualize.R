@@ -825,46 +825,6 @@ TCGAvisualize_profilePlot <- function(data = NULL,
     for( i in 1:idx) {
         data <- rbind(data, rep(NA,ncol(data)))
     }
-    if(ncol(columns.colors) == 1) columns.colors <- cbind(columns.colors, "white")
-
-    ######### ROW colors
-    if(!missing(row.metadata)){
-
-        for (i in 1:length(row.labels)){
-            aux <- row.metadata[,row.labels[i]]
-            names(aux) <- rownames(row.metadata)
-
-            subtype <- unique(as.character(aux))
-
-            if(any(is.na(subtype) )) subtype <- subtype[!is.na(subtype) ]
-
-            color <- rep("white",length(aux))
-
-            # selecting colors for the bars
-            if(is.null(row.colors)) {
-                myColors <- rainbow(length(subtype))
-            } else {
-                myColors <- row.colors[[i]]
-            }
-
-            message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
-            message(paste0("Label: ",row.labels[i]))
-            idxColor <- 1
-            for (j in 1:length(subtype)) {
-
-                if (subtype[j] != "NA"){
-                    idx <- aux == as.character(subtype[j])
-                    idx[is.na(idx)] <- FALSE
-                    size <- length(color[idx])
-                    color[idx] <- rep(myColors[idxColor], size)
-                    message(sprintf("Group: %-15s color: %s ",
-                                    subtype[j],myColors[idxColor]))
-                    idxColor <- idxColor + 1
-                } else {
-                    message(sprintf("Group: %-15s color: %s ", subtype[j],"White"))
-                }
-            }
-            message("-=--=-=-=-=--=--=--=-=-=-=-=-=--=--=-=--==--=-=-=-=-=-=")
 
     data <- cbind(all,data)
     colnames(data)[1] <- subtypeCol
@@ -884,77 +844,6 @@ TCGAvisualize_profilePlot <- function(data = NULL,
         }  else {
             width <- c(width, rep((ngroups/max) * length(na.omit(data[,i])),nsbutype))
         }
-        colnames(rows.colors) <- row.labels
-    }
-    if (!(is.null(dev.list()["RStudioGD"]))) dev.off()
-
-    if (file_ext(filename) == "pdf") pdf(file = filename)
-
-    if (type == "expression") color <- gplots::greenred(75)
-    if (type == "methylation") color <- matlab::jet.colors(75)
-
-    if(!missing(col.metadata) & !missing(row.metadata)){
-        .heatmap.plus.sm(
-            t(GE),
-            na.rm = TRUE,
-            scale = "none",
-            RowSideColors = rows.colors,
-            ColSideColors = columns.colors,
-            col = color,
-            Rowv = NA,
-            Colv = NA,
-            cexRow = 0.2,
-            cexCol = 0.2,
-            labCol = NA,
-            labRow = NA,
-            main = "Heatmap from consensus cluster"
-        )
-    }
-    if(!missing(col.metadata) & missing(row.metadata)){
-        .heatmap.plus.sm(
-            t(GE),
-            na.rm = TRUE,
-            scale = "none",
-            ColSideColors = columns.colors,
-            col=color,
-            Rowv = NA,
-            Colv = NA,
-            cexRow = 0.2,
-            cexCol = 0.2,
-            labCol = NA,
-            labRow = NA,
-            main = "Heatmap from consensus cluster"
-        )}
-    if(missing(col.metadata) & !missing(row.metadata)){
-        .heatmap.plus.sm(
-            t(GE),
-            na.rm = TRUE,
-            scale = "none",
-            RowSideColors = rows.colors,
-            col=color,
-            Rowv = NA,
-            Colv = NA,
-            cexRow = 0.2,
-            cexCol = 0.2,
-            labCol = NA,
-            labRow = NA,
-            main = "Heatmap from consensus cluster"
-        )
-    }
-    if(missing(col.metadata) & missing(row.metadata)){
-        .heatmap.plus.sm(
-            t(GE),
-            na.rm = TRUE,
-            scale = "none",
-            col=color,
-            Rowv = NA,
-            Colv = NA,
-            cexRow = 0.2,
-            cexCol = 0.2,
-            labCol = NA,
-            labRow = NA,
-            main = "Heatmap from consensus cluster"
-        )
     }
 
     p <- .mysjp.stackfrq(data,
@@ -1035,12 +924,6 @@ TCGAvisualize_profilePlot <- function(data = NULL,
 
 
 
-    # create a collumn for all values
-    all <- as.numeric(unlist(data))
-    idx <- length(all) - nrow(data)
-    for( i in 1:idx) {
-        data <- rbind(data, rep(NA,ncol(data)))
-    }
 
 #' @title Visualize mutation
 #' @description See % of genes mutated
