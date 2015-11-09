@@ -561,7 +561,7 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @description Heatmap with more sensible behavior using heatmap.plus
 #' @param data The object to with the heatmap data (expression, methylation)
 #' @param col.metadata Metadata for the columns (patients). It should have the
-#' column bcr_patient_barcode with the patients barcodes.
+#' column bcr_patient_barcode or patient or ID with the patients barcodes.
 #' @param row.metadata  Metadata for the rows  genes (expression) or probes (methylation)
 #' @param col.colors A list of names colors
 #' @param row.colors A list of named colors
@@ -636,15 +636,18 @@ TCGAvisualize_Heatmap <- function(data,
 
     # STEP 1 add columns labels (top of heatmap)
     if(!missing(col.metadata)) {
-        stopifnot("bcr_patient_barcode" %in% colnames(col.metadata))
+        idCols <- c("bcr_patient_barcode","patient","ID")
+        stopifnot(any(idCols %in% colnames(col.metadata)))
+
+        id <- idCols[which( idCols %in% colnames(col.metadata) == TRUE)]
         # should be in the same order than the matrix!
         message(paste0("Reorganizing: col.metadata order should ",
                        "be the same of the data object"))
         df <- col.metadata[match(substr(colnames(data),1,12),
-                                 col.metadata$bcr_patient_barcode),]
-        df$bcr_patient_barcode <- NULL
+                                 col.metadata[,id]),]
+        df[,id] <- NULL
 
-        if(!missing(sortCol)){
+        if (!missing(sortCol)) {
             message(paste0("Sorting columns based on column: ",
                            sortCol))
             column_order <- order(df[,sortCol])
@@ -661,16 +664,28 @@ TCGAvisualize_Heatmap <- function(data,
     if (type == "methylation") color <- matlab::jet.colors(200)
     if(missing(title)) title <- type
 
-    heatmap  <- Heatmap(data, name = type,
-                        top_annotation = ha,
-                        bottom_annotation_height = unit(3, "cm"),
-                        col = color,
-                        show_row_names = show_row_names,
-                        cluster_rows = cluster_rows,
-                        cluster_columns = cluster_columns,
-                        show_column_names = show_column_names,
-                        column_order = column_order,
-                        column_title = title)
+    if(!missing(sortCol)){
+        heatmap  <- Heatmap(data, name = type,
+                            top_annotation = ha,
+                            bottom_annotation_height = unit(3, "cm"),
+                            col = color,
+                            show_row_names = show_row_names,
+                            cluster_rows = cluster_rows,
+                            cluster_columns = cluster_columns,
+                            show_column_names = show_column_names,
+                            column_order = column_order,
+                            column_title = title)
+    } else {
+        heatmap  <- Heatmap(data, name = type,
+                            top_annotation = ha,
+                            bottom_annotation_height = unit(3, "cm"),
+                            col = color,
+                            show_row_names = show_row_names,
+                            cluster_rows = cluster_rows,
+                            cluster_columns = cluster_columns,
+                            show_column_names = show_column_names,
+                            column_title = title)
+    }
 
     # STEP 3 row labels (right side)
     if (!missing(row.metadata)) {
