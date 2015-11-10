@@ -61,15 +61,10 @@ dat <- matrix(c(0.3,0.2,0.3,1,1,0.1,1,1,0, 0.8,1,0.7,0.7,0.3,1),
                  "TCGA-DU-A5TS",
                  "TCGA-HT-7688")))
 
-mdat <- matrix(c("Male","coc1","IDHwt",
-                "Male","coc1","IDHMut-cod",
-                "Famele","coc1","IDHMut-noncod"),
-              nrow = 3, ncol = 3, byrow = TRUE,
-              dimnames = list(
-                  c("TCGA-DU-6410",
-                    "TCGA-DU-A5TS",
-                    "TCGA-HT-7688"),
-                  c("Sex", "COCCluster","IDHtype")))
+mdat <- data.frame(ID=c("TCGA-DU-6410","TCGA-DU-A5TS","TCGA-HT-7688"),
+                   Sex=c("Male","Female","Male"),
+                   COCCluster=c("coc1","coc1","coc1"),
+                   IDHtype=c("IDHwt","IDHMut-cod","IDHMut-noncod"))
 
 TCGAvisualize_Heatmap(dat,
                     col.metadata = mdat,
@@ -78,7 +73,7 @@ TCGAvisualize_Heatmap(dat,
                                                      "TRUE"="green"),
                                      "Enhancer region" = c("FALSE" = "purple",
                                                             "TRUE"="grey")),
-                    col.colors = list(Sex = c("Male" = "blue", "Famele"="red"),
+                    col.colors = list(Sex = c("Male" = "blue", "Female"="red"),
                                       COCCluster=c("coc1"="grey"),
                                       IDHtype=c("IDHwt"="cyan",
                                       "IDHMut-cod"="tomato"
