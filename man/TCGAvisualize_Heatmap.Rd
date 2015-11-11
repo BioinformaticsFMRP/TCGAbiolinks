@@ -79,6 +79,6 @@ TCGAvisualize_Heatmap(dat,
                                       "IDHMut-cod"="tomato"
                                       ,"IDHMut-noncod"="gold")),
                     type = "methylation",
-                    show_row_names=T)
+                    show_row_names=TRUE)
 }
 
