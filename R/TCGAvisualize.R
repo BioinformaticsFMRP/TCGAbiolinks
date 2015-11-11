@@ -610,7 +610,7 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #'                                       "IDHMut-cod"="tomato"
 #'                                       ,"IDHMut-noncod"="gold")),
 #'                     type = "methylation",
-#'                     show_row_names=T)
+#'                     show_row_names=TRUE)
 #' @export
 #' @importFrom matlab jet.colors
 #' @import ComplexHeatmap
