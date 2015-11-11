@@ -30,7 +30,6 @@ Imports:
     XML,
     Biobase,
     affy,
-    heatmap.plus,
     xtable,
     data.table,
     EDASeq (>= 2.0.0),
