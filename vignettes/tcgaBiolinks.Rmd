@@ -1563,7 +1563,7 @@ library(TCGAbiolinks)
 cancer <- "LGG"
 PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
 dataType <- "rsem.genes.results"
-pathCancer <- paste0("../data",cancer)
+pathCancer <- paste0("../TCGA/data",cancer)
 #------------------------------------------
 
 #----------- DATA --------------------
@@ -1579,7 +1579,7 @@ dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
 dataSubt <- TCGAquery_subtype(tumor = cancer)
 
 # get clinical data
-dataClin <- TCGAquery_clinic(tumor = cancer,
+dataClin <- TCGAquery_clinic(cancer  = cancer,
                              clinical_data_type = "clinical_patient")
 
 TCGAdownload(data = datQuery,
