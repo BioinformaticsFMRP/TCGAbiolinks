@@ -1,3 +1,10 @@
+  TCGAbiolinks 1.1.8
+----------------------------------------------------------------
+* TCGAvisualize_Heatmap Now it is using Heatmap plus package and is calculating z-cores
+* TCGAvisualize_profilePlot  Visualize the distribution of subgroups in the groups distributions
+* Database update
+* From version 1.0: small bugs corrections in some plots, documentation improvement.
+
   TCGAbiolinks 0.99.2
 ----------------------------------------------------------------
   FIRST VERSION - FEATURES
