@@ -573,6 +573,12 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @param cluster_columns Cluster columns ? Dafault: FALSE
 #' @param sortCol Name of the column to be used to sort the columns
 #' @param title Title of the plot
+#' @param scale Use z-score to make the heamat?
+#' If we want to show differences between genes, it is good to make Z-score by samples
+#' (force each sample to have zero mean and standard deviation=1).
+#' If we want to show differences between samples, it is good to make Z-score by genes
+#' (force each gene to have zero mean and standard deviation=1).
+#' Possibilities: "row", "col. Default "none"
 #' @examples
 #'  row.mdat <- matrix(c("FALSE","FALSE",
 #'                      "TRUE","TRUE",
@@ -613,8 +619,9 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #'                     show_row_names=TRUE)
 #' @export
 #' @importFrom matlab jet.colors
+#' @importFrom circlize colorRamp2
 #' @import ComplexHeatmap
-#' @return Heatmap plotted in pdf or png file.
+#' @return Heatmap plotted in the device
 TCGAvisualize_Heatmap <- function(data,
                                   col.metadata,
                                   row.metadata,
@@ -626,8 +633,8 @@ TCGAvisualize_Heatmap <- function(data,
                                   cluster_columns = FALSE,
                                   sortCol,
                                   title,
-                                  type = "expression"){
-
+                                  type = "expression",
+                                  scale = "none"){
 
     # STEP 1 add columns labels (top of heatmap)
     if(!missing(col.metadata)) {
@@ -655,8 +662,24 @@ TCGAvisualize_Heatmap <- function(data,
 
     # STEP 2 Create heatmap
 
-    if (type == "expression") color <- gplots::greenred(200)
-    if (type == "methylation") color <- matlab::jet.colors(200)
+    # If we want to show differences between genes, it is good to make Z-score by samples
+    # (force each sample to have zero mean and standard deviation=1).
+    # If we want to show differences between samples, it is good to make Z-score by genes
+    # (force each gene to have zero mean and standard deviation=1).
+    if(scale == "row"){
+        message("Calculiating z-scores for the rows....")
+        data <- t(scale(t(data)))
+        if (type == "expression") color <- colorRamp2(seq(-4,4,0.1), gplots::greenred(length(seq(-4,4,0.1))))
+        if (type == "methylation") color <- colorRamp2(seq(-4,4,0.1), matlab::jet.colors(length(seq(-4,4,0.1))))
+    } else if(scale == "col"){
+        message("Calculiating z-scores for the columns....")
+        data <- scale(data)
+        if (type == "expression") color <- colorRamp2(seq(-4,4,0.1), gplots::greenred(length(seq(-4,4,0.1))))
+        if (type == "methylation") color <- colorRamp2(seq(-4,4,0.1), matlab::jet.colors(length(seq(-4,4,0.1))))
+    } else {
+        if (type == "expression") color <- gplots::greenred(200)
+        if (type == "methylation") color <- matlab::jet.colors(200)
+    }
     if(missing(title)) title <- type
 
     if(!missing(sortCol)){
