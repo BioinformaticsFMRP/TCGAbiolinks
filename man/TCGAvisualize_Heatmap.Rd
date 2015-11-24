@@ -7,7 +7,7 @@
 TCGAvisualize_Heatmap(data, col.metadata, row.metadata, col.colors = NULL,
   row.colors = NULL, show_column_names = FALSE, show_row_names = FALSE,
   cluster_rows = FALSE, cluster_columns = FALSE, sortCol, title,
-  type = "expression")
+  type = "expression", scale = "none")
 }
 \arguments{
 \item{data}{The object to with the heatmap data (expression, methylation)}
@@ -35,9 +35,16 @@ column bcr_patient_barcode or patient or ID with the patients barcodes.}
 
 \item{type}{Select the colors of the heatmap values. Possible values are
 "expression" (default), "methylation"}
+
+\item{scale}{Use z-score to make the heamat?
+If we want to show differences between genes, it is good to make Z-score by samples
+(force each sample to have zero mean and standard deviation=1).
+If we want to show differences between samples, it is good to make Z-score by genes
+(force each gene to have zero mean and standard deviation=1).
+Possibilities: "row", default "none"}
 }
 \value{
-Heatmap plotted in pdf or png file.
+Heatmap plotted in the device
 }
 \description{
 Heatmap with more sensible behavior using heatmap.plus
