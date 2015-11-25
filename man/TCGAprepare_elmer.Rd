@@ -4,10 +4,10 @@
 \alias{TCGAprepare_elmer}
 \title{Prepare the data for ELEMR package}
 \usage{
-TCGAprepare_elmer(df, platform = NULL, met.na.cut = 0.2, save = FALSE)
+TCGAprepare_elmer(data, platform, met.na.cut = 0.2, save = FALSE)
 }
 \arguments{
-\item{df}{data frame from TCGAPrepare setting summarizedExperiment to FALSE}
+\item{data}{A data frame or summarized experiment from TCGAPrepare}
 
 \item{platform}{platform of the data}
 
