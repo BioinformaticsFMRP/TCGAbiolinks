@@ -932,6 +932,14 @@ img <- readPNG("EAplot.png")
 grid.raster(img)
 ```
 
+
+The figure shows canonical pathways significantly overrepresented (enriched) by the DEGs 
+(differentially expressed genes).
+The most statistically significant canonical pathways identified 
+in DEGs list are listed according to their p value corrected FDR (-Log) (colored bars) 
+and the ratio of list genes found in each pathway over the total number of 
+genes in that pathway (Ratio, red line).
+
 ## `TCGAanalyze_survival`: Survival Analysis: Cox Regression and dnet package
 When analyzing survival, different problems come up than the ones discussed so far. 
 One question is how do we deal with subjects dropping out of a
