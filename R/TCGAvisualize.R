@@ -272,7 +272,12 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 
 #' @title barPlot for a complete Enrichment Analysis
 #' @description
-#'   TCGAvisualize_EAbarplot plots the result from TCGAanalyze_EAcomplete in a complete barPlot
+#' The figure shows canonical pathways significantly overrepresented (enriched) by the DEGs
+#' (differentially expressed genes).
+#' The most statistically significant canonical pathways identified
+#' in DEGs list are listed according to their p value corrected FDR (-Log) (colored bars)
+#' and the ratio of list genes found in each pathway over the total number of
+#' genes in that pathway (Ratio, red line).
 #' @param tf is a list of gene symbols
 #' @param GOBPTab is results from TCGAanalyze_EAcomplete related to Biological Process (BP)
 #' @param GOCCTab is results from TCGAanalyze_EAcomplete related to Cellular Component (CC)
