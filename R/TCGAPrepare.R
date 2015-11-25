@@ -853,7 +853,7 @@ TCGAprepare_elmer <- function(data,
         data <- subset(data,select = 4:ncol(data))
         }
         if(class(data) == class(SummarizedExperiment())){
-            df <- assay(data)
+            data <- assay(data)
         }
         msg <- paste0("2 - Removing probes with ",
                       "NA values in more than 20% samples")
