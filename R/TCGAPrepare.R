@@ -852,7 +852,7 @@ TCGAprepare_elmer <- function(data,
         message(msg)
         data <- subset(data,select = 4:ncol(data))
         }
-        if(class(data) == class(SummarizedExperiment())){
+        if(typeof(data) == typeof(SummarizedExperiment())){
             data <- assay(data)
         }
         msg <- paste0("2 - Removing probes with ",
