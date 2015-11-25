@@ -829,7 +829,7 @@ TCGAprepare_elmer <- function(data,
         message(paste0("1 - expression = log2(expression + 1): ",
                        "To linearize \n    relation between ",
                        "methylation and expression"))
-        if(class(data) == class(SummarizedExperiment())){
+        if(typeof(data) == typeof(SummarizedExperiment())){
             data <- assay(data)
         }
 
