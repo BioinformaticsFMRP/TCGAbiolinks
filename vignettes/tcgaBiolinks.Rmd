@@ -86,6 +86,19 @@ references:
   issued:
     year: 2011 
 
+- id: ref7
+  title: Identification of a CpG island methylator phenotype that defines a distinct subgroup of glioma
+  author: 
+  - family: Noushmehr, H., Weisenberger, D.J., Diefes, K., Phillips, H.S., Pujara, K., Berman,
+B.P., Pan, F., Pelloski, C.E., Sulman, E.P., Bhat, K.P. et al.
+    given:
+  journal: Cancer cell
+  volume: 17
+  number: 5
+  pages: 510-522
+  issued:
+    year: 2010
+
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
@@ -1291,7 +1304,7 @@ grid.raster(img)
 ## `TCGAvisualize_starburst`: Integration of gene expression and DNA methylation data 
 
  The starburst plot is proposed to combine information from two volcano plots, 
- and is applied for a study of DNA methylation and gene expression. In order to
+ and is applied for a study of DNA methylation and gene expression. It first introduced in 2010 [@ref7]. In order to
  reproduce this plot, we will use the `TCGAvisualize_starburst` function.
  
 The function creates Starburst plot for comparison of DNA methylation
