@@ -803,7 +803,7 @@ TCGAprepare <- function(query,
 #' @title Prepare the data for ELEMR package
 #' @description Prepare the data for ELEMR package
 #' @return Matrix prepared for fetch.mee function
-#' @param df data frame from TCGAPrepare setting summarizedExperiment to FALSE
+#' @param data A data frame or summarized experiment from TCGAPrepare
 #' @param platform platform of the data
 #' @param met.na.cut Define the percentage of NA that the line should have to
 #'  remove the probes for humanmethylation platforms.
@@ -814,14 +814,14 @@ TCGAprepare <- function(query,
 #' df <- data.frame(runif(200, 1e5, 1e6),runif(200, 1e5, 1e6))
 #' rownames(df) <- sprintf("?|%03d", 1:200)
 #' TCGAprepare_elmer(df,platform="IlluminaHiSeq_RNASeqV2")
-TCGAprepare_elmer <- function(df,
-                              platform = NULL,
+TCGAprepare_elmer <- function(data,
+                              platform,
                               met.na.cut = 0.2,
                               save = FALSE){
     # parameters veryfication
-    if (class(df) != class(data.frame())) stop("df should be a data frame")
-    if (is.null(df))  stop("Please set the data parameter")
-    if (is.null(platform))  stop("Please set the platform parameter")
+
+    if (missing(data))  stop("Please set the data parameter")
+    if (missing(platform))  stop("Please set the platform parameter")
 
     if (grepl("illuminahiseq_rnaseqv2|illuminahiseq_totalrnaseqv2",
               platform, ignore.case = TRUE)) {
@@ -829,12 +829,16 @@ TCGAprepare_elmer <- function(df,
         message(paste0("1 - expression = log2(expression + 1): ",
                        "To linearize \n    relation between ",
                        "methylation and expression"))
-        df <- log2(df+1)
+        if(class(data) == class(SummarizedExperiment())){
+            data <- assay(data)
+        }
+
+        data <- log2(data+1)
         message("2 - rownames  (gene|loci) => ('ID'loci) ")
-        aux <- strsplit(rownames(df),"\\|")
+        aux <- strsplit(rownames(data),"\\|")
         GeneID <- unlist(lapply(aux,function(x) x[2]))
-        row.names(df) <- paste0("ID",GeneID)
-        Exp <- data.matrix(df)
+        row.names(data) <- paste0("ID",GeneID)
+        Exp <- data.matrix(data)
 
         if (save)  save(Exp,file = "Exp_elmer.rda")
         return(Exp)
@@ -842,15 +846,20 @@ TCGAprepare_elmer <- function(df,
 
     if (grepl("humanmethylation", platform, ignore.case = TRUE)) {
         message("============ Pre-pocessing methylation data =============")
+        if (class(data) == class(data.frame())){
         msg <- paste0("1 - Removing Columns: \n  * Gene_Symbol  \n",
                       "  * Chromosome  \n  * Genomic_Coordinate")
         message(msg)
-        df <- subset(df,select = 4:ncol(df))
+        data <- subset(data,select = 4:ncol(data))
+        }
+        if(class(data) == class(SummarizedExperiment())){
+            df <- assay(data)
+        }
         msg <- paste0("2 - Removing probes with ",
                       "NA values in more than 20% samples")
         message(msg)
-        df <- df[rowMeans(is.na(df)) < met.na.cut,]
-        Met <- data.matrix(df)
+        data <- data[rowMeans(is.na(data)) < met.na.cut,]
+        Met <- data.matrix(data)
         if (save)  save(Met,file = "Met_elmer.rda")
         return (Met)
     }
