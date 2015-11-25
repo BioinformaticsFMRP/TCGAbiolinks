@@ -26,7 +26,12 @@ Complete barPlot from Enrichment Analysis showing significant (default FDR < 0.0
 BP,CC,MF and pathways enriched by list of genes.
 }
 \description{
-TCGAvisualize_EAbarplot plots the result from TCGAanalyze_EAcomplete in a complete barPlot
+The figure shows canonical pathways significantly overrepresented (enriched) by the DEGs
+(differentially expressed genes).
+The most statistically significant canonical pathways identified
+in DEGs list are listed according to their p value corrected FDR (-Log) (colored bars)
+and the ratio of list genes found in each pathway over the total number of
+genes in that pathway (Ratio, red line).
 }
 \examples{
 Genelist <- c("FN1","COL1A1")
