@@ -89,8 +89,7 @@ references:
 - id: ref7
   title: Identification of a CpG island methylator phenotype that defines a distinct subgroup of glioma
   author: 
-  - family: Noushmehr, H., Weisenberger, D.J., Diefes, K., Phillips, H.S., Pujara, K., Berman,
-B.P., Pan, F., Pelloski, C.E., Sulman, E.P., Bhat, K.P. et al.
+  - family: Noushmehr, H., Weisenberger, D.J., Diefes, K., Phillips, H.S., Pujara, K., Berman, B.P., Pan, F., Pelloski, C.E., Sulman, E.P., Bhat, K.P. et al.
     given:
   journal: Cancer cell
   volume: 17
