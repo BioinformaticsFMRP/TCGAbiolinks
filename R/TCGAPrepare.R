@@ -544,44 +544,44 @@ TCGAprepare <- function(query,
         }
 
         if (summarizedExperiment){
-            if (grepl("gene_id",colnames(df)[1])){
+            if (grepl("gene_id",colnames(df)[1])) {
                 aux <- strsplit(df$gene_id,"\\|")
                 GeneID <- unlist(lapply(aux,function(x) x[2]))
                 df$entrezid <- as.numeric(GeneID)
                 GeneSymbol <- unlist(lapply(aux,function(x) x[1]))
                 df$external_gene_name <- as.character(GeneSymbol)
 
-                merged <- merge(df,gene.location,by="external_gene_name")
+                df <- merge(df,gene.location,by="external_gene_name")
 
-                rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
-                                     ranges = IRanges(start = merged$start_position,
-                                                      end = merged$end_position),
-                                     strand = merged$strand,
-                                     gene_id = merged$external_gene_name,
-                                     entrezgene = merged$entrezid,
-                                     transcript_id = subset(merged, select = 5))
-                names(rowRanges) <- as.character(merged$gene_id)
+                rowRanges <- GRanges(seqnames = paste0("chr", df$chromosome_name),
+                                     ranges = IRanges(start = df$start_position,
+                                                      end = df$end_position),
+                                     strand = df$strand,
+                                     gene_id = df$external_gene_name,
+                                     entrezgene = df$entrezid,
+                                     transcript_id = subset(df, select = 5))
+                names(rowRanges) <- as.character(df$gene_id)
 
                 if (length(colnames(data)) > 2) {
                     assays <- SimpleList(
                         raw_counts = data.matrix(
-                            subset(merged,
-                                   select = grep("raw_count",colnames(merged)))
+                            subset(df,
+                                   select = grep("raw_count",colnames(df)))
                         ),
                         scaled_estimate = data.matrix(
-                            subset(merged,
-                                   select = grep("scaled_estimate",colnames(merged)))
+                            subset(df,
+                                   select = grep("scaled_estimate",colnames(df)))
                         )
                     )
                 } else {
                     # case genes.normalized_results
                     assays <- SimpleList(
                         normalized_count = data.matrix(
-                            subset(merged,
-                                   select = grep("normalized_count",colnames(merged))))
+                            subset(df,
+                                   select = grep("normalized_count",colnames(df))))
                     )
                 }
-            } else if(grepl("junction",colnames(df)[1])){
+            } else if (grepl("junction",colnames(df)[1])){
                 aux    <- strsplit(df$junction,":")
                 name   <- unlist(lapply(aux,function(x) x[1]))
                 x <- as.numeric(unlist(lapply(aux,function(x) x[2])))
@@ -615,24 +615,23 @@ TCGAprepare <- function(query,
                 names(rowRanges) <- as.character(df$exon)
                 assays <- SimpleList(
                     raw_counts = data.matrix(
-                        subset(merged,
-                               select = grep("raw_count",colnames(merged)))
+                        df[,grep("raw_count",colnames(df)),with = FALSE]
                     ),
                     median_length_normalized=data.matrix(
-                        subset(merged,
-                               select = grep("median_length",colnames(merged)))
+                        df[,grep("median_length",colnames(df)),with = FALSE]
                     ),
                     RPKM=data.matrix(
-                        subset(merged,
-                               select = grep("RPKM",colnames(merged)))
-                    ),
+                        df[,grep("RPKM",colnames(df)),with = FALSE]
+                    )
                 )
             } else if(grepl("isoform",colnames(df)[1])){
                 message("TBD")
+                return (NULL)
             }
             regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
-            barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
+
+            barcode <- unique(unlist(str_match_all(colnames(df),regex)))
             colData <- colDataPrepare(barcode,query)
 
             rse <- SummarizedExperiment(assays=assays,
@@ -647,7 +646,7 @@ TCGAprepare <- function(query,
 
     if (grepl("illuminahiseq_mirnaseq",platform, ignore.case = TRUE)) {
 
-        if(is.null(type) || (type != "hg19.mirna" && type != "mirna")){
+        if (is.null(type) || (type != "hg19.mirna" && type != "mirna")){
             msg <- paste0("Plase select a type. \n Possibilities:\n",
                           " = hg19.mirna\n = mirna")
             message(msg)
