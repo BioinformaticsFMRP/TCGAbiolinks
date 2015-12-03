@@ -1,3 +1,8 @@
+  TCGAbiolinks 1.1.10
+----------------------------------------------------------------
+* TCGAPrepare: bug fix for bt.exon_quantification files from IlluminaHiSeq_RNASeqV2 platform
+* Database update
+
   TCGAbiolinks 1.1.8
 ----------------------------------------------------------------
 * TCGAvisualize_Heatmap Now it is using Heatmap plus package and is calculating z-cores
