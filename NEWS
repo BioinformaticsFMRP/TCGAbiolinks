@@ -1,4 +1,8 @@
-  TCGAbiolinks 1.1.10
+TCGAbiolinks 1.1.11
+---------------------------------------------------------------
+* Update in the citation
+  
+TCGAbiolinks 1.1.10
 ----------------------------------------------------------------
 * TCGAPrepare: bug fix for bt.exon_quantification files from IlluminaHiSeq_RNASeqV2 platform
 * Database update
