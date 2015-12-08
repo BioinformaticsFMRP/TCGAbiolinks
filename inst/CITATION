@@ -9,7 +9,7 @@ citEntry(entry = "Article",
                                    as.person("Claudia Cava"),
                                    as.person("Davide Garolini"),
                                    as.person("Thais Sabedot"),
-                                   as.person("Tathiane Malta"),
+                                   as.person("Tathiane M. Malta"),
                                    as.person("Stefano M. Pagnotta"),
                                    as.person("Isabella Castiglioni"),
                                    as.person("Michele Ceccarelli"),
@@ -26,5 +26,5 @@ citEntry(entry = "Article",
                    "Isabella Castiglioni,Michele Ceccarelli, Gianluca Bontempi",
                    "Houtan Noushmehr (2015).",
                    "TCGAbiolinks: An R/Bioconductor package for integrative analysis with TCGA data",
-                   "manuscript in preparation.")
+                   "NAR conditionally accepted.")
 )
