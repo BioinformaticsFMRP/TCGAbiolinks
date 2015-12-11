@@ -1,7 +1,7 @@
 citHeader("To cite TCGAbiolinks in publications use:")
 
 citEntry(entry = "Article",
-         title        = "TCGAbiolinks: An R/Bioconductor package for integrative analysis with TCGA data",
+         title        = " TCGAbiolinks: An R/Bioconductor package for integrative analysis of TCGA data",
          author       = personList(as.person("Antonio Colaprico"),
                                    as.person("Tiago Chedraoui Silva"),
                                    as.person("Catharina Olsen"),
@@ -16,7 +16,7 @@ citEntry(entry = "Article",
                                    as.person("Gianluca Bontempi"),
                                    as.person("Houtan Noushmehr")
          ),
-         journal = "manuscript in preparation",
+         journal = "Nucleic Acids Research",
          year         = "2015",
          journal      = "Nucleic Acids Research",
          textVersion  =
@@ -24,7 +24,7 @@ citEntry(entry = "Article",
                    "Luciano Garofano, Claudia Cava, Davide Garolini,",
                    "Thais Sabedot, Tathiane Malta, Stefano M. Pagnotta,",
                    "Isabella Castiglioni,Michele Ceccarelli, Gianluca Bontempi",
-                   "Houtan Noushmehr (2015).",
-                   "TCGAbiolinks: An R/Bioconductor package for integrative analysis with TCGA data",
-                   "NAR conditionally accepted.")
+                   "Houtan Noushmehr.",
+                   "TCGAbiolinks: An R/Bioconductor package for integrative analysis of TCGA data",
+                   "Nucleic Acids Research (2015) (In Press).")
 )
