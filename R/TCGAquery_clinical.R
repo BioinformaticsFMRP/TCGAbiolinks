@@ -299,16 +299,46 @@ clinical_data_site_cancer <- function(cancer){
 #' clinical_omf_v4.0 \tab clinical_patient \cr
 #' clinical_radiation
 #'}
+#' @param samples List of barcodes to get the clinical data
 #' @export
 #' @importFrom RCurl getURL
 #' @return clinic data
 #' @examples
 #' data <- TCGAquery_clinic("LGG","clinical_drug")
-TCGAquery_clinic <- function(tumor,clinical_data_type){
-    query <- TCGAquery(tumor = tumor, platform = "bio", level=2)
+#' data <- TCGAquery_clinic(clinical_data_type = "clinical_patient",
+#' samples = c("TCGA-06-5416-01A-01D-1481-05",
+#'             "TCGA-2G-AAEW-01A-11D-A42Z-05",
+#'             "TCGA-2G-AAEX-01A-11D-A42Z-05"))
+TCGAquery_clinic <- function(tumor, clinical_data_type, samples){
+
+    if(missing(clinical_data_type)) stop("Please select the type of clinical data. Use ?TCGAquery_clinic to get a list")
+    if(!missing(samples)) samples <- substr(samples,1,12)
+
+    if(!missing(samples) & !missing(tumor)) {
+        query <- TCGAquery(tumor = tumor, samples = samples, platform = "bio", level=2)
+    } else  if(!missing(tumor)) {
+        query <- TCGAquery(tumor = tumor, platform = "bio", level=2)
+    } else if(!missing(samples)) {
+        query <- TCGAquery(samples = samples, platform = "bio", level=2)
+    }
+
+    # this is one file for all samples, no need to add samples argument
     TCGAdownload(query,type = clinical_data_type)
-    clinical_patient <- TCGAprepare(query,type = clinical_data_type, dir = ".")
-    return(clinical_patient)
+
+    ret <- NULL
+    # prepare works if one file only so we will do a iteration for each tumor type
+    for( i in unique(query$Disease)){
+        message(paste0("Tumor type: ",i))
+        x <- subset(query, query$Disease == i)
+        clin <- TCGAprepare(x,type = clinical_data_type, dir = ".")
+        if(!missing(samples)) clin <- subset(clin,clin$bcr_patient_barcode %in% samples)
+        message("Adding disease collumn to data frame")
+        disease <- rep(i,nrow(clin))
+        clin <- cbind(disease,clin)
+        ret <- plyr::rbind.fill(ret,clin)
+    }
+
+    return(ret)
 }
 
 
