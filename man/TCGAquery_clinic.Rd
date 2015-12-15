@@ -4,7 +4,7 @@
 \alias{TCGAquery_clinic}
 \title{Get the clinical information}
 \usage{
-TCGAquery_clinic(tumor, clinical_data_type)
+TCGAquery_clinic(tumor, clinical_data_type, samples)
 }
 \arguments{
 \item{tumor}{a character vector indicating cancer type Examples:
@@ -34,6 +34,8 @@ clinical_follow_up_v4.0_nte \tab clinical_nte \cr
 clinical_omf_v4.0 \tab clinical_patient \cr
 clinical_radiation
 }}
+
+\item{samples}{List of barcodes to get the clinical data}
 }
 \value{
 clinic data
@@ -43,5 +45,9 @@ Get the clinical information
 }
 \examples{
 data <- TCGAquery_clinic("LGG","clinical_drug")
+data <- TCGAquery_clinic(clinical_data_type = "clinical_patient",
+samples = c("TCGA-06-5416-01A-01D-1481-05",
+            "TCGA-2G-AAEW-01A-11D-A42Z-05",
+            "TCGA-2G-AAEX-01A-11D-A42Z-05"))
 }
 
