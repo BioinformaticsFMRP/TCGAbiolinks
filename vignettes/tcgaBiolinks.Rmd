@@ -313,6 +313,7 @@ The arguments of this function are:
 
 * tumor ("OV","BRCA","GBM", etc)
 * clinical_data_type ("clinical_patient","clinical_drug", etc)
+* samples List of barcodes
 
 A full list of cancer and clinical data type can be found in the help of the function.
 
@@ -321,6 +322,10 @@ A full list of cancer and clinical data type can be found in the help of the fun
 clinical_brca_data <- TCGAquery_clinic("brca","clinical_patient")
 clinical_uvm_data_bio <- TCGAquery_clinic("uvm","biospecimen_normal_control")
 clinical_brca_data_bio <- TCGAquery_clinic("brca","biospecimen_normal_control")
+clinical_data_barcode <- TCGAquery_clinic(clinical_data_type = "clinical_patient",
+                                          samples = c("TCGA-06-5416-01A-01D-1481-05",
+                                                      "TCGA-2G-AAEW-01A-11D-A42Z-05",
+                                                      "TCGA-2G-AAEX-01A-11D-A42Z-05"))
 ```
 
 Also, some functions to work with clinical data are provided.
