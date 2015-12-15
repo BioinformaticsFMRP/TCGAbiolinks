@@ -691,7 +691,7 @@ TCGAprepare <- function(query,
         if (length(files) == 1) {
             df <- read.table(files, header = TRUE, sep = "\t",
                              stringsAsFactors = FALSE, check.names = FALSE,
-                             comment.char = "#",fill = TRUE)
+                             comment.char = "#",fill = TRUE,quote="")
             regex <- paste0("[[:alnum:]]{8}-[[:alnum:]]{4}",
                             "-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}")
             if (grepl("clinical",type)) colnames(df) <- df[1,]
