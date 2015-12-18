@@ -565,8 +565,11 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @title Heatmap with more sensible behavior using heatmap.plus
 #' @description Heatmap with more sensible behavior using heatmap.plus
 #' @param data The object to with the heatmap data (expression, methylation)
-#' @param col.metadata Metadata for the columns (patients). It should have the
-#' column bcr_patient_barcode or patient or ID with the patients barcodes.
+#' @param col.metadata Metadata for the columns (samples). It should have the
+#' sample column to match with the samples. It will also work with
+#' "bcr_patient_barcode","patient","ID" columns but as one patient might
+#' have more than one sample, this coul lead to errors in the annotation.
+#' The code will throw a warning in case two samples are from the same patient.
 #' @param row.metadata  Metadata for the rows  genes (expression) or probes (methylation)
 #' @param col.colors A list of names colors
 #' @param row.colors A list of named colors
@@ -643,15 +646,30 @@ TCGAvisualize_Heatmap <- function(data,
 
     # STEP 1 add columns labels (top of heatmap)
     if(!missing(col.metadata)) {
-        idCols <- c("bcr_patient_barcode","patient","ID")
-        stopifnot(any(idCols %in% colnames(col.metadata)))
+        idCols <- c("sample")
+        if(!("sample")  %in% colnames(col.metadata)){
+            idCols <- c("bcr_patient_barcode","patient","ID")
+            stopifnot(any(idCols %in% colnames(col.metadata)))
+            id <- idCols[which( idCols %in% colnames(col.metadata) == TRUE)]
 
-        id <- idCols[which( idCols %in% colnames(col.metadata) == TRUE)]
-        # should be in the same order than the matrix!
-        message(paste0("Reorganizing: col.metadata order should ",
-                       "be the same of the data object"))
-        df <- col.metadata[match(substr(colnames(data),1,12),
-                                 col.metadata[,id]),]
+            duplicated.samples <- any(sapply(col.metadata[,id],
+                                         function(x) {length(grep(x,col.metadata[,id])) > 1 }))
+            if(duplicated.samples){
+                warning("Some samples are from the same patient, this might lead to the wrong upper annotation")
+            }
+            # should be in the same order than the matrix!
+            message(paste0("Reorganizing: col.metadata order should ",
+                           "be the same of the data object"))
+            df <- col.metadata[match(substr(colnames(data),1,12),
+                                     col.metadata[,id]),]
+        } else {
+            id <- idCols[which( idCols %in% colnames(col.metadata) == TRUE)]
+            # should be in the same order than the matrix!
+            message(paste0("Reorganizing: col.metadata order should ",
+                           "be the same of the data object"))
+            df <- col.metadata[match(colnames(data),
+                                     col.metadata[,id]),]
+        }
         df[,id] <- NULL
 
         if (!missing(sortCol)) {
