@@ -12,8 +12,11 @@ TCGAvisualize_Heatmap(data, col.metadata, row.metadata, col.colors = NULL,
 \arguments{
 \item{data}{The object to with the heatmap data (expression, methylation)}
 
-\item{col.metadata}{Metadata for the columns (patients). It should have the
-column bcr_patient_barcode or patient or ID with the patients barcodes.}
+\item{col.metadata}{Metadata for the columns (samples). It should have the
+sample column to match with the samples. It will also work with
+"bcr_patient_barcode","patient","ID" columns but as one patient might
+have more than one sample, this coul lead to errors in the annotation.
+The code will throw a warning in case two samples are from the same patient.}
 
 \item{row.metadata}{Metadata for the rows  genes (expression) or probes (methylation)}
 
