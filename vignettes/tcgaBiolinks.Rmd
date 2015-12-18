@@ -1604,7 +1604,7 @@ dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
 dataSubt <- TCGAquery_subtype(tumor = cancer)
 
 # get clinical data
-dataClin <- TCGAquery_clinic(cancer  = cancer,
+dataClin <- TCGAquery_clinic(tumor  = cancer,
                              clinical_data_type = "clinical_patient")
 
 TCGAdownload(data = datQuery,
