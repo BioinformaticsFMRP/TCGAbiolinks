@@ -1,3 +1,9 @@
+TCGAbiolinks 1.1.15
+---------------------------------------------------------------
+* ggplot2 updat broke the package. Some small fixes were made, but
+the function TCGAvisualize_profilePlot is not working as sjPlot is not updated yet.
+* small fixes in documentation
+
 TCGAbiolinks 1.1.14
 ---------------------------------------------------------------
 * Change in TCGAvisualize_Heatmap: coloring the columns by patient might give
