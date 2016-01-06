@@ -1,3 +1,16 @@
+TCGAbiolinks 1.1.15
+---------------------------------------------------------------
+* ggplot2 updat broke the package. Some small fixes were made, but
+the function TCGAvisualize_profilePlot is not working as sjPlot is not updated yet.
+* small fixes in documentation
+
+TCGAbiolinks 1.1.14
+---------------------------------------------------------------
+* Change in TCGAvisualize_Heatmap: coloring the columns by patient might give
+wrong results if patient has more than one sample in the hetamap.
+To solve that we added the possibility to use the sample columns and we added a warning
+if there is more than one sample for the patients and a patient column is being used.
+
 TCGAbiolinks 1.1.11 - 1.1.13
 ---------------------------------------------------------------
 * Update in the citation
@@ -12,7 +25,7 @@ TCGAbiolinks 1.1.10
 * TCGAvisualize_Heatmap Now it is using Heatmap plus package and is calculating z-cores
 * TCGAvisualize_profilePlot  Visualize the distribution of subgroups in the groups distributions
 * Database update
-* From version 1.0: small bugs corrections in some plots, documentation improvement.
+* From version 1.0: small bugs corrections in some plots and TCGAprepare_elmer, documentation improvement.
 
   TCGAbiolinks 0.99.2
 ----------------------------------------------------------------
