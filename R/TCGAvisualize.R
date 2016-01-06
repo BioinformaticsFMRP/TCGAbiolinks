@@ -779,7 +779,7 @@ TCGAvisualize_Heatmap <- function(data,
 #'            rep("subtype2",10),
 #'            rep("subtype3",10)),3)
 #' df <- data.frame(cluster,subtype)
-#' TCGAvisualize_profilePlot(df, "cluster","subtype")
+#' TCGAvisualize_profilePlot(data = df, groupCol = "cluster", subtypeCol = "subtype")
 #' @return A plot
 TCGAvisualize_profilePlot <- function(data = NULL,
                                       groupCol = NULL,
@@ -793,6 +793,11 @@ TCGAvisualize_profilePlot <- function(data = NULL,
                                       legend.size=1.5,
                                       legend.title.size=1.5,
                                       geom.label.size = 6.0) {
+    # To be removed
+    if (packageVersion("ggplot2") >= 2) {
+        message("sjPlot is not working yet with ggplot version >= 2")
+        return(NULL)
+    }
 
     sjp.setTheme(theme = "scatterw",
                  axis.title.size = axis.title.size,
@@ -813,15 +818,15 @@ TCGAvisualize_profilePlot <- function(data = NULL,
 
     # use https://github.com/cttobin/ggthemr
     # when it is in cran
-    if(is.null(colors)) colors <- c("#34495e",
-                                    "#3498db",
-                                    "#2ecc71",
-                                    "#f1c40f",
-                                    "#e74c3c",
-                                    "#9b59b6",
-                                    "#1abc9c",
-                                    "#f39c12",
-                                    "#d35400")
+    if (is.null(colors)) colors <- c("#34495e",
+                                     "#3498db",
+                                     "#2ecc71",
+                                     "#f1c40f",
+                                     "#e74c3c",
+                                     "#9b59b6",
+                                     "#1abc9c",
+                                     "#f39c12",
+                                     "#d35400")
 
     # The ideia is: we have a data frame like this:
     #----------------------
@@ -887,6 +892,7 @@ TCGAvisualize_profilePlot <- function(data = NULL,
         }
     }
 
+    # Create the horizontal barplot
     p <- .mysjp.stackfrq(data,
                          legendTitle = subtypeCol,
                          axisTitle.x = groupCol,
@@ -905,12 +911,13 @@ TCGAvisualize_profilePlot <- function(data = NULL,
     j <- 1
     groups <- as.data.frame(groups)
     groups$x <- 1
-    for( i in sort(unique(groups[,1]))){
+    for (i in sort(unique(groups[,1]))){
         idx <- which(groups[,1] == i)
-        groups[idx,] <- as.numeric(j)
+        groups[idx,"x"] <- as.numeric(j)
         j <- j + 1
     }
 
+    # Create the vertical barplot with the percentage of element in each group
     p2 <- sjp.stackfrq(groups[,2],
                        #legendTitle = subtypeCol,
                        axisTitle.y = "Cluster distribution",
@@ -949,8 +956,7 @@ TCGAvisualize_profilePlot <- function(data = NULL,
             #panel.grid.minor=element_blank(),
             plot.background=element_blank())
 
-
-
+    # put the plots together
     p$plot <-  plot_grid(p2$plot,
                          p$plot,
                          ncol = 2,
