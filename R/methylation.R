@@ -243,19 +243,21 @@ TCGAanalyze_survival <- function(data,
 #' @return Save the pdf survival plot
 #' @examples
 #' nrows <- 200; ncols <- 21
-#' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
+#' counts <- matrix(runif(nrows * ncols, 0, 1), nrows)
 #' rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
 #'                    IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
 #'                     strand=sample(c("+", "-"), 200, TRUE),
 #'                     feature_id=sprintf("ID%03d", 1:200))
 #'colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input","Other"), 7),
 #'                     row.names=LETTERS[1:21],
-#'                     group=rep(c("group1","group2","group3"),c(7,7,7)))
+#'                     group=rep(c("group1","group2","group3"),c(7,7,7)),
+#'                     subgroup=rep(c("subgroup1","subgroup2","subgroup3"),7))
 #'data <- SummarizedExperiment::SummarizedExperiment(
 #'          assays=S4Vectors::SimpleList(counts=counts),
 #'          rowRanges=rowRanges,
 #'          colData=colData)
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group")
+#' TCGAvisualize_meanMethylation(data,groupCol  = "group", subgroupCol="subgroup")
 TCGAvisualize_meanMethylation <- function(data,
                                           groupCol=NULL,
                                           subgroupCol=NULL,
@@ -340,17 +342,16 @@ TCGAvisualize_meanMethylation <- function(data,
                 environment = .e) +
         geom_boxplot(aes(fill = factor(df$groups)),
                      notchwidth = 0.25, outlier.shape = NA)
-    if(!is.null(subgroupCol)){
+
+    if (!is.null(subgroupCol)){
 
         p <- p + geom_jitter(aes(shape = subgroups,
                                  size =  subgroups),
-                             height = 0,
                              position = position_jitter(width = 0.1),
                              size = 3)
     } else {
-        p <- p +  geom_jitter(height = 0,
-                              position = position_jitter(width = 0.1),
-                              size = 3)
+        p <- p + geom_jitter(position = position_jitter(width = 0.1),
+                             size = 3)
     }
 
     p <- p + scale_fill_manual(values = color,labels = labels, name = group.legend)
