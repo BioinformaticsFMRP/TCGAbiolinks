@@ -14,7 +14,7 @@ table with common samples among platforms from TCGAquery
 }
 \description{
 In order to help the user to have an overview of the number of
-samples in commun we created the function `TCGAquery_integrate` that will receive the
+samples in common we created the function `TCGAquery_integrate` that will receive the
 data frame returned from `TCGAquery` and produce a matrix n platforms x n platforms
 with the values of samples in commun.
 }
