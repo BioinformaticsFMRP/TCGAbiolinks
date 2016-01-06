@@ -565,8 +565,11 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @title Heatmap with more sensible behavior using heatmap.plus
 #' @description Heatmap with more sensible behavior using heatmap.plus
 #' @param data The object to with the heatmap data (expression, methylation)
-#' @param col.metadata Metadata for the columns (patients). It should have the
-#' column bcr_patient_barcode or patient or ID with the patients barcodes.
+#' @param col.metadata Metadata for the columns (samples). It should have the
+#' sample column to match with the samples. It will also work with
+#' "bcr_patient_barcode","patient","ID" columns but as one patient might
+#' have more than one sample, this coul lead to errors in the annotation.
+#' The code will throw a warning in case two samples are from the same patient.
 #' @param row.metadata  Metadata for the rows  genes (expression) or probes (methylation)
 #' @param col.colors A list of names colors
 #' @param row.colors A list of named colors
@@ -643,15 +646,30 @@ TCGAvisualize_Heatmap <- function(data,
 
     # STEP 1 add columns labels (top of heatmap)
     if(!missing(col.metadata)) {
-        idCols <- c("bcr_patient_barcode","patient","ID")
-        stopifnot(any(idCols %in% colnames(col.metadata)))
+        idCols <- c("sample")
+        if(!("sample")  %in% colnames(col.metadata)){
+            idCols <- c("bcr_patient_barcode","patient","ID")
+            stopifnot(any(idCols %in% colnames(col.metadata)))
+            id <- idCols[which( idCols %in% colnames(col.metadata) == TRUE)]
 
-        id <- idCols[which( idCols %in% colnames(col.metadata) == TRUE)]
-        # should be in the same order than the matrix!
-        message(paste0("Reorganizing: col.metadata order should ",
-                       "be the same of the data object"))
-        df <- col.metadata[match(substr(colnames(data),1,12),
-                                 col.metadata[,id]),]
+            duplicated.samples <- any(sapply(col.metadata[,id],
+                                         function(x) {length(grep(x,col.metadata[,id])) > 1 }))
+            if(duplicated.samples){
+                warning("Some samples are from the same patient, this might lead to the wrong upper annotation")
+            }
+            # should be in the same order than the matrix!
+            message(paste0("Reorganizing: col.metadata order should ",
+                           "be the same of the data object"))
+            df <- col.metadata[match(substr(colnames(data),1,12),
+                                     col.metadata[,id]),]
+        } else {
+            id <- idCols[which( idCols %in% colnames(col.metadata) == TRUE)]
+            # should be in the same order than the matrix!
+            message(paste0("Reorganizing: col.metadata order should ",
+                           "be the same of the data object"))
+            df <- col.metadata[match(colnames(data),
+                                     col.metadata[,id]),]
+        }
         df[,id] <- NULL
 
         if (!missing(sortCol)) {
@@ -761,7 +779,7 @@ TCGAvisualize_Heatmap <- function(data,
 #'            rep("subtype2",10),
 #'            rep("subtype3",10)),3)
 #' df <- data.frame(cluster,subtype)
-#' TCGAvisualize_profilePlot(df, "cluster","subtype")
+#' TCGAvisualize_profilePlot(data = df, groupCol = "cluster", subtypeCol = "subtype")
 #' @return A plot
 TCGAvisualize_profilePlot <- function(data = NULL,
                                       groupCol = NULL,
@@ -775,6 +793,11 @@ TCGAvisualize_profilePlot <- function(data = NULL,
                                       legend.size=1.5,
                                       legend.title.size=1.5,
                                       geom.label.size = 6.0) {
+    # To be removed
+    if (packageVersion("ggplot2") >= 2) {
+        message("sjPlot is not working yet with ggplot version >= 2")
+        return(NULL)
+    }
 
     sjp.setTheme(theme = "scatterw",
                  axis.title.size = axis.title.size,
@@ -795,15 +818,15 @@ TCGAvisualize_profilePlot <- function(data = NULL,
 
     # use https://github.com/cttobin/ggthemr
     # when it is in cran
-    if(is.null(colors)) colors <- c("#34495e",
-                                    "#3498db",
-                                    "#2ecc71",
-                                    "#f1c40f",
-                                    "#e74c3c",
-                                    "#9b59b6",
-                                    "#1abc9c",
-                                    "#f39c12",
-                                    "#d35400")
+    if (is.null(colors)) colors <- c("#34495e",
+                                     "#3498db",
+                                     "#2ecc71",
+                                     "#f1c40f",
+                                     "#e74c3c",
+                                     "#9b59b6",
+                                     "#1abc9c",
+                                     "#f39c12",
+                                     "#d35400")
 
     # The ideia is: we have a data frame like this:
     #----------------------
@@ -869,6 +892,7 @@ TCGAvisualize_profilePlot <- function(data = NULL,
         }
     }
 
+    # Create the horizontal barplot
     p <- .mysjp.stackfrq(data,
                          legendTitle = subtypeCol,
                          axisTitle.x = groupCol,
@@ -887,12 +911,13 @@ TCGAvisualize_profilePlot <- function(data = NULL,
     j <- 1
     groups <- as.data.frame(groups)
     groups$x <- 1
-    for( i in sort(unique(groups[,1]))){
+    for (i in sort(unique(groups[,1]))){
         idx <- which(groups[,1] == i)
-        groups[idx,] <- as.numeric(j)
+        groups[idx,"x"] <- as.numeric(j)
         j <- j + 1
     }
 
+    # Create the vertical barplot with the percentage of element in each group
     p2 <- sjp.stackfrq(groups[,2],
                        #legendTitle = subtypeCol,
                        axisTitle.y = "Cluster distribution",
@@ -931,8 +956,7 @@ TCGAvisualize_profilePlot <- function(data = NULL,
             #panel.grid.minor=element_blank(),
             plot.background=element_blank())
 
-
-
+    # put the plots together
     p$plot <-  plot_grid(p2$plot,
                          p$plot,
                          ncol = 2,
