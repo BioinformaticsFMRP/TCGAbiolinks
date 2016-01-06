@@ -27,5 +27,5 @@ citEntry(entry = "Article",
                    "Isabella Castiglioni,Michele Ceccarelli, Gianluca Bontempi",
                    "Houtan Noushmehr.",
                    "TCGAbiolinks: An R/Bioconductor package for integrative analysis of TCGA data",
-                   "Nucleic Acids Research 2015 (doi:10.1093/nar/gkv1507) In Press.")
+                   "Nucleic Acids Research 2015 (doi:10.1093/nar/gkv1507)")
 )
