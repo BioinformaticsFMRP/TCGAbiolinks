@@ -1063,7 +1063,7 @@ of < 0.01.
 
 After these tests, we save a volcano plot (x-axis:diff mean methylation,
 y-axis: statistical significance) that will help the user identify the differentially
-methylated CpG sites and return the object with the calculus in the rowRanges.
+methylated CpG sites, then the results are saved in a csv file (DMR_results.groupCol.group1.group2.csv) and finally the object is returned with the calculus in the rowRanges.
 
 The arguments of TCGAanalyze_DMR are:
 
@@ -1074,7 +1074,7 @@ The arguments of TCGAanalyze_DMR are:
  the name of the group
 * **group2 ** In case our object has more than 2 groups, you should set
  the name of the group
-* **filename ** pdf filename. Default: volcano.pdf
+* **plot.filename ** pdf filename. Default: volcano.pdf
 * **legend ** Legend title
 * **color **vector of colors to be used in graph
 * **title **main title. If not specified it will be
@@ -1094,12 +1094,16 @@ The arguments of TCGAanalyze_DMR are:
 for both groups? *Default: FALSE*
 * **save **save the object with the results?
 * **cores **use multiple cores for non-parametric test
-
+* **filename ** Name of the rda file to save the object 
 
 ```{r, eval = FALSE}
-data <- TCGAanalyze_DMR(data, groupCol = "cluster.meth",subgroupCol = "disease",
-                              group.legend  = "Groups", subgroup.legend = "Tumor",
-                              print.pvalue = TRUE)
+data <- TCGAanalyze_DMR(data, groupCol = "methylation_subtype",
+                        group1 = "CIMP.H",
+                        group2="CIMP.L",
+                        p.cut = 10^-5,
+                        diffmean.cut = 0.25,
+                        legend = "State",
+                        plot.filename = "coad_CIMPHvsCIMPL_metvolcano.png")
 ```
 
 The output will be a plot such as the figure below. The green dots are the 
@@ -1149,20 +1153,21 @@ different features. This function is a wrapper to the package
 
 The arguments of this function are:
 
-* **data** The object to with the heatmap data (expression, methylation)
-* **col.metadata: Dataframe with the col.label and rownames with patients ids
-* **row.metadata: Dataframe with the row.label and rownames as genes 
-(expression) or probes (methylation)
-* **col.labels** Vector of columns to add to the heatpmap col labels
-* **row.labels** Vector of columns to add to the heatpmap row labels
-* **col.colors** A list of colors, aech one will be used in the labelCols
-* **row.colors** A list of colors, aech one will be used in the labelRows
-* **type** Select the colors of the heatmap values. Possible values are: 
-"expression" (default), "methylation"
-* **show_column_names** Show colnames names? Dafault: FALSE
-* **show_row_names** Show row names? Dafault: FALSE
-* **cluster_rows** Cluster rows ? Dafault: FALSE
+
+* **data**	The object with the heatmap data (expression, methylation)
+* **col.metadata** Metadata for the columns (patients). It should have the column bcr_patient_barcode or patient or ID with the patients barcodes.
+* **row.metadata** Metadata for the rows genes (expression) or probes (methylation)
+* **col.colors ** A list of names colors
+* **row.colors ** A list of named colors
+* **show_column_names **	Show column names names? Dafault: FALSE
+* **show_row_names ** Show row names? Dafault: FALSE
+* **cluster_rows ** Cluster rows ? Dafault: FALSE
 * **cluster_columns** Cluster columns ? Dafault: FALSE
+* **sortCol** Name of the column to be used to sort the columns
+* **title** Title of the plot
+* **type** Select the colors of the heatmap values. Possible values are "expression" (default), "methylation"
+* **scale**	Use z-score to make the heamat? If we want to show differences between genes, it is good to make Z-score by samples (force each sample to have zero mean and standard deviation=1). If we want to show differences between samples, it is good to make Z-score by genes (force each gene to have zero mean and standard deviation=1). Possibilities: "row", "col. Default "none"
+
 
 For more information please take a look on case study #2.
 
