@@ -862,8 +862,14 @@ TCGAanalyze_DMR <- function(data,
                           names = names,
                           x.cut = diffmean.cut,
                           y.cut = p.cut)
-    if(is.null(filename)) filename <- paste(groupCol,group1,group2, "rda", sep = ".")
-    if(save) save(data,file = filename)
+    if (is.null(filename)) filename <- paste(groupCol,group1,group2, "rda", sep = ".")
+    if (save) save(data,file = filename)
+
+    # saving results into a csv file
+    csv <- paste("DMR_results",groupCol,group1,group2, "csv", sep = ".")
+    message(paste0("Saving the results also in a csv file:"), csv)
+    write.csv2(values(data),file =  csv)
+
     return(data)
 }
 
