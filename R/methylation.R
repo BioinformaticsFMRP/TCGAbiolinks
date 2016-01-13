@@ -715,6 +715,7 @@ TCGAVisualize_volcano <- function(x,y,
 #' @importFrom SummarizedExperiment colData rowRanges assay rowRanges<- values<-
 #' @importFrom S4Vectors metadata
 #' @importFrom dplyr data_frame
+#' @import utils
 #' @export
 #' @return Volcano plot saved and the given data with the results
 #' (diffmean.group1.group2,p.value.group1.group2,
@@ -862,8 +863,14 @@ TCGAanalyze_DMR <- function(data,
                           names = names,
                           x.cut = diffmean.cut,
                           y.cut = p.cut)
-    if(is.null(filename)) filename <- paste(groupCol,group1,group2, "rda", sep = ".")
-    if(save) save(data,file = filename)
+    if (is.null(filename)) filename <- paste(groupCol,group1,group2, "rda", sep = ".")
+    if (save) save(data,file = filename)
+
+    # saving results into a csv file
+    csv <- paste("DMR_results",groupCol,group1,group2, "csv", sep = ".")
+    message(paste0("Saving the results also in a csv file:"), csv)
+    write.csv2(values(data),file =  csv)
+
     return(data)
 }
 
@@ -915,8 +922,7 @@ TCGAanalyze_DMR <- function(data,
 #' @param group2 The name of the group 2.
 #' Obs: Column p.value.adj.group1.group2 should exist
 #' @import ggplot2
-#' @importFrom SummarizedExperiment subsetByOverlaps rowRanges rowRanges<-
-#'             values<-
+#' @importFrom SummarizedExperiment rowRanges rowRanges<- values<-
 #' @importFrom RColorBrewer brewer.pal
 #' @export
 #' @return Save a starburst plot
