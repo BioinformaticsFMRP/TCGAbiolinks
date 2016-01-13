@@ -1063,7 +1063,7 @@ of < 0.01.
 
 After these tests, we save a volcano plot (x-axis:diff mean methylation,
 y-axis: statistical significance) that will help the user identify the differentially
-methylated CpG sites and return the object with the calculus in the rowRanges.
+methylated CpG sites, then the results are saved in a csv file (DMR_results.groupCol.group1.group2.csv) and finally the object is returned with the calculus in the rowRanges.
 
 The arguments of TCGAanalyze_DMR are:
 
