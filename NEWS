@@ -1,3 +1,11 @@
+TCGAbiolinks 1.1.16
+---------------------------------------------------------------
+* Bug fix: subsetByOverlaps was removed from SummarizedExperiment package
+TCGAbiolinks should not import it
+* Small fixes in documentation
+* TCGAanalyze_DMR is now saving the results in a cvs file
+
+
 TCGAbiolinks 1.1.15
 ---------------------------------------------------------------
 * ggplot2 updat broke the package. Some small fixes were made, but
