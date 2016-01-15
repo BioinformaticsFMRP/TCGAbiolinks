@@ -943,7 +943,7 @@ TCGAanalyze_DMR <- function(data,
 #'          colData=colData)
 #' met <- data
 #' exp <- data.frame(row.names=sprintf("ID%03d", 1:20000),
-#'                   logFC=runif(20000, -0.2, 0.2),
+#'                   logFC=runif(20000, -5, 5),
 #'                   FDR=runif(20000, 0.01, 1))
 #' SummarizedExperiment::rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
 #' SummarizedExperiment::rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
@@ -1152,7 +1152,7 @@ TCGAvisualize_starburst <- function(met,
                              color = "black",
                              shape=1,
                              size = 8,
-                             show_guide = FALSE)
+                             show.legend = FALSE)
     }
 
     if(names == TRUE){
