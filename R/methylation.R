@@ -905,6 +905,8 @@ TCGAanalyze_DMR <- function(data,
 #' @param label vector of labels to be used in graph
 #' @param title main title
 #' @param names Add the names of the significant genes? Default: FALSE
+#' @param circle Circle pair gene/probe that respects diffmean.cut and logFC.cut
+#' Default: TRUE
 #' @param ylab y axis text
 #' @param xlab x axis text
 #' @param xlim x limits to cut image
@@ -951,8 +953,8 @@ TCGAanalyze_DMR <- function(data,
 #' result <- TCGAvisualize_starburst(met,exp,
 #'                                   exp.p.cut = 0.05, met.p.cut = 0.05,
 #'                                   group1="g1",group2="g2",
-#'                                   diffmean.cut=0.8,
-#'                                   names=TRUE)
+#'                                   diffmean.cut=0.0,
+#'                                   names=TRUE, circle = FALSE)
 TCGAvisualize_starburst <- function(met,
                                     exp,
                                     group1=NULL,
@@ -962,6 +964,7 @@ TCGAvisualize_starburst <- function(met,
                                     diffmean.cut = 0,
                                     logFC.cut = 0,
                                     names = FALSE,
+                                    circle = TRUE,
                                     filename = "starburst.pdf",
                                     ylab = expression(atop("Gene Expression",
                                                            paste(Log[10],
@@ -1145,7 +1148,7 @@ TCGAvisualize_starburst <- function(met,
     #    labels = c("Candidate Biologically Significant"),
     #    name = "Biological importance")
 
-    if(!is.null(significant)){
+    if(!is.null(significant) & circle){
         p <- p + geom_point( data = significant,
                              aes(x = significant$meFDR2,
                                  y = significant$geFDR2),
