@@ -106,3 +106,10 @@ NULL
 #' @format A data frame with 10 rows and 8 variables
 NULL
 
+#' TCGA batch information from Biospecimen Metadata Browser
+#' @docType data
+#' @keywords internal
+#' @name batchinfo
+#' @format A data frame with 11382 rows and 3 variables
+NULL
+
