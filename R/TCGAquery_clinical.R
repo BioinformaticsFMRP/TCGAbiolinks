@@ -499,6 +499,12 @@ colDataPrepare <- function(barcode,query){
     ret <- merge(ret,aux, by = "code", sort = FALSE)
     ret <- ret[match(barcode,ret$barcode),]
 
+    # add batch information
+    message("Adding batch info to summarizedExperiment object")
+    ret <- merge(ret,batch.info, by = "patient", sort = FALSE)
+    ret <- ret[match(barcode,ret$barcode),]
+
+    # Add disease platform and center information
     df <- do.call(rbind,
                   lapply(seq_along(samples),
                          function(i) {
