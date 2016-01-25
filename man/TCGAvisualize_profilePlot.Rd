@@ -49,6 +49,17 @@ subtype <- rep(c(rep("subtype1",10),
            rep("subtype2",10),
            rep("subtype3",10)),3)
 df <- data.frame(cluster,subtype)
-TCGAvisualize_profilePlot(data = df, groupCol = "cluster", subtypeCol = "subtype")
+TCGAvisualize_profilePlot(data = df, groupCol = "cluster", subtypeCol = "subtype",
+                          plot.margin=c(-4.2,-2.5,-0.0,2))
+cluster <- c(rep("cluster1",10),
+             rep("cluster2",20),
+             rep("cluster3",30),
+             rep("cluster4",40))
+subtype <- rep(c(rep("subtype1",5),
+           rep("subtype2",10),
+           rep("subtype3",10)),4)
+df <- data.frame(cluster,subtype)
+TCGAvisualize_profilePlot(data = df, groupCol = "cluster", subtypeCol = "subtype",
+                          plot.margin=c(-4.2,-2.5,-0.5,2))
 }
 
