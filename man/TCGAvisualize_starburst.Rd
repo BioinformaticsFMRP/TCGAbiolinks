@@ -6,7 +6,7 @@
 \usage{
 TCGAvisualize_starburst(met, exp, group1 = NULL, group2 = NULL,
   exp.p.cut = 0.01, met.p.cut = 0.01, diffmean.cut = 0, logFC.cut = 0,
-  names = FALSE, filename = "starburst.pdf",
+  names = FALSE, circle = TRUE, filename = "starburst.pdf",
   ylab = expression(atop("Gene Expression", paste(Log[10],
   " (FDR corrected P values)"))), xlab = expression(atop("DNA Methylation",
   paste(Log[10], " (FDR corrected P values)"))), title = "Starburst Plot",
@@ -42,6 +42,9 @@ change higher than methylation cut-off will be
  highlighted in the plot. And the data frame return will be subseted.}
 
 \item{names}{Add the names of the significant genes? Default: FALSE}
+
+\item{circle}{Circle pair gene/probe that respects diffmean.cut and logFC.cut
+Default: TRUE}
 
 \item{filename}{The filename of the file (it can be pdf, svg, png, etc)}
 
@@ -100,7 +103,7 @@ data <- SummarizedExperiment::SummarizedExperiment(
          colData=colData)
 met <- data
 exp <- data.frame(row.names=sprintf("ID\%03d", 1:20000),
-                  logFC=runif(20000, -0.2, 0.2),
+                  logFC=runif(20000, -5, 5),
                   FDR=runif(20000, 0.01, 1))
 SummarizedExperiment::rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
 SummarizedExperiment::rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
@@ -108,7 +111,7 @@ SummarizedExperiment::rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
 result <- TCGAvisualize_starburst(met,exp,
                                   exp.p.cut = 0.05, met.p.cut = 0.05,
                                   group1="g1",group2="g2",
-                                  diffmean.cut=0.8,
-                                  names=TRUE)
+                                  diffmean.cut=0.0,
+                                  names=TRUE, circle = FALSE)
 }
 

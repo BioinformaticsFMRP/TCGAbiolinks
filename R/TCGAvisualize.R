@@ -779,7 +779,19 @@ TCGAvisualize_Heatmap <- function(data,
 #'            rep("subtype2",10),
 #'            rep("subtype3",10)),3)
 #' df <- data.frame(cluster,subtype)
-#' TCGAvisualize_profilePlot(data = df, groupCol = "cluster", subtypeCol = "subtype")
+#' TCGAvisualize_profilePlot(data = df, groupCol = "cluster", subtypeCol = "subtype",
+#'                           plot.margin=c(-4.2,-2.5,-0.0,2))
+#' cluster <- c(rep("cluster1",10),
+#'              rep("cluster2",20),
+#'              rep("cluster3",30),
+#'              rep("cluster4",40))
+#' subtype <- rep(c(rep("subtype1",5),
+#'            rep("subtype2",10),
+#'            rep("subtype3",10)),4)
+#' df <- data.frame(cluster,subtype)
+#' TCGAvisualize_profilePlot(data = df, groupCol = "cluster", subtypeCol = "subtype",
+#'                           plot.margin=c(-4.2,-2.5,-0.5,2))
+
 #' @return A plot
 TCGAvisualize_profilePlot <- function(data = NULL,
                                       groupCol = NULL,
@@ -793,11 +805,6 @@ TCGAvisualize_profilePlot <- function(data = NULL,
                                       legend.size=1.5,
                                       legend.title.size=1.5,
                                       geom.label.size = 6.0) {
-    # To be removed
-    if (packageVersion("ggplot2") >= 2) {
-        message("sjPlot is not working yet with ggplot version >= 2")
-        return(NULL)
-    }
 
     sjp.setTheme(theme = "scatterw",
                  axis.title.size = axis.title.size,
@@ -895,7 +902,8 @@ TCGAvisualize_profilePlot <- function(data = NULL,
     # Create the horizontal barplot
     p <- .mysjp.stackfrq(data,
                          legendTitle = subtypeCol,
-                         axisTitle.x = groupCol,
+                         #axisTitle.x = groupCol,
+                         axisTitle.x = "",
                          #sort.frq = "last.desc",
                          expand.grid = FALSE,
                          geom.size = width,

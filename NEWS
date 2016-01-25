@@ -1,3 +1,10 @@
+TCGAbiolinks 1.1.17
+---------------------------------------------------------------
+* Adding batch information to the package. batch.info object is available for user
+and TCGAprepare adds automtically info for the summarizedExperiment object
+* TCGAvisualize_starburst new parameter: circle, to draw or not the circles in the plot
+* Database updae
+
 TCGAbiolinks 1.1.16
 ---------------------------------------------------------------
 * Bug fix: subsetByOverlaps was removed from SummarizedExperiment package
