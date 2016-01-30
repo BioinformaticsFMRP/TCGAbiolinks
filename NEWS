@@ -1,9 +1,13 @@
+TCGAbiolinks 1.1.18
+---------------------------------------------------------------
+* Update lgg and gbm subtype information. Source: http://dx.doi.org/10.1016/j.cell.2015.12.028
+
 TCGAbiolinks 1.1.17
 ---------------------------------------------------------------
 * Adding batch information to the package. batch.info object is available for user
 and TCGAprepare adds automtically info for the summarizedExperiment object
 * TCGAvisualize_starburst new parameter: circle, to draw or not the circles in the plot
-* Database updae
+* Database update
 
 TCGAbiolinks 1.1.16
 ---------------------------------------------------------------
