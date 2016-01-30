@@ -528,7 +528,12 @@ colDataPrepare <- function(barcode,query){
 
     for (i in unique(query$Disease)) {
         if (grepl("lgg|gbm|luad|stad|coad|read", i,ignore.case = TRUE)) {
-            subtype <- TCGAquery_subtype(i)
+            if(tolower(i) %in% c("gbm","lgg")){
+                subtype <- lgg.gbm.subtype
+                if(all(colnames(subtype) %in% colnames(ret))) break
+            } else {
+                subtype <- TCGAquery_subtype(i)
+            }
             if (any(ret$patient %in% subtype$patient)) {
                 ret <- merge(ret, subtype,
                              all.x = TRUE ,
@@ -640,8 +645,15 @@ TCGAquery_subtype <- function(tumor){
 
         # The object with the gbm and lgg classification are the same
         # source: http://dx.doi.org/10.1016/j.cell.2015.12.028
-        if(tolower(tumor) == "lgg") tumor <- "lgg.gbm"
-        if(tolower(tumor) == "gbm") tumor <- "lgg.gbm"
+        if(tolower(tumor) %in% c("lgg","gbm")) {
+            aux <- get("lgg.gbm.subtype")
+            if(tolower(tumor) == "gbm"){
+                aux <- subset(aux,aux$Study == "Glioblastoma multiforme")
+            } else {
+            aux <- subset(aux,aux$Study != "Glioblastoma multiforme")
+            }
+            return (aux)
+        }
         return(get(paste0(tolower(tumor),".subtype")))
     } else {
         stop("For the moment we have only subtype for: LGG, GBM, STAD, BRCA, READ, COAD and LUAD")
