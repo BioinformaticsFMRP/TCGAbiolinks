@@ -9,13 +9,13 @@ TCGAprepare_elmer(data, platform, met.na.cut = 0.2, save = FALSE)
 \arguments{
 \item{data}{A data frame or summarized experiment from TCGAPrepare}
 
-\item{platform}{platform of the data}
+\item{platform}{platform of the data. Example: "HumanMethylation450", "IlluminaHiSeq_RNASeqV2"}
 
 \item{met.na.cut}{Define the percentage of NA that the line should have to
 remove the probes for humanmethylation platforms.}
 
 \item{save}{Save object? Default: FALSE.
-Names of the files will be: "Exp_elmer.rda" and   "Met_elmer.rda"}
+Names of the files will be: "Exp_elmer.rda" (object Exp) and "Met_elmer.rda" (object Met)}
 }
 \value{
 Matrix prepared for fetch.mee function
