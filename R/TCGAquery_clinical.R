@@ -311,15 +311,15 @@ clinical_data_site_cancer <- function(cancer){
 #'             "TCGA-2G-AAEX-01A-11D-A42Z-05"))
 TCGAquery_clinic <- function(tumor, clinical_data_type, samples){
 
-    if(missing(clinical_data_type)) stop("Please select the type of clinical data. Use ?TCGAquery_clinic to get a list")
-    if(!missing(samples)) samples <- substr(samples,1,12)
+    if (missing(clinical_data_type)) stop("Please select the type of clinical data. Use ?TCGAquery_clinic to get a list")
+    if (!missing(samples)) samples <- substr(samples,1,12)
 
-    if(!missing(samples) & !missing(tumor)) {
+    if (!missing(samples) & !missing(tumor)) {
         query <- TCGAquery(tumor = tumor, samples = samples, platform = "bio", level=2)
     } else  if(!missing(tumor)) {
-        query <- TCGAquery(tumor = tumor, platform = "bio", level=2)
+        query <- TCGAquery(tumor = tumor, platform = "bio", level = 2)
     } else if(!missing(samples)) {
-        query <- TCGAquery(samples = samples, platform = "bio", level=2)
+        query <- TCGAquery(samples = samples, platform = "bio", level = 2)
     }
 
     # this is one file for all samples, no need to add samples argument
@@ -528,7 +528,12 @@ colDataPrepare <- function(barcode,query){
 
     for (i in unique(query$Disease)) {
         if (grepl("lgg|gbm|luad|stad|coad|read", i,ignore.case = TRUE)) {
-            subtype <- TCGAquery_subtype(i)
+            if(tolower(i) %in% c("gbm","lgg")){
+                subtype <- lgg.gbm.subtype
+                if(all(colnames(subtype) %in% colnames(ret))) break
+            } else {
+                subtype <- TCGAquery_subtype(i)
+            }
             if (any(ret$patient %in% subtype$patient)) {
                 ret <- merge(ret, subtype,
                              all.x = TRUE ,
@@ -637,6 +642,18 @@ TCGAquery_subtype <- function(tumor){
         # COAD and READ are in the same object
         #
         if(tolower(tumor) == "read") tumor <- "coad"
+
+        # The object with the gbm and lgg classification are the same
+        # source: http://dx.doi.org/10.1016/j.cell.2015.12.028
+        if(tolower(tumor) %in% c("lgg","gbm")) {
+            aux <- get("lgg.gbm.subtype")
+            if(tolower(tumor) == "gbm"){
+                aux <- subset(aux,aux$Study == "Glioblastoma multiforme")
+            } else {
+            aux <- subset(aux,aux$Study != "Glioblastoma multiforme")
+            }
+            return (aux)
+        }
         return(get(paste0(tolower(tumor),".subtype")))
     } else {
         stop("For the moment we have only subtype for: LGG, GBM, STAD, BRCA, READ, COAD and LUAD")
