@@ -98,6 +98,65 @@ references:
   issued:
     year: 2010
 
+- id: ref8
+  title: Molecular Profiling Reveals Biologically Discrete Subsets and Pathways of Progression in Diffuse Glioma
+  author: 
+  - family: Ceccarelli, MicheleAnjum, Samreen et al.
+    given:
+  journal: Cell
+  volume: 164
+  number: 3
+  pages: 550-563
+  issued:
+    year: 2016
+
+
+- id: ref9
+  title: Comprehensive molecular profiling of lung adenocarcinoma
+  author: 
+  - family: Cancer Genome Atlas Research Network and others
+    given:
+  journal: Nature
+  volume: 511
+  number: 7511
+  pages: 543-550
+  issued:
+    year: 2014
+
+
+- id: ref10
+  title: Comprehensive molecular characterization of gastric adenocarcinoma
+  author: 
+  - family: Cancer Genome Atlas Research Network and others
+    given:
+  journal: Nature
+  issued:
+    year: 2014
+
+- id: ref11
+  title: Comprehensive molecular portraits of human breast tumours
+  author: 
+  - family: Cancer Genome Atlas Research Network and others
+    given:
+  journal: Nature
+  volume: 490
+  number: 7418
+  pages: 61-70
+  issued:
+    year: 2012
+  
+- id: ref12
+  title: Comprehensive molecular characterization of human colon and rectal cancer
+  author: 
+  - family: Cancer Genome Atlas Research Network and others
+    given:
+  journal: Nature
+  volume: 487
+  number: 7407
+  pages: 330-337
+  issued:
+    year: 2012    
+
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
@@ -431,7 +490,7 @@ print(female_erpos_herpos)
 
 The Cancer Genome Atlas (TCGA) Research Network has reported integrated genome-wide 
 studies of various diseases. We have added some of the subtypes defined by these
-report in our package. The LGG, GBM, STAD, BRCA, READ, COAD and LUAD  tumors 
+report in our package. The LGG[@ref8], GBM [@ref8], STAD [@ref10], BRCA [@ref11], READ [@ref12], COAD [@ref12] and LUAD  [@ref9]  tumors 
 have data added. These subtypes will be automatically added in the summarizedExperiment
 object through TCGAprepare. But you can also use the `TCGAquery_subtype` function
 to retrive this information.
@@ -446,7 +505,7 @@ LGG_path_subtypes <- TCGAquery_subtype(tumor = "lgg")
 A subset of the lgg subytpe is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
-knitr::kable(lgg.subtype[1:10,c(1,2,3,4)], digits = 2, 
+knitr::kable(lgg.gbm.subtype[1:10,c(1,2,3,4)], digits = 2, 
              caption = "Table with LGG molecular subtypes from TCGAquery_subtype",
              row.names = TRUE)
 ```
