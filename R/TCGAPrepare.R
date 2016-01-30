@@ -803,11 +803,11 @@ TCGAprepare <- function(query,
 #' @description Prepare the data for ELEMR package
 #' @return Matrix prepared for fetch.mee function
 #' @param data A data frame or summarized experiment from TCGAPrepare
-#' @param platform platform of the data
+#' @param platform platform of the data. Example: "HumanMethylation450", "IlluminaHiSeq_RNASeqV2"
 #' @param met.na.cut Define the percentage of NA that the line should have to
 #'  remove the probes for humanmethylation platforms.
 #' @param save Save object? Default: FALSE.
-#' Names of the files will be: "Exp_elmer.rda" and   "Met_elmer.rda"
+#' Names of the files will be: "Exp_elmer.rda" (object Exp) and "Met_elmer.rda" (object Met)
 #' @export
 #' @examples
 #' df <- data.frame(runif(200, 1e5, 1e6),runif(200, 1e5, 1e6))
