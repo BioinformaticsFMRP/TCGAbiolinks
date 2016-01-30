@@ -67,7 +67,7 @@ Imports:
     dplyr,
     parallel,
     xml2,
-    sjPlot,
+    sjPlot (>= 1.9),
     magrittr,
     CNTools,
     cghMCR,
