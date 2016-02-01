@@ -2,7 +2,9 @@
 
 ### Installation ###
 ```R
-source("http://bioconductor.org/biocLite.R")
-biocLite("TCGAbiolinks")
+devtools::install_github(repo = "BioinformaticsFMRP/TCGAbiolinks")
 ```
 
+### Manual ### 
+
+http://bioconductor.org/packages/devel/bioc/vignettes/TCGAbiolinks/inst/doc/tcgaBiolinks.html

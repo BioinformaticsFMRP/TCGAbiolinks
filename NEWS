@@ -1,3 +1,8 @@
+TCGAbiolinks 1.1.19
+---------------------------------------------------------------
+* Bug fix: preparing the data for "IlluminaGA_DNASeq" platform and
+TCGAquery_maf had a problem for some files.
+
 TCGAbiolinks 1.1.18
 ---------------------------------------------------------------
 * Update lgg and gbm subtype information. Source: http://dx.doi.org/10.1016/j.cell.2015.12.028
