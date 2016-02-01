@@ -257,7 +257,7 @@ TCGAprepare <- function(query,
         files <- files[idx]
         for (i in seq_along(files)) {
             data <- read.table(files[i], fill = TRUE,
-                               comment.char = "#", header = TRUE, sep = "\t")
+                               comment.char = "#", header = TRUE, sep = "\t", quote="")
             if (i == 1) {
                 df <- data
             } else {
