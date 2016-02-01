@@ -1002,7 +1002,7 @@ TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
     if (!is.null(archive.name)) df <- df[grepl(archive.name,df[,"Archive.Name"],
                                                ignore.case = TRUE),]
 
-    message("We found these maf  below")
+    message("We found these maf below:")
     print(df[,c(1,5,7)])
 
     if(nrow(df) > 1){
@@ -1031,7 +1031,7 @@ TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
 
     suppressWarnings({
         ret <- read.table(basename(df[1,]$Deploy.Location), fill = TRUE,
-                          comment.char = "#", header = TRUE, sep = "\t")
+                          comment.char = "#", header = TRUE, sep = "\t", quote='')
     })
     ret$bcr_patient_barcode <- substr(ret$Tumor_Sample_Barcode,1,12)
 
