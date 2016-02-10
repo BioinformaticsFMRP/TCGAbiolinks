@@ -258,10 +258,17 @@ TCGAprepare <- function(query,
         for (i in seq_along(files)) {
             data <- read.table(files[i], fill = TRUE,
                                comment.char = "#", header = TRUE, sep = "\t", quote="")
+
+            # some center has different ways to name the collums
+            idx.pos <- grep("Start_position", colnames(data))
+            colnames(data)[idx.pos] <- "Start_Position"
+            idx.pos <- grep("End_position", colnames(data))
+            colnames(data)[idx.pos] <- "End_Position"
+
             if (i == 1) {
                 df <- data
             } else {
-                df <- rbind(df, data)
+                df <-  plyr::rbind.fill(df, data)
             }
             setTxtProgressBar(pb, i)
         }
