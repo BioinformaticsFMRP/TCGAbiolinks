@@ -262,7 +262,7 @@ is.linux <- function() {
 #' @importFrom scales muted
 # @import plyr
 # @import scales
-#' @import grid
+# @import grid
 #' @import stats
 #' @keywords internal
 #' @return  a ggplot2 plot
