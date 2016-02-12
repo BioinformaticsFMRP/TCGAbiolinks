@@ -14,7 +14,7 @@
 #' (maximum cluster number to evaluate.). Each element is a list containing
 #' consensusMatrix (numerical matrix), consensusTree (hclust), consensusClass
 #' (consensus class asssignments). ConsensusClusterPlus also produces images.
-TCGAanalyze_Clustering<- function(tabDF, method,  methodHC = "ward.D2"){
+TCGAanalyze_Clustering <- function(tabDF, method,  methodHC = "ward.D2"){
 
     if( method == "hclust"){
         ans <- hclust(ddist <- dist(tabDF), method = methodHC)
@@ -128,7 +128,7 @@ TCGAanalyze_Preprocessing<- function(object,
 
     samplesCor <- rowMeans(c)
     objectWO <-  assay(object,"raw_counts")[, samplesCor > cor.cut]
-    colnames(objectWO) <- colData(object)$sample
+    #colnames(objectWO) <- colData(object)$sample[,samplesCor > cor.cut]
 
     dev.off()
     return(objectWO)
