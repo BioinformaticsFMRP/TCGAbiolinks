@@ -76,6 +76,8 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 
             url <- gsub(".tar.gz","",data[i,]$deployLocation)
             files <- getFileNames(paste0(root,url))
+            manifest <- fread(paste0(root,url,"/",files[grep("MANIFEST",files)]), data.table = F)
+            print(head(manifest))
             idx <- grep("MANIFEST|README|CHANGES|DESCRIPTION|DATA_USE|Name|Size|Parent|Last",files)
             files <- files[-idx]
 
@@ -101,13 +103,25 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 
             for (i in seq_along(files)) {
                 if (force || !file.exists(file.path(path,folder,files[i])) ||
-                    file.size(file.path(path,folder,files[i]))==0 ) {
-                    message(paste0("[",i,"] ", files[i],"\n"))
-                    suppressWarnings(
-                        download(paste0(root,url,"/",files[i]),
-                                 file.path(path,folder,files[i]),
-                                 quiet = TRUE)
-                    )
+                    tools::md5sum(file.path(path,folder,files[i])) != manifest[which(manifest[,2] == files[i]),1]) {
+
+                    # repeat until not corrupted
+                    repeat{
+                        message(paste0("[",i,"] ", files[i],"\n"))
+                        suppressWarnings(
+                            download(paste0(root,url,"/",files[i]),
+                                     file.path(path,folder,files[i]),
+                                     quiet = TRUE)
+                        )
+                        md5 <- tools::md5sum(file.path(path,folder,files[i]))
+                        corrupted <- md5 != manifest[which(manifest[,2] == files[i]),1]
+                        # if corrupted try to download again!
+                        if(!corrupted){
+                            break
+                        }
+                        message("This downloaded file might be corrupted, we are downloading it again.")
+
+                    }
                 }
                 setTxtProgressBar(pb, i)
             }
