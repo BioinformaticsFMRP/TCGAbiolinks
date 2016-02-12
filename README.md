@@ -5,6 +5,6 @@
 devtools::install_github(repo = "BioinformaticsFMRP/TCGAbiolinks")
 ```
 
-### Manual ### 
+### Manual ###
 
 http://bioconductor.org/packages/devel/bioc/vignettes/TCGAbiolinks/inst/doc/tcgaBiolinks.html
