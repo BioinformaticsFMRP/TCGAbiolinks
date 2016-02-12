@@ -56,12 +56,18 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             file <- paste0(path, "/", basename(data[i, "deployLocation"]))
             cat(paste0("\nDownloading:",
                        basename(data[i, "deployLocation"]),"\n"))
-            if (force || !file.exists(file) || file.size(file)==0 ) {
 
-                suppressWarnings(
-                    download(paste0(root, data[i, "deployLocation"]),
-                             file, quiet = TRUE)
-                )
+            md5 <- fread(paste0(root, data[i, "deployLocation"],".md5"),header = F,data.table = F)[1]
+
+            if (force || !file.exists(file) ||  tools::md5sum(file) != md5) {
+                repeat{
+                    suppressWarnings(
+                        download(paste0(root, data[i, "deployLocation"]),
+                                 file, quiet = TRUE)
+                    )
+                    if(tools::md5sum(file) == md5) break
+                    message("The data downloaded might be corrupted. We will download it again")
+                }
                 untar(file, exdir = path)
             }
             setTxtProgressBar(pb, i)
