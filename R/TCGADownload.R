@@ -47,7 +47,7 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
     # Downloading the folder
     if (is.null(type) && is.null(samples) ) {
         message(rep("-=",(nchar(file.path(path))/2) + 4))
-        message(paste0("| Downloading:", dim(data), " folders"))
+        message(paste0("| Downloading:", nrow(data), " folders"))
         message(paste0("| Path:", file.path(path)))
         message(rep("-=",(nchar(file.path(path))/2) + 4))
         pb <- txtProgressBar(min = 0, max = nrow(data), style = 3)
@@ -56,12 +56,18 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             file <- paste0(path, "/", basename(data[i, "deployLocation"]))
             cat(paste0("\nDownloading:",
                        basename(data[i, "deployLocation"]),"\n"))
-            if (force || !file.exists(file) || file.size(file)==0 ) {
 
-                suppressWarnings(
-                    download(paste0(root, data[i, "deployLocation"]),
-                             file, quiet = TRUE)
-                )
+            md5 <- fread(paste0(root, data[i, "deployLocation"],".md5"),header = F,data.table = F)[1]
+
+            if (force || !file.exists(file) ||  tools::md5sum(file) != md5) {
+                repeat{
+                    suppressWarnings(
+                        download(paste0(root, data[i, "deployLocation"]),
+                                 file, quiet = TRUE)
+                    )
+                    if(tools::md5sum(file) == md5) break
+                    message("The data downloaded might be corrupted. We will download it again")
+                }
                 untar(file, exdir = path)
             }
             setTxtProgressBar(pb, i)
@@ -76,6 +82,8 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 
             url <- gsub(".tar.gz","",data[i,]$deployLocation)
             files <- getFileNames(paste0(root,url))
+            manifest <- fread(paste0(root,url,"/",files[grep("MANIFEST",files)]), data.table = F)
+            print(head(manifest))
             idx <- grep("MANIFEST|README|CHANGES|DESCRIPTION|DATA_USE|Name|Size|Parent|Last",files)
             files <- files[-idx]
 
@@ -101,13 +109,25 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 
             for (i in seq_along(files)) {
                 if (force || !file.exists(file.path(path,folder,files[i])) ||
-                    file.size(file.path(path,folder,files[i]))==0 ) {
-                    message(paste0("[",i,"] ", files[i],"\n"))
-                    suppressWarnings(
-                        download(paste0(root,url,"/",files[i]),
-                                 file.path(path,folder,files[i]),
-                                 quiet = TRUE)
-                    )
+                    tools::md5sum(file.path(path,folder,files[i])) != manifest[which(manifest[,2] == files[i]),1]) {
+
+                    # repeat until not corrupted
+                    repeat{
+                        message(paste0("[",i,"] ", files[i],"\n"))
+                        suppressWarnings(
+                            download(paste0(root,url,"/",files[i]),
+                                     file.path(path,folder,files[i]),
+                                     quiet = TRUE)
+                        )
+                        md5 <- tools::md5sum(file.path(path,folder,files[i]))
+                        corrupted <- md5 != manifest[which(manifest[,2] == files[i]),1]
+                        # if corrupted try to download again!
+                        if(!corrupted){
+                            break
+                        }
+                        message("This downloaded file might be corrupted, we are downloading it again.")
+
+                    }
                 }
                 setTxtProgressBar(pb, i)
             }
