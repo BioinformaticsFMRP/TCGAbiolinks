@@ -1,3 +1,7 @@
+TCGAbiolinks 1.1.21
+---------------------------------------------------------------
+* Improvement: TCGADownload checks for data integrity.
+
 TCGAbiolinks 1.1.20
 ---------------------------------------------------------------
 * Bug fix: TCGAanalyze_Preprocessing subseting was incorrect in case there
