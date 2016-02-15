@@ -83,7 +83,6 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             url <- gsub(".tar.gz","",data[i,]$deployLocation)
             files <- getFileNames(paste0(root,url))
             manifest <- fread(paste0(root,url,"/",files[grep("MANIFEST",files)]), data.table = F)
-            print(head(manifest))
             idx <- grep("MANIFEST|README|CHANGES|DESCRIPTION|DATA_USE|Name|Size|Parent|Last",files)
             files <- files[-idx]
 
