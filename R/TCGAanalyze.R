@@ -720,13 +720,11 @@ TCGAanalyze_LevelTab <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
     MeanTumor <- matrix(0,nrow(TF_enriched),1)
     MeanDiffTumorNormal <- matrix(0,nrow(TF_enriched),1)
 
-
     for (i in 1:nrow(TF_enriched)) {
-        #print(paste(i, "of", nrow(TF_enriched),TF_enriched[i]))
-        TableLevel[i,typeCond1] <- mean(TableCond1[rownames(TableCond1) %in%
-                                                       TF_enriched[i] , ])
-        TableLevel[i,typeCond2] <- mean(TableCond2[rownames(TableCond2) %in%
-                                                       TF_enriched[i] , ])
+        TableLevel[i,typeCond1] <- mean(as.numeric(TableCond1[rownames(TableCond1) %in%
+                                                       TF_enriched[i] , ]))
+        TableLevel[i,typeCond2] <- mean(as.numeric(TableCond2[rownames(TableCond2) %in%
+                                                       TF_enriched[i] , ]))
     }
 
 
