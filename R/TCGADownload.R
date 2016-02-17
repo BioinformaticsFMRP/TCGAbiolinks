@@ -41,6 +41,9 @@
 TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                          force = FALSE) {
 
+
+    if(is.windows()) mode <- "wb" else  mode <- "w"
+
     dir.create(path, showWarnings = FALSE, recursive = TRUE)
     root <- "https://tcga-data.nci.nih.gov"
 
@@ -61,10 +64,9 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 
             if (force || !file.exists(file) ||  tools::md5sum(file) != md5) {
                 repeat{
-                    suppressWarnings(
-                        download(paste0(root, data[i, "deployLocation"]),
-                                 file, quiet = TRUE)
-                    )
+                    download(paste0(root, data[i, "deployLocation"]),
+                             file, quiet = TRUE,mode = mode)
+
                     if(tools::md5sum(file) == md5) break
                     message("The data downloaded might be corrupted. We will download it again")
                 }
@@ -113,11 +115,10 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                     # repeat until not corrupted
                     repeat{
                         message(paste0("[",i,"] ", files[i],"\n"))
-                        suppressWarnings(
-                            download(paste0(root,url,"/",files[i]),
-                                     file.path(path,folder,files[i]),
-                                     quiet = TRUE)
-                        )
+                        download(paste0(root,url,"/",files[i]),
+                                 file.path(path,folder,files[i]),
+                                 quiet = TRUE,mode = mode)
+
                         md5 <- tools::md5sum(file.path(path,folder,files[i]))
                         corrupted <- md5 != manifest[which(manifest[,2] == files[i]),1]
                         # if corrupted try to download again!
