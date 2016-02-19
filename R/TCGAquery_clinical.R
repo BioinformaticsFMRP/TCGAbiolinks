@@ -495,6 +495,7 @@ colDataPrepare <- function(barcode,query){
     ret <- DataFrame(sample = samples,
                      barcode = barcode,
                      patient = substr(barcode, 1, 12),
+                     patient.type = substr(barcode, 1, 16),
                      code = substr(barcode, 14, 15))
     ret <- merge(ret,aux, by = "code", sort = FALSE)
     ret <- ret[match(barcode,ret$barcode),]
@@ -548,9 +549,16 @@ colDataPrepare <- function(barcode,query){
                              sort = FALSE,
                              by = "sample")
             }
+        } else if (grepl("thca", i,ignore.case = TRUE)) {
+            subtype <- TCGAquery_subtype(i)
+            if (any(ret$patient.type %in% subtype$patient.type)) {
+                ret <- merge(ret, subtype,
+                             all.x = TRUE ,
+                             sort = FALSE,
+                             by = "patient.type")
+            }
         }
     }
-
     ret <- ret[match(barcode,ret$barcode),]
 
     rownames(ret) <- ret$barcode
@@ -573,7 +581,7 @@ colDataPrepare <- function(barcode,query){
 #' dataSubt <- TCGAquery_subtype(tumor = "lgg")
 #' @return a data.frame with barcode and molecular subtypes
 TCGAquery_subtype <- function(tumor){
-    if (grepl("lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan", tumor,ignore.case = TRUE)) {
+    if (grepl("lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca", tumor,ignore.case = TRUE)) {
         # COAD and READ are in the same object
         #
         if(tolower(tumor) == "read") tumor <- "coad"
