@@ -257,7 +257,7 @@ TCGAUpdate <- function(){
              EAGenes,gene.location,listEA_pathways,
              lgg.gbm.subtype, luad.subtype,skcm.subtype,
              hnsc.subtype, kich.subtype, lusc.subtype, ucec.subtype,
-             pancan.subtype,
+             pancan.subtype, thca.subtype,
              stad.subtype, brca.subtype, coad.subtype,
              internal = TRUE,overwrite = TRUE)
 }
