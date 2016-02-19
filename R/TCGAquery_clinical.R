@@ -492,10 +492,9 @@ colDataPrepare <- function(barcode,query){
                     "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
     samples <- str_match(barcode,regex)[,1]
 
-    ret <- DataFrame(sample = samples,
-                     barcode = barcode,
+    ret <- DataFrame(barcode = barcode,
                      patient = substr(barcode, 1, 12),
-                     patient.type = substr(barcode, 1, 16),
+                     sample = substr(barcode, 1, 16),
                      code = substr(barcode, 14, 15))
     ret <- merge(ret,aux, by = "code", sort = FALSE)
     ret <- ret[match(barcode,ret$barcode),]
@@ -528,7 +527,7 @@ colDataPrepare <- function(barcode,query){
     ret <- cbind(ret,df)
 
     for (i in unique(query$Disease)) {
-        if (grepl("lgg|gbm|luad|stad|coad|read|skcm|hnsc|kich|lusc|ucec", i,ignore.case = TRUE)) {
+        if (grepl("lgg|gbm|luad|stad|coad|read|skcm|hnsc|kich|lusc|ucec|kirp|prad|kirc", i,ignore.case = TRUE)) {
             if(tolower(i) %in% c("gbm","lgg")){
                 subtype <- lgg.gbm.subtype
                 if(all(colnames(subtype) %in% colnames(ret))) break
@@ -543,19 +542,20 @@ colDataPrepare <- function(barcode,query){
             }
         } else if (grepl("brca", i,ignore.case = TRUE)) {
             subtype <- TCGAquery_subtype(i)
+            if (any(ret$barcode %in% subtype$barcode)) {
+                ret <- merge(ret, subtype,
+                             all.x = TRUE ,
+                             sort = FALSE,
+                             by = "barcode")
+            }
+        } else if (grepl("thca", i,ignore.case = TRUE)) {
+            print("ok")
+            subtype <- TCGAquery_subtype(i)
             if (any(ret$sample %in% subtype$sample)) {
                 ret <- merge(ret, subtype,
                              all.x = TRUE ,
                              sort = FALSE,
                              by = "sample")
-            }
-        } else if (grepl("thca", i,ignore.case = TRUE)) {
-            subtype <- TCGAquery_subtype(i)
-            if (any(ret$patient.type %in% subtype$patient.type)) {
-                ret <- merge(ret, subtype,
-                             all.x = TRUE ,
-                             sort = FALSE,
-                             by = "patient.type")
             }
         }
     }
@@ -563,8 +563,6 @@ colDataPrepare <- function(barcode,query){
 
     rownames(ret) <- ret$barcode
     ret$code <- NULL
-    ret$barcode <- NULL
-
     return(DataFrame(ret))
 }
 
@@ -581,7 +579,8 @@ colDataPrepare <- function(barcode,query){
 #' dataSubt <- TCGAquery_subtype(tumor = "lgg")
 #' @return a data.frame with barcode and molecular subtypes
 TCGAquery_subtype <- function(tumor){
-    if (grepl("lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca", tumor,ignore.case = TRUE)) {
+    if (grepl("lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc",
+              tumor,ignore.case = TRUE)) {
         # COAD and READ are in the same object
         #
         if(tolower(tumor) == "read") tumor <- "coad"
