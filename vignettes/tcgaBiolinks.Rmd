@@ -218,6 +218,17 @@ references:
   issued:
     year: 2013   
 
+- id: ref18
+  title: Integrated genomic characterization of papillary thyroid carcinoma
+  author: 
+  - family: Cancer Genome Atlas Research Network and others
+    given:
+  journal: Cell
+  volume: 159
+  number: 3
+  pages: 676-690
+  issued:
+    year: 2014   
 
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -553,7 +564,7 @@ print(female_erpos_herpos)
 The Cancer Genome Atlas (TCGA) Research Network has reported integrated genome-wide 
 studies of various diseases. We have added some of the subtypes defined by these
 report in our package. The BRCA [@ref11], COAD [@ref12], GBM [@ref8], HNSC [@ref14], KICH [@ref15], LGG [@ref8], LUAD [@ref9], 
-LUSC[@ref16], READ [@ref12],  SKCM [@ref13], STAD [@ref10], UCEC [@ref17] tumors have data added. 
+LUSC[@ref16], READ [@ref12],  SKCM [@ref13], STAD [@ref10], THCA [@ref18], UCEC [@ref17] tumors have data added. 
 These subtypes will be automatically added in the summarizedExperiment
 object through TCGAprepare. But you can also use the `TCGAquery_subtype` function
 to retrive this information.
