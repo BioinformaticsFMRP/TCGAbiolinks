@@ -527,7 +527,7 @@ colDataPrepare <- function(barcode,query){
     ret <- cbind(ret,df)
 
     for (i in unique(query$Disease)) {
-        if (grepl("lgg|gbm|luad|stad|coad|read", i,ignore.case = TRUE)) {
+        if (grepl("lgg|gbm|luad|stad|coad|read|skcm|hnsc|kich|lusc|ucec", i,ignore.case = TRUE)) {
             if(tolower(i) %in% c("gbm","lgg")){
                 subtype <- lgg.gbm.subtype
                 if(all(colnames(subtype) %in% colnames(ret))) break
@@ -560,71 +560,6 @@ colDataPrepare <- function(barcode,query){
     return(DataFrame(ret))
 }
 
-#' @importFrom xlsx read.xlsx2
-getsubtypes <- function(tumor = NULL, path = ".") {
-
-    dir.create(path, showWarnings = FALSE, recursive = TRUE)
-    root <- "https://tcga-data.nci.nih.gov/docs/publications/"
-
-    if(grepl("lgg",tumor,ignore.case = TRUE)){
-        link <- paste0(root,"lgg_2015/S1.Table.Revision.xlsx")
-    }
-    if(grepl("gbm",tumor,ignore.case = TRUE)){
-        link <- paste0(root,"gbm_2013/supplement/Molecular_subtype_classification.xlsx")
-    }
-
-    if (grepl("luad",tumor,ignore.case = TRUE)){
-        link <- paste0(root,"luad_2014/tcga.luad.gene.expression.subtypes.20121025.csv")
-    }
-
-    if (grepl("stad",tumor,ignore.case = TRUE)){
-        link <- paste0(root,"stad_2014/STAD%20Master%20Patient%20Table%2020140207.xlsx")
-    }
-
-    if (grepl("brca",tumor,ignore.case = TRUE)){
-        link <- paste0(root,"brca_2012/BRCA.547.PAM50.SigClust.Subtypes.txt")
-    }
-
-    # COAD and READ are in the zip file inside
-    #http://www.nature.com/nature/journal/v487/n7407/full/nature11252.html#supplementary-information
-
-    fname <- paste0(path, "/", basename(link))
-    fname <- gsub(" ","_",fname)
-    link <- gsub(" ","%20",link)
-
-    suppressWarnings(
-        if (!file.exists(fname)) {
-            download(link,fname, quiet = TRUE,  mode = "wb")
-        }
-    )
-
-    message("Adding subytpes information for", tumor, "samples")
-    message(paste0("Source:", link))
-
-    if (grepl("lgg",tumor,ignore.case = TRUE)){
-        subtype <- read.xlsx2(fname,1,stringAsFactor=FALSE, header=TRUE)
-        subtype <- merge(subtype,read.xlsx2(fname,2,stringAsFactor=FALSE, header=TRUE))
-    }
-    if (grepl("gbm",tumor,ignore.case = TRUE)){
-        subtype <- read.xlsx2(fname,1,stringAsFactor=FALSE, header=TRUE, startRow = 3)
-    }
-    if (grepl("luad",tumor,ignore.case = TRUE)){
-        subtype <- read.csv(fname)
-    }
-    if (grepl("stad",tumor,ignore.case = TRUE)){
-        subtype <- read.xlsx2(fname,1,stringAsFactor=FALSE, header=TRUE)
-    }
-
-    if (grepl("brca",tumor,ignore.case = TRUE)){
-        subtype <- fread(link,header = TRUE)
-        setnames(subtype,1,"sample")
-        return(subtype)
-    }
-    colnames(subtype)[1] <- "patient"
-
-    return(subtype)
-}
-
 #' @title Retrieve molecular subtypes for a given tumor
 #' @description
 #'   TCGAquery_subtype Retrieve molecular subtypes for a given tumor
@@ -638,7 +573,7 @@ getsubtypes <- function(tumor = NULL, path = ".") {
 #' dataSubt <- TCGAquery_subtype(tumor = "lgg")
 #' @return a data.frame with barcode and molecular subtypes
 TCGAquery_subtype <- function(tumor){
-    if (grepl("lgg|gbm|luad|stad|brca|coad|read", tumor,ignore.case = TRUE)) {
+    if (grepl("lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan", tumor,ignore.case = TRUE)) {
         # COAD and READ are in the same object
         #
         if(tolower(tumor) == "read") tumor <- "coad"
