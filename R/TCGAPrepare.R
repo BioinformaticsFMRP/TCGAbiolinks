@@ -44,6 +44,7 @@
 #' DEFAULT: FALSE. (For the moment only working for methylation data)
 #' @param summarizedExperiment Output as SummarizedExperiment?
 #' Default: \code{FALSE}
+#' @param add.subtype Add subtype information from tcgaquery_subtype? Default: \code{FALSE}
 #' @examples
 #' sample <- "TCGA-06-0939-01A-01D-1228-05"
 #' query <- TCGAquery(tumor = "GBM",samples = sample, level = 3)
@@ -73,7 +74,8 @@ TCGAprepare <- function(query,
                         filename = NULL,
                         add.mutation.genes = FALSE,
                         reannotate = FALSE,
-                        summarizedExperiment = TRUE){
+                        summarizedExperiment = TRUE,
+                        add.subtype = FALSE){
 
     if (is.null(dir)) {
         message("Argument dir is NULL. Plese provide the directory
@@ -175,7 +177,7 @@ TCGAprepare <- function(query,
                                  Gene_Symbol = df$Gene_Symbol)
 
             names(rowRanges) <- as.character(df$Composite.Element.REF)
-            colData <-  colDataPrepare(colnames(df)[5:ncol(df)],query)
+            colData <-  colDataPrepare(colnames(df)[5:ncol(df)],query,add.subtype = add.subtype)
             assay <- data.matrix(subset(df,select = c(5:ncol(df))))
 
             if(reannotate){
@@ -374,7 +376,7 @@ TCGAprepare <- function(query,
                     RPKM=data.matrix(subset(df,select=seq(4,ncol(df),3))))
 
             }
-            colData <- colDataPrepare(as.character(barcode), query)
+            colData <- colDataPrepare(as.character(barcode), query,add.subtype = add.subtype)
             rse <- SummarizedExperiment(assays=assays,
                                         rowRanges=rowRanges,
                                         colData=colData)
@@ -431,7 +433,7 @@ TCGAprepare <- function(query,
             regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
-            colData <- colDataPrepare(barcode,query)
+            colData <- colDataPrepare(barcode,query,add.subtype = add.subtype)
 
             assays <- SimpleList(raw_counts=data.matrix(
                 subset(merged,select=seq(3,2+length(barcode)))
@@ -489,7 +491,7 @@ TCGAprepare <- function(query,
             regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
-            colData <- colDataPrepare(barcode,query)
+            colData <- colDataPrepare(barcode,query,add.subtype = add.subtype)
 
             suppressWarnings(
                 assays <- SimpleList(raw_counts=data.matrix(
@@ -639,7 +641,7 @@ TCGAprepare <- function(query,
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
 
             barcode <- unique(unlist(str_match_all(colnames(df),regex)))
-            colData <- colDataPrepare(barcode,query)
+            colData <- colDataPrepare(barcode,query,add.subtype = add.subtype)
 
             rse <- SummarizedExperiment(assays=assays,
                                         rowRanges=rowRanges,
