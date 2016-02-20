@@ -458,7 +458,7 @@ TCGAquery_clinicFilt <- function(barcode,
 #' @importFrom S4Vectors DataFrame
 #' @importFrom stringr str_match
 #' @importFrom xlsx read.xlsx2
-colDataPrepare <- function(barcode,query){
+colDataPrepare <- function(barcode,query,add.subtype = FALSE){
 
     code <- c('01','02','03','04','05','06','07','08','09','10','11',
               '12','13','14','20','40','50','60','61')
@@ -525,37 +525,38 @@ colDataPrepare <- function(barcode,query){
                   ))
 
     ret <- cbind(ret,df)
-
-    for (i in unique(query$Disease)) {
-        if (grepl("lgg|gbm|luad|stad|coad|read|skcm|hnsc|kich|lusc|ucec|kirp|prad|kirc", i,ignore.case = TRUE)) {
-            if(tolower(i) %in% c("gbm","lgg")){
-                subtype <- lgg.gbm.subtype
-                if(all(colnames(subtype) %in% colnames(ret))) break
-            } else {
+    if(add.subtype == TRUE){
+        for (i in unique(query$Disease)) {
+            if (grepl("lgg|gbm|luad|stad|coad|read|skcm|hnsc|kich|lusc|ucec|kirp|prad|kirc", i,ignore.case = TRUE)) {
+                if(tolower(i) %in% c("gbm","lgg")){
+                    subtype <- lgg.gbm.subtype
+                    if(all(colnames(subtype) %in% colnames(ret))) break
+                } else {
+                    subtype <- TCGAquery_subtype(i)
+                }
+                if (any(ret$patient %in% subtype$patient)) {
+                    ret <- merge(ret, subtype,
+                                 all.x = TRUE ,
+                                 sort = FALSE,
+                                 by = "patient")
+                }
+            } else if (grepl("brca", i,ignore.case = TRUE)) {
                 subtype <- TCGAquery_subtype(i)
-            }
-            if (any(ret$patient %in% subtype$patient)) {
-                ret <- merge(ret, subtype,
-                             all.x = TRUE ,
-                             sort = FALSE,
-                             by = "patient")
-            }
-        } else if (grepl("brca", i,ignore.case = TRUE)) {
-            subtype <- TCGAquery_subtype(i)
-            if (any(ret$barcode %in% subtype$barcode)) {
-                ret <- merge(ret, subtype,
-                             all.x = TRUE ,
-                             sort = FALSE,
-                             by = "barcode")
-            }
-        } else if (grepl("thca", i,ignore.case = TRUE)) {
-            print("ok")
-            subtype <- TCGAquery_subtype(i)
-            if (any(ret$sample %in% subtype$sample)) {
-                ret <- merge(ret, subtype,
-                             all.x = TRUE ,
-                             sort = FALSE,
-                             by = "sample")
+                if (any(ret$barcode %in% subtype$barcode)) {
+                    ret <- merge(ret, subtype,
+                                 all.x = TRUE ,
+                                 sort = FALSE,
+                                 by = "barcode")
+                }
+            } else if (grepl("thca", i,ignore.case = TRUE)) {
+                print("ok")
+                subtype <- TCGAquery_subtype(i)
+                if (any(ret$sample %in% subtype$sample)) {
+                    ret <- merge(ret, subtype,
+                                 all.x = TRUE ,
+                                 sort = FALSE,
+                                 by = "sample")
+                }
             }
         }
     }
@@ -592,7 +593,7 @@ TCGAquery_subtype <- function(tumor){
             if(tolower(tumor) == "gbm"){
                 aux <- subset(aux,aux$Study == "Glioblastoma multiforme")
             } else {
-            aux <- subset(aux,aux$Study != "Glioblastoma multiforme")
+                aux <- subset(aux,aux$Study != "Glioblastoma multiforme")
             }
             return (aux)
         }
