@@ -7,7 +7,7 @@
 \usage{
 TCGAprepare(query, dir = NULL, samples = NULL, type = NULL,
   save = FALSE, filename = NULL, add.mutation.genes = FALSE,
-  reannotate = FALSE, summarizedExperiment = TRUE)
+  reannotate = FALSE, summarizedExperiment = TRUE, add.subtype = FALSE)
 }
 \arguments{
 \item{query}{TCGAquery output}
@@ -30,6 +30,8 @@ DEFAULT: FALSE. (For the moment only working for methylation data)}
 
 \item{summarizedExperiment}{Output as SummarizedExperiment?
 Default: \code{FALSE}}
+
+\item{add.subtype}{Add subtype information from tcgaquery_subtype? Default: \code{FALSE}}
 }
 \value{
 A SummarizedExperiment object (If SummarizedExperiment = \code{FALSE},
