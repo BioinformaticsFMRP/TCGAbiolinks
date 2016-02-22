@@ -157,6 +157,116 @@ references:
   issued:
     year: 2012    
 
+- id: ref13
+  title: Genomic classification of cutaneous melanoma
+  author: 
+  - family: Cancer Genome Atlas Research Network and others
+    given:
+  journal: Cell
+  volume: 161
+  number: 7
+  pages: 1681-1696
+  issued:
+    year: 2015    
+
+- id: ref14
+  title: Comprehensive genomic characterization of head and neck squamous cell carcinomas
+  author: 
+  - family: Cancer Genome Atlas Research Network and others
+    given:
+  journal: Nature
+  volume: 517
+  number: 7536
+  pages: 576-582
+  issued:
+    year: 2015    
+
+- id: ref15
+  title: The somatic genomic landscape of chromophobe renal cell carcinoma
+  author: 
+  - family: Davis, Caleb F and Ricketts, Christopher J and Wang, Min and Yang, Lixing and Cherniack, Andrew D and Shen, Hui and Buhay, Christian and Kang, Hyojin and Kim, Sang Cheol and Fahey, Catherine C and others
+    given:
+  journal: Cancer Cell
+  volume: 26
+  number: 3
+  pages: 319-330
+  issued:
+    year: 2014    
+
+
+- id: ref16
+  title: Comprehensive genomic characterization of squamous cell lung cancers
+  author: 
+  - family: Cancer Genome Atlas Research Network and others
+    given:
+  journal: Nature
+  volume: 489
+  number: 7417
+  pages: 519-525
+  issued:
+    year: 2012   
+
+- id: ref17
+  title: Integrated genomic characterization of endometrial carcinoma
+  author: 
+  - family: Cancer Genome Atlas Research Network and others
+    given:
+  journal: Nature
+  volume: 497
+  number: 7447
+  pages: 67-73
+  issued:
+    year: 2013   
+
+- id: ref18
+  title: Integrated genomic characterization of papillary thyroid carcinoma
+  author: 
+  - family: Cancer Genome Atlas Research Network and others
+    given:
+  journal: Cell
+  volume: 159
+  number: 3
+  pages: 676-690
+  issued:
+    year: 2014   
+
+- id: ref19
+  title: The molecular taxonomy of primary prostate cancer
+  author: 
+  - family: Cancer Genome Atlas Research Network and others
+    given:
+  journal: Cell
+  volume: 163
+  number: 4
+  pages: 1011-1025
+  issued:
+    year: 2015   
+    
+
+- id: ref20
+  title: Comprehensive Molecular Characterization of Papillary Renal-Cell Carcinoma
+  author: 
+  - family: Linehan, W Marston and Spellman, Paul T and Ricketts, Christopher J and Creighton, Chad J and Fei, Suzanne S and Davis, Caleb and Wheeler, David A and Murray, Bradley A and Schmidt, Laura and Vocke, Cathy D and others
+    given:
+  journal: NEW ENGLAND JOURNAL OF MEDICINE
+  volume: 374
+  number: 2
+  pages: 135-145
+  issued:
+    year: 2016    
+    
+- id: ref21
+  title: Comprehensive molecular characterization of clear cell renal cell carcinoma
+  author: 
+  - family: Cancer Genome Atlas Research Network and others
+    given:
+  journal: Nature
+  volume: 499
+  number: 7456
+  pages: 43-49
+  issued:
+    year: 2013        
+    
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
@@ -490,8 +600,9 @@ print(female_erpos_herpos)
 
 The Cancer Genome Atlas (TCGA) Research Network has reported integrated genome-wide 
 studies of various diseases. We have added some of the subtypes defined by these
-report in our package. The LGG[@ref8], GBM [@ref8], STAD [@ref10], BRCA [@ref11], READ [@ref12], COAD [@ref12] and LUAD  [@ref9]  tumors 
-have data added. These subtypes will be automatically added in the summarizedExperiment
+report in our package. The BRCA [@ref11], COAD [@ref12], GBM [@ref8], HNSC [@ref14], KICH [@ref15], KIRC[@ref21], KIRP [@ref20], LGG [@ref8], LUAD [@ref9], 
+LUSC[@ref16], PRAD[@ref19], READ [@ref12],  SKCM [@ref13], STAD [@ref10], THCA [@ref18], UCEC [@ref17] tumors have data added. 
+These subtypes will be automatically added in the summarizedExperiment
 object through TCGAprepare. But you can also use the `TCGAquery_subtype` function
 to retrive this information.
 
