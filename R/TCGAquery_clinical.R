@@ -591,6 +591,6 @@ TCGAquery_subtype <- function(tumor){
         }
         return(get(paste0(tolower(tumor),".subtype")))
     } else {
-        stop("For the moment we have only subtype for: brca, coad, lgg, gbm, luad, hnsc, kich, kirp, kirc, lusc, ucec, pancan, read, skcm, stad, thca, prad")
+        stop("For the moment we have only subtype for: brca, coad, gbm, hnsc, kich, kirp, kirc, lgg, luad, lusc, prad, pancan, read, skcm, stad, thca and ucec")
     }
 }
