@@ -101,7 +101,7 @@ references:
 - id: ref8
   title: Molecular Profiling Reveals Biologically Discrete Subsets and Pathways of Progression in Diffuse Glioma
   author: 
-  - family: Ceccarelli, MicheleAnjum, Samreen et al.
+  - family: Ceccarelli, Michele and Barthel, Floris P and Malta, Tathiane M and Sabedot, Thais S and Salama, Sofie R and Murray, Bradley A and Morozova, Olena and Newton, Yulia and Radenbaugh, Amie and Pagnotta, Stefano M and others
     given:
   journal: Cell
   volume: 164
@@ -788,6 +788,7 @@ The arguments are:
 * **reannotate** Reannotate genes? Source http://grch37.ensembl.org/. 
 Default: `FALSE`. (For the moment only working for methylation data)
 * **mutation.genes** Add List of gene mutation? Default: `FALSE`
+* **add.subtype** Add subtype information in the SummarizedExperiment object. See TCGAquery_subtype function for more information.
 
 In order to add useful information to reasearches we added in the colData of the 
 summarizedExperiment the subtypes classification for the LGG and GBM samples 
