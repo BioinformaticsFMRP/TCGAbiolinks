@@ -101,7 +101,7 @@ references:
 - id: ref8
   title: Molecular Profiling Reveals Biologically Discrete Subsets and Pathways of Progression in Diffuse Glioma
   author: 
-  - family: Ceccarelli, MicheleAnjum, Samreen et al.
+  - family: Ceccarelli, Michele and Barthel, Floris P and Malta, Tathiane M and Sabedot, Thais S and Salama, Sofie R and Murray, Bradley A and Morozova, Olena and Newton, Yulia and Radenbaugh, Amie and Pagnotta, Stefano M and others
     given:
   journal: Cell
   volume: 164
