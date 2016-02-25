@@ -527,7 +527,7 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE){
     ret <- cbind(ret,df)
     if(add.subtype == TRUE){
         for (i in unique(query$Disease)) {
-            if (grepl("lgg|gbm|luad|stad|coad|read|skcm|hnsc|kich|lusc|ucec|kirp|prad|kirc", i,ignore.case = TRUE)) {
+            if (grepl("lgg|gbm|luad|stad|coad|read|skcm|hnsc|kich|lusc|ucec|kirp|prad|kirc|brca", i,ignore.case = TRUE)) {
                 if(tolower(i) %in% c("gbm","lgg")){
                     subtype <- lgg.gbm.subtype
                     if(all(colnames(subtype) %in% colnames(ret))) break
@@ -539,14 +539,6 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE){
                                  all.x = TRUE ,
                                  sort = FALSE,
                                  by = "patient")
-                }
-            } else if (grepl("brca", i,ignore.case = TRUE)) {
-                subtype <- TCGAquery_subtype(i)
-                if (any(ret$barcode %in% subtype$barcode)) {
-                    ret <- merge(ret, subtype,
-                                 all.x = TRUE ,
-                                 sort = FALSE,
-                                 by = "barcode")
                 }
             } else if (grepl("thca", i,ignore.case = TRUE)) {
                 print("ok")
@@ -599,6 +591,6 @@ TCGAquery_subtype <- function(tumor){
         }
         return(get(paste0(tolower(tumor),".subtype")))
     } else {
-        stop("For the moment we have only subtype for: LGG, GBM, STAD, BRCA, READ, COAD and LUAD")
+        stop("For the moment we have only subtype for: brca, coad, gbm, hnsc, kich, kirp, kirc, lgg, luad, lusc, prad, pancan, read, skcm, stad, thca and ucec")
     }
 }
