@@ -383,7 +383,7 @@ TCGAvisualize_meanMethylation <- function(data,
 
     if (print.pvalue){
         p <- p + annotate("text",x = -Inf,y = -Inf, hjust = -0.1,
-                          vjust = -1.0, size = 3,
+                          vjust = -1.0, size = 5,
                           label = paste0("P-value = ",
                                          format(pvalue,scientific = TRUE,
                                                 digits = 2)))
