@@ -1,3 +1,9 @@
+TCGAbiolinks 1.1.22
+---------------------------------------------------------------
+* Bug fix: when  checking the data integrity, manifest was being read
+with argument header = T,but it should be false.
+
+
 TCGAbiolinks 1.1.21
 ---------------------------------------------------------------
 * Improvement: TCGADownload checks for data integrity.
