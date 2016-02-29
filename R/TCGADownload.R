@@ -84,7 +84,7 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 
             url <- gsub(".tar.gz","",data[i,]$deployLocation)
             files <- getFileNames(paste0(root,url))
-            manifest <- fread(paste0(root,url,"/",files[grep("MANIFEST",files)]), data.table = F)
+            manifest <- fread(paste0(root,url,"/",files[grep("MANIFEST",files)]), data.table = F,header = F)
             idx <- grep("MANIFEST|README|CHANGES|DESCRIPTION|DATA_USE|Name|Size|Parent|Last",files)
             files <- files[-idx]
 
@@ -121,6 +121,7 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
 
                         md5 <- tools::md5sum(file.path(path,folder,files[i]))
                         corrupted <- md5 != manifest[which(manifest[,2] == files[i]),1]
+
                         # if corrupted try to download again!
                         if(!corrupted){
                             break
