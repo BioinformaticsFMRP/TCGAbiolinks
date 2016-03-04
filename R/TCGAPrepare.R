@@ -463,6 +463,11 @@ TCGAprepare <- function(query,
         df <- df[-1,]
 
         if(summarizedExperiment){
+            message("===================================================================================")
+            message(" As we can't map some miRNA to genomic positions this step might loose some rows .")
+            message(" Please, for all rows run TCGAprepare with summarizedExperiment=F")
+            message("====================================================================================")
+
             if(grepl("HG-U133_Plus_2|agilent",platform, ignore.case = TRUE)){
                 suppressWarnings(
                     df$external_gene_name <-  alias2SymbolTable(df$`Hybridization REF`)
@@ -501,6 +506,11 @@ TCGAprepare <- function(query,
             rse <- SummarizedExperiment(assays=assays,
                                         rowRanges=rowRanges,
                                         colData=colData)
+        } else {
+            df <- as.data.frame(df)
+            rownames(df) <- df[,1]
+            df[,1] <- NULL
+            df <- data.matrix(df)
         }
 
     }
