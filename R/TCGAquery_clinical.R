@@ -320,6 +320,8 @@ TCGAquery_clinic <- function(tumor, clinical_data_type, samples){
         query <- TCGAquery(tumor = tumor, platform = "bio", level = 2)
     } else if(!missing(samples)) {
         query <- TCGAquery(samples = samples, platform = "bio", level = 2)
+    } else {
+        query <- TCGAquery(platform = "bio", level = 2)
     }
 
     # this is one file for all samples, no need to add samples argument
