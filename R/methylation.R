@@ -304,17 +304,19 @@ TCGAvisualize_meanMethylation <- function(data,
     #comb2by2 <- combinations(length(levels(droplevels(df$groups))),
     #                  2,
     #                 levels(droplevels(df$groups)))
-    comb2by2 <- t(combn(levels(droplevels(df$groups)),2))
+    groups <- levels(droplevels(df$groups))
+    if(length(groups) > 1){
+        comb2by2 <- t(combn(levels(droplevels(df$groups)),2))
 
-    for (i in 1:nrow(comb2by2)){
-        try({
-            aux <- t.test(mean ~ groups,
-                          data = subset(df,subset=df$groups %in% comb2by2[i,]) )$p.value;
-            message(paste("P-value:", paste0(comb2by2[i,], collapse = "-"),"=",aux))},
-            silent = TRUE
-        )
+        for (i in 1:nrow(comb2by2)){
+            try({
+                aux <- t.test(mean ~ groups,
+                              data = subset(df,subset=df$groups %in% comb2by2[i,]) )$p.value;
+                message(paste("P-value:", paste0(comb2by2[i,], collapse = "-"),"=",aux))},
+                silent = TRUE
+            )
+        }
     }
-
     if(print.pvalue & length(levels(droplevels(df$groups))) == 2) {
         pvalue <- t.test(mean ~ groups, data = df)$p.value
     } else {
@@ -391,7 +393,7 @@ TCGAvisualize_meanMethylation <- function(data,
     # saving box plot to analyse it
     if(!is.null(filename)){
         ggsave(p, filename = filename, width = 10, height = 10, dpi = 600)
-    message(paste("Plot saved in: ", file.path(getwd(),filename)))
+        message(paste("Plot saved in: ", file.path(getwd(),filename)))
     } else {
         return(p)
     }
