@@ -389,8 +389,12 @@ TCGAvisualize_meanMethylation <- function(data,
                                                 digits = 2)))
     }
     # saving box plot to analyse it
-    ggsave(p, filename = filename, width = 10, height = 10, dpi = 600)
+    if(!is.null(filename)){
+        ggsave(p, filename = filename, width = 10, height = 10, dpi = 600)
     message(paste("Plot saved in: ", file.path(getwd(),filename)))
+    } else {
+        return(p)
+    }
 }
 
 #' @title Calculate pvalues
