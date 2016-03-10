@@ -657,7 +657,7 @@ in pubmed related to a specific cancer, disease, or tissue.
 library(TCGAbiolinks)
 
 # Select only transcription factors (TFs) from DEGs
-TFs <- EAGenes[EAGenes$Family =="transcription regulator",]
+TFs <- TCGAbiolinks:::EAGenes[TCGAbiolinks:::EAGenes$Family =="transcription regulator",]
 TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
 dataDEGsFiltLevelTFs <- dataDEGsFiltLevel[TFs_inDEGs,]
 
