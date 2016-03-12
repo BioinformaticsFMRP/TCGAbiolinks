@@ -503,7 +503,7 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE){
 
     # add batch information
     message("Adding batch info to summarizedExperiment object")
-    ret <- merge(ret,batch.info, by = "patient", sort = FALSE)
+    ret <- merge(ret,batch.info, by = "patient", sort = FALSE,all.x = TRUE)
     ret <- ret[match(barcode,ret$barcode),]
 
     # Add disease platform and center information
