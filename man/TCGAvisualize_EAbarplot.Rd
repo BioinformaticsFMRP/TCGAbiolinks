@@ -4,7 +4,8 @@
 \alias{TCGAvisualize_EAbarplot}
 \title{barPlot for a complete Enrichment Analysis}
 \usage{
-TCGAvisualize_EAbarplot(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab)
+TCGAvisualize_EAbarplot(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab,
+  filename = "TCGAvisualize_EAbarplot_Output.pdf")
 }
 \arguments{
 \item{tf}{is a list of gene symbols}
@@ -20,6 +21,8 @@ TCGAvisualize_EAbarplot(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab)
 \item{nBar}{is the number of bar histogram selected to show (default = 10)}
 
 \item{nRGTab}{is the gene signature list with gene symbols.}
+
+\item{filename.}{Name for the pdf. If null it will return the plot.}
 }
 \value{
 Complete barPlot from Enrichment Analysis showing significant (default FDR < 0.01)
@@ -42,7 +45,8 @@ TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
          GOMFTab = ansEA$ResMF,
         PathTab = ansEA$ResPat,
          nRGTab = Genelist,
-         nBar = 10)
+         nBar = 10,
+         filename=NULL)
 \dontrun{
 Genelist <- rownames(dataDEGsFiltLevel)
 system.time(ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))

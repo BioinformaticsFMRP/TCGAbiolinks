@@ -285,6 +285,7 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #' @param PathTab is results from TCGAanalyze_EAcomplete related to Pathways EA
 #' @param nBar is the number of bar histogram selected to show (default = 10)
 #' @param nRGTab is the gene signature list with gene symbols.
+#' @param filename. Name for the pdf. If null it will return the plot.
 #' @export
 #' @importFrom EDASeq barplot
 #' @import graphics
@@ -299,7 +300,8 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #'          GOMFTab = ansEA$ResMF,
 #'         PathTab = ansEA$ResPat,
 #'          nRGTab = Genelist,
-#'          nBar = 10)
+#'          nBar = 10,
+#'          filename=NULL)
 #' \dontrun{
 #' Genelist <- rownames(dataDEGsFiltLevel)
 #' system.time(ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
@@ -313,9 +315,10 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #'          nRGTab = Genelist,
 #'          nBar = 10)
 #'}
-TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
+TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab,
+                                    filename = "TCGAvisualize_EAbarplot_Output.pdf"){
 
-    pdf("TCGAvisualize_EAbarplot_Output.pdf", width = 15, height = 15)
+    if(!is.null(filename)) pdf(filename, width = 15, height = 15)
 
     splitFun <- function(tf, Tab, nBar){
         tmp <- lapply(Tab[tf, ], function(x) strsplit(x, ";"))
@@ -399,7 +402,7 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
     mainLab <- paste(tf, " (nRG = ", nRG, ")", sep = "")
     mtext(mainLab, side = 3, line = -1, outer = TRUE, font = 2)
 
-    dev.off()
+    if(!is.null(filename)) dev.off()
 }
 
 #' @title Barplot of subtypes and clinical info in groups of gene expression clustered.
