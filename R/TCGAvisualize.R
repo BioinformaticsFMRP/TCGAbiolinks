@@ -658,44 +658,45 @@ TCGAvisualize_Heatmap <- function(data,
                                   scale = "none"){
 
     # STEP 1 add columns labels (top of heatmap)
+    ha <-  NULL
     if(!missing(col.metadata)) {
-        idCols <- c("sample")
-        if(!("sample")  %in% colnames(col.metadata)){
-            idCols <- c("bcr_patient_barcode","patient","ID")
-            stopifnot(any(idCols %in% colnames(col.metadata)))
-            id <- idCols[which( idCols %in% colnames(col.metadata) == TRUE)]
+        if(!is.null(col.metadata)) {
 
-            duplicated.samples <- any(sapply(col.metadata[,id],
-                                             function(x) {length(grep(x,col.metadata[,id])) > 1 }))
-            if(duplicated.samples){
-                warning("Some samples are from the same patient, this might lead to the wrong upper annotation")
+            idCols <- c("sample")
+            if(!("sample")  %in% colnames(col.metadata)){
+                idCols <- c("bcr_patient_barcode","patient","ID")
+                stopifnot(any(idCols %in% colnames(col.metadata)))
+                id <- idCols[which( idCols %in% colnames(col.metadata) == TRUE)]
+
+                duplicated.samples <- any(sapply(col.metadata[,id],
+                                                 function(x) {length(grep(x,col.metadata[,id])) > 1 }))
+                if(duplicated.samples){
+                    warning("Some samples are from the same patient, this might lead to the wrong upper annotation")
+                }
+                # should be in the same order than the matrix!
+                message(paste0("Reorganizing: col.metadata order should ",
+                               "be the same of the data object"))
+                df <- col.metadata[match(substr(colnames(data),1,12),
+                                         col.metadata[,id]),]
+            } else {
+                id <- idCols[which( idCols %in% colnames(col.metadata) == TRUE)]
+                # should be in the same order than the matrix!
+                message(paste0("Reorganizing: col.metadata order should ",
+                               "be the same of the data object"))
+                df <- col.metadata[match(colnames(data),
+                                         col.metadata[,id]),]
             }
-            # should be in the same order than the matrix!
-            message(paste0("Reorganizing: col.metadata order should ",
-                           "be the same of the data object"))
-            df <- col.metadata[match(substr(colnames(data),1,12),
-                                     col.metadata[,id]),]
-        } else {
-            id <- idCols[which( idCols %in% colnames(col.metadata) == TRUE)]
-            # should be in the same order than the matrix!
-            message(paste0("Reorganizing: col.metadata order should ",
-                           "be the same of the data object"))
-            df <- col.metadata[match(colnames(data),
-                                     col.metadata[,id]),]
-        }
-        df[,id] <- NULL
+            df[,id] <- NULL
 
-        if (!missing(sortCol)) {
-            message(paste0("Sorting columns based on column: ",
-                           sortCol))
-            column_order <- order(df[,sortCol])
+            if (!missing(sortCol)) {
+                message(paste0("Sorting columns based on column: ",
+                               sortCol))
+                column_order <- order(df[,sortCol])
+            }
+            ha <- HeatmapAnnotation(df = df,
+                                    col = col.colors)
         }
-        ha <- HeatmapAnnotation(df = df,
-                                col = col.colors)
-    } else {
-        ha = NULL
     }
-
     # STEP 2 Create heatmap
 
     # If we want to show differences between genes, it is good to make Z-score by samples
@@ -743,20 +744,22 @@ TCGAvisualize_Heatmap <- function(data,
 
     # STEP 3 row labels (right side)
     if (!missing(row.metadata)) {
-        for (i in 1:ncol(row.metadata)) {
-            if (!missing(row.colors) && !is.null(row.colors[[colnames(row.metadata)[i]]])) {
-                color <- row.colors[[colnames(row.metadata)[i]]]
-                x = Heatmap(row.metadata[,i] ,
-                            name = colnames(row.metadata)[i],
-                            width = unit(0.5, "cm"),
-                            show_row_names = FALSE, col = color )
-            } else {
-                x = Heatmap(row.metadata[,i] ,
-                            name = colnames(row.metadata)[i],
-                            width = unit(0.5, "cm"),
-                            show_row_names = FALSE)
+        if (!is.null(row.metadata)) {
+            for (i in 1:ncol(row.metadata)) {
+                if (!missing(row.colors) && !is.null(row.colors[[colnames(row.metadata)[i]]])) {
+                    color <- row.colors[[colnames(row.metadata)[i]]]
+                    x = Heatmap(row.metadata[,i] ,
+                                name = colnames(row.metadata)[i],
+                                width = unit(0.5, "cm"),
+                                show_row_names = FALSE, col = color )
+                } else {
+                    x = Heatmap(row.metadata[,i] ,
+                                name = colnames(row.metadata)[i],
+                                width = unit(0.5, "cm"),
+                                show_row_names = FALSE)
+                }
+                heatmap <- add_heatmap(heatmap,x)
             }
-            heatmap <- add_heatmap(heatmap,x)
         }
     }
     return(heatmap)
