@@ -660,7 +660,11 @@ TCGAVisualize_volcano <- function(x,y,
         p <- p + annotate("text", x = x[idx], y =  -1.1 *log10(y[idx]) ,
                           label = names[idx],  size = 2.0,  alpha = .6)
     }
-    ggsave(p, filename = filename, width = width, height = height, dpi = 600)
+    if(!is.null(filename)){
+        ggsave(p, filename = filename, width = width, height = height, dpi = 600)
+    } else {
+        return(p)
+    }
 }
 
 #' @title Differentially methylated regions Analysis
