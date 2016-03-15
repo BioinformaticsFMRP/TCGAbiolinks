@@ -286,6 +286,7 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #' @param nBar is the number of bar histogram selected to show (default = 10)
 #' @param nRGTab is the gene signature list with gene symbols.
 #' @param filename. Name for the pdf. If null it will return the plot.
+#' @param color. A vector of colors for each barplot. Deafult:  c("orange", "cyan","green","yellow")
 #' @export
 #' @importFrom EDASeq barplot
 #' @import graphics
@@ -316,7 +317,8 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #'          nBar = 10)
 #'}
 TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab,
-                                    filename = "TCGAvisualize_EAbarplot_Output.pdf"){
+                                    filename = "TCGAvisualize_EAbarplot_Output.pdf",
+                                    color = c("orange", "cyan","green","yellow") ){
 
     if(!is.null(filename)) pdf(filename, width = 15, height = 15)
 
@@ -346,43 +348,51 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
 
     par(mfrow = c(2, 2))
 
-    toPlot <- splitFun(tf, GOBPTab, nBar)
-    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "orange",
-                     main = "GO:Biological Process", xlab = "-log10(FDR)")
-    labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
-    text(x = 1, y = xAxis, labs, pos = 4)
-    lines(x = toPlot[, 3], y = xAxis, col = "red")
-    points(x = toPlot[, 3], y = xAxis, col = "red")
-    axis(side = 3, at = pretty(range(0:1)), col = "red")
-
-    toPlot <- splitFun(tf, GOCCTab, nBar)
-    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "cyan",
-                     main = "GO:Cellular Component", xlab = "-log10(FDR)")
-    labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
-    text(x = 1, y = xAxis, labs, pos = 4)
-    lines(x = toPlot[, 3], y = xAxis, col = "red")
-    points(x = toPlot[, 3], y = xAxis, col = "red")
-    axis(side = 3, at = pretty(range(0:1)), col = "red")
-
-    toPlot <- splitFun(tf, GOMFTab, nBar)
-    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "green",
-                     main = "GO:Molecular Function", xlab = "-log10(FDR)")
-    labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
-    text(x = 1, y = xAxis, labs, pos = 4)
-    lines(x = toPlot[, 3], y = xAxis, col = "red")
-    points(x = toPlot[, 3], y = xAxis, col = "red")
-    axis(side = 3, at = pretty(range(0:1)), col = "red")
-
-    toPlot <- splitFun(tf, PathTab, nBar)
-    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "yellow",
-                     main = "Pathways", xlab = "-log10(FDR)")
-    labs <- toPlot[, 1]
-    text(x = 1, y = xAxis, labs, pos = 4)
-    lines(x = toPlot[, 3], y = xAxis, col = "red")
-    points(x = toPlot[, 3], y = xAxis, col = "red")
-    #axis(side = 1, at = pretty(range(0:1)), col = "red", line = 2.5)
-    axis(side = 3, at = pretty(range(0:1)), col = "red")
-
+    if(!missing(GOBPTab) & !is.null(GOBPTab)){
+        # Plotting GOBPTab
+        toPlot <- splitFun(tf, GOBPTab, nBar)
+        xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[1],
+                         main = "GO:Biological Process", xlab = "-log10(FDR)")
+        labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
+        text(x = 1, y = xAxis, labs, pos = 4)
+        lines(x = toPlot[, 3], y = xAxis, col = "red")
+        points(x = toPlot[, 3], y = xAxis, col = "red")
+        axis(side = 3, at = pretty(range(0:1)), col = "red")
+    }
+    if(!missing(GOCCTab) & !is.null(GOCCTab)){
+        # Plotting GOCCTab
+        toPlot <- splitFun(tf, GOCCTab, nBar)
+        xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[2],
+                         main = "GO:Cellular Component", xlab = "-log10(FDR)")
+        labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
+        text(x = 1, y = xAxis, labs, pos = 4)
+        lines(x = toPlot[, 3], y = xAxis, col = "red")
+        points(x = toPlot[, 3], y = xAxis, col = "red")
+        axis(side = 3, at = pretty(range(0:1)), col = "red")
+    }
+    if(!missing(GOMFTab) & !is.null(GOMFTab)){
+        # Plotting GOMFTab
+        toPlot <- splitFun(tf, GOMFTab, nBar)
+        xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[3],
+                         main = "GO:Molecular Function", xlab = "-log10(FDR)")
+        labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
+        text(x = 1, y = xAxis, labs, pos = 4)
+        lines(x = toPlot[, 3], y = xAxis, col = "red")
+        points(x = toPlot[, 3], y = xAxis, col = "red")
+        axis(side = 3, at = pretty(range(0:1)), col = "red")
+    }
+    if(!missing(PathTab) & !is.null(PathTab)){
+        # Plotting PathTab
+        toPlot <- splitFun(tf, PathTab, nBar)
+        xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[4],
+                         main = "Pathways", xlab = "-log10(FDR)")
+        labs <- toPlot[, 1]
+        text(x = 1, y = xAxis, labs, pos = 4)
+        lines(x = toPlot[, 3], y = xAxis, col = "red")
+        points(x = toPlot[, 3], y = xAxis, col = "red")
+        #axis(side = 1, at = pretty(range(0:1)), col = "red", line = 2.5)
+        axis(side = 3, at = pretty(range(0:1)), col = "red")
+    }
     #par(new = TRUE)
     #plot(toPlot[, 3], xAxis, axes = FALSE, bty = "n", xlab = "",
     # ylab = "", col = "blue")
@@ -656,7 +666,7 @@ TCGAvisualize_Heatmap <- function(data,
             id <- idCols[which( idCols %in% colnames(col.metadata) == TRUE)]
 
             duplicated.samples <- any(sapply(col.metadata[,id],
-                                         function(x) {length(grep(x,col.metadata[,id])) > 1 }))
+                                             function(x) {length(grep(x,col.metadata[,id])) > 1 }))
             if(duplicated.samples){
                 warning("Some samples are from the same patient, this might lead to the wrong upper annotation")
             }
