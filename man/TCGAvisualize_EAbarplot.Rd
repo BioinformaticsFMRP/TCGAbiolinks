@@ -5,7 +5,8 @@
 \title{barPlot for a complete Enrichment Analysis}
 \usage{
 TCGAvisualize_EAbarplot(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab,
-  filename = "TCGAvisualize_EAbarplot_Output.pdf")
+  filename = "TCGAvisualize_EAbarplot_Output.pdf", color = c("orange",
+  "cyan", "green", "yellow"))
 }
 \arguments{
 \item{tf}{is a list of gene symbols}
@@ -23,6 +24,8 @@ TCGAvisualize_EAbarplot(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab,
 \item{nRGTab}{is the gene signature list with gene symbols.}
 
 \item{filename.}{Name for the pdf. If null it will return the plot.}
+
+\item{color.}{A vector of colors for each barplot. Deafult:  c("orange", "cyan","green","yellow")}
 }
 \value{
 Complete barPlot from Enrichment Analysis showing significant (default FDR < 0.01)
