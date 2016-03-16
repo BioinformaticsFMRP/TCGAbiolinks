@@ -30,7 +30,7 @@ patients with days_to_deth > cutoff will be set to Alive.}
 
 \item{xlab}{x axis text of the plot}
 
-\item{filename}{The name of the pdf file}
+\item{filename}{The name of the pdf file.}
 
 \item{color}{Define the colors of the lines.}
 
