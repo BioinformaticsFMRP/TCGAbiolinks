@@ -939,6 +939,7 @@ TCGAanalyze_DMR <- function(data,
 #' Obs: Column p.value.adj.group1.group2 should exist
 #' @param group2 The name of the group 2.
 #' Obs: Column p.value.adj.group1.group2 should exist
+#' @param return.plot. If true only plot object will be returned (pdf will not be created)
 #' @import ggplot2
 #' @importFrom SummarizedExperiment rowRanges rowRanges<- values<-
 #' @importFrom RColorBrewer brewer.pal
@@ -964,6 +965,7 @@ TCGAanalyze_DMR <- function(data,
 #'                   logFC=runif(20000, -5, 5),
 #'                   FDR=runif(20000, 0.01, 1))
 #' SummarizedExperiment::rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
+#' SummarizedExperiment::rowRanges(met)$diffmean.g2.g1 <- -1*(SummarizedExperiment::rowRanges(met)$diffmean.g1.g2)
 #' SummarizedExperiment::rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
 #' SummarizedExperiment::rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
 #' result <- TCGAvisualize_starburst(met,exp,
@@ -982,6 +984,7 @@ TCGAvisualize_starburst <- function(met,
                                     names = FALSE,
                                     circle = TRUE,
                                     filename = "starburst.pdf",
+                                    return.plot = FALSE,
                                     ylab = expression(atop("Gene Expression",
                                                            paste(Log[10],
                                                                  " (FDR corrected P values)"))),
@@ -1047,6 +1050,7 @@ TCGAvisualize_starburst <- function(met,
     volcano[idx, "meFDR2"] <- -1 * volcano[idx, "meFDR"]
 
     label[2:9] <-  paste(label[2:9], "in", group1)
+
     # subseting by regulation (geFDR) and methylation level
     # (meFDR) down regulated up regulated lowerthr
     # |||||||||||||||| upperthr hypomethylated hipermethylated
@@ -1128,8 +1132,6 @@ TCGAvisualize_starburst <- function(met,
                "Down regulated",
                "Up regulated & Hyper methylated",
                "Down regulated & Hyper methylated")
-
-
 
     s <- list(a, b, c, d, e, f, g, h)
     for (i in seq_along(s)) {
@@ -1228,7 +1230,7 @@ TCGAvisualize_starburst <- function(met,
     #    p <- p + scale_shape_discrete(
     #        labels = c("Candidate Biologically Significant"),
     #        name = "Biological importance")
-
+    if(return.plot) return(p)
     ggsave(filename = filename, width = 14, height = 10, dpi = 600)
 
     #statuscol <- paste("status", group1, group2, sep = ".")
