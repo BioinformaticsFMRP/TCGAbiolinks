@@ -86,7 +86,7 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' @param labels labels of the plot
 #' @param ylab y axis text of the plot
 #' @param xlab x axis text of the plot
-#' @param filename The name of the pdf file
+#' @param filename The name of the pdf file.
 #' @param color Define the colors of the lines.
 #' @param width Image width
 #' @param height Image height
@@ -211,7 +211,11 @@ TCGAanalyze_survival <- function(data,
               #legend.position="top",
               axis.title.y= element_text(size = 16))
 
-    ggsave(surv, filename = filename, width = width, height = height, dpi = 600)
+    if(!is.null(filename)) {
+        ggsave(surv, filename = filename, width = width, height = height, dpi = 600)
+    } else {
+        return(surv)
+    }
 }
 #' @title Mean methylation boxplot
 #' @description
