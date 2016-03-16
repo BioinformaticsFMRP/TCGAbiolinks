@@ -1230,8 +1230,7 @@ TCGAvisualize_starburst <- function(met,
     #    p <- p + scale_shape_discrete(
     #        labels = c("Candidate Biologically Significant"),
     #        name = "Biological importance")
-    if(return.plot) return(p)
-    ggsave(filename = filename, width = 14, height = 10, dpi = 600)
+    if(!return.plot) ggsave(filename = filename, width = 14, height = 10, dpi = 600)
 
     #statuscol <- paste("status", group1, group2, sep = ".")
 
@@ -1252,5 +1251,10 @@ TCGAvisualize_starburst <- function(met,
     if (logFC.cut != 0){
         volcano <- subset(volcano, abs(volcano$logFC) >= logFC.cut)
     }
+
+    if(return.plot) {
+        return(list(plot=p,starburst=volcano))
+    }
+
     return(volcano)
 }
