@@ -1558,14 +1558,15 @@ The arguments of this function are:
 * **groupCol** The name of the column with the group information
 * **subtypeCol** The name of the column with the subtype information
 * **colors** A vector of colors 
-* **na.rm** Remove the NA groups? DEAFULT: `FALSE`
+* **na.rm.groups** Remove the NA groups? DEAFULT: `FALSE`
+* **na.rm.subtypes** Remove the NA subtypes? DEAFULT: `FALSE`
 
 ```{r, eval = FALSE}
 df <- TCGAquery_subtype("lgg")
 TCGAvisualize_profilePlot(df, 
                           groupCol = "RNASeqCluster", 
                           subtypeCol =  "IDH.1p19q.Subtype", 
-                          na.rm = TRUE)
+                          na.rm.groups = TRUE)
 ```
 
 
@@ -1901,7 +1902,7 @@ TCGAvisualize_profilePlot(clin_subt,
                           subtypeCol="IDH.1p19q.Subtype",
                           filename = "case2_Idh.pdf",
                           plot.margin = c(-4.0, -2.5, -0.5, 2),
-                          na.rm = TRUE)
+                          na.rm.groups = TRUE)
 ```
 
 The IDH subgroup profile plot is shown below:
@@ -1919,7 +1920,7 @@ TCGAvisualize_profilePlot(clin_subt,
                           subtypeCol="MethylationCluster",
                           filename = "case2_Met.png",
                           plot.margin = c(-4.0, -2.5, -0.5, 2),
-                          na.rm = TRUE)
+                          na.rm.groups = TRUE)
 ```
 
 The Methylation subgroup profile plot is shown below:
@@ -1997,7 +1998,7 @@ of the gene ATRX by HC groups.
 TCGAvisualize_profilePlot(dataMut,
                           groupCol = "groupsHC",
                           subtypeCol =  "Variant_Classification",
-                          na.rm = FALSE,
+                          na.rm.groups = FALSE,
                           plot.margin = c(-4.0, -2.5, -0.5, 2),
                           filename = paste0(mRNAsel,"_Mutation_Variant_Classification.png"))
 ```
@@ -2018,7 +2019,7 @@ We can see the distribution of the subtypes Variant_Type of the gene ATRX by HC 
 TCGAvisualize_profilePlot(dataMut,
                           groupCol = "groupsHC",
                           subtypeCol =  "Variant_Type",
-                          na.rm = FALSE,
+                          na.rm.groups = FALSE,
                           plot.margin = c(-4.0, -2.5, -0.5, 2),
                           filename = paste0(mRNAsel,"_Mutation_Variant_Type_in_EC_clusters.png"))
 ```
