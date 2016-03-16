@@ -772,7 +772,8 @@ TCGAvisualize_Heatmap <- function(data,
 #' @param subtypeCol Name of the column with the subtype information
 #' @param groupCol Names of tre columns with the cluster information
 #' @param filename Name of the file to save the plot, can be pdf, png, svg etc..
-#' @param na.rm Remove NA groups/subtypes? Default = FALSE
+#' @param na.rm.groups Remove NA groups? Default = FALSE
+#' @param na.rm.subtypes Remove NA subtypes? Default = FALSE
 #' @param colors Vector of colors to be used in the bars
 #' @param plot.margin Plot margin for cluster distribution. This can control the size
 #' of the bar if the output is not aligned
@@ -813,7 +814,8 @@ TCGAvisualize_profilePlot <- function(data = NULL,
                                       subtypeCol = NULL,
                                       colors = NULL,
                                       filename = NULL,
-                                      na.rm = FALSE,
+                                      na.rm.groups = FALSE,
+                                      na.rm.subtypes= FALSE,
                                       plot.margin=c(-2.5,-2.5,-0.5,2),
                                       axis.title.size=1.5,
                                       axis.textsize=1.3,
@@ -833,9 +835,13 @@ TCGAvisualize_profilePlot <- function(data = NULL,
     if (is.null(data)) stop("Please provide the data argument")
     if (is.null(filename)) filename <- paste0(groupCol,subtypeCol,".pdf")
 
-    if(na.rm){
+    if(na.rm.groups){
         data <- data[!is.na(data[,groupCol]),]
         data <- data[which(data[,groupCol] != "NA"),]
+    }
+    if(na.rm.subtypes){
+        data <- data[!is.na(data[,subtypeCol]),]
+        data <- data[which(data[,subtypeCol] != "NA"),]
     }
 
     # use https://github.com/cttobin/ggthemr
@@ -900,7 +906,7 @@ TCGAvisualize_profilePlot <- function(data = NULL,
 
     ngroups <- length(unique(groups))
     nsbutype <- length(unique(all))
-    print(unique(all))
+
     if(NA %in% unique(all)) nsbutype <- nsbutype - 1
     max <- length(na.omit(data[,1]))
     message(paste0("Number of subtypes: ", nsbutype))
@@ -913,7 +919,8 @@ TCGAvisualize_profilePlot <- function(data = NULL,
             width <- c(width, rep((ngroups/max) * length(na.omit(data[,i])),nsbutype))
         }
     }
-
+    var.labels <- as.character(var.labels)
+    var.labels[which(is.na(var.labels)==TRUE)] <- "NA"
     # Create the horizontal barplot
     p <- .mysjp.stackfrq(data,
                          legendTitle = subtypeCol,
@@ -1106,7 +1113,7 @@ TCGAvisualize_mutation <- function (data = NULL,
         summary <- table(unlist(data$genes))
 
         for( i in genes){
-            print(i)
+
             count <- summary[i]
             count <- as.numeric(count)
 
@@ -1477,7 +1484,7 @@ TCGAvisualize_mutation <- function (data = NULL,
     # --------------------------------------------------------
     if (showSeparatorLine) {
         baseplot <- baseplot +
-            geom_vline(x = c(seq(1.5, length(items), by = 1)),
+            geom_vline(xintercept = c(seq(1.5, length(items), by = 1)),
                        size = separatorLineSize,
                        colour = separatorLineColor)
     }
@@ -1510,7 +1517,7 @@ TCGAvisualize_mutation <- function (data = NULL,
     baseplot <- sjPlot:::sj.setGeomColors(baseplot,
                                           geom.colors,
                                           length(legendLabels),
-                                          ifelse(hideLegend == TRUE, FALSE, TRUE),
+                                          ifelse(isTRUE(hideLegend), FALSE, TRUE),
                                           legendLabels)
     # ---------------------------------------------------------
     # Check whether ggplot object should be returned or plotted
