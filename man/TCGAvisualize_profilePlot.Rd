@@ -5,9 +5,10 @@
 \title{Profile plot}
 \usage{
 TCGAvisualize_profilePlot(data = NULL, groupCol = NULL, subtypeCol = NULL,
-  colors = NULL, filename = NULL, na.rm = FALSE, plot.margin = c(-2.5,
-  -2.5, -0.5, 2), axis.title.size = 1.5, axis.textsize = 1.3,
-  legend.size = 1.5, legend.title.size = 1.5, geom.label.size = 6)
+  colors = NULL, filename = NULL, na.rm.groups = FALSE,
+  na.rm.subtypes = FALSE, plot.margin = c(-2.5, -2.5, -0.5, 2),
+  axis.title.size = 1.5, axis.textsize = 1.3, legend.size = 1.5,
+  legend.title.size = 1.5, geom.label.size = 6)
 }
 \arguments{
 \item{data}{A data frame with the cluters and subytpe of cancers}
@@ -20,7 +21,9 @@ TCGAvisualize_profilePlot(data = NULL, groupCol = NULL, subtypeCol = NULL,
 
 \item{filename}{Name of the file to save the plot, can be pdf, png, svg etc..}
 
-\item{na.rm}{Remove NA groups/subtypes? Default = FALSE}
+\item{na.rm.groups}{Remove NA groups? Default = FALSE}
+
+\item{na.rm.subtypes}{Remove NA subtypes? Default = FALSE}
 
 \item{plot.margin}{Plot margin for cluster distribution. This can control the size
 of the bar if the output is not aligned}
