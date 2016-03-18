@@ -648,10 +648,11 @@ TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type,method = "exactTest",
     }
 
     if (method == "glmLRT"){
-        tumorType <- rep(c(Cond1type,Cond2type),
-                         c(Cond1num,Cond2num))
-        design <- model.matrix(~as.factor(tumorType))
-        aDGEList <- edgeR::DGEList(counts = TOC, group = as.factor(tumorType))
+        tumorType <- factor(x =  rep(c(Cond1type,Cond2type),
+                                     c(Cond1num,Cond2num)),
+                            levels = c(Cond1type,Cond2type))
+        design <- model.matrix(~tumorType)
+        aDGEList <- edgeR::DGEList(counts = TOC, group = tumorType)
         aDGEList <- edgeR::estimateGLMCommonDisp(aDGEList, design)
         aDGEList <- edgeR::estimateGLMTagwiseDisp(aDGEList, design)
         aGlmFit <- edgeR::glmFit(aDGEList, design, dispersion = aDGEList$tagwise.dispersion,
