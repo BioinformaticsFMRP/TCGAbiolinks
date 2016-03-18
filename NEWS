@@ -1,3 +1,8 @@
+TCGAbiolinks 1.1.23
+---------------------------------------------------------------
+* Bug fix: logFC result from TCGAanalyze_DEA for method "glmLRT" was
+considerent the alphabetical order of groups, which migth induce the user to error
+
 TCGAbiolinks 1.1.22
 ---------------------------------------------------------------
 * Bug fix: when  checking the data integrity, manifest was being read
