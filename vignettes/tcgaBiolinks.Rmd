@@ -2100,6 +2100,7 @@ TCGAdownload(query.met, path = "/dados/ibm/comparing/biolinks/coad/")
 coad.met <- TCGAprepare(query = query.met,
                         dir = "/dados/ibm/comparing/biolinks/coad/",
                         save = TRUE,
+                        add.subtype = TRUE,
                         filename = "metcoad.rda",
                         reannotate = TRUE)
 
@@ -2118,6 +2119,7 @@ TCGAdownload(coad.query.exp,
 coad.exp <- TCGAprepare(query = coad.query.exp,
                         dir = "/dados/ibm/comparing/biolinks/RNA/",
                         type = "rsem.genes.results",
+                        add.subtype = TRUE,
                         save = T,filename = "coadexp.rda")
 
 
