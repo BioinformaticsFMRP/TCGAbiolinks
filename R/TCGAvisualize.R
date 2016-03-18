@@ -285,6 +285,8 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #' @param PathTab is results from TCGAanalyze_EAcomplete related to Pathways EA
 #' @param nBar is the number of bar histogram selected to show (default = 10)
 #' @param nRGTab is the gene signature list with gene symbols.
+#' @param filename. Name for the pdf. If null it will return the plot.
+#' @param color. A vector of colors for each barplot. Deafult:  c("orange", "cyan","green","yellow")
 #' @export
 #' @importFrom EDASeq barplot
 #' @import graphics
@@ -299,7 +301,8 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #'          GOMFTab = ansEA$ResMF,
 #'         PathTab = ansEA$ResPat,
 #'          nRGTab = Genelist,
-#'          nBar = 10)
+#'          nBar = 10,
+#'          filename=NULL)
 #' \dontrun{
 #' Genelist <- rownames(dataDEGsFiltLevel)
 #' system.time(ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
@@ -313,9 +316,11 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #'          nRGTab = Genelist,
 #'          nBar = 10)
 #'}
-TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab){
+TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab,
+                                    filename = "TCGAvisualize_EAbarplot_Output.pdf",
+                                    color = c("orange", "cyan","green","yellow") ){
 
-    pdf("TCGAvisualize_EAbarplot_Output.pdf", width = 15, height = 15)
+    if(!is.null(filename)) pdf(filename, width = 15, height = 15)
 
     splitFun <- function(tf, Tab, nBar){
         tmp <- lapply(Tab[tf, ], function(x) strsplit(x, ";"))
@@ -343,43 +348,51 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
 
     par(mfrow = c(2, 2))
 
-    toPlot <- splitFun(tf, GOBPTab, nBar)
-    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "orange",
-                     main = "GO:Biological Process", xlab = "-log10(FDR)")
-    labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
-    text(x = 1, y = xAxis, labs, pos = 4)
-    lines(x = toPlot[, 3], y = xAxis, col = "red")
-    points(x = toPlot[, 3], y = xAxis, col = "red")
-    axis(side = 3, at = pretty(range(0:1)), col = "red")
-
-    toPlot <- splitFun(tf, GOCCTab, nBar)
-    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "cyan",
-                     main = "GO:Cellular Component", xlab = "-log10(FDR)")
-    labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
-    text(x = 1, y = xAxis, labs, pos = 4)
-    lines(x = toPlot[, 3], y = xAxis, col = "red")
-    points(x = toPlot[, 3], y = xAxis, col = "red")
-    axis(side = 3, at = pretty(range(0:1)), col = "red")
-
-    toPlot <- splitFun(tf, GOMFTab, nBar)
-    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "green",
-                     main = "GO:Molecular Function", xlab = "-log10(FDR)")
-    labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
-    text(x = 1, y = xAxis, labs, pos = 4)
-    lines(x = toPlot[, 3], y = xAxis, col = "red")
-    points(x = toPlot[, 3], y = xAxis, col = "red")
-    axis(side = 3, at = pretty(range(0:1)), col = "red")
-
-    toPlot <- splitFun(tf, PathTab, nBar)
-    xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = "yellow",
-                     main = "Pathways", xlab = "-log10(FDR)")
-    labs <- toPlot[, 1]
-    text(x = 1, y = xAxis, labs, pos = 4)
-    lines(x = toPlot[, 3], y = xAxis, col = "red")
-    points(x = toPlot[, 3], y = xAxis, col = "red")
-    #axis(side = 1, at = pretty(range(0:1)), col = "red", line = 2.5)
-    axis(side = 3, at = pretty(range(0:1)), col = "red")
-
+    if(!missing(GOBPTab) & !is.null(GOBPTab)){
+        # Plotting GOBPTab
+        toPlot <- splitFun(tf, GOBPTab, nBar)
+        xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[1],
+                         main = "GO:Biological Process", xlab = "-log10(FDR)")
+        labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
+        text(x = 1, y = xAxis, labs, pos = 4)
+        lines(x = toPlot[, 3], y = xAxis, col = "red")
+        points(x = toPlot[, 3], y = xAxis, col = "red")
+        axis(side = 3, at = pretty(range(0:1)), col = "red")
+    }
+    if(!missing(GOCCTab) & !is.null(GOCCTab)){
+        # Plotting GOCCTab
+        toPlot <- splitFun(tf, GOCCTab, nBar)
+        xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[2],
+                         main = "GO:Cellular Component", xlab = "-log10(FDR)")
+        labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
+        text(x = 1, y = xAxis, labs, pos = 4)
+        lines(x = toPlot[, 3], y = xAxis, col = "red")
+        points(x = toPlot[, 3], y = xAxis, col = "red")
+        axis(side = 3, at = pretty(range(0:1)), col = "red")
+    }
+    if(!missing(GOMFTab) & !is.null(GOMFTab)){
+        # Plotting GOMFTab
+        toPlot <- splitFun(tf, GOMFTab, nBar)
+        xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[3],
+                         main = "GO:Molecular Function", xlab = "-log10(FDR)")
+        labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
+        text(x = 1, y = xAxis, labs, pos = 4)
+        lines(x = toPlot[, 3], y = xAxis, col = "red")
+        points(x = toPlot[, 3], y = xAxis, col = "red")
+        axis(side = 3, at = pretty(range(0:1)), col = "red")
+    }
+    if(!missing(PathTab) & !is.null(PathTab)){
+        # Plotting PathTab
+        toPlot <- splitFun(tf, PathTab, nBar)
+        xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[4],
+                         main = "Pathways", xlab = "-log10(FDR)")
+        labs <- toPlot[, 1]
+        text(x = 1, y = xAxis, labs, pos = 4)
+        lines(x = toPlot[, 3], y = xAxis, col = "red")
+        points(x = toPlot[, 3], y = xAxis, col = "red")
+        #axis(side = 1, at = pretty(range(0:1)), col = "red", line = 2.5)
+        axis(side = 3, at = pretty(range(0:1)), col = "red")
+    }
     #par(new = TRUE)
     #plot(toPlot[, 3], xAxis, axes = FALSE, bty = "n", xlab = "",
     # ylab = "", col = "blue")
@@ -399,7 +412,7 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
     mainLab <- paste(tf, " (nRG = ", nRG, ")", sep = "")
     mtext(mainLab, side = 3, line = -1, outer = TRUE, font = 2)
 
-    dev.off()
+    if(!is.null(filename)) dev.off()
 }
 
 #' @title Barplot of subtypes and clinical info in groups of gene expression clustered.
@@ -645,44 +658,45 @@ TCGAvisualize_Heatmap <- function(data,
                                   scale = "none"){
 
     # STEP 1 add columns labels (top of heatmap)
+    ha <-  NULL
     if(!missing(col.metadata)) {
-        idCols <- c("sample")
-        if(!("sample")  %in% colnames(col.metadata)){
-            idCols <- c("bcr_patient_barcode","patient","ID")
-            stopifnot(any(idCols %in% colnames(col.metadata)))
-            id <- idCols[which( idCols %in% colnames(col.metadata) == TRUE)]
+        if(!is.null(col.metadata)) {
 
-            duplicated.samples <- any(sapply(col.metadata[,id],
-                                         function(x) {length(grep(x,col.metadata[,id])) > 1 }))
-            if(duplicated.samples){
-                warning("Some samples are from the same patient, this might lead to the wrong upper annotation")
+            idCols <- c("sample")
+            if(!("sample")  %in% colnames(col.metadata)){
+                idCols <- c("bcr_patient_barcode","patient","ID")
+                stopifnot(any(idCols %in% colnames(col.metadata)))
+                id <- idCols[which( idCols %in% colnames(col.metadata) == TRUE)]
+
+                duplicated.samples <- any(sapply(col.metadata[,id],
+                                                 function(x) {length(grep(x,col.metadata[,id])) > 1 }))
+                if(duplicated.samples){
+                    warning("Some samples are from the same patient, this might lead to the wrong upper annotation")
+                }
+                # should be in the same order than the matrix!
+                message(paste0("Reorganizing: col.metadata order should ",
+                               "be the same of the data object"))
+                df <- col.metadata[match(substr(colnames(data),1,12),
+                                         col.metadata[,id]),]
+            } else {
+                id <- idCols[which( idCols %in% colnames(col.metadata) == TRUE)]
+                # should be in the same order than the matrix!
+                message(paste0("Reorganizing: col.metadata order should ",
+                               "be the same of the data object"))
+                df <- col.metadata[match(colnames(data),
+                                         col.metadata[,id]),]
             }
-            # should be in the same order than the matrix!
-            message(paste0("Reorganizing: col.metadata order should ",
-                           "be the same of the data object"))
-            df <- col.metadata[match(substr(colnames(data),1,12),
-                                     col.metadata[,id]),]
-        } else {
-            id <- idCols[which( idCols %in% colnames(col.metadata) == TRUE)]
-            # should be in the same order than the matrix!
-            message(paste0("Reorganizing: col.metadata order should ",
-                           "be the same of the data object"))
-            df <- col.metadata[match(colnames(data),
-                                     col.metadata[,id]),]
-        }
-        df[,id] <- NULL
+            df[,id] <- NULL
 
-        if (!missing(sortCol)) {
-            message(paste0("Sorting columns based on column: ",
-                           sortCol))
-            column_order <- order(df[,sortCol])
+            if (!missing(sortCol)) {
+                message(paste0("Sorting columns based on column: ",
+                               sortCol))
+                column_order <- order(df[,sortCol])
+            }
+            ha <- HeatmapAnnotation(df = df,
+                                    col = col.colors)
         }
-        ha <- HeatmapAnnotation(df = df,
-                                col = col.colors)
-    } else {
-        ha = NULL
     }
-
     # STEP 2 Create heatmap
 
     # If we want to show differences between genes, it is good to make Z-score by samples
@@ -730,20 +744,22 @@ TCGAvisualize_Heatmap <- function(data,
 
     # STEP 3 row labels (right side)
     if (!missing(row.metadata)) {
-        for (i in 1:ncol(row.metadata)) {
-            if (!missing(row.colors) && !is.null(row.colors[[colnames(row.metadata)[i]]])) {
-                color <- row.colors[[colnames(row.metadata)[i]]]
-                x = Heatmap(row.metadata[,i] ,
-                            name = colnames(row.metadata)[i],
-                            width = unit(0.5, "cm"),
-                            show_row_names = FALSE, col = color )
-            } else {
-                x = Heatmap(row.metadata[,i] ,
-                            name = colnames(row.metadata)[i],
-                            width = unit(0.5, "cm"),
-                            show_row_names = FALSE)
+        if (!is.null(row.metadata)) {
+            for (i in 1:ncol(row.metadata)) {
+                if (!missing(row.colors) && !is.null(row.colors[[colnames(row.metadata)[i]]])) {
+                    color <- row.colors[[colnames(row.metadata)[i]]]
+                    x = Heatmap(row.metadata[,i] ,
+                                name = colnames(row.metadata)[i],
+                                width = unit(0.5, "cm"),
+                                show_row_names = FALSE, col = color )
+                } else {
+                    x = Heatmap(row.metadata[,i] ,
+                                name = colnames(row.metadata)[i],
+                                width = unit(0.5, "cm"),
+                                show_row_names = FALSE)
+                }
+                heatmap <- add_heatmap(heatmap,x)
             }
-            heatmap <- add_heatmap(heatmap,x)
         }
     }
     return(heatmap)
@@ -756,7 +772,8 @@ TCGAvisualize_Heatmap <- function(data,
 #' @param subtypeCol Name of the column with the subtype information
 #' @param groupCol Names of tre columns with the cluster information
 #' @param filename Name of the file to save the plot, can be pdf, png, svg etc..
-#' @param na.rm Remove NA groups/subtypes? Default = FALSE
+#' @param na.rm.groups Remove NA groups? Default = FALSE
+#' @param na.rm.subtypes Remove NA subtypes? Default = FALSE
 #' @param colors Vector of colors to be used in the bars
 #' @param plot.margin Plot margin for cluster distribution. This can control the size
 #' of the bar if the output is not aligned
@@ -797,7 +814,8 @@ TCGAvisualize_profilePlot <- function(data = NULL,
                                       subtypeCol = NULL,
                                       colors = NULL,
                                       filename = NULL,
-                                      na.rm = FALSE,
+                                      na.rm.groups = FALSE,
+                                      na.rm.subtypes= FALSE,
                                       plot.margin=c(-2.5,-2.5,-0.5,2),
                                       axis.title.size=1.5,
                                       axis.textsize=1.3,
@@ -817,9 +835,13 @@ TCGAvisualize_profilePlot <- function(data = NULL,
     if (is.null(data)) stop("Please provide the data argument")
     if (is.null(filename)) filename <- paste0(groupCol,subtypeCol,".pdf")
 
-    if(na.rm){
+    if(na.rm.groups){
         data <- data[!is.na(data[,groupCol]),]
         data <- data[which(data[,groupCol] != "NA"),]
+    }
+    if(na.rm.subtypes){
+        data <- data[!is.na(data[,subtypeCol]),]
+        data <- data[which(data[,subtypeCol] != "NA"),]
     }
 
     # use https://github.com/cttobin/ggthemr
@@ -884,7 +906,7 @@ TCGAvisualize_profilePlot <- function(data = NULL,
 
     ngroups <- length(unique(groups))
     nsbutype <- length(unique(all))
-    print(unique(all))
+
     if(NA %in% unique(all)) nsbutype <- nsbutype - 1
     max <- length(na.omit(data[,1]))
     message(paste0("Number of subtypes: ", nsbutype))
@@ -897,7 +919,8 @@ TCGAvisualize_profilePlot <- function(data = NULL,
             width <- c(width, rep((ngroups/max) * length(na.omit(data[,i])),nsbutype))
         }
     }
-
+    var.labels <- as.character(var.labels)
+    var.labels[which(is.na(var.labels)==TRUE)] <- "NA"
     # Create the horizontal barplot
     p <- .mysjp.stackfrq(data,
                          legendTitle = subtypeCol,
@@ -1090,7 +1113,7 @@ TCGAvisualize_mutation <- function (data = NULL,
         summary <- table(unlist(data$genes))
 
         for( i in genes){
-            print(i)
+
             count <- summary[i]
             count <- as.numeric(count)
 
@@ -1461,7 +1484,7 @@ TCGAvisualize_mutation <- function (data = NULL,
     # --------------------------------------------------------
     if (showSeparatorLine) {
         baseplot <- baseplot +
-            geom_vline(x = c(seq(1.5, length(items), by = 1)),
+            geom_vline(xintercept = c(seq(1.5, length(items), by = 1)),
                        size = separatorLineSize,
                        colour = separatorLineColor)
     }
@@ -1494,7 +1517,7 @@ TCGAvisualize_mutation <- function (data = NULL,
     baseplot <- sjPlot:::sj.setGeomColors(baseplot,
                                           geom.colors,
                                           length(legendLabels),
-                                          ifelse(hideLegend == TRUE, FALSE, TRUE),
+                                          ifelse(isTRUE(hideLegend), FALSE, TRUE),
                                           legendLabels)
     # ---------------------------------------------------------
     # Check whether ggplot object should be returned or plotted

@@ -503,7 +503,7 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE){
 
     # add batch information
     message("Adding batch info to summarizedExperiment object")
-    ret <- merge(ret,batch.info, by = "patient", sort = FALSE)
+    ret <- merge(ret,batch.info, by = "patient", sort = FALSE,all.x = TRUE)
     ret <- ret[match(barcode,ret$barcode),]
 
     # Add disease platform and center information
@@ -574,10 +574,55 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE){
 #' dataSubt <- TCGAquery_subtype(tumor = "lgg")
 #' @return a data.frame with barcode and molecular subtypes
 TCGAquery_subtype <- function(tumor){
-    if (grepl("lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc",
+    if (grepl("lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc|all",
               tumor,ignore.case = TRUE)) {
+
+        if(tolower(tumor) == "all") {
+            all.tumor <- c("lgg", "gbm", "luad", "stad", "brca", "coad",
+                           "skcm", "hnsc", 'kich', "lusc", "ucec", "pancan", "thca",
+                           "prad","kirp","kirc")
+            doi <- c("aml"="doi:10.1056/NEJMoa1301689",
+                     "blca"="doi:10.1038/nature12965",
+                     "brca"="doi:10.1038/nature11412",
+                     "coad"="doi:10.1038/nature11252",
+                     "gbm"="doi:10.1016/j.cell.2015.12.028",
+                     "lgg"="doi:10.1016/j.cell.2015.12.028",
+                     "hnsc"="doi:10.1038/nature14129",
+                     "kich"="doi:10.1016/j.ccr.2014.07.014",
+                     "kirc"="doi:10.1038/nature12222",
+                     "kirp"="doi:10.1056/NEJMoa1505917",
+                     "lihc"="",
+                     "luad"="doi:10.1038/nature13385",
+                     "lusc"="doi:10.1038/nature11404",
+                     "ovca"= "doi:10.1038/nature10166",
+                     "pancan"="doi:10.1016/j.cell.2014.06.049",
+                     "prad"="doi:10.1016/j.cell.2015.10.025",
+                     "skcm"="doi:10.1016/j.cell.2015.05.044",
+                     "stad"="doi:10.1038/nature13480",
+                     "thca"="doi:10.1016/j.cell.2014.09.050",
+                     "ucec"="doi:10.1038/nature12113",
+                     "ucs"="")
+
+            all <- NULL
+            for(i in all.tumor){
+                try({
+                    aux <- TCGAquery_subtype(i)
+                    aux$Disease <- toupper(i)
+                    aux$doi <- doi[i]
+                    if(is.null(all)) all <- aux
+                    else all <- plyr::rbind.fill(all,aux)
+                })
+            }
+            idx <- which(colnames(all) == "doi")
+            all <- all[, c(idx, (1:ncol(all))[-idx])]
+
+            idx <- which(colnames(all) == "Disease")
+            all <- all[, c(idx, (1:ncol(all))[-idx])]
+
+            return(all)
+        }
+
         # COAD and READ are in the same object
-        #
         if(tolower(tumor) == "read") tumor <- "coad"
 
         # The object with the gbm and lgg classification are the same
