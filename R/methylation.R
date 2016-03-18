@@ -1042,14 +1042,14 @@ TCGAvisualize_starburst <- function(met,
         -1 * volcano[volcano$logFC > 0, "geFDR"]
 
 
-    diffcol <- paste("diffmean",group2,group1,sep = ".")
+    diffcol <- paste("diffmean",group1,group2,sep = ".")
     volcano$meFDR <- log10(volcano[,pcol])
     volcano$meFDR2 <- volcano$meFDR
     idx <- volcano[,diffcol] > 0
     idx[is.na(idx)] <- FALSE # handling NAs
     volcano[idx, "meFDR2"] <- -1 * volcano[idx, "meFDR"]
 
-    label[2:9] <-  paste(label[2:9], "in", group1)
+    label[2:9] <-  paste(label[2:9], "in", group2)
 
     # subseting by regulation (geFDR) and methylation level
     # (meFDR) down regulated up regulated lowerthr
