@@ -86,7 +86,7 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' @param labels labels of the plot
 #' @param ylab y axis text of the plot
 #' @param xlab x axis text of the plot
-#' @param filename The name of the pdf file
+#' @param filename The name of the pdf file.
 #' @param color Define the colors of the lines.
 #' @param width Image width
 #' @param height Image height
@@ -211,7 +211,11 @@ TCGAanalyze_survival <- function(data,
               #legend.position="top",
               axis.title.y= element_text(size = 16))
 
-    ggsave(surv, filename = filename, width = width, height = height, dpi = 600)
+    if(!is.null(filename)) {
+        ggsave(surv, filename = filename, width = width, height = height, dpi = 600)
+    } else {
+        return(surv)
+    }
 }
 #' @title Mean methylation boxplot
 #' @description
@@ -375,7 +379,8 @@ TCGAvisualize_meanMethylation <- function(data,
               panel.border = element_blank(),
               panel.grid.major = element_blank(),
               panel.grid.minor = element_blank(),
-              axis.line = element_line(colour = "black"),
+              axis.line.x=element_line(colour = "black"),
+              axis.line.y=element_line(colour = "black"),
               legend.position="top",
               legend.key = element_rect(colour = 'white'))
 
@@ -651,7 +656,8 @@ TCGAVisualize_volcano <- function(x,y,
         theme_bw() + theme(panel.border = element_blank(),
                            panel.grid.major = element_blank(),
                            panel.grid.minor = element_blank(),
-                           axis.line = element_line(colour = "black"),
+                           axis.line.x=element_line(colour = "black"),
+                           axis.line.y=element_line(colour = "black"),
                            legend.position="top",
                            legend.key = element_rect(colour = 'white'))
     # Label points with the textxy function from the calibrate plot
@@ -660,7 +666,11 @@ TCGAVisualize_volcano <- function(x,y,
         p <- p + annotate("text", x = x[idx], y =  -1.1 *log10(y[idx]) ,
                           label = names[idx],  size = 2.0,  alpha = .6)
     }
-    ggsave(p, filename = filename, width = width, height = height, dpi = 600)
+    if(!is.null(filename)){
+        ggsave(p, filename = filename, width = width, height = height, dpi = 600)
+    } else {
+        return(p)
+    }
 }
 
 #' @title Differentially methylated regions Analysis
@@ -929,6 +939,7 @@ TCGAanalyze_DMR <- function(data,
 #' Obs: Column p.value.adj.group1.group2 should exist
 #' @param group2 The name of the group 2.
 #' Obs: Column p.value.adj.group1.group2 should exist
+#' @param return.plot. If true only plot object will be returned (pdf will not be created)
 #' @import ggplot2
 #' @importFrom SummarizedExperiment rowRanges rowRanges<- values<-
 #' @importFrom RColorBrewer brewer.pal
@@ -954,6 +965,7 @@ TCGAanalyze_DMR <- function(data,
 #'                   logFC=runif(20000, -5, 5),
 #'                   FDR=runif(20000, 0.01, 1))
 #' SummarizedExperiment::rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
+#' SummarizedExperiment::rowRanges(met)$diffmean.g2.g1 <- -1*(SummarizedExperiment::rowRanges(met)$diffmean.g1.g2)
 #' SummarizedExperiment::rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
 #' SummarizedExperiment::rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
 #' result <- TCGAvisualize_starburst(met,exp,
@@ -972,6 +984,7 @@ TCGAvisualize_starburst <- function(met,
                                     names = FALSE,
                                     circle = TRUE,
                                     filename = "starburst.pdf",
+                                    return.plot = FALSE,
                                     ylab = expression(atop("Gene Expression",
                                                            paste(Log[10],
                                                                  " (FDR corrected P values)"))),
@@ -1036,6 +1049,7 @@ TCGAvisualize_starburst <- function(met,
     idx[is.na(idx)] <- FALSE # handling NAs
     volcano[idx, "meFDR2"] <- -1 * volcano[idx, "meFDR"]
 
+    label[2:9] <-  paste(label[2:9], "in", group2)
 
     # subseting by regulation (geFDR) and methylation level
     # (meFDR) down regulated up regulated lowerthr
@@ -1119,8 +1133,6 @@ TCGAvisualize_starburst <- function(met,
                "Up regulated & Hyper methylated",
                "Down regulated & Hyper methylated")
 
-
-
     s <- list(a, b, c, d, e, f, g, h)
     for (i in seq_along(s)) {
         idx <- rownames(s[[i]])
@@ -1198,7 +1210,8 @@ TCGAvisualize_starburst <- function(met,
         theme(panel.border = element_blank(),
               panel.grid.major = element_blank(),
               panel.grid.minor = element_blank(),
-              axis.line = element_line(colour = "black"),
+              axis.line.x=element_line(colour = "black"),
+              axis.line.y=element_line(colour = "black"),
               legend.position="top",
               legend.key = element_rect(colour = 'white'),
               plot.title = element_text(face = "bold", size = 16),
@@ -1217,8 +1230,7 @@ TCGAvisualize_starburst <- function(met,
     #    p <- p + scale_shape_discrete(
     #        labels = c("Candidate Biologically Significant"),
     #        name = "Biological importance")
-
-    ggsave(filename = filename, width = 14, height = 10, dpi = 600)
+    if(!return.plot) ggsave(filename = filename, width = 14, height = 10, dpi = 600)
 
     #statuscol <- paste("status", group1, group2, sep = ".")
 
@@ -1239,5 +1251,10 @@ TCGAvisualize_starburst <- function(met,
     if (logFC.cut != 0){
         volcano <- subset(volcano, abs(volcano$logFC) >= logFC.cut)
     }
+
+    if(return.plot) {
+        return(list(plot=p,starburst=volcano))
+    }
+
     return(volcano)
 }
