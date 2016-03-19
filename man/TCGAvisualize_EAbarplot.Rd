@@ -23,9 +23,9 @@ TCGAvisualize_EAbarplot(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab,
 
 \item{nRGTab}{is the gene signature list with gene symbols.}
 
-\item{filename.}{Name for the pdf. If null it will return the plot.}
+\item{filename}{Name for the pdf. If null it will return the plot.}
 
-\item{color.}{A vector of colors for each barplot. Deafult:  c("orange", "cyan","green","yellow")}
+\item{color}{A vector of colors for each barplot. Deafult:  c("orange", "cyan","green","yellow")}
 }
 \value{
 Complete barPlot from Enrichment Analysis showing significant (default FDR < 0.01)
