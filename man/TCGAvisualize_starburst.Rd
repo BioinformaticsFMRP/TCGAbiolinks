@@ -49,6 +49,8 @@ Default: TRUE}
 
 \item{filename}{The filename of the file (it can be pdf, svg, png, etc)}
 
+\item{return.plot}{If true only plot object will be returned (pdf will not be created)}
+
 \item{ylab}{y axis text}
 
 \item{xlab}{x axis text}
@@ -64,8 +66,6 @@ Default: TRUE}
 \item{xlim}{x limits to cut image}
 
 \item{ylim}{y limits to cut image}
-
-\item{return.plot.}{If true only plot object will be returned (pdf will not be created)}
 }
 \value{
 Save a starburst plot
