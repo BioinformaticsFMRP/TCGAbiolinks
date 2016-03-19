@@ -939,7 +939,7 @@ TCGAanalyze_DMR <- function(data,
 #' Obs: Column p.value.adj.group1.group2 should exist
 #' @param group2 The name of the group 2.
 #' Obs: Column p.value.adj.group1.group2 should exist
-#' @param return.plot. If true only plot object will be returned (pdf will not be created)
+#' @param return.plot If true only plot object will be returned (pdf will not be created)
 #' @import ggplot2
 #' @importFrom SummarizedExperiment rowRanges rowRanges<- values<-
 #' @importFrom RColorBrewer brewer.pal
