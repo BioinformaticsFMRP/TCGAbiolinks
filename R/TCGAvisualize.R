@@ -285,8 +285,8 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #' @param PathTab is results from TCGAanalyze_EAcomplete related to Pathways EA
 #' @param nBar is the number of bar histogram selected to show (default = 10)
 #' @param nRGTab is the gene signature list with gene symbols.
-#' @param filename. Name for the pdf. If null it will return the plot.
-#' @param color. A vector of colors for each barplot. Deafult:  c("orange", "cyan","green","yellow")
+#' @param filename Name for the pdf. If null it will return the plot.
+#' @param color A vector of colors for each barplot. Deafult:  c("orange", "cyan","green","yellow")
 #' @export
 #' @importFrom EDASeq barplot
 #' @import graphics
