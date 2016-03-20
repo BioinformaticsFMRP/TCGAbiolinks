@@ -6,6 +6,7 @@ warnings_are_errors: true
 
 before_install:
   - Rscript -e 'install.packages("nlme", lib="/home/travis/R-bin/lib/R/library/")'
+  - Rscript -e 'install.packages("roxygen2", lib="/home/travis/R-bin/lib/R/library/")'
 
 r_packages:
   - covr
