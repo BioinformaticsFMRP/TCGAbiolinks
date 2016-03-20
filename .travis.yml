@@ -1,5 +1,8 @@
 language: r
+cache: packages
 bioc_required: true
+warnings_are_errors: true
+sudo: required
 
 r_github_packages:
     - jimhester/covr
