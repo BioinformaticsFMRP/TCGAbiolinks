@@ -505,24 +505,24 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
         rawCounts <- rawCounts[commonGenes,]
 
         timeEstimated <- format(ncol(tabDF)*nrow(tabDF)/80000,digits = 2)
-        print(messageEstimation <- paste("I Need about ", timeEstimated,
+        message(messageEstimation <- paste("I Need about ", timeEstimated,
                                          "seconds for this Complete Normalization Upper Quantile",
                                          " [Processing 80k elements /s]  "))
 
         ffData  <- as.data.frame(geneInfo)
         rawCounts <- floor(rawCounts)
-        print("Step 1 of 4: newSeqExpressionSet ...")
+        message("Step 1 of 4: newSeqExpressionSet ...")
         tmp <- newSeqExpressionSet(as.matrix(rawCounts), featureData = ffData)
 
         #fData(tmp)[, "gcContent"] <- as.numeric(geneInfo[, "gcContent"])
 
-        print("Step 2 of 4: withinLaneNormalization ...")
+        message("Step 2 of 4: withinLaneNormalization ...")
         tmp <- withinLaneNormalization(tmp, "gcContent", which = "upper", offset = TRUE)
-        print("Step 3 of 4: betweenLaneNormalization ...")
+        message("Step 3 of 4: betweenLaneNormalization ...")
         tmp <- betweenLaneNormalization(tmp, which = "upper", offset = TRUE)
         normCounts <-  log(rawCounts + .1) + offst(tmp)
         normCounts <-  floor(exp(normCounts) - .1)
-        print("Step 4 of 4: .quantileNormalization ...")
+        message("Step 4 of 4: .quantileNormalization ...")
         tmp <- t(.quantileNormalization(t(normCounts)))
         tabDF_norm <- floor(tmp)
     }
@@ -550,17 +550,17 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
         geneInfo <- geneInfo[commonGenes,]
 
         timeEstimated <- format(ncol(tabDF)*nrow(tabDF)/80000,digits = 2)
-        print(messageEstimation <- paste("I Need about ", timeEstimated,
+        message(messageEstimation <- paste("I Need about ", timeEstimated,
                                          "seconds for this Complete Normalization Upper Quantile",
                                          " [Processing 80k elements /s]  "))
 
-        print("Step 1 of 4: newSeqExpressionSet ...")
+        message("Step 1 of 4: newSeqExpressionSet ...")
         system.time(tabDF_norm <- EDASeq::newSeqExpressionSet(tabDF, featureData = geneInfo))
-        print("Step 2 of 4: withinLaneNormalization ...")
+        message("Step 2 of 4: withinLaneNormalization ...")
         system.time(tabDF_norm <- EDASeq::withinLaneNormalization(tabDF_norm, "geneLength", which = "upper", offset = FALSE))
-        print("Step 3 of 4: betweenLaneNormalization ...")
+        message("Step 3 of 4: betweenLaneNormalization ...")
         system.time(tabDF_norm <- EDASeq::betweenLaneNormalization(tabDF_norm, which = "upper", offset = FALSE))
-        print("Step 4 of 4: exprs ...")
+        message("Step 4 of 4: exprs ...")
 
         #system.time(tabDF_norm <- EDASeq::exprs(tabDF_norm))
         system.time(tabDF_norm <- EDASeq::counts(tabDF_norm))
@@ -617,15 +617,16 @@ TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type,method = "exactTest",
     Cond1num <- ncol(mat1)
     Cond2num <- ncol(mat2)
 
-    print(message1 <- paste( "there are Cond1 type", Cond1type ,"in ",
+    message("----------------------- DEA -------------------------------")
+    message(message1 <- paste( "there are Cond1 type", Cond1type ,"in ",
                              Cond1num, "samples"))
-    print(message2 <- paste( "there are Cond2 type", Cond2type ,"in ",
+    message(message2 <- paste( "there are Cond2 type", Cond2type ,"in ",
                              Cond2num, "samples"))
-    print(message3 <- paste( "there are ", nrow(TOC) ,
+    message(message3 <- paste( "there are ", nrow(TOC) ,
                              "features as miRNA or genes "))
 
     timeEstimated <- format(ncol(TOC)*nrow(TOC)/30000,digits = 2)
-    print(messageEstimation <- paste("I Need about ", timeEstimated,
+    message(messageEstimation <- paste("I Need about ", timeEstimated,
                                      "seconds for this DEA. [Processing 30k elements /s]  "))
 
     # Reading in the data and creating a DGEList object
@@ -663,6 +664,8 @@ TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type,method = "exactTest",
         tableDEA <- tableDEA[tableDEA$FDR < fdr.cut,]
         tableDEA <- tableDEA[abs(tableDEA$logFC) > logFC.cut,]
     }
+
+    message("----------------------- END DEA -------------------------------")
 
     return(tableDEA)
 
