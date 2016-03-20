@@ -147,7 +147,7 @@ test_that("Results from TCGAanalyze_DEA and DMR in starburst plot are correct", 
 
 
     # Threshold are respected
-    expect_equal(nrow(result), 2)
+    expect_equal(nrow(result.fdr.cut), 2)
     expect_equal(nrow(result.no.cut), 4)
     expect_equal(nrow(result.fc.cut), 2)
     expect_equal(nrow(result.met.cut), 2)
