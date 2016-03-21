@@ -1,5 +1,38 @@
 context("Analyse")
 
+test_that("TCGAanalyze_survival creates pdf", {
+    days_to_death <- floor(runif(200, 1, 1000))
+    vital_status <- c(rep("Dead",200))
+    groups <- c(rep(c("G1","G2"),c(100,100)))
+    df <- data.frame(days_to_death,vital_status,groups)
+    TCGAanalyze_survival(df,clusterCol="groups",filename = "test.pdf")
+    expect_true(file.exists("test.pdf"))
+    expect_equal(class(TCGAanalyze_survival(df,clusterCol="groups", filename = NULL)), class(ggplot2::ggplot(NULL)))
+    unlink("test.pdf")
+})
+
+
+test_that("TCGAanalyze_DMR ask for the missing parameters", {
+    nrows <- 2; ncols <- 20
+    counts <- matrix(c(rep(0.9,20),rep(0.1,20)), nrows)
+    rowRanges <- GenomicRanges::GRanges((rep("chr1",2)),
+                                        IRanges::IRanges(c(2000,2000), width=100),
+                                        strand=c("+","-"),
+                                        feature_id=sprintf("ID%03d", 1:2))
+    colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
+                                    row.names=LETTERS[1:20],
+                                    group=rep(c("group1","group2","group3","group4"),c(5,5,5,5)))
+    data <- SummarizedExperiment::SummarizedExperiment(
+        assays=S4Vectors::SimpleList(counts=counts),
+        rowRanges=rowRanges,
+        colData=colData)
+    expect_null(TCGAanalyze_DMR(data, p.cut = 0.85))
+    expect_message(TCGAanalyze_DMR(data, p.cut = 0.85),"Please, set the groupCol parameter")
+    expect_null(TCGAanalyze_DMR(data, p.cut = 0.85,"group"))
+    expect_message(TCGAanalyze_DMR(data, p.cut = 0.85,"group"),"Please, set the group1 and group2 parameters")
+
+})
+
 test_that("Results of TCGAanalyze_DEA inverting groups changes signal and order of the signals are right", {
 
     dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
@@ -135,15 +168,15 @@ test_that("Results from TCGAanalyze_DEA and DMR in starburst plot are correct", 
                                              names=TRUE, circle = FALSE,return.plot = TRUE)$starburst
 
     result.met.cut <- TCGAvisualize_starburst(met,exp,
-                                             exp.p.cut = 1, met.p.cut = 1,
-                                             group1="group1",group2="group2",
-                                             diffmean.cut=0.5,logFC.cut = 0,
-                                             names=TRUE, circle = FALSE,return.plot = TRUE)$starburst
-    result.met.exp.cut <- TCGAvisualize_starburst(met,exp,
                                               exp.p.cut = 1, met.p.cut = 1,
                                               group1="group1",group2="group2",
-                                              diffmean.cut=0.5,logFC.cut = 2.5,
+                                              diffmean.cut=0.5,logFC.cut = 0,
                                               names=TRUE, circle = FALSE,return.plot = TRUE)$starburst
+    result.met.exp.cut <- TCGAvisualize_starburst(met,exp,
+                                                  exp.p.cut = 1, met.p.cut = 1,
+                                                  group1="group1",group2="group2",
+                                                  diffmean.cut=0.5,logFC.cut = 2.5,
+                                                  names=TRUE, circle = FALSE,return.plot = TRUE)$starburst
 
 
     # Threshold are respected
@@ -163,15 +196,15 @@ test_that("Results from TCGAanalyze_DEA and DMR in starburst plot are correct", 
 
     # --- Changing groups order
     result.met.cut.inv <- TCGAvisualize_starburst(met,exp,
-                                              exp.p.cut = 1, met.p.cut = 1,
-                                              group1="group2",group2="group1",
-                                              diffmean.cut=0.5,logFC.cut = 0,
-                                              names=TRUE, circle = FALSE,return.plot = TRUE)$starburst
-    result.met.exp.cut.inv <- TCGAvisualize_starburst(met,exp,
                                                   exp.p.cut = 1, met.p.cut = 1,
                                                   group1="group2",group2="group1",
-                                                  diffmean.cut=0.5,logFC.cut = 2.5,
+                                                  diffmean.cut=0.5,logFC.cut = 0,
                                                   names=TRUE, circle = FALSE,return.plot = TRUE)$starburst
+    result.met.exp.cut.inv <- TCGAvisualize_starburst(met,exp,
+                                                      exp.p.cut = 1, met.p.cut = 1,
+                                                      group1="group2",group2="group1",
+                                                      diffmean.cut=0.5,logFC.cut = 2.5,
+                                                      names=TRUE, circle = FALSE,return.plot = TRUE)$starburst
 
     # group2 vs groups1 (logFC = log(group1) - log(group2), diffmean = group1 - group2 )
     expect_true(result.met.exp.cut.inv$starburst.status == "Down regulated & Hypo methylated" &
