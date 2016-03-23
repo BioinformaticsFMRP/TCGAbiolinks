@@ -110,15 +110,6 @@ TCGAprepare <- function(query,
         files <- files[-idx]
     }
 
-    # Filter by type
-    if (!is.null(type)) {
-        files <- files[grep(type,files)]
-        if(length(files) == 0){
-            message("No files of that type found")
-            return(NULL)
-        }
-    }
-
     # Filter by samples
     if (!is.null(samples)) {
         files <- filterFiles(query[i,],samples,files)
@@ -298,6 +289,22 @@ TCGAprepare <- function(query,
 
     if (tolower(platform) == "illuminaga_rnaseq" ||
         tolower(platform) == "illuminahiseq_rnaseq") {
+
+
+        if(is.null(type) || (type != "exon.quantification" &&
+                             type != "spljxn.quantification" &&
+                             type != "gene.quantification")
+        ){
+            msg <- paste0("Plase select a type. \n Possibilities:\n",
+                          " = gene.quantification\n",
+                          " = spljxn.quantification\n",
+                          " = exon.quantification\n"
+            )
+            message(msg)
+            return()
+        }
+
+        files <- files[grep(type,files)]
         # Barcode in the name
         regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                         "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
@@ -723,21 +730,28 @@ TCGAprepare <- function(query,
     }
     if (grepl("genome_wide_snp_6",tolower(platform))) {
 
-
-        while(!(type %in% c("nocnv_hg18","nocnv_hg19","cnv_hg18","cnv_hg19"))){
+        while(!(type %in% c("nocnv_hg18","nocnv_hg19","cnv_hg18","cnv_hg19",
+                            "nocnv_hg18.seg","hg18.seg","hg19.seg","nocnv_hg19.seg"))){
             type <- readline(
                 paste("Which type do you want?",
                       "(Options: nocnv_hg19,nocnv_hg18,cnv_hg18,cnv_hg19, cancel)  ")
             )
             if(type == "cancel") return(NULL)
         }
-        if(type == "nocnv_hg18") regex <- "nocnv_hg18"
-        if(type == "cnv_hg18") regex <- "[^no]cnv_hg18"
-        if(type == "nocnv_hg19") regex <- "nocnv_hg19"
-        if(type == "cnv_hg19") regex <- "[^no]cnv_hg19"
+
+        if(type == "nocnv_hg18" | type == "nocnv_hg18.seg") regex <- "nocnv_hg18"
+        if(type == "cnv_hg18" | type == "hg18.seg") regex <- "[^nocnv_]hg18.seg"
+        if(type == "nocnv_hg19" | type == "nocnv_hg19.seg") regex <- "nocnv_hg19"
+        if(type == "cnv_hg19" | type == "hg19.seg") regex <- "[^nocnv_]hg19.seg"
+
+        files <- files[grep(regex,files)]
+
+        if(length(files) == 0){
+            message("No files of that type found")
+            return(NULL)
+        }
 
         idx <- grep(regex, files)
-
         if (length(idx) > 0){
             files <- files[idx]
         } else {
@@ -865,10 +879,10 @@ TCGAprepare_elmer <- function(data,
     if (grepl("humanmethylation", platform, ignore.case = TRUE)) {
         message("============ Pre-pocessing methylation data =============")
         if (class(data) == class(data.frame())){
-        msg <- paste0("1 - Removing Columns: \n  * Gene_Symbol  \n",
-                      "  * Chromosome  \n  * Genomic_Coordinate")
-        message(msg)
-        data <- subset(data,select = 4:ncol(data))
+            msg <- paste0("1 - Removing Columns: \n  * Gene_Symbol  \n",
+                          "  * Chromosome  \n  * Genomic_Coordinate")
+            message(msg)
+            data <- subset(data,select = 4:ncol(data))
         }
         if(typeof(data) == typeof(SummarizedExperiment())){
             data <- assay(data)
