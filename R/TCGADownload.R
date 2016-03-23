@@ -89,7 +89,12 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
             files <- files[-idx]
 
             if(!is.null(type)){
+                if(type == "nocnv_hg18" | type == "nocnv_hg18.seg") type <- "nocnv_hg18"
+                if(type == "cnv_hg18" | type == "hg18.seg") type <- "[^nocnv_]hg18.seg"
+                if(type == "nocnv_hg19" | type == "nocnv_hg19.seg") type <- "nocnv_hg19"
+                if(type == "cnv_hg19" | type == "hg19.seg") type <- "[^nocnv_]hg19.seg"
                 files <- files[grepl(type,files)]
+
                 if (length(files) == 0) {
                     next
                 }
