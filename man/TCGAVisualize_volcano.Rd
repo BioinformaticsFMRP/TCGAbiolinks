@@ -63,5 +63,6 @@ Creates a volcano plot from the expression and methylation analysis.
 x <- runif(200, 1e5, 1e6)
 y <- runif(200, 1e5, 1e6)
 TCGAVisualize_volcano(x,y)
+while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 }
 
