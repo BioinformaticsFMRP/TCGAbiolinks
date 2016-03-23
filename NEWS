@@ -1,3 +1,7 @@
+TCGAbiolinks 1.1.24
+---------------------------------------------------------------
+* Bug fix: types argument for Genome_Wide_SNP_6 was not working.
+
 TCGAbiolinks 1.1.23
 ---------------------------------------------------------------
 * Bug fix: logFC result from TCGAanalyze_DEA for method "glmLRT" was
