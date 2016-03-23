@@ -1013,6 +1013,10 @@ TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
             return (NULL)
         }
     }
+    if(nrow(df) == 0){
+        message("Sorry, no maf found")
+        return (NULL)
+    }
 
 
     # change the path to be downloaded
