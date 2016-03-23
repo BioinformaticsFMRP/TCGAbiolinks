@@ -79,3 +79,15 @@ test_that("If the version specified it is updated", {
     expect_true( grepl("3.9.5.0",res$name))
 })
 
+
+test_that("If no result exists return is NULL ", {
+    capture.output(res <- TCGAquery(tumor = "gbm",platform = "bio",level=3))
+    expect_null(res)
+})
+
+test_that("TCGAquery_maf works", {
+    capture.output(mutation <- TCGAquery_maf(tumor = "lgg",
+                               archive.name = "IlluminaGA_DNASeq_curated.Level_2.1.4.0"))
+    expect_equal(class(mutation),class(data.frame()))
+    expect_null(TCGAquery_maf(tumor = "lgg", archive.name = "xxx"))
+})
