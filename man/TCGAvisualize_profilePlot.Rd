@@ -45,6 +45,7 @@ A plot
 Displaty the association between cancer subtypes and any kind of clustering.
 }
 \examples{
+while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 cluster <- c(rep("cluster1",30),
              rep("cluster2",30),
              rep("cluster3",30))
@@ -54,6 +55,7 @@ subtype <- rep(c(rep("subtype1",10),
 df <- data.frame(cluster,subtype)
 TCGAvisualize_profilePlot(data = df, groupCol = "cluster", subtypeCol = "subtype",
                           plot.margin=c(-4.2,-2.5,-0.0,2))
+while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 cluster <- c(rep("cluster1",10),
              rep("cluster2",20),
              rep("cluster3",30),
@@ -62,7 +64,7 @@ subtype <- rep(c(rep("subtype1",5),
            rep("subtype2",10),
            rep("subtype3",10)),4)
 df <- data.frame(cluster,subtype)
-TCGAvisualize_profilePlot(data = df, groupCol = "cluster", subtypeCol = "subtype",
+plot <- TCGAvisualize_profilePlot(data = df, groupCol = "cluster", subtypeCol = "subtype",
                           plot.margin=c(-4.2,-2.5,-0.5,2))
 }
 
