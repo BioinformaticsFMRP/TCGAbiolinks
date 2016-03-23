@@ -65,5 +65,6 @@ data <- SummarizedExperiment::SummarizedExperiment(
          colData=colData)
 TCGAvisualize_meanMethylation(data,groupCol  = "group")
 TCGAvisualize_meanMethylation(data,groupCol  = "group", subgroupCol="subgroup")
+if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 }
 
