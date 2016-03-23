@@ -262,6 +262,7 @@ TCGAanalyze_survival <- function(data,
 #'          colData=colData)
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group")
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group", subgroupCol="subgroup")
+#' if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 TCGAvisualize_meanMethylation <- function(data,
                                           groupCol=NULL,
                                           subgroupCol=NULL,
@@ -593,6 +594,7 @@ calculate.pvalues <- function(data,
 #' x <- runif(200, 1e5, 1e6)
 #' y <- runif(200, 1e5, 1e6)
 #' TCGAVisualize_volcano(x,y)
+#' while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 TCGAVisualize_volcano <- function(x,y,
                                   filename = "volcano.pdf",
                                   ylab =  expression(paste(-Log[10],
