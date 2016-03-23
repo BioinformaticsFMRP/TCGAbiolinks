@@ -49,7 +49,8 @@ TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
         PathTab = ansEA$ResPat,
          nRGTab = Genelist,
          nBar = 10,
-         filename=NULL)
+         filename="a.pdf")
+while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 \dontrun{
 Genelist <- rownames(dataDEGsFiltLevel)
 system.time(ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
