@@ -218,7 +218,8 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
 #' # quantile filter of genes
 #' dataFilt <- TCGAanalyze_Filtering(tabDF = dataBRCA, method = "quantile", qnt.cut =  0.25)
 #' # Principal Component Analysis plot for ntop selected DEGs
-#' TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
+#' pca <- TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
+#' if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
     ComparisonSelected <- "Normal vs Tumor"
     TitlePlot <- paste0("PCA ", "top ", ntopgenes,
@@ -302,7 +303,8 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #'         PathTab = ansEA$ResPat,
 #'          nRGTab = Genelist,
 #'          nBar = 10,
-#'          filename=NULL)
+#'          filename="a.pdf")
+#' while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 #' \dontrun{
 #' Genelist <- rownames(dataDEGsFiltLevel)
 #' system.time(ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
@@ -638,6 +640,7 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #'                                       ,"IDHMut-noncod"="gold")),
 #'                     type = "methylation",
 #'                     show_row_names=TRUE)
+#' if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 #' @export
 #' @importFrom matlab jet.colors
 #' @importFrom circlize colorRamp2
@@ -789,6 +792,7 @@ TCGAvisualize_Heatmap <- function(data,
 #' @import gtable
 #' @export
 #' @examples
+#' while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 #' cluster <- c(rep("cluster1",30),
 #'              rep("cluster2",30),
 #'              rep("cluster3",30))
@@ -798,6 +802,7 @@ TCGAvisualize_Heatmap <- function(data,
 #' df <- data.frame(cluster,subtype)
 #' TCGAvisualize_profilePlot(data = df, groupCol = "cluster", subtypeCol = "subtype",
 #'                           plot.margin=c(-4.2,-2.5,-0.0,2))
+#' while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 #' cluster <- c(rep("cluster1",10),
 #'              rep("cluster2",20),
 #'              rep("cluster3",30),
@@ -806,7 +811,7 @@ TCGAvisualize_Heatmap <- function(data,
 #'            rep("subtype2",10),
 #'            rep("subtype3",10)),4)
 #' df <- data.frame(cluster,subtype)
-#' TCGAvisualize_profilePlot(data = df, groupCol = "cluster", subtypeCol = "subtype",
+#' plot <- TCGAvisualize_profilePlot(data = df, groupCol = "cluster", subtypeCol = "subtype",
 #'                           plot.margin=c(-4.2,-2.5,-0.5,2))
 #' @return A plot
 TCGAvisualize_profilePlot <- function(data = NULL,
@@ -933,10 +938,8 @@ TCGAvisualize_profilePlot <- function(data = NULL,
                          jitterValueLabels = TRUE,
                          #showSeparatorLine = TRUE,
                          showValueLabels = FALSE,
-                         geom.colors = colors[1:length(var.labels)],
-                         #separatorLineColor = "#6699cc"
-                         printPlot = TRUE)
-    p$plot <-  ggdraw(switch_axis_position(p$plot , axis = 'y'))
+                         geom.colors = colors[1:length(var.labels)])$plot
+    p <-  ggdraw(switch_axis_position(p , axis = 'y'))
 
     j <- 1
     groups <- as.data.frame(groups)
@@ -964,11 +967,9 @@ TCGAvisualize_profilePlot <- function(data = NULL,
                                                  start = 0.6,
                                                  end = 0.9,
                                                  gamma = 2.2,
-                                                 alpha = 0.1),
-                       #separatorLineColor = "#6699cc"
-                       printPlot = TRUE)
+                                                 alpha = 0.1))$plot
 
-    p2$plot <- p2$plot +
+    p2 <- p2 +
         theme(#legend.position="none",
             #plot.margin=unit(c(-3.0,4.5,-0.75,5.5), "cm"),
             #plot.margin=unit(c(-3.3,-2.5,-1.0,2), "cm"),
@@ -986,16 +987,15 @@ TCGAvisualize_profilePlot <- function(data = NULL,
             plot.background=element_blank())
 
     # put the plots together
-    p$plot <-  plot_grid(p2$plot,
-                         p$plot,
+    p <-  plot_grid(p2,
+                         p,
                          ncol = 2,
                          scale = c(0.5,1),
                          rel_heights = c(2,8),
                          rel_widths = c(0.6,2))
-
-    plot(p$plot)
-
-    ggsave(p$plot, filename = filename, width = 20, height = 10, dpi = 600)
+    plot(p)
+    if(!is.null(filename))
+        ggsave(p, filename = filename, width = 20, height = 10, dpi = 600)
 }
 
 
