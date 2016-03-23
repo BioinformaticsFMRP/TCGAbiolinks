@@ -4,9 +4,9 @@ test_that("It can download a file", {
     sample <- c("TCGA-33-6737-01","TCGA-33-6737-11")
         query <- TCGAquery(tumor = "lusc", samples = sample,
                            platform = "IlluminaHiSeq_RNASeqV2", level = "3")
-        out <- TCGAdownload(query, path = "dataTest",
+        capture.output(out <- TCGAdownload(query, path = "dataTest",
                             type = "rsem.genes.results",
-                            samples = sample)
+                            samples = sample))
     folder <- gsub(".tar.gz","",basename(query$deployLocation))
     file <- file.path("dataTest",folder,
                       paste0("unc.edu.38dbab79-7aeb-4153-",
@@ -18,7 +18,7 @@ test_that("It can download a folder", {
     query <- TCGAquery(tumor = "lusc", level = "mage-tab",
                        platform = "IlluminaHiSeq_RNASeqV2")
 
-    suppressMessages(
+    capture.output(
         out <- TCGAdownload(query, path = "dataTest")
     )
     folder <- basename(query$deployLocation)
