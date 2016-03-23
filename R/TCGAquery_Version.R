@@ -16,7 +16,7 @@
 #' @importFrom rvest html html_text
 #' @importFrom stringr str_split str_trim
 #' @examples
-#' TCGAquery_Version('GBM','illuminahiseq_rnaseqv2')
+#' query <- TCGAquery_Version('GBM','illuminahiseq_rnaseqv2')
 #' @export
 #' @return Data frame with version, date, number of samples,size of
 #'         the platform and tumor
