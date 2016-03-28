@@ -8,7 +8,7 @@ TCGAvisualize_meanMethylation(data, groupCol = NULL, subgroupCol = NULL,
   shapes = NULL, print.pvalue = FALSE, filename = "groupMeanMet.pdf",
   ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
   xlab = NULL, title = "Mean DNA methylation", labels = NULL,
-  group.legend = NULL, subgroup.legend = NULL, color = NULL)
+  group.legend = NULL, subgroup.legend = NULL, color = NULL, sort)
 }
 \arguments{
 \item{data}{SummarizedExperiment object obtained from TCGAPrepare}
@@ -38,6 +38,9 @@ of the subgroups. Example: shapes = c(21,23) if for two levels}
 \item{subgroup.legend}{Name of the subgroup legend. DEFAULT: subgroupCol}
 
 \item{color}{vector of colors to be used in graph}
+
+\item{sort}{Sort boxplot by mean or median.
+Possible values: mean.asc, mean.desc, median.asc, meadian.desc}
 }
 \value{
 Save the pdf survival plot
@@ -65,6 +68,11 @@ data <- SummarizedExperiment::SummarizedExperiment(
          colData=colData)
 TCGAvisualize_meanMethylation(data,groupCol  = "group")
 TCGAvisualize_meanMethylation(data,groupCol  = "group", subgroupCol="subgroup")
+TCGAvisualize_meanMethylation(data,groupCol  = "group")
+TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="mean.desc",filename="meandesc.pdf")
+TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="mean.asc",filename="meanasc.pdf")
+TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="median.asc",filename="medianasc.pdf")
+TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="median.desc",filename="mediandesc.pdf")
 if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 }
 
