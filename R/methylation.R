@@ -240,8 +240,12 @@ TCGAanalyze_survival <- function(data,
 #' @param xlab x axis text in the plot
 #' @param labels Labels of the groups
 #' @param sort Sort boxplot by mean or median.
-#' @param add.jitter Add jitter? Default TRUE
 #' Possible values: mean.asc, mean.desc, median.asc, meadian.desc
+#' @param plot.jitter Plot jitter? Default TRUE
+#' @param jitter.size Plot jitter size? Default 3
+#' @param height Plot height default:10
+#' @param width Plot width default:10
+#' @param dpi Pdf dpi default:600
 #' @import ggplot2 stats
 #' @importFrom SummarizedExperiment colData rowRanges assay
 #' @importFrom grDevices rainbow
@@ -278,7 +282,8 @@ TCGAvisualize_meanMethylation <- function(data,
                                           subgroupCol=NULL,
                                           shapes = NULL,
                                           print.pvalue=FALSE,
-                                          add.jitter = TRUE,
+                                          plot.jitter = TRUE,
+                                          jitter.size=3,
                                           filename = "groupMeanMet.pdf",
                                           ylab = expression(
                                               paste("Mean DNA methylation (",
@@ -289,7 +294,11 @@ TCGAvisualize_meanMethylation <- function(data,
                                           group.legend = NULL,
                                           subgroup.legend = NULL,
                                           color = NULL,
-                                          sort) {
+                                          sort,
+                                          width=10,
+                                          height=10,
+                                          dpi=600
+) {
     .e <- environment()
     mean <- colMeans(assay(data),na.rm = TRUE)
 
@@ -386,21 +395,22 @@ TCGAvisualize_meanMethylation <- function(data,
         geom_boxplot(aes(fill = x),
                      notchwidth = 0.25, outlier.shape = NA)
 
-    if (add.jitter){
+    if (plot.jitter){
 
         if (!is.null(subgroupCol)){
 
             p <- p + geom_jitter(aes(shape = subgroups,
                                      size =  subgroups),
                                  position = position_jitter(width = 0.1),
-                                 size = 3)
+                                 size = jitter.size)
         } else {
             p <- p + geom_jitter(position = position_jitter(width = 0.1),
-                                 size = 3)
+                                 size = jitter.size)
         }
     }
+
     p <- p + scale_fill_manual(values = color,labels = labels, name = group.legend)
-    p <- p + scale_x_discrete(breaks = labels,labels = labels)
+    p <- p + scale_x_discrete(limits=levels(x))
     p <- p + ylab(ylab) + xlab(xlab) + labs(title = title) +
         labs(shape=subgroup.legend, color=group.legend) +
         theme_bw() +
@@ -436,7 +446,7 @@ TCGAvisualize_meanMethylation <- function(data,
     }
     # saving box plot to analyse it
     if(!is.null(filename)){
-        ggsave(p, filename = filename, width = 10, height = 10, dpi = 600)
+        ggsave(p, filename = filename, width = width, height = height, dpi = dpi)
         message(paste("Plot saved in: ", file.path(getwd(),filename)))
     } else {
         return(p)
