@@ -5,8 +5,8 @@
 \title{Mean methylation boxplot}
 \usage{
 TCGAvisualize_meanMethylation(data, groupCol = NULL, subgroupCol = NULL,
-  shapes = NULL, print.pvalue = FALSE, add.jitter = TRUE,
-  filename = "groupMeanMet.pdf",
+  shapes = NULL, print.pvalue = FALSE, plot.jitter = TRUE,
+  jitter.size = 3, filename = "groupMeanMet.pdf",
   ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
   xlab = NULL, title = "Mean DNA methylation", labels = NULL,
   group.legend = NULL, subgroup.legend = NULL, color = NULL, sort,
@@ -25,8 +25,9 @@ of the subgroups. Example: shapes = c(21,23) if for two levels}
 
 \item{print.pvalue}{Print p-value for two groups}
 
-\item{add.jitter}{Add jitter? Default TRUE
-Possible values: mean.asc, mean.desc, median.asc, meadian.desc}
+\item{plot.jitter}{Plot jitter? Default TRUE}
+
+\item{jitter.size}{Plot jitter size? Default 3}
 
 \item{filename}{The name of the pdf that will be saved}
 
@@ -44,7 +45,8 @@ Possible values: mean.asc, mean.desc, median.asc, meadian.desc}
 
 \item{color}{vector of colors to be used in graph}
 
-\item{sort}{Sort boxplot by mean or median.}
+\item{sort}{Sort boxplot by mean or median.
+Possible values: mean.asc, mean.desc, median.asc, meadian.desc}
 
 \item{width}{Plot width default:10}
 
