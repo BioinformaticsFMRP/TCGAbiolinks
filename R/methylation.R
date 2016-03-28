@@ -308,9 +308,10 @@ TCGAvisualize_meanMethylation <- function(data,
     } else {
         df <- data.frame(mean = mean, groups = groups)
     }
-
+    message("==================== DATA Summary ====================")
     print(kable(ddply(df, .(groups), summarize,  Mean=mean(mean), Median=median(mean),
                       Max = max(mean),Min=min(mean))))
+    message("==================== END DATA Summary ====================")
 
     #comb2by2 <- combinations(length(levels(droplevels(df$groups))),
     #                  2,
@@ -331,7 +332,10 @@ TCGAvisualize_meanMethylation <- function(data,
             silent = TRUE
             )
         }
+        message("==================== T test results ====================")
         print(kable(mat.pvalue))
+        message("==================== END T test results ====================")
+
     }
     if(print.pvalue & length(levels(droplevels(df$groups))) == 2) {
         pvalue <- t.test(mean ~ groups, data = df)$p.value
@@ -370,12 +374,8 @@ TCGAvisualize_meanMethylation <- function(data,
 
     if(is.null(color)){
         color <- rainbow(length(labels))
-        print(levels(x))
-        print(levels(factor(df$groups)))
-        print(match(levels(x),levels(factor(df$groups))))
         color <- color[(match(levels(x),levels(factor(df$groups))))]
     }
-
 
     p <- ggplot(df, aes(x, df$mean),
                 environment = .e) +
