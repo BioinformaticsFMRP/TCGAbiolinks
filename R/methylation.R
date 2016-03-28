@@ -193,23 +193,23 @@ TCGAanalyze_survival <- function(data,
         scale_y_continuous(labels = scales::percent) +
         theme_bw() +
         theme(#panel.border = element_blank(),
-              panel.grid.major = element_blank(),
-              panel.grid.minor = element_blank(),
-              panel.border = element_rect(colour = "black", size= 1.5),
-              legend.key = element_rect(colour = 'white'),
-              legend.justification=c(1,1),
-              #axis.line = element_line(colour = "black"),
-              legend.background = element_rect(colour = "black"),
-                                               #linetype = "dashed"),
-              #legend.background = element_rect(colour = "white"),
-              legend.position=c(1,1),
-              plot.title = element_text(size = 20),
-              legend.text = element_text(size = 16),
-              legend.title = element_text(size = 16),
-              axis.text= element_text(size = 16),
-              axis.title.x= element_text(size = 16),
-              #legend.position="top",
-              axis.title.y= element_text(size = 16))
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.border = element_rect(colour = "black", size= 1.5),
+            legend.key = element_rect(colour = 'white'),
+            legend.justification=c(1,1),
+            #axis.line = element_line(colour = "black"),
+            legend.background = element_rect(colour = "black"),
+            #linetype = "dashed"),
+            #legend.background = element_rect(colour = "white"),
+            legend.position=c(1,1),
+            plot.title = element_text(size = 20),
+            legend.text = element_text(size = 16),
+            legend.title = element_text(size = 16),
+            axis.text= element_text(size = 16),
+            axis.title.x= element_text(size = 16),
+            #legend.position="top",
+            axis.title.y= element_text(size = 16))
 
     if(!is.null(filename)) {
         ggsave(surv, filename = filename, width = width, height = height, dpi = 600)
@@ -239,10 +239,19 @@ TCGAanalyze_survival <- function(data,
 #' @param print.pvalue Print p-value for two groups
 #' @param xlab x axis text in the plot
 #' @param labels Labels of the groups
+#' @param sort Sort boxplot by mean or median.
+#' Possible values: mean.asc, mean.desc, median.asc, meadian.desc
+#' @param plot.jitter Plot jitter? Default TRUE
+#' @param jitter.size Plot jitter size? Default 3
+#' @param height Plot height default:10
+#' @param width Plot width default:10
+#' @param dpi Pdf dpi default:600
 #' @import ggplot2 stats
 #' @importFrom SummarizedExperiment colData rowRanges assay
 #' @importFrom grDevices rainbow
 # ' @importFrom gtools combinations
+#' @importFrom plyr ddply . summarize
+#' @importFrom knitr kable
 #' @export
 #' @return Save the pdf survival plot
 #' @examples
@@ -262,12 +271,19 @@ TCGAanalyze_survival <- function(data,
 #'          colData=colData)
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group")
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group", subgroupCol="subgroup")
+#' TCGAvisualize_meanMethylation(data,groupCol  = "group")
+#' TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="mean.desc",filename="meandesc.pdf")
+#' TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="mean.asc",filename="meanasc.pdf")
+#' TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="median.asc",filename="medianasc.pdf")
+#' TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="median.desc",filename="mediandesc.pdf")
 #' if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 TCGAvisualize_meanMethylation <- function(data,
                                           groupCol=NULL,
                                           subgroupCol=NULL,
                                           shapes = NULL,
                                           print.pvalue=FALSE,
+                                          plot.jitter = TRUE,
+                                          jitter.size=3,
                                           filename = "groupMeanMet.pdf",
                                           ylab = expression(
                                               paste("Mean DNA methylation (",
@@ -277,19 +293,26 @@ TCGAvisualize_meanMethylation <- function(data,
                                           labels = NULL,
                                           group.legend = NULL,
                                           subgroup.legend = NULL,
-                                          color = NULL) {
+                                          color = NULL,
+                                          sort,
+                                          width=10,
+                                          height=10,
+                                          dpi=600
+) {
     .e <- environment()
     mean <- colMeans(assay(data),na.rm = TRUE)
 
     if (is.null(groupCol)){
         groups <- rep("Patient",length(mean))
     } else {
+        if(!(groupCol %in% colnames(colData(data)))) stop("groupCol not found in the object")
         groups <- colData(data)[,groupCol]
     }
 
     if (is.null(subgroupCol)){
         subgroups <- NULL
     } else {
+        if(!(subgroupCol %in% colnames(colData(data)))) stop("subgroupCol not found in the object")
         subgroups <- colData(data)[,subgroupCol]
     }
 
@@ -298,18 +321,19 @@ TCGAvisualize_meanMethylation <- function(data,
     } else {
         df <- data.frame(mean = mean, groups = groups)
     }
-
-    for(i in unique(df$groups)){
-        message(paste("Mean group ",i,":",mean(subset(df, groups==i)$mean)))
-    }
-    if(is.null(color)){
-        color <- rainbow(length(unique(groups)))
-    }
+    message("==================== DATA Summary ====================")
+    data.summary <- ddply(df, .(groups), summarize,
+                          Mean=mean(mean), Median=median(mean),
+                          Max = max(mean),Min=min(mean))
+    print(kable(data.summary))
+    message("==================== END DATA Summary ====================")
 
     #comb2by2 <- combinations(length(levels(droplevels(df$groups))),
     #                  2,
     #                 levels(droplevels(df$groups)))
     groups <- levels(droplevels(df$groups))
+    mat.pvalue <- matrix(ncol=length(groups),nrow=length(groups),
+                         dimnames=list(groups,groups))
     if(length(groups) > 1){
         comb2by2 <- t(combn(levels(droplevels(df$groups)),2))
 
@@ -317,10 +341,16 @@ TCGAvisualize_meanMethylation <- function(data,
             try({
                 aux <- t.test(mean ~ groups,
                               data = subset(df,subset=df$groups %in% comb2by2[i,]) )$p.value;
-                message(paste("P-value:", paste0(comb2by2[i,], collapse = "-"),"=",aux))},
-                silent = TRUE
+                mat.pvalue[comb2by2[i,1],comb2by2[i,2]] <- aux
+                mat.pvalue[comb2by2[i,2],comb2by2[i,1]] <- aux
+            },
+            silent = TRUE
             )
         }
+        message("==================== T test results ====================")
+        print(kable(mat.pvalue))
+        message("==================== END T test results ====================")
+
     }
     if(print.pvalue & length(levels(droplevels(df$groups))) == 2) {
         pvalue <- t.test(mean ~ groups, data = df)$p.value
@@ -340,29 +370,49 @@ TCGAvisualize_meanMethylation <- function(data,
         subgroup.legend <- subgroupCol
     }
 
+    if(missing(sort)){
+        x <- factor(df$groups)
+    } else if(sort == "mean.asc") {
+        x <- reorder(df$groups, df$mean, FUN="mean")
+    } else  if(sort == "mean.desc") {
+        x <- reorder(df$groups, -df$mean, FUN="mean")
+    } else if(sort == "median.asc") {
+        x <- reorder(df$groups, df$mean, FUN="median")
+    } else if(sort == "median.desc") {
+        x <- reorder(df$groups, -df$mean, FUN="median")
+    }
+
     if (is.null(labels)) {
-        labels <- levels(factor(df$groups))
+        labels <- levels(x)
         labels <-  sapply(labels,label.add.n)
     }
 
-    p <- ggplot(df, aes(factor(df$groups), df$mean),
+    if(is.null(color)){
+        color <- rainbow(length(labels))
+        color <- color[(match(levels(x),levels(factor(df$groups))))]
+    }
+
+    p <- ggplot(df, aes(x, df$mean),
                 environment = .e) +
-        geom_boxplot(aes(fill = factor(df$groups)),
+        geom_boxplot(aes(fill = x),
                      notchwidth = 0.25, outlier.shape = NA)
 
-    if (!is.null(subgroupCol)){
+    if (plot.jitter){
 
-        p <- p + geom_jitter(aes(shape = subgroups,
-                                 size =  subgroups),
-                             position = position_jitter(width = 0.1),
-                             size = 3)
-    } else {
-        p <- p + geom_jitter(position = position_jitter(width = 0.1),
-                             size = 3)
+        if (!is.null(subgroupCol)){
+
+            p <- p + geom_jitter(aes(shape = subgroups,
+                                     size =  subgroups),
+                                 position = position_jitter(width = 0.1),
+                                 size = jitter.size)
+        } else {
+            p <- p + geom_jitter(position = position_jitter(width = 0.1),
+                                 size = jitter.size)
+        }
     }
 
     p <- p + scale_fill_manual(values = color,labels = labels, name = group.legend)
-    p <- p + scale_x_discrete(breaks = labels,labels = labels)
+    p <- p + scale_x_discrete(limits=levels(x))
     p <- p + ylab(ylab) + xlab(xlab) + labs(title = title) +
         labs(shape=subgroup.legend, color=group.legend) +
         theme_bw() +
@@ -398,7 +448,7 @@ TCGAvisualize_meanMethylation <- function(data,
     }
     # saving box plot to analyse it
     if(!is.null(filename)){
-        ggsave(p, filename = filename, width = 10, height = 10, dpi = 600)
+        ggsave(p, filename = filename, width = width, height = height, dpi = dpi)
         message(paste("Plot saved in: ", file.path(getwd(),filename)))
     } else {
         return(p)
