@@ -240,6 +240,7 @@ TCGAanalyze_survival <- function(data,
 #' @param xlab x axis text in the plot
 #' @param labels Labels of the groups
 #' @param sort Sort boxplot by mean or median.
+#' @param add.jitter Add jitter? Default TRUE
 #' Possible values: mean.asc, mean.desc, median.asc, meadian.desc
 #' @import ggplot2 stats
 #' @importFrom SummarizedExperiment colData rowRanges assay
@@ -277,6 +278,7 @@ TCGAvisualize_meanMethylation <- function(data,
                                           subgroupCol=NULL,
                                           shapes = NULL,
                                           print.pvalue=FALSE,
+                                          add.jitter = TRUE,
                                           filename = "groupMeanMet.pdf",
                                           ylab = expression(
                                               paste("Mean DNA methylation (",
@@ -382,17 +384,19 @@ TCGAvisualize_meanMethylation <- function(data,
         geom_boxplot(aes(fill = x),
                      notchwidth = 0.25, outlier.shape = NA)
 
-    if (!is.null(subgroupCol)){
+    if (add.jitter){
 
-        p <- p + geom_jitter(aes(shape = subgroups,
-                                 size =  subgroups),
-                             position = position_jitter(width = 0.1),
-                             size = 3)
-    } else {
-        p <- p + geom_jitter(position = position_jitter(width = 0.1),
-                             size = 3)
+        if (!is.null(subgroupCol)){
+
+            p <- p + geom_jitter(aes(shape = subgroups,
+                                     size =  subgroups),
+                                 position = position_jitter(width = 0.1),
+                                 size = 3)
+        } else {
+            p <- p + geom_jitter(position = position_jitter(width = 0.1),
+                                 size = 3)
+        }
     }
-
     p <- p + scale_fill_manual(values = color,labels = labels, name = group.legend)
     p <- p + scale_x_discrete(breaks = labels,labels = labels)
     p <- p + ylab(ylab) + xlab(xlab) + labs(title = title) +
