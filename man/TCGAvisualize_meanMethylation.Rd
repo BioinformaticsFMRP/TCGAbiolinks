@@ -5,7 +5,8 @@
 \title{Mean methylation boxplot}
 \usage{
 TCGAvisualize_meanMethylation(data, groupCol = NULL, subgroupCol = NULL,
-  shapes = NULL, print.pvalue = FALSE, filename = "groupMeanMet.pdf",
+  shapes = NULL, print.pvalue = FALSE, add.jitter = TRUE,
+  filename = "groupMeanMet.pdf",
   ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
   xlab = NULL, title = "Mean DNA methylation", labels = NULL,
   group.legend = NULL, subgroup.legend = NULL, color = NULL, sort)
@@ -23,6 +24,9 @@ of the subgroups. Example: shapes = c(21,23) if for two levels}
 
 \item{print.pvalue}{Print p-value for two groups}
 
+\item{add.jitter}{Add jitter? Default TRUE
+Possible values: mean.asc, mean.desc, median.asc, meadian.desc}
+
 \item{filename}{The name of the pdf that will be saved}
 
 \item{ylab}{y axis text in the plot}
@@ -39,8 +43,7 @@ of the subgroups. Example: shapes = c(21,23) if for two levels}
 
 \item{color}{vector of colors to be used in graph}
 
-\item{sort}{Sort boxplot by mean or median.
-Possible values: mean.asc, mean.desc, median.asc, meadian.desc}
+\item{sort}{Sort boxplot by mean or median.}
 }
 \value{
 Save the pdf survival plot
