@@ -9,7 +9,8 @@ TCGAvisualize_meanMethylation(data, groupCol = NULL, subgroupCol = NULL,
   filename = "groupMeanMet.pdf",
   ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
   xlab = NULL, title = "Mean DNA methylation", labels = NULL,
-  group.legend = NULL, subgroup.legend = NULL, color = NULL, sort)
+  group.legend = NULL, subgroup.legend = NULL, color = NULL, sort,
+  width = 10, height = 10, dpi = 600)
 }
 \arguments{
 \item{data}{SummarizedExperiment object obtained from TCGAPrepare}
@@ -44,6 +45,12 @@ Possible values: mean.asc, mean.desc, median.asc, meadian.desc}
 \item{color}{vector of colors to be used in graph}
 
 \item{sort}{Sort boxplot by mean or median.}
+
+\item{width}{Plot width default:10}
+
+\item{height}{Plot height default:10}
+
+\item{dpi}{Pdf dpi default:600}
 }
 \value{
 Save the pdf survival plot
