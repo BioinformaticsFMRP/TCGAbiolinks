@@ -5,10 +5,12 @@
 \title{Mean methylation boxplot}
 \usage{
 TCGAvisualize_meanMethylation(data, groupCol = NULL, subgroupCol = NULL,
-  shapes = NULL, print.pvalue = FALSE, filename = "groupMeanMet.pdf",
+  shapes = NULL, print.pvalue = FALSE, plot.jitter = TRUE,
+  jitter.size = 3, filename = "groupMeanMet.pdf",
   ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
   xlab = NULL, title = "Mean DNA methylation", labels = NULL,
-  group.legend = NULL, subgroup.legend = NULL, color = NULL)
+  group.legend = NULL, subgroup.legend = NULL, color = NULL, sort,
+  width = 10, height = 10, dpi = 600)
 }
 \arguments{
 \item{data}{SummarizedExperiment object obtained from TCGAPrepare}
@@ -22,6 +24,10 @@ columns defined a columns called "Patients" will be used}
 of the subgroups. Example: shapes = c(21,23) if for two levels}
 
 \item{print.pvalue}{Print p-value for two groups}
+
+\item{plot.jitter}{Plot jitter? Default TRUE}
+
+\item{jitter.size}{Plot jitter size? Default 3}
 
 \item{filename}{The name of the pdf that will be saved}
 
@@ -38,6 +44,15 @@ of the subgroups. Example: shapes = c(21,23) if for two levels}
 \item{subgroup.legend}{Name of the subgroup legend. DEFAULT: subgroupCol}
 
 \item{color}{vector of colors to be used in graph}
+
+\item{sort}{Sort boxplot by mean or median.
+Possible values: mean.asc, mean.desc, median.asc, meadian.desc}
+
+\item{width}{Plot width default:10}
+
+\item{height}{Plot height default:10}
+
+\item{dpi}{Pdf dpi default:600}
 }
 \value{
 Save the pdf survival plot
@@ -65,6 +80,11 @@ data <- SummarizedExperiment::SummarizedExperiment(
          colData=colData)
 TCGAvisualize_meanMethylation(data,groupCol  = "group")
 TCGAvisualize_meanMethylation(data,groupCol  = "group", subgroupCol="subgroup")
+TCGAvisualize_meanMethylation(data,groupCol  = "group")
+TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="mean.desc",filename="meandesc.pdf")
+TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="mean.asc",filename="meanasc.pdf")
+TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="median.asc",filename="medianasc.pdf")
+TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="median.desc",filename="mediandesc.pdf")
 if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 }
 
