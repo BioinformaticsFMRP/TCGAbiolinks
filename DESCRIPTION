@@ -33,7 +33,6 @@ Imports:
     xtable,
     data.table,
     EDASeq (>= 2.0.0),
-    grid (>= 3.0.0),
     RCurl,
     edgeR (>= 3.0.0),
     rjson,
@@ -101,7 +100,6 @@ Suggests:
     testthat,
     png,
     BiocStyle,
-    knitr,
     rmarkdown
 VignetteBuilder: knitr
 LazyData: true
