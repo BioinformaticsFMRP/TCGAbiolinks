@@ -250,7 +250,7 @@ TCGAanalyze_survival <- function(data,
 #' @importFrom SummarizedExperiment colData rowRanges assay
 #' @importFrom grDevices rainbow
 # ' @importFrom gtools combinations
-#' @importFrom plyr ddply . summarise
+#' @importFrom plyr ddply . summarize
 #' @importFrom knitr kable
 #' @export
 #' @return Save the pdf survival plot
