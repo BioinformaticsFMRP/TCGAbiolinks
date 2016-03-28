@@ -246,6 +246,7 @@ TCGAanalyze_survival <- function(data,
 #' @param height Plot height default:10
 #' @param width Plot width default:10
 #' @param dpi Pdf dpi default:600
+#' @param axis.text.x.angle Angle of text in the x axis
 #' @import ggplot2 stats
 #' @importFrom SummarizedExperiment colData rowRanges assay
 #' @importFrom grDevices rainbow
@@ -297,7 +298,8 @@ TCGAvisualize_meanMethylation <- function(data,
                                           sort,
                                           width=10,
                                           height=10,
-                                          dpi=600
+                                          dpi=600,
+                                          axis.text.x.angle = 90
 ) {
     .e <- environment()
     mean <- colMeans(assay(data),na.rm = TRUE)
@@ -417,7 +419,7 @@ TCGAvisualize_meanMethylation <- function(data,
         labs(shape=subgroup.legend, color=group.legend) +
         theme_bw() +
         theme(axis.title.x = element_text(face = "bold", size = 20),
-              axis.text.x = element_text(angle = 90,
+              axis.text.x = element_text(angle = axis.text.x.angle,
                                          vjust = 0.5,
                                          size = 16),
               axis.title.y = element_text(face = "bold",
