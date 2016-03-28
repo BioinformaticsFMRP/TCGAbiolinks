@@ -10,7 +10,7 @@ TCGAvisualize_meanMethylation(data, groupCol = NULL, subgroupCol = NULL,
   ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
   xlab = NULL, title = "Mean DNA methylation", labels = NULL,
   group.legend = NULL, subgroup.legend = NULL, color = NULL, sort,
-  width = 10, height = 10, dpi = 600)
+  width = 10, height = 10, dpi = 600, axis.text.x.angle = 90)
 }
 \arguments{
 \item{data}{SummarizedExperiment object obtained from TCGAPrepare}
@@ -53,6 +53,8 @@ Possible values: mean.asc, mean.desc, median.asc, meadian.desc}
 \item{height}{Plot height default:10}
 
 \item{dpi}{Pdf dpi default:600}
+
+\item{axis.text.x.angle}{Angle of text in the x axis}
 }
 \value{
 Save the pdf survival plot
