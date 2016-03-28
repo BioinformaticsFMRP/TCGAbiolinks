@@ -305,12 +305,14 @@ TCGAvisualize_meanMethylation <- function(data,
     if (is.null(groupCol)){
         groups <- rep("Patient",length(mean))
     } else {
+        if(!(groupCol %in% colnames(colData(data)))) stop("groupCol not found in the object")
         groups <- colData(data)[,groupCol]
     }
 
     if (is.null(subgroupCol)){
         subgroups <- NULL
     } else {
+        if(!(subgroupCol %in% colnames(colData(data)))) stop("subgroupCol not found in the object")
         subgroups <- colData(data)[,subgroupCol]
     }
 
