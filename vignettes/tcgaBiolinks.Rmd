@@ -879,22 +879,21 @@ head(dataREAD_df)
 
 You can easily search TCGA samples, download and prepare a matrix of copy number variation (CNV) data.
 ```{r, eval = FALSE}
-
 # Define a list of samples to query and download providing relative TCGA barcodes.
-samplesList <- c("TCGA-02-0046-10A-01D-0182-01", 
-                "TCGA-02-0052-01A-01D-0182-01", 
-                "TCGA-02-0033-10A-01D-0182-01", 
-                "TCGA-02-0034-01A-01D-0182-01", 
-                "TCGA-02-0007-01A-01D-0182-01")
+samplesList <- c("TCGA-02-0046-10A-01D-0182-01",
+                 "TCGA-02-0052-01A-01D-0182-01",
+                 "TCGA-02-0033-10A-01D-0182-01",
+                 "TCGA-02-0034-01A-01D-0182-01",
+                 "TCGA-02-0007-01A-01D-0182-01")
 
-# Query platform Genome_Wide_SNP_6 with a list of barcode 
+# Query platform Genome_Wide_SNP_6 with a list of barcode
 query <- TCGAquery(tumor = "gbm", level = 3, platform = "Genome_Wide_SNP_6")
 
 # Download a list of barcodes with platform Genome_Wide_SNP_6
-TCGAdownload(query, path = "samples")
+TCGAdownload(query, path = "samples",type = "hg19.seg", samples = samplesList)
 
-# Prepare matrix 
-GBM_CNV <- TCGAprepare(query, dir = "samples", type = ".hg19.seg.txt")
+# Prepare matrix
+GBM_CNV <- TCGAprepare(query, dir = "samples", type = "hg19.seg",samples = samplesList)
 ```
 
 ### `TCGAprepare`: Types of data available for downloading
