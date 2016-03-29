@@ -641,11 +641,15 @@ calculate.pvalues <- function(data,
 #' Example: c("Not Significant","Hypermethylated in group1",
 #' "Hypomethylated in group1"))#'
 #' @export
+#' @importFrom ggrepel geom_label_repel geom_text_repel
 #' @return Saves the volcano plot in the current folder
 #' @examples
-#' x <- runif(200, 1e5, 1e6)
-#' y <- runif(200, 1e5, 1e6)
+#' x <- runif(20, -1, 1)
+#' y <- runif(20, -1, 1)
 #' TCGAVisualize_volcano(x,y)
+#' TCGAVisualize_volcano(x,y,filename = NULL,y.cut = 10000000,x.cut=0.8,
+#'                       names = rep("AAAA",length(x)), legend = "Status",
+#'                       names.fill = FALSE)
 #' while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 TCGAVisualize_volcano <- function(x,y,
                                   filename = "volcano.pdf",
@@ -655,6 +659,7 @@ TCGAVisualize_volcano <- function(x,y,
                                   label=NULL, xlim=NULL, ylim=NULL,
                                   color = c("black", "red", "green"),
                                   names=NULL,
+                                  names.fill= TRUE,
                                   x.cut=0,
                                   y.cut=0.01,
                                   height=5,
@@ -710,6 +715,7 @@ TCGAVisualize_volcano <- function(x,y,
         theme_bw() + theme(panel.border = element_blank(),
                            panel.grid.major = element_blank(),
                            panel.grid.minor = element_blank(),
+                           legend.text = element_text(size = 10),
                            axis.line.x=element_line(colour = "black"),
                            axis.line.y=element_line(colour = "black"),
                            legend.position="top",
@@ -717,8 +723,25 @@ TCGAVisualize_volcano <- function(x,y,
     # Label points with the textxy function from the calibrate plot
     if(!is.null(names)){
         idx <- (up & sig) | (down & sig)
-        p <- p + annotate("text", x = x[idx], y =  -1.1 *log10(y[idx]) ,
-                          label = names[idx],  size = 2.0,  alpha = .6)
+        if(names.fill){
+            p <- p + geom_label_repel(
+                data = subset(df, threshold %in% c("2","3")),
+                aes(label = names[idx],fill=threshold),
+                size = 4, show.legend = FALSE,
+                fontface = 'bold', color = 'white',
+                box.padding = unit(0.35, "lines"),
+                point.padding = unit(0.3, "lines")
+            ) +   scale_fill_manual(values=color[2:3])
+        }  else {
+            p <- p + geom_text_repel(
+                data = subset(df, threshold %in% c("2","3")),
+                aes(label = names[idx]),
+                size = 4, show.legend = FALSE,
+                fontface = 'bold', color = 'black',
+                point.padding = unit(0.3, "lines"),
+                box.padding = unit(0.5, 'lines')
+            )
+        }
     }
     if(!is.null(filename)){
         ggsave(p, filename = filename, width = width, height = height, dpi = 600)
