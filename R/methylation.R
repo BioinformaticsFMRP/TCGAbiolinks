@@ -1265,7 +1265,7 @@ TCGAvisualize_starburst <- function(met,
                              show.legend = FALSE)
     }
 
-    if(names == TRUE){
+    if(names == TRUE & !is.null(significant)){
         message("Adding names to genes")
         if(names.fill){
             p <- p + geom_label_repel(
