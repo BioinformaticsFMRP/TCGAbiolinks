@@ -637,6 +637,7 @@ calculate.pvalues <- function(data,
 #' @param width Figure width
 #' @param names Names to be ploted if significant.
 #' Should be the same size of x and y
+#' @param names.fill Names should be filled in a color box?  Default: TRUE
 #' @param label vector of labels to be used in the figure.
 #' Example: c("Not Significant","Hypermethylated in group1",
 #' "Hypomethylated in group1"))#'
@@ -998,6 +999,7 @@ TCGAanalyze_DMR <- function(data,
 #' @param label vector of labels to be used in graph
 #' @param title main title
 #' @param names Add the names of the significant genes? Default: FALSE
+#' @param names.fill Names should be filled in a color box?  Default: TRUE
 #' @param circle Circle pair gene/probe that respects diffmean.cut and logFC.cut
 #' Default: TRUE
 #' @param ylab y axis text
@@ -1017,9 +1019,13 @@ TCGAanalyze_DMR <- function(data,
 #' @param group2 The name of the group 2.
 #' Obs: Column p.value.adj.group1.group2 should exist
 #' @param return.plot If true only plot object will be returned (pdf will not be created)
+#' @param height Figure height
+#' @param width Figure width
+#' @param dpi Figure dpi
 #' @import ggplot2
 #' @importFrom SummarizedExperiment rowRanges rowRanges<- values<-
 #' @importFrom RColorBrewer brewer.pal
+#' @importFrom ggrepel geom_label_repel geom_text_repel
 #' @export
 #' @return Save a starburst plot
 #' @examples
@@ -1059,6 +1065,7 @@ TCGAvisualize_starburst <- function(met,
                                     diffmean.cut = 0,
                                     logFC.cut = 0,
                                     names = FALSE,
+                                    names.fill = TRUE,
                                     circle = TRUE,
                                     filename = "starburst.pdf",
                                     return.plot = FALSE,
@@ -1080,7 +1087,10 @@ TCGAvisualize_starburst <- function(met,
                                               "Down regulated",
                                               "Up regulated & Hyper methylated",
                                               "Down regulated & Hyper methylated"),
-                                    xlim = NULL, ylim = NULL
+                                    xlim = NULL, ylim = NULL,
+                                    height=10,
+                                    width=20,
+                                    dpi=600
 )
 {
     .e <- environment()
@@ -1090,6 +1100,8 @@ TCGAvisualize_starburst <- function(met,
                                   "purple")
     names(color) <- as.character(1:9)
     names(label) <- as.character(1:9)
+    names.color <- color
+    names(names.color) <- label
 
     if ( is.null(group1) || is.null(group2)) {
         message("Please, set the group1 and group2 parameters")
@@ -1255,15 +1267,29 @@ TCGAvisualize_starburst <- function(met,
 
     if(names == TRUE){
         message("Adding names to genes")
-        s <- list(a.sig,b.sig,g.sig,h.sig)
-        for (i in s) {
-            if(nrow(i) > 0){
-                p <- p + annotate("text", x = i$meFDR2, y =  1.1 *(i$geFDR2),
-                                  label = i$Gene_Symbol,  size = 4.0,  alpha = .6)
-
-            }
+        if(names.fill){
+            p <- p + geom_label_repel(
+                data = significant,
+                aes(x = significant$meFDR2, y =  significant$geFDR2,
+                    label = significant$Gene_Symbol, fill = as.factor(significant$starburst.status)),
+                size = 4, show.legend = FALSE,
+                fontface = 'bold', color = 'white',
+                box.padding = unit(0.35, "lines"),
+                point.padding = unit(0.3, "lines")
+            ) + scale_fill_manual(values=names.color)
+        }  else {
+            p <- p + geom_text_repel(
+                data = significant,
+                aes(x = significant$meFDR2, y =  significant$geFDR2,
+                    label = significant$Gene_Symbol, fill = significant$starburst.status),
+                size = 4, show.legend = FALSE,
+                fontface = 'bold', color = 'black',
+                point.padding = unit(0.3, "lines"),
+                box.padding = unit(0.5, 'lines')
+            )
         }
     }
+
 
     if (!is.null(xlim)) {
         p <- p + xlim(xlim)
@@ -1307,7 +1333,7 @@ TCGAvisualize_starburst <- function(met,
     #    p <- p + scale_shape_discrete(
     #        labels = c("Candidate Biologically Significant"),
     #        name = "Biological importance")
-    if(!return.plot) ggsave(filename = filename, width = 14, height = 10, dpi = 600)
+    if(!return.plot) ggsave(filename = filename, width = width, height = height, dpi = dpi)
 
     #statuscol <- paste("status", group1, group2, sep = ".")
 
