@@ -77,6 +77,17 @@ TCGAprepare <- function(query,
                         summarizedExperiment = TRUE,
                         add.subtype = FALSE){
 
+    if(add.subtype){
+        for (i in unique(query$Disease)) {
+            if (!grepl("lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc|all",
+                       i,ignore.case = TRUE)) {
+                message(paste0("Sorry we don't have subtypes for: ",i))
+                message("add.subtype set to FALSE")
+                add.subtype <- FALSE
+            }
+        }
+    }
+
     if (is.null(dir)) {
         message("Argument dir is NULL. Plese provide the directory
                 with the folders to be prepared. ")
