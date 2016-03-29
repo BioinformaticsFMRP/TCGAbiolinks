@@ -6,16 +6,17 @@
 \usage{
 TCGAvisualize_starburst(met, exp, group1 = NULL, group2 = NULL,
   exp.p.cut = 0.01, met.p.cut = 0.01, diffmean.cut = 0, logFC.cut = 0,
-  names = FALSE, circle = TRUE, filename = "starburst.pdf",
-  return.plot = FALSE, ylab = expression(atop("Gene Expression",
-  paste(Log[10], " (FDR corrected P values)"))),
-  xlab = expression(atop("DNA Methylation", paste(Log[10],
-  " (FDR corrected P values)"))), title = "Starburst Plot",
+  names = FALSE, names.fill = TRUE, circle = TRUE,
+  filename = "starburst.pdf", return.plot = FALSE,
+  ylab = expression(atop("Gene Expression", paste(Log[10],
+  " (FDR corrected P values)"))), xlab = expression(atop("DNA Methylation",
+  paste(Log[10], " (FDR corrected P values)"))), title = "Starburst Plot",
   legend = "DNA Methylation/Expression Relation", color = NULL,
   label = c("Not Significant", "Up regulated & Hypo methylated",
   "Down regulated & Hypo methylated", "hypo methylated", "hyper methylated",
   "Up regulated", "Down regulated", "Up regulated & Hyper methylated",
-  "Down regulated & Hyper methylated"), xlim = NULL, ylim = NULL)
+  "Down regulated & Hyper methylated"), xlim = NULL, ylim = NULL,
+  height = 10, width = 20, dpi = 600)
 }
 \arguments{
 \item{met}{SummarizedExperiment with methylation data obtained from the
@@ -44,6 +45,8 @@ change higher than methylation cut-off will be
 
 \item{names}{Add the names of the significant genes? Default: FALSE}
 
+\item{names.fill}{Names should be filled in a color box?  Default: TRUE}
+
 \item{circle}{Circle pair gene/probe that respects diffmean.cut and logFC.cut
 Default: TRUE}
 
@@ -66,6 +69,12 @@ Default: TRUE}
 \item{xlim}{x limits to cut image}
 
 \item{ylim}{y limits to cut image}
+
+\item{height}{Figure height}
+
+\item{width}{Figure width}
+
+\item{dpi}{Figure dpi}
 }
 \value{
 Save a starburst plot
