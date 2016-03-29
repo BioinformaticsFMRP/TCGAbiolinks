@@ -8,7 +8,7 @@ TCGAVisualize_volcano(x, y, filename = "volcano.pdf",
   ylab = expression(paste(-Log[10], " (FDR corrected -P values)")),
   xlab = NULL, title = NULL, legend = NULL, label = NULL, xlim = NULL,
   ylim = NULL, color = c("black", "red", "green"), names = NULL,
-  x.cut = 0, y.cut = 0.01, height = 5, width = 10)
+  names.fill = TRUE, x.cut = 0, y.cut = 0.01, height = 5, width = 10)
 }
 \arguments{
 \item{x}{x-axis data}
@@ -60,9 +60,12 @@ Creates a volcano plot from the expression and methylation analysis.
    Observation: This function automatically is called by TCGAanalyse_DMR
 }
 \examples{
-x <- runif(200, 1e5, 1e6)
-y <- runif(200, 1e5, 1e6)
+x <- runif(20, -1, 1)
+y <- runif(20, -1, 1)
 TCGAVisualize_volcano(x,y)
+TCGAVisualize_volcano(x,y,filename = NULL,y.cut = 10000000,x.cut=0.8,
+                      names = rep("AAAA",length(x)), legend = "Status",
+                      names.fill = FALSE)
 while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 }
 
