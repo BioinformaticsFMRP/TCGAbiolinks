@@ -532,15 +532,25 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE){
                 if(tolower(i) %in% c("gbm","lgg")){
                     subtype <- lgg.gbm.subtype
                     if(all(colnames(subtype) %in% colnames(ret))) break
+                    if (any(ret$patient %in% subtype$patient)) {
+                        ret$aux <- substr(ret$sample,1,15)
+                        subtype$aux <- paste0(subtype$patient,"-01")
+                        ret <- merge(ret, subtype,
+                                     all.x = TRUE ,
+                                     sort = FALSE,
+                                     by = "aux")
+                        ret$aux <- NULL
+                    }
                 } else {
                     subtype <- TCGAquery_subtype(i)
+                    if (any(ret$patient %in% subtype$patient)) {
+                        ret <- merge(ret, subtype,
+                                     all.x = TRUE ,
+                                     sort = FALSE,
+                                     by = "patient")
+                    }
                 }
-                if (any(ret$patient %in% subtype$patient)) {
-                    ret <- merge(ret, subtype,
-                                 all.x = TRUE ,
-                                 sort = FALSE,
-                                 by = "patient")
-                }
+
             } else if (grepl("thca", i,ignore.case = TRUE)) {
                 print("ok")
                 subtype <- TCGAquery_subtype(i)
