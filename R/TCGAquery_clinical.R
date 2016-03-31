@@ -535,6 +535,7 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE){
                     if (any(ret$patient %in% subtype$patient)) {
                         ret$aux <- substr(ret$sample,1,15)
                         subtype$aux <- paste0(subtype$patient,"-01")
+                        subtype$patient <- NULL
                         ret <- merge(ret, subtype,
                                      all.x = TRUE ,
                                      sort = FALSE,
