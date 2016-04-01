@@ -963,7 +963,26 @@ TCGAanalyze_DMR <- function(data,
     # saving results into a csv file
     csv <- paste("DMR_results",groupCol,group1,group2, "csv", sep = ".")
     message(paste0("Saving the results also in a csv file:"), csv)
-    write.csv2(values(data),file =  csv)
+
+    if (any(hyper & sig)) values(data)[hyper & sig,statuscol] <- paste("Hypermethylated","in", group2)
+    if (any(hyper & sig)) values(data)[hyper & sig,statuscol2] <- paste("Hypomethylated","in", group1)
+    if (any(hypo & sig)) values(data)[hypo & sig,statuscol] <- paste("Hypomethylated","in", group2)
+    if (any(hypo & sig)) values(data)[hypo & sig,statuscol2] <- paste("Hypermethylated","in", group1)
+    # get metadata not created by this function
+    idx <- grep("mean|status|value",colnames(values(data)),invert = TRUE)
+    write.csv2(values(data)[,
+                            c(colnames(values(data))[idx],
+                              paste("mean",group1,sep = "."),
+                              paste("mean",group2,sep = "."),
+                              paste("diffmean",group1,group2,sep = "."),
+                              paste("p.value",group1,group2,sep = "."),
+                              paste("p.value.adj",group1,group2,sep = "."),
+                              statuscol,
+                              paste("diffmean",group2,group1,sep = "."),
+                              paste("p.value",group2,group1,sep = "."),
+                              paste("p.value.adj",group2,group1,sep = "."),
+                              statuscol2)
+                              ],file =  csv)
 
     return(data)
 }
