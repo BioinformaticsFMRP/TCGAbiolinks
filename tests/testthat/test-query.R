@@ -90,4 +90,8 @@ test_that("TCGAquery_maf works", {
                                archive.name = "IlluminaGA_DNASeq_curated.Level_2.1.4.0"))
     expect_equal(class(mutation),class(data.frame()))
     expect_null(TCGAquery_maf(tumor = "lgg", archive.name = "xxx"))
+    capture.output(mutation <- TCGAquery_maf(tumor = "THYM",
+                               archive.name = "genome.wustl.edu_THYM.IlluminaHiSeq_DNASeq_automated.Level_2.1.1.0"))
+    expect_equal(class(mutation),class(data.frame()))
+
 })
