@@ -989,9 +989,14 @@ TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
     # merge the data frame in the lists
     if(length(idx) > 1) {
         df <- Reduce(function(...) merge(..., all=TRUE), df)
+     }  else if(length(idx) == 1) {
+            df <- Reduce(function(...) merge(..., all=TRUE), df)
+            df <- df[[1]]
+            colnames(df) <- gsub(" ",".", colnames(df))
+            colnames(df) <- gsub(":",".", colnames(df))
     } else {
-	df <- df[[1]][[1]]
-        colnames(df) <- gsub(" ",".", colnames(df))
+	message("Sorry, no maf found")
+        return (NULL)
     }
 
     # Remove obsolete/protected
