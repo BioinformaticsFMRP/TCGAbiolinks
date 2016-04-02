@@ -1,3 +1,6 @@
+TCGAbiolinks 1.1.25
+---------------------------------------------------------------
+* Bug fix: TCGAquery_maf had a bug if only one table was found.
 TCGAbiolinks 1.1.24
 ---------------------------------------------------------------
 * Bug fix: types argument for Genome_Wide_SNP_6 was not working.
