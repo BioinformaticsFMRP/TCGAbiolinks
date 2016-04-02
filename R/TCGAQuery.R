@@ -974,23 +974,24 @@ TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
     message("Source: https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files")
 
     tables <- read_html("https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files")
-
     tables <-  html_table(tables)
 
     # Table one is junk
     tables[[1]] <- NULL
 
-    # get which tables are from the tumor
-    idx <- which(mapply(function(x) {
-        any(grepl(tumor,(x[,1]), ignore.case = TRUE))
-    },tables) == TRUE)
-    df <- lapply(idx,function(x) tables[x])
-
+    if(!is.null(tumor)){
+       # get which tables are from the tumor
+       idx <- which(mapply(function(x) {
+          any(grepl(tumor,(x[,1]), ignore.case = TRUE))
+       },tables) == TRUE)
+       df <- lapply(idx,function(x) tables[x])
+    }
     # merge the data frame in the lists
     if(length(idx) > 1) {
         df <- Reduce(function(...) merge(..., all=TRUE), df)
     } else {
-        df <- unlist(df)
+	df <- df[[1]][[1]]
+        colnames(df) <- gsub(" ",".", colnames(df))
     }
 
     # Remove obsolete/protected
