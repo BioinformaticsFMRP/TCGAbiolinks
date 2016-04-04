@@ -212,7 +212,7 @@ filterFiles <- function(data,samples,files){
               | (grepl("humanmethylation", data$Platform, ignore.case = TRUE) & level != 1 )) {
         idx <- unique(unlist(lapply(samples, function(x) grep(x,files))))
         files <- files[idx]
-    } else if(grepl(mageName, data$Platform, ignore.case = TRUE)) {
+    } else if(grepl(mageName, data$Platform, ignore.case = TRUE) | (grepl("humanmethylation", data$Platform, ignore.case = TRUE) & level == 1 )) {
         mage <- getMage(data)
         idx <- unlist(lapply(samples,
                              function(x) grep(x,mage$Comment..TCGA.Barcode.)))
