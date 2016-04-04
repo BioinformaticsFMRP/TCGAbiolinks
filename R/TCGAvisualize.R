@@ -596,12 +596,12 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @param cluster_columns Cluster columns ? Dafault: FALSE
 #' @param sortCol Name of the column to be used to sort the columns
 #' @param title Title of the plot
-#' @param scale Use z-score to make the heamat?
+#' @param scale Use z-score to make the heatmap?
 #' If we want to show differences between genes, it is good to make Z-score by samples
 #' (force each sample to have zero mean and standard deviation=1).
 #' If we want to show differences between samples, it is good to make Z-score by genes
 #' (force each gene to have zero mean and standard deviation=1).
-#' Possibilities: "row", "col. Default "none"
+#' Possibilities: "row", "col". Default "none"
 #' @examples
 #'  row.mdat <- matrix(c("FALSE","FALSE",
 #'                      "TRUE","TRUE",
