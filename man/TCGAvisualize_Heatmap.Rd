@@ -39,12 +39,12 @@ The code will throw a warning in case two samples are from the same patient.}
 \item{type}{Select the colors of the heatmap values. Possible values are
 "expression" (default), "methylation"}
 
-\item{scale}{Use z-score to make the heamat?
+\item{scale}{Use z-score to make the heatmap?
 If we want to show differences between genes, it is good to make Z-score by samples
 (force each sample to have zero mean and standard deviation=1).
 If we want to show differences between samples, it is good to make Z-score by genes
 (force each gene to have zero mean and standard deviation=1).
-Possibilities: "row", "col. Default "none"}
+Possibilities: "row", "col". Default "none"}
 }
 \value{
 Heatmap plotted in the device
