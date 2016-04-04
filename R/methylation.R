@@ -1127,17 +1127,19 @@ TCGAvisualize_starburst <- function(met,
         return(NULL)
     }
 
-    # Preparing methylation
-    pcol <- paste("p.value.adj",group1,group2,sep = ".")
-    if(!(pcol %in%  colnames(values(met)))){
-        pcol <- paste("p.value.adj",group2,group1,sep = ".")
-    }
-    if(!(pcol %in%  colnames(values(met)))){
-        stop("Error! p-values adjusted not found. Please, run TCGAanalyze_DMR")
-    }
     if (class(met) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
         met <- as.data.frame(rowRanges(met))
     }
+
+    # Preparing methylation
+    pcol <- paste("p.value.adj",group1,group2,sep = ".")
+    if(!(pcol %in%  colnames(met))){
+        pcol <- paste("p.value.adj",group2,group1,sep = ".")
+    }
+    if(!(pcol %in%  colnames(met))){
+        stop("Error! p-values adjusted not found. Please, run TCGAanalyze_DMR")
+    }
+
 
     aux <- strsplit(row.names(exp),"\\|")
     exp$Gene_Symbol  <- unlist(lapply(aux,function(x) x[1]))
