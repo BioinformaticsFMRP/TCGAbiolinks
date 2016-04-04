@@ -1009,7 +1009,7 @@ TCGAanalyze_DMR <- function(data,
 #'    Output: starburst plot
 #'
 #' @param met SummarizedExperiment with methylation data obtained from the
-#' TCGAPrepare. Expected colData columns: diffmean,  p.value.adj  and p.value
+#' TCGAPrepare or Data frame from DMR_results file. Expected colData columns: diffmean,  p.value.adj  and p.value
 #' Execute volcanoPlot function in order to obtain these values for the object.
 #' @param exp Object obtained by DEArnaSEQ function
 #' @param filename The filename of the file (it can be pdf, svg, png, etc)
@@ -1135,7 +1135,9 @@ TCGAvisualize_starburst <- function(met,
     if(!(pcol %in%  colnames(values(met)))){
         stop("Error! p-values adjusted not found. Please, run TCGAanalyze_DMR")
     }
-    met <- as.data.frame(rowRanges(met))
+    if (class(met) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+        met <- as.data.frame(rowRanges(met))
+    }
 
     aux <- strsplit(row.names(exp),"\\|")
     exp$Gene_Symbol  <- unlist(lapply(aux,function(x) x[1]))
