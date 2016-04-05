@@ -1075,6 +1075,12 @@ TCGAanalyze_DMR <- function(data,
 #'                                   group1="g1",group2="g2",
 #'                                   diffmean.cut=0.0,
 #'                                   names=TRUE, circle = FALSE)
+#' result <- TCGAvisualize_starburst(SummarizedExperiment::values(met),
+#'                                   exp,
+#'                                   exp.p.cut = 0.05, met.p.cut = 0.05,
+#'                                   group1="g1",group2="g2",
+#'                                   diffmean.cut=0.0,
+#'                                   names=TRUE, circle = FALSE)
 TCGAvisualize_starburst <- function(met,
                                     exp,
                                     group1=NULL,
