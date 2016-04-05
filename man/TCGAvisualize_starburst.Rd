@@ -20,7 +20,7 @@ TCGAvisualize_starburst(met, exp, group1 = NULL, group2 = NULL,
 }
 \arguments{
 \item{met}{SummarizedExperiment with methylation data obtained from the
-TCGAPrepare. Expected colData columns: diffmean,  p.value.adj  and p.value
+TCGAPrepare or Data frame from DMR_results file. Expected colData columns: diffmean,  p.value.adj  and p.value
 Execute volcanoPlot function in order to obtain these values for the object.}
 
 \item{exp}{Object obtained by DEArnaSEQ function}
@@ -122,6 +122,12 @@ SummarizedExperiment::rowRanges(met)$diffmean.g2.g1 <- -1*(SummarizedExperiment:
 SummarizedExperiment::rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
 SummarizedExperiment::rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
 result <- TCGAvisualize_starburst(met,exp,
+                                  exp.p.cut = 0.05, met.p.cut = 0.05,
+                                  group1="g1",group2="g2",
+                                  diffmean.cut=0.0,
+                                  names=TRUE, circle = FALSE)
+result <- TCGAvisualize_starburst(SummarizedExperiment::values(met),
+                                  exp,
                                   exp.p.cut = 0.05, met.p.cut = 0.05,
                                   group1="g1",group2="g2",
                                   diffmean.cut=0.0,
