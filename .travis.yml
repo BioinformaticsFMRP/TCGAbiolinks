@@ -6,16 +6,17 @@ warnings_are_errors: false
 
 os:
   - linux
-  - osx
+#  - osx
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("nlme", lib="/home/travis/R-bin/lib/R/library/")'; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("roxygen2", lib="/home/travis/R-bin/lib/R/library/")'; fi
 
 r_github_packages:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]];  jimhester/covr
+  - jimhester/covr
+
 after_success:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]];  Rscript -e 'library(covr);codecov()'
+  -  Rscript -e 'library(covr);codecov()'
 
 r_build_args: --no-build-vignettes --no-manual --no-resave-data
 r_check_args: --no-build-vignettes --no-manual
