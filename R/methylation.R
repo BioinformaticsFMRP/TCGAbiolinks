@@ -957,13 +957,13 @@ TCGAanalyze_DMR <- function(data,
                           names = names,
                           x.cut = diffmean.cut,
                           y.cut = p.cut)
-    if (is.null(filename)) filename <- paste(groupCol,group1,group2, "rda", sep = ".")
+    if (is.null(filename)) filename <- paste0(paste(groupCol,group1,group2,"pcut",p.cut,"meancut",diffmean.cut, sep = "_"),".rda")
     if (save) save(data,file = filename)
 
     # saving results into a csv file
-    csv <- paste("DMR_results",groupCol,group1,group2, "csv", sep = ".")
+    csv <- paste0(paste("DMR_results",groupCol,group1,group2, "pcut",p.cut,"meancut",diffmean.cut,  sep = "_"),".csv")
     message(paste0("Saving the results also in a csv file:"), csv)
-    df <- values(data)		
+    df <- values(data)
     if (any(hyper & sig)) df[hyper & sig,statuscol] <- paste("Hypermethylated","in", group2)
     if (any(hyper & sig)) df[hyper & sig,statuscol2] <- paste("Hypomethylated","in", group1)
     if (any(hypo & sig)) df[hypo & sig,statuscol] <- paste("Hypomethylated","in", group2)
@@ -971,18 +971,18 @@ TCGAanalyze_DMR <- function(data,
     # get metadata not created by this function
     idx <- grep("mean|status|value",colnames(df),invert = TRUE)
     write.csv2(df[,
-                            c(colnames(df)[idx],
-                              paste("mean",group1,sep = "."),
-                              paste("mean",group2,sep = "."),
-                              paste("diffmean",group1,group2,sep = "."),
-                              paste("p.value",group1,group2,sep = "."),
-                              paste("p.value.adj",group1,group2,sep = "."),
-                              statuscol,
-                              paste("diffmean",group2,group1,sep = "."),
-                              paste("p.value",group2,group1,sep = "."),
-                              paste("p.value.adj",group2,group1,sep = "."),
-                              statuscol2)
-                              ],file =  csv)
+                  c(colnames(df)[idx],
+                    paste("mean",group1,sep = "."),
+                    paste("mean",group2,sep = "."),
+                    paste("diffmean",group1,group2,sep = "."),
+                    paste("p.value",group1,group2,sep = "."),
+                    paste("p.value.adj",group1,group2,sep = "."),
+                    statuscol,
+                    paste("diffmean",group2,group1,sep = "."),
+                    paste("p.value",group2,group1,sep = "."),
+                    paste("p.value.adj",group2,group1,sep = "."),
+                    statuscol2)
+                  ],file =  csv)
 
     return(data)
 }
@@ -1009,7 +1009,7 @@ TCGAanalyze_DMR <- function(data,
 #'    Output: starburst plot
 #'
 #' @param met SummarizedExperiment with methylation data obtained from the
-#' TCGAPrepare. Expected colData columns: diffmean,  p.value.adj  and p.value
+#' TCGAPrepare or Data frame from DMR_results file. Expected colData columns: diffmean,  p.value.adj  and p.value
 #' Execute volcanoPlot function in order to obtain these values for the object.
 #' @param exp Object obtained by DEArnaSEQ function
 #' @param filename The filename of the file (it can be pdf, svg, png, etc)
@@ -1075,6 +1075,12 @@ TCGAanalyze_DMR <- function(data,
 #'                                   group1="g1",group2="g2",
 #'                                   diffmean.cut=0.0,
 #'                                   names=TRUE, circle = FALSE)
+#' result <- TCGAvisualize_starburst(SummarizedExperiment::values(met),
+#'                                   exp,
+#'                                   exp.p.cut = 0.05, met.p.cut = 0.05,
+#'                                   group1="g1",group2="g2",
+#'                                   diffmean.cut=0.0,
+#'                                   names=TRUE, circle = FALSE)
 TCGAvisualize_starburst <- function(met,
                                     exp,
                                     group1=NULL,
@@ -1127,15 +1133,19 @@ TCGAvisualize_starburst <- function(met,
         return(NULL)
     }
 
+    if (class(met) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+        met <- as.data.frame(rowRanges(met))
+    }
+
     # Preparing methylation
     pcol <- paste("p.value.adj",group1,group2,sep = ".")
-    if(!(pcol %in%  colnames(values(met)))){
+    if(!(pcol %in%  colnames(met))){
         pcol <- paste("p.value.adj",group2,group1,sep = ".")
     }
-    if(!(pcol %in%  colnames(values(met)))){
+    if(!(pcol %in%  colnames(met))){
         stop("Error! p-values adjusted not found. Please, run TCGAanalyze_DMR")
     }
-    met <- as.data.frame(rowRanges(met))
+
 
     aux <- strsplit(row.names(exp),"\\|")
     exp$Gene_Symbol  <- unlist(lapply(aux,function(x) x[1]))
