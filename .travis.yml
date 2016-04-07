@@ -9,8 +9,8 @@ os:
   - osx
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; Rscript -e 'install.packages("nlme", lib="/home/travis/R-bin/lib/R/library/")'
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; Rscript -e 'install.packages("roxygen2", lib="/home/travis/R-bin/lib/R/library/")'
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("nlme", lib="/home/travis/R-bin/lib/R/library/")'; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("roxygen2", lib="/home/travis/R-bin/lib/R/library/")'; fi
 
 r_github_packages:
   - jimhester/covr
