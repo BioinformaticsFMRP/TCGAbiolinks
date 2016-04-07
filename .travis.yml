@@ -4,9 +4,13 @@ cache: packages
 bioc_required: true
 warnings_are_errors: false
 
+os:
+  - linux
+  - osx
+
 before_install:
-  - Rscript -e 'install.packages("nlme", lib="/home/travis/R-bin/lib/R/library/")'
-  - Rscript -e 'install.packages("roxygen2", lib="/home/travis/R-bin/lib/R/library/")'
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("nlme", lib="/home/travis/R-bin/lib/R/library/")'; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("roxygen2", lib="/home/travis/R-bin/lib/R/library/")'; fi
 
 r_github_packages:
   - jimhester/covr
