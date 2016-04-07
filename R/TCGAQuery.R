@@ -1036,8 +1036,9 @@ TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
     #df -> df[order(nb,decreasing = F),]
 
     message("Downloading maf file")
+    if(is.windows()) mode <- "wb" else  mode <- "w"
     if (!file.exists(basename(df[1,]$Deploy.Location)))
-        download(df[1,]$Deploy.Location,basename(df[1,]$Deploy.Location))
+        download(df[1,]$Deploy.Location,basename(df[1,]$Deploy.Location), quiet = TRUE,mode = mode)
 
     suppressWarnings({
         ret <- read.table(basename(df[1,]$Deploy.Location), fill = TRUE,
