@@ -13,9 +13,9 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("roxygen2", lib="/home/travis/R-bin/lib/R/library/")'; fi
 
 r_github_packages:
-  - jimhester/covr
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]];  jimhester/covr
 after_success:
-  - Rscript -e 'library(covr);codecov()'
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]];  Rscript -e 'library(covr);codecov()'
 
 r_build_args: --no-build-vignettes --no-manual --no-resave-data
 r_check_args: --no-build-vignettes --no-manual
