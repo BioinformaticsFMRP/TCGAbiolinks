@@ -697,13 +697,12 @@ TCGAprepare <- function(query,
             return()
         }
 
-        if(type == "hg19.mirbase20.mirna.quantification") type <- "hg19.mirbase20.mirna.quantification"
-        if(type == "hg19.mirbase20.isoform.quantification") type <- "hg19.mirbase20.isoform.quantification"
-        if(type == "isoform.quantification" ) type <- "[^(hg19.mirbase20)].isoform.quantification"
-        if(type == "mirna.quantification" ) type <- "[^(hg19.mirbase20)].mirna.quantification"
+        if(type == "hg19.mirbase20.mirna.quantification") regex <- "hg19.mirbase20.mirna.quantification"
+        if(type == "hg19.mirbase20.isoform.quantification") regex <- "hg19.mirbase20.isoform.quantification"
+        if(type == "isoform.quantification" ) regex <- "[^(hg19.mirbase20)].isoform.quantification"
+        if(type == "mirna.quantification" ) regex <- "[^(hg19.mirbase20)].mirna.quantification"
 
-
-        files <- files[grep(pat,files, perl = TRUE)]
+        files <- files[grep(regex,files)]
 
         if(length(files) == 0){
             message("No mirna files of that type found")
