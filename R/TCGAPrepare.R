@@ -709,6 +709,13 @@ TCGAprepare <- function(query,
             return(NULL)
         }
 
+        if(summarizedExperiment){
+            message(
+                paste("Sorry, but for this platform we haven't prepared",
+                      "the data into a summarizedExperiment object.",
+                      "\nBut we will do it soon! The return is a data frame")
+            )
+        }
         regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                         "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
         barcode <- str_match(files,regex)
@@ -724,6 +731,7 @@ TCGAprepare <- function(query,
             } else {
                 df <- merge(df, data, by=colnames(data)[1])
             }
+            setTxtProgressBar(pb, i)
         }
         setDF(df)
         rownames(df) <- df[,1]
