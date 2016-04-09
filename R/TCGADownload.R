@@ -93,6 +93,12 @@ TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
                 if(type == "cnv_hg18" | type == "hg18.seg") type <- "[^nocnv_]hg18.seg"
                 if(type == "nocnv_hg19" | type == "nocnv_hg19.seg") type <- "nocnv_hg19"
                 if(type == "cnv_hg19" | type == "hg19.seg") type <- "[^nocnv_]hg19.seg"
+                # mirna types
+                if(type == "hg19.mirbase20.mirna.quantification") type <- "hg19.mirbase20.mirna.quantification"
+                if(type == "hg19.mirbase20.isoform.quantification") type <- "hg19.mirbase20.isoform.quantification"
+                if(type == "isoform.quantification" ) type <- "[^(hg19.mirbase20)].isoform.quantification"
+                if(type == "mirna.quantification" ) type <- "[^(hg19.mirbase20)].mirna.quantification"
+
                 files <- files[grepl(type,files)]
 
                 if (length(files) == 0) {
