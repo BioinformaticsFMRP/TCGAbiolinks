@@ -599,6 +599,7 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
 #' two groups of negative-binomially distributed counts.
 #' @param  fdr.cut is a threshold to filter DEGs according their p-value corrected
 #' @param logFC.cut is a threshold to filter DEGs according their logFC
+#' @param elementsRatio is number of elements processed for second for time consumation estimation
 #' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags estimateGLMCommonDisp
 #' estimateGLMTagwiseDisp glmFit glmLRT
 #' @export
@@ -611,7 +612,7 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
 #'                       dataFilt[,samplesTP],"Normal", "Tumor")
 #' @return table with DEGs containing for each gene logFC, logCPM, pValue,and FDR
 TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type,method = "exactTest",
-                            fdr.cut = 1, logFC.cut = 0) {
+                            fdr.cut = 1, logFC.cut = 0, elementsRatio = 30000) {
 
     TOC <- cbind(mat1,mat2)
     Cond1num <- ncol(mat1)
@@ -625,7 +626,7 @@ TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type,method = "exactTest",
     message(message3 <- paste( "there are ", nrow(TOC) ,
                              "features as miRNA or genes "))
 
-    timeEstimated <- format(ncol(TOC)*nrow(TOC)/30000,digits = 2)
+    timeEstimated <- format(ncol(TOC)*nrow(TOC)/elementsRatio,digits = 2)
     message(messageEstimation <- paste("I Need about ", timeEstimated,
                                      "seconds for this DEA. [Processing 30k elements /s]  "))
 
