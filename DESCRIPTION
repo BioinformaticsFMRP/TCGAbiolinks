@@ -74,6 +74,7 @@ Imports:
     reshape2,
     gtable,
     sjmisc,
+    httr,
     matlab,
     circlize,
     ComplexHeatmap,
