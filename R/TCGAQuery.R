@@ -963,6 +963,7 @@ TCGAquery_samplesfilter <- function(query) {
 #' @param archive.name Archive name to filter the search
 #' @importFrom rvest html_table
 #' @importFrom xml2 read_html
+#' @importFrom httr GET
 #' @examples
 #' \dontrun{
 #'  query <- TCGAquery(tumor = 'lgg')
@@ -973,7 +974,11 @@ TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
     message("Getting maf tables")
     message("Source: https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files")
 
-    tables <- read_html("https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files")
+    if(is.windows()) {
+      tables <- read_html(GET("https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files"))
+    } else {
+      tables <- read_html("https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files")
+    }
     tables <-  html_table(tables)
 
     # Table one is junk
