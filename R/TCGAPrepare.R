@@ -681,17 +681,27 @@ TCGAprepare <- function(query,
         }
     }
 
-    if (grepl("illuminahiseq_mirnaseq",platform, ignore.case = TRUE)) {
+    if (grepl("illuminahiseq_mirnaseq",platform, ignore.case = TRUE) ||
+        grepl("illuminaga_mirnaseq",platform, ignore.case = TRUE)) {
 
-        if (is.null(type) || (type != "hg19.mirna" && type != "mirna")){
+        if (is.null(type) || (type != "isoform.quantification" &&
+                              type != "hg19.mirbase20.isoform.quantification" &&
+                              type != "hg19.mirbase20.mirna.quantification" &&
+                              type != "mirna.quantification")){
             msg <- paste0("Plase select a type. \n Possibilities:\n",
-                          " = hg19.mirna\n = mirna")
+                          "\n = hg19.mirbase20.mirna.quantification",
+                          "\n = mirna.quantification",
+                          "\n = hg19.mirbase20.isoform.quantification",
+                          "\n = isoform.quantification")
             message(msg)
             return()
         }
 
-        if(type == "hg19.mirna")   pat <- "(hg19.)mirna"
-        if(type == "mirna")        pat <- "(?<!hg19\\.)mirna"
+        if(type == "hg19.mirbase20.mirna.quantification") type <- "hg19.mirbase20.mirna.quantification"
+        if(type == "hg19.mirbase20.isoform.quantification") type <- "hg19.mirbase20.isoform.quantification"
+        if(type == "isoform.quantification" ) type <- "[^(hg19.mirbase20)].isoform.quantification"
+        if(type == "mirna.quantification" ) type <- "[^(hg19.mirbase20)].mirna.quantification"
+
 
         files <- files[grep(pat,files, perl = TRUE)]
 
