@@ -963,6 +963,7 @@ TCGAquery_samplesfilter <- function(query) {
 #' @param archive.name Archive name to filter the search
 #' @importFrom rvest html_table
 #' @importFrom xml2 read_html
+#' @importFrom httr GET
 #' @examples
 #' \dontrun{
 #'  query <- TCGAquery(tumor = 'lgg')
@@ -973,7 +974,11 @@ TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
     message("Getting maf tables")
     message("Source: https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files")
 
-    tables <- read_html("https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files")
+    if(is.windows()) {
+      tables <- read_html(GET("https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files"))
+    } else {
+      tables <- read_html("https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files")
+    }
     tables <-  html_table(tables)
 
     # Table one is junk
@@ -1024,26 +1029,21 @@ TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
         return (NULL)
     }
 
-
     # change the path to be downloaded
     df[,"Deploy.Location"] <- gsub("/dccfiles_prod/tcgafiles/",
                                    "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/",
                                    df[,"Deploy.Location"] )
 
-    # We will order to get the file with more samples
-    # we are considering this is the last. Needs to be checked
-    #nb <- sapply(strsplit(df$Tumor.Samples.Normal.Samples,":"), function(x) x[[1]])
-    #df -> df[order(nb,decreasing = F),]
-
     message("Downloading maf file")
     if(is.windows()) mode <- "wb" else  mode <- "w"
-    if (!file.exists(basename(df[1,]$Deploy.Location)))
-        download(df[1,]$Deploy.Location,basename(df[1,]$Deploy.Location), quiet = TRUE,mode = mode)
+       if (!file.exists(df$MAF.File.Name))
+        download(df$Deploy.Location,df$MAF.File.Name, quiet = FALSE,mode = mode)
 
     suppressWarnings({
-        ret <- read.table(basename(df[1,]$Deploy.Location), fill = TRUE,
+        ret <- read.table(df$MAF.File.Name, fill = TRUE,
                           comment.char = "#", header = TRUE, sep = "\t", quote='')
     })
+
     ret$bcr_patient_barcode <- substr(ret$Tumor_Sample_Barcode,1,12)
 
     return(ret)
