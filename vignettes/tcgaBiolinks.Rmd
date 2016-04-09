@@ -768,6 +768,8 @@ rsem.isoforms.results, rsem.genes.normalized_results,
 rsem.isoforms.normalized_results, bt.exon_quantification
 *  **RNASeq:** exon.quantification,spljxn.quantification, gene.quantification
 *  **genome_wide_snp_6:** hg18.seg,hg19.seg,nocnv_hg18.seg,nocnv_hg19.seg
+*  **IlluminaHiSeq_miRNASeq:** hg19.mirbase20.mirna.quantification,
+hg19.mirbase20.isoform.quantification, mirna.quantification, isoform.quantification
 
 # `TCGAprepare`: Preparing the data
 You can easily read the downloaded data using the `TCGAprepare` function.
@@ -780,7 +782,7 @@ The arguments are:
 
 * **query**	Data frame as the one returned from TCGAquery
 * **dir**	Directory with the files
-* **type**	File to prepare.
+* **type**	File to prepare. 
 * **samples**	List of samples to prepare.
 * **save**	Save a rda object with the prepared object? Default: FALSE
 * **filename** Name of the rda object that will be saved if `save` is `TRUE`
@@ -874,6 +876,16 @@ class(dataREAD_df)
 dim(dataREAD_df)
 head(dataREAD_df)
 ```
+
+### `TCGAprepare`: Types of data available for downloading
+
+*  **RNASeqV2:** junction_quantification,rsem.genes.results,
+rsem.isoforms.results, rsem.genes.normalized_results, 
+rsem.isoforms.normalized_results, bt.exon_quantification
+*  **RNASeq:** exon.quantification,spljxn.quantification, gene.quantification
+*  **genome_wide_snp_6:** hg18.seg,hg19.seg,nocnv_hg18.seg,nocnv_hg19.seg
+*  **IlluminaHiSeq_miRNASeq:** hg19.mirbase20.mirna.quantification,
+hg19.mirbase20.isoform.quantification, mirna.quantification, isoform.quantification
 
 ### Example of use: Preparing the data with CNV data (Genome_Wide_SNP_6)
 

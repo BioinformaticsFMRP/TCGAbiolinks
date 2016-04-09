@@ -681,25 +681,41 @@ TCGAprepare <- function(query,
         }
     }
 
-    if (grepl("illuminahiseq_mirnaseq",platform, ignore.case = TRUE)) {
+    if (grepl("illuminahiseq_mirnaseq",platform, ignore.case = TRUE) ||
+        grepl("illuminaga_mirnaseq",platform, ignore.case = TRUE)) {
 
-        if (is.null(type) || (type != "hg19.mirna" && type != "mirna")){
+        if (is.null(type) || (type != "isoform.quantification" &&
+                              type != "hg19.mirbase20.isoform.quantification" &&
+                              type != "hg19.mirbase20.mirna.quantification" &&
+                              type != "mirna.quantification")){
             msg <- paste0("Plase select a type. \n Possibilities:\n",
-                          " = hg19.mirna\n = mirna")
+                          "\n = hg19.mirbase20.mirna.quantification",
+                          "\n = mirna.quantification",
+                          "\n = hg19.mirbase20.isoform.quantification",
+                          "\n = isoform.quantification")
             message(msg)
             return()
         }
 
-        if(type == "hg19.mirna")   pat <- "(hg19.)mirna"
-        if(type == "mirna")        pat <- "(?<!hg19\\.)mirna"
+        if(type == "hg19.mirbase20.mirna.quantification") regex <- "hg19.mirbase20.mirna.quantification"
+        if(type == "hg19.mirbase20.isoform.quantification") regex <- "hg19.mirbase20.isoform.quantification"
+        if(type == "isoform.quantification" ) regex <- "[^(hg19.mirbase20)].isoform.quantification"
+        if(type == "mirna.quantification" ) regex <- "[^(hg19.mirbase20)].mirna.quantification"
 
-        files <- files[grep(pat,files, perl = TRUE)]
+        files <- files[grep(regex,files)]
 
         if(length(files) == 0){
             message("No mirna files of that type found")
             return(NULL)
         }
 
+        if(summarizedExperiment){
+            message(
+                paste("Sorry, but for this platform we haven't prepared",
+                      "the data into a summarizedExperiment object.",
+                      "\nBut we will do it soon! The return is a data frame")
+            )
+        }
         regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                         "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
         barcode <- str_match(files,regex)
@@ -715,6 +731,7 @@ TCGAprepare <- function(query,
             } else {
                 df <- merge(df, data, by=colnames(data)[1])
             }
+            setTxtProgressBar(pb, i)
         }
         setDF(df)
         rownames(df) <- df[,1]
