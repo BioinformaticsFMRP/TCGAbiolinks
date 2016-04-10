@@ -877,7 +877,7 @@ dim(dataREAD_df)
 head(dataREAD_df)
 ```
 
-### `TCGAprepare`: Types of data available for downloading
+### `TCGAprepare`: Types of data available for preparing
 
 *  **RNASeqV2:** junction_quantification,rsem.genes.results,
 rsem.isoforms.results, rsem.genes.normalized_results, 
