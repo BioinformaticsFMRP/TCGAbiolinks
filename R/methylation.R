@@ -638,6 +638,8 @@ calculate.pvalues <- function(data,
 #' @param names Names to be ploted if significant.
 #' Should be the same size of x and y
 #' @param names.fill Names should be filled in a color box?  Default: TRUE
+#' @param names.size Size of the names text
+#' @param dpi Figure dpi
 #' @param label vector of labels to be used in the figure.
 #' Example: c("Not Significant","Hypermethylated in group1",
 #' "Hypomethylated in group1"))#'
@@ -664,7 +666,9 @@ TCGAVisualize_volcano <- function(x,y,
                                   x.cut=0,
                                   y.cut=0.01,
                                   height=5,
-                                  width=10){
+                                  width=10,
+                                  names.size = 4,
+                                  dpi = 300){
 
     if(!is.null(names)) {
         if(all(grepl("\\|",names))){
@@ -728,7 +732,7 @@ TCGAVisualize_volcano <- function(x,y,
             p <- p + geom_label_repel(
                 data = subset(df, threshold %in% c("2","3")),
                 aes(label = names[idx],fill=threshold),
-                size = 4, show.legend = FALSE,
+                size = names.size, show.legend = FALSE,
                 fontface = 'bold', color = 'white',
                 box.padding = unit(0.35, "lines"),
                 point.padding = unit(0.3, "lines")
@@ -737,7 +741,7 @@ TCGAVisualize_volcano <- function(x,y,
             p <- p + geom_text_repel(
                 data = subset(df, threshold %in% c("2","3")),
                 aes(label = names[idx]),
-                size = 4, show.legend = FALSE,
+                size = names.size, show.legend = FALSE,
                 fontface = 'bold', color = 'black',
                 point.padding = unit(0.3, "lines"),
                 box.padding = unit(0.5, 'lines')
@@ -745,7 +749,7 @@ TCGAVisualize_volcano <- function(x,y,
         }
     }
     if(!is.null(filename)){
-        ggsave(p, filename = filename, width = width, height = height, dpi = 600)
+        ggsave(p, filename = filename, width = width, height = height, dpi = dpi)
     } else {
         return(p)
     }
