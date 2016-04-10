@@ -1504,12 +1504,13 @@ The black dashed line shows the FDR-adjusted P value of 0.01.
 
 The arguments of this function are:
 
-* **met** SummarizedExperiment with methylation data obtained from the 
-`TCGAprepare` and processed by `TCGAanalyze_DMR` function. 
-Expected colData columns: diffmean and p.value.adj 
+* **met** SummarizedExperiment with methylation data obtained from the `TCGAPrepare` or Data frame from `DMR_results` file. Expected colData columns: diffmean, p.value.adj and p.value Execute volcanoPlot function in order to obtain these values for the object.
 * **exp** Matrix with expression data obtained from the `TCGAanalyze_DEA` function. 
 Expected colData columns: logFC, FDR
-* **filename**  pdf filename
+* **names**	Add the names of the significant genes? Default: FALSE
+* **names.fill** Names should be filled in a color box? Default: TRUE
+* **circle** Circle pair gene/probe that respects diffmean.cut and logFC.cut 
+* **filename** pdf filename
 * **legend**  legend title
 * **color**  vector of colors to be used in graph
 * **label**  vector of labels to be used in graph
@@ -1525,6 +1526,9 @@ Expected colData columns: logFC, FDR
 * **met.p.cut**	methylation p value cut-off
 * **diffmean.cut**	If set, the probes with diffmean higher than methylation cut-off will be highlighted in the plot. And the data frame return will be subseted.
 * **logFC.cut** If set, the probes with expression fold change higher than methylation cut-off will be highlighted in the plot. And the data frame return will be subseted.
+* **height**	Figure height
+* **width**	Figure width
+* **dpi** Figure dpi
 
 
 ```{r, eval = FALSE}
@@ -2096,6 +2100,10 @@ So, selected the groups CIMP.L and CIMP.H to do RNA expression and DNA methylati
 
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+library(TCGAbiolinks)
+library(SummarizedExperiment)
+dir.create("case3")
+setwd("case3")
 #-----------------------------------
 # STEP 1: Search, download, prepare |
 #-----------------------------------
@@ -2106,10 +2114,10 @@ query.met <- TCGAquery(tumor = c("coad"),
                                     "HumanMethylation450"),
                        level = 3)
 
-TCGAdownload(query.met, path = "/dados/ibm/comparing/biolinks/coad/")
+TCGAdownload(query.met, path = "methylation")
 
 coad.met <- TCGAprepare(query = query.met,
-                        dir = "/dados/ibm/comparing/biolinks/coad/",
+                        dir = "methylation",
                         save = TRUE,
                         add.subtype = TRUE,
                         filename = "metcoad.rda",
@@ -2118,21 +2126,18 @@ coad.met <- TCGAprepare(query = query.met,
 #-----------------------------------
 # 1.2 - RNA expression
 # ----------------------------------
-
 coad.query.exp <- TCGAquery(tumor = "coad",
                             platform = "IlluminaGA_RNASeqV2",
                             level = 3)
-
 TCGAdownload(coad.query.exp,
-             path = "/dados/ibm/comparing/biolinks/RNA/",
+             path = "expression",
              type = "rsem.genes.results")
 
 coad.exp <- TCGAprepare(query = coad.query.exp,
-                        dir = "/dados/ibm/comparing/biolinks/RNA/",
+                        dir = "expression",
                         type = "rsem.genes.results",
                         add.subtype = TRUE,
                         save = T,filename = "coadexp.rda")
-
 
 # removing the samples without subtype classification
 coad.aux <- subset(coad.met, 
@@ -2225,9 +2230,11 @@ TCGAVisualize_volcano(dataDEGs$logFC,dataDEGs$FDR,
                       x.cut = 3,
                       y.cut = 10^-4,
                       names = rownames(dataDEGs),
+                      names.size = 2,
                       xlab = " Gene expression fold change (Log2)",
                       legend = "State",
-                      title = "Volcano plot (CIMP.l vs CIMP.H)")
+                      title = "Volcano plot (CIMP.l vs CIMP.H)",
+                      width = 10)
 ```
 
 The figure resulted from the code above is shown below:
@@ -2254,7 +2261,10 @@ starburst <- TCGAvisualize_starburst(coad.aux, dataDEGs,"CIMP.H","CIMP.L",
                                      exp.p.cut = 10^-4,
                                      diffmean.cut = 0.25,
                                      logFC.cut = 3,
-                                     names = TRUE)
+                                     names = TRUE,
+                                     height=10,
+                                     width=15,
+                                     dpi=300)
 ```
 
 The figure resulted from the code above is shown below:
