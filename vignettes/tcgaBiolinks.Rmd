@@ -2315,23 +2315,25 @@ library(TCGAbiolinks)
 library(SummarizedExperiment)
 library(ELMER)
 library(parallel)
+dir.create("case4")
+setwd("case4")
 #-----------------------------------
 # STEP 1: Search, download, prepare |
 #-----------------------------------
 # Step 1.1 download methylation data|
 # -----------------------------------
-path <-  "."
 query <- TCGAquery(tumor = "KIRC",level = 3, platform = "HumanMethylation450")
-TCGAdownload(query, path = path)
-kirc.met <- TCGAprepare(query,dir = path,
+TCGAdownload(query, path = "methylation")
+kirc.met <- TCGAprepare(query,dir = "methylation",
                         save = TRUE,
                         filename = "metKirc.rda",
                         summarizedExperiment = FALSE)
 
-kirc.met <- TCGAprepare_elmer(kirc.met,
+kirc.met <- TCGAprepare_elmer(kirc.met, 
                               platform = "HumanMethylation450",
                               save = TRUE,
                               met.na.cut = 0.2)
+
 ```
 For the gene expression data we will search the platform IlluminaHiSeq_RNASeqV2
 and level 3 data with TCGAquery. Next, we will download the normalized_results 
@@ -2341,15 +2343,17 @@ to ELMER.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 # Step 1.2 download expression data
-query.rna <- TCGAquery(tumor="KIRC",level=3, platform="IlluminaHiSeq_RNASeqV2")
-TCGAdownload(query.rna,path=path,type = "rsem.genes.normalized_results")
-kirc.exp <- TCGAprepare(query.rna, dir=path, save = TRUE,
+query.rna <- TCGAquery(tumor = "KIRC", level = 3, platform = "IlluminaHiSeq_RNASeqV2")
+TCGAdownload(query.rna, path="expression", type = "rsem.genes.normalized_results")
+kirc.exp <- TCGAprepare(query.rna, dir="expression", 
+                        save = TRUE,
                         type = "rsem.genes.normalized_results",
-                        filename = "expKirc.rda", summarizedExperiment = FALSE)
+                        filename = "expKirc.rda", 
+                        summarizedExperiment = FALSE)
 
 kirc.exp <- TCGAprepare_elmer(kirc.exp,
                               save = TRUE,
-                              platform = "IlluminaHiSeq_RNASeqV2")
+                              platform = "IlluminaHiSeq_RNASeqV2") 
 ```
 
 The ELMER input is a mee object that contains the methylation matrix,
@@ -2375,53 +2379,73 @@ mee <- fetch.mee(meth = kirc.met, exp = kirc.exp, TCGA = TRUE,
 
 The code below excute steps 2-5 showed above: 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-#--------------------------------------
-# STEP 3: Analysis                     |
-#--------------------------------------
-# Step 3.1: Get diff methylated probes |
-#--------------------------------------
-Sig.probes <- get.diff.meth(mee ,cores=detectCores(),
-                            dir.out ="kirc",diff.dir="hypo",
-                            pvalue = 0.01)
+direction <- c("hyper","hypo")
 
-#--------------------------------------------------
-# Step 3.2: Identifying putative probe-gene pairs |
-#--------------------------------------------------
-# Collect nearby 20 genes for Sig.probes
-nearGenes <- GetNearGenes(TRange=getProbeInfo(mee, probe=Sig.probes),
-                          cores=detectCores(),
-                          geneAnnot=getGeneInfo(mee))
-
-# Identify significant probe-gene pairs
-Hypo.pair <- get.pair(mee=mee,
-                      probes=Sig.probes,
-                      nearGenes=nearGenes,
-                      permu.dir="./kirc/permu",
-                      dir.out="./kirc/",
-                      cores=detectCores(),
-                      label= "hypo",
-                      permu.size=10000,
-                      Pe = 0.001)
-
-Sig.probes.paired <- fetch.pair(pair=Hypo.pair,
-                                probeInfo = getProbeInfo(mee),
-                                geneInfo = getGeneInfo(mee))
-
-#-------------------------------------------------------------
-# Step 3.3: Motif enrichment analysis on the selected probes |
-#-------------------------------------------------------------
-enriched.motif <- get.enriched.motif(probes=Sig.probes.paired,
-                                     dir.out="kirc", label="hypo",
-                                     background.probes = probe$name)
-
-#-------------------------------------------------------------
-# Step 3.4: Identifying regulatory TFs                        |
-#-------------------------------------------------------------
-TF <- get.TFs(mee=mee,
-              enriched.motif=enriched.motif,
-              dir.out="kirc",
-              cores=detectCores(), label= "hypo")
-
+for (j in direction){
+    print(j)
+    dir.out <- paste0("kirc/",j)
+    dir.create(dir.out, recursive = TRUE)
+    #--------------------------------------
+    # STEP 3: Analysis                     |
+    #--------------------------------------
+    # Step 3.1: Get diff methylated probes |
+    #--------------------------------------
+    Sig.probes <- get.diff.meth(mee, cores=detectCores(),
+                                dir.out =dir.out,
+                                diff.dir=j,
+                                pvalue = 0.01)
+    
+    #-------------------------------------------------------------
+    # Step 3.2: Identify significant probe-gene pairs            |
+    #-------------------------------------------------------------
+    # Collect nearby 20 genes for Sig.probes
+    nearGenes <- GetNearGenes(TRange=getProbeInfo(mee, probe=Sig.probes$probe),
+                              cores=detectCores(),
+                              geneAnnot=getGeneInfo(mee))
+    
+    pair <- get.pair(mee=mee,
+                     probes=Sig.probes$probe,
+                     nearGenes=nearGenes,
+                     permu.dir=paste0(dir.out,"/permu"),
+                     dir.out=dir.out,
+                     cores=detectCores(),
+                     label= j,
+                     permu.size=10000,
+                     Pe = 0.001)
+    
+    Sig.probes.paired <- fetch.pair(pair=pair,
+                                    probeInfo = getProbeInfo(mee),
+                                    geneInfo = getGeneInfo(mee))
+    Sig.probes.paired <-read.csv(paste0(dir.out,"/getPair.",j,".pairs.significant.csv"),
+                                 stringsAsFactors=FALSE)[,1]
+    
+    
+    #-------------------------------------------------------------
+    # Step 3.3: Motif enrichment analysis on the selected probes |
+    #-------------------------------------------------------------
+    if(length(Sig.probes.paired) > 0 ){
+        #-------------------------------------------------------------
+        # Step 3.3: Motif enrichment analysis on the selected probes |
+        #-------------------------------------------------------------
+        enriched.motif <- get.enriched.motif(probes=Sig.probes.paired,
+                                             dir.out=dir.out, label=j,
+                                             background.probes = probe$name)
+        if(length(enriched.motif) > 0){
+            #-------------------------------------------------------------
+            # Step 3.4: Identifying regulatory TFs                        |
+            #-------------------------------------------------------------
+            print("get.TFs")
+            
+            TF <- get.TFs(mee = mee,
+                          enriched.motif = enriched.motif,
+                          dir.out = dir.out,
+                          cores = detectCores(), label = j)
+            save(TF, enriched.motif, Sig.probes.paired,
+                 pair, nearGenes, Sig.probes,
+                 file=paste0(dir.out,"/ELMER_results_",j,".rda"))
+        }
+    }
+}
 ```
 
 From this analysis it is possible to verify the relationship between nearby 20 
