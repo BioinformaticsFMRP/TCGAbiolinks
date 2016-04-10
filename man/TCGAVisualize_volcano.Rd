@@ -8,7 +8,8 @@ TCGAVisualize_volcano(x, y, filename = "volcano.pdf",
   ylab = expression(paste(-Log[10], " (FDR corrected -P values)")),
   xlab = NULL, title = NULL, legend = NULL, label = NULL, xlim = NULL,
   ylim = NULL, color = c("black", "red", "green"), names = NULL,
-  names.fill = TRUE, x.cut = 0, y.cut = 0.01, height = 5, width = 10)
+  names.fill = TRUE, x.cut = 0, y.cut = 0.01, height = 5, width = 10,
+  names.size = 4, dpi = 300)
 }
 \arguments{
 \item{x}{x-axis data}
@@ -48,6 +49,10 @@ Should be the same size of x and y}
 \item{height}{Figure height}
 
 \item{width}{Figure width}
+
+\item{names.size}{Size of the names text}
+
+\item{dpi}{Figure dpi}
 }
 \value{
 Saves the volcano plot in the current folder
