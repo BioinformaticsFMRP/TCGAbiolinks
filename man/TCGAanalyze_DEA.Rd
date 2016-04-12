@@ -5,7 +5,7 @@
 \title{Differentially expression analysis (DEA) using edgeR package.}
 \usage{
 TCGAanalyze_DEA(mat1, mat2, Cond1type, Cond2type, method = "exactTest",
-  fdr.cut = 1, logFC.cut = 0)
+  fdr.cut = 1, logFC.cut = 0, elementsRatio = 30000)
 }
 \arguments{
 \item{mat1}{numeric matrix, each row represents a gene,
@@ -29,6 +29,8 @@ two groups of negative-binomially distributed counts.}
 \item{fdr.cut}{is a threshold to filter DEGs according their p-value corrected}
 
 \item{logFC.cut}{is a threshold to filter DEGs according their logFC}
+
+\item{elementsRatio}{is number of elements processed for second for time consumation estimation}
 }
 \value{
 table with DEGs containing for each gene logFC, logCPM, pValue,and FDR
