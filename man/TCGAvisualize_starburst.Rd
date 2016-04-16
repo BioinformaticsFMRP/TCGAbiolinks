@@ -19,7 +19,7 @@ TCGAvisualize_starburst(met, exp, group1 = NULL, group2 = NULL,
   height = 10, width = 20, dpi = 600)
 }
 \arguments{
-\item{met}{SummarizedExperiment with methylation data obtained from the
+\item{met}{A SummarizedExperiment with methylation data obtained from the
 TCGAPrepare or Data frame from DMR_results file. Expected colData columns: diffmean,  p.value.adj  and p.value
 Execute volcanoPlot function in order to obtain these values for the object.}
 
