@@ -8,8 +8,9 @@ TCGAVisualize_volcano(x, y, filename = "volcano.pdf",
   ylab = expression(paste(-Log[10], " (FDR corrected -P values)")),
   xlab = NULL, title = NULL, legend = NULL, label = NULL, xlim = NULL,
   ylim = NULL, color = c("black", "red", "green"), names = NULL,
-  names.fill = TRUE, x.cut = 0, y.cut = 0.01, height = 5, width = 10,
-  names.size = 4, dpi = 300)
+  names.fill = TRUE, show.names = "significant", x.cut = 0,
+  y.cut = 0.01, height = 5, width = 10, highlight = NULL,
+  highlight.color = "orange", names.size = 4, dpi = 300)
 }
 \arguments{
 \item{x}{x-axis data}
@@ -42,6 +43,8 @@ Should be the same size of x and y}
 
 \item{names.fill}{Names should be filled in a color box?  Default: TRUE}
 
+\item{show.names}{What names will be showd? Possibilities: "both", "significant", "highlighted"}
+
 \item{x.cut}{x-axis threshold. Default: 0.0}
 
 \item{y.cut}{p-values threshold. Default: 0.01}
@@ -49,6 +52,10 @@ Should be the same size of x and y}
 \item{height}{Figure height}
 
 \item{width}{Figure width}
+
+\item{highlight}{List of genes/probes to be highlighted. It should be in the names argument.}
+
+\item{highlight.color}{Color of the points highlighted}
 
 \item{names.size}{Size of the names text}
 
@@ -68,11 +75,14 @@ Creates a volcano plot from the expression and methylation analysis.
 }
 \examples{
 x <- runif(20, -1, 1)
-y <- runif(20, -1, 1)
+y <- runif(20, 0.01, 1)
 TCGAVisualize_volcano(x,y)
 TCGAVisualize_volcano(x,y,filename = NULL,y.cut = 10000000,x.cut=0.8,
                       names = rep("AAAA",length(x)), legend = "Status",
                       names.fill = FALSE)
+TCGAVisualize_volcano(x,y,filename = NULL,y.cut = 10000000,x.cut=0.8,
+                      names = as.character(1:length(x)), legend = "Status",
+                      names.fill = TRUE, highlight = c("1","2"),show="both")
 while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 }
 
