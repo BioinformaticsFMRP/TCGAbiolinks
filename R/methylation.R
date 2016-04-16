@@ -761,13 +761,19 @@ TCGAVisualize_volcano <- function(x,y,
             if(!is.null(highlight)){
                 idx <- (names %in% highlight)
                 important <- c("4")
-            }
+            } else (
+                message("Missing highlight argument")
+                return(NULL)
+            )
         } else if(show.names == "both"){
-            idx <- (up & sig) | (down & sig) |  (names %in% highlight)
-            important <- c("2","3","4")
+            if(!is.null(highlight)){
+                idx <- (up & sig) | (down & sig) |  (names %in% highlight)
+                important <- c("2","3","4")
+            } else (
+                message("Missing highlight argument")
+                return(NULL)
+            )
         }
-        print(important)
-        print(idx)
 
         if(any(threshold %in% important)){
             if(names.fill){
