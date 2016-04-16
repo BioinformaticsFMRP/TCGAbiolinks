@@ -725,6 +725,8 @@ TCGAVisualize_volcano <- function(x,y,
         }
     }
     df <- data.frame(x=x,y=y,threshold=threshold)
+
+    df <- df[with(df, order(threshold)), ]
     # Plot a volcano plot
     p <- ggplot(data=df,
                 aes(x = x , y = -1 * log10(y), colour = threshold ),
