@@ -716,8 +716,6 @@ TCGAVisualize_volcano <- function(x,y,
             threshold[which(names %in% highlight)]  <- "4"
             color <- c(color,highlight.color)
             names(color) <- as.character(1:4)
-            print(color)
-            print(threshold)
             label = c("1" = "Not Significant",
                       "2" = "Up regulared",
                       "3" = "Down regulated")
@@ -726,7 +724,15 @@ TCGAVisualize_volcano <- function(x,y,
     }
     df <- data.frame(x=x,y=y,threshold=threshold)
 
-    df <- df[with(df, order(threshold)), ]
+    # As last color should be the highlighthed, we need to order all the vectors
+    if(!is.null(highlight)){
+        order.idx <-  order(df$threshold)
+        down <- down[order.idx]
+        sig <- sig[order.idx]
+        up <- up[order.idx]
+        df <- df[order.idx, ]
+        names <- names[order.idx]
+    }
     # Plot a volcano plot
     p <- ggplot(data=df,
                 aes(x = x , y = -1 * log10(y), colour = threshold ),
@@ -770,11 +776,15 @@ TCGAVisualize_volcano <- function(x,y,
         } else if(show.names == "both"){
             if(!is.null(highlight)){
                 idx <- (up & sig) | (down & sig) |  (names %in% highlight)
+                print(idx)
                 important <- c("2","3","4")
             } else {
                 message("Missing highlight argument")
                 return(NULL)
             }
+        } else {
+            message("Wrong highlight argument")
+            return(NULL)
         }
 
         if(any(threshold %in% important)){
