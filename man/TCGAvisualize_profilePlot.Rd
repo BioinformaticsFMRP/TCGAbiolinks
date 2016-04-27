@@ -8,7 +8,8 @@ TCGAvisualize_profilePlot(data = NULL, groupCol = NULL, subtypeCol = NULL,
   colors = NULL, filename = NULL, na.rm.groups = FALSE,
   na.rm.subtypes = FALSE, plot.margin = c(-2.5, -2.5, -0.5, 2),
   axis.title.size = 1.5, axis.textsize = 1.3, legend.size = 1.5,
-  legend.title.size = 1.5, geom.label.size = 6)
+  legend.title.size = 1.5, geom.label.size = 6,
+  geom.label.color = "black")
 }
 \arguments{
 \item{data}{A data frame with the cluters and subytpe of cancers}
@@ -32,11 +33,13 @@ of the bar if the output is not aligned}
 
 \item{axis.textsize}{axis.textsize}
 
-\item{legend.size}{legend.size}
+\item{legend.size}{Size of the legend}
 
-\item{legend.title.size}{legend.title.size}
+\item{legend.title.size}{Size of the legend title}
 
-\item{geom.label.size}{geom.label.size}
+\item{geom.label.size}{Size of % in the left barplot}
+
+\item{geom.label.color}{Color of % in the left barplot}
 }
 \value{
 A plot
