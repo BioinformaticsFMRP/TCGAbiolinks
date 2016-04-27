@@ -104,6 +104,8 @@ references:
   - family: Ceccarelli, Michele and Barthel, Floris P and Malta, Tathiane M and Sabedot, Thais S and Salama, Sofie R and Murray, Bradley A and Morozova, Olena and Newton, Yulia and Radenbaugh, Amie and Pagnotta, Stefano M and others
     given:
   journal: Cell
+  URL: "http://doi.org/10.1016/j.cell.2015.12.028"
+  DOI: "10.1016/j.cell.2015.12.028"
   volume: 164
   number: 3
   pages: 550-563
@@ -117,6 +119,8 @@ references:
   - family: Cancer Genome Atlas Research Network and others
     given:
   journal: Nature
+  URL: "http://doi.org/10.1038/nature13385"
+  DOI: "10.1038/nature13385"
   volume: 511
   number: 7511
   pages: 543-550
@@ -130,6 +134,8 @@ references:
   - family: Cancer Genome Atlas Research Network and others
     given:
   journal: Nature
+  URL: "http://doi.org/10.1038/nature13480"
+  DOI: "10.1038/nature13480"
   issued:
     year: 2014
 
@@ -139,6 +145,8 @@ references:
   - family: Cancer Genome Atlas Research Network and others
     given:
   journal: Nature
+  URL: "http://doi.org/10.1038/nature11412"
+  DOI: "10.1038/nature11412"
   volume: 490
   number: 7418
   pages: 61-70
@@ -151,6 +159,8 @@ references:
   - family: Cancer Genome Atlas Research Network and others
     given:
   journal: Nature
+  URL: "http://doi.org/10.1038/nature11252"
+  DOI: "10.1038/nature11252"
   volume: 487
   number: 7407
   pages: 330-337
@@ -163,6 +173,8 @@ references:
   - family: Cancer Genome Atlas Research Network and others
     given:
   journal: Cell
+  URL: "http://doi.org/10.1016/j.cell.2015.05.044"
+  DOI: "10.1016/j.cell.2015.05.044"
   volume: 161
   number: 7
   pages: 1681-1696
@@ -175,6 +187,8 @@ references:
   - family: Cancer Genome Atlas Research Network and others
     given:
   journal: Nature
+  URL: "http://doi.org/10.1038/nature14129"
+  DOI: "10.1038/nature14129"
   volume: 517
   number: 7536
   pages: 576-582
@@ -187,6 +201,8 @@ references:
   - family: Davis, Caleb F and Ricketts, Christopher J and Wang, Min and Yang, Lixing and Cherniack, Andrew D and Shen, Hui and Buhay, Christian and Kang, Hyojin and Kim, Sang Cheol and Fahey, Catherine C and others
     given:
   journal: Cancer Cell
+  URL: "http://doi.org/10.1016/j.ccr.2014.07.014"
+  DOI: "10.1016/j.ccr.2014.07.014"
   volume: 26
   number: 3
   pages: 319-330
@@ -200,6 +216,8 @@ references:
   - family: Cancer Genome Atlas Research Network and others
     given:
   journal: Nature
+  URL: "http://doi.org/10.1038/nature11404"
+  DOI: "10.1038/nature11404"
   volume: 489
   number: 7417
   pages: 519-525
@@ -212,6 +230,8 @@ references:
   - family: Cancer Genome Atlas Research Network and others
     given:
   journal: Nature
+  URL: "http://doi.org/10.1038/nature12113"
+  DOI: "10.1038/nature12113"
   volume: 497
   number: 7447
   pages: 67-73
@@ -224,6 +244,8 @@ references:
   - family: Cancer Genome Atlas Research Network and others
     given:
   journal: Cell
+  URL: "http://doi.org/10.1016/j.cell.2014.09.050"
+  DOI: "10.1016/j.cell.2014.09.050"
   volume: 159
   number: 3
   pages: 676-690
@@ -236,6 +258,8 @@ references:
   - family: Cancer Genome Atlas Research Network and others
     given:
   journal: Cell
+  URL: "http://doi.org/10.1016/j.cell.2015.10.025"
+  DOI: "10.1016/j.cell.2015.10.025"
   volume: 163
   number: 4
   pages: 1011-1025
@@ -249,6 +273,8 @@ references:
   - family: Linehan, W Marston and Spellman, Paul T and Ricketts, Christopher J and Creighton, Chad J and Fei, Suzanne S and Davis, Caleb and Wheeler, David A and Murray, Bradley A and Schmidt, Laura and Vocke, Cathy D and others
     given:
   journal: NEW ENGLAND JOURNAL OF MEDICINE
+  URL: "http://doi.org/10.1056/NEJMoa1505917"
+  DOI: "10.1056/NEJMoa1505917"
   volume: 374
   number: 2
   pages: 135-145
@@ -261,11 +287,14 @@ references:
   - family: Cancer Genome Atlas Research Network and others
     given:
   journal: Nature
+  URL: "http://doi.org/10.1038/nature12222"
+  DOI: "10.1038/nature12222"
   volume: 499
   number: 7456
   pages: 43-49
   issued:
     year: 2013        
+          
     
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -1361,6 +1390,37 @@ img <- readPNG("case2_Heatmap.png")
 grid.raster(img)
 ```
 
+## `TCGAvisualize_Volcano`: Create volcano plot 
+
+Creates a volcano plot for DNA methylation or expression
+
+The arguments of this function are:
+
+* **x** x-axis data
+* **y** y-axis data
+* **y.cut** p-values threshold. Default: 0.01
+* **x.cut**  x-axis threshold. Default: 0.0
+* **filename** Filename. Default: volcano.pdf, volcano.svg, volcano.png
+* **legend** Legend title
+* **color** vector of colors to be used in graph
+* **title** main title. If not specified it will be Volcano plot (group1 vs group2)
+* **ylab** y axis text
+* **xlab** x axis text
+* **xlim** x limits to cut image
+* **ylim** y limits to cut image
+* **height** Figure height
+* **width** Figure width
+* **names** Names to be ploted if significant. Should be the same size of x and y
+* **names.fill** Names should be filled in a color box?  Default: TRUE
+* **names.size** Size of the names text
+* **dpi** Figure dpi
+* **label** vector of labels to be used in the figure. Example: c("Not Significant","Hypermethylated in group1", "Hypomethylated in group1"))
+* **highlight** List of genes/probes to be highlighted. It should be in the names argument.
+* **highlight.color** Color of the points highlighted
+* **show.names** What names will be showd? Possibilities: "both", "significant", "highlighted"
+
+For more information please take a look on case study #3.
+
 ## `TCGAvisualize_PCA`: Principal Component Analysis plot for differentially expressed genes
 
 In order to better understand our genes, we can perform a PCA to reduce the
@@ -1483,6 +1543,7 @@ of the subgroups. Example: shapes = c(21,23) if for two levels
 * **print.pvalue** Print p-value for two groups in the plot
 * **xlab** x axis text in the plot
 * **labels** Labels of the groups
+* **y.limits** Change lower/upper y-axis limit 
 
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
@@ -1491,6 +1552,19 @@ library(grid)
 img <- readPNG("meanmet.png")
 grid.raster(img)
 ```
+
+Other examples using the parameters:
+```{r, eval = FALSE}
+# setting y limits: lower 0, upper 1
+TCGAvisualize_meanMethylation(data,groupCol  = "group", y.limits = c(0,1))
+# setting y limits: lower 0
+TCGAvisualize_meanMethylation(data,groupCol  = "group", y.limits = 0)
+# Changing shapes of jitters to show subgroups
+TCGAvisualize_meanMethylation(data,groupCol  = "group", subgroupCol="subgroup")
+# Sorting bars by descending mean methylation
+TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="mean.desc",filename="meandesc.pdf")
+```
+
 
 ## `TCGAvisualize_starburst`: Integration of gene expression and DNA methylation data 
 
