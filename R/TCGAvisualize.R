@@ -814,9 +814,10 @@ TCGAvisualize_Heatmap <- function(data,
 #' of the bar if the output is not aligned
 #' @param axis.title.size axis.title.size
 #' @param axis.textsize axis.textsize
-#' @param legend.size legend.size
-#' @param legend.title.size legend.title.size
-#' @param geom.label.size geom.label.size
+#' @param legend.size Size of the legend
+#' @param legend.title.size Size of the legend title
+#' @param geom.label.size Size of % in the left barplot
+#' @param geom.label.color Color of % in the left barplot
 #' @importFrom sjPlot sjp.stackfrq sjp.setTheme
 #' @importFrom cowplot ggdraw switch_axis_position plot_grid
 #' @importFrom reshape2 dcast
@@ -858,14 +859,16 @@ TCGAvisualize_profilePlot <- function(data = NULL,
                                       axis.textsize=1.3,
                                       legend.size=1.5,
                                       legend.title.size=1.5,
-                                      geom.label.size = 6.0) {
+                                      geom.label.size = 6.0,
+                                      geom.label.color = "black") {
 
     sjp.setTheme(theme = "scatterw",
                  axis.title.size = axis.title.size,
                  axis.textsize = axis.textsize,
                  legend.size = legend.size,
                  legend.title.size = legend.title.size,
-                 geom.label.size = geom.label.size)
+                 geom.label.size = geom.label.size,
+                 geom.label.color = geom.label.color)
 
     if (is.null(groupCol)) stop("Please provide the groupCol argument")
     if (is.null(subtypeCol)) stop("Please provide the subtypeCol argument")
