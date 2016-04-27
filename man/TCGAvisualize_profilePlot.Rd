@@ -37,9 +37,9 @@ of the bar if the output is not aligned}
 
 \item{legend.title.size}{Size of the legend title}
 
-\item{geom.label.size}{Size of % in the left barplot}
+\item{geom.label.size}{Size of percentage in the left barplot}
 
-\item{geom.label.color}{Color of % in the left barplot}
+\item{geom.label.color}{Color of percentage in the left barplot}
 }
 \value{
 A plot
