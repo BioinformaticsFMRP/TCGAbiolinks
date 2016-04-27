@@ -74,8 +74,8 @@ Creates a volcano plot from the expression and methylation analysis.
    Observation: This function automatically is called by TCGAanalyse_DMR
 }
 \examples{
-x <- runif(20, -1, 1)
-y <- runif(20, 0.01, 1)
+x <- runif(200, -1, 1)
+y <- runif(200, 0.01, 1)
 TCGAVisualize_volcano(x,y)
 TCGAVisualize_volcano(x,y,filename = NULL,y.cut = 10000000,x.cut=0.8,
                       names = rep("AAAA",length(x)), legend = "Status",
