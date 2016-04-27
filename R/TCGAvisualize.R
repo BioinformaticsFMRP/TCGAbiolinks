@@ -371,7 +371,7 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
             # Plotting GOCCTab
             toPlot <- splitFun(tf, GOCCTab, nBar)
             xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[2],
-                             main = "GO:Cellular Component", xlab = "-log10(FDR)",xlim)
+                             main = "GO:Cellular Component", xlab = "-log10(FDR)",xlim = xlim)
             labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
             text(x = 1, y = xAxis, labs, pos = 4, cex = text.size)
             lines(x = toPlot[, 3], y = xAxis, col = "red")
@@ -384,7 +384,7 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
             # Plotting GOMFTab
             toPlot <- splitFun(tf, GOMFTab, nBar)
             xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[3],
-                             main = "GO:Molecular Function", xlab = "-log10(FDR)",xlim)
+                             main = "GO:Molecular Function", xlab = "-log10(FDR)",xlim = xlim)
             labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
             text(x = 1, y = xAxis, labs, pos = 4, cex = text.size)
             lines(x = toPlot[, 3], y = xAxis, col = "red")
@@ -397,7 +397,7 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
             # Plotting PathTab
             toPlot <- splitFun(tf, PathTab, nBar)
             xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[4],
-                             main = "Pathways", xlab = "-log10(FDR)",xlim)
+                             main = "Pathways", xlab = "-log10(FDR)",xlim = xlim)
             labs <- toPlot[, 1]
             text(x = 1, y = xAxis, labs, pos = 4, cex = text.size)
             lines(x = toPlot[, 3], y = xAxis, col = "red")
