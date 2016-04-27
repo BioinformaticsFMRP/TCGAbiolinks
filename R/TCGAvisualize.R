@@ -816,8 +816,8 @@ TCGAvisualize_Heatmap <- function(data,
 #' @param axis.textsize axis.textsize
 #' @param legend.size Size of the legend
 #' @param legend.title.size Size of the legend title
-#' @param geom.label.size Size of % in the left barplot
-#' @param geom.label.color Color of % in the left barplot
+#' @param geom.label.size Size of percentage in the left barplot
+#' @param geom.label.color Color of percentage in the left barplot
 #' @importFrom sjPlot sjp.stackfrq sjp.setTheme
 #' @importFrom cowplot ggdraw switch_axis_position plot_grid
 #' @importFrom reshape2 dcast
