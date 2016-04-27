@@ -247,6 +247,7 @@ TCGAanalyze_survival <- function(data,
 #' @param width Plot width default:10
 #' @param dpi Pdf dpi default:600
 #' @param axis.text.x.angle Angle of text in the x axis
+#' @param y.limits Change lower/upper y-axis limit
 #' @import ggplot2 stats
 #' @importFrom SummarizedExperiment colData rowRanges assay
 #' @importFrom grDevices rainbow
@@ -271,6 +272,10 @@ TCGAanalyze_survival <- function(data,
 #'          rowRanges=rowRanges,
 #'          colData=colData)
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group")
+#' # change lower/upper y-axis limit
+#' TCGAvisualize_meanMethylation(data,groupCol  = "group", y.limits = c(0,1))
+#' # change lower y-axis limit
+#' TCGAvisualize_meanMethylation(data,groupCol  = "group", y.limits = 0)
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group", subgroupCol="subgroup")
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group")
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="mean.desc",filename="meandesc.pdf")
@@ -295,6 +300,7 @@ TCGAvisualize_meanMethylation <- function(data,
                                           group.legend = NULL,
                                           subgroup.legend = NULL,
                                           color = NULL,
+                                          y.limits = NULL,
                                           sort,
                                           width=10,
                                           height=10,
@@ -448,6 +454,10 @@ TCGAvisualize_meanMethylation <- function(data,
                                          format(pvalue,scientific = TRUE,
                                                 digits = 2)))
     }
+    if(!is.null(y.limits)){
+        p <- p + expand_limits(x = 0, y = y.limits )
+    }
+
     # saving box plot to analyse it
     if(!is.null(filename)){
         ggsave(p, filename = filename, width = width, height = height, dpi = dpi)
@@ -650,8 +660,8 @@ calculate.pvalues <- function(data,
 #' @importFrom ggrepel geom_label_repel geom_text_repel
 #' @return Saves the volcano plot in the current folder
 #' @examples
-#' x <- runif(20, -1, 1)
-#' y <- runif(20, 0.01, 1)
+#' x <- runif(200, -1, 1)
+#' y <- runif(200, 0.01, 1)
 #' TCGAVisualize_volcano(x,y)
 #' TCGAVisualize_volcano(x,y,filename = NULL,y.cut = 10000000,x.cut=0.8,
 #'                       names = rep("AAAA",length(x)), legend = "Status",
@@ -776,7 +786,6 @@ TCGAVisualize_volcano <- function(x,y,
         } else if(show.names == "both"){
             if(!is.null(highlight)){
                 idx <- (up & sig) | (down & sig) |  (names %in% highlight)
-                print(idx)
                 important <- c("2","3","4")
             } else {
                 message("Missing highlight argument")
