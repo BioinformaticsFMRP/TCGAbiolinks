@@ -936,6 +936,14 @@ TCGAanalyze_DMR <- function(data,
     .e <- environment()
 
     names(color) <- as.character(1:3)
+    # Check if object is a summarized Experiment
+    if(class(data)!= class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+        stop(paste0("Sorry, but I'm expecting a Summarized Experiment object, but I got a: ", class(data)))
+    }
+    # Check if object has NAs
+    if(any(is.na(assay(data)))){
+        stop(paste0("Sorry, but we found some NA in your data, please either remove/or replace them"))
+    }
 
     if (is.null(groupCol)) {
         message("Please, set the groupCol parameter")
