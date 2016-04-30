@@ -288,6 +288,9 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #' @param nRGTab is the gene signature list with gene symbols.
 #' @param filename Name for the pdf. If null it will return the plot.
 #' @param color A vector of colors for each barplot. Deafult:  c("orange", "cyan","green","yellow")
+#' @param text.size Text size
+#' @param xlim Upper limit of the x-axis.
+#' @param mfrow Vector with number of rows/columns of the plot. Default  2 rows/2 columns "c(2,2)"
 #' @export
 #' @importFrom EDASeq barplot
 #' @import graphics
@@ -320,9 +323,10 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
 #'}
 TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab,
                                     filename = "TCGAvisualize_EAbarplot_Output.pdf",
+                                    text.size = 1.0, mfrow = c(2, 2), xlim = NULL,
                                     color = c("orange", "cyan","green","yellow") ){
 
-    if(!is.null(filename)) pdf(filename, width = 15, height = 15)
+    if(!is.null(filename)) pdf(filename, width = 30, height = 15)
 
     splitFun <- function(tf, Tab, nBar){
         tmp <- lapply(Tab[tf, ], function(x) strsplit(x, ";"))
@@ -347,53 +351,60 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
 
         return(toPlot)
     }
+    par(mfrow = mfrow)
 
-    par(mfrow = c(2, 2))
-
-    if(!missing(GOBPTab) & !is.null(GOBPTab)){
-        # Plotting GOBPTab
-        toPlot <- splitFun(tf, GOBPTab, nBar)
-        xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[1],
-                         main = "GO:Biological Process", xlab = "-log10(FDR)")
-        labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
-        text(x = 1, y = xAxis, labs, pos = 4)
-        lines(x = toPlot[, 3], y = xAxis, col = "red")
-        points(x = toPlot[, 3], y = xAxis, col = "red")
-        axis(side = 3, at = pretty(range(0:1)), col = "red")
+    if(!missing(GOBPTab)){
+        if(!is.null(GOBPTab)){
+            # Plotting GOBPTab
+            toPlot <- splitFun(tf, GOBPTab, nBar)
+            xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[1],
+                             main = "GO:Biological Process", xlab = "-log10(FDR)",xlim = xlim)
+            labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
+            text(x = 1, y = xAxis, labs, pos = 4, cex = text.size)
+            lines(x = toPlot[, 3], y = xAxis, col = "red")
+            points(x = toPlot[, 3], y = xAxis, col = "red")
+            axis(side = 3, at = pretty(range(0:1)), col = "red")
+        }
     }
-    if(!missing(GOCCTab) & !is.null(GOCCTab)){
-        # Plotting GOCCTab
-        toPlot <- splitFun(tf, GOCCTab, nBar)
-        xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[2],
-                         main = "GO:Cellular Component", xlab = "-log10(FDR)")
-        labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
-        text(x = 1, y = xAxis, labs, pos = 4)
-        lines(x = toPlot[, 3], y = xAxis, col = "red")
-        points(x = toPlot[, 3], y = xAxis, col = "red")
-        axis(side = 3, at = pretty(range(0:1)), col = "red")
+    if(!missing(GOCCTab)){
+        if(!is.null(GOCCTab)){
+            # Plotting GOCCTab
+            toPlot <- splitFun(tf, GOCCTab, nBar)
+            xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[2],
+                             main = "GO:Cellular Component", xlab = "-log10(FDR)",xlim = xlim)
+            labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
+            text(x = 1, y = xAxis, labs, pos = 4, cex = text.size)
+            lines(x = toPlot[, 3], y = xAxis, col = "red")
+            points(x = toPlot[, 3], y = xAxis, col = "red")
+            axis(side = 3, at = pretty(range(0:1)), col = "red")
+        }
     }
-    if(!missing(GOMFTab) & !is.null(GOMFTab)){
-        # Plotting GOMFTab
-        toPlot <- splitFun(tf, GOMFTab, nBar)
-        xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[3],
-                         main = "GO:Molecular Function", xlab = "-log10(FDR)")
-        labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
-        text(x = 1, y = xAxis, labs, pos = 4)
-        lines(x = toPlot[, 3], y = xAxis, col = "red")
-        points(x = toPlot[, 3], y = xAxis, col = "red")
-        axis(side = 3, at = pretty(range(0:1)), col = "red")
+    if(!missing(GOMFTab)){
+        if(!is.null(GOMFTab)){
+            # Plotting GOMFTab
+            toPlot <- splitFun(tf, GOMFTab, nBar)
+            xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[3],
+                             main = "GO:Molecular Function", xlab = "-log10(FDR)",xlim = xlim)
+            labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
+            text(x = 1, y = xAxis, labs, pos = 4, cex = text.size)
+            lines(x = toPlot[, 3], y = xAxis, col = "red")
+            points(x = toPlot[, 3], y = xAxis, col = "red")
+            axis(side = 3, at = pretty(range(0:1)), col = "red")
+        }
     }
-    if(!missing(PathTab) & !is.null(PathTab)){
-        # Plotting PathTab
-        toPlot <- splitFun(tf, PathTab, nBar)
-        xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[4],
-                         main = "Pathways", xlab = "-log10(FDR)")
-        labs <- toPlot[, 1]
-        text(x = 1, y = xAxis, labs, pos = 4)
-        lines(x = toPlot[, 3], y = xAxis, col = "red")
-        points(x = toPlot[, 3], y = xAxis, col = "red")
-        #axis(side = 1, at = pretty(range(0:1)), col = "red", line = 2.5)
-        axis(side = 3, at = pretty(range(0:1)), col = "red")
+    if(!missing(PathTab)){
+        if(!is.null(PathTab)){
+            # Plotting PathTab
+            toPlot <- splitFun(tf, PathTab, nBar)
+            xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[4],
+                             main = "Pathways", xlab = "-log10(FDR)",xlim = xlim)
+            labs <- toPlot[, 1]
+            text(x = 1, y = xAxis, labs, pos = 4, cex = text.size)
+            lines(x = toPlot[, 3], y = xAxis, col = "red")
+            points(x = toPlot[, 3], y = xAxis, col = "red")
+            #axis(side = 1, at = pretty(range(0:1)), col = "red", line = 2.5)
+            axis(side = 3, at = pretty(range(0:1)), col = "red")
+        }
     }
     #par(new = TRUE)
     #plot(toPlot[, 3], xAxis, axes = FALSE, bty = "n", xlab = "",
@@ -803,9 +814,10 @@ TCGAvisualize_Heatmap <- function(data,
 #' of the bar if the output is not aligned
 #' @param axis.title.size axis.title.size
 #' @param axis.textsize axis.textsize
-#' @param legend.size legend.size
-#' @param legend.title.size legend.title.size
-#' @param geom.label.size geom.label.size
+#' @param legend.size Size of the legend
+#' @param legend.title.size Size of the legend title
+#' @param geom.label.size Size of percentage in the left barplot
+#' @param geom.label.color Color of percentage in the left barplot
 #' @importFrom sjPlot sjp.stackfrq sjp.setTheme
 #' @importFrom cowplot ggdraw switch_axis_position plot_grid
 #' @importFrom reshape2 dcast
@@ -847,14 +859,16 @@ TCGAvisualize_profilePlot <- function(data = NULL,
                                       axis.textsize=1.3,
                                       legend.size=1.5,
                                       legend.title.size=1.5,
-                                      geom.label.size = 6.0) {
+                                      geom.label.size = 6.0,
+                                      geom.label.color = "black") {
 
     sjp.setTheme(theme = "scatterw",
                  axis.title.size = axis.title.size,
                  axis.textsize = axis.textsize,
                  legend.size = legend.size,
                  legend.title.size = legend.title.size,
-                 geom.label.size = geom.label.size)
+                 geom.label.size = geom.label.size,
+                 geom.label.color = geom.label.color)
 
     if (is.null(groupCol)) stop("Please provide the groupCol argument")
     if (is.null(subtypeCol)) stop("Please provide the subtypeCol argument")
