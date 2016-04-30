@@ -9,8 +9,9 @@ TCGAvisualize_meanMethylation(data, groupCol = NULL, subgroupCol = NULL,
   jitter.size = 3, filename = "groupMeanMet.pdf",
   ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
   xlab = NULL, title = "Mean DNA methylation", labels = NULL,
-  group.legend = NULL, subgroup.legend = NULL, color = NULL, sort,
-  width = 10, height = 10, dpi = 600, axis.text.x.angle = 90)
+  group.legend = NULL, subgroup.legend = NULL, color = NULL,
+  y.limits = NULL, sort, width = 10, height = 10, dpi = 600,
+  axis.text.x.angle = 90)
 }
 \arguments{
 \item{data}{SummarizedExperiment object obtained from TCGAPrepare}
@@ -44,6 +45,8 @@ of the subgroups. Example: shapes = c(21,23) if for two levels}
 \item{subgroup.legend}{Name of the subgroup legend. DEFAULT: subgroupCol}
 
 \item{color}{vector of colors to be used in graph}
+
+\item{y.limits}{Change lower/upper y-axis limit}
 
 \item{sort}{Sort boxplot by mean or median.
 Possible values: mean.asc, mean.desc, median.asc, meadian.desc}
@@ -81,6 +84,10 @@ data <- SummarizedExperiment::SummarizedExperiment(
          rowRanges=rowRanges,
          colData=colData)
 TCGAvisualize_meanMethylation(data,groupCol  = "group")
+# change lower/upper y-axis limit
+TCGAvisualize_meanMethylation(data,groupCol  = "group", y.limits = c(0,1))
+# change lower y-axis limit
+TCGAvisualize_meanMethylation(data,groupCol  = "group", y.limits = 0)
 TCGAvisualize_meanMethylation(data,groupCol  = "group", subgroupCol="subgroup")
 TCGAvisualize_meanMethylation(data,groupCol  = "group")
 TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="mean.desc",filename="meandesc.pdf")

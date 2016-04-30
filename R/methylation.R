@@ -247,6 +247,7 @@ TCGAanalyze_survival <- function(data,
 #' @param width Plot width default:10
 #' @param dpi Pdf dpi default:600
 #' @param axis.text.x.angle Angle of text in the x axis
+#' @param y.limits Change lower/upper y-axis limit
 #' @import ggplot2 stats
 #' @importFrom SummarizedExperiment colData rowRanges assay
 #' @importFrom grDevices rainbow
@@ -271,6 +272,10 @@ TCGAanalyze_survival <- function(data,
 #'          rowRanges=rowRanges,
 #'          colData=colData)
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group")
+#' # change lower/upper y-axis limit
+#' TCGAvisualize_meanMethylation(data,groupCol  = "group", y.limits = c(0,1))
+#' # change lower y-axis limit
+#' TCGAvisualize_meanMethylation(data,groupCol  = "group", y.limits = 0)
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group", subgroupCol="subgroup")
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group")
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="mean.desc",filename="meandesc.pdf")
@@ -295,6 +300,7 @@ TCGAvisualize_meanMethylation <- function(data,
                                           group.legend = NULL,
                                           subgroup.legend = NULL,
                                           color = NULL,
+                                          y.limits = NULL,
                                           sort,
                                           width=10,
                                           height=10,
@@ -448,6 +454,10 @@ TCGAvisualize_meanMethylation <- function(data,
                                          format(pvalue,scientific = TRUE,
                                                 digits = 2)))
     }
+    if(!is.null(y.limits)){
+        p <- p + expand_limits(x = 0, y = y.limits )
+    }
+
     # saving box plot to analyse it
     if(!is.null(filename)){
         ggsave(p, filename = filename, width = width, height = height, dpi = dpi)
@@ -643,16 +653,22 @@ calculate.pvalues <- function(data,
 #' @param label vector of labels to be used in the figure.
 #' Example: c("Not Significant","Hypermethylated in group1",
 #' "Hypomethylated in group1"))#'
+#' @param highlight List of genes/probes to be highlighted. It should be in the names argument.
+#' @param highlight.color Color of the points highlighted
+#' @param show.names What names will be showd? Possibilities: "both", "significant", "highlighted"
 #' @export
 #' @importFrom ggrepel geom_label_repel geom_text_repel
 #' @return Saves the volcano plot in the current folder
 #' @examples
-#' x <- runif(20, -1, 1)
-#' y <- runif(20, -1, 1)
+#' x <- runif(200, -1, 1)
+#' y <- runif(200, 0.01, 1)
 #' TCGAVisualize_volcano(x,y)
 #' TCGAVisualize_volcano(x,y,filename = NULL,y.cut = 10000000,x.cut=0.8,
 #'                       names = rep("AAAA",length(x)), legend = "Status",
 #'                       names.fill = FALSE)
+#' TCGAVisualize_volcano(x,y,filename = NULL,y.cut = 10000000,x.cut=0.8,
+#'                       names = as.character(1:length(x)), legend = "Status",
+#'                       names.fill = TRUE, highlight = c("1","2"),show="both")
 #' while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 TCGAVisualize_volcano <- function(x,y,
                                   filename = "volcano.pdf",
@@ -663,10 +679,13 @@ TCGAVisualize_volcano <- function(x,y,
                                   color = c("black", "red", "green"),
                                   names=NULL,
                                   names.fill= TRUE,
+                                  show.names="significant",
                                   x.cut=0,
                                   y.cut=0.01,
                                   height=5,
                                   width=10,
+                                  highlight=NULL,
+                                  highlight.color = "orange",
                                   names.size = 4,
                                   dpi = 300){
 
@@ -700,7 +719,30 @@ TCGAVisualize_volcano <- function(x,y,
     down[is.na(down)] <- FALSE
     if (any(down & sig)) threshold[down & sig] <- "3"
 
+    if(!is.null(highlight)){
+        idx <- which(names %in% highlight)
+        if(length(idx) >0 ){
+            print(idx)
+            threshold[which(names %in% highlight)]  <- "4"
+            color <- c(color,highlight.color)
+            names(color) <- as.character(1:4)
+            label = c("1" = "Not Significant",
+                      "2" = "Up regulared",
+                      "3" = "Down regulated")
+            print(label)
+        }
+    }
     df <- data.frame(x=x,y=y,threshold=threshold)
+
+    # As last color should be the highlighthed, we need to order all the vectors
+    if(!is.null(highlight)){
+        order.idx <-  order(df$threshold)
+        down <- down[order.idx]
+        sig <- sig[order.idx]
+        up <- up[order.idx]
+        df <- df[order.idx, ]
+        names <- names[order.idx]
+    }
     # Plot a volcano plot
     p <- ggplot(data=df,
                 aes(x = x , y = -1 * log10(y), colour = threshold ),
@@ -713,7 +755,7 @@ TCGAVisualize_volcano <- function(x,y,
                    colour = "black", linetype = "dashed") +
         geom_hline(aes(yintercept = -1 * log10(y.cut)),
                    colour = "black", linetype = "dashed") +
-        scale_color_manual(breaks = as.character(1:3),
+        scale_color_manual(breaks = as.numeric(names(label)),
                            values = color,
                            labels = label,
                            name = legend) +
@@ -725,35 +767,65 @@ TCGAVisualize_volcano <- function(x,y,
                            axis.line.y=element_line(colour = "black"),
                            legend.position="top",
                            legend.key = element_rect(colour = 'white'))
+
     # Label points with the textxy function from the calibrate plot
     if(!is.null(names)){
-        idx <- (up & sig) | (down & sig)
-        if(names.fill){
-            p <- p + geom_label_repel(
-                data = subset(df, threshold %in% c("2","3")),
-                aes(label = names[idx],fill=threshold),
-                size = names.size, show.legend = FALSE,
-                fontface = 'bold', color = 'white',
-                box.padding = unit(0.35, "lines"),
-                point.padding = unit(0.3, "lines")
-            ) +   scale_fill_manual(values=color[2:3])
-        }  else {
-            p <- p + geom_text_repel(
-                data = subset(df, threshold %in% c("2","3")),
-                aes(label = names[idx]),
-                size = names.size, show.legend = FALSE,
-                fontface = 'bold', color = 'black',
-                point.padding = unit(0.3, "lines"),
-                box.padding = unit(0.5, 'lines')
-            )
+        # With the names the user can highlight the significant genes, up and down
+        # or the ones highlighted
+        if(show.names == "significant"){
+            idx <- (up & sig) | (down & sig)
+            important <- c("2","3")
+        } else if(show.names == "highlighted") {
+            if(!is.null(highlight)){
+                idx <- (names %in% highlight)
+                important <- c("4")
+            } else {
+                message("Missing highlight argument")
+                return(NULL)
+            }
+        } else if(show.names == "both"){
+            if(!is.null(highlight)){
+                idx <- (up & sig) | (down & sig) |  (names %in% highlight)
+                important <- c("2","3","4")
+            } else {
+                message("Missing highlight argument")
+                return(NULL)
+            }
+        } else {
+            message("Wrong highlight argument")
+            return(NULL)
+        }
+
+        if(any(threshold %in% important)){
+            if(names.fill){
+                p <- p + geom_label_repel(
+                    data = subset(df, threshold %in% important),
+                    aes(label = names[idx],fill=threshold),
+                    size = names.size, show.legend = FALSE,
+                    fontface = 'bold', color = 'white',
+                    box.padding = unit(0.35, "lines"),
+                    point.padding = unit(0.3, "lines")
+                ) +   scale_fill_manual(values=color[as.numeric(important)])
+            }  else {
+                p <- p + geom_text_repel(
+                    data = subset(df, threshold %in% important),
+                    aes(label = names[idx]),
+                    size = names.size, show.legend = FALSE,
+                    fontface = 'bold', color = 'black',
+                    point.padding = unit(0.3, "lines"),
+                    box.padding = unit(0.5, 'lines')
+                )
+            }
         }
     }
+
     if(!is.null(filename)){
         ggsave(p, filename = filename, width = width, height = height, dpi = dpi)
     } else {
         return(p)
     }
 }
+
 
 #' @title Differentially methylated regions Analysis
 #' @description
@@ -864,6 +936,14 @@ TCGAanalyze_DMR <- function(data,
     .e <- environment()
 
     names(color) <- as.character(1:3)
+    # Check if object is a summarized Experiment
+    if(class(data)!= class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+        stop(paste0("Sorry, but I'm expecting a Summarized Experiment object, but I got a: ", class(data)))
+    }
+    # Check if object has NAs
+    if(any(is.na(assay(data)))){
+        stop(paste0("Sorry, but we found some NA in your data, please either remove/or replace them"))
+    }
 
     if (is.null(groupCol)) {
         message("Please, set the groupCol parameter")
@@ -1012,7 +1092,7 @@ TCGAanalyze_DMR <- function(data,
 #'    Input: data with gene expression/methylation expression
 #'    Output: starburst plot
 #'
-#' @param met SummarizedExperiment with methylation data obtained from the
+#' @param met A SummarizedExperiment with methylation data obtained from the
 #' TCGAPrepare or Data frame from DMR_results file. Expected colData columns: diffmean,  p.value.adj  and p.value
 #' Execute volcanoPlot function in order to obtain these values for the object.
 #' @param exp Object obtained by DEArnaSEQ function
@@ -1143,6 +1223,7 @@ TCGAvisualize_starburst <- function(met,
 
     # Preparing methylation
     pcol <- paste("p.value.adj",group1,group2,sep = ".")
+
     if(!(pcol %in%  colnames(met))){
         pcol <- paste("p.value.adj",group2,group1,sep = ".")
     }
@@ -1154,6 +1235,7 @@ TCGAvisualize_starburst <- function(met,
     aux <- strsplit(row.names(exp),"\\|")
     exp$Gene_Symbol  <- unlist(lapply(aux,function(x) x[1]))
     volcano <- merge(met, exp, by = "Gene_Symbol")
+
     volcano$ID <- paste(volcano$Gene_Symbol,
                         volcano$probeID, sep = ".")
 
