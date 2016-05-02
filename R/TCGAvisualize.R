@@ -632,7 +632,7 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #'                  "TCGA-DU-A5TS",
 #'                  "TCGA-HT-7688")))
 #'
-#' mdat <- data.frame(ID=c("TCGA-DU-6410","TCGA-DU-A5TS","TCGA-HT-7688"),
+#' mdat <- data.frame(patient=c("TCGA-DU-6410","TCGA-DU-A5TS","TCGA-HT-7688"),
 #'                    Sex=c("Male","Female","Male"),
 #'                    COCCluster=c("coc1","coc1","coc1"),
 #'                    IDHtype=c("IDHwt","IDHMut-cod","IDHMut-noncod"))
@@ -669,7 +669,8 @@ TCGAvisualize_Heatmap <- function(data,
                                   sortCol,
                                   title,
                                   type = "expression",
-                                  scale = "none"){
+                                  scale = "none",
+                                  heatmap.legend.color.bar = "continuous"){
 
     # STEP 1 add columns labels (top of heatmap)
     ha <-  NULL
@@ -703,7 +704,7 @@ TCGAvisualize_Heatmap <- function(data,
                 message("    Has the complete barcode (TCGA-AA-3833-01A-01D-0904-05)")
                 message(" => bcr_patient_barcode")
                 message("    Has the patient barcode (TCGA-AA-3833)")
-                message(" => petient")
+                message(" => patient")
                 message("    Has the patient barcode (TCGA-AA-3833)")
                 message(" => sample")
                 message("    Has the sample barcode (TCGA-AA-3833-01A)")
@@ -711,8 +712,7 @@ TCGAvisualize_Heatmap <- function(data,
                 message("Obs: The complete barcode is the recommended one, as the others might lead to errors")
                 return(NULL)
             }
-
-            stopifnot(nchar(col.metadata[,id])[1] == size)
+            stopifnot(nchar(as.character(col.metadata[,id])[1]) == size)
             message(paste0("Reorganizing: col.metadata order should be the same of the data object"))
             df <- col.metadata[match(substr(colnames(data),1,size), col.metadata[,id]),]
             df[,id] <- NULL
@@ -752,9 +752,49 @@ TCGAvisualize_Heatmap <- function(data,
         if (type == "expression") color <- gplots::greenred(200)
         if (type == "methylation") color <- matlab::jet.colors(200)
     }
-    if(missing(title)) title <- type
 
-    if(!missing(sortCol)){
+    # Creating plot title
+    if(missing(title)) {
+        if(type == "methylation") title <- "Methylation heatmap"
+        if(type == "expression") title <- "Expression heatmap"
+    }
+
+    # Change label type
+    if(heatmap.legend.color.bar == "continuous" && type == "methylation"){
+        heatmap_legend_param <- list(color_bar = "continuous", at = c(0,0.2,0.4,0.6,0.8, 1), legend_height = unit(3, "cm"), labels = c("0.0 (hypomethylated)",0.2,0.4,0.6,0.8,"1.0 (hypermethylated)"))
+    }
+    if(heatmap.legend.color.bar == "continuous" && type == "expression"){
+        heatmap_legend_param <- list(color_bar = "continuous")
+    }
+
+    # Change label reference
+    if(type == "methylation") type <- "Methylation level"
+    if(type == "expression") type <- "Expression"
+
+    if(!missing(sortCol) & heatmap.legend.color.bar == "continuous"){
+        heatmap  <- Heatmap(data, name = type,
+                            top_annotation = ha,
+                            bottom_annotation_height = unit(3, "cm"),
+                            col = color,
+                            show_row_names = show_row_names,
+                            cluster_rows = cluster_rows,
+                            cluster_columns = cluster_columns,
+                            show_column_names = show_column_names,
+                            column_order = column_order,
+                            column_title = title,
+                            heatmap_legend_param = heatmap_legend_param)
+    } else if(missing(sortCol) & heatmap.legend.color.bar == "continuous"){
+        heatmap  <- Heatmap(data, name = type,
+                            top_annotation = ha,
+                            bottom_annotation_height = unit(3, "cm"),
+                            col = color,
+                            show_row_names = show_row_names,
+                            cluster_rows = cluster_rows,
+                            cluster_columns = cluster_columns,
+                            show_column_names = show_column_names,
+                            column_title = title,
+                            heatmap_legend_param = heatmap_legend_param)
+    }  else if(!missing(sortCol)){
         heatmap  <- Heatmap(data, name = type,
                             top_annotation = ha,
                             bottom_annotation_height = unit(3, "cm"),
@@ -774,7 +814,8 @@ TCGAvisualize_Heatmap <- function(data,
                             cluster_rows = cluster_rows,
                             cluster_columns = cluster_columns,
                             show_column_names = show_column_names,
-                            column_title = title)
+                            column_title = title,
+                            heatmap_legend_param = heatmap_legend_param)
     }
 
     # STEP 3 row labels (right side)
