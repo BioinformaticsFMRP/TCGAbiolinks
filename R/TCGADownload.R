@@ -36,6 +36,7 @@
 #' @export
 #' @importFrom downloader download
 #' @importFrom stringr str_extract
+#' @importFrom rvest %>%
 #' @return Download TCGA data into the given path
 #' @family data functions
 TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
