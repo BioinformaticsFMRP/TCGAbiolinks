@@ -251,7 +251,7 @@ TCGAUpdate <- function(){
     tcga.db <- new.db
 
     gene.location <- get.GRCh.bioMart()
-
+    #gene.location <- get("gene.location")
     use_data(platform.table, disease.table, tcga.db, center.table,
              DAVID_BP_matrix,DAVID_CC_matrix,DAVID_MF_matrix,
              EAGenes,gene.location,listEA_pathways,
@@ -272,7 +272,7 @@ get.GRCh.bioMart <- function(genome="hg19") {
     if (genome == "hg19"){
         # for hg19
         ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
-                           host = "grch37.ensembl.org",
+                           host = "feb2014.archive.ensembl.org",
                            path = "/biomart/martservice" ,
                            dataset = "hsapiens_gene_ensembl")
     } else {
@@ -284,7 +284,7 @@ get.GRCh.bioMart <- function(genome="hg19") {
     gene.location <- getBM(attributes = c("chromosome_name",
                                           "start_position",
                                           "end_position", "strand",
-                                          "external_gene_name",
+                                          "external_gene_id",
                                           "entrezgene"),
                            filters = c("chromosome_name"),
                            values = list(chrom), mart = ensembl)
