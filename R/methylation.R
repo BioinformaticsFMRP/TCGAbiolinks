@@ -949,6 +949,10 @@ TCGAanalyze_DMR <- function(data,
         message("Please, set the groupCol parameter")
         return(NULL)
     }
+    if(!(groupCol %in% colnames(colData(data)))){
+        stop(paste0("column ",groupCol, " not found in the object"))
+    }
+
     if ( length(unique(colData(data)[,groupCol])) != 2 &&
          is.null(group1) && is.null(group2)) {
         message("Please, set the group1 and group2 parameters")
@@ -961,6 +965,15 @@ TCGAanalyze_DMR <- function(data,
         message(paste0("Group1:", group1))
         message(paste0("Group2:", group2))
     }
+
+    # Check if groups has at least one sample
+    if(!any(colData(data)[,groupCol] == group1,na.rm = TRUE)){
+        stop(paste0("Sorry, but ", group1, " has no samples" ))
+    }
+    if(!any(colData(data)[,groupCol] == group2,na.rm = TRUE)){
+        stop(paste0("Sorry, but ", group2, " has no samples" ))
+    }
+
 
     # defining title and label if not specified by the user
     if (is.null(title)) {
