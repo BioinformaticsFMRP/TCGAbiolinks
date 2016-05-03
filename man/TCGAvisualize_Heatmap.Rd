@@ -46,6 +46,9 @@ If we want to show differences between genes, it is good to make Z-score by samp
 If we want to show differences between samples, it is good to make Z-score by genes
 (force each gene to have zero mean and standard deviation=1).
 Possibilities: "row", "col". Default "none"}
+
+\item{heatmap.legend.color.bar}{Heatmap legends values type.
+Options: "continuous", "disctrete}
 }
 \value{
 Heatmap plotted in the device
