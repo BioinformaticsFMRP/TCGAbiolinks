@@ -967,10 +967,10 @@ TCGAanalyze_DMR <- function(data,
     }
 
     # Check if groups has at least one sample
-    if(!any(colData(coad.met)[,groupCol] == group1,na.rm = TRUE)){
+    if(!any(colData(data)[,groupCol] == group1,na.rm = TRUE)){
         stop(paste0("Sorry, but ", group1, " has no samples" ))
     }
-    if(!any(colData(coad.met)[,groupCol] == group2,na.rm = TRUE)){
+    if(!any(colData(data)[,groupCol] == group2,na.rm = TRUE)){
         stop(paste0("Sorry, but ", group2, " has no samples" ))
     }
 
