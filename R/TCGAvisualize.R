@@ -607,6 +607,8 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @param cluster_columns Cluster columns ? Dafault: FALSE
 #' @param sortCol Name of the column to be used to sort the columns
 #' @param title Title of the plot
+#' @param heatmap.legend.color.bar Heatmap legends values type.
+#' Options: "continuous", "disctrete
 #' @param scale Use z-score to make the heatmap?
 #' If we want to show differences between genes, it is good to make Z-score by samples
 #' (force each sample to have zero mean and standard deviation=1).
