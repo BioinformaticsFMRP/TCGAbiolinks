@@ -7,7 +7,8 @@
 TCGAvisualize_Heatmap(data, col.metadata, row.metadata, col.colors = NULL,
   row.colors = NULL, show_column_names = FALSE, show_row_names = FALSE,
   cluster_rows = FALSE, cluster_columns = FALSE, sortCol, title,
-  type = "expression", scale = "none")
+  type = "expression", scale = "none",
+  heatmap.legend.color.bar = "continuous")
 }
 \arguments{
 \item{data}{The object to with the heatmap data (expression, methylation)}
@@ -45,6 +46,9 @@ If we want to show differences between genes, it is good to make Z-score by samp
 If we want to show differences between samples, it is good to make Z-score by genes
 (force each gene to have zero mean and standard deviation=1).
 Possibilities: "row", "col". Default "none"}
+
+\item{heatmap.legend.color.bar}{Heatmap legends values type.
+Options: "continuous", "disctrete}
 }
 \value{
 Heatmap plotted in the device
@@ -71,7 +75,7 @@ dat <- matrix(c(0.3,0.2,0.3,1,1,0.1,1,1,0, 0.8,1,0.7,0.7,0.3,1),
                  "TCGA-DU-A5TS",
                  "TCGA-HT-7688")))
 
-mdat <- data.frame(ID=c("TCGA-DU-6410","TCGA-DU-A5TS","TCGA-HT-7688"),
+mdat <- data.frame(patient=c("TCGA-DU-6410","TCGA-DU-A5TS","TCGA-HT-7688"),
                    Sex=c("Male","Female","Male"),
                    COCCluster=c("coc1","coc1","coc1"),
                    IDHtype=c("IDHwt","IDHMut-cod","IDHMut-noncod"))
