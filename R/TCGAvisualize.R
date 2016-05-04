@@ -855,10 +855,6 @@ TCGAvisualize_Heatmap <- function(data,
     return(heatmap)
 }
 
-    data <- cbind(all,data)
-    colnames(data)[1] <- subtypeCol
-    data <- as.data.frame(data)
-
 #' @title Profile plot
 #' @description Displaty the association between cancer subtypes and any kind of clustering.
 #' @param data A data frame with the cluters and subytpe of cancers
