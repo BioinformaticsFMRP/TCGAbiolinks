@@ -839,21 +839,10 @@ TCGAvisualize_Heatmap <- function(data,
                 heatmap <- add_heatmap(heatmap,x)
             }
         }
-        missing <- m-length(x)
-        x <- c(x,rep(NA,missing))
-        if(i == 2) data <- x
-        if(i > 2) data <- cbind(data,x)
-    }
-    colnames(data) <- colnames(df)[-1]
-
-    # create a collumn for all values
-    all <- as.numeric(unlist(data))
-    idx <- length(all) - nrow(data)
-    for( i in 1:idx) {
-        data <- rbind(data, rep(NA,ncol(data)))
     }
     return(heatmap)
 }
+
 
 #' @title Profile plot
 #' @description Displaty the association between cancer subtypes and any kind of clustering.
