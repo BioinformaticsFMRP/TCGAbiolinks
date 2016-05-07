@@ -232,8 +232,14 @@ TCGAprepare <- function(query,
             data <- fread(files[i], header = TRUE, sep = "\t", data.table = FALSE)
             data <- data[-1,] # removing Composite Element REF
             x <- subset(map, uuid == uuid[i])
+            
+            if( length(x$barcode)!=0){
             colnames(data)[2] <- as.character(x$barcode)
-
+            }
+            else{
+              next
+            }
+            
             if (i == 1) {
                 df <- data
             } else {
@@ -565,12 +571,18 @@ TCGAprepare <- function(query,
                           stringsAsFactors = FALSE)
             x <- subset(map, uuid == uuid[i])
 
+            if( length(x$barcode)!=0){
+            
             if (summarizedExperiment) {
                 setnames(data,colnames(data)[2:ncol(data)],
                          paste0(colnames(data)[2:ncol(data)],"_",x$barcode))
             } else {
                 setnames(data,2, as.character(x$barcode))
             }
+              
+            }
+            else{ 
+              next }
 
             if (i == 1) {
                 df <- data
