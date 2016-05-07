@@ -300,6 +300,7 @@ clinical_data_site_cancer <- function(cancer){
 #' clinical_radiation
 #'}
 #' @param samples List of barcodes to get the clinical data
+#' @param path Directory to save the downloaded data default getwd()
 #' @export
 #' @importFrom RCurl getURL
 #' @return clinic data
@@ -309,7 +310,7 @@ clinical_data_site_cancer <- function(cancer){
 #' samples = c("TCGA-06-5416-01A-01D-1481-05",
 #'             "TCGA-2G-AAEW-01A-11D-A42Z-05",
 #'             "TCGA-2G-AAEX-01A-11D-A42Z-05"))
-TCGAquery_clinic <- function(tumor, clinical_data_type, samples){
+TCGAquery_clinic <- function(tumor, clinical_data_type, samples, path = getwd()){
 
     if (missing(clinical_data_type)) stop("Please select the type of clinical data. Use ?TCGAquery_clinic to get a list")
     if (!missing(samples)) samples <- substr(samples,1,12)
@@ -325,7 +326,7 @@ TCGAquery_clinic <- function(tumor, clinical_data_type, samples){
     }
 
     # this is one file for all samples, no need to add samples argument
-    TCGAdownload(query,type = clinical_data_type)
+    TCGAdownload(query,type = clinical_data_type,path = path)
 
     ret <- NULL
     # prepare works if one file only so we will do a iteration for each tumor type
