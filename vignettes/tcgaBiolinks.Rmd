@@ -1706,8 +1706,8 @@ library(TCGAbiolinks)
 cancer <- "BRCA"
 PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
 dataType <- "rsem.genes.results"
-pathCancer <- paste0("../data",cancer)
-
+pathCancer <- paste0("../TCGA/data",cancer)
+  
 datQuery <- TCGAquery(tumor = cancer, platform = PlatformCancer, level = "3")  
 lsSample <- TCGAquery_samplesfilter(query = datQuery)
 
