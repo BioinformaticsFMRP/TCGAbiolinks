@@ -232,7 +232,13 @@ TCGAprepare <- function(query,
             data <- fread(files[i], header = TRUE, sep = "\t", data.table = FALSE)
             data <- data[-1,] # removing Composite Element REF
             x <- subset(map, uuid == uuid[i])
-            colnames(data)[2] <- as.character(x$barcode)
+
+            if( length(x$barcode)!=0){
+                colnames(data)[2] <- as.character(x$barcode)
+            }
+            else{
+                next
+            }
 
             if (i == 1) {
                 df <- data
@@ -565,11 +571,17 @@ TCGAprepare <- function(query,
                           stringsAsFactors = FALSE)
             x <- subset(map, uuid == uuid[i])
 
-            if (summarizedExperiment) {
-                setnames(data,colnames(data)[2:ncol(data)],
-                         paste0(colnames(data)[2:ncol(data)],"_",x$barcode))
+            if( length(x$barcode)!=0){
+
+                if (summarizedExperiment) {
+                    setnames(data,colnames(data)[2:ncol(data)],
+                             paste0(colnames(data)[2:ncol(data)],"_",x$barcode))
+                } else {
+                    setnames(data,2, as.character(x$barcode))
+                }
+
             } else {
-                setnames(data,2, as.character(x$barcode))
+                next
             }
 
             if (i == 1) {
@@ -611,12 +623,8 @@ TCGAprepare <- function(query,
                         )
                     )
                 } else {
-                    # case genes.normalized_results
-                    assays <- SimpleList(
-                        normalized_count = data.matrix(
-                            subset(df,
-                                   select = grep("normalized_count",colnames(df))))
-                    )
+                    normalized_count <- data.matrix(subset(df, select = grep("normalized_count",colnames(df))))
+                    assays <- list(normalized_count = normalized_count)
                 }
             } else if (grepl("junction",colnames(df)[1])){
                 aux    <- strsplit(df$junction,":")
@@ -650,17 +658,16 @@ TCGAprepare <- function(query,
                                      ranges = IRanges(start = start, end = end),
                                      strand = strand)
                 names(rowRanges) <- as.character(df$exon)
-                assays <- SimpleList(
-                    raw_counts = data.matrix(
-                        df[,grep("raw_count",colnames(df)),with = FALSE]
-                    ),
-                    median_length_normalized=data.matrix(
-                        df[,grep("median_length",colnames(df)),with = FALSE]
-                    ),
-                    RPKM=data.matrix(
-                        df[,grep("RPKM",colnames(df)),with = FALSE]
-                    )
+                raw_counts = data.matrix(
+                    df[,grep("raw_count",colnames(df)),with = FALSE]
                 )
+                median_length_normalized=data.matrix(
+                    df[,grep("median_length",colnames(df)),with = FALSE]
+                )
+                RPKM=data.matrix(
+                    df[,grep("RPKM",colnames(df)),with = FALSE]
+                )
+                assays <- list( raw_counts = raw_counts, median_length_normalized=median_length_normalized, RPKM=RPKM)
             } else if(grepl("isoform",colnames(df)[1])){
                 message("TBD")
                 return (NULL)
@@ -670,6 +677,11 @@ TCGAprepare <- function(query,
 
             barcode <- unique(unlist(str_match_all(colnames(df),regex)))
             colData <- colDataPrepare(barcode,query,add.subtype = add.subtype)
+
+            assays <- lapply(assays, function(x){
+                colnames(x) <- barcode
+                return(x)
+            })
 
             rse <- SummarizedExperiment(assays=assays,
                                         rowRanges=rowRanges,
