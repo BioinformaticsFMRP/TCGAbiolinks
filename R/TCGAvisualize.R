@@ -1148,7 +1148,6 @@ TCGAvisualize_mutation <- function (data = NULL,
         if(length(geneList) != 1 ){
             stop("Please geneList in this case must be only one gene")
         }
-
         clusters <- unique(data[,groupCol])
         df <-  data.frame(matrix(NA, ncol = length(clusters), nrow = nrow(data)))
         colnames(df) <- clusters
@@ -1158,16 +1157,16 @@ TCGAvisualize_mutation <- function (data = NULL,
             aux <- data[idx,]
             summary <- table(unlist(aux$genes))
             count <- summary[geneList]
+            if(is.na(count)) count <- 0
+            if(count > nrow(aux)) count <- nrow(aux)
             df[,j] <- c(rep(1,as.numeric(count)),
                         rep(2,nrow(aux)-count),
                         rep(NA,nrow(data)- nrow(aux)))
-
             all <- c(all,c(rep(1,as.numeric(count))))
         }
 
         df[,groupCol] <- c(all,rep(2,nrow(data)-length(all)))
         df <- df[,rev(colnames(df))]
-
         # add theme when this library is in CRAN
         # https://github.com/cttobin/ggthemr
         #sjp.setTheme(theme = "539")
