@@ -60,7 +60,7 @@
 #' @importFrom GenomicRanges GRanges distanceToNearest
 #' @importFrom IRanges IRanges
 #' @import utils TxDb.Hsapiens.UCSC.hg19.knownGene
-#' @importFrom data.table fread setnames setcolorder setDF
+#' @importFrom data.table fread setnames setcolorder setDF data.table
 #' @seealso  \code{\link{TCGAquery}} for searching the data to download
 #'
 #'  \code{\link{TCGAdownload}} for downloading the data from the
@@ -169,7 +169,7 @@ TCGAprepare <- function(query,
                                ranges = IRanges(start = gene.location$start_position,
                                                 end = gene.location$end_position),
                                strand = gene.location$strand,
-                               symbol = gene.location$external_gene_name,
+                               symbol = gene.location$external_gene_id,
                                EntrezID = gene.location$entrezgene)
 
             rowRanges <- GRanges(seqnames = paste0("chr", df$Chromosome),
@@ -192,7 +192,7 @@ TCGAprepare <- function(query,
                                    ranges = IRanges(start = gene.location$start_position,
                                                     end=gene.location$end_position),
                                    strand = gene.location$strand,
-                                   symbol = gene.location$external_gene_name,
+                                   symbol = gene.location$external_gene_id,
                                    EntrezID = gene.location$entrezgene)
 
                 probe.info  <- rowRanges
@@ -200,7 +200,7 @@ TCGAprepare <- function(query,
                 gene.order.by.distance <- gene.location[distance$subjectHits,]
                 gene.order.by.distance$distance <- as.matrix(distance$distance)
                 rowRanges$distance <- gene.order.by.distance[,c("distance")]
-                rowRanges$Gene_Symbol <- gene.order.by.distance[,c("external_gene_name")]
+                rowRanges$Gene_Symbol <- gene.order.by.distance[,c("external_gene_id")]
                 rowRanges$entrezgene <- gene.order.by.distance[,c("entrezgene")]
             }
 
@@ -353,7 +353,7 @@ TCGAprepare <- function(query,
                                      ranges = IRanges(start = merged$start_position,
                                                       end = merged$end_position),
                                      strand=merged$strand,
-                                     gene_id = merged$external_gene_name,
+                                     gene_id = merged$external_gene_id,
                                      entrezgene = merged$entrezgene)
                 names(rowRanges) <- as.character(merged$gene)
                 assays <- SimpleList(
@@ -442,14 +442,14 @@ TCGAprepare <- function(query,
 
         if(summarizedExperiment){
             # TODO create GRanges
-            #df$external_gene_name <-  alias2SymbolTable(df$`Composite Element REF`)
-            df$external_gene_name <-  df$`Composite Element REF`
-            merged <- merge(df,gene.location,by="external_gene_name")
+            #df$external_gene_id <-  alias2SymbolTable(df$`Composite Element REF`)
+            df$external_gene_id <-  df$`Composite Element REF`
+            merged <- merge(df,gene.location,by="external_gene_id")
             rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
                                  ranges = IRanges(start = merged$start_position,
                                                   end = merged$end_position),
                                  strand=merged$strand,
-                                 gene_id = merged$external_gene_name,
+                                 gene_id = merged$external_gene_id,
                                  entrezgene = merged$entrezgene,
                                  alias = merged$`Composite Element REF`)
             names(rowRanges) <- as.character(merged$`Composite Element REF`)
@@ -494,14 +494,14 @@ TCGAprepare <- function(query,
 
             if(grepl("HG-U133_Plus_2|agilent",platform, ignore.case = TRUE)){
                 suppressWarnings(
-                    df$external_gene_name <-  alias2SymbolTable(df$`Hybridization REF`)
+                    df$external_gene_id <-  alias2SymbolTable(df$`Hybridization REF`)
                 )
-                merged <- merge(df,gene.location,by="external_gene_name")
+                merged <- merge(df,gene.location,by="external_gene_id")
                 rowRanges <- GRanges(seqnames = paste0("chr", merged$chromosome_name),
                                      ranges = IRanges(start = merged$start_position,
                                                       end = merged$end_position),
                                      strand=merged$strand,
-                                     gene_id = merged$external_gene_name,
+                                     gene_id = merged$external_gene_id,
                                      entrezgene = merged$entrezgene,
                                      alias = merged$`Hybridization REF`)
                 names(rowRanges) <- as.character(merged$`Hybridization REF`)
@@ -598,15 +598,14 @@ TCGAprepare <- function(query,
                 GeneID <- unlist(lapply(aux,function(x) x[2]))
                 df$entrezid <- as.numeric(GeneID)
                 GeneSymbol <- unlist(lapply(aux,function(x) x[1]))
-                df$external_gene_name <- as.character(GeneSymbol)
-
-                df <- merge(df,gene.location,by="external_gene_name")
+                df$external_gene_id <- as.character(GeneSymbol)
+                df <- merge(df,gene.location,by="external_gene_id")
 
                 rowRanges <- GRanges(seqnames = paste0("chr", df$chromosome_name),
                                      ranges = IRanges(start = df$start_position,
                                                       end = df$end_position),
                                      strand = df$strand,
-                                     gene_id = df$external_gene_name,
+                                     gene_id = df$external_gene_id,
                                      entrezgene = df$entrezid,
                                      transcript_id = subset(df, select = 5))
                 names(rowRanges) <- as.character(df$gene_id)
