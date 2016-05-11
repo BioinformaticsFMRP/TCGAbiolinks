@@ -60,7 +60,7 @@
 #' @importFrom GenomicRanges GRanges distanceToNearest
 #' @importFrom IRanges IRanges
 #' @import utils TxDb.Hsapiens.UCSC.hg19.knownGene
-#' @importFrom data.table fread setnames setcolorder setDF
+#' @importFrom data.table fread setnames setcolorder setDF data.table
 #' @seealso  \code{\link{TCGAquery}} for searching the data to download
 #'
 #'  \code{\link{TCGAdownload}} for downloading the data from the
