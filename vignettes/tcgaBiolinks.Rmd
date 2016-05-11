@@ -1889,6 +1889,7 @@ dataAssy <- TCGAprepare(query = datQuery,
                         summarizedExperiment = TRUE,
                         samples = dataSmTP,
                         add.mutation.genes = TRUE,
+                        add.subtype = TRUE,
                         filename = paste0(cancer,"_",PlatformCancer,".rda"))
 ```
 
