@@ -1845,7 +1845,8 @@ grid.raster(img)
 ## Case study n. 2: Pan Cancer downstream analysis LGG
 
 We focused on the analysis of LGG samples. In particular, we used TCGAbiolinks
-to download 293 samples with molecular subtypes. 
+to download 293 samples with molecular subtypes. Link the complete [complete code](https://gist.github.com/tiagochst/277651ebed998fd3d1952d3fbc376ef2).
+.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(TCGAbiolinks)
@@ -2034,13 +2035,15 @@ TCGAvisualize_Heatmap(t(datFilt),
                                        "EC2"="red",
                                        "EC3"="blue",
                                        "EC4"="green3"),
-                          histological_type=c("Astrocytoma"="cyan",
+                          histological_type=c("Astrocytoma"="navy",
                                               "Oligoastrocytoma"="green3",
                                               "Oligodendroglioma"="red"),
                           IDH.codel.subtype = c("IDHmut-codel"="tomato",
-                                                "IDHmut-non-codel"="cyan",
+                                                "IDHmut-non-codel"="navy",
                                                 "IDHwt"="gold","NA"="white")),
                       sortCol = "groupsHC",
+                      type = "expression", # sets default color
+                      scale = "row", # use z-scores for better visualization
                       title = "Heatmap from concensus cluster",
                       cluster_rows = TRUE)
 ```
@@ -2117,7 +2120,7 @@ We can see the percentage of samples that have the ATRX mutation for each RNASeq
 TCGAvisualize_mutation(data = colData(dataAssy),
                        groupCol = "Supervised.DNA.Methylation.Cluster",
                        geneList = "ATRX",
-                       filename = "mutation_ATRX_RNASeqCluster.png",
+                       filename = "mutation_ATRX.png",
                        by = "cluster")
 ```
 
@@ -2135,7 +2138,7 @@ We can see the percentage of samples that have the IDH1 mutation for each RNASeq
 TCGAvisualize_mutation(data = colData(dataAssy),
                        groupCol = "Supervised.DNA.Methylation.Cluster",
                        geneList = "IDH1",
-                       filename = "mutation_IDH1_RNASeqCluster.png",
+                       filename = "mutation_IDH1.png",
                        by = "cluster")
 ```
 
