@@ -1845,16 +1845,18 @@ grid.raster(img)
 ## Case study n. 2: Pan Cancer downstream analysis LGG
 
 We focused on the analysis of LGG samples. In particular, we used TCGAbiolinks
-to download 293 samples with molecular subtypes. 
+to download 293 samples with molecular subtypes. Link the complete [complete code](https://gist.github.com/tiagochst/277651ebed998fd3d1952d3fbc376ef2).
+.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(TCGAbiolinks)
+library(SummarizedExperiment)
 
 #----------- Parameters--------------------
 cancer <- "LGG"
 PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
 dataType <- "rsem.genes.results"
-pathCancer <- paste0("../TCGA/data",cancer)
+pathCancer <- paste0("TCGA/data",cancer)
 #------------------------------------------
 
 #----------- DATA --------------------
@@ -1863,6 +1865,8 @@ datQuery <- TCGAquery(tumor = cancer,
                       level = "3")
 
 lsSample <- TCGAquery_samplesfilter(query = datQuery)
+
+# Get only primary samples
 dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
                                   typesample = "TP")
 
@@ -1870,14 +1874,14 @@ dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
 dataSubt <- TCGAquery_subtype(tumor = cancer)
 
 # get clinical data
-dataClin <- TCGAquery_clinic(tumor  = cancer,
-                             clinical_data_type = "clinical_patient")
+dataClin <- TCGAquery_clinic(tumor  = cancer, clinical_data_type = "clinical_patient")
 
 TCGAdownload(data = datQuery,
              path = pathCancer,
              type = dataType,
              samples = dataSmTP )
 
+# Selected option 6
 dataAssy <- TCGAprepare(query = datQuery,
                         dir = pathCancer,
                         type = dataType,
@@ -1885,6 +1889,7 @@ dataAssy <- TCGAprepare(query = datQuery,
                         summarizedExperiment = TRUE,
                         samples = dataSmTP,
                         add.mutation.genes = TRUE,
+                        add.subtype = TRUE,
                         filename = paste0(cancer,"_",PlatformCancer,".rda"))
 ```
 
@@ -1948,7 +1953,7 @@ the cluster information and we will add the subtype information.
 #------  Add cluster information
 cluster <- data.frame("groupsHC" = data_Hc2[[4]]$consensusClass)
 cluster$groupsHC <- paste0("EC",cluster$groupsHC)
-cluster$patient <-  substr(rownames(cluster),1,12)
+cluster$patient <-  substr(colData(dataAssy)$patient,1,12)
 
 # Add information about gropus from consensus Cluster in clinical data
 dataClin <- merge(dataClin,cluster, by.x="bcr_patient_barcode", by.y="patient")
@@ -1969,7 +1974,6 @@ TCGAanalyze_survival(data = clin_subt_all,
                      main = "TCGA kaplan meier survival plot from consensus cluster",
                      legend = "RNA Group",
                      color = c("black","red","blue","green3"),
-                     labels=levels(consensusClusters) ,
                      filename = "case2_surv.pdf")
 ```
 
@@ -1988,7 +1992,7 @@ methylation cluster and age, for the EC groups.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 TCGAvisualize_profilePlot(clin_subt,
                           groupCol="groupsHC",
-                          subtypeCol="IDH.1p19q.Subtype",
+                          subtypeCol="IDH.codel.subtype",
                           filename = "case2_Idh.pdf",
                           plot.margin = c(-4.0, -2.5, -0.5, 2),
                           na.rm.groups = TRUE)
@@ -2006,7 +2010,7 @@ grid.raster(img)
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 TCGAvisualize_profilePlot(clin_subt,
                           groupCol="groupsHC",
-                          subtypeCol="MethylationCluster",
+                          subtypeCol="Supervised.DNA.Methylation.Cluster",
                           filename = "case2_Met.png",
                           plot.margin = c(-4.0, -2.5, -0.5, 2),
                           na.rm.groups = TRUE)
@@ -2022,37 +2026,27 @@ grid.raster(img)
 
 We will also, create a heatmap of the expression.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-TCGAvisualize_Heatmap(datFilt,
+TCGAvisualize_Heatmap(t(datFilt),
                       col.metadata =  clin_subt[,c("bcr_patient_barcode",
                                                    "groupsHC",
                                                    "histological_type",
-                                                   "IDH.1p19q.Subtype",
-                                                   "CNCluster",
-                                                   "COCCluster",
-                                                   "OncosignCluster")],
+                                                   "IDH.codel.subtype")],
                       col.colors =  list(
                           groupsHC = c("EC1"="black",
-                                        "EC2"="red",
-                                        "EC3"="blue",
-                                        "EC4"="green3"),
-                          histological_type=c("Astrocytoma"="cyan",
-                                     "Oligoastrocytoma"="green3",
-                                     "Oligodendroglioma"="red"),
-                         IDH.1p19q.Subtype = c("IDHmut-codel"="tomato",
-                                       "IDHmut-non-codel"="cyan",
-                                       "IDHwt"="gold","NA"="white"),
-                           CNCluster=c("C1"="purple",
-                                       "C2"="green",
-                                       "C3"="red",
-                                       "NA"="white"),
-                           COCCluster=c("coc1"="purple",
-                                        "coc2"="green","coc3"="red"),
-                           OncosignCluster= c("OSC1"="red","OSC2"="purple",
-                                    "OSC3"="green","OSC4"="orange",
-                                    "Unclassified"="gray","NA"="white")),
+                                       "EC2"="red",
+                                       "EC3"="blue",
+                                       "EC4"="green3"),
+                          histological_type=c("Astrocytoma"="navy",
+                                              "Oligoastrocytoma"="green3",
+                                              "Oligodendroglioma"="red"),
+                          IDH.codel.subtype = c("IDHmut-codel"="tomato",
+                                                "IDHmut-non-codel"="navy",
+                                                "IDHwt"="gold","NA"="white")),
                       sortCol = "groupsHC",
+                      type = "expression", # sets default color
+                      scale = "row", # use z-scores for better visualization
                       title = "Heatmap from concensus cluster",
-                      cluster_rows = T)
+                      cluster_rows = TRUE)
 ```
 
 The result is shown below:
@@ -2125,9 +2119,9 @@ We can see the percentage of samples that have the ATRX mutation for each RNASeq
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 TCGAvisualize_mutation(data = colData(dataAssy),
-                       groupCol = "RNASeqCluster",
+                       groupCol = "Supervised.DNA.Methylation.Cluster",
                        geneList = "ATRX",
-                       filename = "mutation_ATRX_RNASeqCluster.png",
+                       filename = "mutation_ATRX.png",
                        by = "cluster")
 ```
 
@@ -2143,9 +2137,9 @@ We can see the percentage of samples that have the IDH1 mutation for each RNASeq
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 TCGAvisualize_mutation(data = colData(dataAssy),
-                       groupCol = "RNASeqCluster",
+                       groupCol = "Supervised.DNA.Methylation.Cluster",
                        geneList = "IDH1",
-                       filename = "mutation_IDH1_RNASeqCluster.png",
+                       filename = "mutation_IDH1.png",
                        by = "cluster")
 ```
 
