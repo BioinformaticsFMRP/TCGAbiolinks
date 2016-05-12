@@ -23,7 +23,7 @@
 TCGAquery_Version <- function(tumor = NULL, platform = NULL) {
 
     if (is.null(tumor) && is.null(platform)) {
-        message("Please provide one tumor and platform")
+        stop("Please provide one tumor and platform")
     }
 
     # Get last version of files
