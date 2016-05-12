@@ -976,7 +976,7 @@ TCGAvisualize_profilePlot <- function(data = NULL,
     }
     colnames(data) <- colnames(df)[-1]
 
-    # create a collumn for all values
+    # create a column for all values
     all <- as.numeric(unlist(data))
     idx <- length(all) - nrow(data)
     for( i in 1:idx) {
