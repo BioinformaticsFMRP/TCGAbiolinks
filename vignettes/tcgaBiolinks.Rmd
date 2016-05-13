@@ -352,6 +352,17 @@ source("https://bioconductor.org/biocLite.R")
 biocLite("TCGAbiolinks")
 ```
 
+## Citation
+
+Please cite TCGAbiolinks package: 
+
+* Colaprico A, Silva TC, Olsen C, Garofano L, Cava C, Garolini D, Sabedot T, Malta TM, Pagnotta SM, Castiglioni I, Ceccarelli M, Bontempi G and Noushmehr H. "TCGAbiolinks: an R/Bioconductor package for integrative analysis of TCGA data." Nucleic acids research (2015): gkv1507.
+
+Also, if you have used ELMER analysis please cite:
+
+*  Yao, L., Shen, H., Laird, P. W., Farnham, P. J., & Berman, B. P. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome Biol 16 (2015): 105.
+* Yao, Lijing, Benjamin P. Berman, and Peggy J. Farnham. "Demystifying the secret mission of enhancers: linking distal regulatory elements to target genes." Critical reviews in biochemistry and molecular biology 50.6 (2015): 550-573.
+
 # `TCGAquery`: Searching TCGA open-access data  
 
 ## `TCGAquery`: Searching TCGA open-access data for download 
@@ -1432,6 +1443,52 @@ The arguments of this function are:
 * **show.names** What names will be showd? Possibilities: "both", "significant", "highlighted"
 
 For more information please take a look on case study #3.
+
+## `TCGAvisualize_oncoprint`
+
+The visualize the MAF files we created a function called `TCGAvisualize_oncoprint` that
+uses the [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) to create an oncoprint.
+
+* **mut** Mutation file (see TCGAquery_maf from TCGAbiolinks)
+* **genes** Gene list
+* **filename** name of the pdf
+* **color** named vector for the plot
+* **height** pdf height
+* **rm.empty.columns** If there is no alteration in that sample, whether remove it on the oncoprint
+* **show.row.barplot**  Show barplot annotation on rows?
+* **show.column.names** Show column names? Default: FALSE
+* **rows.font.size** Size of the fonts
+* **labels.font.size** Size of the fonts
+* **annotation** Matrix or data frame with the annotation. Should have a column bcr_patient_barcode with the same ID of the mutation object
+* **annotation.position** Position of the annotation "bottom" or "top"
+* **label.title** Title of the label
+
+```{r, eval = FALSE}
+mut <- TCGAbiolinks::TCGAquery_maf(tumor = "GBM",
+        archive.name = "ucsc.edu_GBM.IlluminaGA_DNASeq_automated.Level_2.1.1.0")
+clin <- TCGAbiolinks::TCGAquery_clinic("gbm","clinical_patient")
+clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_tissue_site","race","vital_status")]
+TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:30],
+                        filename = "onco.pdf",
+                        annotation = clin,
+                        color=c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown"),
+                        rows.font.size=10,
+                        heatmap.legend.side = "right",
+                        dist.col = 0,
+                        label.font.size = 10)
+```
+
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("oncoprint.png")
+grid.raster(img)
+```
+
+The columns are the samples and the rows are genes. The upper histograms shows the number
+of mutation of each samples, the right histogram shows the number of patients that has that mutation (which 
+is also represented by the percentage numbers in the left side of the plot).
 
 ## `TCGAvisualize_PCA`: Principal Component Analysis plot for differentially expressed genes
 
