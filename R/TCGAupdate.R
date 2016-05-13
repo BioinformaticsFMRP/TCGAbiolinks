@@ -254,7 +254,7 @@ TCGAUpdate <- function(){
     #gene.location <- get("gene.location")
     use_data(platform.table, disease.table, tcga.db, center.table,
              DAVID_BP_matrix,DAVID_CC_matrix,DAVID_MF_matrix,
-             EAGenes,gene.location,listEA_pathways,
+             EAGenes,gene.location,listEA_pathways, acc.subtype,
              lgg.gbm.subtype, luad.subtype,skcm.subtype,
              hnsc.subtype, kich.subtype, lusc.subtype, ucec.subtype,
              pancan.subtype, thca.subtype, prad.subtype, kirp.subtype, kirc.subtype,

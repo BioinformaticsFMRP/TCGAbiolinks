@@ -95,3 +95,10 @@ test_that("TCGAquery_maf works", {
     expect_equal(class(mutation),class(data.frame()))
 
 })
+
+test_that("TCGAquery_version works", {
+    res <- TCGAquery_Version('GBM','illuminahiseq_rnaseqv2')
+    expect_false(is.null(res))
+    expect_error(TCGAquery_Version())
+})
+
