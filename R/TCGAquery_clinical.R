@@ -503,6 +503,7 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE){
 
     # add batch information
     message("Adding batch info to summarizedExperiment object")
+    batch.info <- get("batch.info")
     ret <- merge(ret,batch.info, by = "patient", sort = FALSE,all.x = TRUE)
     ret <- ret[match(barcode,ret$barcode),]
 
@@ -529,7 +530,7 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE){
     ret <- cbind(ret,df)
     if(add.subtype == TRUE){
         for (i in unique(query$Disease)) {
-            if (grepl("lgg|gbm|luad|stad|coad|read|skcm|hnsc|kich|lusc|ucec|kirp|prad|kirc|brca", i,ignore.case = TRUE)) {
+            if (grepl("acc|lgg|gbm|luad|stad|coad|read|skcm|hnsc|kich|lusc|ucec|kirp|prad|kirc|brca", i,ignore.case = TRUE)) {
                 if(tolower(i) %in% c("gbm","lgg")){
                     subtype <- lgg.gbm.subtype
                     if(all(colnames(subtype) %in% colnames(ret))) break
@@ -585,14 +586,15 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE){
 #' dataSubt <- TCGAquery_subtype(tumor = "lgg")
 #' @return a data.frame with barcode and molecular subtypes
 TCGAquery_subtype <- function(tumor){
-    if (grepl("lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc|all",
+    if (grepl("acc|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc|all",
               tumor,ignore.case = TRUE)) {
 
         if(tolower(tumor) == "all") {
-            all.tumor <- c("lgg", "gbm", "luad", "stad", "brca", "coad",
+            all.tumor <- c("acc","lgg", "gbm", "luad", "stad", "brca", "coad",
                            "skcm", "hnsc", 'kich', "lusc", "ucec", "pancan", "thca",
                            "prad","kirp","kirc")
-            doi <- c("aml"="doi:10.1056/NEJMoa1301689",
+            doi <- c("acc"="doi:10.1016/j.ccell.2016.04.002",
+                     "aml"="doi:10.1056/NEJMoa1301689",
                      "blca"="doi:10.1038/nature12965",
                      "brca"="doi:10.1038/nature11412",
                      "coad"="doi:10.1038/nature11252",
@@ -649,6 +651,6 @@ TCGAquery_subtype <- function(tumor){
         }
         return(get(paste0(tolower(tumor),".subtype")))
     } else {
-        stop("For the moment we have only subtype for: brca, coad, gbm, hnsc, kich, kirp, kirc, lgg, luad, lusc, prad, pancan, read, skcm, stad, thca and ucec")
+        stop("For the moment we have only subtype for: acc, brca, coad, gbm, hnsc, kich, kirp, kirc, lgg, luad, lusc, prad, pancan, read, skcm, stad, thca and ucec")
     }
 }
