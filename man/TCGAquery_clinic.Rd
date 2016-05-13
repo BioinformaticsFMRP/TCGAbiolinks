@@ -4,7 +4,7 @@
 \alias{TCGAquery_clinic}
 \title{Get the clinical information}
 \usage{
-TCGAquery_clinic(tumor, clinical_data_type, samples)
+TCGAquery_clinic(tumor, clinical_data_type, samples, path = getwd())
 }
 \arguments{
 \item{tumor}{a character vector indicating cancer type Examples:
@@ -36,6 +36,8 @@ clinical_radiation
 }}
 
 \item{samples}{List of barcodes to get the clinical data}
+
+\item{path}{Directory to save the downloaded data default getwd()}
 }
 \value{
 clinic data
