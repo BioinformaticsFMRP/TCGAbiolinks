@@ -58,6 +58,7 @@
 #' @importFrom GenomicFeatures microRNAs
 #' @importFrom BiocGenerics as.data.frame
 #' @importFrom GenomicRanges GRanges distanceToNearest
+#' @importFrom data.table data.table
 #' @importFrom IRanges IRanges
 #' @import utils TxDb.Hsapiens.UCSC.hg19.knownGene
 #' @importFrom data.table fread setnames setcolorder setDF data.table
