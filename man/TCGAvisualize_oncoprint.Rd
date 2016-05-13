@@ -36,9 +36,19 @@ Should have a column bcr_patient_barcode with the same ID of the mutation object
 
 \item{label.title}{Title of the label}
 
+\item{label.font.size}{Size of the fonts}
+
 \item{rows.font.size}{Size of the fonts}
 
-\item{labels.font.size}{Size of the fonts}
+\item{dist.col}{distance between columns in the plot}
+
+\item{dist.row}{distance between rows in the plot}
+
+\item{row.order}{Order the genes (rows). Genes with more mutations will be in the first rows}
+
+\item{heatmap.legend.side}{Position of the heatmap legend}
+
+\item{annotation.legend.side}{Position of the annotation legend}
 }
 \value{
 A oncoprint plot
