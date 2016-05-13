@@ -1629,11 +1629,16 @@ unlistlabels <- function(lab) {
 #' @param show.row.barplot  Show barplot annotation on rows?
 #' @param show.column.names Show column names? Default: FALSE
 #' @param rows.font.size Size of the fonts
-#' @param labels.font.size Size of the fonts
+#' @param dist.col distance between columns in the plot
+#' @param dist.row distance between rows in the plot
+#' @param label.font.size Size of the fonts
+#' @param row.order Order the genes (rows). Genes with more mutations will be in the first rows
 #' @param annotation Matrix or data frame with the annotation.
 #' Should have a column bcr_patient_barcode with the same ID of the mutation object
 #' @param annotation.position Position of the annotation "bottom" or "top"
 #' @param label.title Title of the label
+#' @param annotation.legend.side Position of the annotation legend
+#' @param heatmap.legend.side Position of the heatmap legend
 #' @importFrom ComplexHeatmap oncoPrint draw HeatmapAnnotation
 #' @importFrom grid gpar grid.rect
 #' @importFrom data.table dcast setDT setDF :=
