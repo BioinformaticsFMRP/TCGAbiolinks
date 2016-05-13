@@ -863,7 +863,7 @@ TCGAvisualize_Heatmap <- function(data,
 #' @param geom.label.color Color of percentage in the left barplot
 #' @importFrom sjPlot sjp.stackfrq sjp.setTheme
 #' @importFrom cowplot ggdraw switch_axis_position plot_grid
-#' @importFrom reshape2 dcast
+#' @importFrom data.table dcast
 #' @importFrom grDevices gray.colors
 #' @import gtable
 #' @export
@@ -958,7 +958,7 @@ TCGAvisualize_profilePlot <- function(data = NULL,
     df <- as.data.frame(data)
     groups <- df[,groupCol]
 
-    df <- dcast(df, as.formula(paste0(subtypeCol, " ~ ", groupCol)))
+    df <- setDF(dcast(df, as.formula(paste0(subtypeCol, " ~ ", groupCol))))
 
     var.labels <- unique(df[,1]) # get the cluster names
     m <- max(apply(df[,-1],2,sum)) # get the max number of subtypes in the clusters
@@ -1695,7 +1695,7 @@ TCGAvisualize_oncoprint <- function (mut,
 
     # value will be a collum with all the mutations
     mat$value <- ""
-    mat <- setDT(mat)
+
     for ( i in columns){
         mat[,i] <-  replace(mat[,i,with = FALSE],mat[,i,with = FALSE]>0,paste0(i,";"))
         mat[,i] <-  replace(mat[,i,with = FALSE],mat[,i,with = FALSE]==0,"")
