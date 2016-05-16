@@ -170,7 +170,8 @@ filterFiles <- function(data,samples,files){
                          "SOLiD_DNASeq",
                          "pathology_reports",
                          "IlluminaDNAMethylation",
-                         "HG-CGH-244A",
+                         #"HG-CGH-244A", # exception depends on the center (harvard - barcode name)
+                         # mskcc.org in the mage
                          "HG-CGH-415K_G4124A",
                          "HG-U133_Plus_2",
                          "IlluminaGA_DNASeq_automated",
@@ -216,10 +217,13 @@ filterFiles <- function(data,samples,files){
         idx <- which(uuid %in% map[idx,]$uuid)
         files <- files[ceiling(idx / 2)]
     } else if(grepl(barcodeName, data$Platform, ignore.case = TRUE)
-              | (grepl("humanmethylation", data$Platform, ignore.case = TRUE) & level != 1 )) {
+              | (grepl("humanmethylation", data$Platform, ignore.case = TRUE) & level != 1 )
+              | (grepl("HG-CGH-244A", data$Platform, ignore.case = TRUE) & data$Center == "hms.harvard.edu" )) {
         idx <- unique(unlist(lapply(samples, function(x) grep(x,files))))
         files <- files[idx]
-    } else if(grepl(mageName, data$Platform, ignore.case = TRUE) | (grepl("humanmethylation", data$Platform, ignore.case = TRUE) & level == 1 )) {
+    } else if(grepl(mageName, data$Platform, ignore.case = TRUE)
+              | (grepl("humanmethylation", data$Platform, ignore.case = TRUE) & level == 1 )
+              | (grepl("HG-CGH-244A", data$Platform, ignore.case = TRUE) & data$Center == "mskcc.org" )) {
         mage <- getMage(data)
         idx <- unlist(lapply(samples,
                              function(x) grep(x,mage$Comment..TCGA.Barcode.)))
