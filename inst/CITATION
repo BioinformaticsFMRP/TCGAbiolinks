@@ -20,7 +20,7 @@ citEntry(entry = "Article",
          year         = "2015",
          journal      = "Nucleic Acids Research",
          doi = "10.1093/nar/gkv1507",
-         url = "http://doi.org/10.1093/nar/gkv1507"
+         url = "http://doi.org/10.1093/nar/gkv1507",
          textVersion  =
              paste("Antonio Colaprico, Tiago Chedraoui Silva, Catharina Olsen,",
                    "Luciano Garofano, Claudia Cava, Davide Garolini,",

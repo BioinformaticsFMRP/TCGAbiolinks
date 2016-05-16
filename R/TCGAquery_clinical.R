@@ -567,8 +567,7 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE){
         }
     }
     ret <- ret[match(barcode,ret$barcode),]
-
-    rownames(ret) <- ret$barcode
+    rownames(ret) <- make.names(ret$barcode,unique=TRUE)
     ret$code <- NULL
     return(DataFrame(ret))
 }
