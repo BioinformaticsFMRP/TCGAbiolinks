@@ -181,8 +181,10 @@ TCGAprepare <- function(query,
 
             names(rowRanges) <- as.character(df$Composite.Element.REF)
             colData <-  colDataPrepare(colnames(df)[5:ncol(df)],query,add.subtype = add.subtype)
+            rownames(colData) <- gsub("\\.","-",rownames(colData))
             assay <- data.matrix(subset(df,select = c(5:ncol(df))))
-
+            colnames(assay) <- colnames(df)[5:ncol(df)]
+            rownames(assay) <- as.character(df$Composite.Element.REF)
             if(reannotate){
                 message("Reannotating genes Source:http://grch37.ensembl.org/")
                 gene.location <- gene.location[gene.location$chromosome_name %in% c(1:22,"X","Y"),]
