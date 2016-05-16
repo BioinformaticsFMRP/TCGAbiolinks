@@ -181,8 +181,10 @@ TCGAprepare <- function(query,
 
             names(rowRanges) <- as.character(df$Composite.Element.REF)
             colData <-  colDataPrepare(colnames(df)[5:ncol(df)],query,add.subtype = add.subtype)
+            rownames(colData) <- gsub("\\.","-",rownames(colData))
             assay <- data.matrix(subset(df,select = c(5:ncol(df))))
-
+            colnames(assay) <- colnames(df)[5:ncol(df)]
+            rownames(assay) <- as.character(df$Composite.Element.REF)
             if(reannotate){
                 message("Reannotating genes Source:http://grch37.ensembl.org/")
                 gene.location <- gene.location[gene.location$chromosome_name %in% c(1:22,"X","Y"),]
@@ -768,6 +770,85 @@ TCGAprepare <- function(query,
             return(NULL)
         }
     }
+
+    if (grepl("HuEx-1_0-st-v2",tolower(platform),ignore.case = TRUE)) {
+        print("HuEx-1_0-st-v2")
+        if(!(type %in% c("FIRMA","gene"))){
+            stop("Please, set type argument to FIRMA or gene (type = 'gene' or type = 'FIRMA'")
+        }
+
+        files <- files[grep(type,files)]
+
+        if(length(files) == 0){
+            message("No files of that type found")
+            return(NULL)
+        }
+
+        if(is.vector(query)){
+            mage <- getMage(query)
+        } else {
+            mage <- getMage(query[1,])
+        }
+
+        for (i in seq_along(files)) {
+            data <- fread(files[i], header = TRUE, sep = "\t",
+                          stringsAsFactors = FALSE, data.table = FALSE)
+            if(i == 1) df <- data
+            if(i != 1) df <- merge(df,data,by="Hybridization REF")
+            setTxtProgressBar(pb, i)
+        }
+
+
+        # The df object is:
+        #
+        # Hibridation ref 123 345
+        # gene 1
+        # gene 2
+        #
+        # The mage has the map btw  Hibridation ref and barcode
+        codes <- colnames(df)
+        codes <- codes[-1] # remove the Hybridization REF
+        barcodes <- mage[match(as.integer(codes), as.integer(mage$Hybridization.Name)),"Comment..TCGA.Barcode."]
+        not.found <- which(barcodes == "->")
+        barcodes[not.found] <- codes[not.found] # some does not have a barcode
+        colnames(df)[2:length(colnames(df))] <- barcodes
+
+        if (summarizedExperiment & type == "FIRMA" ) {
+            message("Sorry we can prepare FIRMA type into summarizedExperiment please set summarizedExperiment = FALSE")
+            summarizedExperiment <- FALSE
+        }
+        if (summarizedExperiment){
+            df$external_gene_id <- df[,1]
+
+            df <- merge(df,gene.location,by="external_gene_id")
+
+            rowRanges <- GRanges(seqnames = paste0("chr", df$chromosome_name),
+                                 ranges = IRanges(start = df$start_position,
+                                                  end = df$end_position),
+                                 strand = df$strand,
+                                 gene_id = df$external_gene_id,
+                                 entrezgene = df$entrezgene)
+            names(rowRanges) <- as.character(df$external_gene_id)
+            assays <- SimpleList(
+                signal = data.matrix(df[,3:(length(barcodes)+2)],rownames.force = T)
+                )
+
+            colData <- colDataPrepare(barcodes,query,add.subtype = add.subtype)
+
+            rownames(colData) <- barcodes
+            assays <- lapply(assays, function(x){
+                colnames(x) <- barcodes
+                rownames(x) <- as.character(df$external_gene_id)
+                return(x)
+            })
+            rse <- SummarizedExperiment(assays=assays,
+                                        rowRanges=rowRanges,
+                                        colData=colData)
+        }
+
+    }
+
+
     if (grepl("genome_wide_snp_6",tolower(platform))) {
 
         while(!(type %in% c("nocnv_hg18","nocnv_hg19","cnv_hg18","cnv_hg19",
