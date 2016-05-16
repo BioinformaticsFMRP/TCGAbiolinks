@@ -831,7 +831,7 @@ TCGAprepare <- function(query,
             names(rowRanges) <- as.character(df$external_gene_id)
             assays <- SimpleList(
                 signal = data.matrix(df[,3:(length(barcodes)+2)],rownames.force = T)
-                )
+            )
 
             colData <- colDataPrepare(barcodes,query,add.subtype = add.subtype)
 
@@ -848,6 +848,91 @@ TCGAprepare <- function(query,
 
     }
 
+    if (grepl("CGH-1x1M_G4447A",tolower(platform),ignore.case = TRUE)) {
+
+        if(summarizedExperiment){
+            message(
+                paste("Sorry, but for this platform we haven't prepared",
+                      "the data into a summarizedExperiment object.",
+                      "\n The return is a data frame")
+            )
+            summarizedExperiment = FALSE
+        }
+
+        if(is.vector(query)){
+            mage <- getMage(query)
+        } else {
+            mage <- getMage(query[1,])
+        }
+
+        for (i in seq_along(files)) {
+            data <- read.table(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+
+            if(i == 1) df <- data
+            if(i != 1) df <- rbind(df, data, make.row.names = FALSE)
+
+            setTxtProgressBar(pb, i)
+        }
+        mage <- mage[,c("Comment..TCGA.Barcode.","Hybridization.Name")]
+        mage <- mage[!mage$Comment..TCGA.Barcode. == "->",]
+        print(head(mage))
+        print(head(df))
+        df$sample <- gsub("\\.","-",df$sample)
+        df <- merge(df,mage,
+                    by.x="sample",by.y="Hybridization.Name", sort=FALSE)
+        print(head(df))
+        df[,1] <- df[,ncol(df)]
+        df[,ncol(df)] <- NULL
+
+    }
+
+    if (grepl("HG-CGH-244A|HG-CGH-415K_G4124A",tolower(platform),ignore.case = TRUE)) {
+
+        if(summarizedExperiment){
+            message(
+                paste("Sorry, but for this platform we haven't prepared",
+                      "the data into a summarizedExperiment object.",
+                      "\n The return is a data frame")
+            )
+            summarizedExperiment = FALSE
+        }
+
+        if(is.vector(query)){
+            mage <- getMage(query)
+            center <- query$Center
+        } else {
+            mage <- getMage(query[1,])
+            center <- query[1,]$Center
+        }
+        if(query[1,]$Center == "hms.harvard.edu"){
+            regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
+                            "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
+            barcode <- str_match(files,regex)
+            for (i in seq_along(files)) {
+                data <- read.table(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+                data$sample <- barcode[i]
+                if(i == 1) df <- data
+                if(i != 1) df <- rbind(df, data, make.row.names = FALSE)
+
+                setTxtProgressBar(pb, i)
+            }
+            df <- df[,c(ncol(df),1:(ncol(df)-1))]
+        } else {
+            for (i in seq_along(files)) {
+                data <- read.table(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+                if(i == 1) df <- data
+                if(i != 1) df <- rbind(df, data, make.row.names = FALSE)
+                setTxtProgressBar(pb, i)
+            }
+            mage <- mage[,c("Comment..TCGA.Barcode.","Hybridization.Name")]
+            mage <- mage[!mage$Comment..TCGA.Barcode. == "->",]
+            df$sample <- gsub("\\.","-",df$sample)
+            df <- merge(df,mage,
+                        by.x="sample",by.y="Hybridization.Name", sort=FALSE)
+            df[,1] <- df[,ncol(df)]
+            df[,ncol(df)] <- NULL
+        }
+    }
 
     if (grepl("genome_wide_snp_6",tolower(platform))) {
 
