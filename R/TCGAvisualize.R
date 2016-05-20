@@ -1031,15 +1031,14 @@ TCGAvisualize_profilePlot <- function(data = NULL,
     # Create the vertical barplot with the percentage of element in each group
     p2 <- sjp.stackfrq(groups[,2],
                        #legendTitle = subtypeCol,
-                       axisTitle.y = "Cluster distribution",
+                       axis.titles = c("","Cluster distribution"),
                        #sort.frq = "first.asc",
                        #expand.grid = TRUE,
-                       legendLabels = as.character(unique(groups[,2])),
+                       legend.labels = as.character(unique(groups[,2])),
                        coord.flip = FALSE,
-                       hideLegend = TRUE,
-                       showSeparatorLine = FALSE,
+                       show.legend = FALSE,
+                       #showSeparatorLine = FALSE,
                        #showValueLabels = FALSE,
-                       includeN = FALSE,
                        #geom.size = c(0.1,0.2,0.4,0.3),
                        geom.colors = gray.colors(length(unique(groups[,2])),
                                                  start = 0.6,
@@ -1172,16 +1171,16 @@ TCGAvisualize_mutation <- function (data = NULL,
         #sjp.setTheme(theme = "539")
         p <- sjp.stackfrq(df,
                           title = paste0(geneList),
-                          legendTitle = "Status",
+                          legend.title = "Status",
                           #axisTitle.x = groupCol,
                           #sort.frq = "last.desc",
                           expand.grid = FALSE,
-                          legendLabels = c("Mutated","Not mutated"),
-                          showSeparatorLine = TRUE,
+                          legend.labels = c("Mutated","Not mutated"),
+                          #showSeparatorLine = TRUE,
                           showValueLabels = FALSE,
                           geom.colors = colors[1:2],
                           #separatorLineColor = "#6699cc"
-                          printPlot = TRUE)
+                          prnt.plot = TRUE)
 
 
     } else {
@@ -1213,12 +1212,12 @@ TCGAvisualize_mutation <- function (data = NULL,
                           #axisTitle.x = groupCol,
                           #sort.frq = "last.desc",
                           expand.grid = FALSE,
-                          legendLabels = c("Mutated","Not mutated"),
-                          showSeparatorLine = TRUE,
-                          showValueLabels = FALSE,
+                          legend.labels = c("Mutated","Not mutated"),
+                          #showSeparatorLine = TRUE,
+                          #showValueLabels = FALSE,
                           geom.colors = colors[1:2],
                           #separatorLineColor = "#6699cc"
-                          printPlot = TRUE)
+                          prnt.plot = TRUE)
 
     }
 
