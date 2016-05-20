@@ -1787,7 +1787,7 @@ dataSubt <- TCGAquery_subtype(tumor = cancer)
 dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
                                   typesample = "TP")
 # Which samples are Solid Tissue Normal
-dataSmTN <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
+dataSmNT <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
                                   typesample ="NT")
 # get clinical data
 dataClin <- TCGAquery_clinic(tumor = cancer,
@@ -1796,14 +1796,14 @@ dataClin <- TCGAquery_clinic(tumor = cancer,
 TCGAdownload(data = datQuery, 
              path = pathCancer, 
              type = dataType,
-             samples =c(dataSmTP,dataSmTN))
+             samples =c(dataSmTP,dataSmNT))
 
 dataAssy <- TCGAprepare(query = datQuery, 
                         dir = pathCancer, 
                         type = dataType, 
                         save = TRUE, 
                         summarizedExperiment = TRUE, 
-                        samples = c(dataSmTP,dataSmTN),
+                        samples = c(dataSmTP,dataSmNT),
                         filename = paste0(cancer,"_",PlatformCancer,".rda")) 
 ```
 
@@ -1825,7 +1825,7 @@ dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
                                   method = "quantile", 
                                   qnt.cut =  0.25)   
 
-dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmTN],
+dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmNT],
                             mat2 = dataFilt[,dataSmTP],
                             Cond1type = "Normal",
                             Cond2type = "Tumor",
