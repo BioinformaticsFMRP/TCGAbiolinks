@@ -320,7 +320,7 @@ knitr::opts_chunk$set(cache=FALSE)
 ```
 
 ```{r, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
-devtools::load_all(".")
+library("TCGAbiolinks")
 ```
 
 ## Introduction 
