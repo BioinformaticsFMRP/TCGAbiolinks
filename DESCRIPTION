@@ -58,7 +58,6 @@ Imports:
     GenomicFeatures,
     TxDb.Hsapiens.UCSC.hg19.knownGene,
     limma,
-    devtools,
     genefilter,
     ConsensusClusterPlus,
     RColorBrewer,
@@ -100,7 +99,8 @@ Suggests:
     testthat,
     png,
     BiocStyle,
-    rmarkdown
+    rmarkdown,
+    devtools
 VignetteBuilder: knitr
 LazyData: true
 URL: https://github.com/BioinformaticsFMRP/TCGAbiolinks
