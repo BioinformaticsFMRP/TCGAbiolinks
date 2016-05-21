@@ -726,10 +726,6 @@ TCGAVisualize_volcano <- function(x,y,
             threshold[which(names %in% highlight)]  <- "4"
             color <- c(color,highlight.color)
             names(color) <- as.character(1:4)
-            label = c("1" = "Not Significant",
-                      "2" = "Up regulared",
-                      "3" = "Down regulated")
-            print(label)
         }
     }
     df <- data.frame(x=x,y=y,threshold=threshold)
