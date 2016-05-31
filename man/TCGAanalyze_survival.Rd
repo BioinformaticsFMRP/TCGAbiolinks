@@ -9,7 +9,7 @@ TCGAanalyze_survival(data, clusterCol = NULL, legend = "Legend",
   main = "Kaplan-Meier Overall Survival Curves",
   ylab = "Probability of survival", xlab = "Time since diagnosis (days)",
   filename = "survival.pdf", color = NULL, height = 8, width = 12,
-  legend.position = "inside", legend.title.position = "top",
+  dpi = 300, legend.position = "inside", legend.title.position = "top",
   legend.ncols = 1, add.legend = TRUE, print.value = TRUE,
   add.points = TRUE)
 }
@@ -39,6 +39,8 @@ patients with days_to_deth > cutoff will be set to Alive.}
 \item{height}{Image height}
 
 \item{width}{Image width}
+
+\item{dpi}{Figure quality}
 
 \item{legend.position}{Legend position ("top", "right","left","bottom")}
 
