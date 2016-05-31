@@ -97,6 +97,7 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' @param add.legend If true, legend is created. Otherwise names will
 #' be added to the last point in the lines.
 #' @param add.points If true, shows each death at the line of survival curves
+#' @param dpi Figure quality
 #' @importFrom GGally ggsurv
 #' @importFrom survival survfit Surv
 #' @importFrom scales percent
@@ -126,6 +127,7 @@ TCGAanalyze_survival <- function(data,
                                  color = NULL,
                                  height = 8,
                                  width = 12,
+                                 dpi = 300,
                                  legend.position = "inside",
                                  legend.title.position = "top",
                                  legend.ncols = 1,
@@ -222,14 +224,14 @@ TCGAanalyze_survival <- function(data,
 
     if(add.legend == FALSE){
         surv <- surv +  geom_text_repel(data=ddply(surv$data, .(group), function(x) x[nrow(x), ]),
-                                                 aes(label = group, color = factor(group)),
-                                                 segment.color = '#555555', segment.size = 0.0,
-                                                 size = 3, show.legend = FALSE) +
+                                        aes(label = group, color = factor(group)),
+                                        segment.color = '#555555', segment.size = 0.0,
+                                        size = 3, show.legend = FALSE) +
             theme(legend.position="none")
     }
 
     if(!is.null(filename)) {
-        ggsave(surv, filename = filename, width = width, height = height, dpi = 600)
+        ggsave(surv, filename = filename, width = width, height = height, dpi = dpi)
     } else {
         return(surv)
     }
@@ -263,6 +265,7 @@ TCGAanalyze_survival <- function(data,
 #' @param height Plot height default:10
 #' @param width Plot width default:10
 #' @param dpi Pdf dpi default:600
+#' @param order Order of the boxplots
 #' @param axis.text.x.angle Angle of text in the x axis
 #' @param y.limits Change lower/upper y-axis limit
 #' @param legend.position Legend position ("top", "right","left","bottom")
@@ -323,6 +326,7 @@ TCGAvisualize_meanMethylation <- function(data,
                                           color = NULL,
                                           y.limits = NULL,
                                           sort,
+                                          order,
                                           legend.position = "top",
                                           legend.title.position = "top",
                                           legend.ncols = 3,
@@ -404,7 +408,11 @@ TCGAvisualize_meanMethylation <- function(data,
     }
 
     if(missing(sort)){
-        x <- factor(df$groups)
+        if(missing(order)){
+            x <- factor(df$groups)
+        } else {
+            x <- factor(df$groups,levels = order)
+        }
     } else if(sort == "mean.asc") {
         x <- reorder(df$groups, df$mean, FUN="mean")
     } else  if(sort == "mean.desc") {
