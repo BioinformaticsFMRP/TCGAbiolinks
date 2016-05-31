@@ -10,7 +10,9 @@ TCGAvisualize_meanMethylation(data, groupCol = NULL, subgroupCol = NULL,
   ylab = expression(paste("Mean DNA methylation (", beta, "-values)")),
   xlab = NULL, title = "Mean DNA methylation", labels = NULL,
   group.legend = NULL, subgroup.legend = NULL, color = NULL,
-  y.limits = NULL, sort, width = 10, height = 10, dpi = 600,
+  y.limits = NULL, sort, legend.position = "top",
+  legend.title.position = "top", legend.ncols = 3,
+  add.axis.x.text = FALSE, width = 10, height = 10, dpi = 600,
   axis.text.x.angle = 90)
 }
 \arguments{
@@ -50,6 +52,14 @@ of the subgroups. Example: shapes = c(21,23) if for two levels}
 
 \item{sort}{Sort boxplot by mean or median.
 Possible values: mean.asc, mean.desc, median.asc, meadian.desc}
+
+\item{legend.position}{Legend position ("top", "right","left","bottom")}
+
+\item{legend.title.position}{Legend title position ("top", "right","left","bottom")}
+
+\item{legend.ncols}{Number of columns of the legend}
+
+\item{add.axis.x.text}{Add text to x-axis? Default: FALSE}
 
 \item{width}{Plot width default:10}
 
