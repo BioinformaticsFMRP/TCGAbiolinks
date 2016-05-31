@@ -42,6 +42,7 @@ Imports:
     coin,
     gplots,
     ggplot2,
+    ggthemes,
     survival,
     stringr (>= 1.0.0),
     IRanges,

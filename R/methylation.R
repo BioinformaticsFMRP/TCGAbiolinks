@@ -91,9 +91,17 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' @param width Image width
 #' @param height Image height
 #' @param print.value Print pvalue in the plot? Default: TRUE
+#' @param legend.position Legend position ("top", "right","left","bottom")
+#' @param legend.title.position  Legend title position ("top", "right","left","bottom")
+#' @param legend.ncols Number of columns of the legend
+#' @param add.legend If true, legend is created. Otherwise names will
+#' be added to the last point in the lines.
+#' @param add.points If true, shows each death at the line of survival curves
 #' @importFrom GGally ggsurv
 #' @importFrom survival survfit Surv
 #' @importFrom scales percent
+#' @importFrom ggthemes theme_base
+#' @importFrom ggrepel geom_text_repel
 #' @export
 #' @return Survival plot
 #' @examples
@@ -118,7 +126,12 @@ TCGAanalyze_survival <- function(data,
                                  color = NULL,
                                  height = 8,
                                  width = 12,
-                                 print.value = TRUE
+                                 legend.position = "inside",
+                                 legend.title.position = "top",
+                                 legend.ncols = 1,
+                                 add.legend = TRUE,
+                                 print.value = TRUE,
+                                 add.points = TRUE
 ) {
     .e <- environment()
 
@@ -182,34 +195,38 @@ TCGAanalyze_survival <- function(data,
     if(is.null(labels)){
         labels <- sapply(levels(data$type),label.add.n)
     }
-
-
     surv <- surv + scale_colour_manual(name = legend,
                                        labels = labels,
                                        values=color)
-    surv <- surv + geom_point(aes(colour = group),
-                              shape = 3,size = 2)
+    if(add.points){
+        surv <- surv + geom_point(aes(colour = group),
+                                  shape = 3,size = 2)
+    }
     surv <- surv + guides(linetype = FALSE) +
         scale_y_continuous(labels = scales::percent) +
-        theme_bw() +
-        theme(#panel.border = element_blank(),
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            panel.border = element_rect(colour = "black", size= 1.5),
-            legend.key = element_rect(colour = 'white'),
-            legend.justification=c(1,1),
-            #axis.line = element_line(colour = "black"),
-            legend.background = element_rect(colour = "black"),
-            #linetype = "dashed"),
-            #legend.background = element_rect(colour = "white"),
-            legend.position=c(1,1),
-            plot.title = element_text(size = 20),
-            legend.text = element_text(size = 16),
-            legend.title = element_text(size = 16),
-            axis.text= element_text(size = 16),
-            axis.title.x= element_text(size = 16),
-            #legend.position="top",
-            axis.title.y= element_text(size = 16))
+        theme_base()
+
+    if(add.legend == TRUE){
+        if(legend.position == "inside"){
+            surv <- surv +  theme(legend.justification=c(1,1),
+                                  legend.background = element_rect(colour = "black"),
+                                  legend.position=c(1,1))
+        } else {
+            surv <- surv +  theme(legend.position=legend.position)
+        }
+        surv <- surv +
+            guides(color=guide_legend(override.aes=list(size=3)),
+                   fill=guide_legend(ncol=legend.ncols,title.position = legend.title.position, title.hjust =0.5))
+
+    }
+
+    if(add.legend == FALSE){
+        surv <- surv +  geom_text_repel(data=ddply(surv$data, .(group), function(x) x[nrow(x), ]),
+                                                 aes(label = group, color = factor(group)),
+                                                 segment.color = '#555555', segment.size = 0.0,
+                                                 size = 3, show.legend = FALSE) +
+            theme(legend.position="none")
+    }
 
     if(!is.null(filename)) {
         ggsave(surv, filename = filename, width = width, height = height, dpi = 600)
@@ -428,8 +445,8 @@ TCGAvisualize_meanMethylation <- function(data,
     }
     if(add.axis.x.text){
         axis.text.x <- element_text(angle = axis.text.x.angle,
-                         vjust = 0.5,
-                         size = 16)
+                                    vjust = 0.5,
+                                    size = 16)
     } else {
         axis.text.x <-  element_blank()
     }
