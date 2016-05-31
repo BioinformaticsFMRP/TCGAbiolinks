@@ -248,6 +248,10 @@ TCGAanalyze_survival <- function(data,
 #' @param dpi Pdf dpi default:600
 #' @param axis.text.x.angle Angle of text in the x axis
 #' @param y.limits Change lower/upper y-axis limit
+#' @param legend.position Legend position ("top", "right","left","bottom")
+#' @param legend.title.position  Legend title position ("top", "right","left","bottom")
+#' @param legend.ncols Number of columns of the legend
+#' @param add.axis.x.text Add text to x-axis? Default: FALSE
 #' @import ggplot2 stats
 #' @importFrom SummarizedExperiment colData rowRanges assay
 #' @importFrom grDevices rainbow
@@ -302,6 +306,10 @@ TCGAvisualize_meanMethylation <- function(data,
                                           color = NULL,
                                           y.limits = NULL,
                                           sort,
+                                          legend.position = "top",
+                                          legend.title.position = "top",
+                                          legend.ncols = 3,
+                                          add.axis.x.text = FALSE,
                                           width=10,
                                           height=10,
                                           dpi=600,
@@ -418,16 +426,20 @@ TCGAvisualize_meanMethylation <- function(data,
                                  size = jitter.size)
         }
     }
-
+    if(add.axis.x.text){
+        axis.text.x <- element_text(angle = axis.text.x.angle,
+                         vjust = 0.5,
+                         size = 16)
+    } else {
+        axis.text.x <-  element_blank()
+    }
     p <- p + scale_fill_manual(values = color,labels = labels, name = group.legend)
     p <- p + scale_x_discrete(limits=levels(x))
     p <- p + ylab(ylab) + xlab(xlab) + labs(title = title) +
         labs(shape=subgroup.legend, color=group.legend) +
         theme_bw() +
         theme(axis.title.x = element_text(face = "bold", size = 20),
-              axis.text.x = element_text(angle = axis.text.x.angle,
-                                         vjust = 0.5,
-                                         size = 16),
+              axis.text.x = axis.text.x,
               axis.title.y = element_text(face = "bold",
                                           size = 20),
               axis.text.y = element_text(size = 16),
@@ -440,8 +452,9 @@ TCGAvisualize_meanMethylation <- function(data,
               panel.grid.minor = element_blank(),
               axis.line.x=element_line(colour = "black"),
               axis.line.y=element_line(colour = "black"),
-              legend.position="top",
-              legend.key = element_rect(colour = 'white'))
+              legend.position=legend.position,
+              legend.key = element_rect(colour = 'white')) +
+        guides(fill=guide_legend(ncol=legend.ncols,title.position = legend.title.position, title.hjust =0.5))
 
     if (!is.null(shapes)){
         p <- p + scale_shape_manual(values = shapes)
