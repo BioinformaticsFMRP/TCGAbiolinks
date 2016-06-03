@@ -536,7 +536,9 @@ The arguments of this function are:
 * clinical_data_type ("clinical_patient","clinical_drug", etc)
 * samples List of barcodes
 
-A full description of the clinical data provided by TCGA is below:
+Descriptions of the clinical data elements can be obtained at: https://tcga-data.nci.nih.gov/docs/dictionary/TCGA_BCR_DataDictionary.xml.
+
+A full description of the clinical data files provided by TCGA is below:
 
 * Biospecimen (patient sample information):
     + biospecimen_aliquot: a list of sample aliquots that were shipped by the BCR to TCGA characterization centers. An aliquot is sub-division of an analyte.
