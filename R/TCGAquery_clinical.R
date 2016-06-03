@@ -293,11 +293,13 @@ clinical_data_site_cancer <- function(cancer){
 #' biospecimen_protocol \tab biospecimen_sample \cr
 #' biospecimen_shipment_portion \tab biospecimen_slide \cr
 #' biospecimen_tumor_sample \tab clinical_cqcf \cr
-#' clinical_drug \tab clinical_follow_up_v1.5 \cr
-#' clinical_follow_up_v2.1 \tab clinical_follow_up_v4.0 \cr
-#' clinical_follow_up_v4.0_nte \tab clinical_nte \cr
-#' clinical_omf_v4.0 \tab clinical_patient \cr
-#' clinical_radiation
+#' clinical_follow_up_v1.0 \tab clinical_follow_up_v1.5 \cr
+#' clinical_follow_up_v2.0 \tab clinical_follow_up_v2.1 \cr
+#' clinical_follow_up_v4.0 \tab clinical_follow_up_v4.0_nte \cr
+#' clinical_nte \tab  clinical_omf_v4.0 \cr
+#' clinical_patient \tab  clinical_radiation \cr
+#' ssf_normal_controls  \tab  ssf_tumor_samples \cr
+#' clinical_follow_up_v1.0_nte \cr
 #'}
 #' @param samples List of barcodes to get the clinical data
 #' @param path Directory to save the downloaded data default getwd()
