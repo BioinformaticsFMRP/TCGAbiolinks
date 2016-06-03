@@ -7,7 +7,8 @@
 \usage{
 TCGAprepare(query, dir = NULL, samples = NULL, type = NULL,
   save = FALSE, filename = NULL, add.mutation.genes = FALSE,
-  reannotate = FALSE, summarizedExperiment = TRUE, add.subtype = FALSE)
+  add.clinical = TRUE, reannotate = FALSE, summarizedExperiment = TRUE,
+  add.subtype = FALSE)
 }
 \arguments{
 \item{query}{TCGAquery output}
@@ -24,6 +25,9 @@ Default: \code{FALSE}}
 \item{filename}{Name of the saved file}
 
 \item{add.mutation.genes}{Integrate information about genes mutation? DEFAULT: FALSE}
+
+\item{add.clinical}{Add clinical information from TCGAquery_clinic?
+(The information file add will be: clinical_patient) Default: \code{FALSE}}
 
 \item{reannotate}{Reannotate genes?  Source http://grch37.ensembl.org/.
 DEFAULT: FALSE. (For the moment only working for methylation data)}
