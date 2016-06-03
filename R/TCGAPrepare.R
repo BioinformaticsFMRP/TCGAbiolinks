@@ -45,6 +45,8 @@
 #' @param summarizedExperiment Output as SummarizedExperiment?
 #' Default: \code{FALSE}
 #' @param add.subtype Add subtype information from tcgaquery_subtype? Default: \code{FALSE}
+#' @param add.clinical Add clinical information from TCGAquery_clinic?
+#' (The information file add will be: clinical_patient) Default: \code{FALSE}
 #' @examples
 #' sample <- "TCGA-06-0939-01A-01D-1228-05"
 #' query <- TCGAquery(tumor = "GBM",samples = sample, level = 3)
@@ -74,6 +76,7 @@ TCGAprepare <- function(query,
                         save = FALSE,
                         filename = NULL,
                         add.mutation.genes = FALSE,
+                        add.clinical = TRUE,
                         reannotate = FALSE,
                         summarizedExperiment = TRUE,
                         add.subtype = FALSE){
@@ -180,7 +183,8 @@ TCGAprepare <- function(query,
                                  Gene_Symbol = df$Gene_Symbol)
 
             names(rowRanges) <- as.character(df$Composite.Element.REF)
-            colData <-  colDataPrepare(colnames(df)[5:ncol(df)],query,add.subtype = add.subtype)
+            colData <-  colDataPrepare(colnames(df)[5:ncol(df)],query,
+                                       add.subtype = add.subtype, add.clinical = add.clinical)
             rownames(colData) <- gsub("\\.","-",rownames(colData))
             assay <- data.matrix(subset(df,select = c(5:ncol(df))))
             colnames(assay) <- rownames(colData)
@@ -403,7 +407,8 @@ TCGAprepare <- function(query,
                     RPKM=data.matrix(subset(df,select=seq(4,ncol(df),3))))
 
             }
-            colData <- colDataPrepare(as.character(barcode), query,add.subtype = add.subtype)
+            colData <- colDataPrepare(as.character(barcode),
+                                      query,add.subtype = add.subtype,add.clinical = add.clinical)
             rse <- SummarizedExperiment(assays=assays,
                                         rowRanges=rowRanges,
                                         colData=colData)
@@ -460,7 +465,8 @@ TCGAprepare <- function(query,
             regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
-            colData <- colDataPrepare(barcode,query,add.subtype = add.subtype)
+            colData <- colDataPrepare(barcode,query,
+                                      add.subtype = add.subtype, add.clinical = add.clinical)
 
             assays <- SimpleList(raw_counts=data.matrix(
                 subset(merged,select=seq(3,2+length(barcode)))
@@ -523,7 +529,8 @@ TCGAprepare <- function(query,
             regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
-            colData <- colDataPrepare(barcode,query,add.subtype = add.subtype)
+            colData <- colDataPrepare(barcode, query,
+                                      add.subtype = add.subtype, add.clinical = add.clinical)
 
             suppressWarnings(
                 assays <- SimpleList(raw_counts=data.matrix(
@@ -678,7 +685,8 @@ TCGAprepare <- function(query,
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
 
             barcode <- unique(unlist(str_match_all(colnames(df),regex)))
-            colData <- colDataPrepare(barcode,query,add.subtype = add.subtype)
+            colData <- colDataPrepare(barcode,query,
+                                      add.subtype = add.subtype,add.clinical = add.clinical)
 
             assays <- lapply(assays, function(x){
                 colnames(x) <- barcode
@@ -754,7 +762,7 @@ TCGAprepare <- function(query,
 
     if (grepl("bio",platform,ignore.case = TRUE)) {
         if (!is.null(type)) {
-            if(grep("clinical_follow_up_v1.0"))  type <- paste0(type,"[^_nte]*$")
+            if(type == "clinical_follow_up_v1.0")  type <- paste0(type,"[^_nte]*$")
             files <- files[grep(type,files)]
         }
         if (length(files) == 1) {
@@ -834,7 +842,8 @@ TCGAprepare <- function(query,
                 signal = data.matrix(df[,3:(length(barcodes)+2)],rownames.force = T)
             )
 
-            colData <- colDataPrepare(barcodes,query,add.subtype = add.subtype)
+            colData <- colDataPrepare(barcodes,query,
+                                      add.subtype = add.subtype, add.clinical = add.clinical)
 
             rownames(colData) <- barcodes
             assays <- lapply(assays, function(x){
