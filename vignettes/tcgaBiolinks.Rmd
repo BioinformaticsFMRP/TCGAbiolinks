@@ -536,7 +536,36 @@ The arguments of this function are:
 * clinical_data_type ("clinical_patient","clinical_drug", etc)
 * samples List of barcodes
 
-A full list of cancer and clinical data type can be found in the help of the function.
+A full description of the clinical data provided by TCGA is below:
+
+* Biospecimen (patient sample information):
+    + biospecimen_aliquot: a list of sample aliquots that were shipped by the BCR to TCGA characterization centers. An aliquot is sub-division of an analyte.
+    + biospecimen_analyte: a list of patient sample analytes that were isolated from sample portions. .Each analyte is sub-divided into aliquots for shipment to the TCGA genome characterization centers.
+    + biospecimen_auxiliary: results of additional DNA testing performed at the BCR.
+    + biospecimen_cqcf: sample-relevant case quality control information (exclusion/inclusion criteria) submitted by the Tissue Source Site to the BCR for the patient. This information is used by BCR to qualify/disqualify patients.
+    + biospecimen_diagnostic_slides: > a list of diagnostic images available for the patient sample, representing sections of the diagnostic block.
+    + biospecimen_normal_control: information on the normal control samples from the patient (including quality). This information is provided by the BCR after processing each sample.
+    + biospecimen_portion: a list of patient samples subjected to histopathological validation prior to being processed into DNA and RNA analytes. A portion is a sub-division of a sample.
+    + biospecimen_protocol: the specific protocol used by the BCRs to process a particular sample portion into an analyte.
+    + biospecimen_sample: information provided by the Tissue Source Site on the patient samples. The sample represents approximately the gross tissue sample obtained for research use.
+    + biospecimen_shipment_portion: information regarding sample shipments to TCGA characterization centers. This information is provided by the BCR after shipping the samples.
+biospecimen_slide: a list of histopathological slide images available for the patient sample, representing sections of sample portions.
+    + biospecimen_tumor_sample: information on tumor samples from the patient (including quality). This information is provided by the BCR after processing each sample.
+
+* Clinical (patient information):
+    + clinical_cqcf: patient-relevant case quality control information (exclusion/inclusion criteria) submitted by the Tissue Source Site to the Biospecimen Core Resource (BCR) along with the patient's samples. This information is used by BCR to qualify/disqualify patients.
+    + clinical_drug: available drug treatment information for the patient regarding the treatment of the tumor event submitted to TCGA.
+    + clinical_follow_up: available follow-up data for the patient collected at time points after enrollment. Some deceased patients with older enrollment form versions might have follow-up forms completed at the time of enrollment in order to ensure all data elements were captured. (Please see below note regarding follow-up data files.)
+    + clinical_nte:available new tumor event information for the patient, including recurrences, metastasis, and new primaries. This information is submitted by the Tissue Source Site on the enrollment form or on subsequent follow-up forms.
+    + clinical_follow_up_nte: available new tumor event information for the patient, including recurrences, metastasis, and new primaries. This information is derived from subsequent follow-up forms.
+    + clinical_omf:available other malignancy data for the patient, including malignancies diagnosed prior to or at the time of the submitted malignancy. This information is provided by the Tissue Source Site on the other malignancy form at the time of sample submission or when the enrollment form is submitted
+    + clinical_patient: available clinical information for the patient.
+    + clinical_radiation: available radiation treatment information for the patient regarding the treatment of the tumor event submitted to TCGA.
+
+**Important note**
+
+Follow-up data (in biotab format) for TCGA patients are contained in the 'clinical_follow_up' files for each cancer type. The different versions of the follow-up files represent changes or new data added to follow-up forms over time. Multiple follow-up files for a single patient often represent a series of follow-ups over a period of time. However, multiple instances of the same follow-up file can also represent multiple new tumor events within the same time period. To obtain all available disease progression information, please use ALL of the follow_up files in your analyses, not just the latest version.
+
 
 ```{r, eval = FALSE}
 # Get clinical data
