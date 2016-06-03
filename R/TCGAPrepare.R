@@ -754,6 +754,7 @@ TCGAprepare <- function(query,
 
     if (grepl("bio",platform,ignore.case = TRUE)) {
         if (!is.null(type)) {
+            if(grep("clinical_follow_up_v1.0"))  type <- paste0(type,"[^_nte]*$")
             files <- files[grep(type,files)]
         }
         if (length(files) == 1) {
