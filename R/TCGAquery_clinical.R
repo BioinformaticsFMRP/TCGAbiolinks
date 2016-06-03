@@ -293,11 +293,13 @@ clinical_data_site_cancer <- function(cancer){
 #' biospecimen_protocol \tab biospecimen_sample \cr
 #' biospecimen_shipment_portion \tab biospecimen_slide \cr
 #' biospecimen_tumor_sample \tab clinical_cqcf \cr
-#' clinical_drug \tab clinical_follow_up_v1.5 \cr
-#' clinical_follow_up_v2.1 \tab clinical_follow_up_v4.0 \cr
-#' clinical_follow_up_v4.0_nte \tab clinical_nte \cr
-#' clinical_omf_v4.0 \tab clinical_patient \cr
-#' clinical_radiation
+#' clinical_follow_up_v1.0 \tab clinical_follow_up_v1.5 \cr
+#' clinical_follow_up_v2.0 \tab clinical_follow_up_v2.1 \cr
+#' clinical_follow_up_v4.0 \tab clinical_follow_up_v4.0_nte \cr
+#' clinical_nte \tab  clinical_omf_v4.0 \cr
+#' clinical_patient \tab  clinical_radiation \cr
+#' ssf_normal_controls  \tab  ssf_tumor_samples \cr
+#' clinical_follow_up_v1.0_nte \cr
 #'}
 #' @param samples List of barcodes to get the clinical data
 #' @param path Directory to save the downloaded data default getwd()
@@ -321,24 +323,35 @@ TCGAquery_clinic <- function(tumor, clinical_data_type, samples, path = getwd())
         query <- TCGAquery(tumor = tumor, platform = "bio", level = 2)
     } else if(!missing(samples)) {
         query <- TCGAquery(samples = samples, platform = "bio", level = 2)
+        save(query,clinical_data_type,path,file = "test.rda")
     } else {
         query <- TCGAquery(platform = "bio", level = 2)
     }
 
     # this is one file for all samples, no need to add samples argument
     TCGAdownload(query,type = clinical_data_type,path = path)
+    if("CNTL" %in% unique(query$Disease)){
+        TCGAdownload(query,type = "control_cntl",path = path)
+    }
 
     ret <- NULL
     # prepare works if one file only so we will do a iteration for each tumor type
     for( i in unique(query$Disease)){
         message(paste0("Tumor type: ",i))
         x <- subset(query, query$Disease == i)
-        clin <- TCGAprepare(x,type = clinical_data_type, dir = ".")
-        if(!missing(samples)) clin <- subset(clin,clin$bcr_patient_barcode %in% samples)
-        message("Adding disease collumn to data frame")
-        disease <- rep(i,nrow(clin))
-        clin <- cbind(disease,clin)
-        ret <- plyr::rbind.fill(ret,clin)
+        if(nrow(x) > 0) {
+            if(i == "CNTL"){
+                clin <- TCGAprepare(x,type = "control_cntl", dir = ".")
+            } else {
+                clin <- TCGAprepare(x,type = clinical_data_type, dir = ".")
+            }
+            if(!missing(samples)) clin <- subset(clin,clin$bcr_patient_barcode %in% samples)
+
+            message("Adding disease collumn to data frame")
+            disease <- rep(i,nrow(clin))
+            clin <- cbind(disease,clin)
+            ret <- plyr::rbind.fill(ret,clin)
+        }
     }
 
     return(ret)
@@ -460,7 +473,7 @@ TCGAquery_clinicFilt <- function(barcode,
 # ref: TCGA codeTablesReport - Table: Sample type
 #' @importFrom S4Vectors DataFrame
 #' @importFrom stringr str_match
-colDataPrepare <- function(barcode,query,add.subtype = FALSE){
+colDataPrepare <- function(barcode,query,add.subtype = FALSE, add.clinical = FALSE){
 
     code <- c('01','02','03','04','05','06','07','08','09','10','11',
               '12','13','14','20','40','50','60','61')
@@ -555,7 +568,6 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE){
                 }
 
             } else if (grepl("thca", i,ignore.case = TRUE)) {
-                print("ok")
                 subtype <- TCGAquery_subtype(i)
                 if (any(ret$sample %in% subtype$sample)) {
                     ret <- merge(ret, subtype,
@@ -566,6 +578,16 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE){
             }
         }
     }
+
+    if(add.clinical){
+       clin <- TCGAquery_clinic(samples = ret$barcode,clinical_data_type = "clinical_patient")
+       clin$patient <- clin$bcr_patient_barcode
+       ret <- merge(ret, clin,
+                    all.x = TRUE ,
+                    sort = FALSE,
+                    by = "patient")
+    }
+
     ret <- ret[match(barcode,ret$barcode),]
     rownames(ret) <- gsub("\\.","-",make.names(ret$barcode,unique=TRUE))
     ret$code <- NULL
