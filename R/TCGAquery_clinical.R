@@ -342,10 +342,14 @@ TCGAquery_clinic <- function(tumor, clinical_data_type, samples, path = getwd())
         if(nrow(x) > 0) {
             if(i == "CNTL"){
                 clin <- TCGAprepare(x,type = "control_cntl", dir = ".")
+            } else if(i == "FPPP"){
+                # Clinical data
+                # https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/fppp/bcr/biotab/clin/
+                next;
             } else {
                 clin <- TCGAprepare(x,type = clinical_data_type, dir = ".")
             }
-            if(!missing(samples)) clin <- subset(clin,clin$bcr_patient_barcode %in% samples)
+            if(!missing(samples)) clin <- subset(clin,clin$bcr_patient_barcode %in% substr(samples,1,12))
 
             message("Adding disease collumn to data frame")
             disease <- rep(i,nrow(clin))
