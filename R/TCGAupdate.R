@@ -213,55 +213,56 @@ tcgaGetTable <- function(url, max = 0) {
 TCGAUpdate <- function(){
     if (requireNamespace("devtools", quietly = TRUE)) {
 
-    tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
+        tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
 
-    # Get platform table
-    tcga.query <- "query=Platform"
-    next.url <- paste0(tcga.root, tcga.query)
-    platform.table <- tcgaGetTable(next.url)
-    platform.table <- platform.table[, 1:4]
-    platform.table <- platform.table[order(platform.table$name,
-                                           decreasing = TRUE),]
-    # Get disease table
-    tcga.query <- "query=Disease"
-    next.url <- paste0(tcga.root, tcga.query)
-    disease.table <- tcgaGetTable(next.url)
-    disease.table <- disease.table[, 1:3]
-    # Get center table
-    tcga.query <- "query=Center"
-    next.url <- paste0(tcga.root, tcga.query)
-    center.table  <- tcgaGetTable(next.url)
-    center.table <- center.table[, 1:3]
+        # Get platform table
+        tcga.query <- "query=Platform"
+        next.url <- paste0(tcga.root, tcga.query)
+        platform.table <- tcgaGetTable(next.url)
+        platform.table <- platform.table[, 1:4]
+        platform.table <- platform.table[order(platform.table$name,
+                                               decreasing = TRUE),]
+        # Get disease table
+        tcga.query <- "query=Disease"
+        next.url <- paste0(tcga.root, tcga.query)
+        disease.table <- tcgaGetTable(next.url)
+        disease.table <- disease.table[, 1:3]
+        # Get center table
+        tcga.query <- "query=Center"
+        next.url <- paste0(tcga.root, tcga.query)
+        center.table  <- tcgaGetTable(next.url)
+        center.table <- center.table[, 1:3]
 
-    # get new version of files
-    new.db <-  createTcgaTable()
-    # copy not modified ones
-    for (i in seq_along(new.db[,1])){
-        db <- subset(tcga.db,new.db[i,"name"] == tcga.db$name)
-        if (nrow(db) == 1){
-            new.db[i,"deployStatus"] <- db$barcode
+        # get new version of files
+        new.db <-  createTcgaTable()
+        # copy not modified ones
+        for (i in seq_along(new.db[,1])){
+            db <- subset(tcga.db,new.db[i,"name"] == tcga.db$name)
+            if (nrow(db) == 1){
+                new.db[i,"deployStatus"] <- db$barcode
+            }
         }
-    }
 
-    idx <- ((new.db$deployStatus == "" |  new.db$deployStatus == "Not found" |
-                 (new.db$deployStatus == "Available")) &
-                !grepl("aux|mage-tab", new.db$name)
-    )
-    new.db[idx,]$deployStatus <- "Available"
-    new.db[idx,]$deployStatus <- getBarcode(new.db[idx,])$barcode
-    colnames(new.db)[4] <- "barcode"
-    tcga.db <- new.db
+        idx <- ((new.db$deployStatus == "" |  new.db$deployStatus == "Not found" |
+                     (new.db$deployStatus == "Available")) &
+                    !grepl("aux|mage-tab", new.db$name)
+        )
+        new.db[idx,]$deployStatus <- "Available"
+        new.db[idx,]$deployStatus <- getBarcode(new.db[idx,])$barcode
+        colnames(new.db)[4] <- "barcode"
+        tcga.db <- new.db
 
-    gene.location <- get.GRCh.bioMart()
-    #gene.location <- get("gene.location")
-    devtools::use_data(platform.table, disease.table, tcga.db, center.table,
-             DAVID_BP_matrix,DAVID_CC_matrix,DAVID_MF_matrix,
-             EAGenes,gene.location,listEA_pathways, acc.subtype,
-             lgg.gbm.subtype, luad.subtype,skcm.subtype,
-             hnsc.subtype, kich.subtype, lusc.subtype, ucec.subtype,
-             pancan.subtype, thca.subtype, prad.subtype, kirp.subtype, kirc.subtype,
-             stad.subtype, brca.subtype, coad.subtype,
-             internal = TRUE,overwrite = TRUE)
+        clinical.table <- get.clinical.table()
+        gene.location <- get.GRCh.bioMart()
+        #gene.location <- get("gene.location")
+        devtools::use_data(platform.table, disease.table, tcga.db, center.table,
+                           DAVID_BP_matrix,DAVID_CC_matrix,DAVID_MF_matrix,
+                           EAGenes,gene.location,listEA_pathways, acc.subtype,
+                           lgg.gbm.subtype, luad.subtype,skcm.subtype,
+                           hnsc.subtype, kich.subtype, lusc.subtype, ucec.subtype,
+                           pancan.subtype, thca.subtype, prad.subtype, kirp.subtype, kirc.subtype,
+                           stad.subtype, brca.subtype, coad.subtype, clinical.table,
+                           internal = TRUE,overwrite = TRUE)
     }
 }
 
@@ -293,4 +294,43 @@ get.GRCh.bioMart <- function(genome="hg19") {
                            values = list(chrom), mart = ensembl)
 
     return(gene.location)
+}
+
+
+get.clinical.table <- function(){
+    clinical.table <- NULL
+    for( disease in disease.table$abbreviation){
+        print(disease)
+        if(disease %in% c("MISC","LCML")) next
+        path <- paste0("https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/",tolower(disease),"/bcr/biotab/clin/")
+        files <- getFileNames(path)
+
+        files <- files[!(files %in% c("Name",
+                                      "Last modified",
+                                      "Size",
+                                      "Parent Directory",
+                                      "CHANGES_DCC.txt",
+                                      "MANIFEST.txt",
+                                      "README_DCC.txt",
+                                      "auxiliary"))]
+        files <- files[ !grepl("BCR_auxiliary_description",files,ignore.case = TRUE)]
+        files <- files[ !grepl("Readme",files,ignore.case = TRUE)]
+        files <- gsub("nationwidechildrens.org_","",files)
+        files <- files[ !grepl("auxiliary",files,ignore.case = TRUE)]
+        files <- gsub(paste0("_",tolower(disease),".txt"),"",files)
+        if(is.null(clinical.table)) {
+            clinical.table <- matrix(data = 0, nrow = length(files), ncol = nrow(disease.table), byrow = FALSE,
+                                     dimnames = list(files,disease.table$abbreviation))
+        }
+        for(f in files){
+            if(f %in% rownames(clinical.table)){
+                clinical.table[f,disease] <- 1
+            } else {
+                clinical.table <- miscTools::insertRow( clinical.table, nrow(clinical.table), v = 0, rName = f)
+                clinical.table[f,disease] <- 1
+            }
+        }
+
+    }
+    return(clinical.table)
 }
