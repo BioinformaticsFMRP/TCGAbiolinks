@@ -314,6 +314,11 @@ clinical_data_site_cancer <- function(cancer){
 #'             "TCGA-2G-AAEX-01A-11D-A42Z-05"))
 TCGAquery_clinic <- function(tumor, clinical_data_type, samples, path = getwd()){
 
+    update <- FALSE
+    if(clinical_data_type == "clinical_patient_updated"){
+        update <- TRUE
+        clinical_data_type <- "clinical_patient"
+    }
     if (missing(clinical_data_type)){
         message("Available clinical data type are:")
         if(missing(tumor)){
@@ -342,7 +347,6 @@ TCGAquery_clinic <- function(tumor, clinical_data_type, samples, path = getwd())
     } else {
         query <- TCGAquery(platform = "bio", level = 2)
     }
-
     # this is one file for all samples, no need to add samples argument
     TCGAdownload(query,type = clinical_data_type,path = path)
     if("CNTL" %in% unique(query$Disease)){
@@ -372,11 +376,31 @@ TCGAquery_clinic <- function(tumor, clinical_data_type, samples, path = getwd())
             ret <- plyr::rbind.fill(ret,clin)
         }
     }
-
+   if(update){
+       message("Updating with last follow up information")
+       ret <- update.clinical.with.last.followup(ret)
+   }
     return(ret)
 }
 
 
+update.clinical.with.last.followup <- function(clin){
+
+    for(disease in unique(clin$disease)){
+        aux <- clinical.table[,disease]
+        files <- rownames(clinical.table[which(aux==1),])
+        # get last follow up files not nte
+        files <- sort(files[grepl("follow",files) & !grepl("nte",files)],decreasing = T)[1]
+
+        follow <- TCGAquery_clinic(disease,files)
+
+        colnames(follow) [colnames(follow) %in% colnames(clin)]
+        aux <- plyr::ddply(follow, .(bcr_patient_barcode), function(x) x[c(nrow(x)), ])
+        aux <- aux[,colnames(aux) %in% colnames(clin)]
+        clin[match(aux$bcr_patient_barcode,clin$bcr_patient_barcode),match(colnames(aux),colnames(clin))] <- aux
+    }
+    return(clin)
+}
 
 #' @title Filter samples using clinical data
 #' @description
