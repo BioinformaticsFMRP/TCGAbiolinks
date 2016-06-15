@@ -563,7 +563,8 @@ biospecimen_slide: a list of histopathological slide images available for the pa
     + clinical_omf:available other malignancy data for the patient, including malignancies diagnosed prior to or at the time of the submitted malignancy. This information is provided by the Tissue Source Site on the other malignancy form at the time of sample submission or when the enrollment form is submitted
     + clinical_patient: available clinical information for the patient.
     + clinical_radiation: available radiation treatment information for the patient regarding the treatment of the tumor event submitted to TCGA.
-
+ + clinical_patient_updated: this is TCGAbiolinks only. This options downloads the clinical_patient file and updates the information using the last follow-up information that is available for the patient.
+ 
 **Important note**
 
 Follow-up data (in biotab format) for TCGA patients are contained in the 'clinical_follow_up' files for each cancer type. The different versions of the follow-up files represent changes or new data added to follow-up forms over time. Multiple follow-up files for a single patient often represent a series of follow-ups over a period of time. However, multiple instances of the same follow-up file can also represent multiple new tumor events within the same time period. To obtain all available disease progression information, please use ALL of the follow_up files in your analyses, not just the latest version.
