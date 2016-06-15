@@ -643,7 +643,7 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE, add.clinical = FAL
     }
 
     if(add.clinical){
-        clin <- TCGAquery_clinic(samples = ret$barcode,clinical_data_type = "clinical_patient")
+        clin <- TCGAquery_clinic(samples = ret$barcode,clinical_data_type = "clinical_patient_updated")
         clin$patient <- clin$bcr_patient_barcode
         ret <- merge(ret, clin,
                      all.x = TRUE ,
