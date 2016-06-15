@@ -314,7 +314,22 @@ clinical_data_site_cancer <- function(cancer){
 #'             "TCGA-2G-AAEX-01A-11D-A42Z-05"))
 TCGAquery_clinic <- function(tumor, clinical_data_type, samples, path = getwd()){
 
-    if (missing(clinical_data_type)) stop("Please select the type of clinical data. Use ?TCGAquery_clinic to get a list")
+    if (missing(clinical_data_type)){
+        message("Available clinical data type are:")
+        if(missing(tumor)){
+            step <- 12
+            for(i in seq(1,nrow(clinical.table),step)){
+                end <- ifelse(i + step > nrow(clinical.table),nrow(clinical.table),i + step)
+                print(knitr::kable(clinical.table[,i:end], row.names = TRUE))
+            }
+        } else {
+            aux <- clinical.table[,toupper(tumor)]
+            files <- rownames(clinical.table[which(aux==1),])
+            files <- paste("=> ",files)
+            message(paste(files,collapse = "\n"))
+        }
+        stop("Please select the type of clinical data")
+    }
     if (!missing(samples)) samples <- substr(samples,1,12)
 
     if (!missing(samples) & !missing(tumor)) {
@@ -584,12 +599,12 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE, add.clinical = FAL
     }
 
     if(add.clinical){
-       clin <- TCGAquery_clinic(samples = ret$barcode,clinical_data_type = "clinical_patient")
-       clin$patient <- clin$bcr_patient_barcode
-       ret <- merge(ret, clin,
-                    all.x = TRUE ,
-                    sort = FALSE,
-                    by = "patient")
+        clin <- TCGAquery_clinic(samples = ret$barcode,clinical_data_type = "clinical_patient")
+        clin$patient <- clin$bcr_patient_barcode
+        ret <- merge(ret, clin,
+                     all.x = TRUE ,
+                     sort = FALSE,
+                     by = "patient")
     }
 
     ret <- ret[match(barcode,ret$barcode),]
