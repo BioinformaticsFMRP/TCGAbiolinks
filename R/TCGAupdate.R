@@ -332,5 +332,6 @@ get.clinical.table <- function(){
         }
 
     }
+    clinical.table <- clinical.table[sort(rownames(clinical.table)),sort(colnames(clinical.table))]
     return(clinical.table)
 }
