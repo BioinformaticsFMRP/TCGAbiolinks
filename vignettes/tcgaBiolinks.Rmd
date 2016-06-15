@@ -889,8 +889,9 @@ The arguments are:
 * **summarizedExperiment** Should the output be a SummarizedExperiment object? Default: `TRUE`
 * **reannotate** Reannotate genes? Source http://grch37.ensembl.org/. 
 Default: `FALSE`. (For the moment only working for methylation data)
-* **mutation.genes** Add List of gene mutation? Default: `FALSE`
+* **add.mutation.genes** Genes that are mutated into SummarizedExperiment objec? Default: `FALSE`
 * **add.subtype** Add subtype information in the SummarizedExperiment object. See TCGAquery_subtype function for more information.
+* **add.clinical** Add clinical information updated with last follow up information in the SummarizedExperiment object. See TCGAquery_clinic function for more information.
 
 In order to add useful information to reasearches we added in the colData of the 
 summarizedExperiment the subtypes classification for the LGG and GBM samples 
