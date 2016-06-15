@@ -184,7 +184,7 @@ TCGAprepare <- function(query,
 
             names(rowRanges) <- as.character(df$Composite.Element.REF)
             colData <-  colDataPrepare(colnames(df)[5:ncol(df)],query,
-                                       add.subtype = add.subtype, add.clinical = add.clinical)
+                                       add.subtype = add.subtype, add.clinical = add.clinical, add.mutation.genes = add.mutation.genes)
             rownames(colData) <- gsub("\\.","-",rownames(colData))
             assay <- data.matrix(subset(df,select = c(5:ncol(df))))
             colnames(assay) <- rownames(colData)
@@ -408,7 +408,7 @@ TCGAprepare <- function(query,
 
             }
             colData <- colDataPrepare(as.character(barcode),
-                                      query,add.subtype = add.subtype,add.clinical = add.clinical)
+                                      query,add.subtype = add.subtype,add.clinical = add.clinical, add.mutation.genes = add.mutation.genes)
             rse <- SummarizedExperiment(assays=assays,
                                         rowRanges=rowRanges,
                                         colData=colData)
@@ -466,7 +466,7 @@ TCGAprepare <- function(query,
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
             colData <- colDataPrepare(barcode,query,
-                                      add.subtype = add.subtype, add.clinical = add.clinical)
+                                      add.subtype = add.subtype, add.clinical = add.clinical, add.mutation.genes = add.mutation.genes)
 
             assays <- SimpleList(raw_counts=data.matrix(
                 subset(merged,select=seq(3,2+length(barcode)))
@@ -530,7 +530,7 @@ TCGAprepare <- function(query,
                             "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
             barcode <- unique(unlist(str_match_all(colnames(merged),regex)))
             colData <- colDataPrepare(barcode, query,
-                                      add.subtype = add.subtype, add.clinical = add.clinical)
+                                      add.subtype = add.subtype, add.clinical = add.clinical, add.mutation.genes = add.mutation.genes)
 
             suppressWarnings(
                 assays <- SimpleList(raw_counts=data.matrix(
@@ -686,7 +686,7 @@ TCGAprepare <- function(query,
 
             barcode <- unique(unlist(str_match_all(colnames(df),regex)))
             colData <- colDataPrepare(barcode,query,
-                                      add.subtype = add.subtype,add.clinical = add.clinical)
+                                      add.subtype = add.subtype,add.clinical = add.clinical, add.mutation.genes = add.mutation.genes)
 
             assays <- lapply(assays, function(x){
                 colnames(x) <- barcode
@@ -843,7 +843,7 @@ TCGAprepare <- function(query,
             )
 
             colData <- colDataPrepare(barcodes,query,
-                                      add.subtype = add.subtype, add.clinical = add.clinical)
+                                      add.subtype = add.subtype, add.clinical = add.clinical, add.mutation.genes = add.mutation.genes)
 
             rownames(colData) <- barcodes
             assays <- lapply(assays, function(x){
