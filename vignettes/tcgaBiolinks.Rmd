@@ -568,7 +568,13 @@ biospecimen_slide: a list of histopathological slide images available for the pa
 
 Follow-up data (in biotab format) for TCGA patients are contained in the 'clinical_follow_up' files for each cancer type. The different versions of the follow-up files represent changes or new data added to follow-up forms over time. Multiple follow-up files for a single patient often represent a series of follow-ups over a period of time. However, multiple instances of the same follow-up file can also represent multiple new tumor events within the same time period. To obtain all available disease progression information, please use ALL of the follow_up files in your analyses, not just the latest version.
 
+The files available for each tumor type is shown below:
+```{r, eval = TRUE, echo = FALSE}
+knitr::kable(clinical.table, 
+             caption = "List of clinical files: 1 means the file exists, 0 is does not",row.names = TRUE)
+```
 
+Examples of use:
 ```{r, eval = FALSE}
 # Get clinical data
 clinical_brca_data <- TCGAquery_clinic("brca","clinical_patient")
@@ -578,6 +584,16 @@ clinical_data_barcode <- TCGAquery_clinic(clinical_data_type = "clinical_patient
                                           samples = c("TCGA-06-5416-01A-01D-1481-05",
                                                       "TCGA-2G-AAEW-01A-11D-A42Z-05",
                                                       "TCGA-2G-AAEX-01A-11D-A42Z-05"))
+```
+
+
+If you want all the available files download the complete folder:
+```{r, eval = TRUE}
+# Get clinical data
+query <- TCGAquery("ACC",platform = "bio", level = 2)
+TCGAdownload(query)
+# See downloaded files
+print(dir(query$name,full.names = TRUE))
 ```
 
 Also, some functions to work with clinical data are provided.
