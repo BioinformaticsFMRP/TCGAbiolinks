@@ -283,9 +283,13 @@ clinical_data_site_cancer <- function(cancer){
 #'READ \tab BLCA \tab DLBC \tab UCS  \tab FPPP\cr
 #'LUAD \tab LIHC \tab STAD \tab MESO \tab CNTL
 #'}
+#'
 #' For information about cancer types: https://tcga-data.nci.nih.gov/tcga/
 #' @param clinical_data_type a character vector indicating the types of
-#' clinical data Example:
+#' clinical data. Besides TCGA data, we created the clinical_patient_updated,
+#' which is the clinical_patient file with the last follow up information from the last
+#' follow up file.
+#'  Example:
 #' \tabular{ll}{
 #' biospecimen_aliquot \tab biospecimen_analyte \cr
 #' biospecimen_cqcf \tab biospecimen_diagnostic_slides \cr
@@ -299,7 +303,7 @@ clinical_data_site_cancer <- function(cancer){
 #' clinical_nte \tab  clinical_omf_v4.0 \cr
 #' clinical_patient \tab  clinical_radiation \cr
 #' ssf_normal_controls  \tab  ssf_tumor_samples \cr
-#' clinical_follow_up_v1.0_nte \cr
+#' clinical_follow_up_v1.0_nte \cr clinical_patient_updated (TCGAbiolinks only)
 #'}
 #' @param samples List of barcodes to get the clinical data
 #' @param path Directory to save the downloaded data default getwd()
@@ -334,6 +338,22 @@ TCGAquery_clinic <- function(tumor, clinical_data_type, samples, path = getwd())
             message(paste(files,collapse = "\n"))
         }
         stop("Please select the type of clinical data")
+    } else {
+        if(!clinical_data_type %in% rownames(clinical.table)){
+            if(missing(tumor)){
+                step <- 12
+                for(i in seq(1,nrow(clinical.table),step)){
+                    end <- ifelse(i + step > nrow(clinical.table),nrow(clinical.table),i + step)
+                    print(knitr::kable(clinical.table[,i:end], row.names = TRUE))
+                }
+            } else {
+                aux <- clinical.table[,toupper(tumor)]
+                files <- rownames(clinical.table[which(aux==1),])
+                files <- paste("=> ",files)
+                message(paste(files,collapse = "\n"))
+            }
+            stop("Please select the type of clinical data")
+        }
     }
     if (!missing(samples)) samples <- substr(samples,1,12)
 
