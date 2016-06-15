@@ -390,16 +390,16 @@ TCGAquery_clinic <- function(tumor, clinical_data_type, samples, path = getwd())
             }
             if(!missing(samples)) clin <- subset(clin,clin$bcr_patient_barcode %in% substr(samples,1,12))
 
-            message("Adding disease collumn to data frame")
+            message("Adding disease column to data frame")
             disease <- rep(i,nrow(clin))
             clin <- cbind(disease,clin)
             ret <- plyr::rbind.fill(ret,clin)
         }
     }
-   if(update){
-       message("Updating with last follow up information")
-       ret <- update.clinical.with.last.followup(ret)
-   }
+    if(update){
+        message("Updating with last follow up information")
+        ret <- update.clinical.with.last.followup(ret)
+    }
     return(ret)
 }
 
@@ -652,11 +652,18 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE, add.clinical = FAL
     }
     if(add.mutation.genes){
         mut <- get.mutation.matrix(barcode,query)
-        ret <- merge(ret, mut,
-                     all.x = TRUE ,
-                     sort = FALSE,
-                     by.x = "barcode",
-                     by.y = 0)
+        if(!is.null(mut)){
+            print("hey")
+            print(table(mut))
+            mut <- as.data.frame(mut)
+            print(head(mut))
+            mut$sample <- substr(rownames(mut),1,16)
+            save(mut,file = "mut.rda")
+            ret <- merge(ret, mut,
+                         all.x = TRUE ,
+                         sort = FALSE,
+                         by = "sample")
+        }
     }
 
     ret <- ret[match(barcode,ret$barcode),]
@@ -716,15 +723,20 @@ get.mutation.matrix <- function(barcode,query){
 
     ret <- NULL
     for(disease in unique(query$Disease)){
+        print(disease)
         df <- aux[aux$Tumor == disease,]
-        message("Downloading maf file")
+        message(paste0("Downloading maf file",df$MAF.File.Name))
         if(is.windows()) mode <- "wb" else  mode <- "w"
         if (!file.exists(df$MAF.File.Name))
             downloader::download(df$Deploy.Location,df$MAF.File.Name, quiet = FALSE,mode = mode)
 
         mutation.matrix <- read.table(df$MAF.File.Name, fill = TRUE,
                                       comment.char = "#", header = TRUE, sep = "\t", quote='')
-        mutation.matrix <- mutation.matrix[mutation.matrix$Tumor_Sample_Barcode %in% barcode,]
+        mutation.matrix <- mutation.matrix[substr(mutation.matrix$Tumor_Sample_Barcode,1,15) %in% substr(barcode,1,15),]
+        if(nrow(mutation.matrix) == 0) {
+            next
+        }
+        print(dim(mutation.matrix))
         # Fazer um subset de acordo com as amostras que eu tenho
         mutation.matrix <- data.table::setDT(mutation.matrix)
         mutation.matrix <- reshape2::acast(mutation.matrix, Tumor_Sample_Barcode~Hugo_Symbol, value.var="Variant_Type")
