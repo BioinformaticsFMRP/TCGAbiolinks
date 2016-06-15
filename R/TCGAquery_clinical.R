@@ -536,7 +536,7 @@ TCGAquery_clinicFilt <- function(barcode,
 # ref: TCGA codeTablesReport - Table: Sample type
 #' @importFrom S4Vectors DataFrame
 #' @importFrom stringr str_match
-colDataPrepare <- function(barcode,query,add.subtype = FALSE, add.clinical = FALSE){
+colDataPrepare <- function(barcode,query,add.subtype = FALSE, add.clinical = FALSE, add.mutation.genes = FALSE){
 
     code <- c('01','02','03','04','05','06','07','08','09','10','11',
               '12','13','14','20','40','50','60','61')
@@ -650,12 +650,95 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE, add.clinical = FAL
                      sort = FALSE,
                      by = "patient")
     }
+    if(add.mutation.genes){
+        mut <- get.mutation.matrix(barcode,query)
+        ret <- merge(ret, mut,
+                     all.x = TRUE ,
+                     sort = FALSE,
+                     by.x = "barcode",
+                     by.y = 0)
+    }
 
     ret <- ret[match(barcode,ret$barcode),]
     rownames(ret) <- gsub("\\.","-",make.names(ret$barcode,unique=TRUE))
     ret$code <- NULL
     return(DataFrame(ret))
 }
+
+load.maf <- function(){
+    if (requireNamespace("xml2", quietly = TRUE) & requireNamespace("rvest", quietly = TRUE) ) {
+        tables <- xml2::read_html("https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files")
+        tables <-  rvest::html_table(tables)
+        # Table one is junk
+        tables[[1]] <- NULL
+
+        # get which tables are from the tumor
+        all.df <- data.frame()
+        for(tumor in unique(TCGAbiolinks::TCGAquery()$Disease)) {
+
+            idx <- which(mapply(function(x) {
+                any(grepl(tumor,(x[,1]), ignore.case = TRUE))
+            },tables) == TRUE)
+            df <- lapply(idx,function(x) tables[x])
+
+            if(length(df) == 0) next
+            # merge the data frame in the lists
+            if(length(idx) > 1) {
+                df <- Reduce(function(...) merge(..., all=TRUE), df)
+            }  else if(length(idx) == 1) {
+                df <- Reduce(function(...) merge(..., all=TRUE), df)
+                df <- df[[1]]
+                colnames(df) <- gsub(" ",".", colnames(df))
+                colnames(df) <- gsub(":",".", colnames(df))
+            }
+
+            # Remove obsolete/protected
+            df <- subset(df, df$Deploy.Status == "Available")
+            df <- subset(df, df$Protection.Status == "Public")
+
+            if(nrow(df) == 0) next
+
+            df$Tumor <- tumor
+            all.df <- rbind(all.df,df)
+        }
+
+        all.df[,"Deploy.Location"] <- gsub("/dccfiles_prod/tcgafiles/",
+                                           "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/",
+                                           all.df[,"Deploy.Location"] )
+    }
+    return(all.df)
+}
+
+get.mutation.matrix <- function(barcode,query){
+    maf <- load.maf()
+    maf <- maf[order(as.Date(maf$Deploy.Date, "%d-%b-%Y")),]
+    aux <- plyr::ddply(maf, .(Tumor), function(x) x[c(nrow(x)), ])
+
+    ret <- NULL
+    for(disease in unique(query$Disease)){
+        df <- aux[aux$Tumor == disease,]
+        message("Downloading maf file")
+        if(is.windows()) mode <- "wb" else  mode <- "w"
+        if (!file.exists(df$MAF.File.Name))
+            downloader::download(df$Deploy.Location,df$MAF.File.Name, quiet = FALSE,mode = mode)
+
+        mutation.matrix <- read.table(df$MAF.File.Name, fill = TRUE,
+                                      comment.char = "#", header = TRUE, sep = "\t", quote='')
+        mutation.matrix <- mutation.matrix[mutation.matrix$Tumor_Sample_Barcode %in% barcode,]
+        # Fazer um subset de acordo com as amostras que eu tenho
+        mutation.matrix <- data.table::setDT(mutation.matrix)
+        mutation.matrix <- reshape2::acast(mutation.matrix, Tumor_Sample_Barcode~Hugo_Symbol, value.var="Variant_Type")
+        mutation.matrix[which(mutation.matrix > 0)] <- 1
+        if(is.null(ret)) {
+            ret <- mutation.matrix
+        }  else{
+            ret <- plyr::rbind.fill(ret,mutation.matrix)
+            ret[is.na(ret)] <- 0
+        }
+    }
+    return(ret)
+}
+
 
 #' @title Retrieve molecular subtypes for a given tumor
 #' @description
