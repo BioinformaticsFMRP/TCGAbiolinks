@@ -1023,11 +1023,6 @@ TCGAprepare <- function(query,
                               "FilesInfo:"=list(finf))
     }
 
-    if (add.mutation.genes & summarizedExperiment){
-        colData(rse) <- DataFrame(mutation.genes(
-            unique(query$Disease),colData(rse)))
-    }
-
     if (save) {
         message("Saving the data...")
 
