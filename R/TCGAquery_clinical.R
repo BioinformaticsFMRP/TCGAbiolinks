@@ -653,12 +653,10 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE, add.clinical = FAL
     if(add.mutation.genes){
         mut <- get.mutation.matrix(barcode,query)
         if(!is.null(mut)){
-            print("hey")
-            print(table(mut))
+
             mut <- as.data.frame(mut)
-            print(head(mut))
+            colnames(mut) <- paste0("mutation.",colnames(mut))
             mut$sample <- substr(rownames(mut),1,16)
-            save(mut,file = "mut.rda")
             ret <- merge(ret, mut,
                          all.x = TRUE ,
                          sort = FALSE,
@@ -723,7 +721,6 @@ get.mutation.matrix <- function(barcode,query){
 
     ret <- NULL
     for(disease in unique(query$Disease)){
-        print(disease)
         df <- aux[aux$Tumor == disease,]
         message(paste0("Downloading maf file",df$MAF.File.Name))
         if(is.windows()) mode <- "wb" else  mode <- "w"
@@ -736,7 +733,6 @@ get.mutation.matrix <- function(barcode,query){
         if(nrow(mutation.matrix) == 0) {
             next
         }
-        print(dim(mutation.matrix))
         # Fazer um subset de acordo com as amostras que eu tenho
         mutation.matrix <- data.table::setDT(mutation.matrix)
         mutation.matrix <- reshape2::acast(mutation.matrix, Tumor_Sample_Barcode~Hugo_Symbol, value.var="Variant_Type")
@@ -744,7 +740,7 @@ get.mutation.matrix <- function(barcode,query){
         if(is.null(ret)) {
             ret <- mutation.matrix
         }  else{
-            ret <- plyr::rbind.fill(ret,mutation.matrix)
+            ret <- plyr::rbind.fill(as.data.frame(ret),as.data.frame(mutation.matrix))
             ret[is.na(ret)] <- 0
         }
     }
