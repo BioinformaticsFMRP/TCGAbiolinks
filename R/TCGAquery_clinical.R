@@ -416,8 +416,8 @@ update.clinical.with.last.followup <- function(clin){
 
         colnames(follow) [colnames(follow) %in% colnames(clin)]
         aux <- plyr::ddply(follow, .(bcr_patient_barcode), function(x) x[c(nrow(x)), ])
-        aux <- aux[,colnames(aux) %in% colnames(clin)]
-        clin[match(aux$bcr_patient_barcode,clin$bcr_patient_barcode),match(colnames(aux),colnames(clin))] <- aux
+        aux <- aux[aux$bcr_patient_barcode %in% clin$bcr_patient_barcode,colnames(aux) %in% colnames(clin)]
+        clin[na.omit(match(aux$bcr_patient_barcode,clin$bcr_patient_barcode)),match(colnames(aux),colnames(clin))] <- aux
     }
     return(clin)
 }
