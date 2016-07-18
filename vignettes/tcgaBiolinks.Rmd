@@ -459,143 +459,41 @@ query <- TCGAquery(samples = listSamples)
 query <- TCGAquery(samples = "TCGA-61-1743-01A")
 ```
 
-## `TCGAquery_Version`: Retrieve versions information of the data in TCGA 
-
-In case the user want to have an overview of the size and number of samples and
-date of old versions, you can use the `TCGAquery_Version` function.
-
-The arguments of this function are:
-
-* tumor 
-* platform 
-
-
-For example, the code below queries the version history for the 
-IlluminaHiSeq_RNASeqV2 platform.
-
-```{r, eval = FALSE}
-library(TCGAbiolinks)
-
-BRCA_RNASeqV2_version <- TCGAquery_Version(tumor = "brca", 
-                                           platform = "illuminahiseq_rnaseqv2")
-
-```
-
-The result is shown below:
-
-```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
-knitr::opts_chunk$set(comment = "", warning = FALSE, message = FALSE, echo = TRUE, tidy = FALSE, size="small")
-knitr::kable(BRCA_RNASeqV2_version[,1:4], digits = 2, 
-             caption = "Table with date, version and number of samples of BRCA IlluminaHiSeq_RNASeqV2", 
-             row.names = FALSE)
-```
-
-### `TCGAquery`: Searching old versions
-
-The results from TCGAquery are always the last version from the TCGA data portal.
-As we have a preprocessed table you should always update `TCGAbiolinks` package.
-We intent to update the database constantly.
-
-In case you want an old version of the files we have the version parameter 
-that should be a list of triple values(platform,tumor,version).
-For example the code below will get the LGG and GBM tumor for platform 
-HumanMethylation450 but we want the version 5
-of the files instead of the latest. This could take some seconds.
-
-```{r, eval = FALSE}
-query <- TCGAquery(tumor = c("LGG","GBM"), platform = c("HumanMethylation450"), level = 3, 
-                   version = list(c("HumanMethylation450","LGG",5)))
-```
-
-## `TCGAquery_maf`: Working with mutation files.
+## `GDCquery_maf`: Working with mutation files.
 
 In order to download the Mutation Annotation Format (MAF), we provide the user
-with the `TCGAquery_maf` function. Briefly, it will get the tables from
-https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files, remove the obsolete/protected
-files and ask the user which maf file he wants to download.
-
+with the `GDCquery_maf` function. Briefly, it will get the open acess maf files from
+https://gdc-docs.nci.nih.gov/Data/Release_Notes/Data_Release_Notes/
 
 The arguments that will be used to filter the data are:
 
 * tumor 
-* center
-* archive.name
 
 ```{r, eval = FALSE}
-mutation <- TCGAquery_maf (tumor = "lgg", 
-                           archive.name = "IlluminaGA_DNASeq_curated.Level_2.1.4.0")
+mutation <- TCGAquery_maf(tumor = "lgg")
 ```
 
-## `TCGAquery_clinic` `&` `TCGAquery_clinicFilt`: Working with clinical data.
+## `GDCquery_clinic`: Working with clinical data.
 
-You can retrieve clinical data using the `TCGAquery_clinic` function. 
+You can retrieve clinical data using the `GDCquery_clinic` function. 
+This will get only the indexed GDC clinical data. This is the same as clicking on the
+download clinical buttun in the data portal.
+This means this function is not parsing the XML files, we are also working in a function to
+parse the XML to biotab.
+
 The arguments of this function are: 
 
-* tumor ("OV","BRCA","GBM", etc)
-* clinical_data_type ("clinical_patient","clinical_drug", etc)
-* samples List of barcodes
+* project: project_id ("TCGA-OV","TCGA-BRCA","TARGET-WT", etc)
+* type: ("clinical","biospecimen")
+* save.csv: save the clinical/biospeciment into a csv file. Pattern: project_type.csv
 
-Descriptions of the clinical data elements can be obtained at: https://tcga-data.nci.nih.gov/docs/dictionary/TCGA_BCR_DataDictionary.xml.
-
-A full description of the clinical data files provided by TCGA is below:
-
-* Biospecimen (patient sample information):
-    + biospecimen_aliquot: a list of sample aliquots that were shipped by the BCR to TCGA characterization centers. An aliquot is sub-division of an analyte.
-    + biospecimen_analyte: a list of patient sample analytes that were isolated from sample portions. .Each analyte is sub-divided into aliquots for shipment to the TCGA genome characterization centers.
-    + biospecimen_auxiliary: results of additional DNA testing performed at the BCR.
-    + biospecimen_cqcf: sample-relevant case quality control information (exclusion/inclusion criteria) submitted by the Tissue Source Site to the BCR for the patient. This information is used by BCR to qualify/disqualify patients.
-    + biospecimen_diagnostic_slides: > a list of diagnostic images available for the patient sample, representing sections of the diagnostic block.
-    + biospecimen_normal_control: information on the normal control samples from the patient (including quality). This information is provided by the BCR after processing each sample.
-    + biospecimen_portion: a list of patient samples subjected to histopathological validation prior to being processed into DNA and RNA analytes. A portion is a sub-division of a sample.
-    + biospecimen_protocol: the specific protocol used by the BCRs to process a particular sample portion into an analyte.
-    + biospecimen_sample: information provided by the Tissue Source Site on the patient samples. The sample represents approximately the gross tissue sample obtained for research use.
-    + biospecimen_shipment_portion: information regarding sample shipments to TCGA characterization centers. This information is provided by the BCR after shipping the samples.
-biospecimen_slide: a list of histopathological slide images available for the patient sample, representing sections of sample portions.
-    + biospecimen_tumor_sample: information on tumor samples from the patient (including quality). This information is provided by the BCR after processing each sample.
-
-* Clinical (patient information):
-    + clinical_cqcf: patient-relevant case quality control information (exclusion/inclusion criteria) submitted by the Tissue Source Site to the Biospecimen Core Resource (BCR) along with the patient's samples. This information is used by BCR to qualify/disqualify patients.
-    + clinical_drug: available drug treatment information for the patient regarding the treatment of the tumor event submitted to TCGA.
-    + clinical_follow_up: available follow-up data for the patient collected at time points after enrollment. Some deceased patients with older enrollment form versions might have follow-up forms completed at the time of enrollment in order to ensure all data elements were captured. (Please see below note regarding follow-up data files.)
-    + clinical_nte:available new tumor event information for the patient, including recurrences, metastasis, and new primaries. This information is submitted by the Tissue Source Site on the enrollment form or on subsequent follow-up forms.
-    + clinical_follow_up_nte: available new tumor event information for the patient, including recurrences, metastasis, and new primaries. This information is derived from subsequent follow-up forms.
-    + clinical_omf:available other malignancy data for the patient, including malignancies diagnosed prior to or at the time of the submitted malignancy. This information is provided by the Tissue Source Site on the other malignancy form at the time of sample submission or when the enrollment form is submitted
-    + clinical_patient: available clinical information for the patient.
-    + clinical_radiation: available radiation treatment information for the patient regarding the treatment of the tumor event submitted to TCGA.
- + clinical_patient_updated: this is TCGAbiolinks only. This options downloads the clinical_patient file and updates the information using the last follow-up information that is available for the patient.
- 
-**Important note**
-
-Follow-up data (in biotab format) for TCGA patients are contained in the 'clinical_follow_up' files for each cancer type. The different versions of the follow-up files represent changes or new data added to follow-up forms over time. Multiple follow-up files for a single patient often represent a series of follow-ups over a period of time. However, multiple instances of the same follow-up file can also represent multiple new tumor events within the same time period. To obtain all available disease progression information, please use ALL of the follow_up files in your analyses, not just the latest version.
-
-The files available for each tumor type is shown below:
-```{r, eval = TRUE, echo = FALSE}
-knitr::kable(clinical.table, 
-             caption = "List of clinical files: 1 means the file exists, 0 is does not",row.names = TRUE)
-```
 
 Examples of use:
 ```{r, eval = FALSE}
-# Get clinical data
-clinical_brca_data <- TCGAquery_clinic("brca","clinical_patient")
-clinical_uvm_data_bio <- TCGAquery_clinic("uvm","biospecimen_normal_control")
-clinical_brca_data_bio <- TCGAquery_clinic("brca","biospecimen_normal_control")
-clinical_data_barcode <- TCGAquery_clinic(clinical_data_type = "clinical_patient",
-                                          samples = c("TCGA-06-5416-01A-01D-1481-05",
-                                                      "TCGA-2G-AAEW-01A-11D-A42Z-05",
-                                                      "TCGA-2G-AAEX-01A-11D-A42Z-05"))
+clin <- GDCquery_clinic("TCGA-ACC", type = "clinical", save.csv = TRUE)
+clin <- GDCquery_clinic("TCGA-ACC", type = "biospecimen", save.csv = TRUE)
 ```
 
-
-If you want all the available files download the complete folder:
-```{r, eval = TRUE}
-# Get clinical data
-query <- TCGAquery("ACC",platform = "bio", level = 2)
-TCGAdownload(query)
-# See downloaded files
-print(dir(query$name,full.names = TRUE))
-```
 
 Also, some functions to work with clinical data are provided.
 
@@ -833,243 +731,71 @@ knitr::kable(head(tabPackage1), digits = 2, caption = "Find most related questio
 knitr::kable(tabPackage2[c(1,5,7),], digits = 2, caption = "Find most related question in biostar with package",row.names = FALSE)
 ```
 
-# `TCGAdownload`: Downloading open-access data  
-You can easily download data using the `TCGAdownload` function.
+# `GDCdownload`: Downloading GDC data  
+You can easily download data using the `GDCdownload` function.
+It uses GDC transfer tool to download gdc data
+The data from query will be save in a folder: project/data.category
 
 The arguments are:
 
-*  **data**	The `TCGAquery` output
-*  **path**	location to save the files. Default: "."
-*  **type**	Filter the files to download by type
-*  **samples**	List of samples to download
-*  **force**	Download again if file already exists? Default: FALSE
+*  **query**	A query for `GDCquery` function
+*  **token.file** A manifest file from the GDC data portal
 
-### `TCGAdownload`: Example of use
+### `GDCdownload`: Example of use
 ```{r, eval = FALSE}
 # get all samples from the query and save them in the TCGA folder
 # samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
 # samples to normalize later
-TCGAdownload(query, path = "data", type = "rsem.genes.results")
-
-TCGAdownload(query, path = "data", type = "rsem.isoforms.normalized_results")
-
-TCGAdownload(query, path = "dataBrca", type = "rsem.genes.results",
-             samples = c("TCGA-E9-A1NG-11A-52R-A14M-07",
-                         "TCGA-BH-A1FC-11A-32R-A13Q-07"))
+GDCdownload(query)
 ```
 
-Comment: The function will structure the folders to save the data as:
-_Path given by the user/Experiment folder_
+# `GDCprepare`: Preparing the data
 
-### `TCGAdownload`: Types of data available for downloading
+This function is still under development, it is not working for all cases.
 
-*  **RNASeqV2:** junction_quantification,rsem.genes.results,
-rsem.isoforms.results, rsem.genes.normalized_results, 
-rsem.isoforms.normalized_results, bt.exon_quantification
-*  **RNASeq:** exon.quantification,spljxn.quantification, gene.quantification
-*  **genome_wide_snp_6:** hg18.seg,hg19.seg,nocnv_hg18.seg,nocnv_hg19.seg
-*  **IlluminaHiSeq_miRNASeq:** hg19.mirbase20.mirna.quantification,
-hg19.mirbase20.isoform.quantification, mirna.quantification, isoform.quantification
-
-# `TCGAprepare`: Preparing the data
-You can easily read the downloaded data using the `TCGAprepare` function.
+You can easily read the downloaded data using the `GDCprepare` function.
 This function will prepare the data into a 
 [SummarizedExperiment](http://www.nature.com/nmeth/journal/v12/n2/abs/nmeth.3252.html) 
 [@ref1] object for downstream analysis. 
 For the moment this function works only with data level 3.
 
+
 The arguments are:
 
 * **query**	Data frame as the one returned from TCGAquery
-* **dir**	Directory with the files
-* **type**	File to prepare. 
-* **samples**	List of samples to prepare.
 * **save**	Save a rda object with the prepared object? Default: FALSE
-* **filename** Name of the rda object that will be saved if `save` is `TRUE`
+* **save.filename** Name of the rda object that will be saved if `save` is `TRUE`
 * **summarizedExperiment** Should the output be a SummarizedExperiment object? Default: `TRUE`
-* **reannotate** Reannotate genes? Source http://grch37.ensembl.org/. 
-Default: `FALSE`. (For the moment only working for methylation data)
-* **add.mutation.genes** Genes that are mutated into SummarizedExperiment objec? Default: `FALSE`
-* **add.subtype** Add subtype information in the SummarizedExperiment object. See TCGAquery_subtype function for more information.
-* **add.clinical** Add clinical information updated with last follow up information in the SummarizedExperiment object. See TCGAquery_clinic function for more information.
-
-In order to add useful information to reasearches we added in the colData of the 
-summarizedExperiment the subtypes classification for the LGG and GBM samples 
-that can be found in the [TCGA publication section](https://tcga-data.nci.nih.gov/docs/publications/).
-We intend to add more tumor types in the future.
-
-Also in the  metadata of the objet we added the arguments used in TCGAprepare,
-the query matrix used for preparing, and file information (name, creation time and modification time)
-in order to help the user knows which samples, versions, and arguments they used.
 
 ### Example of use
 ```{r, eval = FALSE}
-# get all samples from the query and save them in the TCGA folder
-# samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
-# samples to normalize later
-dataREAD <- TCGAprepare(query, dir = "data", save = TRUE, filename = "myfile.rda")
-```
-
-```{r,eval=FALSE,echo=FALSE,message=FALSE,warning=FALSE}
 library(TCGAbiolinks)
-library(SummarizedExperiment)
+# Downloading and prepare 
+query <- GDCquery(project = "TARGET-AML", 
+                  data.category = "Transcriptome Profiling", 
+                  data.type = "Gene Expression Quantification", 
+                  workflow.type = "HTSeq - FPKM-UQ")
+GDCDownload(query)
+data <- GDCPrepare(query)
 
-samples <- c("TCGA-DY-A1DE-01A-11R-A155-07", "TCGA-DY-A0XA-01A-11R-A155-07")
+# Downloading and prepare using legacy
+query <- GDCquery(project = "TCGA-GBM",
+                  data.category = "Protein expression",
+                  legacy = TRUE, 
+                  barcode = c("TCGA-OX-A56R-01A-21-A44T-20","TCGA-08-0357-01A-21-1898-20"))
+GDCDownload(query)
+data <- GDCPrepare(query)
 
-query <- TCGAquery(tumor = "READ", 
-                   platform = "IlluminaHiSeq_RNASeqV2", 
-                   level = 3,
-                   samples = samples)
+# Downloading and prepare using legacy
+query <- GDCquery(project = "TCGA-GBM",
+                  data.category = "DNA methylation", 
+                  platform = "Illumina Human Methylation 27",legacy = TRUE,
+                  barcode = c("TCGA-02-0047-01A-01D-0186-05","TCGA-06-2559-01A-01D-0788-05"))
+GDCDownload(query)
+data <- GDCPrepare(query)
 
-TCGAdownload(query,
-             samples = samples,
-             type = "rsem.genes.normalized_results",
-             path = "../dataREAD")
-
-dataREAD <- TCGAprepare(query,dir = "../dataREAD", 
-                        type = "rsem.genes.normalized_results",
-                        samples = samples)
 ```
 
-As an example, for the platform IlluminaHiSeq_RNASeqV2 we prepared two samples (TCGA-DY-A1DE-01A-11R-A155-07 and TCGA-DY-A0XA-01A-11R-A155-07) for the rsem.genes.normalized_results type. In order to create the object mapped the gene_id 
-to the hg19. The genes_id not found are then removed from the final matrix.
-The default output is a SummarizedExperiment and is shown below. 
-
-```{r, eval = TRUE,message=FALSE,warning=FALSE}
-library(TCGAbiolinks)
-library(SummarizedExperiment)
-head(assay(dataREAD,"normalized_count"))
-metadata(dataREAD)
-rowRanges(dataREAD)
-colData(dataREAD)
-```
-
-In order to create the SummarizedExperiment object we mapped the rows of the 
-experiments into GRanges. In order to map miRNA we used the miRNA from the 
-anotation database TxDb.Hsapiens.UCSC.hg19.knownGene, this will exclude the 
-miRNA from viruses and bacteria. 
-In order to map genes, genes alias, we used the biomart hg19 database 
-(hsapiens_gene_ensembl from grch37.ensembl.org).
-
-In case you prefere to have the raw data, you can get a data frame without any
-modification by setting the `summarizedExperiment` to false.
-
-```{r,eval=FALSE,echo=FALSE,message=FALSE,warning=FALSE}
-library(SummarizedExperiment)
-library(TCGAbiolinks)
-query <- TCGAquery(tumor = "READ", platform = "IlluminaHiSeq_RNASeqV2", level = 3,
-                   samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
-                             "TCGA-DY-A0XA-01A-11R-A155-07"))
-TCGAdownload(query,samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
-                             "TCGA-DY-A0XA-01A-11R-A155-07"),
-             type = "rsem.genes.normalized_results",path = "../dataREAD")
-
-dataREAD_df <- TCGAprepare(query,dir = "../dataREAD", 
-                           type = "rsem.genes.normalized_results",
-                        samples = c("TCGA-DY-A1DE-01A-11R-A155-07",
-                             "TCGA-DY-A0XA-01A-11R-A155-07"),
-                        summarizedExperiment = FALSE)
-```
-
-```{r, eval = TRUE}
-library(TCGAbiolinks)
-class(dataREAD_df)
-dim(dataREAD_df)
-head(dataREAD_df)
-```
-
-### `TCGAprepare`: Types of data available for preparing
-
-*  **RNASeqV2:** junction_quantification,rsem.genes.results,
-rsem.isoforms.results, rsem.genes.normalized_results, 
-rsem.isoforms.normalized_results, bt.exon_quantification
-*  **RNASeq:** exon.quantification,spljxn.quantification, gene.quantification
-*  **genome_wide_snp_6:** hg18.seg,hg19.seg,nocnv_hg18.seg,nocnv_hg19.seg
-*  **IlluminaHiSeq_miRNASeq:** hg19.mirbase20.mirna.quantification,
-hg19.mirbase20.isoform.quantification, mirna.quantification, isoform.quantification
-
-### Example of use: Preparing the data with CNV data (Genome_Wide_SNP_6)
-
-You can easily search TCGA samples, download and prepare a matrix of copy number variation (CNV) data.
-```{r, eval = FALSE}
-# Define a list of samples to query and download providing relative TCGA barcodes.
-samplesList <- c("TCGA-02-0046-10A-01D-0182-01",
-                 "TCGA-02-0052-01A-01D-0182-01",
-                 "TCGA-02-0033-10A-01D-0182-01",
-                 "TCGA-02-0034-01A-01D-0182-01",
-                 "TCGA-02-0007-01A-01D-0182-01")
-
-# Query platform Genome_Wide_SNP_6 with a list of barcode
-query <- TCGAquery(tumor = "gbm", level = 3, platform = "Genome_Wide_SNP_6")
-
-# Download a list of barcodes with platform Genome_Wide_SNP_6
-TCGAdownload(query, path = "samples",type = "hg19.seg", samples = samplesList)
-
-# Prepare matrix
-GBM_CNV <- TCGAprepare(query, dir = "samples", type = "hg19.seg",samples = samplesList)
-```
-
-### `TCGAprepare`: Types of data available for downloading
-
-*  **RNASeqV2:** junction_quantification,rsem.genes.results,
-rsem.isoforms.results, rsem.genes.normalized_results, 
-rsem.isoforms.normalized_results, bt.exon_quantification
-*  **RNASeq:** exon.quantification,spljxn.quantification, gene.quantification
-*  **genome_wide_snp_6:** hg18.seg,hg19.seg,nocnv_hg18.seg,nocnv_hg19.seg
-
-## Preparing the data for other packages
-This section will show how to integrate `TCGAbiolinks` with other packages.
-Our intention is to provide as many integrations as possible.
-
-The example below shows how to use `TCGAbiolinks` with `ELMER` package 
-(expression/methylation analysis) [@ref4]. The `TCGAprepare_elmer` for the DNA methylation data 
-will remove probes with NA values in more than 20% samples and remove the 
-anottation data. For RNA expression data it will take the log2(expression + 1)
-of the expression matrix in order to linearize the relation between 
-DNA methylation and expression. Also, it will prepare the rownames as 
-specified by the package.
-
-```{r, eval = FALSE}
-# Step 1.1 download DNA methylation data with TCGAbiolinks
-library(TCGAbiolinks)
-path <- "kirc"
-query <- TCGAquery(tumor = "KIRC", level = 3, platform = "HumanMethylation450")
-TCGAdownload(query, path =path)
-
-kirc.met <- TCGAprepare(query, dir = path,
-                        save = TRUE,
-                        filename = "metKirc.rda",
-                        summarizedExperiment = FALSE)
-
-kirc.met <- TCGAprepare_elmer(kirc.met,
-                              platform = "HumanMethylation450",
-                              save = TRUE,
-                              met.na.cut = 0.2)
-
-# Step 1.2 download RNA expression data
-query.rna <- TCGAquery(tumor="KIRC",level=3, platform="IlluminaHiSeq_RNASeqV2")
-TCGAdownload(query.rna,path=path,type = "rsem.genes.normalized_results")
-
-kirc.exp <- TCGAprepare(query.rna, dir=path, save = TRUE,
-                        type = "rsem.genes.normalized_results",
-                        filename = "expKirc.rda", summarizedExperiment = FALSE)
-
-kirc.exp <- TCGAprepare_elmer(kirc.exp,
-                              save = TRUE,
-                              platform = "IlluminaHiSeq_RNASeqV2")
-
-# Step 2 prepare mee object
-library(ELMER)
-library(parallel)
-
-geneAnnot <- txs()
-geneAnnot$GENEID <- paste0("ID",geneAnnot$GENEID)
-geneInfo <- promoters(geneAnnot,upstream = 0, downstream = 0)
-probe <- get.feature.probe()
-mee <- fetch.mee(meth = kirc.met, exp = kirc.exp, TCGA = TRUE,
-                 probeInfo = probe, geneInfo = geneInfo)
-save(mee,file="case4mee.rda")
-```
 
 # `TCGAanalyze`: Analyze data from TCGA. 
 You can easily analyze data using following functions:
