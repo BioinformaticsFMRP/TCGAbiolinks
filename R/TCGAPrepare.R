@@ -1364,64 +1364,6 @@ TCGAprepare_elmer <- function(data,
     }
 }
 
-#  Internal function
-#  Get a list of barcode from a list of uuid
-#  example mapuuidbarcode(c("011bb13f-e0e8-4f4b-b7a5-4867bbe3b30a",
-#                           "048615c7-c08c-4199-b394-c59160337d67"))
-#' @importFrom jsonlite fromJSON
-#' @importFrom plyr rbind.fill
-#' @importFrom RCurl postForm
-mapuuidbarcode <- function(uuid){
-    # Using tcga api: https://goo.gl/M1uQLR
-    serv <- "https://tcga-data.nci.nih.gov/uuid/uuidws/mapping/json/uuid/batch"
-    header <- c('Content-Type' = 'text/plain')
-    uuids <- paste0(uuid, collapse = ",")
-    ans <- fromJSON(postForm(serv,
-                             .opts = list(postfields = uuids,
-                                          httpheader = header,
-                                          ssl.verifypeer = FALSE)))
-    if(length(uuid) == 1){
-        x <- data.frame(ans$uuidMapping$barcode,ans$uuidMapping$uuid,
-                        stringsAsFactors = FALSE)
-        colnames(x) <- c("barcode","uuid")
-    } else {
-        # Extract patient barcode from sample barcode.
-        x <- (do.call("rbind.fill", lapply(ans$uuidMapping, as.data.frame)))
-    }
-    return(x)
-}
-
-#  Internal function
-#  Get a list of barcode from a list of uuid
-#  example mapuuidbarcode(c("011bb13f-e0e8-4f4b-b7a5-4867bbe3b30a",
-#                           "048615c7-c08c-4199-b394-c59160337d67"))
-#' @importFrom jsonlite fromJSON
-#' @importFrom plyr rbind.fill
-#' @importFrom RCurl postForm
-mapbarcodeuuid <- function(barcode){
-    # Using tcga api: https://goo.gl/M1uQLR
-    barcodes <- paste0(barcode, collapse = ",")
-    serv <- paste0("https://tcga-data.nci.nih.gov/",
-                   "uuid/uuidws/mapping/json/barcode/batch")
-    header <- c('Content-Type' = 'text/plain')
-    ans <- fromJSON(postForm(serv,
-                             .opts = list(postfields = barcodes,
-                                          httpheader = header,
-                                          ssl.verifypeer = FALSE)))
-
-    if(length(barcode) == 1){
-        x <- data.frame(ans$uuidMapping$barcode,ans$uuidMapping$uuid,
-                        stringsAsFactors = FALSE)
-        colnames(x) <- c("barcode","uuid")
-    } else {
-        # Extract patient barcode from sample barcode.
-        x <- (do.call("rbind.fill", lapply(ans$uuidMapping, as.data.frame)))
-    }
-    return(x)
-}
-
-
-
 #' @title Prepare CEL files into an AffyBatch.
 #' @description Prepare CEL files into an AffyBatch.
 #' @param ClinData write
