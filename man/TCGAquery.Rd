@@ -67,7 +67,6 @@ query <- TCGAquery(tumor = "gbm")
 }
 }
 \seealso{
-Other data.functions: \code{\link{TCGAdownload}},
-  \code{\link{TCGAprepare}}
+Other data.functions: \code{\link{TCGAdownload}}
 }
 

@@ -55,7 +55,6 @@ TCGAdownload(query,path = "RNA",
 \code{\link{TCGAprepare}} for preparing the data for the user into
 a Summarized experiment object, or a matrix.
 
-Other data.functions: \code{\link{TCGAprepare}},
-  \code{\link{TCGAquery}}
+Other data.functions: \code{\link{TCGAquery}}
 }
 
