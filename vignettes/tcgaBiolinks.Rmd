@@ -363,100 +363,43 @@ Also, if you have used ELMER analysis please cite:
 *  Yao, L., Shen, H., Laird, P. W., Farnham, P. J., & Berman, B. P. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome Biol 16 (2015): 105.
 * Yao, Lijing, Benjamin P. Berman, and Peggy J. Farnham. "Demystifying the secret mission of enhancers: linking distal regulatory elements to target genes." Critical reviews in biochemistry and molecular biology 50.6 (2015): 550-573.
 
-# `TCGAquery`: Searching TCGA open-access data  
+# `GDCquery`: Searching TCGA open-access data  
 
-## `TCGAquery`: Searching TCGA open-access data for download 
+## `GDCquery`: Searching GDC data for download 
 
- You can easily search TCGA samples using the `TCGAquery` function.
+ You can easily search GDC data using the `GDCquery` function.
+
  Using a summary of filters as used in the TCGA portal, the function works
  with the following arguments:
 
-* **tumor** Tumor or list of tumors. The list of tumor is shown in the examples. 
-* **platform** Platform or list of platforms The list of platforms is shown in the examples.
-* **samples** List of TCGA barcodes
-* **level**  Options: 1,2,3,"mage-tab"
-* **center**
-* **version** List of Platform/Tumor/Version to be changed
-
+* **project** A valid project (see list with getGDCprojects()$project_id)]
+* **data.category** A valid project (see list with getProjectSummary(project))
+* **data.type** A data type to filter the files to download
+* **sample.type** A sample type to filter the files to download
+* **workflow.type** GDC workflow type
+* **barcode** A list of barcodes to filter the files to download
+* **legacy** Search in the legacy repository
 
 The next subsections will detail each of the search arguments.
 Below, we show some search examples:
 ```{r, eval = FALSE}
-query <- TCGAquery(tumor = c("LGG","GBM"), level = 3,
-                   platform = c("HumanMethylation450","HumanMethylation27"),
-                   samples = c("TCGA-19-4065","TCGA-E1-5322-01A-01D-1467-05"), 
-                   version = list(c("HumanMethylation450","LGG",1),
-                                  c("HumanMethylation450","GBM",5)))
+query <- GDCquery(project = "TARGET-AML",
+                  data.category = "Transcriptome Profiling",
+                  data.type = "Gene Expression Quantification", 
+                  workflow.type = "HTSeq - Counts")
+
+# Using legacy
+query <- GDCquery(project = "TCGA-GBM",
+                  data.category = "DNA methylation", 
+                  platform = "Illumina Human Methylation 27", 
+                  legacy = TRUE,
+                  barcode = c("TCGA-02-0047-01A-01D-0186-05","TCGA-06-2559-01A-01D-0788-05"))
 ```
 
-### `TCGAquery`: Searching by tumor
-You can filter the search by tumor using the tumor parameter.
-
-```{r, eval = TRUE}
-query <- TCGAquery(tumor = "gbm")
-```
-
-The list of tumors is show below:
+The list of projects is below
 ```{r, eval = TRUE, echo = FALSE}
-knitr::kable(disease.table, digits = 2,
-             caption = "List of tumors",row.names = FALSE)
-```
-
-### `TCGAquery`: Searching by level
-You can filter the search by level	"1", "2", "3" or "mage-tab"
-```{r, eval = TRUE}
-query <- TCGAquery(tumor = "gbm", level = 3)
-query <- TCGAquery(tumor = "gbm", level = 2)
-query <- TCGAquery(tumor = "gbm", level = 1)
-query <- TCGAquery(tumor = "gbm", level = "mage-tab")
-```
-
-### `TCGAquery`: Searching by platform
-You can filter the search by platform using the platform parameter.
-
-```{r, eval = TRUE}
-query <- TCGAquery(tumor = "gbm", platform = "IlluminaHiSeq_RNASeqV2")
-```
-
-The list of platforms is show below:
-```{r, eval = TRUE, echo = FALSE}
-knitr::kable(platform.table[,2:4], digits = 2,
-             caption = "List of platforms",row.names = FALSE)
-```
-
-### `TCGAquery`: Searching by center
-You can filter the search by center using the center parameter.
-
-```{r, eval = TRUE}
-query <- TCGAquery(tumor = "gbm", center = "mskcc.org")
-```
-
-If you don't remember the center or if you have incorrectly typed it. 
-It will provide you with all the center names in TCGA. 
-
-The list of centers is shown below:
-```{r, eval = TRUE, echo = FALSE}
-knitr::kable(center.table, digits = 2,
-             caption = "List of centers",row.names = FALSE)
-```
-
-### `TCGAquery`: Searching by samples
-You can filter the search by samples using the samples parameter.
-You can give a list of barcodes or only one barcode. These barcode can be partial barcodes.
-
-```{r, eval = TRUE}
-# You can define a list of samples to query and download providing relative TCGA barcodes.
-listSamples <- c("TCGA-E9-A1NG-11A-52R-A14M-07","TCGA-BH-A1FC-11A-32R-A13Q-07",
-                "TCGA-A7-A13G-11A-51R-A13Q-07","TCGA-BH-A0DK-11A-13R-A089-07",
-                "TCGA-E9-A1RH-11A-34R-A169-07","TCGA-BH-A0AU-01A-11R-A12P-07",
-                "TCGA-C8-A1HJ-01A-11R-A13Q-07","TCGA-A7-A13D-01A-13R-A12P-07",
-                "TCGA-A2-A0CV-01A-31R-A115-07","TCGA-AQ-A0Y5-01A-11R-A14M-07")
-
-# Query all available platforms with a list of barcode 
-query <- TCGAquery(samples = listSamples)
-
-# Query with a partial barcode 
-query <- TCGAquery(samples = "TCGA-61-1743-01A")
+knitr::kable(getGDCprojects(), digits = 2,
+             caption = "List of projects",row.names = FALSE)
 ```
 
 ## `GDCquery_maf`: Working with mutation files.
@@ -619,31 +562,6 @@ knitr::kable(lgg.gbm.subtype[1:10,c(1,2,3,4)], digits = 2,
              row.names = TRUE)
 ```
 
-## `TCGAquery_integrate`: Summary of the common numbers of patient samples in different platforms 
-
-Some times researches would like to use samples from different platforms 
-from the same patient. In order to help the user to have an overview of the number of
-samples in commun we created the function `TCGAquery_integrate` that will receive the 
-data frame returned from `TCGAquery` and produce a matrix n platforms x n platforms 
-with the values of samples in commum.
-
-Some search examples are shown below
-```{r, eval = FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-query <- TCGAquery(tumor = "brca",level = 3)
-matSamples <- TCGAquery_integrate(query)
-matSamples[c(1,4,9),c(1,4,9)]
-```
-
-The result of the 3 platforms  of `TCGAquery_integrate` result is shown below:
-
-```{r, eval = TRUE, echo = FALSE}
-query <- TCGAquery(tumor = "brca",level = 3)
-matSamples <- TCGAquery_integrate(query)
-knitr::kable(matSamples[c(1,4,9),c(1,4,9)], digits = 2, 
-             caption = "Table common samples among platforms from TCGAquery_integrate",
-             row.names = TRUE)
-```
-
 ## `TCGAquery_investigate`: Find most studied TFs in pubmed 
 
 Find the most studied transcription factors (TFs) 
@@ -752,6 +670,25 @@ GDCdownload(query)
 # `GDCprepare`: Preparing the data
 
 This function is still under development, it is not working for all cases.
+
+| Data.category               	| Platform                            	| File extension 	| Status 	|
+|-----------------------------	|-------------------------------------	|----------------	|--------	|
+| Transcriptome Profiling     	|                                     	|                	|        	|
+| Copy Number Variation       	|                                     	|                	|        	|
+| Simple Nucleotide Variation 	|                                     	|                	|        	|
+| Raw Sequencing Data         	|                                     	|                	|        	|
+| Biospecimen                 	|                                     	|                	|        	|
+| Clinical                    	|                                     	|                	|        	|
+| Protein expression          	|                                     	|                	|        	|
+| Gene expression             	|                                     	|                	|        	|
+| DNA methylation             	| Illumina Human Methylation 450      	| -              	|        	|
+|                             	| Illumina Human Methylation 27       	| -              	|        	|
+|                             	| Illumina DNA Methylation OMA003 CPI 	| -              	|        	|
+|                             	| Illumina DNA Methylation OMA002 CPI 	| -              	|        	|
+|                             	| Illumina Hi Seq                     	| -              	|        	|
+| Raw Microarray Data         	|                                     	|                	|        	|
+| Structural Rearrangement    	|                                     	|                	|        	|
+| Other                       	|                                     	|                	|        	|
 
 You can easily read the downloaded data using the `GDCprepare` function.
 This function will prepare the data into a 

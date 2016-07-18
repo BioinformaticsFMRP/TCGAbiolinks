@@ -499,7 +499,8 @@ TCGAquery_clinicFilt <- function(barcode,
 # ref: TCGA codeTablesReport - Table: Sample type
 #' @importFrom S4Vectors DataFrame
 #' @importFrom stringr str_match
-colDataPrepare <- function(barcode,query,add.subtype = FALSE, add.clinical = FALSE, add.mutation.genes = FALSE){
+
+colDataPrepare <- function(barcode){
 
     code <- c('01','02','03','04','05','06','07','08','09','10','11',
               '12','13','14','20','40','50','60','61')
@@ -539,99 +540,11 @@ colDataPrepare <- function(barcode,query,add.subtype = FALSE, add.clinical = FAL
                      code = substr(barcode, 14, 15))
     ret <- merge(ret,aux, by = "code", sort = FALSE)
     ret <- ret[match(barcode,ret$barcode),]
-
-    # add batch information
-    message("Adding batch info to summarizedExperiment object")
-    batch.info <- get("batch.info")
-    ret <- merge(ret,batch.info, by = "patient", sort = FALSE,all.x = TRUE)
-    ret <- ret[match(barcode,ret$barcode),]
-
-    # Add disease platform and center information
-    df <- do.call(rbind,
-                  lapply(seq_along(samples),
-                         function(i) {
-                             idx <- grep(str_match(samples[i],regex)[1,1],query$barcode)
-                             # exception case: same barcodes!
-                             # we will select the correct row
-                             if (length(idx) > 1) {
-                                 idx2 <- grep(samples[i],barcode)
-                                 idx <- idx[match(i,idx2)]
-                             }
-                             aux <- query[idx,]
-                             return(data.frame(
-                                 disease = unique(aux$Disease),
-                                 platform = unique(aux$Platform),
-                                 center = unique(aux$Center)
-                             ))
-                         }
-                  ))
-
-    ret <- cbind(ret,df)
-    if(add.subtype == TRUE){
-        for (i in unique(query$Disease)) {
-            if (grepl("acc|lgg|gbm|luad|stad|coad|read|skcm|hnsc|kich|lusc|ucec|kirp|prad|kirc|brca", i,ignore.case = TRUE)) {
-                if(tolower(i) %in% c("gbm","lgg")){
-                    subtype <- lgg.gbm.subtype
-                    if(all(colnames(subtype) %in% colnames(ret))) break
-                    if (any(ret$patient %in% subtype$patient)) {
-                        ret$aux <- substr(ret$sample,1,15)
-                        subtype$aux <- paste0(subtype$patient,"-01")
-                        subtype$patient <- NULL
-                        ret <- merge(ret, subtype,
-                                     all.x = TRUE ,
-                                     sort = FALSE,
-                                     by = "aux")
-                        ret$aux <- NULL
-                    }
-                } else {
-                    subtype <- TCGAquery_subtype(i)
-                    if (any(ret$patient %in% subtype$patient)) {
-                        ret <- merge(ret, subtype,
-                                     all.x = TRUE ,
-                                     sort = FALSE,
-                                     by = "patient")
-                    }
-                }
-
-            } else if (grepl("thca", i,ignore.case = TRUE)) {
-                subtype <- TCGAquery_subtype(i)
-                if (any(ret$sample %in% subtype$sample)) {
-                    ret <- merge(ret, subtype,
-                                 all.x = TRUE ,
-                                 sort = FALSE,
-                                 by = "sample")
-                }
-            }
-        }
-    }
-
-    if(add.clinical){
-        clin <- TCGAquery_clinic(samples = ret$barcode,clinical_data_type = "clinical_patient_updated")
-        clin$patient <- clin$bcr_patient_barcode
-        ret <- merge(ret, clin,
-                     all.x = TRUE ,
-                     sort = FALSE,
-                     by = "patient")
-    }
-    if(add.mutation.genes){
-        mut <- get.mutation.matrix(barcode,query)
-        if(!is.null(mut)){
-
-            mut <- as.data.frame(mut)
-            colnames(mut) <- paste0("mutation.",colnames(mut))
-            mut$sample <- substr(rownames(mut),1,16)
-            ret <- merge(ret, mut,
-                         all.x = TRUE ,
-                         sort = FALSE,
-                         by = "sample")
-        }
-    }
-
-    ret <- ret[match(barcode,ret$barcode),]
     rownames(ret) <- gsub("\\.","-",make.names(ret$barcode,unique=TRUE))
     ret$code <- NULL
     return(DataFrame(ret))
 }
+
 
 load.maf <- function(){
     if (requireNamespace("xml2", quietly = TRUE) & requireNamespace("rvest", quietly = TRUE) ) {
