@@ -49,13 +49,11 @@ clinical_follow_up_v1.0_nte \cr clinical_patient_updated (TCGAbiolinks only)
 clinic data
 }
 \description{
-Get the clinical information
+This function has been replaced. Use GDCquery_clinic
 }
 \examples{
+\dontrun{
 data <- TCGAquery_clinic("LGG","clinical_drug")
-data <- TCGAquery_clinic(clinical_data_type = "clinical_patient",
-samples = c("TCGA-06-5416-01A-01D-1481-05",
-            "TCGA-2G-AAEW-01A-11D-A42Z-05",
-            "TCGA-2G-AAEX-01A-11D-A42Z-05"))
+}
 }
 
