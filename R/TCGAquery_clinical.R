@@ -283,11 +283,11 @@ clinical_data_site_cancer <- function(cancer){
 #' @importFrom data.table rbindlist
 #' @importFrom jsonlite fromJSON
 #' @examples
-#' acc.clin <- GDCquery_clinic("ACC")
 #' clin <- GDCquery_clinic("TCGA-ACC", type = "clinical", save.csv = TRUE)
 #' clin <- GDCquery_clinic("TCGA-ACC", type = "biospecimen", save.csv = TRUE)
 #' @return A data frame with the clinical information
 GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
+    checkProjectInput(project)
     baseURL <- "https://gdc-api.nci.nih.gov/cases/?"
     options.pretty <- "pretty=true"
     if(type == "clinical"){
