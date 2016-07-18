@@ -596,59 +596,6 @@ knitr::kable(tabDEGsTFPubmed, digits = 2,
              row.names = FALSE)
 ```
 
-## `TCGAquery_Social`: Searching questions,answers and literature
-The `TCGAquery_Social` function has two type of searches, one that searches for
-most downloaded packages in CRAN or BioConductor and one that searches the most related question in biostar. 
-
-### `TCGAquery_Social` with BioConductor
-Find most downloaded packages in CRAN or BioConductor
- 
-```{r, eval = FALSE}
-library(TCGAbiolinks)
-# Define a list of package to find number of downloads
-listPackage <- c("limma","edgeR","survcomp")
-tabPackage <- TCGAquery_Social(siteToFind ="bioconductor.org",listPackage)
-```
-
-The result is shown below:
-
-```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
-listPackage <- c("limma","edgeR","survcomp")
-tabPackage <- TCGAquery_Social(siteToFind = "bioconductor.org", listPackage)
-
-knitr::kable(head(tabPackage), digits = 2, 
-             caption = "Table with number of downloads about a list of packages",
-             row.names = FALSE)
-
-```
-
-### `TCGAquery_Social` with Biostar
-Find most related question in biostar.
- 
-```{r, eval = FALSE}
-library(TCGAbiolinks)
-
-# Find most related question in biostar with TCGA
-tabPackage1 <- TCGAquery_Social(siteToFind ="biostars.org",KeyInfo = "TCGA")
-
-# Find most related question in biostar with package
-tabPackage2 <- TCGAquery_Social(siteToFind ="biostars.org",KeyInfo = "package")
-
-```
-
-The result is shown below:
-
-```{r, eval = TRUE, echo = FALSE}
-library(TCGAbiolinks)
-# Find most related question in biostar with TCGA
-#tabPackage <- TCGAquery_Social(siteToFind ="biostars.org",KeyInfo = "package")
-
-knitr::kable(head(tabPackage1), digits = 2, caption = "Find most related question in biostar with TCGA",row.names = FALSE)
-
-knitr::kable(tabPackage2[c(1,5,7),], digits = 2, caption = "Find most related question in biostar with package",row.names = FALSE)
-```
-
 # `GDCdownload`: Downloading GDC data  
 You can easily download data using the `GDCdownload` function.
 It uses GDC transfer tool to download gdc data
