@@ -10,6 +10,9 @@
 #' @param sample.type A sample type to filter the files to download
 #' @param barcode A list of barcodes to filter the files to download
 #' @param legacy Search in the legacy repository
+#' @param file.extension To be used in the legacy database for some platforms,
+#' to define which file types to be used.
+#' @param workflow.type GDC workflow type
 #' @param platform Example:
 #' \tabular{ll}{
 #'CGH- 1x1M_G4447A                   \tab IlluminaGA_RNASeqV2   \cr
@@ -579,38 +582,6 @@ TCGAquery_Investigate <- function(tumor,dataDEGsFiltLevelTF,topgenes){
     return(dataDEGsFiltLevelTF)
 }
 
-#' @title Filtering common samples among platforms from TCGAquery for the same tumor
-#' @description In order to help the user to have an overview of the number of
-#' samples in common we created the function `TCGAquery_integrate` that will receive the
-#' data frame returned from `TCGAquery` and produce a matrix n platforms x n platforms
-#' with the values of samples in commun.
-#' @param query is the output of TCGAquery
-#' @export
-#' @return table with common samples among platforms from TCGAquery
-#' @examples
-#' query <- TCGAquery(tumor = 'brca',level = 3)
-#' matSamples <- TCGAquery_integrate(query)
-TCGAquery_integrate <- function(query) {
-
-    querySamples <- TCGAquery_samplesfilter(query)
-
-    matSamples <- matrix(0, length(querySamples), length(querySamples))
-    colnames(matSamples) <- names(querySamples)
-    rownames(matSamples) <- names(querySamples)
-
-    for (i in 1:nrow(matSamples)) {
-        for (j in 1:nrow(matSamples)) {
-            if (i != j) {
-                x <- as.vector(substr(querySamples[[i]], 1, 12))
-                y <- as.vector(substr(querySamples[[j]], 1, 12))
-                matSamples[i, j] <- length(intersect(x, y))
-            } else {
-                matSamples[i, j] <- length(querySamples[[i]])
-            }
-        }
-    }
-    return(matSamples)
-}
 
 
 #' @title Retrieve open access maf files from GDC server

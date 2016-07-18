@@ -14,6 +14,8 @@ GDCquery(project, data.category, data.type, workflow.type, legacy = FALSE,
 
 \item{data.type}{A data type to filter the files to download}
 
+\item{workflow.type}{GDC workflow type}
+
 \item{legacy}{Search in the legacy repository}
 
 \item{platform}{Example:
@@ -42,6 +44,9 @@ tissue_images                     \tab Mixed_DNASeq_automated         \cr
 HumanMethylation27                \tab Mixed_DNASeq_Cont_curated      \cr
 IlluminaHiSeq_RNASeqV2            \tab Mixed_DNASeq_Cont
 }}
+
+\item{file.extension}{To be used in the legacy database for some platforms,
+to define which file types to be used.}
 
 \item{barcode}{A list of barcodes to filter the files to download}
 
