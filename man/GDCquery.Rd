@@ -5,7 +5,7 @@
 \title{Query GDC data}
 \usage{
 GDCquery(project, data.category, data.type, workflow.type, legacy = FALSE,
-  platform, file.extension, barcode, sample.type)
+  platform, file.type, barcode, sample.type)
 }
 \arguments{
 \item{project}{A valid project (see list with TCGAbiolinks:::getGDCprojects()$project_id)]}
@@ -45,7 +45,7 @@ HumanMethylation27                \tab Mixed_DNASeq_Cont_curated      \cr
 IlluminaHiSeq_RNASeqV2            \tab Mixed_DNASeq_Cont
 }}
 
-\item{file.extension}{To be used in the legacy database for some platforms,
+\item{file.type}{To be used in the legacy database for some platforms,
 to define which file types to be used.}
 
 \item{barcode}{A list of barcodes to filter the files to download}

@@ -21,7 +21,6 @@ GDCquery_clinic will download all clinical information from the API
   as the one with using the button from each project
 }
 \examples{
-acc.clin <- GDCquery_clinic("ACC")
 clin <- GDCquery_clinic("TCGA-ACC", type = "clinical", save.csv = TRUE)
 clin <- GDCquery_clinic("TCGA-ACC", type = "biospecimen", save.csv = TRUE)
 }

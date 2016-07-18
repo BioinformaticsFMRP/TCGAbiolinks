@@ -10,7 +10,7 @@
 #' @param sample.type A sample type to filter the files to download
 #' @param barcode A list of barcodes to filter the files to download
 #' @param legacy Search in the legacy repository
-#' @param file.extension To be used in the legacy database for some platforms,
+#' @param file.type To be used in the legacy database for some platforms,
 #' to define which file types to be used.
 #' @param workflow.type GDC workflow type
 #' @param platform Example:
@@ -47,7 +47,7 @@ GDCquery <- function(project,
                      workflow.type,
                      legacy = FALSE,
                      platform,
-                     file.extension,
+                     file.type,
                      barcode,
                      sample.type){
 
@@ -66,6 +66,7 @@ GDCquery <- function(project,
         options.expand <- "expand=cases.samples.portions.analytes.aliquots,cases.project,center,analysis"
     }
     option.size <- paste0("size=",getNbFiles(project,data.category,legacy))
+
     options.filter <- paste0("filters=",
                              URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
                              project,
@@ -118,7 +119,14 @@ GDCquery <- function(project,
         }
         results <- results[results$analysis$workflow_type %in% workflow.type,]
     }
+    # Filter by sample.type
+    if(!missing(file.type)) {
+        pat <- file.type
+        if(file.type == "normalized_results") pat <- "normalized_results"
+        if(file.type == "results") pat <- "[^normalized_]results"
 
+        results <- results[grepl(pat,results$file_name),]
+    }
     # prepare output
     if(missing(sample.type)) sample.type <- NA
     if(missing(data.type)) data.type <- NA
