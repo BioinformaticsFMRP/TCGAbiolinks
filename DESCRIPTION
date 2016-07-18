@@ -2,7 +2,7 @@ Package: TCGAbiolinks
 Type: Package
 Title: TCGAbiolinks: An R/Bioconductor package for integrative analysis with
     TCGA data
-Version: 1.3.5
+Version: 1.3.6
 Date: 2015-12-13
 Author: Antonio Colaprico,
     Tiago Chedraoui Silva,
@@ -35,7 +35,7 @@ Imports:
     EDASeq (>= 2.0.0),
     RCurl,
     edgeR (>= 3.0.0),
-    rjson,
+    jsonlite,
     plyr,
     knitr,
     biomaRt,
@@ -75,7 +75,6 @@ Imports:
     httr,
     matlab,
     circlize,
-    ComplexHeatmap,
     ggrepel
 Description: The aim of TCGAbiolinks is : i) facilitate the TCGA open-access
     data retrieval, ii) prepare the data using the appropriate pre-processing
