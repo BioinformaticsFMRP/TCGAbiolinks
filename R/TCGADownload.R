@@ -55,8 +55,11 @@ GDCclientPath <- function(){
 GDCclientExists <- function(){
     return(Sys.which("gdc-client") != "" | dir(pattern = "gdc-client*[^zip]$") == "gdc-client")
 }
+#' @importFrom xml2 read_html
+#' @importFrom downloader download
+#' @importFrom rvest html_nodes html_attr
 GDCclientInstall <- function(){
-    if(GDCclientExists()) return(GDCclientPath())
+    if(length(GDCclientExists())) return(GDCclientPath())
 
     links <- read_html("https://gdc.nci.nih.gov/access-data/gdc-data-transfer-tool")  %>% html_nodes("a") %>% html_attr("href")
     bin <- links[grep("zip",links)]
@@ -64,7 +67,7 @@ GDCclientInstall <- function(){
     if(is.mac()) bin <- bin[grep("OSX", bin)]
     if(is.linux()) bin <- bin[grep("Ubuntu", bin)]
 
-    downloader::download(paste0("https://gdc.nci.nih.gov/",bin), basename(bin))
+    download(paste0("https://gdc.nci.nih.gov/",bin), basename(bin))
     unzip(basename(bin))
     Sys.chmod("gdc-client")
     return(dir(pattern = "gdc-client*[^zip]$",full.names = TRUE))
