@@ -19,7 +19,7 @@ GDCPrepare <- function(query, save = FALSE, save.filename, summarizedExperiment 
                        gsub(" ","_",query$results[[1]]$file_name))
 
     if(query$data.category == "Transcriptome Profiling"){
-        data <- readTranscriptomeProfiling(files,unique(query$results[[1]]$analysis$workflow_type,query$results[[1]]$cases))
+        data <- readTranscriptomeProfiling(files,unique(query$results[[1]]$analysis$workflow_type),query$results[[1]]$cases)
     } else if(query$data.category == "Copy Number Variation") {
         data <- readCopyNumberVariantion(files, query$results[[1]]$cases)
     }  else if(query$data.category == "DNA methylation") {
@@ -305,11 +305,9 @@ readTranscriptomeProfiling <- function(files, workflow.type, cases) {
         pb <- txtProgressBar(min = 0, max = length(files), style = 3)
         for (i in seq_along(files)) {
             data <- read_tsv(file = files[i], col_names = FALSE)
-            rownames(data) <- data[,1]
-            data[,1] <- NULL
-            if(!missing(cases))  colnames(data) <- cases[i]
+            if(!missing(cases))  colnames(data)[2] <- cases[i]
             if(i == 1) df <- data
-            if(i != 1) df <- cbind(df, data)
+            if(i != 1) df <- merge(df, data, by=colnames(df)[1],all = TRUE)
             setTxtProgressBar(pb, i)
         }
         close(pb)
