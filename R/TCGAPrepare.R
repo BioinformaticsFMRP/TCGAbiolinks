@@ -47,45 +47,56 @@ GDCPrepare <- function(query, save = FALSE, save.filename, summarizedExperiment 
 
 readGeneExpressionQuantification <- function(files, cases, summarizedExperiment = TRUE, platform){
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-    for (i in seq_along(files)) {
-        data <- fread(files[i], header = TRUE, sep = "\t",
-                      stringsAsFactors = FALSE)
-        if(!missing(cases)) {
-            assay.list <- colnames(data)[2:ncol(data)]
-            setnames(data,colnames(data)[2:ncol(data)],
-                     paste0(colnames(data)[2:ncol(data)],"_",cases[i]))
+    skip = 0
+    if(grepl("Agilent", platform)) {
+        skip = 1
+        summarizedExperiment = FALSE
+    }
+        for (i in seq_along(files)) {
+            data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE,skip = skip)
+
+            if(!missing(cases)) {
+                assay.list <- colnames(data)[2:ncol(data)]
+                setnames(data,colnames(data)[2:ncol(data)],
+                         paste0(colnames(data)[2:ncol(data)],"_",cases[i]))
+            }
+            if (i == 1) {
+                df <- data
+            } else {
+                df <- merge(df, data, by=colnames(data)[1], all = TRUE)
+            }
+            setTxtProgressBar(pb, i)
         }
-        if (i == 1) {
-            df <- data
+        if (summarizedExperiment) {
+            print(head(df))
+            df <- makeSEfromGeneExpressionQuantification(df,assay.list)
         } else {
-            df <- merge(df, data, by="gene_id", all = TRUE)
+            setDF(df)
         }
-        setTxtProgressBar(pb, i)
-    }
-    if (summarizedExperiment) {
-        df <- makeSEfromGeneExpressionQuantification(df,assay.list)
-    }
     return(df)
 }
-makeSEfromGeneExpressionQuantification <- function(df, assay.list,genome="hg19"){
+makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"){
     gene.location <- get.GRCh.bioMart(genome)
-    aux <- strsplit(df$gene_id,"\\|")
-    GeneID <- unlist(lapply(aux,function(x) x[2]))
-    df$entrezid <- as.numeric(GeneID)
-    GeneSymbol <- unlist(lapply(aux,function(x) x[1]))
-    df$external_gene_id <- as.character(GeneSymbol)
+    if(all(grepl("\\|",df[,1]))){
+        aux <- strsplit(df$gene_id,"\\|")
+        GeneID <- unlist(lapply(aux,function(x) x[2]))
+        df$entrezid <- as.numeric(GeneID)
+        GeneSymbol <- unlist(lapply(aux,function(x) x[1]))
+        df$external_gene_id <- as.character(GeneSymbol)
+    }
     df <- merge(df, gene.location, by="external_gene_id")
-
-    if(transcript_id %in% assay.list){
-    rowRanges <- GRanges(seqnames = paste0("chr", df$chromosome_name),
-                         ranges = IRanges(start = df$start_position,
-                                          end = df$end_position),
-                         strand = df$strand,
-                         gene_id = df$external_gene_id,
-                         entrezgene = df$entrezid,
-                         transcript_id = subset(df, select = 5))
-    names(rowRanges) <- as.character(df$gene_id)
-    assay.list <- assay.list[which(assay.list != "transcript_id")]
+    print(assay.list)
+    print(head(df))
+    if("transcript_id" %in% assay.list){
+        rowRanges <- GRanges(seqnames = paste0("chr", df$chromosome_name),
+                             ranges = IRanges(start = df$start_position,
+                                              end = df$end_position),
+                             strand = df$strand,
+                             gene_id = df$external_gene_id,
+                             entrezgene = df$entrezid,
+                             transcript_id = subset(df, select = 5))
+        names(rowRanges) <- as.character(df$gene_id)
+        assay.list <- assay.list[which(assay.list != "transcript_id")]
     } else {
         rowRanges <- GRanges(seqnames = paste0("chr", df$chromosome_name),
                              ranges = IRanges(start = df$start_position,
@@ -104,11 +115,11 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list,genome="hg19")
     samples <- na.omit(unique(str_match(colnames(df),regex)[,1]))
     colData <-  colDataPrepare(samples)
 
-    #assays <- lapply(assays, function(x){
-    #    colnames(x) <- barcode
-    #    return(x)
-    #})
-
+    assays <- lapply(assays, function(x){
+        colnames(x) <- NULL
+        return(x)
+    })
+    save(assays,rowRanges,colData,file = "test2.rda")
     rse <- SummarizedExperiment(assays=assays,
                                 rowRanges=rowRanges,
                                 colData=colData)
