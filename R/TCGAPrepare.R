@@ -1,3 +1,236 @@
+
+#' @title Prepare GDC data
+#' @description
+#'   Reads the data downloaded and prepare it into an R object
+#' @param query A query for GDCquery function
+#' @param save Save result as RData object?
+#' @param save.filename Name of the file to be save if empty an automatic will be created
+#' @export
+#' @return A summarizedExperiment or a data.frame
+GDCPrepare <- function(query, save = FALSE, save.filename, summarizedExperiment = TRUE){
+
+    if(missing(query)) stop("Please set query parameter")
+
+    # We save the files in project/data.category/data.type/file_id/file_name
+    files <- file.path(query$project,
+                       gsub(" ","_",query$results[[1]]$data_category),
+                       gsub(" ","_",query$results[[1]]$data_type),
+                       gsub(" ","_",query$results[[1]]$file_id),
+                       gsub(" ","_",query$results[[1]]$file_name))
+
+    if(query$data.category == "Transcriptome Profiling"){
+        data <- readTranscriptomeProfiling(files,unique(query$results[[1]]$analysis$workflow_type,query$results[[1]]$cases))
+    } else if(query$data.category == "Copy Number Variation") {
+        data <- readCopyNumberVariantion(files, query$results[[1]]$cases)
+    }  else if(query$data.category == "DNA methylation") {
+        data <- readDNAmethylation(files, query$results[[1]]$cases, summarizedExperiment)
+    }  else if(query$data.category == "Protein expression") {
+        data <- readProteinExpression(files, query$results[[1]]$cases)
+    }
+
+    if(save){
+        if(missing(save.filename) & !missing(query)) save.filename <- paste0(query$project,gsub(" ","_", query$data.category),gsub(" ","_",date()),".RData")
+        message(paste0("Saving file:",save.filename))
+        save(data, file = save.filename)
+        message("File saved")
+    }
+    return(data)
+}
+
+
+makeSEfromDNAmethylation <- function(df, genome="hg19"){
+    gene.location <- get.GRCh.bioMart(genome)
+    gene.GR <- GRanges(seqnames = paste0("chr", gene.location$chromosome_name),
+                       ranges = IRanges(start = gene.location$start_position,
+                                        end = gene.location$end_position),
+                       strand = gene.location$strand,
+                       symbol = gene.location$external_gene_id,
+                       EntrezID = gene.location$entrezgene)
+
+    rowRanges <- GRanges(seqnames = paste0("chr", df$Chromosome),
+                         ranges = IRanges(start = df$Genomic_Coordinate,
+                                          end = df$Genomic_Coordinate),
+                         probeID = df$Composite.Element.REF,
+                         Gene_Symbol = df$Gene_Symbol)
+
+    names(rowRanges) <- as.character(df$Composite.Element.REF)
+    colData <-  colDataPrepare(colnames(df)[5:ncol(df)])
+    assay <- data.matrix(subset(df,select = c(5:ncol(df))))
+    colnames(assay) <- rownames(colData)
+    rownames(assay) <- as.character(df$Composite.Element.REF)
+
+    rse <- SummarizedExperiment(assays = assay, rowRanges = rowRanges, colData = colData)
+
+}
+
+# We will try to make this function easier to use this function in its own data
+# In case it is not TCGA I should not consider that there is a barcode in the header
+# Instead the user should be able to add the names to his data
+# The only problem is that the data from the user will not have all the columns
+# TODO: Improve this function to be more generic as possible
+readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE){
+    pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+    for (i in seq_along(files)) {
+        print(files[i])
+        data <- fread(files[i], header = TRUE, sep = "\t",
+                      stringsAsFactors = FALSE,skip = 1,
+                      colClasses=c("character", # Composite Element REF
+                                   "numeric",   # beta value
+                                   "character", # Gene symbol
+                                   "character", # Chromosome
+                                   "integer"))  # Genomic coordinate
+        setnames(data,gsub(" ", "\\.", colnames(data)))
+        if(!missing(cases)) setnames(data,2,cases[i])
+        if (i == 1) {
+            setcolorder(data,c(1, 3:5, 2))
+            df <- data
+        } else {
+            data <- subset(data,select = c(1,2))
+            df <- merge(df, data, by = "Composite.Element.REF")
+        }
+        setTxtProgressBar(pb, i)
+    }
+    if (summarizedExperiment) {
+        df <- makeSEfromDNAmethylation(df)
+    } else {
+        setDF(df)
+        rownames(df) <- df$Composite.Element.REF
+        df$Composite.Element.REF <- NULL
+    }
+    return(df)
+}
+
+colDataPrepare <- function(barcode){
+
+    code <- c('01','02','03','04','05','06','07','08','09','10','11',
+              '12','13','14','20','40','50','60','61')
+    shortLetterCode <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
+                         "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
+                         "CELL","XP","XCL")
+
+    definition <- c("Primary solid Tumor",
+                    "Recurrent Solid Tumor",
+                    "Primary Blood Derived Cancer - Peripheral Blood",
+                    "Recurrent Blood Derived Cancer - Bone Marrow",
+                    "Additional - New Primary",
+                    "Metastatic",
+                    "Additional Metastatic",
+                    "Human Tumor Original Cells",
+                    "Primary Blood Derived Cancer - Bone Marrow",
+                    "Blood Derived Normal",
+                    "Solid Tissue Normal",
+                    "Buccal Cell Normal",
+                    "EBV Immortalized Normal",
+                    "Bone Marrow Normal",
+                    "Control Analyte",
+                    "Recurrent Blood Derived Cancer - Peripheral Blood",
+                    "Cell Lines",
+                    "Primary Xenograft Tissue",
+                    "Cell Line Derived Xenograft Tissue")
+    aux <- DataFrame(code = code,shortLetterCode,definition)
+
+    # in case multiple equal barcode
+    regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
+                    "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
+    samples <- str_match(barcode,regex)[,1]
+
+    ret <- DataFrame(barcode = barcode,
+                     patient = substr(barcode, 1, 12),
+                     sample = substr(barcode, 1, 16),
+                     code = substr(barcode, 14, 15))
+    ret <- merge(ret,aux, by = "code", sort = FALSE)
+    ret <- ret[match(barcode,ret$barcode),]
+    rownames(ret) <- gsub("\\.","-",make.names(ret$barcode,unique=TRUE))
+    ret$code <- NULL
+    return(DataFrame(ret))
+}
+
+#' @importFrom biomaRt getBM useMart
+get.GRCh.bioMart <- function(genome="hg19") {
+    message(paste0("Downloading genome information: ",genome))
+    if (genome == "hg19"){
+        # for hg19
+        ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
+                           host = "feb2014.archive.ensembl.org",
+                           path = "/biomart/martservice" ,
+                           dataset = "hsapiens_gene_ensembl")
+    } else {
+        # for hg38
+        ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+    }
+
+    chrom <- c(1:22, "X", "Y")
+    gene.location <- getBM(attributes = c("chromosome_name",
+                                          "start_position",
+                                          "end_position", "strand",
+                                          "external_gene_id",
+                                          "entrezgene"),
+                           filters = c("chromosome_name"),
+                           values = list(chrom), mart = ensembl)
+
+    return(gene.location)
+}
+
+
+readProteinExpression <- function(files,cases) {
+    pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+    for (i in seq_along(files)) {
+        data <- read_tsv(file = files[i], col_names = TRUE)
+        data <- data[-1,]
+        if(i == 1) df <- data
+        if(i != 1) df <- merge(df, data,all=TRUE, by="Sample REF")
+        setTxtProgressBar(pb, i)
+    }
+    close(pb)
+    if(!missing(cases))  colnames(df)[2:length(colnames(df))] <- cases
+
+    return(df)
+}
+
+readTranscriptomeProfiling <- function(files, workflow.type, cases) {
+    # Status working for:
+    #  - htseq
+    #  - FPKM
+    #  - FPKM-UQ
+    if(grepl("HTSeq",workflow.type)){
+        pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+        for (i in seq_along(files)) {
+            data <- read_tsv(file = files[i], col_names = FALSE)
+            rownames(data) <- data[,1]
+            data[,1] <- NULL
+            if(!missing(cases))  colnames(data) <- cases[i]
+            if(i == 1) df <- data
+            if(i != 1) df <- cbind(df, data)
+            setTxtProgressBar(pb, i)
+        }
+        close(pb)
+    }
+    return(df)
+}
+
+# Reads Copy Number Variantion files to a data frame, basically it will rbind it
+readCopyNumberVariantion <- function(files, cases){
+
+    pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+    for (i in seq_along(files)) {
+        data <- read_tsv(file = files[i])
+        aux <- query$results[[1]]
+        if(!missing(cases)) data$Barcode <- cases[i]
+        if(i == 1) df <- data
+        if(i != 1) df <- rbind(df, data, make.row.names = FALSE)
+        setTxtProgressBar(pb, i)
+    }
+    close(pb)
+    return(df)
+}
+
+# Source: https://stackoverflow.com/questions/10266963/moving-files-between-folders
+move <- function(from, to) {
+    todir <- dirname(to)
+    if (!isTRUE(file.info(todir)$isdir)) dir.create(todir, recursive=TRUE,showWarnings = FALSE)
+    file.rename(from = from,  to = to)
+}
+
 #' @title Read the data from level 3 the experiments and prepare it
 #'  for downstream analysis into a SummarizedExperiment object.
 #' @description
@@ -80,7 +313,7 @@ TCGAprepare <- function(query,
                         reannotate = FALSE,
                         summarizedExperiment = TRUE,
                         add.subtype = FALSE){
-
+    stop("TCGA data has moved from DCC server to GDC server. Please use GDCprepare function")
     if(add.subtype){
         for (i in unique(query$Disease)) {
             if (!grepl("lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc|all",
@@ -1112,7 +1345,7 @@ TCGAprepare_elmer <- function(data,
 #  Get a list of barcode from a list of uuid
 #  example mapuuidbarcode(c("011bb13f-e0e8-4f4b-b7a5-4867bbe3b30a",
 #                           "048615c7-c08c-4199-b394-c59160337d67"))
-#' @importFrom rjson fromJSON
+#' @importFrom jsonlite fromJSON
 #' @importFrom plyr rbind.fill
 #' @importFrom RCurl postForm
 mapuuidbarcode <- function(uuid){
@@ -1139,7 +1372,7 @@ mapuuidbarcode <- function(uuid){
 #  Get a list of barcode from a list of uuid
 #  example mapuuidbarcode(c("011bb13f-e0e8-4f4b-b7a5-4867bbe3b30a",
 #                           "048615c7-c08c-4199-b394-c59160337d67"))
-#' @importFrom rjson fromJSON
+#' @importFrom jsonlite fromJSON
 #' @importFrom plyr rbind.fill
 #' @importFrom RCurl postForm
 mapbarcodeuuid <- function(barcode){
@@ -1164,52 +1397,7 @@ mapbarcodeuuid <- function(barcode){
     return(x)
 }
 
-# Get sdrf file/array_design of a line
-# example
-# query <- TCGAquery(tumor = "BRCA")
-# getMagecontent(query[1,])
-# Obs: delete the file after reading
-#      is it better to save it?
-getMage <- function(line){
 
-    root <- "https://tcga-data.nci.nih.gov"
-    path <- "mages"
-    dir.create(path,showWarnings = FALSE)
-    mages <-  tcga.db[grep("mage-tab",tcga.db$name),]
-    # get the mage file for the entry
-    mage <- subset(mages, mages$Disease == line$Disease &
-                       mages$Platform == line$Platform &
-                       mages$Center == line$Center)
-
-    if (dim(mage)[1] != 0) {
-        file <- file.path(path,basename(mage$deployLocation))
-        if ( !file.exists(file)) {
-            suppressWarnings(
-                download(paste0(root,mage$deployLocation), file, quiet = TRUE)
-            )
-        }
-        folder <- gsub(".tar.gz","",file)
-        if ( !file.exists(folder)) {
-            untar(file,exdir = "mages")
-        }
-        files <- list.files(folder)
-        if (line$Platform == "MDA_RPPA_Core") {
-            sdrf <- files[grep("array_design",files)]
-        } else {
-            # Platform is not MDA_RPPA_Core
-            sdrf <- files[grep("sdrf",files)]
-        }
-        if (length(sdrf) > 1) {
-            sdrf <- sdrf[1]
-        }
-
-        df <- read.delim(file = file.path(folder,sdrf),
-                         sep = "\t",
-                         stringsAsFactors = FALSE,
-                         fileEncoding = "latin1")
-    }
-    return(df)
-}
 
 #' @title Prepare CEL files into an AffyBatch.
 #' @description Prepare CEL files into an AffyBatch.
