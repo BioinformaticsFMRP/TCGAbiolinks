@@ -1,3 +1,12 @@
+TCGAbiolinks 1.3.6
+---------------------------------------------------------------
+* Starting to move the code to GDC data portal
+
+TCGAbiolinks 1.1.26
+---------------------------------------------------------------
+* Bug fix: TCGAprepare for  IlluminaHiSeq_miRNASeq platform was
+not considering all file types
+
 TCGAbiolinks 1.1.26
 ---------------------------------------------------------------
 * Bug fix: TCGAprepare for  IlluminaHiSeq_miRNASeq platform was
