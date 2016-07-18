@@ -248,7 +248,6 @@ TCGAquery <- function(tumor = NULL,
 #' where find in pubmed if those genes or TFs are already related to that cancer or disease
 #' @importFrom RCurl url.exists curlVersion
 #' @examples
-#' query <- TCGAquery(tumor = "lgg")
 #' \dontrun{
 #' TFs <- EAGenes[EAGenes$Family =="transcription regulator",]
 #' TFs_inDEGs <- intersect(TFs$Gene, dataDEGsFiltLevel$mRNA )
