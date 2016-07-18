@@ -76,10 +76,7 @@ GDCquery <- function(project,
 
     # Protein files does not have cases information in the legacy database?
     if(data.category == "Protein expression" & legacy) {
-        pat <- paste0("[[:alnum:]]{8}-[[:alnum:]]{4}",
-                      "-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}")
-        uuid <- str_match(query$results[[1]]$file_name,pat)[,1]
-        barcodes <- TCGAbiolinks:::mapuuidbarcode(unique(na.omit(uuid)))$barcode
+        # Expection: no barcode
     } else {
         # get barcode of the samples
         # TARGET-20-PANLLX-09A-01R
@@ -87,9 +84,9 @@ GDCquery <- function(project,
         pat <- paste("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}",
                      "[:alnum:]{6}-[:alnum:]{2}-[:alnum:]{6}-[:alnum:]{3}-[:alnum:]{3}",sep = "|")
         barcodes <- na.omit(unlist(lapply(results$cases,function(x) str_extract(x,pat))))
+        results$cases <- barcodes
+        results$definition <- expandBarcodeInfo(barcodes)$definition
     }
-    results$cases <- barcodes
-    results$definition <- expandBarcodeInfo(barcodes)$definition
 
     if(legacy & !missing(platform)){
         if(!(platform %in% results$platform)) {
