@@ -23,7 +23,7 @@ GDCPrepare <- function(query, save = FALSE, save.filename, summarizedExperiment 
     } else if(query$data.category == "Copy Number Variation") {
         data <- readCopyNumberVariantion(files, query$results[[1]]$cases)
     }  else if(query$data.category == "DNA methylation") {
-        data <- readDNAmethylation(files, query$results[[1]]$cases, summarizedExperiment)
+        data <- readDNAmethylation(files, query$results[[1]]$cases, summarizedExperiment, unique(y$results[[1]]$platform))
     }  else if(query$data.category == "Protein expression") {
         data <- readProteinExpression(files, query$results[[1]]$cases)
     }
@@ -68,34 +68,57 @@ makeSEfromDNAmethylation <- function(df, genome="hg19"){
 # Instead the user should be able to add the names to his data
 # The only problem is that the data from the user will not have all the columns
 # TODO: Improve this function to be more generic as possible
-readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE){
-    pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-    for (i in seq_along(files)) {
-        print(files[i])
-        data <- fread(files[i], header = TRUE, sep = "\t",
-                      stringsAsFactors = FALSE,skip = 1,
-                      colClasses=c("character", # Composite Element REF
-                                   "numeric",   # beta value
-                                   "character", # Gene symbol
-                                   "character", # Chromosome
-                                   "integer"))  # Genomic coordinate
-        setnames(data,gsub(" ", "\\.", colnames(data)))
-        if(!missing(cases)) setnames(data,2,cases[i])
-        if (i == 1) {
-            setcolorder(data,c(1, 3:5, 2))
-            df <- data
-        } else {
-            data <- subset(data,select = c(1,2))
-            df <- merge(df, data, by = "Composite.Element.REF")
+readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platform){
+    if (grepl("OMA00",platform)){
+        pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+        for (i in seq_along(files)) {
+            print(files[i])
+            data <- fread(files[i], header = TRUE, sep = "\t",
+                          stringsAsFactors = FALSE,skip = 1,
+                          na.strings="N/A",
+                          colClasses=c("character", # Composite Element REF
+                                       "numeric"))   # beta value
+            setnames(data,gsub(" ", "\\.", colnames(data)))
+            if(!missing(cases)) setnames(data,2,cases[i])
+            if (i == 1) {
+                df <- data
+            } else {
+                df <- merge(df, data, by = "Composite.Element.REF")
+            }
+            setTxtProgressBar(pb, i)
         }
-        setTxtProgressBar(pb, i)
-    }
-    if (summarizedExperiment) {
-        df <- makeSEfromDNAmethylation(df)
-    } else {
         setDF(df)
         rownames(df) <- df$Composite.Element.REF
         df$Composite.Element.REF <- NULL
+    } else {
+        pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+        for (i in seq_along(files)) {
+            print(files[i])
+            data <- fread(files[i], header = TRUE, sep = "\t",
+                          stringsAsFactors = FALSE,skip = 1,
+                          colClasses=c("character", # Composite Element REF
+                                       "numeric",   # beta value
+                                       "character", # Gene symbol
+                                       "character", # Chromosome
+                                       "integer"))  # Genomic coordinate
+            setnames(data,gsub(" ", "\\.", colnames(data)))
+            if(!missing(cases)) setnames(data,2,cases[i])
+            if (i == 1) {
+                setcolorder(data,c(1, 3:5, 2))
+                df <- data
+            } else {
+                data <- subset(data,select = c(1,2))
+                df <- merge(df, data, by = "Composite.Element.REF")
+            }
+            setTxtProgressBar(pb, i)
+        }
+        if (summarizedExperiment) {
+            df <- makeSEfromDNAmethylation(df)
+        } else {
+            setDF(df)
+            rownames(df) <- df$Composite.Element.REF
+            df$Composite.Element.REF <- NULL
+        }
     }
     return(df)
 }
