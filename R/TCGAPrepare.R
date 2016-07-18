@@ -52,27 +52,24 @@ readGeneExpressionQuantification <- function(files, cases, summarizedExperiment 
         skip = 1
         summarizedExperiment = FALSE
     }
-        for (i in seq_along(files)) {
-            data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE,skip = skip)
+    for (i in seq_along(files)) {
+        data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE,skip = skip)
 
-            if(!missing(cases)) {
-                assay.list <- colnames(data)[2:ncol(data)]
-                setnames(data,colnames(data)[2:ncol(data)],
-                         paste0(colnames(data)[2:ncol(data)],"_",cases[i]))
-            }
-            if (i == 1) {
-                df <- data
-            } else {
-                df <- merge(df, data, by=colnames(data)[1], all = TRUE)
-            }
-            setTxtProgressBar(pb, i)
+        if(!missing(cases)) {
+            assay.list <- colnames(data)[2:ncol(data)]
+            setnames(data,colnames(data)[2:ncol(data)],
+                     paste0(colnames(data)[2:ncol(data)],"_",cases[i]))
         }
-        if (summarizedExperiment) {
-            print(head(df))
-            df <- makeSEfromGeneExpressionQuantification(df,assay.list)
+        if (i == 1) {
+            df <- data
         } else {
-            setDF(df)
+            df <- merge(df, data, by=colnames(data)[1], all = TRUE)
         }
+        setTxtProgressBar(pb, i)
+    }
+    setDF(df)
+
+    if (summarizedExperiment) df <- makeSEfromGeneExpressionQuantification(df,assay.list)
     return(df)
 }
 makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"){
@@ -117,6 +114,7 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
 
     assays <- lapply(assays, function(x){
         colnames(x) <- NULL
+        rownames(x) <- NULL
         return(x)
     })
     save(assays,rowRanges,colData,file = "test2.rda")
