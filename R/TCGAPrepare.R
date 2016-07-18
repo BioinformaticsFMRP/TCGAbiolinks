@@ -390,10 +390,12 @@ move <- function(from, to) {
 #' @param add.clinical Add clinical information from TCGAquery_clinic?
 #' (The information file add will be: clinical_patient) Default: \code{FALSE}
 #' @examples
+#' \dontrun{
 #' sample <- "TCGA-06-0939-01A-01D-1228-05"
 #' query <- TCGAquery(tumor = "GBM",samples = sample, level = 3)
 #' TCGAdownload(query,path = "exampleData",samples = sample)
 #' data <- TCGAprepare(query, dir="exampleData")
+#' }
 #' @export
 #' @importFrom stringr str_match str_trim str_detect str_match_all
 #' @importFrom SummarizedExperiment SummarizedExperiment metadata<- colData<-
@@ -406,11 +408,6 @@ move <- function(from, to) {
 #' @importFrom IRanges IRanges
 #' @import utils TxDb.Hsapiens.UCSC.hg19.knownGene
 #' @importFrom data.table fread setnames setcolorder setDF data.table
-#' @seealso  \code{\link{TCGAquery}} for searching the data to download
-#'
-#'  \code{\link{TCGAdownload}} for downloading the data from the
-#' search
-#' @family data functions
 TCGAprepare <- function(query,
                         dir = NULL,
                         samples = NULL,
