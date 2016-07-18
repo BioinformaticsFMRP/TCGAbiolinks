@@ -48,8 +48,6 @@ TCGAanalyze_Clustering <- function(tabDF, method,  methodHC = "ward.D2"){
 #' @importFrom grDevices dev.list
 #' @export
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
-#' @examples
-#' query <- TCGAquery(tumor = "lgg")
 TCGAanalyze_Preprocessing<- function(object,
                                      cor.cut = 0,
                                      filename = NULL,
@@ -163,14 +161,13 @@ TCGAanalyze_Preprocessing<- function(object,
 #' @export
 #' @return table with survival genes pvalues from KM.
 #' @examples
-#' query <- TCGAquery(tumor = "lgg")
 #' \dontrun{
-#' clinical_patient_Cancer <- TCGAquery_clinic("brca","clinical_patient")
-#' dataBRCAcomplete <- log2(BRCA_rnaseqv2)
-#' # Selecting only 10 genes for example
-#' dataBRCAcomplete <- dataBRCAcomplete[1:10,]
-#' tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,dataBRCAcomplete,
-#' Genelist = rownames(dataBRCAcomplete), Survresult = FALSE,ThreshTop=0.67,ThreshDown=0.33)
+#'  clinical_patient_Cancer <- TCGAquery_clinic("brca","clinical_patient")
+#'  dataBRCAcomplete <- log2(BRCA_rnaseqv2)
+#'  # Selecting only 10 genes for example
+#'  dataBRCAcomplete <- dataBRCAcomplete[1:10,]
+#'  tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,dataBRCAcomplete,
+#'  Genelist = rownames(dataBRCAcomplete), Survresult = FALSE,ThreshTop=0.67,ThreshDown=0.33)
 #' }
 TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
                                  ThreshTop=0.67, ThreshDown=0.33,p.cut=0.05){
