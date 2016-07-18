@@ -270,9 +270,58 @@ clinical_data_site_cancer <- function(cancer){
                   cancer,"/bcr/biotab/clin/"))
 }
 
+
+
+#' @title Get DDC clinical data
+#' @description
+#'   GDCquery_clinic will download all clinical information from the API
+#'   as the one with using the button from each project
+#' @param project A valid project (see list with getGDCprojects()$project_id)]
+#' @param type A valid type. Options "clinical", "Biospecimen"  (see list with getGDCprojects()$project_id)]
+#' @param save.csv Write clinical information into a csv document
+#' @export
+#' @importFrom data.table rbindlist
+#' @importFrom jsonlite fromJSON
+#' @examples
+#' acc.clin <- GDCquery_clinic("ACC")
+#' clin <- GDCquery_clinic("TCGA-ACC", type = "clinical", save.csv = TRUE)
+#' clin <- GDCquery_clinic("TCGA-ACC", type = "biospecimen", save.csv = TRUE)
+#' @return A data frame with the clinical information
+GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
+    baseURL <- "https://gdc-api.nci.nih.gov/cases/?"
+    options.pretty <- "pretty=true"
+    if(type == "clinical"){
+        options.expand <- "expand=diagnoses,demographic,exposures"
+        option.size <- paste0("size=",getNbCases(project,"Clinical"))
+    } else {
+        options.expand <- "expand=samples,samples.portions,samples.portions.analytes,samples.portions.analytes.aliquots"
+        option.size <- paste0("size=",getNbCases(project,"Biospecimen"))
+    }
+    options.filter <- paste0("filters=",
+                             URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
+                             project,
+                             URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["Biospecimen"]}}]}'))
+    json <- fromJSON(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")), simplifyDataFrame = TRUE)
+    results <- json$data$hits
+
+    if(type == "clinical"){
+        diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
+        exposures <- rbindlist(results$exposures, fill = TRUE)
+        df <- cbind(diagnoses,exposures,results$demographic)
+    } else {
+        df <- rbindlist(results$samples,fill = T)
+    }
+    #y <- data.frame(diagnosis=I(results$diagnoses), demographic=results$demographic,exposures=I(results$exposures))
+    if(save.csv){
+        if(type == "biospecimen") df$portions <- NULL
+        write_csv(df,paste0(project,"_",type,".csv"))
+    }
+    return(df)
+}
+
 #' @title Get the clinical information
 #' @description
-#'   Get the clinical information
+#'   This function has been replaced. Use GDCquery_clinic
 #' @param tumor a character vector indicating cancer type Examples:
 #' \tabular{lllll}{
 #'OV   \tab BRCA \tab CESC \tab ESCA \tab PCPG\cr
@@ -308,99 +357,13 @@ clinical_data_site_cancer <- function(cancer){
 #' @param samples List of barcodes to get the clinical data
 #' @param path Directory to save the downloaded data default getwd()
 #' @export
-#' @importFrom RCurl getURL
 #' @return clinic data
 #' @examples
+#' \dontrun{
 #' data <- TCGAquery_clinic("LGG","clinical_drug")
-#' data <- TCGAquery_clinic(clinical_data_type = "clinical_patient",
-#' samples = c("TCGA-06-5416-01A-01D-1481-05",
-#'             "TCGA-2G-AAEW-01A-11D-A42Z-05",
-#'             "TCGA-2G-AAEX-01A-11D-A42Z-05"))
+#' }
 TCGAquery_clinic <- function(tumor, clinical_data_type, samples, path = getwd()){
-
-    update <- FALSE
-    if(clinical_data_type == "clinical_patient_updated"){
-        update <- TRUE
-        clinical_data_type <- "clinical_patient"
-    }
-    if (missing(clinical_data_type)){
-        message("Available clinical data type are:")
-        if(missing(tumor)){
-            step <- 12
-            for(i in seq(1,nrow(clinical.table),step)){
-                end <- ifelse(i + step > nrow(clinical.table),nrow(clinical.table),i + step)
-                print(knitr::kable(clinical.table[,i:end], row.names = TRUE))
-            }
-        } else {
-            aux <- clinical.table[,toupper(tumor)]
-            files <- rownames(clinical.table[which(aux==1),])
-            files <- paste("=> ",files)
-            message(paste(files,collapse = "\n"))
-        }
-        stop("Please select the type of clinical data")
-    } else {
-        if(!clinical_data_type %in% rownames(clinical.table)){
-            if(missing(tumor)){
-                step <- 12
-                for(i in seq(1,nrow(clinical.table),step)){
-                    end <- ifelse(i + step > nrow(clinical.table),nrow(clinical.table),i + step)
-                    print(knitr::kable(clinical.table[,i:end], row.names = TRUE))
-                }
-            } else {
-                aux <- clinical.table[,toupper(tumor)]
-                files <- rownames(clinical.table[which(aux==1),])
-                files <- paste("=> ",files)
-                message(paste(files,collapse = "\n"))
-            }
-            stop("Please select the type of clinical data")
-        }
-    }
-    if (!missing(samples)) samples <- substr(samples,1,12)
-
-    if (!missing(samples) & !missing(tumor)) {
-        query <- TCGAquery(tumor = tumor, samples = samples, platform = "bio", level=2)
-    } else  if(!missing(tumor)) {
-        query <- TCGAquery(tumor = tumor, platform = "bio", level = 2)
-    } else if(!missing(samples)) {
-        query <- TCGAquery(samples = samples, platform = "bio", level = 2)
-        save(query,clinical_data_type,path,file = "test.rda")
-    } else {
-        query <- TCGAquery(platform = "bio", level = 2)
-    }
-    # this is one file for all samples, no need to add samples argument
-    TCGAdownload(query,type = clinical_data_type,path = path)
-    if("CNTL" %in% unique(query$Disease)){
-        TCGAdownload(query,type = "control_cntl",path = path)
-    }
-
-    ret <- NULL
-    # prepare works if one file only so we will do a iteration for each tumor type
-    for( i in unique(query$Disease)){
-        message(paste0("Tumor type: ",i))
-        x <- subset(query, query$Disease == i)
-        if(nrow(x) > 0) {
-            if(i == "CNTL"){
-                clin <- TCGAprepare(x,type = "control_cntl", dir = ".")
-            } else if(i == "FPPP"){
-                # Clinical data
-                # https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/fppp/bcr/biotab/clin/
-                next;
-            } else {
-                clin <- TCGAprepare(x,type = clinical_data_type, dir = ".")
-            }
-            if(!missing(samples)) clin <- subset(clin,clin$bcr_patient_barcode %in% substr(samples,1,12))
-
-            message("Adding disease column to data frame")
-            disease <- rep(i,nrow(clin))
-            clin <- cbind(disease,clin)
-            ret <- plyr::rbind.fill(ret,clin)
-        }
-    }
-    if(update){
-        message("Updating with last follow up information")
-        ret <- update.clinical.with.last.followup(ret)
-    }
-    return(ret)
+    stop("TCGA data has moved from DCC server to GDC server. Please use GDCquery_clinic function")
 }
 
 
