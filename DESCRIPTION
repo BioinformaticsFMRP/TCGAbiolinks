@@ -54,6 +54,8 @@ Imports:
     igraph,
     supraHex,
     S4Vectors,
+    ComplexHeatmap,
+    R.utils,
     SummarizedExperiment,
     BiocGenerics,
     GenomicFeatures,
