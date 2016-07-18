@@ -29,9 +29,9 @@ GDCPrepare <- function(query, save = FALSE, save.filename, summarizedExperiment 
     } else if (query$data.category == "Gene expression") {
         if(query$data.type == "Gene expression quantification")
             data <- readGeneExpressionQuantification(files,
-                                       query$results[[1]]$cases,
-                                       summarizedExperiment,
-                                       unique(query$platform))
+                                                     query$results[[1]]$cases,
+                                                     summarizedExperiment,
+                                                     unique(query$platform))
         #if(query$data.type == "Gene expression quantification") data <- readGeneExpression()
 
     }
@@ -51,13 +51,14 @@ readGeneExpressionQuantification <- function(files, cases, summarizedExperiment 
         data <- fread(files[i], header = TRUE, sep = "\t",
                       stringsAsFactors = FALSE)
         if(!missing(cases)) {
-            assay.list <- colnames(data)[2]
-            setnames(data,2,cases[i])
+            assay.list <- colnames(data)[2:ncol(data)]
+            setnames(data,colnames(data)[2:ncol(data)],
+                     paste0(colnames(data)[2:ncol(data)],"_",cases[i]))
         }
         if (i == 1) {
             df <- data
         } else {
-            df <- merge(df, data ,by="gene_id", all = TRUE)
+            df <- merge(df, data, by="gene_id", all = TRUE)
         }
         setTxtProgressBar(pb, i)
     }
@@ -75,6 +76,7 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list,genome="hg19")
     df$external_gene_id <- as.character(GeneSymbol)
     df <- merge(df, gene.location, by="external_gene_id")
 
+    if(transcript_id %in% assay.list){
     rowRanges <- GRanges(seqnames = paste0("chr", df$chromosome_name),
                          ranges = IRanges(start = df$start_position,
                                           end = df$end_position),
@@ -83,11 +85,24 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list,genome="hg19")
                          entrezgene = df$entrezid,
                          transcript_id = subset(df, select = 5))
     names(rowRanges) <- as.character(df$gene_id)
-    if(assay.list == "normalized_count") {
-        normalized_count <- data.matrix(subset(df, select = grep("TCGA",colnames(df))))
-        assays <- list(normalized_count = normalized_count)
-        colData <-  colDataPrepare(colnames(normalized_count))
+    assay.list <- assay.list[which(assay.list != "transcript_id")]
+    } else {
+        rowRanges <- GRanges(seqnames = paste0("chr", df$chromosome_name),
+                             ranges = IRanges(start = df$start_position,
+                                              end = df$end_position),
+                             strand = df$strand,
+                             gene_id = df$external_gene_id,
+                             entrezgene = df$entrezid)
+        names(rowRanges) <- as.character(df$gene_id)
     }
+    assays <- lapply(assay.list, function (x) {
+        return(data.matrix(subset(df, select = grep(x,colnames(df)))))
+    })
+    names(assays) <- assay.list
+    regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
+                    "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
+    samples <- na.omit(unique(str_match(colnames(df),regex)[,1]))
+    colData <-  colDataPrepare(samples)
 
     #assays <- lapply(assays, function(x){
     #    colnames(x) <- barcode
@@ -457,125 +472,6 @@ TCGAprepare <- function(query,
     df <- NULL
     rse <- NULL
 
-    if (grepl("humanmethylation",tolower(platform))) {
-
-        regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
-                        "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
-        barcode <- str_match(files,regex)
-
-        for (i in seq_along(files)) {
-            data <- fread(files[i], header = TRUE, sep = "\t",
-                          stringsAsFactors = FALSE,skip = 1,
-                          colClasses=c("character", # Composite Element REF
-                                       "numeric",   # beta value
-                                       "character", # Gene symbol
-                                       "character",   # Chromosome
-                                       "integer"))  # Genomic coordinate
-            setnames(data,gsub(" ", "\\.", colnames(data)))
-            setnames(data,2,barcode[i])
-
-            if (i == 1) {
-                setcolorder(data,c(1, 3:5, 2))
-                df <- data
-            } else {
-                data <- subset(data,select = c(1,2))
-                df <- merge(df, data, by = "Composite.Element.REF")
-            }
-
-            setTxtProgressBar(pb, i)
-        }
-
-        if (summarizedExperiment) {
-
-            gene.GR <- GRanges(seqnames = paste0("chr", gene.location$chromosome_name),
-                               ranges = IRanges(start = gene.location$start_position,
-                                                end = gene.location$end_position),
-                               strand = gene.location$strand,
-                               symbol = gene.location$external_gene_id,
-                               EntrezID = gene.location$entrezgene)
-
-            rowRanges <- GRanges(seqnames = paste0("chr", df$Chromosome),
-                                 ranges = IRanges(start = df$Genomic_Coordinate,
-                                                  end = df$Genomic_Coordinate),
-                                 probeID = df$Composite.Element.REF,
-                                 Gene_Symbol = df$Gene_Symbol)
-
-            names(rowRanges) <- as.character(df$Composite.Element.REF)
-            colData <-  colDataPrepare(colnames(df)[5:ncol(df)],query,
-                                       add.subtype = add.subtype, add.clinical = add.clinical, add.mutation.genes = add.mutation.genes)
-            rownames(colData) <- gsub("\\.","-",rownames(colData))
-            assay <- data.matrix(subset(df,select = c(5:ncol(df))))
-            colnames(assay) <- rownames(colData)
-            rownames(assay) <- as.character(df$Composite.Element.REF)
-            if(reannotate){
-                message("Reannotating genes Source:http://grch37.ensembl.org/")
-                gene.location <- gene.location[gene.location$chromosome_name %in% c(1:22,"X","Y"),]
-                gene.location <- gene.location[!is.na (gene.location$entrezgene),]
-                gene.location <- gene.location[!duplicated(gene.location$entrezgene),]
-
-                gene.GR <- GRanges(seqnames = paste0("chr",gene.location$chromosome_name),
-                                   ranges = IRanges(start = gene.location$start_position,
-                                                    end=gene.location$end_position),
-                                   strand = gene.location$strand,
-                                   symbol = gene.location$external_gene_id,
-                                   EntrezID = gene.location$entrezgene)
-
-                probe.info  <- rowRanges
-                distance <- as.data.frame(distanceToNearest(rowRanges ,gene.GR))
-                gene.order.by.distance <- gene.location[distance$subjectHits,]
-                gene.order.by.distance$distance <- as.matrix(distance$distance)
-                rowRanges$distance <- gene.order.by.distance[,c("distance")]
-                rowRanges$Gene_Symbol <- gene.order.by.distance[,c("external_gene_id")]
-                rowRanges$entrezgene <- gene.order.by.distance[,c("entrezgene")]
-            }
-
-            rse <- SummarizedExperiment(assays = assay,
-                                        rowRanges = rowRanges,
-                                        colData = colData)
-
-        } else {
-            setDF(df)
-            rownames(df) <- df$Composite.Element.REF
-            df$Composite.Element.REF <- NULL
-        }
-    }
-
-    if (grepl("mda_rppa_core",tolower(platform))) {
-
-        message(
-            paste("Sorry, but for this platform we haven't prepared",
-                  "the data into a summarizedExperiment object.",
-                  "\nBut we will do it soon! The return is a data frame")
-        )
-
-        regex <- paste0("[:alnum:]{8}-[:alnum:]{4}",
-                        "-[:alnum:]{4}-[:alnum:]{4}-[:alnum:]{12}")
-        uuid <- str_match(files,regex)
-        map <- mapuuidbarcode(uuid)
-
-        for (i in seq_along(files)) {
-            data <- fread(files[i], header = TRUE, sep = "\t", data.table = FALSE)
-            data <- data[-1,] # removing Composite Element REF
-            x <- subset(map, uuid == uuid[i])
-
-            if( length(x$barcode)!=0){
-                colnames(data)[2] <- as.character(x$barcode)
-            }
-            else{
-                next
-            }
-
-            if (i == 1) {
-                df <- data
-            } else {
-                df <- merge(df, data,by = "Sample REF",all = TRUE )
-            }
-            setTxtProgressBar(pb, i)
-        }
-        rownames(df) <- df[,1]
-        df[,1] <- NULL
-    }
-
     if (grepl("illuminaga_dnaseq",tolower(platform))) {
 
         message(
@@ -607,26 +503,6 @@ TCGAprepare <- function(query,
             }
             setTxtProgressBar(pb, i)
         }
-    }
-
-    if (grepl("illuminadnamethylation_oma",
-              platform, ignore.case = TRUE)) {
-
-        for (i in seq_along(files)) {
-            data <- read.table(files[i], header = TRUE, sep = "\t",
-                               stringsAsFactors = FALSE, check.names = FALSE,
-                               comment.char = "#",fill = TRUE)
-            data <- data[-1,] # removing Composite Element REF
-            if (i == 1) {
-                df <- data
-            } else {
-                df <- merge(df, data,by = "Hybridization REF")
-            }
-            setTxtProgressBar(pb, i)
-        }
-
-        rownames(df) <- df[,1]
-        df[,1] <- NULL
     }
 
     if (tolower(platform) == "illuminaga_rnaseq" ||
