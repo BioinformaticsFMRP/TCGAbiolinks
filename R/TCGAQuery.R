@@ -162,7 +162,7 @@ expandBarcodeInfo <- function(barcode){
                          case.unique.id = substr(barcode, 11, 16),
                          tissue.code = substr(barcode, 18, 19),
                          nucleic.acid.code = substr(barcode, 24, 24))
-        ret <- merge(ret,getBarcodeDefinition(), by = "tissue.code", sort = FALSE)
+        ret <- merge(ret,getBarcodeDefinition("TARGET"), by = "tissue.code", sort = FALSE)
         ret <- ret[match(barcode,ret$barcode),]
     }
     if(all(grepl("TCGA",barcode))) {
@@ -170,7 +170,7 @@ expandBarcodeInfo <- function(barcode){
                           patient = substr(barcode, 1, 12),
                           sample = substr(barcode, 1, 16),
                           tissue.code = substr(barcode, 14, 15))
-        ret <- merge(ret,getBarcodeDefinition(), by = "tissue.code", sort = FALSE)
+        ret <- merge(ret,getBarcodeDefinition("TCGA"), by = "tissue.code", sort = FALSE)
         ret <- ret[match(barcode,ret$barcode),]
     }
     return(ret)
