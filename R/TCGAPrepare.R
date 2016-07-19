@@ -214,7 +214,7 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
 }
 
 colDataPrepareTARGET <- function(barcode){
-    message("Adding description to target samples")
+    message("Adding description to TARGET samples")
     tissue.code <- c('01','02','03','04','05','06','07','08','09','10','11',
               '12','13','14','15','16','17','20','40','41','42','50','60','61','99')
 
@@ -364,7 +364,6 @@ colDataPrepare <- function(barcode){
 
 #' @importFrom biomaRt getBM useMart
 get.GRCh.bioMart <- function(genome="hg19") {
-    message(paste0("Downloading genome information: ",genome))
     if (genome == "hg19"){
         # for hg19
         ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
@@ -375,7 +374,8 @@ get.GRCh.bioMart <- function(genome="hg19") {
         # for hg38
         ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
     }
-
+    message(paste0("Downloading genome information. Using: ",
+                   listDatasets(ensembl)[listDatasets(ensembl)$dataset=="hsapiens_gene_ensembl",]$description))
     chrom <- c(1:22, "X", "Y")
     gene.location <- getBM(attributes = c("chromosome_name",
                                           "start_position",
@@ -404,10 +404,26 @@ readProteinExpression <- function(files,cases) {
 }
 
 makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
+    # How many cases do we have?
+    # We wil consider col 1 is the ensemble gene id, other ones are data
+    size <- ncol(data)
+
+    # Prepare Patient table
+    colData <-  colDataPrepare(cases)
+
+    gene.location <- get.GRCh.bioMart("hg38")
+    aux <- strsplit(data$X1,"\\.")
+    data$ensembl_gene_id <- as.character(unlist(lapply(aux,function(x) x[1])))
+
+    found.genes <- table(data$ensembl_gene_id %in% gene.location$ensembl_gene_id)
+    if("FALSE" %in% names(found.genes))
+        message(paste0("From the ", nrow(data), " genes we couldn't map ", found.genes[["FALSE"]]))
+
+    data <- merge(data, gene.location, by="ensembl_gene_id")
 
     # Prepare data table
     # Remove the version from the ensembl gene id
-    assays <- data.matrix(data[,2:ncol(data)])
+    assays <- list(data.matrix(data[,2:size+1]))
     names(assays) <- assay.list
     assays <- lapply(assays, function(x){
         colnames(x) <- NULL
@@ -415,19 +431,7 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
         return(x)
     })
 
-    # Prepare Patient table
-    print(cases)
-    colData <-  colDataPrepare(cases)
-
     # Prepare rowRanges
-    gene.location <- get.GRCh.bioMart("hg38")
-    aux <- strsplit(data$X1,"\\.")
-    data$ensembl_gene_id <- as.character(unlist(lapply(aux,function(x) x[1])))
-    print(head(data))
-    print(head(data))
-
-    data <- merge(data, gene.location, by="ensembl_gene_id")
-    print(head(data))
     rowRanges <- GRanges(seqnames = paste0("chr", data$chromosome_name),
                          ranges = IRanges(start = data$start_position,
                                           end = data$end_position),
