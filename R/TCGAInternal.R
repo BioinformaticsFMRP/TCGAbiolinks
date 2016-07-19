@@ -11,7 +11,7 @@
         "   ||   |    | ___  |___| |__  | |  | |   | | | | |_/ |__         \n",
         "   ||   |___ |____| |   | |__| | |__| |__ | | |_| | \\  __|       \n",
         " ------------------------------------------------------------\n",
-        " Query, download & analyze - TCGA                  \n",
+        " Query, download & analyze - GDC                  \n",
         " Version:",utils::packageVersion("TCGAbiolinks"),"\n",
         " ==============================================================\n"
     )
@@ -146,59 +146,6 @@ getFileNames <- function(url) {
     return(x)
 }
 
-tcga.get.barcode <- function(data){
-    # todo considere next page =/
-    # comparar com sdrf
-    # for each tcga.db id get barcodes
-    message("Downloading TCGA barcodes")
-    all.barcode <- c()
-
-    tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?query="
-    tcga.query <- paste0("FileInfo&Archive[@id=",data$id,
-                         "]&roleName=fileCollection")
-
-    next.url <- paste0(tcga.root,tcga.query)
-    files <- tcgaGetTable(next.url)
-    #print(files)
-    if (nrow(files) == 0) {
-        return(NULL)
-    }
-    files <- files[,1:4]
-    idx <- grep("somatic.maf",files$name)
-    if (length(idx > 0)) {
-        files <- files[idx,]
-    } else {
-        # no maf file
-        # try in the name
-        pat <- paste0("((((TCGA-[A-Z0-9]{2})-[A-Z0-9]{4})-[A-Z0-9]{3}-",
-                      "[A-Z0-9]{3})-[A-Z0-9]{4}-[A-Z0-9]{2})")
-        barcode <- str_match(files$name,pat)[,1]
-        #message("Found in name")
-        if (!all(is.na(barcode))) {
-            message("Found in name")
-            barcode <- barcode[!is.na(barcode)]
-            barcode <- paste0(unique(barcode), collapse = ",")
-            return(barcode)
-        }
-
-        return(NULL)
-    }
-
-    # maybe two maf files
-    for (i in  seq_along(files$name)) {
-        tcga.query <- paste0("BiospecimenBarcode&FileInfo[@id=",files[i,"id"],
-                             "]&roleName=biospecimenBarcodeCollection")
-        next.url <- paste0(tcga.root,tcga.query)
-        print(next.url)
-        barcode.table <- tcgaGetTable(next.url)
-        barcode.table <- barcode.table[,1:8]
-        all.barcode <- union(all.barcode, unique(barcode.table$barcode))
-    }
-
-    all.barcode <- paste0(unique(all.barcode), collapse = ",")
-
-    return(all.barcode)
-}
 
 #' @import utils
 #' @importFrom RCurl getURL
