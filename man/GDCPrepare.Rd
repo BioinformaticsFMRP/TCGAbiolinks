@@ -12,6 +12,8 @@ GDCPrepare(query, save = FALSE, save.filename, summarizedExperiment = TRUE)
 \item{save}{Save result as RData object?}
 
 \item{save.filename}{Name of the file to be save if empty an automatic will be created}
+
+\item{summarizedExperiment}{Create a summarizedExperiment? Default TRUE (if possible)}
 }
 \value{
 A summarizedExperiment or a data.frame
