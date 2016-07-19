@@ -618,6 +618,23 @@ GDCdownload(query)
 
 This function is still under development, it is not working for all cases.
 
+## Harmonized data
+
+| Data.category               | Data.type                         | Workflow Type   | Status  |
+|-----------------------------|-----------------------------------|-----------------|---------|
+| Transcriptome Profiling     | Gene Expression Quantification    | HTSeq - Counts  | Working |
+|                             |                                   | HTSeq - FPKM-UQ | Working |
+|                             |                                   | HTSeq - FPKM    | Working |
+|                             | Isoform Expression Quantification |                 |         |
+|                             | miRNA Expression Quantification   |                 |         |
+| Copy number variation       | Copy Number Segment               |                 | Working |
+|                             | Masked Copy Number Segment        |                 | Working |
+| Simple Nucleotide Variation |                                   |                 |         |
+| Raw Sequencing Data         |                                   |                 |         |
+| Biospecimen                 |                                   |                 |         |
+| Clinical                    |                                   |                 |         |
+
+## Legacy data
 | Data.category               	| Platform                            	| File extension 	| Status 	|
 |-----------------------------	|-------------------------------------	|----------------	|--------	|
 | Transcriptome Profiling     	|                                     	|                	|        	|

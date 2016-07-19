@@ -496,61 +496,6 @@ TCGAquery_clinicFilt <- function(barcode,
     return(x)
 }
 
-
-
-# This function will preprare the colData for TCGAPrepare
-# The idea is to add usefull information to the object
-# that will help the users to understand their samples
-# ref: TCGA codeTablesReport - Table: Sample type
-#' @importFrom S4Vectors DataFrame
-#' @importFrom stringr str_match
-
-colDataPrepare <- function(barcode){
-
-    code <- c('01','02','03','04','05','06','07','08','09','10','11',
-              '12','13','14','20','40','50','60','61')
-    shortLetterCode <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
-                         "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
-                         "CELL","XP","XCL")
-
-    definition <- c("Primary solid Tumor",
-                    "Recurrent Solid Tumor",
-                    "Primary Blood Derived Cancer - Peripheral Blood",
-                    "Recurrent Blood Derived Cancer - Bone Marrow",
-                    "Additional - New Primary",
-                    "Metastatic",
-                    "Additional Metastatic",
-                    "Human Tumor Original Cells",
-                    "Primary Blood Derived Cancer - Bone Marrow",
-                    "Blood Derived Normal",
-                    "Solid Tissue Normal",
-                    "Buccal Cell Normal",
-                    "EBV Immortalized Normal",
-                    "Bone Marrow Normal",
-                    "Control Analyte",
-                    "Recurrent Blood Derived Cancer - Peripheral Blood",
-                    "Cell Lines",
-                    "Primary Xenograft Tissue",
-                    "Cell Line Derived Xenograft Tissue")
-    aux <- DataFrame(code = code,shortLetterCode,definition)
-
-    # in case multiple equal barcode
-    regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
-                    "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
-    samples <- str_match(barcode,regex)[,1]
-
-    ret <- DataFrame(barcode = barcode,
-                     patient = substr(barcode, 1, 12),
-                     sample = substr(barcode, 1, 16),
-                     code = substr(barcode, 14, 15))
-    ret <- merge(ret,aux, by = "code", sort = FALSE)
-    ret <- ret[match(barcode,ret$barcode),]
-    rownames(ret) <- gsub("\\.","-",make.names(ret$barcode,unique=TRUE))
-    ret$code <- NULL
-    return(DataFrame(ret))
-}
-
-
 load.maf <- function(){
     if (requireNamespace("xml2", quietly = TRUE) & requireNamespace("rvest", quietly = TRUE) ) {
         tables <- xml2::read_html("https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files")
