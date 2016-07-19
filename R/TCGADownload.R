@@ -5,7 +5,7 @@
 #'   The data from query will be save in a folder: project/data.category
 #'   The data from manifest.file  will be save in a folder: manifest.file.without.extension/
 #' @param query A query for GDCquery function
-#' @param manifest.file A manifest file from the GDC data portal
+#' @param token.file Token file to download controleed data
 #' @export
 #' @return Shows the output from the GDC transfer tools
 GDCDownload <- function(query, token.file) {
