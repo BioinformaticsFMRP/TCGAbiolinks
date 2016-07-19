@@ -38,6 +38,7 @@ The TCGAdownload function will download the data using as reference
      download again, unless the force parameter is set to \code{TRUE}
 }
 \examples{
+\dontrun{
 samples <- c("TCGA-26-1442-01A-01R-1850-01")
 query <- TCGAquery(tumor = "gbm",
                    platform = "IlluminaHiSeq_RNASeqV2",
@@ -47,13 +48,13 @@ TCGAdownload(query,path = "RNA",
              samples = samples,
              type ="rsem.genes.results")
 }
+}
 \seealso{
 \code{\link{TCGAquery}} for searching the data to download
 
 \code{\link{TCGAprepare}} for preparing the data for the user into
 a Summarized experiment object, or a matrix.
 
-Other data.functions: \code{\link{TCGAprepare}},
-  \code{\link{TCGAquery}}
+Other data.functions: \code{\link{TCGAquery}}
 }
 
