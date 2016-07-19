@@ -72,18 +72,11 @@ List of accepted platforms:
  \strong{Return}The default output is a SummarizedExperiment object.
 }
 \examples{
+\dontrun{
 sample <- "TCGA-06-0939-01A-01D-1228-05"
 query <- TCGAquery(tumor = "GBM",samples = sample, level = 3)
 TCGAdownload(query,path = "exampleData",samples = sample)
 data <- TCGAprepare(query, dir="exampleData")
 }
-\seealso{
-\code{\link{TCGAquery}} for searching the data to download
-
- \code{\link{TCGAdownload}} for downloading the data from the
-search
-
-Other data.functions: \code{\link{TCGAdownload}},
-  \code{\link{TCGAquery}}
 }
 

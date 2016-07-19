@@ -59,43 +59,14 @@ A dataframe with the results of the query
        (lastest version of the files)
 }
 \description{
-The TCGAquery searches TCGA open-access data through a preprocessed table
-   with the latest version of the files.
-
-   Some parameters as tumor, platorm, level, center, barcode can be used
-   to search the data.
-
-   TCGAquery will return a matrix with the results found,
-   that will be used in the other function TCGAdownload, TCGAprepare.
+This function has been replace by GDCquery
 }
 \examples{
+\dontrun{
 query <- TCGAquery(tumor = "gbm")
-
-query <- TCGAquery(tumor = c("gbm","lgg"),
-                   platform = c("HumanMethylation450","HumanMethylation27"))
-
-query <- TCGAquery(tumor = "gbm",
-                   platform = "HumanMethylation450",
-                   level = "3")
-
-query <- TCGAquery(samples = "TCGA-61-1743-01A-01D-0649-04",
-                   tumor = "OV",
-                   platform = "CGH-1x1M_G4447A",
-                   level = 3)
-
-# Get all LGG IlluminaHiSeq_RNASeqV2 data, but change with data version 11
-
-query <- TCGAquery(tumor = "LGG", platform = "IlluminaHiSeq_RNASeqV2", level = "3",
-                   version = list(c("IlluminaHiSeq_RNASeqV2","LGG",11)))
+}
 }
 \seealso{
-\code{\link{TCGAdownload}} for downloading the data from the
-search
-
-\code{\link{TCGAprepare}} for preparing the data for the user into
-a Summarized experiment object, or a matrix.
-
-Other data.functions: \code{\link{TCGAdownload}},
-  \code{\link{TCGAprepare}}
+Other data.functions: \code{\link{TCGAdownload}}
 }
 
