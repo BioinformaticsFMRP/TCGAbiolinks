@@ -11,7 +11,7 @@
         "   ||   |    | ___  |___| |__  | |  | |   | | | | |_/ |__         \n",
         "   ||   |___ |____| |   | |__| | |__| |__ | | |_| | \\  __|       \n",
         " ------------------------------------------------------------\n",
-        " Query, download & analyze - TCGA                  \n",
+        " Query, download & analyze - GDC                  \n",
         " Version:",utils::packageVersion("TCGAbiolinks"),"\n",
         " ==============================================================\n"
     )
@@ -19,61 +19,115 @@
 
 }
 
-# Updates tcga platform and diseases
-# @param env package environment
-#' @importFrom stringr str_match
-#' @importFrom XML readHTMLTable
-#' @importFrom downloader download
-#' @keywords internal
-load.tcga <- function(env) {
-    tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?"
+#' @title Check GDC server status
+#' @description
+#'   Check GDC server status using the api
+#'   https://gdc-api.nci.nih.gov/status
+#' @export
+#' @importFrom jsonlite fromJSON
+#' @examples
+#' status <- isServeOK()
+#' @return Return true if status is ok
+isServeOK <- function(){
+    status <- fromJSON("https://gdc-api.nci.nih.gov/status",simplifyDataFrame = TRUE)$status
+    if(status != "OK") stop("GDC server down, try to use this package later")
+    return(TRUE)
+}
 
-    # Get platform table
-    tcga.query <- "query=Platform"
-    next.url <- paste0(tcga.root, tcga.query)
-    platform.table <- tcgaGetTable(next.url)
-    platform.table <- platform.table[, 1:4]
-    platform.table <- platform.table[order(platform.table$name,
-                                           decreasing = TRUE),]
 
-    # Get disease table
-    tcga.query <- "query=Disease"
-    next.url <- paste0(tcga.root, tcga.query)
-    disease.table <- tcgaGetTable(next.url)
-    disease.table <- disease.table[, 1:3]
-
-    # Get center table
-    tcga.query <- "query=Center"
-    next.url <- paste0(tcga.root, tcga.query)
-    center.table  <- tcgaGetTable(next.url)
-    center.table <- center.table[, 1:3]
-
-    env$platform.table <- platform.table
-    env$center.table <- center.table
-    env$disease.table <- disease.table
-
-    # Get tcga folders with barcodes without private folders
-    tcga.db <- createTcgaTable()
-    env$tcga.db <- tcga.db
-    save(tcga.db, paste0(system.file("extdata", package = "TCGAbiolinks"),
-                         "/tcgadb.rda"))
-    step <- 200
-    for(i in seq(1, nrow(tcga.db) , by = step)){
-        print(i)
-        j <- i + step
-        if(j > nrow(tcga.db)){
-            j <-nrow(tcga.db)
-        }
-        tcga.db[i:j,]$deployStatus <- getBarcode(tcga.db[i:j,])$barcode
-        save(tcga.db, paste0(system.file("extdata", package = "TCGAbiolinks"),
-                             "/tcgadb.rda"))
+checkProjectInput <- function(project){
+    projects <- getGDCprojects()
+    if(missing(project)) {
+        print(knitr::kable(getGDCprojects()[,c(4:6,8)]))
+        stop("Please set a project argument from the column project_id above")
     }
+    if(!(project %in% projects$project_id)) {
+        print(knitr::kable(getGDCprojects()[,c(4:6,8)]))
+        stop("Please set a valid project argument from the column project_id above")
+    }
+}
 
-    env$tcga.db <- tcga.db
-    save(platform.table, disease.table, tcga.db, center.table,
-         file = paste0(system.file("extdata", package = "TCGAbiolinks"),
-                       "/dataFolders.rda")
-    )
+checkTumorInput <- function(tumor){
+    projects <- getGDCprojects()
+    if(missing(tumor)) {
+        print(knitr::kable(getGDCprojects()[,c(4:6,8)]))
+        stop("Please set a project argument from the column project_id above")
+    }
+    if(!(project %in% projects$tumoor)) {
+        print(knitr::kable(getGDCprojects()[,c(4:6,8)]))
+        stop("Please set a valid project argument from the column project_id above")
+    }
+}
+
+checkLegacyPlatform <- function(project,data.category, legacy = FALSE){
+    project.summary <- getProjectSummary(project, legacy)
+    if(missing(data.category)) {
+        print(knitr::kable(project.summary$data_categories))
+        stop("Please set a data.category argument from the column data_category above")
+    }
+    if(!(data.category %in% project.summary$data_categories$data_category)) {
+        print(knitr::kable(project.summary$data_categories))
+        stop("Please set a valid data.category argument from the column data_category above")
+    }
+}
+
+
+checkDataCategoriesInput <- function(project,data.category, legacy = FALSE){
+    project.summary <- getProjectSummary(project, legacy)
+    if(missing(data.category)) {
+        print(knitr::kable(project.summary$data_categories))
+        stop("Please set a data.category argument from the column data_category above")
+    }
+    if(!(data.category %in% project.summary$data_categories$data_category)) {
+        print(knitr::kable(project.summary$data_categories))
+        stop("Please set a valid data.category argument from the column data_category above")
+    }
+}
+
+checkBarcodeDefinition <- function(definition){
+    if(!(definition %in% getBarcodeDefinition()$definition)){
+        print(knitr::kable(getBarcodeDefinition()))
+        stop("Please select a difinition from the table above")
+    }
+}
+
+#' @title Retrieve all GDC projects
+#' @description
+#'   getGDCprojects uses the following api to get projects
+#'   https://gdc-api.nci.nih.gov/projects
+#' @export
+#' @import readr stringr
+#' @examples
+#' projects <- getGDCprojects()
+#' @return A data frame with last GDC projects
+getGDCprojects <- function(){
+    projects <- read_tsv("https://gdc-api.nci.nih.gov/projects?size=1000&format=tsv")
+    projects$tumor <- unlist(lapply(projects$project_id, function(x){unlist(str_split(x,"-"))[2]}))
+    return(projects)
+}
+
+# Source: https://stackoverflow.com/questions/10266963/moving-files-between-folders
+move <- function(from, to) {
+    todir <- dirname(to)
+    if (!isTRUE(file.info(todir)$isdir)) dir.create(todir, recursive=TRUE,showWarnings = FALSE)
+    file.rename(from = from,  to = to)
+}
+
+getProjectSummary <- function(project, legacy = FALSE){
+    baseURL <- ifelse(legacy,"https://gdc-api.nci.nih.gov/legacy/projects/","https://gdc-api.nci.nih.gov/projects/")
+    url <- paste0(baseURL, project,"?expand=summary,summary.data_categories&pretty=true")
+    return(fromJSON(url,simplifyDataFrame = TRUE)$data$summary)
+}
+
+getNbCases <- function(project, data.category, legacy = FALSE){
+    summary <- getProjectSummary(project, legacy)$data_categories
+    nb <- summary[summary$data_category == data.category,"case_count"]
+    return(nb)
+}
+getNbFiles <- function(project, data.category, legacy = FALSE){
+    summary <- getProjectSummary(project, legacy)$data_categories
+    nb <- summary[summary$data_category == data.category,"file_count"]
+    return(nb)
 }
 
 # Get all files in the ftp directory @keywords internal
@@ -92,59 +146,6 @@ getFileNames <- function(url) {
     return(x)
 }
 
-tcga.get.barcode <- function(data){
-    # todo considere next page =/
-    # comparar com sdrf
-    # for each tcga.db id get barcodes
-    message("Downloading TCGA barcodes")
-    all.barcode <- c()
-
-    tcga.root <- "http://tcga-data.nci.nih.gov/tcgadccws/GetHTML?query="
-    tcga.query <- paste0("FileInfo&Archive[@id=",data$id,
-                         "]&roleName=fileCollection")
-
-    next.url <- paste0(tcga.root,tcga.query)
-    files <- tcgaGetTable(next.url)
-    #print(files)
-    if (nrow(files) == 0) {
-        return(NULL)
-    }
-    files <- files[,1:4]
-    idx <- grep("somatic.maf",files$name)
-    if (length(idx > 0)) {
-        files <- files[idx,]
-    } else {
-        # no maf file
-        # try in the name
-        pat <- paste0("((((TCGA-[A-Z0-9]{2})-[A-Z0-9]{4})-[A-Z0-9]{3}-",
-                      "[A-Z0-9]{3})-[A-Z0-9]{4}-[A-Z0-9]{2})")
-        barcode <- str_match(files$name,pat)[,1]
-        #message("Found in name")
-        if (!all(is.na(barcode))) {
-            message("Found in name")
-            barcode <- barcode[!is.na(barcode)]
-            barcode <- paste0(unique(barcode), collapse = ",")
-            return(barcode)
-        }
-
-        return(NULL)
-    }
-
-    # maybe two maf files
-    for (i in  seq_along(files$name)) {
-        tcga.query <- paste0("BiospecimenBarcode&FileInfo[@id=",files[i,"id"],
-                             "]&roleName=biospecimenBarcodeCollection")
-        next.url <- paste0(tcga.root,tcga.query)
-        print(next.url)
-        barcode.table <- tcgaGetTable(next.url)
-        barcode.table <- barcode.table[,1:8]
-        all.barcode <- union(all.barcode, unique(barcode.table$barcode))
-    }
-
-    all.barcode <- paste0(unique(all.barcode), collapse = ",")
-
-    return(all.barcode)
-}
 
 #' @import utils
 #' @importFrom RCurl getURL

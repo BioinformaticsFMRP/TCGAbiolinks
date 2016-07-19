@@ -270,9 +270,63 @@ clinical_data_site_cancer <- function(cancer){
                   cancer,"/bcr/biotab/clin/"))
 }
 
+
+
+#' @title Get DDC clinical data
+#' @description
+#'   GDCquery_clinic will download all clinical information from the API
+#'   as the one with using the button from each project
+#' @param project A valid project (see list with getGDCprojects()$project_id)]
+#' @param type A valid type. Options "clinical", "Biospecimen"  (see list with getGDCprojects()$project_id)]
+#' @param save.csv Write clinical information into a csv document
+#' @export
+#' @importFrom data.table rbindlist
+#' @importFrom jsonlite fromJSON
+#' @examples
+#' clin <- GDCquery_clinic("TCGA-ACC", type = "clinical", save.csv = TRUE)
+#' clin <- GDCquery_clinic("TCGA-ACC", type = "biospecimen", save.csv = TRUE)
+#' @return A data frame with the clinical information
+GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
+    checkProjectInput(project)
+    baseURL <- "https://gdc-api.nci.nih.gov/cases/?"
+    options.pretty <- "pretty=true"
+    if(type == "clinical"){
+        options.expand <- "expand=diagnoses,diagnoses.treatments,annotations,family_histories,demographic,exposures"
+        option.size <- paste0("size=",getNbCases(project,"Clinical"))
+    } else {
+        options.expand <- "expand=samples,samples.portions,samples.portions.analytes,samples.portions.analytes.aliquots"
+        option.size <- paste0("size=",getNbCases(project,"Biospecimen"))
+    }
+    options.filter <- paste0("filters=",
+                             URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
+                             project,
+                             URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["Biospecimen"]}}]}'))
+    json <- fromJSON(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")), simplifyDataFrame = TRUE)
+    results <- json$data$hits
+
+    if(type == "clinical"){
+        diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
+        exposures <- rbindlist(results$exposures, fill = TRUE)
+        annotations <- rbindlist(results$annotations, fill = TRUE)
+        df <- cbind(diagnoses,exposures,results$demographic, annotations )
+        df$bcr_patient_barcode <- gsub("_diagnosis", "", df$submitter_id)
+        df$disease <- gsub("TCGA-|TARGET-", "", project)
+    } else {
+        df <- rbindlist(results$samples,fill = TRUE)
+    }
+
+    #y <- data.frame(diagnosis=I(results$diagnoses), demographic=results$demographic,exposures=I(results$exposures))
+    if(save.csv){
+        if(type == "biospecimen") df$portions <- NULL
+        write_csv(df,paste0(project,"_",type,".csv"))
+    }
+    setDF(df)
+    return(df)
+}
+
 #' @title Get the clinical information
 #' @description
-#'   Get the clinical information
+#'   This function has been replaced. Use GDCquery_clinic
 #' @param tumor a character vector indicating cancer type Examples:
 #' \tabular{lllll}{
 #'OV   \tab BRCA \tab CESC \tab ESCA \tab PCPG\cr
@@ -283,9 +337,13 @@ clinical_data_site_cancer <- function(cancer){
 #'READ \tab BLCA \tab DLBC \tab UCS  \tab FPPP\cr
 #'LUAD \tab LIHC \tab STAD \tab MESO \tab CNTL
 #'}
+#'
 #' For information about cancer types: https://tcga-data.nci.nih.gov/tcga/
 #' @param clinical_data_type a character vector indicating the types of
-#' clinical data Example:
+#' clinical data. Besides TCGA data, we created the clinical_patient_updated,
+#' which is the clinical_patient file with the last follow up information from the last
+#' follow up file.
+#'  Example:
 #' \tabular{ll}{
 #' biospecimen_aliquot \tab biospecimen_analyte \cr
 #' biospecimen_cqcf \tab biospecimen_diagnostic_slides \cr
@@ -299,65 +357,38 @@ clinical_data_site_cancer <- function(cancer){
 #' clinical_nte \tab  clinical_omf_v4.0 \cr
 #' clinical_patient \tab  clinical_radiation \cr
 #' ssf_normal_controls  \tab  ssf_tumor_samples \cr
-#' clinical_follow_up_v1.0_nte \cr
+#' clinical_follow_up_v1.0_nte \cr clinical_patient_updated (TCGAbiolinks only)
 #'}
 #' @param samples List of barcodes to get the clinical data
 #' @param path Directory to save the downloaded data default getwd()
 #' @export
-#' @importFrom RCurl getURL
 #' @return clinic data
 #' @examples
+#' \dontrun{
 #' data <- TCGAquery_clinic("LGG","clinical_drug")
-#' data <- TCGAquery_clinic(clinical_data_type = "clinical_patient",
-#' samples = c("TCGA-06-5416-01A-01D-1481-05",
-#'             "TCGA-2G-AAEW-01A-11D-A42Z-05",
-#'             "TCGA-2G-AAEX-01A-11D-A42Z-05"))
+#' }
 TCGAquery_clinic <- function(tumor, clinical_data_type, samples, path = getwd()){
-
-    if (missing(clinical_data_type)) stop("Please select the type of clinical data. Use ?TCGAquery_clinic to get a list")
-    if (!missing(samples)) samples <- substr(samples,1,12)
-
-    if (!missing(samples) & !missing(tumor)) {
-        query <- TCGAquery(tumor = tumor, samples = samples, platform = "bio", level=2)
-    } else  if(!missing(tumor)) {
-        query <- TCGAquery(tumor = tumor, platform = "bio", level = 2)
-    } else if(!missing(samples)) {
-        query <- TCGAquery(samples = samples, platform = "bio", level = 2)
-        save(query,clinical_data_type,path,file = "test.rda")
-    } else {
-        query <- TCGAquery(platform = "bio", level = 2)
-    }
-
-    # this is one file for all samples, no need to add samples argument
-    TCGAdownload(query,type = clinical_data_type,path = path)
-    if("CNTL" %in% unique(query$Disease)){
-        TCGAdownload(query,type = "control_cntl",path = path)
-    }
-
-    ret <- NULL
-    # prepare works if one file only so we will do a iteration for each tumor type
-    for( i in unique(query$Disease)){
-        message(paste0("Tumor type: ",i))
-        x <- subset(query, query$Disease == i)
-        if(nrow(x) > 0) {
-            if(i == "CNTL"){
-                clin <- TCGAprepare(x,type = "control_cntl", dir = ".")
-            } else {
-                clin <- TCGAprepare(x,type = clinical_data_type, dir = ".")
-            }
-            if(!missing(samples)) clin <- subset(clin,clin$bcr_patient_barcode %in% samples)
-
-            message("Adding disease collumn to data frame")
-            disease <- rep(i,nrow(clin))
-            clin <- cbind(disease,clin)
-            ret <- plyr::rbind.fill(ret,clin)
-        }
-    }
-
-    return(ret)
+    stop("TCGA data has moved from DCC server to GDC server. Please use GDCquery_clinic function")
 }
 
 
+update.clinical.with.last.followup <- function(clin){
+
+    for(disease in unique(clin$disease)){
+        aux <- clinical.table[,disease]
+        files <- rownames(clinical.table[which(aux==1),])
+        # get last follow up files not nte
+        files <- sort(files[grepl("follow",files) & !grepl("nte",files)],decreasing = T)[1]
+
+        follow <- TCGAquery_clinic(disease,files)
+
+        colnames(follow) [colnames(follow) %in% colnames(clin)]
+        aux <- plyr::ddply(follow, .(bcr_patient_barcode), function(x) x[c(nrow(x)), ])
+        aux <- aux[aux$bcr_patient_barcode %in% clin$bcr_patient_barcode,colnames(aux) %in% colnames(clin)]
+        clin[na.omit(match(aux$bcr_patient_barcode,clin$bcr_patient_barcode)),match(colnames(aux),colnames(clin))] <- aux
+    }
+    return(clin)
+}
 
 #' @title Filter samples using clinical data
 #' @description
@@ -465,134 +496,83 @@ TCGAquery_clinicFilt <- function(barcode,
     return(x)
 }
 
+load.maf <- function(){
+    if (requireNamespace("xml2", quietly = TRUE) & requireNamespace("rvest", quietly = TRUE) ) {
+        tables <- xml2::read_html("https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files")
+        tables <-  rvest::html_table(tables)
+        # Table one is junk
+        tables[[1]] <- NULL
 
+        # get which tables are from the tumor
+        all.df <- data.frame()
+        for(tumor in unique(TCGAbiolinks::TCGAquery()$Disease)) {
 
-# This function will preprare the colData for TCGAPrepare
-# The idea is to add usefull information to the object
-# that will help the users to understand their samples
-# ref: TCGA codeTablesReport - Table: Sample type
-#' @importFrom S4Vectors DataFrame
-#' @importFrom stringr str_match
-colDataPrepare <- function(barcode,query,add.subtype = FALSE, add.clinical = FALSE){
+            idx <- which(mapply(function(x) {
+                any(grepl(tumor,(x[,1]), ignore.case = TRUE))
+            },tables) == TRUE)
+            df <- lapply(idx,function(x) tables[x])
 
-    code <- c('01','02','03','04','05','06','07','08','09','10','11',
-              '12','13','14','20','40','50','60','61')
-    shortLetterCode <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
-                         "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
-                         "CELL","XP","XCL")
-
-    definition <- c("Primary solid Tumor",
-                    "Recurrent Solid Tumor",
-                    "Primary Blood Derived Cancer - Peripheral Blood",
-                    "Recurrent Blood Derived Cancer - Bone Marrow",
-                    "Additional - New Primary",
-                    "Metastatic",
-                    "Additional Metastatic",
-                    "Human Tumor Original Cells",
-                    "Primary Blood Derived Cancer - Bone Marrow",
-                    "Blood Derived Normal",
-                    "Solid Tissue Normal",
-                    "Buccal Cell Normal",
-                    "EBV Immortalized Normal",
-                    "Bone Marrow Normal",
-                    "Control Analyte",
-                    "Recurrent Blood Derived Cancer - Peripheral Blood",
-                    "Cell Lines",
-                    "Primary Xenograft Tissue",
-                    "Cell Line Derived Xenograft Tissue")
-    aux <- DataFrame(code = code,shortLetterCode,definition)
-
-    # in case multiple equal barcode
-    regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
-                    "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
-    samples <- str_match(barcode,regex)[,1]
-
-    ret <- DataFrame(barcode = barcode,
-                     patient = substr(barcode, 1, 12),
-                     sample = substr(barcode, 1, 16),
-                     code = substr(barcode, 14, 15))
-    ret <- merge(ret,aux, by = "code", sort = FALSE)
-    ret <- ret[match(barcode,ret$barcode),]
-
-    # add batch information
-    message("Adding batch info to summarizedExperiment object")
-    batch.info <- get("batch.info")
-    ret <- merge(ret,batch.info, by = "patient", sort = FALSE,all.x = TRUE)
-    ret <- ret[match(barcode,ret$barcode),]
-
-    # Add disease platform and center information
-    df <- do.call(rbind,
-                  lapply(seq_along(samples),
-                         function(i) {
-                             idx <- grep(str_match(samples[i],regex)[1,1],query$barcode)
-                             # exception case: same barcodes!
-                             # we will select the correct row
-                             if (length(idx) > 1) {
-                                 idx2 <- grep(samples[i],barcode)
-                                 idx <- idx[match(i,idx2)]
-                             }
-                             aux <- query[idx,]
-                             return(data.frame(
-                                 disease = unique(aux$Disease),
-                                 platform = unique(aux$Platform),
-                                 center = unique(aux$Center)
-                             ))
-                         }
-                  ))
-
-    ret <- cbind(ret,df)
-    if(add.subtype == TRUE){
-        for (i in unique(query$Disease)) {
-            if (grepl("acc|lgg|gbm|luad|stad|coad|read|skcm|hnsc|kich|lusc|ucec|kirp|prad|kirc|brca", i,ignore.case = TRUE)) {
-                if(tolower(i) %in% c("gbm","lgg")){
-                    subtype <- lgg.gbm.subtype
-                    if(all(colnames(subtype) %in% colnames(ret))) break
-                    if (any(ret$patient %in% subtype$patient)) {
-                        ret$aux <- substr(ret$sample,1,15)
-                        subtype$aux <- paste0(subtype$patient,"-01")
-                        subtype$patient <- NULL
-                        ret <- merge(ret, subtype,
-                                     all.x = TRUE ,
-                                     sort = FALSE,
-                                     by = "aux")
-                        ret$aux <- NULL
-                    }
-                } else {
-                    subtype <- TCGAquery_subtype(i)
-                    if (any(ret$patient %in% subtype$patient)) {
-                        ret <- merge(ret, subtype,
-                                     all.x = TRUE ,
-                                     sort = FALSE,
-                                     by = "patient")
-                    }
-                }
-
-            } else if (grepl("thca", i,ignore.case = TRUE)) {
-                subtype <- TCGAquery_subtype(i)
-                if (any(ret$sample %in% subtype$sample)) {
-                    ret <- merge(ret, subtype,
-                                 all.x = TRUE ,
-                                 sort = FALSE,
-                                 by = "sample")
-                }
+            if(length(df) == 0) next
+            # merge the data frame in the lists
+            if(length(idx) > 1) {
+                df <- Reduce(function(...) merge(..., all=TRUE), df)
+            }  else if(length(idx) == 1) {
+                df <- Reduce(function(...) merge(..., all=TRUE), df)
+                df <- df[[1]]
+                colnames(df) <- gsub(" ",".", colnames(df))
+                colnames(df) <- gsub(":",".", colnames(df))
             }
+
+            # Remove obsolete/protected
+            df <- subset(df, df$Deploy.Status == "Available")
+            df <- subset(df, df$Protection.Status == "Public")
+
+            if(nrow(df) == 0) next
+
+            df$Tumor <- tumor
+            all.df <- rbind(all.df,df)
+        }
+
+        all.df[,"Deploy.Location"] <- gsub("/dccfiles_prod/tcgafiles/",
+                                           "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/",
+                                           all.df[,"Deploy.Location"] )
+    }
+    return(all.df)
+}
+
+get.mutation.matrix <- function(barcode,query){
+    maf <- load.maf()
+    maf <- maf[order(as.Date(maf$Deploy.Date, "%d-%b-%Y")),]
+    aux <- plyr::ddply(maf, .(Tumor), function(x) x[c(nrow(x)), ])
+
+    ret <- NULL
+    for(disease in unique(query$Disease)){
+        df <- aux[aux$Tumor == disease,]
+        message(paste0("Downloading maf file",df$MAF.File.Name))
+        if(is.windows()) mode <- "wb" else  mode <- "w"
+        if (!file.exists(df$MAF.File.Name))
+            downloader::download(df$Deploy.Location,df$MAF.File.Name, quiet = FALSE,mode = mode)
+
+        mutation.matrix <- read.table(df$MAF.File.Name, fill = TRUE,
+                                      comment.char = "#", header = TRUE, sep = "\t", quote='')
+        mutation.matrix <- mutation.matrix[substr(mutation.matrix$Tumor_Sample_Barcode,1,15) %in% substr(barcode,1,15),]
+        if(nrow(mutation.matrix) == 0) {
+            next
+        }
+        # Fazer um subset de acordo com as amostras que eu tenho
+        mutation.matrix <- data.table::setDT(mutation.matrix)
+        mutation.matrix <- reshape2::acast(mutation.matrix, Tumor_Sample_Barcode~Hugo_Symbol, value.var="Variant_Type")
+        mutation.matrix[which(mutation.matrix > 0)] <- 1
+        if(is.null(ret)) {
+            ret <- mutation.matrix
+        }  else{
+            ret <- plyr::rbind.fill(as.data.frame(ret),as.data.frame(mutation.matrix))
+            ret[is.na(ret)] <- 0
         }
     }
-
-    if(add.clinical){
-       clin <- TCGAquery_clinic(samples = ret$barcode,clinical_data_type = "clinical_patient")
-       clin$patient <- clin$bcr_patient_barcode
-       ret <- merge(ret, clin,
-                    all.x = TRUE ,
-                    sort = FALSE,
-                    by = "patient")
-    }
-
-    ret <- ret[match(barcode,ret$barcode),]
-    rownames(ret) <- gsub("\\.","-",make.names(ret$barcode,unique=TRUE))
-    ret$code <- NULL
-    return(DataFrame(ret))
+    return(ret)
 }
+
 
 #' @title Retrieve molecular subtypes for a given tumor
 #' @description
