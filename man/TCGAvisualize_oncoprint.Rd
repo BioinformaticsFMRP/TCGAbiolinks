@@ -57,14 +57,13 @@ A oncoprint plot
 Creating a oncoprint
 }
 \examples{
-mut <- TCGAbiolinks::TCGAquery_maf(tumor = "GBM",
-       archive.name = "ucsc.edu_GBM.IlluminaGA_DNASeq_automated.Level_2.1.1.0")
+mut <- GDCquery_Maf(tumor = "ACC")
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:10], rm.empty.columns = TRUE)
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:10],
                  filename = "onco.pdf",
                  color=c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown"))
-clin <- TCGAbiolinks::TCGAquery_clinic("gbm","clinical_patient")
-clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_tissue_site","race","vital_status")]
+clin <- GDCquery_clinic("TCGA-ACC","clinical")
+clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_stage","race","vital_status")]
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
                 filename = "onco.pdf",
                 annotation = clin,
