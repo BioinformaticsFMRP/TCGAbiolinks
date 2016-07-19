@@ -5,6 +5,7 @@
 #' @param query A query for GDCquery function
 #' @param save Save result as RData object?
 #' @param save.filename Name of the file to be save if empty an automatic will be created
+#' @param summarizedExperiment Create a summarizedExperiment? Default TRUE (if possible)
 #' @export
 #' @return A summarizedExperiment or a data.frame
 GDCPrepare <- function(query, save = FALSE, save.filename, summarizedExperiment = TRUE){
