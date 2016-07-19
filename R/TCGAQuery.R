@@ -62,6 +62,8 @@ GDCquery <- function(project,
     options.pretty <- "pretty=true"
     if(data.category == "Protein expression" & legacy) {
         options.expand <- "expand=cases.samples.portions,cases.project,center,analysis"
+    } else if(data.category %in% c("Clinical","Biospecimen")) {
+        options.expand <- "expand=cases,cases.project,center,analysis"
     } else {
         options.expand <- "expand=cases.samples.portions.analytes.aliquots,cases.project,center,analysis"
     }
@@ -82,9 +84,15 @@ GDCquery <- function(project,
     # get barcode of the samples
     # TARGET-20-PANLLX-09A-01R
     #print(results$cases[[1]])
-    pat <- paste("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}-[:alnum:]{3}-[:alnum:]{2,3}-[:alnum:]{4}-[:alnum:]{2}",
+    if(data.category %in% c("Clinical","Biospecimen")) {
+        pat <- paste("TCGA-[:alnum:]{2}-[:alnum:]{4}",
+                     "TARGET-[:alnum:]{2}-[:alnum:]{6}",sep = "|")
+    } else {
+        pat <- paste("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}-[:alnum:]{3}-[:alnum:]{2,3}-[:alnum:]{4}-[:alnum:]{2}",
                  "[:alnum:]{6}-[:alnum:]{2}-[:alnum:]{6}-[:alnum:]{3}-[:alnum:]{3}",sep = "|")
+    }
     barcodes <- na.omit(unlist(lapply(results$cases,function(x) str_extract(x,pat))))
+
     results$cases <- barcodes
     results$definition <- expandBarcodeInfo(barcodes)$definition
 
