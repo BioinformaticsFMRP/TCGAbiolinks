@@ -308,14 +308,19 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
         diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
         exposures <- rbindlist(results$exposures, fill = TRUE)
         df <- cbind(diagnoses,exposures,results$demographic)
+        df$bcr_patient_barcode <- gsub("_diagnosis", "", df$submitter_id)
+        df$disease <- gsub("TCGA-|TARGET-", "", project)
+
     } else {
         df <- rbindlist(results$samples,fill = T)
     }
+
     #y <- data.frame(diagnosis=I(results$diagnoses), demographic=results$demographic,exposures=I(results$exposures))
     if(save.csv){
         if(type == "biospecimen") df$portions <- NULL
         write_csv(df,paste0(project,"_",type,".csv"))
     }
+    setDF(df)
     return(df)
 }
 
