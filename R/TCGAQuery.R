@@ -89,7 +89,7 @@ GDCquery <- function(project,
                      "TARGET-[:alnum:]{2}-[:alnum:]{6}",sep = "|")
     } else {
         pat <- paste("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}-[:alnum:]{3}-[:alnum:]{2,3}-[:alnum:]{4}-[:alnum:]{2}",
-                 "[:alnum:]{6}-[:alnum:]{2}-[:alnum:]{6}-[:alnum:]{3}-[:alnum:]{3}",sep = "|")
+                     "[:alnum:]{6}-[:alnum:]{2}-[:alnum:]{6}-[:alnum:]{3}-[:alnum:]{3}",sep = "|")
     }
     barcodes <- na.omit(unlist(lapply(results$cases,function(x) str_extract(x,pat))))
 
@@ -156,43 +156,87 @@ GDCquery <- function(project,
 }
 
 expandBarcodeInfo <- function(barcode){
-    ret <- data.frame(barcode = barcode,
-                      patient = substr(barcode, 1, 12),
-                      sample = substr(barcode, 1, 16),
-                      code = substr(barcode, 14, 15))
-    ret <- merge(ret,getBarcodeDefinition(), by = "code", sort = FALSE)
-    ret <- ret[match(barcode,ret$barcode),]
+    if(all(grepl("TARGET",barcode))) {
+        ret <- DataFrame(barcode = barcode,
+                         code = substr(barcode, 8, 9),
+                         case.unique.id = substr(barcode, 11, 16),
+                         tissue.code = substr(barcode, 18, 19),
+                         nucleic.acid.code = substr(barcode, 24, 24))
+        ret <- merge(ret,getBarcodeDefinition(), by = "tissue.code", sort = FALSE)
+        ret <- ret[match(barcode,ret$barcode),]
+    }
+    if(all(grepl("TCGA",barcode))) {
+        ret <- data.frame(barcode = barcode,
+                          patient = substr(barcode, 1, 12),
+                          sample = substr(barcode, 1, 16),
+                          tissue.code = substr(barcode, 14, 15))
+        ret <- merge(ret,getBarcodeDefinition(), by = "tissue.code", sort = FALSE)
+        ret <- ret[match(barcode,ret$barcode),]
+    }
     return(ret)
 }
 
 
-getBarcodeDefinition <- function(){
-    code <- c('01','02','03','04','05','06','07','08','09','10','11',
-              '12','13','14','20','40','50','60','61')
-    shortLetterCode <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
-                         "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
-                         "CELL","XP","XCL")
+getBarcodeDefinition <- function(type = "TCGA"){
+    if(type = "TCGA"){
+        tissue.code <- c('01','02','03','04','05','06','07','08','09','10','11',
+                         '12','13','14','20','40','50','60','61')
+        shortLetterCode <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
+                             "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
+                             "CELL","XP","XCL")
 
-    definition <- c("Primary solid Tumor",
-                    "Recurrent Solid Tumor",
-                    "Primary Blood Derived Cancer - Peripheral Blood",
-                    "Recurrent Blood Derived Cancer - Bone Marrow",
-                    "Additional - New Primary",
-                    "Metastatic",
-                    "Additional Metastatic",
-                    "Human Tumor Original Cells",
-                    "Primary Blood Derived Cancer - Bone Marrow",
-                    "Blood Derived Normal",
-                    "Solid Tissue Normal",
-                    "Buccal Cell Normal",
-                    "EBV Immortalized Normal",
-                    "Bone Marrow Normal",
-                    "Control Analyte",
-                    "Recurrent Blood Derived Cancer - Peripheral Blood",
-                    "Cell Lines",
-                    "Primary Xenograft Tissue",
-                    "Cell Line Derived Xenograft Tissue")
-    aux <- data.frame(code = code,shortLetterCode,definition)
+        tissue.definition <- c("Primary solid Tumor",
+                               "Recurrent Solid Tumor",
+                               "Primary Blood Derived Cancer - Peripheral Blood",
+                               "Recurrent Blood Derived Cancer - Bone Marrow",
+                               "Additional - New Primary",
+                               "Metastatic",
+                               "Additional Metastatic",
+                               "Human Tumor Original Cells",
+                               "Primary Blood Derived Cancer - Bone Marrow",
+                               "Blood Derived Normal",
+                               "Solid Tissue Normal",
+                               "Buccal Cell Normal",
+                               "EBV Immortalized Normal",
+                               "Bone Marrow Normal",
+                               "Control Analyte",
+                               "Recurrent Blood Derived Cancer - Peripheral Blood",
+                               "Cell Lines",
+                               "Primary Xenograft Tissue",
+                               "Cell Line Derived Xenograft Tissue")
+        aux <- data.frame(tissue.code = tissue.code,shortLetterCode,tissue.definition)
+    } else {
+        tissue.code <- c('01','02','03','04','05','06','07','08','09','10','11',
+                         '12','13','14','15','16','17','20','40','41','42','50','60','61','99')
+
+        tissue.definition <- c("Primary solid Tumor", # 01
+                               "Recurrent Solid Tumor", # 02
+                               "Primary Blood Derived Cancer - Peripheral Blood", # 03
+                               "Recurrent Blood Derived Cancer - Bone Marrow", # 04
+                               "Additional - New Primary", # 05
+                               "Metastatic", # 06
+                               "Additional Metastatic", # 07
+                               "Tissue disease-specific post-adjuvant therapy", # 08
+                               "Primary Blood Derived Cancer - Bone Marrow", # 09
+                               "Blood Derived Normal", # 10
+                               "Solid Tissue Normal",  # 11
+                               "Buccal Cell Normal",   # 12
+                               "EBV Immortalized Normal", # 13
+                               "Bone Marrow Normal", # 14
+                               "Fibroblasts from Bone Marrow Normal", # 15
+                               "Mononuclear Cells from Bone Marrow Normal", # 16
+                               "Lymphatic Tissue Normal (including centroblasts)", # 17
+                               "Control Analyte", # 20
+                               "Recurrent Blood Derived Cancer - Peripheral Blood", # 40
+                               "Blood Derived Cancer- Bone Marrow, Post-treatment", # 41
+                               "Blood Derived Cancer- Peripheral Blood, Post-treatment", # 42
+                               "Cell line from patient tumor", # 50
+                               "Xenograft from patient not grown as intermediate on plastic tissue culture dish", # 60
+                               "Xenograft grown in mice from established cell lines", #61
+                               "Granulocytes after a Ficoll separation") # 99
+        aux <- DataFrame(tissue.code = tissue.code,tissue.definition)
+
+    }
     return(aux)
 }
 
