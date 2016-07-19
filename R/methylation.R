@@ -106,15 +106,8 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' @export
 #' @return Survival plot
 #' @examples
-#' days_to_death <- floor(runif(200, 1, 1000))
-#' vital_status <- c(rep("Dead",200))
-#' groups <- c(rep(c("G1","G2"),c(100,100)))
-#' df <- data.frame(days_to_death,vital_status,groups)
-#' TCGAanalyze_survival(df,clusterCol="groups")
-#' \dontrun{
-#' clinical <- TCGAquery_clinic("gbm","clinical_patient")
-#' TCGAanalyze_survival(clinical,"gender", filename = "surv.pdf", legend="Gender")
-#' }
+#' clin <- GDCquery_clinic("TCGA-LGG", type = "clinical", save.csv = F)
+#' TCGAanalyze_survival(clin, clusterCol="gender")
 TCGAanalyze_survival <- function(data,
                                  clusterCol = NULL,
                                  legend = "Legend",
@@ -137,6 +130,9 @@ TCGAanalyze_survival <- function(data,
 ) {
     .e <- environment()
 
+    if(!all(c("vital_status", "days_to_death","days_to_last_follow_up") %in% colnames(clin)))
+        stop("Columns vital_status, days_to_death, days_to_last_follow_up should be in data frame")
+
     if(is.null(color)){
         color <- rainbow(length(unique(data[,clusterCol])))
     }
@@ -146,15 +142,14 @@ TCGAanalyze_survival <- function(data,
         message("Please provide the clusterCol argument")
         return(NULL)
     }
-    notDead <- which(data$days_to_death == "[Not Applicable]")
+    notDead <- is.na(data$days_to_death)
 
     if (length(notDead) > 0) {
-        data[notDead,]$days_to_death <- data[notDead,]$days_to_last_followup
+        data[notDead,]$days_to_death <- data[notDead,]$days_to_last_follow_up
     }
-
     # create a column to be used with survival package, info need
     # to be TRUE(DEAD)/FALSE (ALIVE)
-    data$s <- (data$vital_status == "Dead")
+    data$s <- grepl("dead",data$vital_status,ignore.case = TRUE)
 
     # Column with groups
     data$type <- as.factor(data[,clusterCol])
