@@ -9,7 +9,7 @@ GDCDownload(query, token.file)
 \arguments{
 \item{query}{A query for GDCquery function}
 
-\item{manifest.file}{A manifest file from the GDC data portal}
+\item{token.file}{Token file to download controleed data}
 }
 \value{
 Shows the output from the GDC transfer tools
