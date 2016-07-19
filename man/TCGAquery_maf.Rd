@@ -17,11 +17,11 @@ TCGAquery_maf(tumor = NULL, center = NULL, archive.name = NULL)
 list of samples for a tumor
 }
 \description{
-Filtering sample output from TCGAquery
+This function has been replaced. Use GDCquery_maf
 }
 \examples{
 \dontrun{
- query <- TCGAquery(tumor = 'lgg')
+ query <- TCGAquery_maf(tumor = 'lgg')
 }
 }
 
