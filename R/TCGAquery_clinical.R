@@ -307,12 +307,12 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
     if(type == "clinical"){
         diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
         exposures <- rbindlist(results$exposures, fill = TRUE)
-        df <- cbind(diagnoses,exposures,results$demographic)
+        annotations <- rbindlist(results$annotations, fill = TRUE)
+        df <- cbind(diagnoses,exposures,results$demographic, annotations )
         df$bcr_patient_barcode <- gsub("_diagnosis", "", df$submitter_id)
         df$disease <- gsub("TCGA-|TARGET-", "", project)
-
     } else {
-        df <- rbindlist(results$samples,fill = T)
+        df <- rbindlist(results$samples,fill = TRUE)
     }
 
     #y <- data.frame(diagnosis=I(results$diagnoses), demographic=results$demographic,exposures=I(results$exposures))
