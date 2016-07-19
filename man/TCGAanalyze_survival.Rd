@@ -64,14 +64,7 @@ using survival library. It uses the fields days_to_death and vital, plus a
 columns for groups.
 }
 \examples{
-days_to_death <- floor(runif(200, 1, 1000))
-vital_status <- c(rep("Dead",200))
-groups <- c(rep(c("G1","G2"),c(100,100)))
-df <- data.frame(days_to_death,vital_status,groups)
-TCGAanalyze_survival(df,clusterCol="groups")
-\dontrun{
-clinical <- TCGAquery_clinic("gbm","clinical_patient")
-TCGAanalyze_survival(clinical,"gender", filename = "surv.pdf", legend="Gender")
-}
+clin <- GDCquery_clinic("TCGA-LGG", type = "clinical", save.csv = F)
+TCGAanalyze_survival(clin, clusterCol="gender")
 }
 
