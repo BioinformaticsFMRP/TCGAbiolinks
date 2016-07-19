@@ -14,6 +14,6 @@ Check GDC server status using the api
   https://gdc-api.nci.nih.gov/status
 }
 \examples{
-status <- checkGDCstatus()
+status <- isServeOK()
 }
 
