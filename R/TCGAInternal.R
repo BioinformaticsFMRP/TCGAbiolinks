@@ -26,7 +26,7 @@
 #' @export
 #' @importFrom jsonlite fromJSON
 #' @examples
-#' status <- checkGDCstatus()
+#' status <- isServeOK()
 #' @return Return true if status is ok
 isServeOK <- function(){
     status <- fromJSON("https://gdc-api.nci.nih.gov/status",simplifyDataFrame = TRUE)$status
