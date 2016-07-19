@@ -132,9 +132,18 @@ GDCquery <- function(project,
     if(missing(data.type)) data.type <- NA
     if(missing(barcode)) barcode <- NA
     if(missing(platform)) platform <- NA
+    if(missing(file.type)) file.type <- NA
+    if(missing(workflow.type)) workflow.type <- NA
+
     ret <- data.frame(results=I(list(results)), project = project,
-                      data.category = data.category, data.type = data.type, legacy = legacy, platform = I(list(platform)),
-                      sample.type = I(list(sample.type)), barcode = I(list(barcode)))
+                      data.category = data.category,
+                      data.type = data.type,
+                      legacy = legacy,
+                      file.type = file.type,
+                      platform = I(list(platform)),
+                      sample.type = I(list(sample.type)),
+                      barcode = I(list(barcode)),
+                      workflow.type = workflow.type)
     return(ret)
 }
 
