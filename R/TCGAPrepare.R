@@ -20,7 +20,10 @@ GDCPrepare <- function(query, save = FALSE, save.filename, summarizedExperiment 
                        gsub(" ","_",query$results[[1]]$file_name))
 
     if(query$data.category == "Transcriptome Profiling"){
-        data <- readTranscriptomeProfiling(files,unique(query$results[[1]]$analysis$workflow_type),query$results[[1]]$cases)
+        data <- readTranscriptomeProfiling(files = files,
+                                           data.type = query$data.type,
+                                           workflow.type = unique(query$results[[1]]$analysis$workflow_type),
+                                           cases = query$results[[1]]$cases)
     } else if(query$data.category == "Copy Number Variation") {
         data <- readCopyNumberVariantion(files, query$results[[1]]$cases)
     }  else if(query$data.category == "DNA methylation") {
@@ -210,7 +213,103 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
     return(df)
 }
 
-colDataPrepare <- function(barcode){
+colDataPrepareTARGET <- function(barcode){
+    message("Adding description to target samples")
+    tissue.code <- c('01','02','03','04','05','06','07','08','09','10','11',
+              '12','13','14','15','16','17','20','40','41','42','50','60','61','99')
+
+    tissue.definition <- c("Primary solid Tumor", # 01
+                    "Recurrent Solid Tumor", # 02
+                    "Primary Blood Derived Cancer - Peripheral Blood", # 03
+                    "Recurrent Blood Derived Cancer - Bone Marrow", # 04
+                    "Additional - New Primary", # 05
+                    "Metastatic", # 06
+                    "Additional Metastatic", # 07
+                    "Tissue disease-specific post-adjuvant therapy", # 08
+                    "Primary Blood Derived Cancer - Bone Marrow", # 09
+                    "Blood Derived Normal", # 10
+                    "Solid Tissue Normal",  # 11
+                    "Buccal Cell Normal",   # 12
+                    "EBV Immortalized Normal", # 13
+                    "Bone Marrow Normal", # 14
+                    "Fibroblasts from Bone Marrow Normal", # 15
+                    "Mononuclear Cells from Bone Marrow Normal", # 16
+                    "Lymphatic Tissue Normal (including centroblasts)", # 17
+                    "Control Analyte", # 20
+                    "Recurrent Blood Derived Cancer - Peripheral Blood", # 40
+                    "Blood Derived Cancer- Bone Marrow, Post-treatment", # 41
+                    "Blood Derived Cancer- Peripheral Blood, Post-treatment", # 42
+                    "Cell line from patient tumor", # 50
+                    "Xenograft from patient not grown as intermediate on plastic tissue culture dish", # 60
+                    "Xenograft grown in mice from established cell lines", #61
+                    "Granulocytes after a Ficoll separation") # 99
+    aux <- DataFrame(tissue.code = tissue.code,tissue.definition)
+
+    # in case multiple equal barcode
+    regex <- paste0("[:alnum:]{5}-[:alnum:]{2}-[:alnum:]{6}",
+                    "-[:alnum:]{3}-[:alnum:]{3}")
+    samples <- str_match(barcode,regex)[,1]
+
+    ret <- DataFrame(barcode = barcode,
+                     tumor.code = substr(barcode, 8, 9),
+                     case.unique.id = substr(barcode, 11, 16),
+                     tissue.code = substr(barcode, 18, 19),
+                     nucleic.acid.code = substr(barcode, 24, 24))
+
+    ret <- merge(ret,aux, by = "tissue.code", sort = FALSE)
+
+    tumor.code <- c('00','01','02','03','04','10','15','20','21','30','40',
+                     '41','50','51','52','60','61','62','63','64','65','70','71','80','81')
+
+    tumor.definition <- c("Non-cancerous tissue", # 00
+                    "Diffuse Large B-Cell Lymphoma (DLBCL)", # 01
+                    "Lung Cancer (all types)", # 02
+                    "Cervical Cancer (all types)", # 03
+                    "Anal Cancer (all types)", # 04
+                    "Acute lymphoblastic leukemia (ALL)", # 10
+                    "Mixed phenotype acute leukemia (MPAL)", # 15
+                    "Acute myeloid leukemia (AML)", # 20
+                    "Induction Failure AML (AML-IF)", # 21
+                    "Neuroblastoma (NBL)", # 30
+                    "Osteosarcoma (OS)",  # 40
+                    "Ewing sarcoma",   # 41
+                    "Wilms tumor (WT)", # 50
+                    "Clear cell sarcoma of the kidney (CCSK)", # 51
+                    "Rhabdoid tumor (kidney) (RT)", # 52
+                    "CNS, ependymoma", # 60
+                    "CNS, glioblastoma (GBM)", # 61
+                    "CNS, rhabdoid tumor", # 62
+                    "CNS, low grade glioma (LGG)", # 63
+                    "CNS, medulloblastoma", # 64
+                    "CNS, other", # 65
+                    "NHL, anaplastic large cell lymphoma", # 70
+                    "NHL, Burkitt lymphoma (BL)", # 71
+                    "Rhabdomyosarcoma", #80
+                    "Soft tissue sarcoma, non-rhabdomyosarcoma") # 81
+    aux <- DataFrame(tumor.code = tumor.code,tumor.definition)
+    ret <- merge(ret,aux, by = "tumor.code", sort = FALSE)
+
+    nucleic.acid.code <- c('D','E','W','X','Y','R','S')
+    nucleic.acid.description <-  c("DNA, unamplified, from the first isolation of a tissue",
+                                   "DNA, unamplified, from the first isolation of a tissue embedded in FFPE",
+                                   "DNA, whole genome amplified by Qiagen (one independent reaction)",
+                                   "DNA, whole genome amplified by Qiagen (a second, separate independent reaction)",
+                                   "DNA, whole genome amplified by Qiagen (pool of “W” and “X” aliquots)",
+                                   "RNA, from the first isolation of a tissue",
+                                   "RNA, from the first isolation of a tissue embedded in FFPE")
+    aux <- DataFrame(nucleic.acid.code = nucleic.acid.code,nucleic.acid.description)
+    ret <- merge(ret,aux, by = "nucleic.acid.code", sort = FALSE)
+
+
+    ret <- ret[match(barcode,ret$barcode),]
+    rownames(ret) <- gsub("\\.","-",make.names(ret$barcode,unique=TRUE))
+    ret$code <- NULL
+    return(DataFrame(ret))
+}
+
+colDataPrepareTCGA <- function(barcode){
+    # For the moment this will work only for TCGA Data
+    # We should search what TARGET data means
 
     code <- c('01','02','03','04','05','06','07','08','09','10','11',
               '12','13','14','20','40','50','60','61')
@@ -218,25 +317,25 @@ colDataPrepare <- function(barcode){
                          "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
                          "CELL","XP","XCL")
 
-    definition <- c("Primary solid Tumor",
-                    "Recurrent Solid Tumor",
-                    "Primary Blood Derived Cancer - Peripheral Blood",
-                    "Recurrent Blood Derived Cancer - Bone Marrow",
-                    "Additional - New Primary",
-                    "Metastatic",
-                    "Additional Metastatic",
-                    "Human Tumor Original Cells",
-                    "Primary Blood Derived Cancer - Bone Marrow",
-                    "Blood Derived Normal",
-                    "Solid Tissue Normal",
-                    "Buccal Cell Normal",
-                    "EBV Immortalized Normal",
-                    "Bone Marrow Normal",
-                    "Control Analyte",
-                    "Recurrent Blood Derived Cancer - Peripheral Blood",
-                    "Cell Lines",
-                    "Primary Xenograft Tissue",
-                    "Cell Line Derived Xenograft Tissue")
+    definition <- c("Primary solid Tumor", # 01
+                    "Recurrent Solid Tumor", # 02
+                    "Primary Blood Derived Cancer - Peripheral Blood", # 03
+                    "Recurrent Blood Derived Cancer - Bone Marrow", # 04
+                    "Additional - New Primary", # 05
+                    "Metastatic", # 06
+                    "Additional Metastatic", # 07
+                    "Human Tumor Original Cells", # 08
+                    "Primary Blood Derived Cancer - Bone Marrow", # 09
+                    "Blood Derived Normal", # 10
+                    "Solid Tissue Normal",  # 11
+                    "Buccal Cell Normal",   # 12
+                    "EBV Immortalized Normal", # 13
+                    "Bone Marrow Normal", # 14
+                    "Control Analyte", # 20
+                    "Recurrent Blood Derived Cancer - Peripheral Blood", # 40
+                    "Cell Lines", # 50
+                    "Primary Xenograft Tissue", # 60
+                    "Cell Line Derived Xenograft Tissue") # 61
     aux <- DataFrame(code = code,shortLetterCode,definition)
 
     # in case multiple equal barcode
@@ -253,6 +352,14 @@ colDataPrepare <- function(barcode){
     rownames(ret) <- gsub("\\.","-",make.names(ret$barcode,unique=TRUE))
     ret$code <- NULL
     return(DataFrame(ret))
+}
+
+colDataPrepare <- function(barcode){
+    # For the moment this will work only for TCGA Data
+    # We should search what TARGET data means
+    message("Starting to add information to samples")
+    if(all(grepl("TARGET",barcode))) return(colDataPrepareTARGET(barcode))
+    if(all(grepl("TCGA",barcode))) return(colDataPrepareTCGA(barcode))
 }
 
 #' @importFrom biomaRt getBM useMart
@@ -273,8 +380,7 @@ get.GRCh.bioMart <- function(genome="hg19") {
     gene.location <- getBM(attributes = c("chromosome_name",
                                           "start_position",
                                           "end_position", "strand",
-                                          "external_gene_id",
-                                          "entrezgene"),
+                                          "ensembl_gene_id","external_gene_name"),
                            filters = c("chromosome_name"),
                            values = list(chrom), mart = ensembl)
 
@@ -297,7 +403,47 @@ readProteinExpression <- function(files,cases) {
     return(df)
 }
 
-readTranscriptomeProfiling <- function(files, workflow.type, cases) {
+makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
+
+    # Prepare data table
+    # Remove the version from the ensembl gene id
+    assays <- data.matrix(data[,2:ncol(data)])
+    names(assays) <- assay.list
+    assays <- lapply(assays, function(x){
+        colnames(x) <- NULL
+        rownames(x) <- NULL
+        return(x)
+    })
+
+    # Prepare Patient table
+    print(cases)
+    colData <-  colDataPrepare(cases)
+
+    # Prepare rowRanges
+    gene.location <- get.GRCh.bioMart("hg38")
+    aux <- strsplit(data$X1,"\\.")
+    data$ensembl_gene_id <- as.character(unlist(lapply(aux,function(x) x[1])))
+    print(head(data))
+    print(head(data))
+
+    data <- merge(data, gene.location, by="ensembl_gene_id")
+    print(head(data))
+    rowRanges <- GRanges(seqnames = paste0("chr", data$chromosome_name),
+                         ranges = IRanges(start = data$start_position,
+                                          end = data$end_position),
+                         strand = data$strand,
+                         ensembl_gene_id = data$ensembl_gene_id,
+                         external_gene_name = data$external_gene_name)
+    names(rowRanges) <- as.character(data$ensembl_gene_id)
+    save(assays,rowRanges,colData,file = "test2.rda")
+    rse <- SummarizedExperiment(assays=assays,
+                                rowRanges=rowRanges,
+                                colData=colData)
+
+    return(rse)
+}
+
+readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases) {
     # Status working for:
     #  - htseq
     #  - FPKM
@@ -307,6 +453,19 @@ readTranscriptomeProfiling <- function(files, workflow.type, cases) {
         for (i in seq_along(files)) {
             data <- read_tsv(file = files[i], col_names = FALSE)
             if(!missing(cases))  colnames(data)[2] <- cases[i]
+            if(i == 1) df <- data
+            if(i != 1) df <- merge(df, data, by=colnames(df)[1],all = TRUE)
+            setTxtProgressBar(pb, i)
+        }
+        close(pb)
+        df <- makeSEfromTranscriptomeProfiling(df,cases,workflow.type)
+    } else if(grepl("miRNA", workflow.type) & grepl("miRNA", data.type)) {
+        pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+        for (i in seq_along(files)) {
+            data <- read_tsv(file = files[i], col_names = TRUE)
+            if(!missing(cases))
+                colnames(data)[2:ncol(data)] <- paste0(colnames(data)[2:ncol(data)],"_",cases[i])
+
             if(i == 1) df <- data
             if(i != 1) df <- merge(df, data, by=colnames(df)[1],all = TRUE)
             setTxtProgressBar(pb, i)
