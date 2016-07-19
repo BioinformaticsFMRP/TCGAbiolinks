@@ -291,7 +291,7 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
     baseURL <- "https://gdc-api.nci.nih.gov/cases/?"
     options.pretty <- "pretty=true"
     if(type == "clinical"){
-        options.expand <- "expand=diagnoses,demographic,exposures"
+        options.expand <- "expand=diagnoses,diagnoses.treatments,annotations,family_histories,demographic,exposures"
         option.size <- paste0("size=",getNbCases(project,"Clinical"))
     } else {
         options.expand <- "expand=samples,samples.portions,samples.portions.analytes,samples.portions.analytes.aliquots"
