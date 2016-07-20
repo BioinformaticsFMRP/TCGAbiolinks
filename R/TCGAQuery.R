@@ -178,7 +178,7 @@ expandBarcodeInfo <- function(barcode){
 
 
 getBarcodeDefinition <- function(type = "TCGA"){
-    if(type = "TCGA"){
+    if(type == "TCGA"){
         tissue.code <- c('01','02','03','04','05','06','07','08','09','10','11',
                          '12','13','14','20','40','50','60','61')
         shortLetterCode <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
