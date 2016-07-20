@@ -1,10 +1,10 @@
 context("Analyse")
 
 test_that("TCGAanalyze_survival creates pdf", {
-    clin <- GDCquery_clinic("TCGA-LGG", type = "clinical", save.csv = F)
+    clin <- GDCquery_clinic("TCGA-ACC", type = "clinical", save.csv = FALSE)
     TCGAanalyze_survival(clin,clusterCol="gender",filename = "test.pdf")
     expect_true(file.exists("test.pdf"))
-    expect_equal(class(TCGAanalyze_survival(df,clusterCol="groups", filename = NULL)), class(ggplot2::ggplot(NULL)))
+    expect_equal(class(TCGAanalyze_survival(clin,clusterCol="gender", filename = NULL)), class(ggplot2::ggplot(NULL)))
     unlink("test.pdf")
 })
 
