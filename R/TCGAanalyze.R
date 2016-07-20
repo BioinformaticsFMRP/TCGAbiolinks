@@ -91,7 +91,7 @@ TCGAanalyze_Preprocessing<- function(object,
     layout(matrix(c(1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 3, 3, 3, 4), 4, 4, byrow = TRUE))
 
     #c <- cor(exprs(object)[, order], method = "spearman")
-    c <- cor(assay(object,"raw_counts")[, order], method = "spearman")
+    c <- cor(assay(object,"raw_count")[, order], method = "spearman")
 
     image(c, xaxt = "n", yaxt = "n",
           xlab = "Array Samples",
@@ -125,7 +125,7 @@ TCGAanalyze_Preprocessing<- function(object,
             main ="Boxplot of correlation samples by samples after normalization")
 
     samplesCor <- rowMeans(c)
-    objectWO <-  assay(object,"raw_counts")[, samplesCor > cor.cut]
+    objectWO <-  assay(object,"raw_count")[, samplesCor > cor.cut]
     #colnames(objectWO) <- colData(object)$sample[,samplesCor > cor.cut]
 
     dev.off()
