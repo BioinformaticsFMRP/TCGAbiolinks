@@ -106,7 +106,7 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
 #' @export
 #' @return Survival plot
 #' @examples
-#' clin <- GDCquery_clinic("TCGA-LGG", type = "clinical", save.csv = F)
+#' clin <- GDCquery_clinic("TCGA-LGG", type = "clinical", save.csv = FALSE)
 #' TCGAanalyze_survival(clin, clusterCol="gender")
 TCGAanalyze_survival <- function(data,
                                  clusterCol = NULL,
