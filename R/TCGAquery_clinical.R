@@ -303,13 +303,15 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
                              URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["Biospecimen"]}}]}'))
     json <- fromJSON(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")), simplifyDataFrame = TRUE)
     results <- json$data$hits
-
     if(type == "clinical"){
         diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
+        diagnoses$submitter_id <- gsub("_diagnosis","", diagnoses$submitter_id)
         exposures <- rbindlist(results$exposures, fill = TRUE)
-        annotations <- rbindlist(results$annotations, fill = TRUE)
-        df <- cbind(diagnoses,exposures,results$demographic, annotations )
-        df$bcr_patient_barcode <- gsub("_diagnosis", "", df$submitter_id)
+        exposures$submitter_id <- gsub("_exposure","", exposures$submitter_id)
+        results$demographic$submitter_id <- gsub("_demographic","", results$demographic$submitter_id)
+        df <- merge(diagnoses,exposures, by="submitter_id", all = TRUE)
+        df <- merge(df,results$demographic, by="submitter_id", all = TRUE)
+        df$bcr_patient_barcode <- df$submitter_id
         df$disease <- gsub("TCGA-|TARGET-", "", project)
     } else {
         df <- rbindlist(results$samples,fill = TRUE)
