@@ -64,7 +64,7 @@ using survival library. It uses the fields days_to_death and vital, plus a
 columns for groups.
 }
 \examples{
-clin <- GDCquery_clinic("TCGA-LGG", type = "clinical", save.csv = F)
+clin <- GDCquery_clinic("TCGA-LGG", type = "clinical", save.csv = FALSE)
 TCGAanalyze_survival(clin, clusterCol="gender")
 }
 
