@@ -1,11 +1,8 @@
 context("Analyse")
 
 test_that("TCGAanalyze_survival creates pdf", {
-    days_to_death <- floor(runif(200, 1, 1000))
-    vital_status <- c(rep("Dead",200))
-    groups <- c(rep(c("G1","G2"),c(100,100)))
-    df <- data.frame(days_to_death,vital_status,groups)
-    TCGAanalyze_survival(df,clusterCol="groups",filename = "test.pdf")
+    clin <- GDCquery_clinic("TCGA-LGG", type = "clinical", save.csv = F)
+    TCGAanalyze_survival(clin,clusterCol="gender",filename = "test.pdf")
     expect_true(file.exists("test.pdf"))
     expect_equal(class(TCGAanalyze_survival(df,clusterCol="groups", filename = NULL)), class(ggplot2::ggplot(NULL)))
     unlink("test.pdf")
