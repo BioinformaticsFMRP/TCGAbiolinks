@@ -19,25 +19,27 @@ GDCPrepare <- function(query, save = FALSE, save.filename, summarizedExperiment 
                        gsub(" ","_",query$results[[1]]$file_id),
                        gsub(" ","_",query$results[[1]]$file_name))
 
-    if(query$data.category == "Transcriptome Profiling"){
+    if(grepl("Transcriptome Profiling", query$data.category, ignore.case = TRUE)){
         data <- readTranscriptomeProfiling(files = files,
                                            data.type = query$data.type,
                                            workflow.type = unique(query$results[[1]]$analysis$workflow_type),
                                            cases = query$results[[1]]$cases)
-    } else if(query$data.category == "Copy Number Variation") {
+    } else if(grepl("Copy Number Variation",query$data.category,ignore.case = TRUE)) {
         data <- readCopyNumberVariantion(files, query$results[[1]]$cases)
-    }  else if(query$data.category == "DNA methylation") {
+    }  else if(grepl("DNA methylation",query$data.category, ignore.case = TRUE)) {
         data <- readDNAmethylation(files, query$results[[1]]$cases, summarizedExperiment, unique(query$platform))
-    }  else if(query$data.category == "Protein expression") {
+    }  else if(grepl("Protein expression",query$data.category,ignore.case = TRUE)) {
         data <- readProteinExpression(files, query$results[[1]]$cases)
-    } else if (query$data.category == "Gene expression") {
+    }  else if(grepl("Clinical|Biospecimen", query$data.category, ignore.case = TRUE)){
+        mesage("Mot working yet")
+        # data <- readClinical(files, query$results[[1]]$cases)
+    } else if (grepl("Gene expression",query$data.category,ignore.case = TRUE)) {
         if(query$data.type == "Gene expression quantification")
             data <- readGeneExpressionQuantification(files,
                                                      query$results[[1]]$cases,
                                                      summarizedExperiment,
                                                      unique(query$platform))
         #if(query$data.type == "Gene expression quantification") data <- readGeneExpression()
-
     }
 
     if(save){
@@ -56,6 +58,10 @@ readGeneExpressionQuantification <- function(files, cases, summarizedExperiment 
         skip = 1
         summarizedExperiment = FALSE
     }
+    if(grepl("HT_HG-U133A", platform)) {
+        skip = 1
+    }
+
     for (i in seq_along(files)) {
         data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE,skip = skip)
 
@@ -84,7 +90,10 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
         df$entrezid <- as.numeric(GeneID)
         GeneSymbol <- unlist(lapply(aux,function(x) x[1]))
         df$external_gene_id <- as.character(GeneSymbol)
+    } else {
+        df$external_gene_id <- as.character(df[,1])
     }
+
     df <- merge(df, gene.location, by="external_gene_id")
     print(assay.list)
     print(head(df))
@@ -94,7 +103,7 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
                                               end = df$end_position),
                              strand = df$strand,
                              gene_id = df$external_gene_id,
-                             entrezgene = df$entrezid,
+                             entrezgene = df$entrezgene,
                              transcript_id = subset(df, select = 5))
         names(rowRanges) <- as.character(df$gene_id)
         assay.list <- assay.list[which(assay.list != "transcript_id")]
@@ -104,8 +113,8 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
                                               end = df$end_position),
                              strand = df$strand,
                              gene_id = df$external_gene_id,
-                             entrezgene = df$entrezid)
-        names(rowRanges) <- as.character(df$gene_id)
+                             entrezgene = df$entrezgene)
+        names(rowRanges) <- as.character(df$external_gene_id)
     }
     assays <- lapply(assay.list, function (x) {
         return(data.matrix(subset(df, select = grep(x,colnames(df)))))
@@ -362,7 +371,7 @@ colDataPrepare <- function(barcode){
     if(all(grepl("TCGA",barcode))) return(colDataPrepareTCGA(barcode))
 }
 
-#' @importFrom biomaRt getBM useMart
+#' @importFrom biomaRt getBM useMart listDatasets
 get.GRCh.bioMart <- function(genome="hg19") {
     if (genome == "hg19"){
         # for hg19
@@ -370,17 +379,24 @@ get.GRCh.bioMart <- function(genome="hg19") {
                            host = "feb2014.archive.ensembl.org",
                            path = "/biomart/martservice" ,
                            dataset = "hsapiens_gene_ensembl")
+        attributes <- c("chromosome_name",
+                        "start_position",
+                        "end_position", "strand",
+                        "ensembl_gene_id", "entrezgene",
+                        "external_gene_id")
     } else {
         # for hg38
         ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+        attributes <- c("chromosome_name",
+                       "start_position",
+                       "end_position", "strand",
+                       "ensembl_gene_id",
+                       "external_gene_name")
     }
     message(paste0("Downloading genome information. Using: ",
                    listDatasets(ensembl)[listDatasets(ensembl)$dataset=="hsapiens_gene_ensembl",]$description))
     chrom <- c(1:22, "X", "Y")
-    gene.location <- getBM(attributes = c("chromosome_name",
-                                          "start_position",
-                                          "end_position", "strand",
-                                          "ensembl_gene_id","external_gene_name"),
+    gene.location <- getBM(attributes = attributes,
                            filters = c("chromosome_name"),
                            values = list(chrom), mart = ensembl)
 
@@ -570,71 +586,26 @@ move <- function(from, to) {
 #' @importFrom IRanges IRanges
 #' @import utils TxDb.Hsapiens.UCSC.hg19.knownGene
 #' @importFrom data.table fread setnames setcolorder setDF data.table
-TCGAprepare <- function(query,
-                        dir = NULL,
+TCGAprepare <- function(files = NULL,
+                        platform = NULL,
                         samples = NULL,
                         type = NULL,
                         save = FALSE,
                         filename = NULL,
-                        add.mutation.genes = FALSE,
-                        add.clinical = TRUE,
-                        reannotate = FALSE,
-                        summarizedExperiment = TRUE,
-                        add.subtype = FALSE){
+                        summarizedExperiment = TRUE){
     stop("TCGA data has moved from DCC server to GDC server. Please use GDCprepare function")
-    if(add.subtype){
-        for (i in unique(query$Disease)) {
-            if (!grepl("lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc|all",
-                       i,ignore.case = TRUE)) {
-                message(paste0("Sorry we don't have subtypes for: ",i))
-                message("add.subtype set to FALSE")
-                add.subtype <- FALSE
-            }
-        }
-    }
-
-    if (is.null(dir)) {
-        message("Argument dir is NULL. Plese provide the directory
-                with the folders to be prepared. ")
-        return(NULL)
-    }
 
     if (length(unique(query$Platform)) > 1 |
         length(unique(query$Center)) > 2) {
         # This case (27k/450k)accepts two platforms
-        if (all(grepl("HumanMethylation[0-9]{2,3}",unique(query$Platform)))){
+        if (all(grepl("HumanMethylation[0-9]{2,3}",platform))){
             platform <- "humanMethylation"
         } else {
             message("Sorry! But, for the moment, we can only prepare on type of
                 platform per call")
             return(NULL)
         }
-    } else {
-        platform <- unique(query$Platform)
     }
-
-    # Get all files from directory except MANIFEST, README, etc
-    files <- NULL
-    dirs <- gsub(".tar.gz","",basename(query$deployLocation))
-    for (i in seq_along(dirs)) {
-        aux <- list.files(file.path(dir,dirs[i]), full.names = TRUE,
-                          recursive = TRUE)
-        files <- c(files, aux )
-    }
-    idx <- grep("MANIFEST|README|CHANGES|DESCRIPTION|DATA_USE",files)
-    if (length(idx) > 0) {
-        files <- files[-idx]
-    }
-
-    # Filter by samples
-    if (!is.null(samples)) {
-        files <- filterFiles(query[i,],samples,files)
-        if(length(files) == 0){
-            message("No files for that samples found")
-            return(NULL)
-        }
-    }
-
 
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     df <- NULL
@@ -782,12 +753,6 @@ TCGAprepare <- function(query,
     }
 
     if (tolower(platform) == tolower("HT_HG-U133A")) {
-        # Barcode in the mage file
-        if(is.vector(query)){
-            mage <- getMage(query)
-        } else {
-            mage <- getMage(query[1,])
-        }
 
         for (i in seq_along(files)) {
             data <- fread(files[i], header = TRUE, sep = "\t", skip = 1,
@@ -1146,19 +1111,6 @@ TCGAprepare <- function(query,
         print("HuEx-1_0-st-v2")
         if(!(type %in% c("FIRMA","gene"))){
             stop("Please, set type argument to FIRMA or gene (type = 'gene' or type = 'FIRMA'")
-        }
-
-        files <- files[grep(type,files)]
-
-        if(length(files) == 0){
-            message("No files of that type found")
-            return(NULL)
-        }
-
-        if(is.vector(query)){
-            mage <- getMage(query)
-        } else {
-            mage <- getMage(query[1,])
         }
 
         for (i in seq_along(files)) {
