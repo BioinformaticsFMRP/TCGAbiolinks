@@ -72,13 +72,10 @@ readClinical <- function(files){
 #'   And the follow up ones might produce duplicated line for patients
 #'   as it can have multiple follow ups
 #' @param xmlfile A xml file
-#' @export
 #' @importFrom data.table fread
 #' @import XML xml2
 #' @importFrom downloader download
 #' @importFrom R.utils gunzip
-#' @examples
-#' acc.maf <- GDCquery_Maf("ACC")
 #' @return A data frame with the maf file information
 parseClinicalXML <- function(xmlfile, type = "Clinical",debug = FALSE){
 
