@@ -616,43 +616,60 @@ GDCdownload(query)
 
 # `GDCprepare`: Preparing the data
 
-This function is still under development, it is not working for all cases.
+This function is still under development, it is not working for all cases. See the tables below with the status.
+Examples of query, download, prepare can be found in this [gist](https://gist.github.com/tiagochst/a701bad3fa3800ade7063760755e0aad).
 
 ## Harmonized data
 
-| Data.category               | Data.type                         | Workflow Type   | Status  |
-|-----------------------------|-----------------------------------|-----------------|---------|
-| Transcriptome Profiling     | Gene Expression Quantification    | HTSeq - Counts  | Working |
-|                             |                                   | HTSeq - FPKM-UQ | Working |
-|                             |                                   | HTSeq - FPKM    | Working |
-|                             | Isoform Expression Quantification |                 |         |
-|                             | miRNA Expression Quantification   |                 |         |
-| Copy number variation       | Copy Number Segment               |                 | Working |
-|                             | Masked Copy Number Segment        |                 | Working |
-| Simple Nucleotide Variation |                                   |                 |         |
-| Raw Sequencing Data         |                                   |                 |         |
-| Biospecimen                 |                                   |                 |         |
-| Clinical                    |                                   |                 |         |
+| Data.category               | Data.type                         | Workflow Type   | Status                                                                      |
+|-----------------------------|-----------------------------------|-----------------|-----------------------------------------------------------------------------|
+| Transcriptome Profiling     | Gene Expression Quantification    | HTSeq - Counts  | Data frame or SE (losing 5% of information when mapping to genomic regions) |
+|                             |                                   | HTSeq - FPKM-UQ | Returning only a (losing 5% of information when mapping to genomic regions) |
+|                             |                                   | HTSeq - FPKM    | Returning only a (losing 5% of information when mapping to genomic regions) |
+|                             | Isoform Expression Quantification | Not needed      |                                                                             |
+|                             | miRNA Expression Quantification   | Not needed      | Returning only a dataframe for  the moment                                  |
+| Copy number variation       | Copy Number Segment               |                 | Returning only a dataframe for  the moment                                  |
+|                             | Masked Copy Number Segment        |                 | Returning only a dataframe for  the moment                                  |
+| Simple Nucleotide Variation |                                   |                 |                                                                             |
+| Raw Sequencing Data         |                                   |                 |                                                                             |
+| Biospecimen                 |                                   |                 |                                                                             |
+| Clinical                    |                                   |                 |                                                                             |
 
 ## Legacy data
-| Data.category               	| Platform                            	| File extension 	| Status 	|
-|-----------------------------	|-------------------------------------	|----------------	|--------	|
-| Transcriptome Profiling     	|                                     	|                	|        	|
-| Copy Number Variation       	|                                     	|                	|        	|
-| Simple Nucleotide Variation 	|                                     	|                	|        	|
-| Raw Sequencing Data         	|                                     	|                	|        	|
-| Biospecimen                 	|                                     	|                	|        	|
-| Clinical                    	|                                     	|                	|        	|
-| Protein expression          	|                                     	|                	|        	|
-| Gene expression             	|                                     	|                	|        	|
-| DNA methylation             	| Illumina Human Methylation 450      	| -              	|        	|
-|                             	| Illumina Human Methylation 27       	| -              	|        	|
-|                             	| Illumina DNA Methylation OMA003 CPI 	| -              	|        	|
-|                             	| Illumina DNA Methylation OMA002 CPI 	| -              	|        	|
-|                             	| Illumina Hi Seq                     	| -              	|        	|
-| Raw Microarray Data         	|                                     	|                	|        	|
-| Structural Rearrangement    	|                                     	|                	|        	|
-| Other                       	|                                     	|                	|        	|
+| Data.category               | Data.type                         | Platform                            | file.type          | Status          |
+|-----------------------------|-----------------------------------|-------------------------------------|--------------------|-----------------|
+| Transcriptome Profiling     |                                   |                                     |                    |                 |
+| Copy number variation       | -                                 | Affymetrix SNP Array 6.0            | nocnv_hg18.seg     | Working         |
+|                             | -                                 | Affymetrix SNP Array 6.0            | hg18.seg           | Working         |
+|                             | -                                 | Affymetrix SNP Array 6.0            | nocnv_hg19.seg     | Working         |
+|                             | -                                 | Affymetrix SNP Array 6.0            | hg19.seg           | Working         |
+|                             | -                                 | Illumina HiSeq                      | -                  | Working         |
+| Simple Nucleotide Variation |                                   |                                     |                    |                 |
+| Raw Sequencing Data         |                                   |                                     |                    |                 |
+| Biospecimen                 |                                   |                                     |                    |                 |
+| Clinical                    |                                   |                                     |                    |                 |
+| Protein expression          |                                   | MDA RPPA Core                       | -                  | Working         |
+| Gene expression             | Gene expression quantification    | Illumina HiSeq                      | normalized_results | Working         |
+|                             |                                   | Illumina HiSeq                      | results            | Working         |
+|                             |                                   | HT_HG-U133A                         | -                  | Working         |
+|                             |                                   | AgilentG4502A_07_2                  | -                  | Data frame only |
+|                             |                                   | AgilentG4502A_07_1                  | -                  | Data frame only |
+|                             |                                   | HuEx-1_0-st-v2                      | FIRMA.txt          | Not Preparing   |
+|                             |                                   |                                     | gene.txt           | Not Preparing   |
+|                             | Isoform expression quantification |                                     |                    |                 |
+|                             | miRNA gene quantification         |                                     |                    |                 |
+|                             | Exon junction quantification      |                                     |                    |                 |
+|                             | Exon quantification               |                                     |                    |                 |
+|                             | miRNA isoform quantification      |                                     |                    |                 |
+|                             |                                   |                                     |                    |                 |
+| DNA methylation             |                                   | Illumina Human Methylation 450      | Not used           | Working         |
+|                             |                                   | Illumina Human Methylation 27       | Not used           | Working         |
+|                             |                                   | Illumina DNA Methylation OMA003 CPI | Not used           | Working         |
+|                             |                                   | Illumina DNA Methylation OMA002 CPI | Not used           | Working         |
+|                             |                                   | Illumina Hi Seq                     |                    | Not  working    |
+| Raw Microarray Data         |                                   |                                     |                    |                 |
+| Structural Rearrangement    |                                   |                                     |                    |                 |
+| Other                       |                                   |                                     |                    |                 |
 
 You can easily read the downloaded data using the `GDCprepare` function.
 This function will prepare the data into a 
@@ -705,25 +722,28 @@ You can easily analyze data using following functions:
 
 You can easily search TCGA samples, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
-
 # You can define a list of samples to query and download providing relative TCGA barcodes.
-
 listSamples <- c("TCGA-E9-A1NG-11A-52R-A14M-07","TCGA-BH-A1FC-11A-32R-A13Q-07",
-                "TCGA-A7-A13G-11A-51R-A13Q-07","TCGA-BH-A0DK-11A-13R-A089-07",
-                "TCGA-E9-A1RH-11A-34R-A169-07","TCGA-BH-A0AU-01A-11R-A12P-07",
-                "TCGA-C8-A1HJ-01A-11R-A13Q-07","TCGA-A7-A13D-01A-13R-A12P-07",
-                "TCGA-A2-A0CV-01A-31R-A115-07","TCGA-AQ-A0Y5-01A-11R-A14M-07")
+                 "TCGA-A7-A13G-11A-51R-A13Q-07","TCGA-BH-A0DK-11A-13R-A089-07",
+                 "TCGA-E9-A1RH-11A-34R-A169-07","TCGA-BH-A0AU-01A-11R-A12P-07",
+                 "TCGA-C8-A1HJ-01A-11R-A13Q-07","TCGA-A7-A13D-01A-13R-A12P-07",
+                 "TCGA-A2-A0CV-01A-31R-A115-07","TCGA-AQ-A0Y5-01A-11R-A14M-07")
 
-# Query platform IlluminaHiSeq_RNASeqV2 with a list of barcode 
-query <- TCGAquery(tumor = "brca", samples = listSamples, 
-  platform = "IlluminaHiSeq_RNASeqV2", level = "3")
+# Query platform Illumina HiSeq with a list of barcode 
+query <- GDCquery(project = "TCGA-BRCA", 
+                  data.category = "Gene expression",
+                  data.type = "Gene Expression Quantification",
+                  platform = "Illumina HiSeq",
+                  file.type = "results",
+                  barcode = listSamples, 
+                  legacy = TRUE)
 
 # Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
-TCGAdownload(query, path = "../dataBrca", type = "rsem.genes.results",samples = listSamples)
+GDCAdownload(query)
 
 # Prepare expression matrix with geneID in the rows and samples (barcode) in the columns
 # rsem.genes.results as values
-BRCARnaseq_assay <- TCGAprepare(query,"../dataBrca", type = "rsem.genes.results")
+BRCARnaseq_assay <- GDCPrepare(query)
 
 BRCAMatrix <- assay(BRCARnaseq_assay,"raw_counts")
 
@@ -879,12 +899,10 @@ Using the clinical data, it is possible to create a survival plot with the
 function `TCGAanalyze_survival` as follows:
 
 ```{r, eval = FALSE}
-clin.gbm <- TCGAquery_clinic("gbm", "clinical_patient")
-clin.lgg <- TCGAquery_clinic("lgg", "clinical_patient")
-
-TCGAanalyze_survival(plyr::rbind.fill(clin.lgg,clin.gbm),
-                     "radiation_therapy",
-                     main = "TCGA Set\nLGG and GBM",height = 10, width=10)
+clin.gbm <- GDCquery_clinic("TCGA-GBM", "clinical")
+TCGAanalyze_survival(clin.gbm,
+                     "gender",
+                     main = "TCGA Set\n GBM",height = 10, width=10)
 ```
 
 The arguments of `TCGAanalyze_survival` are:
@@ -914,7 +932,7 @@ grid.raster(img)
 library(TCGAbiolinks)
 # Survival Analysis SA
 
-clinical_patient_Cancer <- TCGAquery_clinic("brca","clinical_patient")
+clinical_patient_Cancer <- TCGAquery_clinic("TCGA-BRCA","clinical")
 dataBRCAcomplete <- log2(BRCA_rnaseqv2)
 
 tokenStop<- 1
@@ -922,17 +940,17 @@ tokenStop<- 1
 tabSurvKMcomplete <- NULL
 
 for( i in 1: round(nrow(dataBRCAcomplete)/100)){
-message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
-tokenStart <- tokenStop
-tokenStop <-100*i
-tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
-                                dataBRCAcomplete,
-                                Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
-                                Survresult = F,
-                                ThreshTop=0.67,
-                                ThreshDown=0.33)
+    message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
+    tokenStart <- tokenStop
+    tokenStop <-100*i
+    tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
+                                    dataBRCAcomplete,
+                                    Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
+                                    Survresult = F,
+                                    ThreshTop=0.67,
+                                    ThreshDown=0.33)
 
-tabSurvKMcomplete <- rbind(tabSurvKMcomplete,tabSurvKM)
+    tabSurvKMcomplete <- rbind(tabSurvKMcomplete,tabSurvKM)
 }
 
 tabSurvKMcomplete <- tabSurvKMcomplete[tabSurvKMcomplete$pvalue < 0.01,]
@@ -1140,18 +1158,17 @@ uses the [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) to c
 * **label.title** Title of the label
 
 ```{r, eval = FALSE}
-mut <- TCGAbiolinks::TCGAquery_maf(tumor = "GBM",
-        archive.name = "ucsc.edu_GBM.IlluminaGA_DNASeq_automated.Level_2.1.1.0")
-clin <- TCGAbiolinks::TCGAquery_clinic("gbm","clinical_patient")
-clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_tissue_site","race","vital_status")]
-TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:30],
-                        filename = "onco.pdf",
-                        annotation = clin,
-                        color=c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown"),
-                        rows.font.size=10,
-                        heatmap.legend.side = "right",
-                        dist.col = 0,
-                        label.font.size = 10)
+mut <- GDCquery_Maf(tumor = "ACC")
+clin <- GDCquery_clinic("TCGA-ACC","clinical")
+clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_stage","race","vital_status")]
+TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
+                       filename = "onco.pdf",
+                       annotation = clin,
+                       color=c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown"),
+                       rows.font.size=10,
+                       heatmap.legend.side = "right",
+                       dist.col = 0,
+                       label.font.size = 10)
 ```
 
 The result is shown below:
@@ -1221,15 +1238,14 @@ tokenStop<- 1
 tabSurvKMcomplete <- NULL
 
 for( i in 1: round(nrow(dataBRCAcomplete)/100)){
-message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
-tokenStart <- tokenStop
-tokenStop <-100*i
-tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
-                                dataBRCAcomplete,
-                                Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
-                                Survresult = F,ThreshTop=0.67,ThreshDown=0.33)
-
-tabSurvKMcomplete <- rbind(tabSurvKMcomplete,tabSurvKM)
+    message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
+    tokenStart <- tokenStop
+    tokenStop <-100*i
+    tabSurvKM <- TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
+                                        dataBRCAcomplete,
+                                        Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
+                                        Survresult = F,ThreshTop=0.67,ThreshDown=0.33)
+    tabSurvKMcomplete <- rbind(tabSurvKMcomplete,tabSurvKM)
 }
 
 tabSurvKMcomplete <- tabSurvKMcomplete[tabSurvKMcomplete$pvalue < 0.01,]
@@ -1922,19 +1938,16 @@ setwd("case3")
 #-----------------------------------
 # 1.1 - DNA methylation
 # ----------------------------------
-query.met <- TCGAquery(tumor = c("coad"),
-                       platform = c("HumanMethylation27",
-                                    "HumanMethylation450"),
-                       level = 3)
+query.met <- GDCquery(project = "TCGA-ACC", 
+                      legacy = TRUE,
+                      data.category = "DNA methylation",
+                      platform = "Illumina Human Methylation 450")
+GDCDownload(query.met)
 
-TCGAdownload(query.met, path = "methylation")
-
-coad.met <- TCGAprepare(query = query.met,
-                        dir = "methylation",
-                        save = TRUE,
-                        add.subtype = TRUE,
-                        filename = "metcoad.rda",
-                        reannotate = TRUE)
+acc.met <- GDCPrepare(query = query.met,
+                      save = TRUE, 
+                      save.filename = "accDNAmet.rda",
+                      summarizedExperiment = TRUE)
 
 #-----------------------------------
 # 1.2 - RNA expression
