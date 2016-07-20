@@ -288,6 +288,7 @@ clinical_data_site_cancer <- function(cancer){
 #' @return A data frame with the clinical information
 GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
     checkProjectInput(project)
+    if(!grepl("clinical|Biospecimen",type,ignore.case = TRUE)) stop("Type must be clinical or biospecemen")
     baseURL <- "https://gdc-api.nci.nih.gov/cases/?"
     options.pretty <- "pretty=true"
     if(type == "clinical"){
@@ -311,15 +312,20 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
         results$demographic$submitter_id <- gsub("_demographic","", results$demographic$submitter_id)
         df <- merge(diagnoses,exposures, by="submitter_id", all = TRUE)
         df <- merge(df,results$demographic, by="submitter_id", all = TRUE)
+        treatments <- rbindlist(df$treatments,fill = TRUE)
+        df[,treatments:=NULL]
+        treatments$submitter_id <- gsub("_treatment","", treatments$submitter_id)
+        df <- merge(df,treatments, by="submitter_id", all = TRUE)
         df$bcr_patient_barcode <- df$submitter_id
         df$disease <- gsub("TCGA-|TARGET-", "", project)
     } else {
         df <- rbindlist(results$samples,fill = TRUE)
     }
+    return(df)
 
     #y <- data.frame(diagnosis=I(results$diagnoses), demographic=results$demographic,exposures=I(results$exposures))
     if(save.csv){
-        if(type == "biospecimen") df$portions <- NULL
+        if(grepl("biospecimen",type))  df[,portions:=NULL]
         write_csv(df,paste0(project,"_",type,".csv"))
     }
     setDF(df)
