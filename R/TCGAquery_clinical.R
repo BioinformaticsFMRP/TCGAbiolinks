@@ -321,7 +321,6 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
     } else {
         df <- rbindlist(results$samples,fill = TRUE)
     }
-    return(df)
 
     #y <- data.frame(diagnosis=I(results$diagnoses), demographic=results$demographic,exposures=I(results$exposures))
     if(save.csv){
