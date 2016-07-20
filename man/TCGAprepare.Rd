@@ -5,16 +5,10 @@
 \title{Read the data from level 3 the experiments and prepare it
  for downstream analysis into a SummarizedExperiment object.}
 \usage{
-TCGAprepare(query, dir = NULL, samples = NULL, type = NULL,
-  save = FALSE, filename = NULL, add.mutation.genes = FALSE,
-  add.clinical = TRUE, reannotate = FALSE, summarizedExperiment = TRUE,
-  add.subtype = FALSE)
+TCGAprepare(files = NULL, platform = NULL, samples = NULL, type = NULL,
+  save = FALSE, filename = NULL, summarizedExperiment = TRUE)
 }
 \arguments{
-\item{query}{TCGAquery output}
-
-\item{dir}{Directory with the files downloaded by TCGAdownload}
-
 \item{samples}{List of samples to prepare the data}
 
 \item{type}{Filter the files to prepare.}
@@ -24,18 +18,22 @@ Default: \code{FALSE}}
 
 \item{filename}{Name of the saved file}
 
-\item{add.mutation.genes}{Integrate information about genes mutation? DEFAULT: FALSE}
+\item{summarizedExperiment}{Output as SummarizedExperiment?
+Default: \code{FALSE}}
 
-\item{add.clinical}{Add clinical information from TCGAquery_clinic?
-(The information file add will be: clinical_patient) Default: \code{FALSE}}
+\item{query}{TCGAquery output}
+
+\item{dir}{Directory with the files downloaded by TCGAdownload}
+
+\item{add.mutation.genes}{Integrate information about genes mutation? DEFAULT: FALSE}
 
 \item{reannotate}{Reannotate genes?  Source http://grch37.ensembl.org/.
 DEFAULT: FALSE. (For the moment only working for methylation data)}
 
-\item{summarizedExperiment}{Output as SummarizedExperiment?
-Default: \code{FALSE}}
-
 \item{add.subtype}{Add subtype information from tcgaquery_subtype? Default: \code{FALSE}}
+
+\item{add.clinical}{Add clinical information from TCGAquery_clinic?
+(The information file add will be: clinical_patient) Default: \code{FALSE}}
 }
 \value{
 A SummarizedExperiment object (If SummarizedExperiment = \code{FALSE},
