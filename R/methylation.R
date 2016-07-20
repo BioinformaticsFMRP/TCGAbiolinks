@@ -130,8 +130,8 @@ TCGAanalyze_survival <- function(data,
 ) {
     .e <- environment()
 
-    if(!all(c("vital_status", "days_to_death","days_to_last_follow_up") %in% colnames(data)))
-        stop("Columns vital_status, days_to_death, days_to_last_follow_up should be in data frame")
+    if(!all(c("vital_status", "days_to_death") %in% colnames(data)))
+        stop("Columns vital_status, days_to_death should be in data frame")
 
     if(is.null(color)){
         color <- rainbow(length(unique(data[,clusterCol])))
