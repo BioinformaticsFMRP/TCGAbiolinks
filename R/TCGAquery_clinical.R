@@ -291,20 +291,26 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
     if(!grepl("clinical|Biospecimen",type,ignore.case = TRUE)) stop("Type must be clinical or biospecemen")
     baseURL <- "https://gdc-api.nci.nih.gov/cases/?"
     options.pretty <- "pretty=true"
-    if(type == "clinical"){
+    if(grepl("clinical",type,ignore.case = TRUE)) {
         options.expand <- "expand=diagnoses,diagnoses.treatments,annotations,family_histories,demographic,exposures"
         option.size <- paste0("size=",getNbCases(project,"Clinical"))
+        files.data_category <- "Clinical"
     } else {
         options.expand <- "expand=samples,samples.portions,samples.portions.analytes,samples.portions.analytes.aliquots"
         option.size <- paste0("size=",getNbCases(project,"Biospecimen"))
+        files.data_category <- "Biospecimen"
     }
     options.filter <- paste0("filters=",
                              URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
                              project,
-                             URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["Biospecimen"]}}]}'))
+                             URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["'),
+                            files.data_category,
+                            URLencode('"]}}]}'))
+
     json <- fromJSON(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")), simplifyDataFrame = TRUE)
+    print(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
     results <- json$data$hits
-    if(type == "clinical"){
+    if(grepl("clinical",type,ignore.case = TRUE)) {
         diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
         diagnoses$submitter_id <- gsub("_diagnosis","", diagnoses$submitter_id)
         exposures <- rbindlist(results$exposures, fill = TRUE)
