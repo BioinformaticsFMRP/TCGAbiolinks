@@ -105,7 +105,7 @@ GDCquery <- function(project,
 
     # Filter by sample.type
     if(!missing(sample.type)) {
-        results <- results[results$definition %in% sample.type,]
+        results <- results[results$tissue.definition %in% sample.type,]
     }
     # Filter by barcode
     if(!missing(barcode)) {
