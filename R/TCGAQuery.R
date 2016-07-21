@@ -75,7 +75,7 @@ GDCquery <- function(project,
                              URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["'),
                              URLencode(data.category),
                              URLencode('"]}}]}'))
-    print(paste0(baseURL,paste(options.pretty, options.expand, option.size, options.filter, sep = "&")))
+    message(paste0(baseURL,paste(options.pretty, options.expand, option.size, options.filter, sep = "&")))
     json <- fromJSON(paste0(baseURL,paste(options.pretty, options.expand,option.size, options.filter, sep = "&")), simplifyDataFrame = TRUE)
 
     results <- json$data$hits
@@ -392,14 +392,14 @@ TCGAquery_Investigate <- function(tumor,dataDEGsFiltLevelTF,topgenes){
             # HR, HOMEZ, ANKAR, REST
 
             dataDEGsFiltLevelTF[k,"Pubmed"] <- x6
-            print(paste("Cancer ", tumor, "with TF n. ",k, "of " ,
+            message(paste("Cancer ", tumor, "with TF n. ",k, "of " ,
                         nrow( dataDEGsFiltLevelTF)," : ", CurrentGene,
                         "found n. ", x6, "pubmed."))
 
         }
 
         else{
-            print(paste("Cancer ", tumor, "with TF n. ",k, "of " ,
+            message(paste("Cancer ", tumor, "with TF n. ",k, "of " ,
                         nrow( dataDEGsFiltLevelTF)," : ", CurrentGene,
                         "no item found in pubmed."))
             dataDEGsFiltLevelTF[k,"Pubmed"] <- 0
@@ -457,7 +457,7 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE){
     if (missing(tumor)) stop(paste0("Please, set tumor argument. Possible values:\n => ",
                                     paste(sort(maf$tumor),collapse = "\n => ")))
 
-    if (!grepl(tumor,maf$tumor)) stop(paste0("Please, set a valid tumor argument. Possible values:\n => ",
+    if (!any(grepl(tumor,maf$tumor))) stop(paste0("Please, set a valid tumor argument. Possible values:\n => ",
                                               paste(sort(maf$tumor),collapse = "\n => ")))
 
     #  Info to user
