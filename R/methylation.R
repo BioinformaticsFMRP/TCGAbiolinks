@@ -1260,12 +1260,11 @@ TCGAvisualize_starburst <- function(met,
     }
 
     if (class(met) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
-        met <- as.data.frame(rowRanges(met))
+        met <- values(met)
     }
 
     # Preparing methylation
     pcol <- paste("p.value.adj",group1,group2,sep = ".")
-
     if(!(pcol %in%  colnames(met))){
         pcol <- paste("p.value.adj",group2,group1,sep = ".")
     }
@@ -1273,11 +1272,12 @@ TCGAvisualize_starburst <- function(met,
         stop("Error! p-values adjusted not found. Please, run TCGAanalyze_DMR")
     }
 
+    # somehow the merge changes the names with - to .
+    pcol <- gsub("-",".",pcol)
 
     aux <- strsplit(row.names(exp),"\\|")
     exp$Gene_Symbol  <- unlist(lapply(aux,function(x) x[1]))
     volcano <- merge(met, exp, by = "Gene_Symbol")
-
     volcano$ID <- paste(volcano$Gene_Symbol,
                         volcano$probeID, sep = ".")
 
@@ -1288,7 +1288,7 @@ TCGAvisualize_starburst <- function(met,
         -1 * volcano[volcano$logFC > 0, "geFDR"]
 
 
-    diffcol <- paste("diffmean",group1,group2,sep = ".")
+    diffcol <- gsub("-",".",paste("diffmean",group1,group2,sep = "."))
     volcano$meFDR <- log10(volcano[,pcol])
     volcano$meFDR2 <- volcano$meFDR
     idx <- volcano[,diffcol] > 0
