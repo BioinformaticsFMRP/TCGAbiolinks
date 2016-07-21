@@ -457,7 +457,7 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE){
     if (missing(tumor)) stop(paste0("Please, set tumor argument. Possible values:\n => ",
                                     paste(sort(maf$tumor),collapse = "\n => ")))
 
-    if (!(tumor %in%  maf$tumor)) stop(paste0("Please, set a valid tumor argument. Possible values:\n => ",
+    if (!grepl(tumor,maf$tumor)) stop(paste0("Please, set a valid tumor argument. Possible values:\n => ",
                                               paste(sort(maf$tumor),collapse = "\n => ")))
 
     #  Info to user
