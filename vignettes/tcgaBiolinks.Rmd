@@ -2310,17 +2310,29 @@ library(ELMER)
 library(parallel)
 dir.create("case4")
 setwd("case4")
+library(TCGAbiolinks)
+library(SummarizedExperiment)
+dir.create("case3")
+setwd("case3")
+#---------------------------------------------------------------------------
+# STEP 0: Get samples with both DNA methylation and gene expression data
+#---------------------------------------------------------------------------
+
 #-----------------------------------
 # STEP 1: Search, download, prepare |
 #-----------------------------------
-# Step 1.1 download methylation data|
-# -----------------------------------
-query <- TCGAquery(tumor = "KIRC",level = 3, platform = "HumanMethylation450")
-TCGAdownload(query, path = "methylation")
-kirc.met <- TCGAprepare(query,dir = "methylation",
-                        save = TRUE,
-                        filename = "metKirc.rda",
-                        summarizedExperiment = FALSE)
+# 1.1 - DNA methylation
+# ----------------------------------
+query.met <- GDCquery(project = "TCGA-KIRC", 
+                      legacy = TRUE,
+                      data.category = "DNA methylation",
+                      platform = "Illumina Human Methylation 450")
+GDCDownload(query.met)
+kirc.met <- GDCPrepare(query = query.met,
+                      save = TRUE, 
+                      save.filename = "kircDNAmet.rda",
+                      summarizedExperiment = TRUE)
+
 
 kirc.met <- TCGAprepare_elmer(kirc.met, 
                               platform = "HumanMethylation450",
@@ -2336,13 +2348,17 @@ to ELMER.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 # Step 1.2 download expression data
-query.rna <- TCGAquery(tumor = "KIRC", level = 3, platform = "IlluminaHiSeq_RNASeqV2")
-TCGAdownload(query.rna, path="expression", type = "rsem.genes.normalized_results")
-kirc.exp <- TCGAprepare(query.rna, dir="expression", 
-                        save = TRUE,
-                        type = "rsem.genes.normalized_results",
-                        filename = "expKirc.rda", 
-                        summarizedExperiment = FALSE)
+#-----------------------------------
+# 1.2 - RNA expression
+# ----------------------------------
+query.exp <- GDCquery(project = "TCGA-KIRC", 
+                      legacy = TRUE,
+                      data.category = "Gene expression",
+                      data.type = "Gene expression quantification",
+                      platform = "Illumina HiSeq", 
+                      file.type = "normalized_results")
+GDCDownload(query.exp)
+kirc.exp <- GDCPrepare(query = query.exp, save = TRUE, save.filename = "kirkExp.rda")
 
 kirc.exp <- TCGAprepare_elmer(kirc.exp,
                               save = TRUE,
