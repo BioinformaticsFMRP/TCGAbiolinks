@@ -308,7 +308,7 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
                              URLencode('"]}}]}'))
 
     json <- fromJSON(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")), simplifyDataFrame = TRUE)
-    print(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
+    #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
     results <- json$data$hits
     if(grepl("clinical",type,ignore.case = TRUE)) {
         diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
@@ -658,33 +658,34 @@ TCGAquery_subtype <- function(tumor){
     if (grepl("acc|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc|all",
               tumor,ignore.case = TRUE)) {
 
+        doi <- c("acc"="doi:10.1016/j.ccell.2016.04.002",
+                 "aml"="doi:10.1056/NEJMoa1301689",
+                 "blca"="doi:10.1038/nature12965",
+                 "brca"="doi:10.1038/nature11412",
+                 "coad"="doi:10.1038/nature11252",
+                 "gbm"="doi:10.1016/j.cell.2015.12.028",
+                 "lgg"="doi:10.1016/j.cell.2015.12.028",
+                 "hnsc"="doi:10.1038/nature14129",
+                 "kich"="doi:10.1016/j.ccr.2014.07.014",
+                 "kirc"="doi:10.1038/nature12222",
+                 "kirp"="doi:10.1056/NEJMoa1505917",
+                 "lihc"="",
+                 "luad"="doi:10.1038/nature13385",
+                 "lusc"="doi:10.1038/nature11404",
+                 "ovca"= "doi:10.1038/nature10166",
+                 "pancan"="doi:10.1016/j.cell.2014.06.049",
+                 "prad"="doi:10.1016/j.cell.2015.10.025",
+                 "skcm"="doi:10.1016/j.cell.2015.05.044",
+                 "stad"="doi:10.1038/nature13480",
+                 "thca"="doi:10.1016/j.cell.2014.09.050",
+                 "ucec"="doi:10.1038/nature12113",
+                 "ucs"="")
+
+        if(tolower(tumor) != "all") message(paste0("Subtype information from:", doi[tolower(tumor)]))
         if(tolower(tumor) == "all") {
             all.tumor <- c("acc","lgg", "gbm", "luad", "stad", "brca", "coad",
                            "skcm", "hnsc", 'kich', "lusc", "ucec", "pancan", "thca",
                            "prad","kirp","kirc")
-            doi <- c("acc"="doi:10.1016/j.ccell.2016.04.002",
-                     "aml"="doi:10.1056/NEJMoa1301689",
-                     "blca"="doi:10.1038/nature12965",
-                     "brca"="doi:10.1038/nature11412",
-                     "coad"="doi:10.1038/nature11252",
-                     "gbm"="doi:10.1016/j.cell.2015.12.028",
-                     "lgg"="doi:10.1016/j.cell.2015.12.028",
-                     "hnsc"="doi:10.1038/nature14129",
-                     "kich"="doi:10.1016/j.ccr.2014.07.014",
-                     "kirc"="doi:10.1038/nature12222",
-                     "kirp"="doi:10.1056/NEJMoa1505917",
-                     "lihc"="",
-                     "luad"="doi:10.1038/nature13385",
-                     "lusc"="doi:10.1038/nature11404",
-                     "ovca"= "doi:10.1038/nature10166",
-                     "pancan"="doi:10.1016/j.cell.2014.06.049",
-                     "prad"="doi:10.1016/j.cell.2015.10.025",
-                     "skcm"="doi:10.1016/j.cell.2015.05.044",
-                     "stad"="doi:10.1038/nature13480",
-                     "thca"="doi:10.1016/j.cell.2014.09.050",
-                     "ucec"="doi:10.1038/nature12113",
-                     "ucs"="")
-
             all <- NULL
             for(i in all.tumor){
                 try({
