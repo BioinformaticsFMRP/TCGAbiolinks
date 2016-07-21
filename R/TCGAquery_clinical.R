@@ -304,8 +304,8 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
                              URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
                              project,
                              URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["'),
-                            files.data_category,
-                            URLencode('"]}}]}'))
+                             files.data_category,
+                             URLencode('"]}}]}'))
 
     json <- fromJSON(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")), simplifyDataFrame = TRUE)
     print(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
@@ -335,6 +335,61 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
     }
     setDF(df)
     return(df)
+}
+
+#' @title Parsing clinical xml files
+#' This function receives the query argument and parses the clinical xml files
+#' based on the desired information
+#' @importFrom xml2 read_xml xml_ns
+#' @importFrom XML xmlParse getNodeSet xmlToDataFrame
+#' @export
+#' @examples
+#' query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical", barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))
+#' GDCDownload(query)
+#' clinical <- GDCPrepare_clinic(query,"patient")
+#' clinical.drug <- GDCPrepare_clinic(query,"drug")
+#' clinical.radiation <- GDCPrepare_clinic(query,"radiation")
+#' clinical.admin <- GDCPrepare_clinic(query,"admin")
+GDCPrepare_clinic <- function(query, clinical.info){
+    if(missing(clinical.info)) stop("Please select a clinical information")
+
+    # Get all the clincal xml files
+    files <- file.path(query$project,
+                       gsub(" ","_",query$results[[1]]$data_category),
+                       gsub(" ","_",query$results[[1]]$data_type),
+                       gsub(" ","_",query$results[[1]]$file_id),
+                       gsub(" ","_",query$results[[1]]$file_name))
+
+    disease <- tolower(gsub("TCGA-","",query$project))
+    if(clinical.info == "drug")      xpath <- "//rx:drug"
+    if(clinical.info == "admin")     xpath <- "//admin:admin"
+    if(clinical.info == "follow_up") xpath <- "//follow_up_v1.0:follow_up"
+    if(clinical.info == "radiation") xpath <- "//rad:radiation"
+    if(clinical.info == "patient")   xpath <- paste0("//",disease,":patient")
+    if(clinical.info == "stage_event")     xpath <- "//shared_stage:stage_event"
+    if(clinical.info == "new_tumor_event") xpath <- paste0("//",disease,"_nte:new_tumor_event")
+    if(missing(clinical.info)) stop("Please set a valid clinical.info argument")
+
+    clin <- NULL
+    for(i in seq_along(files)){
+        xmlfile <- files[i]
+        xml <- read_xml(xmlfile)
+        doc = xmlParse(xmlfile)
+
+        patient <- str_extract(xmlfile,"[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}")
+        # Test if this xpath exists before parsing it
+        if(gsub("\\/\\/","", unlist(stringr::str_split(xpath,":"))[1]) %in% names(xml_ns(xml))){
+            df <- xmlToDataFrame(nodes = getNodeSet(doc,xpath))
+            if(nrow(df) == 0) next
+            df$bcr_patient_barcode <- patient
+            if(i == 1) {
+                clin <- df
+            } else {
+                clin <- rbind(clin,df)
+            }
+        }
+    }
+    return(clin)
 }
 
 #' @title Get the clinical information
