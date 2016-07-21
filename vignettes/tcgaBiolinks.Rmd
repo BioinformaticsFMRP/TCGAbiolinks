@@ -519,7 +519,7 @@ mutation <- GDCquery_Maf(tumor = "LGG", save.csv = TRUE)
 
 This mutation data can be visualized through a oncoprint from the  [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) package [@ref23].
 
-```{r, message=FALSE}
+```{r, echo=TRUE, message=FALSE, warning=FALSE, fig.height=6}
 mut <- GDCquery_Maf(tumor = "ACC")
 clin <- GDCquery_clinic("TCGA-ACC","clinical")
 clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_stage","race","vital_status")]
@@ -1332,26 +1332,18 @@ uses the [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) to c
 * **annotation.position** Position of the annotation "bottom" or "top"
 * **label.title** Title of the label
 
-```{r, eval = FALSE}
+```{r, echo=TRUE, fig.height=6, message=FALSE, warning=FALSE}
 mut <- GDCquery_Maf(tumor = "ACC")
 clin <- GDCquery_clinic("TCGA-ACC","clinical")
 clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_stage","race","vital_status")]
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
-                       filename = "onco.pdf",
+                       filename = NULL,
                        annotation = clin,
                        color=c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown"),
                        rows.font.size=10,
                        heatmap.legend.side = "right",
                        dist.col = 0,
                        label.font.size = 10)
-```
-
-The result is shown below:
-```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-library(png)
-library(grid)
-img <- readPNG("oncoprint.png")
-grid.raster(img)
 ```
 
 The columns are the samples and the rows are genes. The upper histograms shows the number
@@ -1447,7 +1439,6 @@ In the following picture the user can see some community of genes with same colo
 
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-
 library(png)
 library(grid)
 img <- readPNG("SurvivalCoxNETOutput.png")
@@ -1459,8 +1450,19 @@ Using the data and calculating the mean DNA methylation per group, it is possibl
 to create a mean DNA methylation boxplot with the function 
 `TCGAvisualize_meanMethylation` as follows:
 
-```{r, eval = FALSE}
-TCGAvisualize_meanMethylation(data,"group")
+```{r, echo=TRUE, fig.height=5, message=FALSE, warning=FALSE}
+query <- GDCquery(project = "TCGA-GBM",
+                  data.category = "DNA methylation",
+                  platform = "Illumina Human Methylation 27",
+                  legacy = TRUE, 
+                  barcode = c("TCGA-02-0058-01A-01D-0186-05", "TCGA-12-1597-01B-01D-0915-05",
+                              "TCGA-12-0829-01A-01D-0392-05", "TCGA-06-0155-01B-01D-0521-05",
+                              "TCGA-02-0099-01A-01D-0199-05", "TCGA-19-4068-01A-01D-1228-05",
+                              "TCGA-19-1788-01A-01D-0595-05", "TCGA-16-0848-01A-01D-0392-05"))
+GDCDownload(query)
+data <- GDCPrepare(query)
+# "shortLetterCode" is a column in the SummarizedExperiment::colData(data) matrix
+TCGAvisualize_meanMethylation(data,"shortLetterCode",filename = NULL)
 ```
 The arguments of `TCGAvisualize_meanMethylation` are:
 
@@ -1481,24 +1483,19 @@ of the subgroups. Example: shapes = c(21,23) if for two levels
 * **labels** Labels of the groups
 * **y.limits** Change lower/upper y-axis limit 
 
-The result is shown below:
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
-library(grid)
-img <- readPNG("meanmet.png")
-grid.raster(img)
-```
-
 Other examples using the parameters:
-```{r, eval = FALSE}
+```{r, echo=TRUE, fig.height=5, message=FALSE, warning=FALSE}
 # setting y limits: lower 0, upper 1
-TCGAvisualize_meanMethylation(data,groupCol  = "group", y.limits = c(0,1))
+TCGAvisualize_meanMethylation(data,"shortLetterCode",filename = NULL, y.limits = c(0,1))
 # setting y limits: lower 0
-TCGAvisualize_meanMethylation(data,groupCol  = "group", y.limits = 0)
+TCGAvisualize_meanMethylation(data,"shortLetterCode",filename = NULL, y.limits = 0)
 # Changing shapes of jitters to show subgroups
-TCGAvisualize_meanMethylation(data,groupCol  = "group", subgroupCol="subgroup")
+TCGAvisualize_meanMethylation(data,groupCol  = "gender", subgroupCol="vital_status", filename = NULL)
 # Sorting bars by descending mean methylation
-TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="mean.desc",filename="meandesc.pdf")
+TCGAvisualize_meanMethylation(data,groupCol  = "gender",sort="mean.desc",filename=NULL)
+# Sorting bars by asc mean methylation
+TCGAvisualize_meanMethylation(data,groupCol  = "gender",sort="mean.asc",filename=NULL)
+TCGAvisualize_meanMethylation(data,groupCol  = "vital_status",sort="mean.asc",filename=NULL)
 ```
 
 
@@ -2088,7 +2085,8 @@ grid.raster(img)
 ```
 
 
-## Case study n. 3: Integration of methylation and expression for COAD
+## Case study n. 3: Integration of methylation and expression for ACC
+
 In recent years, it has been described the relationship between 
 DNA methylation and gene expression and the study of this relationship 
 is often difficult to accomplish.
@@ -2096,9 +2094,10 @@ is often difficult to accomplish.
 This case study will show the steps to investigate the relationship
 between the two types of data.
 
-First, we downloaded COAD DNA methylation data for HumanMethylation27k and HumanMethylation450k platforms, and COAD RNA expression data for IlluminaGA_RNASeqV2. 
+First, we downloaded ACC DNA methylation data for HumanMethylation450k platforms, and ACC RNA expression data for Illumina HiSeq platform. 
 
 TCGAbiolinks adds by default the subtypes classification already published by researchers.
+
 We will use this classification to do our examples. 
 So, selected the groups CIMP.L and CIMP.H to do RNA expression and DNA methylation comparison.
 
