@@ -2133,7 +2133,7 @@ query.exp <- GDCquery(project = "TCGA-ACC",
                       platform = "Illumina HiSeq", 
                       file.type = "results")
 GDCDownload(query.exp)
-acc.exp <- GDCPrepare(query = query.exp, save = TRUE, save.filename = "coadexp.rda")
+acc.exp <- GDCPrepare(query = query.exp, save = TRUE, save.filename = "accExp.rda")
 ```
 
 We will first investigate the mean methylation of the methylation groups and highlight 
@@ -2195,14 +2195,13 @@ of gene expression and their significance value.
 #-------------------------------------------------
 # 2.3 - DEA - Expression analysis - volcano plot
 # ------------------------------------------------
-coad.exp.aux <- subset(coad.exp, 
-                       select = colData(coad.exp)$methylation_subtype %in% c("CIMP.H","CIMP.L"))
+acc.exp.aux <- subset(acc.exp, 
+                       select = colData(acc.exp)$subtype_MethyLevel %in% c("CIMP-high","CIMP-low"))
 
-idx <- colData(coad.exp.aux)$methylation_subtype %in% c("CIMP.H")
-idx2 <- colData(coad.exp.aux)$methylation_subtype %in% c("CIMP.L")
+idx <- colData(acc.exp.aux)$subtype_MethyLevel %in% c("CIMP-high")
+idx2 <- colData(acc.exp.aux)$subtype_MethyLevel %in% c("CIMP-low")
 
-dataPrep <- TCGAanalyze_Preprocessing(object = coad.exp.aux,
-                                      cor.cut = 0.6)
+dataPrep <- TCGAanalyze_Preprocessing(object = acc.exp.aux, cor.cut = 0.6)
 
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
                                       geneInfo = geneInfo,
@@ -2214,19 +2213,20 @@ dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
 
 dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,idx],
                             mat2 = dataFilt[,idx2],
-                            Cond1type = "CIMP.H",
-                            Cond2type = "CIMP.l",
+                            Cond1type = "CIMP-high",
+                            Cond2type = "CIMP-low",
                             method = "glmLRT")
 
 TCGAVisualize_volcano(dataDEGs$logFC,dataDEGs$FDR,
                       filename = "Case3_volcanoexp.png",
                       x.cut = 3,
-                      y.cut = 10^-4,
+                      y.cut = 10^-5,
                       names = rownames(dataDEGs),
+                      color = c("black","red","darkgreen"),
                       names.size = 2,
                       xlab = " Gene expression fold change (Log2)",
                       legend = "State",
-                      title = "Volcano plot (CIMP.l vs CIMP.H)",
+                      title = "Volcano plot (CIMP-high vs CIMP-low)",
                       width = 10)
 ```
 
@@ -2248,10 +2248,10 @@ We used only the samples that had a classification in the examples.
 #------------------------------------------
 # 2.4 - Starburst plot
 # -----------------------------------------
-starburst <- TCGAvisualize_starburst(coad.aux, dataDEGs,"CIMP.H","CIMP.L",
+starburst <- TCGAvisualize_starburst(acc.met, dataDEGs,"CIMP-high","CIMP-low",
                                      filename = "starburst.png",
                                      met.p.cut = 10^-5,
-                                     exp.p.cut = 10^-4,
+                                     exp.p.cut = 10^-5,
                                      diffmean.cut = 0.25,
                                      logFC.cut = 3,
                                      names = TRUE,
