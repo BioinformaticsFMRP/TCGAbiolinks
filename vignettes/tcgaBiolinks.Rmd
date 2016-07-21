@@ -307,7 +307,20 @@ references:
   pages: 43-49
   issued:
     year: 2016 
+
     
+- id: ref23
+  title: Complex heatmaps reveal patterns and correlations in multidimensional genomic data
+  author: 
+  - family: Gu, Zuguang and Eils, Roland and Schlesner, Matthias
+    given:
+  journal: Bioinformatics
+  URL: "http://dx.doi.org/10.1016/j.ccell.2016.04.002"
+  DOI: "10.1016/j.ccell.2016.04.002"
+  pages: "btw313"
+  issued:
+    year: 2016 
+        
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
@@ -322,6 +335,34 @@ knitr::opts_chunk$set(cache=FALSE)
 ```{r, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
 devtools::load_all(".")
 ```
+
+## Updates
+Recently the TCGA data has been moved from the DCC server to 
+The National Cancer Institute (NCI) Genomic Data Commons (GDC) Data Portal 
+In this version of the package, we rewrote all the functions that were  acessing 
+the old TCGA server to GDC.
+
+The GDC, which receives, processes, harmonizes, and distributes clinical, biospecimen, and genomic data from multiple cancer research programs, has data from the  following programs:
+
+*  The Cancer Genome Atlas (TCGA)
+*  Therapeutically Applicable Research to Generate Effective Treatments (TARGET)
+*  the Cancer Genome Characterization Initiative (CGCI)
+
+The big change is that the GDC data is harmonized against GRCh38. However, not all 
+data has been harmonized yet. The old TCGA data can be acessed through GDC legacy Archive,
+in which the majority of data can be found.
+
+More information about the project can be found in [GCD FAQS](https://gdc.nci.nih.gov/about-gdc/gdc-faqs)
+
+The functions `TCGAquery`, `TCGAdownload`, `TCGAPrepare`, `TCGAquery_maf`, 
+`TCGAquery_clinical`, were replaced by 
+`GDCquery`, `GDCdownload`, `GDCPrepare`, `GDCquery_maf`, `GDCquery_clinical`.
+
+And it can acess both the GDC and GDC Legacy Archive.
+
+Note: Not all the examples in this vignette were updated.
+
+
 
 ## Introduction 
 
@@ -342,6 +383,7 @@ these downloaded data directly in one single R package has not yet been availabl
 
 This document describes how to search, download and analyze TCGA data using the
 `TCGAbiolinks` package.
+
 
 ## Installation
 
@@ -378,7 +420,9 @@ Also, if you have used ELMER analysis please cite:
 * **sample.type** A sample type to filter the files to download
 * **workflow.type** GDC workflow type
 * **barcode** A list of barcodes to filter the files to download
-* **legacy** Search in the legacy repository
+* **legacy** Search in the legacy repository? Default: FALSE
+* **platform** Experimental data platform (HumanMethylation450, AgilentG4502A_07 etc). Used only for legacy repository
+* **file.type** A string to filter files, based on its names. Used only for legacy repository
 
 The next subsections will detail each of the search arguments.
 Below, we show some search examples:
@@ -396,33 +440,105 @@ query <- GDCquery(project = "TCGA-GBM",
                   barcode = c("TCGA-02-0047-01A-01D-0186-05","TCGA-06-2559-01A-01D-0788-05"))
 ```
 
-The list of projects is below
+The list of projects is below:
 ```{r, eval = TRUE, echo = FALSE}
 knitr::kable(getGDCprojects(), digits = 2,
              caption = "List of projects",row.names = FALSE)
 ```
 
+The other fields (data.category, data.type, workflow.type, platform, file.type) can be found below. 
+Please, not that these tables are still incomplete.
+
+## Harmonized data
+
+| Data.category               | Data.type                         | Workflow Type   |
+|-----------------------------|-----------------------------------|-----------------|
+| Transcriptome Profiling     | Gene Expression Quantification    | HTSeq - Counts  |
+|                             |                                   | HTSeq - FPKM-UQ |
+|                             |                                   | HTSeq - FPKM    |
+|                             | Isoform Expression Quantification | -               |
+|                             | miRNA Expression Quantification   | -               |
+| Copy number variation       | Copy Number Segment               |                 |
+|                             | Masked Copy Number Segment        |                 |
+| Simple Nucleotide Variation |                                   |                 |
+| Raw Sequencing Data         |                                   |                 |
+| Biospecimen                 |                                   |                 |
+| Clinical                    |                                   |                 |
+
+## Legacy data
+| Data.category               | Data.type                         | Platform                            | file.type          |
+|-----------------------------|-----------------------------------|-------------------------------------|--------------------|
+| Transcriptome Profiling     |                                   |                                     |                    |
+| Copy number variation       | -                                 | Affymetrix SNP Array 6.0            | nocnv_hg18.seg     |
+|                             | -                                 | Affymetrix SNP Array 6.0            | hg18.seg           |
+|                             | -                                 | Affymetrix SNP Array 6.0            | nocnv_hg19.seg     |
+|                             | -                                 | Affymetrix SNP Array 6.0            | hg19.seg           |
+|                             | -                                 | Illumina HiSeq                      | -                  |
+| Simple Nucleotide Variation |                                   |                                     |                    |
+| Raw Sequencing Data         |                                   |                                     |                    |
+| Biospecimen                 |                                   |                                     |                    |
+| Clinical                    |                                   |                                     |                    |
+| Protein expression          |                                   | MDA RPPA Core                       | -                  |
+| Gene expression             | Gene expression quantification    | Illumina HiSeq                      | normalized_results |
+|                             |                                   | Illumina HiSeq                      | results            |
+|                             |                                   | HT_HG-U133A                         | -                  |
+|                             |                                   | AgilentG4502A_07_2                  | -                  |
+|                             |                                   | AgilentG4502A_07_1                  | -                  |
+|                             |                                   | HuEx-1_0-st-v2                      | FIRMA.txt          |
+|                             |                                   |                                     | gene.txt           |
+|                             | Isoform expression quantification |                                     |                    |
+|                             | miRNA gene quantification         |                                     |                    |
+|                             | Exon junction quantification      |                                     |                    |
+|                             | Exon quantification               |                                     |                    |
+|                             | miRNA isoform quantification      |                                     |                    |
+|                             |                                   |                                     |                    |
+| DNA methylation             |                                   | Illumina Human Methylation 450      | -           |
+|                             |                                   | Illumina Human Methylation 27       | -           |
+|                             |                                   | Illumina DNA Methylation OMA003 CPI | -           |
+|                             |                                   | Illumina DNA Methylation OMA002 CPI | -           |
+|                             |                                   | Illumina Hi Seq                     |                    |
+| Raw Microarray Data         |                                   |                                     |                    |
+| Structural Rearrangement    |                                   |                                     |                    |
+| Other                       |                                   |                                     |                    |
+
 ## `GDCquery_maf`: Working with mutation files.
 
 In order to download the Mutation Annotation Format (MAF), we provide the user
 with the `GDCquery_maf` function. Briefly, it will get the open acess maf files from
-https://gdc-docs.nci.nih.gov/Data/Release_Notes/Data_Release_Notes/
+[https://gdc-docs.nci.nih.gov/Data/Release_Notes/Data_Release_Notes/](https://gdc-docs.nci.nih.gov/Data/Release_Notes/Data_Release_Notes/)
 
 The arguments that will be used to filter the data are:
 
 * tumor 
+* save.csv: Save the maf as csv file
 
 ```{r, eval = FALSE}
-mutation <- TCGAquery_maf(tumor = "lgg")
+mutation <- GDCquery_Maf(tumor = "LGG")
+mutation <- GDCquery_Maf(tumor = "LGG", save.csv = TRUE)
 ```
 
-## `GDCquery_clinic`: Working with clinical data.
+This mutation data can be visualized through a oncoprint from the  [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) package [@ref23].
+
+```{r, message=FALSE}
+mut <- GDCquery_Maf(tumor = "ACC")
+clin <- GDCquery_clinic("TCGA-ACC","clinical")
+clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_stage","race","vital_status")]
+TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
+                        filename = NULL,
+                        annotation = clin,
+                        color=c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown"),
+                        rows.font.size=10,
+                        heatmap.legend.side = "right",
+                        dist.col = 0,
+                        label.font.size = 10)
+```
+
+## `GDCquery_clinic` and `GDCPrepare_clinic`: Working with clinical data.
 
 You can retrieve clinical data using the `GDCquery_clinic` function. 
 This will get only the indexed GDC clinical data. This is the same as clicking on the
 download clinical buttun in the data portal.
-This means this function is not parsing the XML files, we are also working in a function to
-parse the XML to biotab.
+This means this function is not parsing the XML files, see `GDCPrepare_clinic` function.
 
 The arguments of this function are: 
 
@@ -435,6 +551,29 @@ Examples of use:
 ```{r, eval = FALSE}
 clin <- GDCquery_clinic("TCGA-ACC", type = "clinical", save.csv = TRUE)
 clin <- GDCquery_clinic("TCGA-ACC", type = "biospecimen", save.csv = TRUE)
+```
+
+To parse the TCGA clinical XML files, please use `GDCPrepare_clinic` function. It receives as
+argument the query object and which clinical information we should retrieve.
+The possible values for the argument `clinical.info` are:
+
+* drug
+* admin
+* radiation
+* patient
+* stage_event
+* new_tumor_event
+* follow_up
+
+```{r, eval = FALSE}
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Clinical", 
+                  barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))
+GDCDownload(query)
+clinical <- GDCPrepare_clinic(query, clinical.info = "patient")
+clinical.drug <- GDCPrepare_clinic(query, clinical.info = "drug")
+clinical.radiation <- GDCPrepare_clinic(query, clinical.info = "radiation")
+clinical.admin <- GDCPrepare_clinic(query, clinical.info = "admin")
 ```
 
 
@@ -598,20 +737,56 @@ knitr::kable(tabDEGsTFPubmed, digits = 2,
 
 # `GDCdownload`: Downloading GDC data  
 You can easily download data using the `GDCdownload` function.
-It uses GDC transfer tool to download gdc data
+It uses GDC transfer tool to download gdc data doing a system call.
+For this reason some times the update will stop to show, which does not means that 
+the download process has stopped. Once the process has finished it will give a signal to R.
+
 The data from query will be save in a folder: project/data.category
 
 The arguments are:
 
 *  **query**	A query for `GDCquery` function
-*  **token.file** A manifest file from the GDC data portal
+*  **token.file** A token file to download protect data (not test yet)
 
 ### `GDCdownload`: Example of use
 ```{r, eval = FALSE}
-# get all samples from the query and save them in the TCGA folder
-# samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
-# samples to normalize later
-GDCdownload(query)
+query <- GDCquery(project = "TCGA-ACC", data.category = "Copy Number Variation",
+                  data.type = "Copy Number Segment",
+                  barcode = c( "TCGA-OR-A5KU-01A-11D-A29H-01", "TCGA-OR-A5JK-01A-11D-A29H-01"))
+GDCDownload(query)
+data <- GDCPrepare(query)
+
+query <- GDCquery(project = "TCGA-GBM",
+                  data.category = "Gene expression",
+                  data.type = "Gene expression quantification",
+                  platform = "Illumina HiSeq", file.type  = "normalized_results",
+                  barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"),
+                  legacy = TRUE)
+GDCDownload(query)
+z <- GDCPrepare(query)
+
+# A function to download only 2 samples
+legacyPipeline <- function(project, data.category, platform){
+    query <- GDCquery(project = project,
+                      data.category = data.category,
+                      platform = platform,
+                      legacy = TRUE)
+    cases <- query$results[[1]]$cases[1:2] # Get two samples from the search
+    query <- GDCquery(project = project,
+                      data.category = data.category,
+                      platform = platform,
+                      legacy = TRUE,
+                      barcode = cases)
+    GDCDownload(query)
+    data <- GDCPrepare(query)
+    return(data)
+}
+# DNA methylation
+data <- legacyPipeline("TCGA-GBM","DNA methylation","Illumina Human Methylation 27")
+data <- legacyPipeline("TCGA-GBM","DNA methylation","Illumina Human Methylation 450")
+data <- legacyPipeline("TCGA-GBM","DNA methylation","Illumina DNA Methylation OMA003 CPI")
+data <- legacyPipeline("TCGA-GBM","DNA methylation","Illumina DNA Methylation OMA002 CPI")
+data <- legacyPipeline("TCGA-GBM","DNA methylation","Illumina DNA Methylation OMA002 CPI")
 ```
 
 # `GDCprepare`: Preparing the data
@@ -1077,7 +1252,7 @@ You can easily visualize results from some following functions:
 In order to have a better view of clusters, we normally use heatmaps.
 `TCGAvisualize_Heatmap` will plot a heatmap and add to each sample bars representing
 different features. This function is a wrapper to the package 
-`complexHeatmap` package,
+ [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/)  package,
 
 The arguments of this function are:
 
