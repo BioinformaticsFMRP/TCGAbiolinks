@@ -518,6 +518,36 @@ move <- function(from, to) {
     file.rename(from = from,  to = to)
 }
 
+getBarcodeInfo <- function(barcode) {
+    baseURL <- "https://gdc-api.nci.nih.gov/cases/?"
+    options.pretty <- "pretty=true"
+    options.expand <- "expand=project,diagnoses,diagnoses.treatments,annotations,family_histories,demographic,exposures"
+    option.size <- paste0("size=",length(barcode))
+
+    options.filter <- paste0("filters=",
+                             URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.submitter_id","value":['),
+                             paste0('"',paste(barcode,collapse = '","')),
+                             URLencode('"]}}]}'))
+    message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
+    json <- fromJSON(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")), simplifyDataFrame = TRUE)
+    results <- json$data$hits
+    diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
+    diagnoses$submitter_id <- gsub("_diagnosis","", diagnoses$submitter_id)
+    exposures <- rbindlist(results$exposures, fill = TRUE)
+    exposures$submitter_id <- gsub("_exposure","", exposures$submitter_id)
+    results$demographic$submitter_id <- gsub("_demographic","", results$demographic$submitter_id)
+    df <- merge(diagnoses,exposures, by="submitter_id", all = TRUE)
+    df <- merge(df,results$demographic, by="submitter_id", all = TRUE)
+    treatments <- rbindlist(df$treatments,fill = TRUE)
+    df[,treatments:=NULL]
+    treatments$submitter_id <- gsub("_treatment","", treatments$submitter_id)
+    df <- merge(df,treatments, by="submitter_id", all = TRUE)
+    df$bcr_patient_barcode <- df$submitter_id
+    df <- cbind(df,results$project)
+    return(df)
+}
+
+
 #' @title Read the data from level 3 the experiments and prepare it
 #'  for downstream analysis into a SummarizedExperiment object.
 #' @description
