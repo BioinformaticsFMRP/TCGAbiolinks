@@ -2099,7 +2099,7 @@ First, we downloaded ACC DNA methylation data for HumanMethylation450k platforms
 TCGAbiolinks adds by default the subtypes classification already published by researchers.
 
 We will use this classification to do our examples. 
-So, selected the groups CIMP.L and CIMP.H to do RNA expression and DNA methylation comparison.
+So, selected the groups CIMP-low and CIMP-high to do RNA expression and DNA methylation comparison.
 
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
@@ -2126,23 +2126,14 @@ acc.met <- GDCPrepare(query = query.met,
 #-----------------------------------
 # 1.2 - RNA expression
 # ----------------------------------
-coad.query.exp <- TCGAquery(tumor = "coad",
-                            platform = "IlluminaGA_RNASeqV2",
-                            level = 3)
-TCGAdownload(coad.query.exp,
-             path = "expression",
-             type = "rsem.genes.results")
-
-coad.exp <- TCGAprepare(query = coad.query.exp,
-                        dir = "expression",
-                        type = "rsem.genes.results",
-                        add.subtype = TRUE,
-                        save = T,filename = "coadexp.rda")
-
-# removing the samples without subtype classification
-coad.aux <- subset(coad.met, 
-                   select = colData(coad.met)$methylation_subtype %in% c("CIMP.L","CIMP.H"))
-
+query.exp <- GDCquery(project = "TCGA-ACC", 
+                      legacy = TRUE,
+                      data.category = "Gene expression",
+                      data.type = "Gene expression quantification",
+                      platform = "Illumina HiSeq", 
+                      file.type = "results")
+GDCDownload(query.exp)
+acc.exp <- GDCPrepare(query = query.exp, save = TRUE, save.filename = "coadexp.rda")
 ```
 
 We will first investigate the mean methylation of the methylation groups and highlight 
@@ -2154,44 +2145,46 @@ the hypermutated subgroup.
 #--------------------------------------------
 # 2.1 - Mean methylation of samples
 # -------------------------------------------
-TCGAvisualize_meanMethylation(coad.aux,
-                              groupCol = "methylation_subtype",
-                              subgroupCol = "hypermutated",
+TCGAvisualize_meanMethylation(acc.met,
+                              groupCol = "subtype_MethyLevel",
+                              subgroupCol = "subtype_Histology",
                               group.legend  = "Groups",
-                              subgroup.legend = "hypermutated",
-                              filename = "coad_mean.png")
+                              subgroup.legend = "Histology",
+                              filename = "acc_mean.png")
 ```
 
 The figure resulted from the code above is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
-img <- readPNG("meanmet.png")
+img <- readPNG("acc_mean.png")
 grid.raster(img)
 ```
 
 For DNA methylation, we do a DMR (different methylated region) analysis, which will give the difference of DNA methylation for the probes of the groups and their significance value.
-The output can be seen in a volcano plot.
+The output can be seen in a volcano plot. 
+Note: Depending on the number of samples this function can be very slow
+due to the wilcoxon test, taking from hours to days.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 # na.omit
-coad.aux <- subset(coad.aux,subset = (rowSums(is.na(assay(coad.aux))) == 0))
+acc.met <- subset(acc.met,subset = (rowSums(is.na(assay(acc.met))) == 0))
 
 # Volcano plot
-coad.aux <- TCGAanalyze_DMR(coad.aux, groupCol = "methylation_subtype",
-                            group1 = "CIMP.H",
-                            group2="CIMP.L",
+acc.met <- TCGAanalyze_DMR(acc.met, groupCol = "subtype_MethyLevel",
+                            group1 = "CIMP-high",
+                            group2="CIMP-low",
                             p.cut = 10^-5,
                             diffmean.cut = 0.25,
                             legend = "State",
-                            plot.filename = "coad_CIMPHvsCIMPL_metvolcano.png")
+                            plot.filename = "CIMP-highvsCIMP-low_metvolcano.png")
 ```
 
 The figure resulted from the code above is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
-img <- readPNG("figure5met.png")
+img <- readPNG("CIMP-highvsCIMP-low_metvolcano.png")
 grid.raster(img)
 ```
 
