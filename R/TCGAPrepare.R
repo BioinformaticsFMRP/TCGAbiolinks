@@ -95,8 +95,7 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
     }
 
     df <- merge(df, gene.location, by="external_gene_id")
-    print(assay.list)
-    print(head(df))
+
     if("transcript_id" %in% assay.list){
         rowRanges <- GRanges(seqnames = paste0("chr", df$chromosome_name),
                              ranges = IRanges(start = df$start_position,
@@ -171,7 +170,6 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
     if (grepl("OMA00",platform)){
         pb <- txtProgressBar(min = 0, max = length(files), style = 3)
         for (i in seq_along(files)) {
-            print(files[i])
             data <- fread(files[i], header = TRUE, sep = "\t",
                           stringsAsFactors = FALSE,skip = 1,
                           na.strings="N/A",
@@ -192,7 +190,6 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
     } else {
         pb <- txtProgressBar(min = 0, max = length(files), style = 3)
         for (i in seq_along(files)) {
-            print(files[i])
             data <- fread(files[i], header = TRUE, sep = "\t",
                           stringsAsFactors = FALSE,skip = 1,
                           colClasses=c("character", # Composite Element REF
@@ -367,8 +364,31 @@ colDataPrepare <- function(barcode){
     # For the moment this will work only for TCGA Data
     # We should search what TARGET data means
     message("Starting to add information to samples")
-    if(all(grepl("TARGET",barcode))) return(colDataPrepareTARGET(barcode))
-    if(all(grepl("TCGA",barcode))) return(colDataPrepareTCGA(barcode))
+
+    if(all(grepl("TARGET",barcode))) ret <- colDataPrepareTARGET(barcode)
+    if(all(grepl("TCGA",barcode))) ret <- colDataPrepareTCGA(barcode)
+
+    message(" => Add clinical information to samples")
+    patient.info <- getBarcodeInfo(ret$patient)
+    ret <- merge(ret,patient.info, by.x = "patient", by.y = "submitter_id" )
+
+    if(grepl("TCGA",unique(ret$project_id))) {
+        message(" => Adding subtype information to samples")
+        tumor <- gsub("TCGA-","",unique(ret$project_id))
+        if (grepl("acc|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc|all",
+                  tumor,ignore.case = TRUE)) {
+            subtype <- TCGAquery_subtype(tumor)
+            colnames(subtype) <- paste0("subtype_", colnames(subtype))
+
+            if(all(str_length(subtype$subtype_patient) == 12)){
+                # Subtype information were to primary tumor in priority
+                subtype$sample <- paste0(subtype$subtype_patient,"-01A")
+            }
+            ret <- merge(ret,subtype, by = "sample", all.x = TRUE)
+        }
+    }
+    ret <- ret[match(barcode,ret$barcode),]
+    return(ret)
 }
 
 #' @importFrom biomaRt getBM useMart listDatasets
@@ -388,10 +408,10 @@ get.GRCh.bioMart <- function(genome="hg19") {
         # for hg38
         ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
         attributes <- c("chromosome_name",
-                       "start_position",
-                       "end_position", "strand",
-                       "ensembl_gene_id",
-                       "external_gene_name")
+                        "start_position",
+                        "end_position", "strand",
+                        "ensembl_gene_id",
+                        "external_gene_name")
     }
     message(paste0("Downloading genome information. Using: ",
                    listDatasets(ensembl)[listDatasets(ensembl)$dataset=="hsapiens_gene_ensembl",]$description))
@@ -528,7 +548,7 @@ getBarcodeInfo <- function(barcode) {
                              URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.submitter_id","value":['),
                              paste0('"',paste(barcode,collapse = '","')),
                              URLencode('"]}}]}'))
-    message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
+    #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
     json <- fromJSON(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")), simplifyDataFrame = TRUE)
     results <- json$data$hits
     diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
@@ -1137,71 +1157,6 @@ TCGAprepare <- function(files = NULL,
         }
     }
 
-    if (grepl("HuEx-1_0-st-v2",tolower(platform),ignore.case = TRUE)) {
-        print("HuEx-1_0-st-v2")
-        if(!(type %in% c("FIRMA","gene"))){
-            stop("Please, set type argument to FIRMA or gene (type = 'gene' or type = 'FIRMA'")
-        }
-
-        for (i in seq_along(files)) {
-            data <- fread(files[i], header = TRUE, sep = "\t",
-                          stringsAsFactors = FALSE, data.table = FALSE)
-            if(i == 1) df <- data
-            if(i != 1) df <- merge(df,data,by="Hybridization REF")
-            setTxtProgressBar(pb, i)
-        }
-
-
-        # The df object is:
-        #
-        # Hibridation ref 123 345
-        # gene 1
-        # gene 2
-        #
-        # The mage has the map btw  Hibridation ref and barcode
-        codes <- colnames(df)
-        codes <- codes[-1] # remove the Hybridization REF
-        barcodes <- mage[match(as.integer(codes), as.integer(mage$Hybridization.Name)),"Comment..TCGA.Barcode."]
-        not.found <- which(barcodes == "->")
-        barcodes[not.found] <- codes[not.found] # some does not have a barcode
-        colnames(df)[2:length(colnames(df))] <- barcodes
-
-        if (summarizedExperiment & type == "FIRMA" ) {
-            message("Sorry we can prepare FIRMA type into summarizedExperiment please set summarizedExperiment = FALSE")
-            summarizedExperiment <- FALSE
-        }
-        if (summarizedExperiment){
-            df$external_gene_id <- df[,1]
-
-            df <- merge(df,gene.location,by="external_gene_id")
-
-            rowRanges <- GRanges(seqnames = paste0("chr", df$chromosome_name),
-                                 ranges = IRanges(start = df$start_position,
-                                                  end = df$end_position),
-                                 strand = df$strand,
-                                 gene_id = df$external_gene_id,
-                                 entrezgene = df$entrezgene)
-            names(rowRanges) <- as.character(df$external_gene_id)
-            assays <- SimpleList(
-                signal = data.matrix(df[,3:(length(barcodes)+2)],rownames.force = T)
-            )
-
-            colData <- colDataPrepare(barcodes,query,
-                                      add.subtype = add.subtype, add.clinical = add.clinical, add.mutation.genes = add.mutation.genes)
-
-            rownames(colData) <- barcodes
-            assays <- lapply(assays, function(x){
-                colnames(x) <- barcodes
-                rownames(x) <- as.character(df$external_gene_id)
-                return(x)
-            })
-            rse <- SummarizedExperiment(assays=assays,
-                                        rowRanges=rowRanges,
-                                        colData=colData)
-        }
-
-    }
-
     if (grepl("CGH-1x1M_G4447A",tolower(platform),ignore.case = TRUE)) {
 
         if(summarizedExperiment){
@@ -1229,12 +1184,9 @@ TCGAprepare <- function(files = NULL,
         }
         mage <- mage[,c("Comment..TCGA.Barcode.","Hybridization.Name")]
         mage <- mage[!mage$Comment..TCGA.Barcode. == "->",]
-        print(head(mage))
-        print(head(df))
         df$sample <- gsub("\\.","-",df$sample)
         df <- merge(df,mage,
                     by.x="sample",by.y="Hybridization.Name", sort=FALSE)
-        print(head(df))
         df[,1] <- df[,ncol(df)]
         df[,ncol(df)] <- NULL
 
@@ -1348,43 +1300,6 @@ TCGAprepare <- function(files = NULL,
 
     }
     close(pb)
-
-    if (!is.null(rse)) {
-        message("Adding metadata to the rse object...")
-
-        finf <- c()
-        finf <- file.info(files)
-        rownames(finf) <- basename(rownames(finf))
-        finf <- finf[,c("mtime","ctime")]
-
-        metadata(rse) <- list("Query:"=list(query),
-                              "TCGAprepareParameters"=c("dir"=dir,
-                                                        "samples"=samples,
-                                                        "type"=type,
-                                                        "save"=save,
-                                                        "add.mutation.genes"=add.mutation.genes,
-                                                        "filename"=filename),
-                              "FilesInfo:"=list(finf))
-    }
-
-    if (save) {
-        message("Saving the data...")
-
-        if (is.null(filename)) {
-            filename <- paste0(platform,"_",gsub(" ","_",Sys.time()),".rda")
-        }
-        if (!is.null(rse)) {
-            save(rse,file = filename)
-        } else {
-            save(df,file = filename)
-        }
-        message(paste("Data saved in:",filename))
-    }
-
-    if (!is.null(rse)) {
-        return(rse)
-    }
-    return(df)
 }
 
 #' @title Prepare the data for ELEMR package
