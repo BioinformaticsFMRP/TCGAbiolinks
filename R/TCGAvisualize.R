@@ -741,7 +741,7 @@ TCGAvisualize_Heatmap <- function(data,
     # If we want to show differences between samples, it is good to make Z-score by genes
     # (force each gene to have zero mean and standard deviation=1).
     if(scale == "row"){
-        message("Calculiating z-scores for the rows....")
+        message("Calculating z-scores for the rows....")
         data <- t(scale(t(data)))
         if (type == "expression") color <- colorRamp2(seq(-4,4,0.1), gplots::greenred(length(seq(-4,4,0.1))))
         if (type == "methylation") color <- colorRamp2(seq(-4,4,0.1), matlab::jet.colors(length(seq(-4,4,0.1))))
