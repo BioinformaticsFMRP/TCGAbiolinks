@@ -340,6 +340,9 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 #' @title Parsing clinical xml files
 #' This function receives the query argument and parses the clinical xml files
 #' based on the desired information
+#' @param query Result from GDCquery, with data.category set to Clinical
+#' @param clinical.info Which information should be retrieved.
+#' Options: drug, admin, follow_up,radiation, patient, stage_event or new_tumor event
 #' @importFrom xml2 read_xml xml_ns
 #' @importFrom XML xmlParse getNodeSet xmlToDataFrame
 #' @export
@@ -361,13 +364,13 @@ GDCPrepare_clinic <- function(query, clinical.info){
                        gsub(" ","_",query$results[[1]]$file_name))
 
     disease <- tolower(gsub("TCGA-","",query$project))
-    if(clinical.info == "drug")      xpath <- "//rx:drug"
-    if(clinical.info == "admin")     xpath <- "//admin:admin"
-    if(clinical.info == "follow_up") xpath <- "//follow_up_v1.0:follow_up"
-    if(clinical.info == "radiation") xpath <- "//rad:radiation"
-    if(clinical.info == "patient")   xpath <- paste0("//",disease,":patient")
-    if(clinical.info == "stage_event")     xpath <- "//shared_stage:stage_event"
-    if(clinical.info == "new_tumor_event") xpath <- paste0("//",disease,"_nte:new_tumor_event")
+    if(tolower(clinical.info) == "drug")      xpath <- "//rx:drug"
+    if(tolower(clinical.info) == "admin")     xpath <- "//admin:admin"
+    if(tolower(clinical.info) == "follow_up") xpath <- "//follow_up_v1.0:follow_up"
+    if(tolower(clinical.info) == "radiation") xpath <- "//rad:radiation"
+    if(tolower(clinical.info) == "patient")   xpath <- paste0("//",disease,":patient")
+    if(tolower(clinical.info) == "stage_event")     xpath <- "//shared_stage:stage_event"
+    if(tolower(clinical.info) == "new_tumor_event") xpath <- paste0("//",disease,"_nte:new_tumor_event")
     if(missing(clinical.info)) stop("Please set a valid clinical.info argument")
 
     clin <- NULL
