@@ -2310,14 +2310,6 @@ library(ELMER)
 library(parallel)
 dir.create("case4")
 setwd("case4")
-library(TCGAbiolinks)
-library(SummarizedExperiment)
-dir.create("case3")
-setwd("case3")
-#---------------------------------------------------------------------------
-# STEP 0: Get samples with both DNA methylation and gene expression data
-#---------------------------------------------------------------------------
-
 #-----------------------------------
 # STEP 1: Search, download, prepare |
 #-----------------------------------
