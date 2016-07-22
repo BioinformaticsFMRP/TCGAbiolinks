@@ -85,7 +85,7 @@ checkDataCategoriesInput <- function(project,data.category, legacy = FALSE){
 }
 
 checkBarcodeDefinition <- function(definition){
-    if(!(definition %in% getBarcodeDefinition()$definition)){
+    if(!(definition %in% getBarcodeDefinition()$tissue.definition)){
         print(knitr::kable(getBarcodeDefinition()))
         stop("Please select a difinition from the table above")
     }
