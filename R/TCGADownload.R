@@ -94,10 +94,6 @@ GDCclientInstall <- function(){
 #' @param samples List of samples to download data
 #' @param force Download files even if it was already downladed?
 #' Default: \code{FALSE}
-#' @seealso \code{\link{TCGAquery}} for searching the data to download
-#'
-#' \code{\link{TCGAprepare}} for preparing the data for the user into
-#' a Summarized experiment object, or a matrix.
 #' @examples
 #' \dontrun{
 #' samples <- c("TCGA-26-1442-01A-01R-1850-01")
@@ -112,93 +108,7 @@ GDCclientInstall <- function(){
 #' @export
 #' @return Download TCGA data into the given path
 #' @family data functions
-TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL,
-                         force = FALSE) {
+TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL, force = FALSE) {
     stop("TCGA data has moved from DCC server to GDC server. Please use GDCdownload function")
 }
 
-# Filter files by barcode
-#' @importFrom stringr str_extract
-filterFiles <- function(data,samples,files){
-
-    # If it if maf it is better to let download all files
-    #maf <- paste("SOLiD_DNASeq_curated",
-    #             "SOLiD_DNASeq", # partial barcode 2
-    #             "illuminaga_dnaseq",
-    #             sep = "|"
-    #)
-
-    barcodeName <- paste("IlluminaHiSeq_RNASeq",
-                         #"humanmethylation",
-                         "H-miRNA_8x15K",
-                         "images",
-                         "SOLiD_DNASeq",
-                         "pathology_reports",
-                         "IlluminaDNAMethylation",
-                         #"HG-CGH-244A", # exception depends on the center (harvard - barcode name)
-                         # mskcc.org in the mage
-                         "HG-CGH-415K_G4124A",
-                         "HG-U133_Plus_2",
-                         "IlluminaGA_DNASeq_automated",
-                         "IlluminaGA_miRNASeq",
-                         "IlluminaGA_mRNA_DGE",
-                         "IlluminaGA_RNASeq",
-                         "IlluminaHiSeq_DNASeqC",
-                         "IlluminaHiSeq_miRNASeq",
-                         "IlluminaHiSeq_RNASeq", sep = "|")
-
-    uuidName <- paste("RNASeqV2",
-                      "MDA_RPPA_Core",
-                      sep = "|")
-
-    mageName <-  paste("AgilentG4502A",
-                       "CGH-1x1M_G4447A",
-                       "Genome_Wide_SNP_6",
-                       "HT_HG-U133A",
-                       "IlluminaHiSeq_WGBS",
-                       sep = "|")
-
-
-    level <- as.numeric(unique(substr(str_extract(data$name,"Level_[1-3]"),7,7)))
-
-    if (grepl(uuidName,data$Platform, ignore.case = TRUE)) {
-        # case uuid in name file
-        regex <- paste0("[[:alnum:]]{8}-[[:alnum:]]{4}",
-                        "-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}")
-        uuid <- str_match(files,regex)[,1]
-        map <- mapuuidbarcode(unique(na.omit(uuid)))
-        idx <- unique(unlist(lapply(samples, function(x) grep(x,map$barcode))))
-        idx <- which(tolower(uuid) %in% map[idx,]$uuid)
-        files <- files[idx]
-    } else if (grepl("IlluminaGA_DNASeq_curated|illuminaga_dnaseq_automated",data$Platform) & data$Center == "broad.mit.edu") {
-        # Exception - two uuids in the name
-        # case uuid in name file
-        regex <- paste0("[[:alnum:]]{8}-[[:alnum:]]{4}",
-                        "-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}")
-        files <- files[grep(regex,files)]
-        uuid <- unlist(str_match_all(files,regex))
-        map <- mapuuidbarcode(unique(na.omit(uuid)))
-        idx <- unique(unlist(lapply(samples, function(x) grep(x,map$barcode))))
-        idx <- which(uuid %in% map[idx,]$uuid)
-        files <- files[ceiling(idx / 2)]
-    } else if(grepl(barcodeName, data$Platform, ignore.case = TRUE)
-              | (grepl("humanmethylation", data$Platform, ignore.case = TRUE) & level != 1 )
-              | (grepl("HG-CGH-244A", data$Platform, ignore.case = TRUE) & data$Center == "hms.harvard.edu" )) {
-        idx <- unique(unlist(lapply(samples, function(x) grep(x,files))))
-        files <- files[idx]
-    } else if(grepl(mageName, data$Platform, ignore.case = TRUE)
-              | (grepl("humanmethylation", data$Platform, ignore.case = TRUE) & level == 1 )
-              | (grepl("HG-CGH-244A", data$Platform, ignore.case = TRUE) & data$Center == "mskcc.org" )) {
-        mage <- getMage(data)
-        idx <- unlist(lapply(samples,
-                             function(x) grep(x,mage$Comment..TCGA.Barcode.)))
-        idx <- unique(idx)
-        mage <- mage[idx,]
-        idx <- grep("Derived.Array.Data.Matrix.File|Array.Data.File|Derived.Data.File",
-                    colnames(mage))
-        names <- unique(unlist(mage[,idx]))
-        idx <- unique(unlist(lapply(names, function(x) grep(x,files))))
-        files <- files[idx]
-    }
-    return(files)
-}
