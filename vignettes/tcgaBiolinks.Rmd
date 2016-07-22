@@ -1977,7 +1977,7 @@ grid.raster(img)
 Finally, we will take a look in the mutation genes. We will first download the maf file
 with `TCGAquery_maf`. In this example we will investigate the gene "ATRX".
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-LGGmut <- GDCquery_maf(tumor = "LGG")
+LGGmut <- GDCquery_Maf(tumor = "LGG") 
 # Selecting gene
 mRNAsel <- "ATRX"
 LGGselected <- LGGmut[LGGmut$Hugo_Symbol == mRNAsel,]
@@ -1998,7 +1998,7 @@ TCGAvisualize_profilePlot(dataMut,
                           groupCol = "groupsHC",
                           subtypeCol =  "Variant_Classification",
                           na.rm.groups = FALSE,
-                          plot.margin = c(-4.0, -2.5, -0.5, 2),
+                          plot.margin = c(-4.0, -2.5, -1.5, 2),
                           filename = paste0(mRNAsel,"_Mutation_Variant_Classification.png"))
 ```
 
@@ -2019,7 +2019,7 @@ TCGAvisualize_profilePlot(dataMut,
                           groupCol = "groupsHC",
                           subtypeCol =  "Variant_Type",
                           na.rm.groups = FALSE,
-                          plot.margin = c(-4.0, -2.5, -0.5, 2),
+                          plot.margin = c(-4.0, -2.5, -1.5, 2),
                           filename = paste0(mRNAsel,"_Mutation_Variant_Type_in_EC_clusters.png"))
 ```
 
@@ -2030,43 +2030,6 @@ library(grid)
 img <- readPNG("ATRX_Mutation_Variant_Type_in_EC_clusters.png")
 grid.raster(img)
 ```
-
-We can see the percentage of samples that have the ATRX mutation for each RNASeqCluster groups.
-
-```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-TCGAvisualize_mutation(data = colData(dataAssy),
-                       groupCol = "Supervised.DNA.Methylation.Cluster",
-                       geneList = "ATRX",
-                       filename = "mutation_ATRX.png",
-                       by = "cluster")
-```
-
-The result is shown below:
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
-library(grid)
-img <- readPNG("mutation_ATRX_RNASeqCluster.png")
-grid.raster(img)
-```
-
-We can see the percentage of samples that have the IDH1 mutation for each RNASeqCluster groups.
-
-```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-TCGAvisualize_mutation(data = colData(lgg.exp),
-                       groupCol = "Supervised.DNA.Methylation.Cluster",
-                       geneList = "IDH1",
-                       filename = "mutation_IDH1.png",
-                       by = "cluster")
-```
-
-The result is shown below:
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
-library(grid)
-img <- readPNG("mutation_IDH1_RNASeqCluster.png")
-grid.raster(img)
-```
-
 
 ## Case study n. 3: Integration of methylation and expression for ACC
 
