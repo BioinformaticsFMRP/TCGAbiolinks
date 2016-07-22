@@ -1641,41 +1641,21 @@ samples using TCGAquery, TCGAdownload and TCGAprepare.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(TCGAbiolinks)
-
-# defining common parameters
-cancer <- "BRCA"
-PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
-dataType <- "rsem.genes.results"
-pathCancer <- paste0("../TCGA/data",cancer)
-  
-datQuery <- TCGAquery(tumor = cancer, platform = PlatformCancer, level = "3")  
-lsSample <- TCGAquery_samplesfilter(query = datQuery)
+query.exp <- GDCquery(project = "TCGA-BRCA", 
+                      legacy = TRUE,
+                      data.category = "Gene expression",
+                      data.type = "Gene expression quantification",
+                      platform = "Illumina HiSeq", 
+                      file.type = "results",
+                      sample.type = c("Primary solid Tumor","Solid Tissue Normal"))
+GDCDownload(query.exp)
+brca.exp <- GDCPrepare(query = query.exp, save = TRUE, save.filename = "brcaExp.rda")
 
 # get subtype information
-dataSubt <- TCGAquery_subtype(tumor = cancer)
+dataSubt <- TCGAquery_subtype(tumor = "BRCA")
 
-# Which samples are Primary Solid Tumor
-dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
-                                  typesample = "TP")
-# Which samples are Solid Tissue Normal
-dataSmNT <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
-                                  typesample ="NT")
 # get clinical data
-dataClin <- TCGAquery_clinic(tumor = cancer,
-                             clinical_data_type = "clinical_patient") 
-
-TCGAdownload(data = datQuery, 
-             path = pathCancer, 
-             type = dataType,
-             samples =c(dataSmTP,dataSmNT))
-
-dataAssy <- TCGAprepare(query = datQuery, 
-                        dir = pathCancer, 
-                        type = dataType, 
-                        save = TRUE, 
-                        summarizedExperiment = TRUE, 
-                        samples = c(dataSmTP,dataSmNT),
-                        filename = paste0(cancer,"_",PlatformCancer,".rda")) 
+dataClin <- GDCquery_clinic(project = "TCGA-BRCA","clinical") 
 ```
 
 Using `TCGAnalyze_DEA`, we identified 3,390 differentially expression genes (DEG) (log 
@@ -1685,7 +1665,7 @@ enrichment analysis using `TCGAnalyze_EA_complete` function.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 
-dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,
+dataPrep <- TCGAanalyze_Preprocessing(object = brca.exp,
                                       cor.cut = 0.6)                      
 
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
@@ -1962,7 +1942,8 @@ TCGAvisualize_Heatmap(t(datFilt),
                       sortCol = "groupsHC",
                       type = "expression", # sets default color
                       scale = "row", # use z-scores for better visualization
-                      title = "Heatmap from concensus cluster",
+                      title = "Heatmap from concensus cluster", 
+                      filename = "lgg_heatmap.png",
                       cluster_rows = TRUE)
 ```
 
