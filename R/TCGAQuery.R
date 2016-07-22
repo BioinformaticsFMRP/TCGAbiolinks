@@ -479,8 +479,11 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE){
     # uncompress file
     uncompressed <- gsub(".gz","",selected$filename)
     if (!file.exists(uncompressed)) gunzip(selected$filename, remove = FALSE)
-
+    message(uncompressed)
+    # Is there a better way??
     ret <- read_tsv(uncompressed,comment = "#")
+    if(ncol(ret) == 1)     ret <- read_csv(uncompressed,comment = "#")
+
 
     if(save.csv) write_csv(ret,gsub("txt","csv",uncompressed))
 
