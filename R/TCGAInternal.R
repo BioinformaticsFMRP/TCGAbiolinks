@@ -85,9 +85,11 @@ checkDataCategoriesInput <- function(project,data.category, legacy = FALSE){
 }
 
 checkBarcodeDefinition <- function(definition){
-    if(!(definition %in% getBarcodeDefinition()$tissue.definition)){
+    for(i in definition){
+        if(!(i %in% getBarcodeDefinition()$tissue.definition)){
         print(knitr::kable(getBarcodeDefinition()))
-        stop("Please select a difinition from the table above")
+        stop(i, " was not found. Please select a difinition from the table above ")
+        }
     }
 }
 
