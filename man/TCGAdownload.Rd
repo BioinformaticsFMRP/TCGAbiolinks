@@ -50,11 +50,6 @@ TCGAdownload(query,path = "RNA",
 }
 }
 \seealso{
-\code{\link{TCGAquery}} for searching the data to download
-
-\code{\link{TCGAprepare}} for preparing the data for the user into
-a Summarized experiment object, or a matrix.
-
 Other data.functions: \code{\link{TCGAquery}}
 }
 
