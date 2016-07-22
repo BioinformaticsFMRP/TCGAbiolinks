@@ -5,10 +5,14 @@
 \title{Read the data from level 3 the experiments and prepare it
  for downstream analysis into a SummarizedExperiment object.}
 \usage{
-TCGAprepare(files = NULL, platform = NULL, samples = NULL, type = NULL,
+TCGAprepare(query = NULL, dir = NULL, samples = NULL, type = NULL,
   save = FALSE, filename = NULL, summarizedExperiment = TRUE)
 }
 \arguments{
+\item{query}{TCGAquery output}
+
+\item{dir}{Directory with the files downloaded by TCGAdownload}
+
 \item{samples}{List of samples to prepare the data}
 
 \item{type}{Filter the files to prepare.}
@@ -20,10 +24,6 @@ Default: \code{FALSE}}
 
 \item{summarizedExperiment}{Output as SummarizedExperiment?
 Default: \code{FALSE}}
-
-\item{query}{TCGAquery output}
-
-\item{dir}{Directory with the files downloaded by TCGAdownload}
 
 \item{add.mutation.genes}{Integrate information about genes mutation? DEFAULT: FALSE}
 
