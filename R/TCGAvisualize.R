@@ -607,6 +607,7 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @param cluster_columns Cluster columns ? Dafault: FALSE
 #' @param sortCol Name of the column to be used to sort the columns
 #' @param title Title of the plot
+#' @param filename Name of the file to save
 #' @param heatmap.legend.color.bar Heatmap legends values type.
 #' Options: "continuous", "disctrete
 #' @param scale Use z-score to make the heatmap?
@@ -670,11 +671,13 @@ TCGAvisualize_Heatmap <- function(data,
                                   cluster_columns = FALSE,
                                   sortCol,
                                   title,
+                                  filename = "heatmap.png",
                                   type = "expression",
                                   scale = "none",
                                   heatmap.legend.color.bar = "continuous"){
 
     # STEP 1 add columns labels (top of heatmap)
+    if(!missing(filename)) pdf(filename,width = 20,height = 20)
     ha <-  NULL
     if(!missing(col.metadata)) {
         if(!is.null(col.metadata)) {
@@ -840,7 +843,11 @@ TCGAvisualize_Heatmap <- function(data,
             }
         }
     }
-    return(heatmap)
+    if(!missing(filename)) {
+        dev.off()
+        return(NULL)
+    }
+    draw(heatmap)
 }
 
 
