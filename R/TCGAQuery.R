@@ -94,18 +94,18 @@ GDCquery <- function(project,
     barcodes <- na.omit(unlist(lapply(results$cases,function(x) str_extract(x,pat))))
 
     results$cases <- barcodes
-    results$definition <- expandBarcodeInfo(barcodes)$definition
+    results$tissue.definition <- expandBarcodeInfo(barcodes)$tissue.definition
 
     if(legacy & !missing(platform)){
         if(!(platform %in% results$platform)) {
             stop("Please set a valid platform argument from the list below:\n  => ", paste(unique(results$platform), collapse = "\n  => "))
         }
-        results <- results[results$platform %in% platform,]
+        results <- results[tolower(results$platform) %in% tolower(platform),]
     }
 
     # Filter by sample.type
     if(!missing(sample.type)) {
-        results <- results[results$tissue.definition %in% sample.type,]
+        results <- results[tolower(results$tissue.definition) %in% tolower(sample.type),]
     }
     # Filter by barcode
     if(!missing(barcode)) {
