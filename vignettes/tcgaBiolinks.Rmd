@@ -414,10 +414,10 @@ Also, if you have used ELMER analysis please cite:
  Using a summary of filters as used in the TCGA portal, the function works
  with the following arguments:
 
-* **project** A valid project (see list with getGDCprojects()$project_id)]
+* **project** A valid project (see table below)
 * **data.category** A valid project (see list with getProjectSummary(project))
 * **data.type** A data type to filter the files to download
-* **sample.type** A sample type to filter the files to download
+* **sample.type** A sample type to filter the files to download (See table below)
 * **workflow.type** GDC workflow type
 * **barcode** A list of barcodes to filter the files to download
 * **legacy** Search in the legacy repository? Default: FALSE
@@ -445,6 +445,13 @@ The list of projects is below:
 knitr::kable(getGDCprojects(), digits = 2,
              caption = "List of projects",row.names = FALSE)
 ```
+
+The list of sample.type is below:
+```{r, eval = TRUE, echo = FALSE}
+knitr::kable(getBarcodeDefinition(), digits = 2,
+             caption = "List sample types",row.names = FALSE)
+```
+
 
 The other fields (data.category, data.type, workflow.type, platform, file.type) can be found below. 
 Please, not that these tables are still incomplete.
@@ -1785,45 +1792,22 @@ to download 293 samples with molecular subtypes. Link the complete [complete cod
 library(TCGAbiolinks)
 library(SummarizedExperiment)
 
-#----------- Parameters--------------------
-cancer <- "LGG"
-PlatformCancer <- "IlluminaHiSeq_RNASeqV2"
-dataType <- "rsem.genes.results"
-pathCancer <- paste0("TCGA/data",cancer)
-#------------------------------------------
-
-#----------- DATA --------------------
-datQuery <- TCGAquery(tumor = cancer,
-                      platform = PlatformCancer,
-                      level = "3")
-
-lsSample <- TCGAquery_samplesfilter(query = datQuery)
-
-# Get only primary samples
-dataSmTP <- TCGAquery_SampleTypes(barcode = lsSample$IlluminaHiSeq_RNASeqV2,
-                                  typesample = "TP")
+query.exp <- GDCquery(project = "TCGA-LGG", 
+                      legacy = TRUE,
+                      data.category = "Gene expression",
+                      data.type = "Gene expression quantification",
+                      platform = "Illumina HiSeq", 
+                      file.type = "results",
+                      sample.type = "Primary solid Tumor")
+GDCDownload(query.exp)
+lgg.exp <- GDCPrepare(query = query.exp, save = TRUE, save.filename = "lggExp.rda")
 
 # get subtype information
-dataSubt <- TCGAquery_subtype(tumor = cancer)
+dataSubt <- TCGAquery_subtype(tumor = "LGG")
 
-# get clinical data
-dataClin <- TCGAquery_clinic(tumor  = cancer, clinical_data_type = "clinical_patient")
+# get indexed clinical data
+dataClin <- GDCquery_clinic(project = "TCGA-LGG", "Clinical")
 
-TCGAdownload(data = datQuery,
-             path = pathCancer,
-             type = dataType,
-             samples = dataSmTP )
-
-# Selected option 6
-dataAssy <- TCGAprepare(query = datQuery,
-                        dir = pathCancer,
-                        type = dataType,
-                        save = TRUE,
-                        summarizedExperiment = TRUE,
-                        samples = dataSmTP,
-                        add.mutation.genes = TRUE,
-                        add.subtype = TRUE,
-                        filename = paste0(cancer,"_",PlatformCancer,".rda"))
 ```
 
 First, we searched for possible outliers using the `TCGAanalyze_Preprocessing` 
@@ -1859,9 +1843,9 @@ After the two clustering analysis, with cut.tree =4 we obtained n=4 espression c
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 
 # expression data with molecular subtypes
-dataAssy <- subset(dataAssy, select = colData(dataAssy)$patient %in% dataSubt$patient)
+lgg.exp <- subset(lgg.exp, select = colData(lgg.exp)$patient %in% dataSubt$patient)
 
-dataPrep <- TCGAanalyze_Preprocessing(object = dataAssy,cor.cut = 0.6)
+dataPrep <- TCGAanalyze_Preprocessing(object = lgg.exp,cor.cut = 0.6)
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
                                       geneInfo = geneInfo,
                                       method = "gcContent")
@@ -1886,7 +1870,7 @@ the cluster information and we will add the subtype information.
 #------  Add cluster information
 cluster <- data.frame("groupsHC" = data_Hc2[[4]]$consensusClass)
 cluster$groupsHC <- paste0("EC",cluster$groupsHC)
-cluster$patient <-  substr(colData(dataAssy)$patient,1,12)
+cluster$patient <-  substr(colData(lgg.exp)$patient,1,12)
 
 # Add information about gropus from consensus Cluster in clinical data
 dataClin <- merge(dataClin,cluster, by.x="bcr_patient_barcode", by.y="patient")
@@ -1907,7 +1891,7 @@ TCGAanalyze_survival(data = clin_subt_all,
                      main = "TCGA kaplan meier survival plot from consensus cluster",
                      legend = "RNA Group",
                      color = c("black","red","blue","green3"),
-                     filename = "case2_surv.pdf")
+                     filename = "case2_surv.png")
 ```
 
 
@@ -1926,7 +1910,7 @@ methylation cluster and age, for the EC groups.
 TCGAvisualize_profilePlot(clin_subt,
                           groupCol="groupsHC",
                           subtypeCol="IDH.codel.subtype",
-                          filename = "case2_Idh.pdf",
+                          filename = "case2_Idh.png",
                           plot.margin = c(-4.0, -2.5, -0.5, 2),
                           na.rm.groups = TRUE)
 ```
@@ -1962,14 +1946,14 @@ We will also, create a heatmap of the expression.
 TCGAvisualize_Heatmap(t(datFilt),
                       col.metadata =  clin_subt[,c("bcr_patient_barcode",
                                                    "groupsHC",
-                                                   "histological_type",
+                                                   "Histology",
                                                    "IDH.codel.subtype")],
                       col.colors =  list(
                           groupsHC = c("EC1"="black",
                                        "EC2"="red",
                                        "EC3"="blue",
                                        "EC4"="green3"),
-                          histological_type=c("Astrocytoma"="navy",
+                          Histology=c("Astrocytoma"="navy",
                                               "Oligoastrocytoma"="green3",
                                               "Oligodendroglioma"="red"),
                           IDH.codel.subtype = c("IDHmut-codel"="tomato",
@@ -1993,8 +1977,7 @@ grid.raster(img)
 Finally, we will take a look in the mutation genes. We will first download the maf file
 with `TCGAquery_maf`. In this example we will investigate the gene "ATRX".
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-LGGmut <- TCGAquery_maf(tumor = "LGG",
-                        archive.name="LGG.IlluminaGA_DNASeq_curated.Level_2.1.4.0")
+LGGmut <- GDCquery_maf(tumor = "LGG")
 # Selecting gene
 mRNAsel <- "ATRX"
 LGGselected <- LGGmut[LGGmut$Hugo_Symbol == mRNAsel,]
@@ -2069,7 +2052,7 @@ grid.raster(img)
 We can see the percentage of samples that have the IDH1 mutation for each RNASeqCluster groups.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-TCGAvisualize_mutation(data = colData(dataAssy),
+TCGAvisualize_mutation(data = colData(lgg.exp),
                        groupCol = "Supervised.DNA.Methylation.Cluster",
                        geneList = "IDH1",
                        filename = "mutation_IDH1.png",
