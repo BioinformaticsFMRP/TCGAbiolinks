@@ -8,6 +8,12 @@ based on the desired information}
 \usage{
 GDCPrepare_clinic(query, clinical.info)
 }
+\arguments{
+\item{query}{Result from GDCquery, with data.category set to Clinical}
+
+\item{clinical.info}{Which information should be retrieved.
+Options: drug, admin, follow_up,radiation, patient, stage_event or new_tumor event}
+}
 \examples{
 query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical", barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))
 GDCDownload(query)
