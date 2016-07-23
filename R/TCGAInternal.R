@@ -50,11 +50,11 @@ checkProjectInput <- function(project){
 checkTumorInput <- function(tumor){
     projects <- getGDCprojects()
     if(missing(tumor)) {
-        print(knitr::kable(getGDCprojects()[,c(4:6,8)]))
+        print(knitr::kable(projects[,c(4:6,8)]))
         stop("Please set a project argument from the column project_id above")
     }
-    if(!(project %in% projects$tumoor)) {
-        print(knitr::kable(getGDCprojects()[,c(4:6,8)]))
+    if(!(project %in% projects$tumor)) {
+        print(knitr::kable(projects[,c(4:6,8)]))
         stop("Please set a valid project argument from the column project_id above")
     }
 }
@@ -85,9 +85,11 @@ checkDataCategoriesInput <- function(project,data.category, legacy = FALSE){
 }
 
 checkBarcodeDefinition <- function(definition){
-    if(!(definition %in% getBarcodeDefinition()$tissue.definition)){
+    for(i in definition){
+        if(!(i %in% getBarcodeDefinition()$tissue.definition)){
         print(knitr::kable(getBarcodeDefinition()))
-        stop("Please select a difinition from the table above")
+        stop(i, " was not found. Please select a difinition from the table above ")
+        }
     }
 }
 
