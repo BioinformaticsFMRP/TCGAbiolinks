@@ -7,6 +7,7 @@
 TCGAvisualize_Heatmap(data, col.metadata, row.metadata, col.colors = NULL,
   row.colors = NULL, show_column_names = FALSE, show_row_names = FALSE,
   cluster_rows = FALSE, cluster_columns = FALSE, sortCol, title,
+  filename = "heatmap.pdf", width = 10, height = 10,
   type = "expression", scale = "none",
   heatmap.legend.color.bar = "continuous")
 }
@@ -36,6 +37,12 @@ The code will throw a warning in case two samples are from the same patient.}
 \item{sortCol}{Name of the column to be used to sort the columns}
 
 \item{title}{Title of the plot}
+
+\item{filename}{Filename to save the heatmap. Default: heatmap.png}
+
+\item{width}{figure width}
+
+\item{height}{figure height}
 
 \item{type}{Select the colors of the heatmap values. Possible values are
 "expression" (default), "methylation"}
