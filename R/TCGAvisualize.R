@@ -605,6 +605,9 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @param show_row_names Show row names? Dafault: FALSE
 #' @param cluster_rows Cluster rows ? Dafault: FALSE
 #' @param cluster_columns Cluster columns ? Dafault: FALSE
+#' @param filename Filename to save the heatmap. Default: heatmap.png
+#' @param width figure width
+#' @param height figure height
 #' @param sortCol Name of the column to be used to sort the columns
 #' @param title Title of the plot
 #' @param heatmap.legend.color.bar Heatmap legends values type.
@@ -657,6 +660,7 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @export
 #' @importFrom matlab jet.colors
 #' @importFrom circlize colorRamp2
+#' @importFrom tools file_ext
 #' @import ComplexHeatmap
 #' @return Heatmap plotted in the device
 TCGAvisualize_Heatmap <- function(data,
@@ -670,11 +674,15 @@ TCGAvisualize_Heatmap <- function(data,
                                   cluster_columns = FALSE,
                                   sortCol,
                                   title,
+                                  filename = "heatmap.pdf",
+                                  width = 10,
+                                  height = 10,
                                   type = "expression",
                                   scale = "none",
                                   heatmap.legend.color.bar = "continuous"){
 
     # STEP 1 add columns labels (top of heatmap)
+
     ha <-  NULL
     if(!missing(col.metadata)) {
         if(!is.null(col.metadata)) {
@@ -741,7 +749,7 @@ TCGAvisualize_Heatmap <- function(data,
     # If we want to show differences between samples, it is good to make Z-score by genes
     # (force each gene to have zero mean and standard deviation=1).
     if(scale == "row"){
-        message("Calculiating z-scores for the rows....")
+        message("Calculating z-scores for the rows....")
         data <- t(scale(t(data)))
         if (type == "expression") color <- colorRamp2(seq(-4,4,0.1), gplots::greenred(length(seq(-4,4,0.1))))
         if (type == "methylation") color <- colorRamp2(seq(-4,4,0.1), matlab::jet.colors(length(seq(-4,4,0.1))))
@@ -840,7 +848,14 @@ TCGAvisualize_Heatmap <- function(data,
             }
         }
     }
-    return(heatmap)
+    if(!is.null(filename)){
+        if(file_ext(filename) == "png") png(filename, width = width, height = height )
+        if(file_ext(filename) == "pdf") pdf(filename, width = width, height = height )
+        draw(heatmap)
+        dev.off()
+    } else {
+        draw(heatmap)
+    }
 }
 
 
@@ -916,7 +931,6 @@ TCGAvisualize_profilePlot <- function(data = NULL,
     if (is.null(groupCol)) stop("Please provide the groupCol argument")
     if (is.null(subtypeCol)) stop("Please provide the subtypeCol argument")
     if (is.null(data)) stop("Please provide the data argument")
-    if (is.null(filename)) filename <- paste0(groupCol,subtypeCol,".pdf")
 
     if(na.rm.groups){
         data <- data[!is.na(data[,groupCol]),]
@@ -1070,158 +1084,11 @@ TCGAvisualize_profilePlot <- function(data = NULL,
                     scale = c(0.5,1),
                     rel_heights = c(2,8),
                     rel_widths = c(0.6,2))
-    plot(p)
-    if(!is.null(filename))
+    if(!is.null(filename)) {
         ggsave(p, filename = filename, width = 20, height = 10, dpi = 600)
-}
-
-
-
-
-#' @title Visualize mutation
-#' @description See % of genes mutated
-#' @param data A data frame with the cluters and subytpe of cancers
-#' @param samples Samples to consider mutation
-#' @param colors Vector of colors for the barplot
-#' @param geneList List of genes to plot
-#' @param filename Name of the file to save the plot, can be pdf, png, svg etc..
-#' @param threshold plot only if number of mutated genes are higher than threshold
-#' @param by type of plot. Options: "genes" and "cluster".
-#'  By "genes" the axis will receive the genes
-#' and how many samples are mutated. By "cluster" will show the mutations of
-#' only one gene in the cluster.
-#' @param groupCol Must be provided if by is set to "cluster"
-#' @param na.rm Remove NA groups
-#' @importFrom sjPlot sjp.stackfrq sjp.setTheme
-#' @export
-#' @return A plot
-TCGAvisualize_mutation <- function (data = NULL,
-                                    colors = NULL,
-                                    samples = NULL,
-                                    geneList = NULL,
-                                    filename = NULL,
-                                    threshold = 0,
-                                    by="genes",
-                                    groupCol=NULL,
-                                    na.rm = TRUE) {
-
-
-    if(na.rm){
-        data <- data[!is.na(data[,groupCol]),]
-        data <- data[which(data[,groupCol] != "NA"),]
-    }
-
-    if (is.null(data)) stop("Please provide the data argument")
-    if (is.null(filename)) filename <- "mutation_summary.pdf"
-
-    # use https://github.com/cttobin/ggthemr
-    # when it is in cran
-    if(is.null(colors)) colors <- c("#34495e",
-                                    "#3498db",
-                                    "#2ecc71",
-                                    "#f1c40f",
-                                    "#e74c3c",
-                                    "#9b59b6",
-                                    "#1abc9c",
-                                    "#f39c12",
-                                    "#d35400")
-
-    # subset samples
-    if(!is.null(samples)){
-        idx <- which(samples == data$patient)
-        data <- data[idx,]
-    }
-
-    # subset samples
-    if(!is.null(geneList)){
-        genes <- geneList
     } else {
-        genes <- na.omit(unique(unlist(data$genes)))
+        plot(p)
     }
-
-    if(by == "cluster" & !is.null(groupCol)){
-        if(is.null(groupCol)){
-            stop("Please provide groupCol argument")
-        }
-
-        if(length(geneList) != 1 ){
-            stop("Please geneList in this case must be only one gene")
-        }
-        clusters <- unique(data[,groupCol])
-        df <-  data.frame(matrix(NA, ncol = length(clusters), nrow = nrow(data)))
-        colnames(df) <- clusters
-        all <- c()
-        for(j in clusters){
-            idx <-  which(data[,groupCol] == j)
-            aux <- data[idx,]
-            summary <- table(unlist(aux$genes))
-            count <- summary[geneList]
-            if(is.na(count)) count <- 0
-            if(count > nrow(aux)) count <- nrow(aux)
-            df[,j] <- c(rep(1,as.numeric(count)),
-                        rep(2,nrow(aux)-count),
-                        rep(NA,nrow(data)- nrow(aux)))
-            all <- c(all,c(rep(1,as.numeric(count))))
-        }
-
-        df[,groupCol] <- c(all,rep(2,nrow(data)-length(all)))
-        df <- df[,rev(colnames(df))]
-        # add theme when this library is in CRAN
-        # https://github.com/cttobin/ggthemr
-        #sjp.setTheme(theme = "539")
-        p <- sjp.stackfrq(df,
-                          title = paste0(geneList),
-                          legend.title = "Status",
-                          #axisTitle.x = groupCol,
-                          #sort.frq = "last.desc",
-                          expand.grid = FALSE,
-                          legend.labels = c("Mutated","Not mutated"),
-                          #showSeparatorLine = TRUE,
-                          showValueLabels = FALSE,
-                          geom.colors = colors[1:2],
-                          #separatorLineColor = "#6699cc"
-                          prnt.plot = TRUE)
-
-
-    } else {
-        df <-  data.frame(matrix(NA, ncol = length(genes), nrow = nrow(data)))
-        colnames(df) <- genes
-        summary <- table(unlist(data$genes))
-
-        for( i in genes){
-
-            count <- summary[i]
-            count <- as.numeric(count)
-
-            if( count < threshold){
-                df[,i] <- NULL
-            } else {
-                print(count)
-                df[,i] <- c(rep(1,as.numeric(count)), rep(2,nrow(data)-count))
-            }
-        }
-
-        if(ncol(df) == 0){
-            stop("No genes found")
-        }
-        if(ncol(df) == 1){
-            df <- as.data.frame(df)
-        }
-        p <- sjp.stackfrq(df,
-                          #legendTitle = subtypeCol,
-                          #axisTitle.x = groupCol,
-                          #sort.frq = "last.desc",
-                          expand.grid = FALSE,
-                          legend.labels = c("Mutated","Not mutated"),
-                          #showSeparatorLine = TRUE,
-                          #showValueLabels = FALSE,
-                          geom.colors = colors[1:2],
-                          #separatorLineColor = "#6699cc"
-                          prnt.plot = TRUE)
-
-    }
-
-    ggsave(p$plot, filename = filename, width = 10, height = 10, dpi = 600)
 }
 
 #' @import magrittr
@@ -1661,23 +1528,23 @@ unlistlabels <- function(lab) {
 #' @export
 #' @return A oncoprint plot
 TCGAvisualize_oncoprint <- function (mut,
-                              genes,
-                              filename,
-                              color,
-                              annotation.position = "bottom",
-                              annotation,
-                              height,
-                              rm.empty.columns = FALSE,
-                              show.column.names = FALSE,
-                              show.row.barplot = TRUE,
-                              label.title = "Mutation",
-                              label.font.size = 16,
-                              rows.font.size = 16,
-                              dist.col = 0.5,
-                              dist.row = 0.5,
-                              row.order = FALSE,
-                              heatmap.legend.side = "bottom",
-                              annotation.legend.side = "bottom"){
+                                     genes,
+                                     filename,
+                                     color,
+                                     annotation.position = "bottom",
+                                     annotation,
+                                     height,
+                                     rm.empty.columns = FALSE,
+                                     show.column.names = FALSE,
+                                     show.row.barplot = TRUE,
+                                     label.title = "Mutation",
+                                     label.font.size = 16,
+                                     rows.font.size = 16,
+                                     dist.col = 0.5,
+                                     dist.row = 0.5,
+                                     row.order = FALSE,
+                                     heatmap.legend.side = "bottom",
+                                     annotation.legend.side = "bottom"){
 
 
     if(missing(mut))   stop("Missing mut argument")
