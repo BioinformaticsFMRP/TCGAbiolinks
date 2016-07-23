@@ -126,7 +126,7 @@ TCGAanalyze_Preprocessing<- function(object,
 
     samplesCor <- rowMeans(c)
     objectWO <-  assay(object,"raw_count")[, samplesCor > cor.cut]
-    #colnames(objectWO) <- colData(object)$sample[,samplesCor > cor.cut]
+    colnames(objectWO) <- colnames(object)[samplesCor > cor.cut]
 
     dev.off()
     return(objectWO)
