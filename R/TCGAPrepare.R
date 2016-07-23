@@ -369,12 +369,26 @@ colDataPrepare <- function(barcode){
     if(all(grepl("TCGA",barcode))) ret <- colDataPrepareTCGA(barcode)
 
     message(" => Add clinical information to samples")
-    patient.info <- getBarcodeInfo(ret$patient)
-    ret <- merge(ret,patient.info, by.x = "patient", by.y = "submitter_id" )
+    # There is a limitation on the size of the string, so this step will be splited in cases of 100
+    patient.info <- NULL
+    step <- 50 # more than 100 gives a bug =/
+    for(i in 0:floor(length(ret$patient)/step)){
+        start <- 1 + step * i
+        end <- start + step - 1
+        if( end > length(ret$patient)) end <- length(ret$patient)
+        if(is.null(patient.info)) {
+            patient.info <- getBarcodeInfo(ret$patient[start:end])
+        } else {
+            patient.info <- rbind(patient.info,getBarcodeInfo(ret$patient[start:end]))
+        }
+    }
+    ret <- merge(ret,patient.info, by.x = "patient", by.y = "submitter_id", all.x = TRUE )
 
-    if(grepl("TCGA",unique(ret$project_id))) {
+    # na.omit should not be here, exceptional case
+
+    if(grepl("TCGA",na.omit(unique(ret$project_id)))) {
         message(" => Adding subtype information to samples")
-        tumor <- gsub("TCGA-","",unique(ret$project_id))
+        tumor <- gsub("TCGA-","",na.omit(unique(ret$project_id)))
         if (grepl("acc|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc|all",
                   tumor,ignore.case = TRUE)) {
             subtype <- TCGAquery_subtype(tumor)
@@ -388,6 +402,7 @@ colDataPrepare <- function(barcode){
         }
     }
     ret <- ret[match(barcode,ret$barcode),]
+    rownames(ret) <- ret$barcode
     return(ret)
 }
 
@@ -543,7 +558,8 @@ getBarcodeInfo <- function(barcode) {
     options.pretty <- "pretty=true"
     options.expand <- "expand=project,diagnoses,diagnoses.treatments,annotations,family_histories,demographic,exposures"
     option.size <- paste0("size=",length(barcode))
-
+    message(paste(barcode,collapse = '","'))
+    message(paste0('"',paste(barcode,collapse = '","')))
     options.filter <- paste0("filters=",
                              URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.submitter_id","value":['),
                              paste0('"',paste(barcode,collapse = '","')),
@@ -556,14 +572,21 @@ getBarcodeInfo <- function(barcode) {
     exposures <- rbindlist(results$exposures, fill = TRUE)
     exposures$submitter_id <- gsub("_exposure","", exposures$submitter_id)
     results$demographic$submitter_id <- gsub("_demographic","", results$demographic$submitter_id)
-    df <- merge(diagnoses,exposures, by="submitter_id", all = TRUE)
-    df <- merge(df,results$demographic, by="submitter_id", all = TRUE)
+    df <- merge(diagnoses,exposures, by="submitter_id", all = TRUE,sort = FALSE)
+    df <- merge(df,results$demographic, by="submitter_id", all = TRUE,sort = FALSE)
     treatments <- rbindlist(df$treatments,fill = TRUE)
     df[,treatments:=NULL]
     treatments$submitter_id <- gsub("_treatment","", treatments$submitter_id)
-    df <- merge(df,treatments, by="submitter_id", all = TRUE)
+    df <- merge(df,treatments, by="submitter_id", all = TRUE,sort = FALSE)
     df$bcr_patient_barcode <- df$submitter_id
     df <- cbind(df,results$project)
+
+    # This line should not exists, but some patients does not have clinical data
+    # case: TCGA-R8-A6YH"
+    # this has been reported to GDC, waiting answers
+    # So we will remove this NA cases
+    df <- df[!is.na(df$submitter_id),]
+
     return(df)
 }
 
