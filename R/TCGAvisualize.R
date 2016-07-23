@@ -605,9 +605,11 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @param show_row_names Show row names? Dafault: FALSE
 #' @param cluster_rows Cluster rows ? Dafault: FALSE
 #' @param cluster_columns Cluster columns ? Dafault: FALSE
+#' @param filename Filename to save the heatmap. Default: heatmap.png
+#' @param width figure width
+#' @param height figure height
 #' @param sortCol Name of the column to be used to sort the columns
 #' @param title Title of the plot
-#' @param filename Name of the file to save
 #' @param heatmap.legend.color.bar Heatmap legends values type.
 #' Options: "continuous", "disctrete
 #' @param scale Use z-score to make the heatmap?
@@ -658,6 +660,7 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @export
 #' @importFrom matlab jet.colors
 #' @importFrom circlize colorRamp2
+#' @importFrom tools file_ext
 #' @import ComplexHeatmap
 #' @return Heatmap plotted in the device
 TCGAvisualize_Heatmap <- function(data,
@@ -671,13 +674,15 @@ TCGAvisualize_Heatmap <- function(data,
                                   cluster_columns = FALSE,
                                   sortCol,
                                   title,
-                                  filename = "heatmap.png",
+                                  filename = "heatmap.pdf",
+                                  width = 10,
+                                  height = 10,
                                   type = "expression",
                                   scale = "none",
                                   heatmap.legend.color.bar = "continuous"){
 
     # STEP 1 add columns labels (top of heatmap)
-    if(!missing(filename)) pdf(filename,width = 20,height = 20)
+
     ha <-  NULL
     if(!missing(col.metadata)) {
         if(!is.null(col.metadata)) {
@@ -843,11 +848,14 @@ TCGAvisualize_Heatmap <- function(data,
             }
         }
     }
-    if(!missing(filename)) {
+    if(!is.null(filename)){
+        if(file_ext(filename) == "png") png(filename, width = width, height = height )
+        if(file_ext(filename) == "pdf") pdf(filename, width = width, height = height )
+        draw(heatmap)
         dev.off()
-        return(NULL)
+    } else {
+        draw(heatmap)
     }
-    draw(heatmap)
 }
 
 
@@ -923,7 +931,6 @@ TCGAvisualize_profilePlot <- function(data = NULL,
     if (is.null(groupCol)) stop("Please provide the groupCol argument")
     if (is.null(subtypeCol)) stop("Please provide the subtypeCol argument")
     if (is.null(data)) stop("Please provide the data argument")
-    if (is.null(filename)) filename <- paste0(groupCol,subtypeCol,".pdf")
 
     if(na.rm.groups){
         data <- data[!is.na(data[,groupCol]),]
@@ -1077,9 +1084,11 @@ TCGAvisualize_profilePlot <- function(data = NULL,
                     scale = c(0.5,1),
                     rel_heights = c(2,8),
                     rel_widths = c(0.6,2))
-    plot(p)
-    if(!is.null(filename))
+    if(!is.null(filename)) {
         ggsave(p, filename = filename, width = 20, height = 10, dpi = 600)
+    } else {
+        plot(p)
+    }
 }
 
 #' @import magrittr
@@ -1519,23 +1528,23 @@ unlistlabels <- function(lab) {
 #' @export
 #' @return A oncoprint plot
 TCGAvisualize_oncoprint <- function (mut,
-                              genes,
-                              filename,
-                              color,
-                              annotation.position = "bottom",
-                              annotation,
-                              height,
-                              rm.empty.columns = FALSE,
-                              show.column.names = FALSE,
-                              show.row.barplot = TRUE,
-                              label.title = "Mutation",
-                              label.font.size = 16,
-                              rows.font.size = 16,
-                              dist.col = 0.5,
-                              dist.row = 0.5,
-                              row.order = FALSE,
-                              heatmap.legend.side = "bottom",
-                              annotation.legend.side = "bottom"){
+                                     genes,
+                                     filename,
+                                     color,
+                                     annotation.position = "bottom",
+                                     annotation,
+                                     height,
+                                     rm.empty.columns = FALSE,
+                                     show.column.names = FALSE,
+                                     show.row.barplot = TRUE,
+                                     label.title = "Mutation",
+                                     label.font.size = 16,
+                                     rows.font.size = 16,
+                                     dist.col = 0.5,
+                                     dist.row = 0.5,
+                                     row.order = FALSE,
+                                     heatmap.legend.side = "bottom",
+                                     annotation.legend.side = "bottom"){
 
 
     if(missing(mut))   stop("Missing mut argument")
