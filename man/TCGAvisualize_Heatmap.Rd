@@ -7,7 +7,7 @@
 TCGAvisualize_Heatmap(data, col.metadata, row.metadata, col.colors = NULL,
   row.colors = NULL, show_column_names = FALSE, show_row_names = FALSE,
   cluster_rows = FALSE, cluster_columns = FALSE, sortCol, title,
-  filename = "heatmap.png", width = 10, height = 10,
+  filename = "heatmap.pdf", width = 10, height = 10,
   type = "expression", scale = "none",
   heatmap.legend.color.bar = "continuous")
 }
