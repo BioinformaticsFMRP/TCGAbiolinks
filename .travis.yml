@@ -13,7 +13,7 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("roxygen2", lib="/home/travis/R-bin/lib/R/library/")'; fi
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt-get update -q
-  - sudo apt-get install libc6 -y
+  - sudo apt-get install libc6 libc6-dev  -y
 r_github_packages:
   - jimhester/covr
 
