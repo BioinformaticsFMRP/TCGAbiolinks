@@ -401,6 +401,7 @@ colDataPrepare <- function(barcode){
             ret <- merge(ret,subtype, by = "sample", all.x = TRUE)
         }
     }
+print(dim(ret))
     ret <- ret[match(barcode,ret$barcode),]
     rownames(ret) <- ret$barcode
     return(ret)
