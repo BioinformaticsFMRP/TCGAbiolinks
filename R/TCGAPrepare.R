@@ -700,14 +700,17 @@ TCGAprepare_elmer <- function(data,
                        "To linearize \n    relation between ",
                        "methylation and expression"))
         if(typeof(data) == typeof(SummarizedExperiment())){
+            row.names(data) <- paste0("ID",values(data)$entrezgene)
             data <- assay(data)
         }
 
+	if(all(grepl("\\|",rownames(data)))){
+  	      message("2 - rownames  (gene|loci) => ('ID'loci) ")
+  	      aux <- strsplit(rownames(data),"\\|")
+  	      GeneID <- unlist(lapply(aux,function(x) x[2]))
+  	      row.names(data) <- paste0("ID",GeneID)
+	} 
         data <- log2(data+1)
-        message("2 - rownames  (gene|loci) => ('ID'loci) ")
-        aux <- strsplit(rownames(data),"\\|")
-        GeneID <- unlist(lapply(aux,function(x) x[2]))
-        row.names(data) <- paste0("ID",GeneID)
         Exp <- data.matrix(data)
 
         if (save)  save(Exp,file = "Exp_elmer.rda")
