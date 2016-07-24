@@ -135,6 +135,19 @@ GDCquery <- function(project,
 
         results <- results[grepl(pat,results$file_name),]
     }
+    # some how there are duplicated files in GDC we should remove them 
+    # Example of problematic query
+    # query.exp <- GDCquery(project = "TCGA-BRCA", 
+    #                  legacy = TRUE,
+    #                  data.category = "Gene expression",
+    #                  data.type = "Gene expression quantification",
+    #                  platform = "Illumina HiSeq", 
+    #                  file.type = "results",
+    #                  sample.type = c("Primary solid Tumor","Solid Tissue Normal"))
+    # 
+    results <- results[!duplicated(results$cases),]
+	
+
     # prepare output
     if(missing(sample.type)) sample.type <- NA
     if(missing(data.type)) data.type <- NA
