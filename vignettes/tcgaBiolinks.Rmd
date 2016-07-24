@@ -2372,7 +2372,7 @@ gene expression vs DNA methylation at this probe. The result of this is
 show by the ELMER scatter plot.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-scatter.plot(mee,byProbe=list(probe=c("cg00328720"),geneNum=20), category="TN")
+scatter.plot(mee,byProbe=list(probe=c("cg00328720"),geneNum=20), category="TN", lm_line = TRUE)
 ```
 
 The result is shown below:
@@ -2383,11 +2383,11 @@ img <- readPNG("case4_elmer.png")
 grid.raster(img)
 ```
 
-Each scatter plot showing the average DNA methylation level of sites with the AP1 motif in all KIRC samples plotted against the expression of the transcription factor CEBPB and GFI1 respectively.
+Each scatter plot showing the average DNA methylation level of sites with the UA6 motif in all KIRC samples plotted against the expression of the transcription factor ZNF677 and PEG3 respectively.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-scatter.plot(mee,byTF = list(TF = c("CEBPB","GFI1"),
-                             probe = enriched.motif[["AP1"]]), category = "TN",
-             save = TRUE, lm_line = TRUE, dir.out = "kirc")
+scatter.plot(mee,byTF = list(TF = c("ZNF677","PEG3"),
+                          probe = enriched.motif[["UA6"]]), category = "TN",
+                          save = TRUE, lm_line = TRUE, dir.out = "kirc")
 ```
 
 The result is shown below:
@@ -2404,7 +2404,7 @@ The genes significantly linked to the probe were shown in red.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 pair <- fetch.pair(pair="./kirc/getPair.hypo.pairs.significant.csv",
                    probeInfo = mee@probeInfo, geneInfo = mee@geneInfo)
-schematic.plot(pair=pair, byProbe="cg14613594",save=FALSE)
+schematic.plot(pair=pair, byProbe="cg15862394",save=FALSE)
 ```
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
@@ -2421,13 +2421,6 @@ The range shows the 95% confidence interval for each Odds Ratio.
 library(png)
 library(grid)
 img <- readPNG("elmer3.png")
-grid.raster(img)
-```
-
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
-library(grid)
-img <- readPNG("elmer4.png")
 grid.raster(img)
 ```
 
