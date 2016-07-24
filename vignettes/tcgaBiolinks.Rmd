@@ -1643,6 +1643,11 @@ dataSubt <- TCGAquery_subtype(tumor = "BRCA")
 
 # get clinical data
 dataClin <- GDCquery_clinic(project = "TCGA-BRCA","clinical") 
+
+# Which samples are primary solid tumor
+dataSmTP <- TCGAquery_SampleTypes(query.exp$results[[1]]$cases,"TP") 
+# which samples are solid tissue normal
+dataSmNT <- TCGAquery_SampleTypes(query.exp$results[[1]]$cases,"NT")
 ```
 
 Using `TCGAnalyze_DEA`, we identified 3,390 differentially expression genes (DEG) (log 
