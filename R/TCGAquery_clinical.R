@@ -274,8 +274,8 @@ clinical_data_site_cancer <- function(cancer){
 
 #' @title Get DDC clinical data
 #' @description
-#'   GDCquery_clinic will download all clinical information from the API
-#'   as the one with using the button from each project
+#' GDCquery_clinic will download all clinical information from the API
+#' as the one with using the button from each project
 #' @param project A valid project (see list with getGDCprojects()$project_id)]
 #' @param type A valid type. Options "clinical", "Biospecimen"  (see list with getGDCprojects()$project_id)]
 #' @param save.csv Write clinical information into a csv document
@@ -338,6 +338,7 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 }
 
 #' @title Parsing clinical xml files
+#' @description
 #' This function receives the query argument and parses the clinical xml files
 #' based on the desired information
 #' @param query Result from GDCquery, with data.category set to Clinical
@@ -347,7 +348,9 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 #' @importFrom XML xmlParse getNodeSet xmlToDataFrame
 #' @export
 #' @examples
-#' query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical", barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))
+#' query <- GDCquery(project = "TCGA-COAD",
+#'                   data.category = "Clinical",
+#'                   barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))
 #' GDCDownload(query)
 #' clinical <- GDCPrepare_clinic(query,"patient")
 #' clinical.drug <- GDCPrepare_clinic(query,"drug")
@@ -366,7 +369,17 @@ GDCPrepare_clinic <- function(query, clinical.info){
     disease <- tolower(gsub("TCGA-","",query$project))
     if(tolower(clinical.info) == "drug")      xpath <- "//rx:drug"
     if(tolower(clinical.info) == "admin")     xpath <- "//admin:admin"
-    if(tolower(clinical.info) == "follow_up") xpath <- "//follow_up_v1.0:follow_up"
+    if(tolower(clinical.info) == "follow_up"){
+        xmlfile <- files[1]
+        xml <- read_xml(xmlfile)
+        follow_up_version <-  names(xml_ns(xml))[grepl("follow_up",names(xml_ns(xml)))]
+        if(length(follow_up_version) > 1) {
+            n <- readline(prompt=paste0("There is more than one follow up version, please select one"),
+                          paste0(seq(1:length(follow_up_version)), follow_up_version))
+            follow_up_version <- follow_up_version[n]
+        }
+        xpath <- paste0("//", follow_up_version, ":follow_up")
+    }
     if(tolower(clinical.info) == "radiation") xpath <- "//rad:radiation"
     if(tolower(clinical.info) == "patient")   xpath <- paste0("//",disease,":patient")
     if(tolower(clinical.info) == "stage_event")     xpath <- "//shared_stage:stage_event"
