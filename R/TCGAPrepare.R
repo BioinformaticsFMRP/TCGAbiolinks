@@ -595,15 +595,7 @@ getBarcodeInfo <- function(barcode) {
 #' @title Read the data from level 3 the experiments and prepare it
 #'  for downstream analysis into a SummarizedExperiment object.
 #' @description
-#'  This function will read the data from level 3 the experiments and prepare it
-#'  for downstream analysis into a SummarizedExperiment object.
-#'
-#'  The samples are always refered by their barcode.
-#'
-#'  If you want to save the data into an rda file, please use the \emph{save}
-#'  parameter that will save an rda object with the  \emph{filename} parameter.
-#'  If no filename was set, the filename will be the concatenation of platform and
-#'  Sys.time.
+#'  This function has been replaced by GDCPrepare
 #'
 #' List of accepted platforms:
 #'\itemize{
@@ -633,14 +625,8 @@ getBarcodeInfo <- function(barcode) {
 #' @param save Save a rda object with the prepared object?
 #'  Default: \code{FALSE}
 #' @param filename Name of the saved file
-#' @param add.mutation.genes Integrate information about genes mutation? DEFAULT: FALSE
-#' @param reannotate Reannotate genes?  Source http://grch37.ensembl.org/.
-#' DEFAULT: FALSE. (For the moment only working for methylation data)
 #' @param summarizedExperiment Output as SummarizedExperiment?
 #' Default: \code{FALSE}
-#' @param add.subtype Add subtype information from tcgaquery_subtype? Default: \code{FALSE}
-#' @param add.clinical Add clinical information from TCGAquery_clinic?
-#' (The information file add will be: clinical_patient) Default: \code{FALSE}
 #' @examples
 #' \dontrun{
 #' sample <- "TCGA-06-0939-01A-01D-1228-05"
@@ -709,7 +695,7 @@ TCGAprepare_elmer <- function(data,
   	      aux <- strsplit(rownames(data),"\\|")
   	      GeneID <- unlist(lapply(aux,function(x) x[2]))
   	      row.names(data) <- paste0("ID",GeneID)
-	} 
+	}
         data <- log2(data+1)
         Exp <- data.matrix(data)
 
