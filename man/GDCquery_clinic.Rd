@@ -18,7 +18,7 @@ A data frame with the clinical information
 }
 \description{
 GDCquery_clinic will download all clinical information from the API
-  as the one with using the button from each project
+as the one with using the button from each project
 }
 \examples{
 clin <- GDCquery_clinic("TCGA-ACC", type = "clinical", save.csv = TRUE)
