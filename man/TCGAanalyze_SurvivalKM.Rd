@@ -10,7 +10,7 @@ TCGAanalyze_SurvivalKM(clinical_patient, dataGE, Genelist, Survresult,
 \arguments{
 \item{clinical_patient}{is a data.frame using function 'clinic' with information
 related to barcode / samples such as bcr_patient_barcode, days_to_death ,
-days_to_last_followup , vital_status, etc}
+days_to_last_follow_up , vital_status, etc}
 
 \item{dataGE}{is a matrix of Gene expression (genes in rows, samples in cols) from TCGAprepare}
 
