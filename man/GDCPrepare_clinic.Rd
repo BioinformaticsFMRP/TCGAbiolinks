@@ -2,9 +2,7 @@
 % Please edit documentation in R/TCGAquery_clinical.R
 \name{GDCPrepare_clinic}
 \alias{GDCPrepare_clinic}
-\title{Parsing clinical xml files
-This function receives the query argument and parses the clinical xml files
-based on the desired information}
+\title{Parsing clinical xml files}
 \usage{
 GDCPrepare_clinic(query, clinical.info)
 }
@@ -14,8 +12,14 @@ GDCPrepare_clinic(query, clinical.info)
 \item{clinical.info}{Which information should be retrieved.
 Options: drug, admin, follow_up,radiation, patient, stage_event or new_tumor event}
 }
+\description{
+This function receives the query argument and parses the clinical xml files
+based on the desired information
+}
 \examples{
-query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical", barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))
+query <- GDCquery(project = "TCGA-COAD",
+                  data.category = "Clinical",
+                  barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))
 GDCDownload(query)
 clinical <- GDCPrepare_clinic(query,"patient")
 clinical.drug <- GDCPrepare_clinic(query,"drug")
