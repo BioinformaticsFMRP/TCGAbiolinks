@@ -366,7 +366,17 @@ GDCPrepare_clinic <- function(query, clinical.info){
     disease <- tolower(gsub("TCGA-","",query$project))
     if(tolower(clinical.info) == "drug")      xpath <- "//rx:drug"
     if(tolower(clinical.info) == "admin")     xpath <- "//admin:admin"
-    if(tolower(clinical.info) == "follow_up") xpath <- "//follow_up_v1.0:follow_up"
+    if(tolower(clinical.info) == "follow_up"){
+        xmlfile <- files[1]
+        xml <- read_xml(xmlfile)
+        follow_up_version <-  names(xml_ns(xml))[grepl("follow_up",names(xml_ns(xml)))]
+        if(length(follow_up_version) > 1) {
+            n <- readline(prompt=paste0("There is more than one follow up version, please select one"),
+                          paste0(seq(1:length(follow_up_version)), follow_up_version))
+            follow_up_version <- follow_up_version[n]
+        }
+        xpath <- paste0("//", follow_up_version, ":follow_up")
+    }
     if(tolower(clinical.info) == "radiation") xpath <- "//rad:radiation"
     if(tolower(clinical.info) == "patient")   xpath <- paste0("//",disease,":patient")
     if(tolower(clinical.info) == "stage_event")     xpath <- "//shared_stage:stage_event"
