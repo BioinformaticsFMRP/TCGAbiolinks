@@ -30,7 +30,7 @@ A SummarizedExperiment object (If SummarizedExperiment = \code{FALSE},
 a data.frame)
 }
 \description{
-This function has been replaced by GDCPrepare
+This function has been replaced by GDCprepare
 
 List of accepted platforms:
 \itemize{
