@@ -351,12 +351,12 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 #' query <- GDCquery(project = "TCGA-COAD",
 #'                   data.category = "Clinical",
 #'                   barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))
-#' GDCDownload(query)
-#' clinical <- GDCPrepare_clinic(query,"patient")
-#' clinical.drug <- GDCPrepare_clinic(query,"drug")
-#' clinical.radiation <- GDCPrepare_clinic(query,"radiation")
-#' clinical.admin <- GDCPrepare_clinic(query,"admin")
-GDCPrepare_clinic <- function(query, clinical.info){
+#' GDCdownload(query)
+#' clinical <- GDCprepare_clinic(query,"patient")
+#' clinical.drug <- GDCprepare_clinic(query,"drug")
+#' clinical.radiation <- GDCprepare_clinic(query,"radiation")
+#' clinical.admin <- GDCprepare_clinic(query,"admin")
+GDCprepare_clinic <- function(query, clinical.info){
     if(missing(clinical.info)) stop("Please select a clinical information")
 
     # Get all the clincal xml files
