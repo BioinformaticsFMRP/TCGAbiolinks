@@ -1273,7 +1273,7 @@ TCGAvisualize_starburst <- function(met,
     }
 
     # somehow the merge changes the names with - to .
-    pcol <- gsub("-",".",pcol)
+    pcol <- gsub(" |-",".",pcol)
 
     aux <- strsplit(row.names(exp),"\\|")
     exp$Gene_Symbol  <- unlist(lapply(aux,function(x) x[1]))
@@ -1287,8 +1287,7 @@ TCGAvisualize_starburst <- function(met,
     volcano[volcano$logFC > 0, "geFDR2"] <-
         -1 * volcano[volcano$logFC > 0, "geFDR"]
 
-
-    diffcol <- gsub("-",".",paste("diffmean",group1,group2,sep = "."))
+    diffcol <- gsub(" |-",".",paste("diffmean",group1,group2,sep = "."))
     volcano$meFDR <- log10(volcano[,pcol])
     volcano$meFDR2 <- volcano$meFDR
     idx <- volcano[,diffcol] > 0
