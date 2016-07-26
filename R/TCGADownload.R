@@ -1,36 +1,37 @@
 #' @title Download GDC data
 #' @description
-#'   Uses GDC transfer tool to download gdc data
-#'   The user can use query or manifest.file argument (not both at the same time)
+#'   Uses GDC API or GDC transfer tool to download gdc data
+#'   The user can use query argument
 #'   The data from query will be save in a folder: project/data.category
-#'   The data from manifest.file  will be save in a folder: manifest.file.without.extension/
 #' @param query A query for GDCquery function
-#' @param token.file Token file to download controleed data
+#' @param token.file Token file to download controled data (only for method = "client)
 #' @param method Use api method or gdc client tool (API is faster)
+#' @importFrom tools md5sum
+#' @importFrom utils untar
 #' @export
 #' @return Shows the output from the GDC transfer tools
 GDCdownload <- function(query, token.file, method = "api") {
 
-    if(method == "client") {
+    if(missing(query)) stop("Please set query argument")
+    if(!(method %in% c("api","client"))) stop("method arguments possible values are: 'api' or 'client'")
+    manifest <- query$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
+    colnames(manifest) <- c("id","filename","md5","size","state")
+    path <- unique(file.path(query$project,
+                             gsub(" ","_", query$results[[1]]$data_category),
+                             gsub(" ","_",query$results[[1]]$data_type)))
+
+    # Check if the files were already downloaded by this package
+    files2Download <- sapply(manifest$id, function(x) !file.exists(file.path(path,x)))
+    manifest <- manifest[files2Download,]
+    if(nrow(manifest) != 0 & method == "client") {
         # There exists two options to download the data, using the query or using a manifest file
         # The second option was created to let users use legacy data or the API to search
-        if(missing(query)) stop("Please set queryargument")
 
         # This will find gdc clinet, if not installed it will install it
         gdc.client.bin <- GDCclientInstall()
 
         # Using the query argument we will organize the files to the user
-
         # Creates a file with the gdc manifest format
-        manifest <- query$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
-        colnames(manifest) <- c("id","filename","md5","size","state")
-        path <- unique(file.path(query$project,
-                                 gsub(" ","_", query$results[[1]]$data_category),
-                                 gsub(" ","_",query$results[[1]]$data_type)))
-
-        # Check if the files were already downloaded by this package
-        files2Download <- sapply(manifest$id, function(x) !file.exists(file.path(path,x)))
-        manifest <- manifest[files2Download,]
         write_delim(manifest,"gdc_manifest.txt",delim = "\t")
 
         cmd <- paste0(gdc.client.bin, " download -m gdc_manifest.txt")
@@ -43,28 +44,35 @@ GDCdownload <- function(query, token.file, method = "api") {
 
         # moving the file to make it more organized
         for(i in manifest$id) move(i,file.path(path,i))
-    } else {
-        manifest <- query$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
-        colnames(manifest) <- c("id","filename","md5","size","state")
-        path <- unique(file.path(query$project,
-                                 gsub(" ","_", query$results[[1]]$data_category),
-                                 gsub(" ","_",query$results[[1]]$data_type)))
 
-        # Check if the files were already downloaded by this package
-        files2Download <- sapply(manifest$id, function(x) !file.exists(file.path(path,x)))
-        manifest <- manifest[files2Download,]
+    } else if (nrow(manifest) != 0 & method =="api"){
         ids <- paste0("ids=",paste(manifest$id,collapse = "&ids="))
         writeLines(ids,"Payload")
-        unlink("gdc.tar.gz")
+        name <- paste0(gsub(" |:","_",date()),".tar.gz")
+        unlink(name)
+        message(paste0("Downloading as: ", name))
         # Is there a better way to do it using rcurl library?
-        system("curl -o gdc.tar.gz --remote-header-name --request POST 'https://gdc-api.nci.nih.gov/legacy/data' --data @Payload")
-        untar("gdc.tar.gz")
+        system(paste0("curl -o ", name ," --remote-header-name --request POST 'https://gdc-api.nci.nih.gov/legacy/data' --data @Payload"))
+        success <- untar(name)
+        if(success != 0){
+            print(success)
+            stop("There was an error in the download process, please execute it again")
+        }
         # moving to project/data_category/data_type/file_id
         for(i in seq_along(manifest$filename)) {
             file <- manifest$filename[i]
             id <- manifest$id[i]
-            move(file,file.path(path,id,file))
+            # Check status
+            if(!(md5sum(file) == manifest$md5[i])){
+                message(paste0("File corrupted:", file))
+                message("Run GDCdownload again to download it")
+                unlink(file)
+                next
+            }
+            if(file.exists(file)) move(file,file.path(path,id,file))
         }
+    } else {
+        message("All samples have been already downloded")
     }
 }
 
