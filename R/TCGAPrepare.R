@@ -8,7 +8,7 @@
 #' @param summarizedExperiment Create a summarizedExperiment? Default TRUE (if possible)
 #' @export
 #' @return A summarizedExperiment or a data.frame
-GDCPrepare <- function(query, save = FALSE, save.filename, summarizedExperiment = TRUE){
+GDCprepare <- function(query, save = FALSE, save.filename, summarizedExperiment = TRUE){
 
     if(missing(query)) stop("Please set query parameter")
 
@@ -595,7 +595,7 @@ getBarcodeInfo <- function(barcode) {
 #' @title Read the data from level 3 the experiments and prepare it
 #'  for downstream analysis into a SummarizedExperiment object.
 #' @description
-#'  This function has been replaced by GDCPrepare
+#'  This function has been replaced by GDCprepare
 #'
 #' List of accepted platforms:
 #'\itemize{
