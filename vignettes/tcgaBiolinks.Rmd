@@ -783,6 +783,7 @@ The arguments are:
 
 *  **query**	A query for `GDCquery` function
 *  **token.file** A token file to download protect data (not test yet)
+*  **method** Use API method or gdc client tool (API is faster). Options: "api", "client"
 
 ### `GDCdownload`: Example of use
 ```{r, eval = FALSE}
