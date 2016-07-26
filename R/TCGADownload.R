@@ -47,15 +47,17 @@ GDCdownload <- function(query, token.file, method = "api") {
     } else if (nrow(manifest) != 0 & method =="api"){
         ids <- paste0("ids=",paste(manifest$id,collapse = "&ids="))
         writeLines(ids,"Payload")
-        unlink("gdc.tar.gz")
+        name <- paste0(gsub(" |:","_",date()),".tar.gz")
+        unlink(name)
+        message(paste0("Downloading as: ", name))
         # Is there a better way to do it using rcurl library?
-        system("curl -o gdc.tar.gz --remote-header-name --request POST 'https://gdc-api.nci.nih.gov/legacy/data' --data @Payload")
-        untar("gdc.tar.gz")
+        system(paste0("curl -o ", name ," --remote-header-name --request POST 'https://gdc-api.nci.nih.gov/legacy/data' --data @Payload"))
+        untar(name)
         # moving to project/data_category/data_type/file_id
         for(i in seq_along(manifest$filename)) {
             file <- manifest$filename[i]
             id <- manifest$id[i]
-            move(file,file.path(path,id,file))
+            if(file.exists(file)) move(file,file.path(path,id,file))
         }
     } else {
         message("All samples have been already downloded")
