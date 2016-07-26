@@ -52,11 +52,22 @@ GDCdownload <- function(query, token.file, method = "api") {
         message(paste0("Downloading as: ", name))
         # Is there a better way to do it using rcurl library?
         system(paste0("curl -o ", name ," --remote-header-name --request POST 'https://gdc-api.nci.nih.gov/legacy/data' --data @Payload"))
-        untar(name)
+        success <- untar(name)
+        if(success != 0){
+            print(success)
+            stop("There was an error in the download process, please execute it again")
+        }
         # moving to project/data_category/data_type/file_id
         for(i in seq_along(manifest$filename)) {
             file <- manifest$filename[i]
             id <- manifest$id[i]
+            # Check status
+            if(!(md5sum(file) == manifest$md5[i])){
+                message(paste0("File corrupted:", file))
+                message("Run GDCdownload again to download it")
+                unlink(file)
+                next
+            }
             if(file.exists(file)) move(file,file.path(path,id,file))
         }
     } else {
