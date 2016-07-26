@@ -605,7 +605,7 @@ The possible values for the argument `clinical.info` are:
 query <- GDCquery(project = "TCGA-COAD", 
                   data.category = "Clinical", 
                   barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))
-GDCDownload(query)
+GDCdownload(query)
 clinical <- GDCPrepare_clinic(query, clinical.info = "patient")
 clinical.drug <- GDCPrepare_clinic(query, clinical.info = "drug")
 clinical.radiation <- GDCPrepare_clinic(query, clinical.info = "radiation")
@@ -789,7 +789,7 @@ The arguments are:
 query <- GDCquery(project = "TCGA-ACC", data.category = "Copy Number Variation",
                   data.type = "Copy Number Segment",
                   barcode = c( "TCGA-OR-A5KU-01A-11D-A29H-01", "TCGA-OR-A5JK-01A-11D-A29H-01"))
-GDCDownload(query)
+GDCdownload(query)
 data <- GDCPrepare(query)
 
 query <- GDCquery(project = "TCGA-GBM",
@@ -798,7 +798,7 @@ query <- GDCquery(project = "TCGA-GBM",
                   platform = "Illumina HiSeq", file.type  = "normalized_results",
                   barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"),
                   legacy = TRUE)
-GDCDownload(query)
+GDCdownload(query)
 z <- GDCPrepare(query)
 
 # A function to download only 2 samples
@@ -813,7 +813,7 @@ legacyPipeline <- function(project, data.category, platform){
                       platform = platform,
                       legacy = TRUE,
                       barcode = cases)
-    GDCDownload(query)
+    GDCdownload(query)
     data <- GDCPrepare(query)
     return(data)
 }
@@ -904,7 +904,7 @@ query <- GDCquery(project = "TARGET-AML",
                   data.category = "Transcriptome Profiling", 
                   data.type = "Gene Expression Quantification", 
                   workflow.type = "HTSeq - FPKM-UQ")
-GDCDownload(query)
+GDCdownload(query)
 data <- GDCPrepare(query)
 
 # Downloading and prepare using legacy
@@ -912,7 +912,7 @@ query <- GDCquery(project = "TCGA-GBM",
                   data.category = "Protein expression",
                   legacy = TRUE, 
                   barcode = c("TCGA-OX-A56R-01A-21-A44T-20","TCGA-08-0357-01A-21-1898-20"))
-GDCDownload(query)
+GDCdownload(query)
 data <- GDCPrepare(query)
 
 # Downloading and prepare using legacy
@@ -920,7 +920,7 @@ query <- GDCquery(project = "TCGA-GBM",
                   data.category = "DNA methylation", 
                   platform = "Illumina Human Methylation 27",legacy = TRUE,
                   barcode = c("TCGA-02-0047-01A-01D-0186-05","TCGA-06-2559-01A-01D-0788-05"))
-GDCDownload(query)
+GDCdownload(query)
 data <- GDCPrepare(query)
 
 ```
@@ -1495,7 +1495,7 @@ query <- GDCquery(project = "TCGA-GBM",
                               "TCGA-12-0829-01A-01D-0392-05", "TCGA-06-0155-01B-01D-0521-05",
                               "TCGA-02-0099-01A-01D-0199-05", "TCGA-19-4068-01A-01D-1228-05",
                               "TCGA-19-1788-01A-01D-0595-05", "TCGA-16-0848-01A-01D-0392-05"))
-GDCDownload(query)
+GDCdownload(query)
 data <- GDCPrepare(query)
 ```
 
@@ -1508,7 +1508,7 @@ query <- GDCquery(project = "TCGA-GBM",
                               "TCGA-12-0829-01A-01D-0392-05", "TCGA-06-0155-01B-01D-0521-05",
                               "TCGA-02-0099-01A-01D-0199-05", "TCGA-19-4068-01A-01D-1228-05",
                               "TCGA-19-1788-01A-01D-0595-05", "TCGA-16-0848-01A-01D-0392-05"))
-GDCDownload(query)
+GDCdownload(query)
 data <- GDCPrepare(query)
 ```
 
@@ -1680,7 +1680,7 @@ query.exp <- GDCquery(project = "TCGA-BRCA",
                       platform = "Illumina HiSeq", 
                       file.type = "results",
                       sample.type = c("Primary solid Tumor","Solid Tissue Normal"))
-GDCDownload(query.exp)
+GDCdownload(query.exp)
 brca.exp <- GDCPrepare(query = query.exp, save = TRUE, save.filename = "brcaExp.rda")
 
 # get subtype information
@@ -1815,7 +1815,7 @@ query.exp <- GDCquery(project = "TCGA-LGG",
                       platform = "Illumina HiSeq", 
                       file.type = "results",
                       sample.type = "Primary solid Tumor")
-GDCDownload(query.exp)
+GDCdownload(query.exp)
 lgg.exp <- GDCPrepare(query = query.exp, save = TRUE, save.filename = "lggExp.rda")
 
 # get subtype information
@@ -2079,7 +2079,7 @@ query.met <- GDCquery(project = "TCGA-ACC",
                       legacy = TRUE,
                       data.category = "DNA methylation",
                       platform = "Illumina Human Methylation 450")
-GDCDownload(query.met)
+GDCdownload(query.met)
 
 acc.met <- GDCPrepare(query = query.met,
                       save = TRUE, 
@@ -2095,7 +2095,7 @@ query.exp <- GDCquery(project = "TCGA-ACC",
                       data.type = "Gene expression quantification",
                       platform = "Illumina HiSeq", 
                       file.type = "results")
-GDCDownload(query.exp)
+GDCdownload(query.exp)
 acc.exp <- GDCPrepare(query = query.exp, save = TRUE, save.filename = "accExp.rda")
 ```
 
@@ -2287,7 +2287,7 @@ query.met <- GDCquery(project = "TCGA-KIRC",
                       legacy = TRUE,
                       data.category = "DNA methylation",
                       platform = "Illumina Human Methylation 450")
-GDCDownload(query.met)
+GDCdownload(query.met)
 kirc.met <- GDCPrepare(query = query.met,
                        save = TRUE, 
                        save.filename = "kircDNAmet.rda",
@@ -2317,7 +2317,7 @@ query.exp <- GDCquery(project = "TCGA-KIRC",
                       data.type = "Gene expression quantification",
                       platform = "Illumina HiSeq", 
                       file.type = "normalized_results")
-GDCDownload(query.exp)
+GDCdownload(query.exp)
 kirc.exp <- GDCPrepare(query = query.exp, save = TRUE, save.filename = "kirkExp.rda")
 
 kirc.exp <- TCGAprepare_elmer(kirc.exp,
