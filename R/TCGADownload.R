@@ -1,12 +1,13 @@
 #' @title Download GDC data
 #' @description
-#'   Uses GDC transfer tool to download gdc data
-#'   The user can use query or manifest.file argument (not both at the same time)
+#'   Uses GDC API or GDC transfer tool to download gdc data
+#'   The user can use query argument
 #'   The data from query will be save in a folder: project/data.category
-#'   The data from manifest.file  will be save in a folder: manifest.file.without.extension/
 #' @param query A query for GDCquery function
 #' @param token.file Token file to download controled data (only for method = "client)
 #' @param method Use api method or gdc client tool (API is faster)
+#' @importFrom tools md5sum
+#' @importFrom utils untar
 #' @export
 #' @return Shows the output from the GDC transfer tools
 GDCdownload <- function(query, token.file, method = "api") {
