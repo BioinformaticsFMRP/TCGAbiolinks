@@ -559,8 +559,8 @@ getBarcodeInfo <- function(barcode) {
     options.pretty <- "pretty=true"
     options.expand <- "expand=project,diagnoses,diagnoses.treatments,annotations,family_histories,demographic,exposures"
     option.size <- paste0("size=",length(barcode))
-    message(paste(barcode,collapse = '","'))
-    message(paste0('"',paste(barcode,collapse = '","')))
+    #message(paste(barcode,collapse = '","'))
+    #message(paste0('"',paste(barcode,collapse = '","')))
     options.filter <- paste0("filters=",
                              URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.submitter_id","value":['),
                              paste0('"',paste(barcode,collapse = '","')),
