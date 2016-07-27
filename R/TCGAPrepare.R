@@ -129,7 +129,6 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
         rownames(x) <- NULL
         return(x)
     })
-    save(assays,rowRanges,colData,file = "test2.rda")
     rse <- SummarizedExperiment(assays=assays,
                                 rowRanges=rowRanges,
                                 colData=colData)
