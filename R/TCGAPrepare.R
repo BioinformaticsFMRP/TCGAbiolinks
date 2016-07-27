@@ -25,7 +25,7 @@ GDCprepare <- function(query, save = FALSE, save.filename, summarizedExperiment 
                                            workflow.type = unique(query$results[[1]]$analysis$workflow_type),
                                            cases = query$results[[1]]$cases)
     } else if(grepl("Copy Number Variation",query$data.category,ignore.case = TRUE)) {
-        data <- readCopyNumberVariantion(files, query$results[[1]]$cases)
+        data <- readCopyNumberVariation(files, query$results[[1]]$cases)
     }  else if(grepl("DNA methylation",query$data.category, ignore.case = TRUE)) {
         data <- readDNAmethylation(files, query$results[[1]]$cases, summarizedExperiment, unique(query$platform))
     }  else if(grepl("Protein expression",query$data.category,ignore.case = TRUE)) {
@@ -129,7 +129,6 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
         rownames(x) <- NULL
         return(x)
     })
-    save(assays,rowRanges,colData,file = "test2.rda")
     rse <- SummarizedExperiment(assays=assays,
                                 rowRanges=rowRanges,
                                 colData=colData)
@@ -531,14 +530,13 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases) {
     return(df)
 }
 
-# Reads Copy Number Variantion files to a data frame, basically it will rbind it
-readCopyNumberVariantion <- function(files, cases){
-
+# Reads Copy Number Variation files to a data frame, basically it will rbind it
+readCopyNumberVariation <- function(files, cases){
+    message("Reading a copy  number variation")
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     for (i in seq_along(files)) {
-        data <- read_tsv(file = files[i])
-        aux <- query$results[[1]]
-        if(!missing(cases)) data$Barcode <- cases[i]
+        data <- read_tsv(file = files[i], col_names = TRUE, col_types = "ccnnnn")
+        if(!missing(cases)) data$Sample <- cases[i]
         if(i == 1) df <- data
         if(i != 1) df <- rbind(df, data, make.row.names = FALSE)
         setTxtProgressBar(pb, i)
@@ -559,8 +557,8 @@ getBarcodeInfo <- function(barcode) {
     options.pretty <- "pretty=true"
     options.expand <- "expand=project,diagnoses,diagnoses.treatments,annotations,family_histories,demographic,exposures"
     option.size <- paste0("size=",length(barcode))
-    message(paste(barcode,collapse = '","'))
-    message(paste0('"',paste(barcode,collapse = '","')))
+    #message(paste(barcode,collapse = '","'))
+    #message(paste0('"',paste(barcode,collapse = '","')))
     options.filter <- paste0("filters=",
                              URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.submitter_id","value":['),
                              paste0('"',paste(barcode,collapse = '","')),
