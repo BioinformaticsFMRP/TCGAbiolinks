@@ -299,7 +299,7 @@ colDataPrepareTARGET <- function(barcode){
                                    "DNA, unamplified, from the first isolation of a tissue embedded in FFPE",
                                    "DNA, whole genome amplified by Qiagen (one independent reaction)",
                                    "DNA, whole genome amplified by Qiagen (a second, separate independent reaction)",
-                                   "DNA, whole genome amplified by Qiagen (pool of “W” and “X” aliquots)",
+                                   "DNA, whole genome amplified by Qiagen (pool of 'W' and 'X' aliquots)",
                                    "RNA, from the first isolation of a tissue",
                                    "RNA, from the first isolation of a tissue embedded in FFPE")
     aux <- DataFrame(nucleic.acid.code = nucleic.acid.code,nucleic.acid.description)
