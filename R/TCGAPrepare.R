@@ -25,7 +25,7 @@ GDCprepare <- function(query, save = FALSE, save.filename, summarizedExperiment 
                                            workflow.type = unique(query$results[[1]]$analysis$workflow_type),
                                            cases = query$results[[1]]$cases)
     } else if(grepl("Copy Number Variation",query$data.category,ignore.case = TRUE)) {
-        data <- readCopyNumberVariantion(files, query$results[[1]]$cases)
+        data <- readCopyNumberVariation(files, query$results[[1]]$cases)
     }  else if(grepl("DNA methylation",query$data.category, ignore.case = TRUE)) {
         data <- readDNAmethylation(files, query$results[[1]]$cases, summarizedExperiment, unique(query$platform))
     }  else if(grepl("Protein expression",query$data.category,ignore.case = TRUE)) {
@@ -530,13 +530,12 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases) {
     return(df)
 }
 
-# Reads Copy Number Variantion files to a data frame, basically it will rbind it
-readCopyNumberVariantion <- function(files, cases){
-
+# Reads Copy Number Variation files to a data frame, basically it will rbind it
+readCopyNumberVariation <- function(files, cases){
+    message("Reading a copy  number variation")
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     for (i in seq_along(files)) {
-        data <- read_tsv(file = files[i])
-        aux <- query$results[[1]]
+        data <- read_tsv(file = files[i], col_names = TRUE, col_types = "ccnnnn")
         if(!missing(cases)) data$Barcode <- cases[i]
         if(i == 1) df <- data
         if(i != 1) df <- rbind(df, data, make.row.names = FALSE)
