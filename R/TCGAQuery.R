@@ -516,5 +516,5 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE){
 #' @export
 #' @return list of samples for a tumor
 TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
-    stop("TCGA data has moved from DCC server to GDC server. Please use GDCquery_maf function")
+    stop("TCGA data has moved from DCC server to GDC server. Please use GDCquery_Maf function")
 }
