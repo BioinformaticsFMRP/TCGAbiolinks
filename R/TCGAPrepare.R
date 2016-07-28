@@ -31,7 +31,7 @@ GDCprepare <- function(query, save = FALSE, save.filename, summarizedExperiment 
     }  else if(grepl("Protein expression",query$data.category,ignore.case = TRUE)) {
         data <- readProteinExpression(files, query$results[[1]]$cases)
     }  else if(grepl("Clinical|Biospecimen", query$data.category, ignore.case = TRUE)){
-        mesage("Mot working yet")
+        message("Mot working yet")
         # data <- readClinical(files, query$results[[1]]$cases)
     } else if (grepl("Gene expression",query$data.category,ignore.case = TRUE)) {
         if(query$data.type == "Gene expression quantification")
