@@ -374,8 +374,8 @@ GDCprepare_clinic <- function(query, clinical.info){
         xml <- read_xml(xmlfile)
         follow_up_version <-  names(xml_ns(xml))[grepl("follow_up",names(xml_ns(xml)))]
         if(length(follow_up_version) > 1) {
-            n <- readline(prompt=paste0("There is more than one follow up version, please select one"),
-                          paste0(seq(1:length(follow_up_version)), follow_up_version))
+            n <- readline(prompt=paste0("There is more than one follow up version, please select one",
+                          paste0(seq(1:length(follow_up_version)), follow_up_version)))
             follow_up_version <- follow_up_version[n]
         }
         xpath <- paste0("//", follow_up_version, ":follow_up")
