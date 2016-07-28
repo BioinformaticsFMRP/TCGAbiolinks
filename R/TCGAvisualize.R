@@ -63,7 +63,6 @@
 #' @export
 #' @return net IGRAPH with related Cox survival genes in community (same pval and color) and with
 #' interactions from STRING database.
-#' query <- TCGAquery(tumor = "lgg")
 TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
                                          dataGE,
                                          Genelist,
