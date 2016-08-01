@@ -52,7 +52,11 @@ GDCdownload <- function(query, token.file, method = "api") {
         unlink(name)
         message(paste0("Downloading as: ", name))
         # Is there a better way to do it using rcurl library?
-        system(paste0("curl -o ", name ," --remote-header-name --request POST 'https://gdc-api.nci.nih.gov/legacy/data' --data @Payload"))
+        if(query$legacy) {
+            system(paste0("curl -o ", name ," --remote-header-name --request POST 'https://gdc-api.nci.nih.gov/legacy/data' --data @Payload"))
+        } else {
+            system(paste0("curl -o ", name ," --remote-header-name --request POST 'https://gdc-api.nci.nih.gov/data' --data @Payload"))
+        }
         success <- untar(name)
         if(success != 0){
             print(success)
