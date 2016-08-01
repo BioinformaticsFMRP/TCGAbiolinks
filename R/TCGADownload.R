@@ -104,8 +104,8 @@ GDCclientInstall <- function(){
     if(is.windows()) bin <- bin[grep("windows", bin)]
     if(is.mac()) bin <- bin[grep("OSX", bin)]
     if(is.linux()) bin <- bin[grep("Ubuntu", bin)]
-
-    download(paste0("https://gdc.nci.nih.gov/",bin), basename(bin))
+    if(is.windows()) mode <- "wb" else  mode <- "w"
+    download(paste0("https://gdc.nci.nih.gov/",bin), basename(bin), mode = mode)
     unzip(basename(bin))
     Sys.chmod("gdc-client")
     return(dir(pattern = "gdc-client*[^zip]$",full.names = TRUE))
