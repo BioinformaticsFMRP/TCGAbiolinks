@@ -360,7 +360,8 @@ GDCprepare_clinic <- function(query, clinical.info){
     if(missing(clinical.info)) stop("Please select a clinical information")
 
     # Get all the clincal xml files
-    files <- file.path(query$project,
+    source <- ifelse(query$legacy,"legacy","harmonized")
+    files <- file.path(query$project, source,
                        gsub(" ","_",query$results[[1]]$data_category),
                        gsub(" ","_",query$results[[1]]$data_type),
                        gsub(" ","_",query$results[[1]]$file_id),
