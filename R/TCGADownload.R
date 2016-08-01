@@ -14,10 +14,6 @@
 GDCdownload <- function(query, token.file, method = "api") {
 
     if(missing(query)) stop("Please set query argument")
-    if(is.windows()) {
-        method <- "client"
-        message("method API is not working for windows yet, changing to gdc client")
-    }
     if(!(method %in% c("api","client"))) stop("method arguments possible values are: 'api' or 'client'")
     manifest <- query$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
     colnames(manifest) <- c("id","filename","md5","size","state")
@@ -25,7 +21,6 @@ GDCdownload <- function(query, token.file, method = "api") {
     path <- unique(file.path(query$project, source,
                              gsub(" ","_", query$results[[1]]$data_category),
                              gsub(" ","_",query$results[[1]]$data_type)))
-
     # Check if the files were already downloaded by this package
     files2Download <- sapply(manifest$id, function(x) !file.exists(file.path(path,x)))
     manifest <- manifest[files2Download,]
@@ -52,9 +47,15 @@ GDCdownload <- function(query, token.file, method = "api") {
         for(i in manifest$id) move(i,file.path(path,i))
 
     } else if (nrow(manifest) != 0 & method =="api"){
-        name <- paste0(gsub(" |:","_",date()),".tar.gz")
-        unlink(name)
+        if(nrow(manifest) > 1) {
+            name <- paste0(gsub(" |:","_",date()),".tar.gz")
+            unlink(name)
+        } else {
+            # case with one file only. This is not at tar.gz
+            name <- query$results[[1]]$file_name
+        }
         message(paste0("Downloading as: ", name))
+
         # Is there a better way to do it using rcurl library?
         server <- ifelse(query$legacy,"https://gdc-api.nci.nih.gov/legacy/data/", "https://gdc-api.nci.nih.gov/data/")
         body <- list(ids=list(manifest$id))
@@ -62,10 +63,14 @@ GDCdownload <- function(query, token.file, method = "api") {
                     body = body,
                     encode = "json")
         writeBin(content(bin,"raw",encoding = "UTF-8"), name)
-        success <- untar(name)
-        if(success != 0){
-            print(success)
-            stop("There was an error in the download process, please execute it again")
+
+        if(nrow(manifest) > 1) {
+            success <- untar(name)
+
+            if(success != 0){
+                print(success)
+                stop("There was an error in the download process, please execute it again")
+            }
         }
         # moving to project/data_category/data_type/file_id
         for(i in seq_along(manifest$filename)) {
@@ -112,7 +117,7 @@ GDCclientInstall <- function(){
     download(paste0("https://gdc.nci.nih.gov/",bin), basename(bin), mode = mode)
     unzip(basename(bin))
     Sys.chmod("gdc-client")
-    return(dir(pattern = "gdc-client*[^zip]$",full.names = TRUE))
+    return(GDCclientPath())
 }
 #' @title Download the data from TCGA using as reference the output from TCGAquery
 #' @description
