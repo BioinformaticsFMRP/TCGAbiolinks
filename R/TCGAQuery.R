@@ -480,12 +480,14 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE){
     message("============================================================================")
     selected <- maf[grepl(tumor,maf$tumor,ignore.case = TRUE),]
 
+    if(is.windows()) mode <- "wb" else  mode <- "w"
     # Download maf
     repeat{
-        if (!file.exists(selected$filename)) download(file.path(root,selected$id),selected$filename)
+        if (!file.exists(selected$filename)) download(file.path(root,selected$id),selected$filename, mode = mode)
 
         # check integrity
         if(md5sum(selected$filename) == selected$md5) break
+        unlink(selected$filename)
         message("The data downloaded might be corrupted. We will download it again")
     }
 
@@ -516,5 +518,5 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE){
 #' @export
 #' @return list of samples for a tumor
 TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
-    stop("TCGA data has moved from DCC server to GDC server. Please use GDCquery_maf function")
+    stop("TCGA data has moved from DCC server to GDC server. Please use GDCquery_Maf function")
 }
