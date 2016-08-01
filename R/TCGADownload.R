@@ -8,15 +8,12 @@
 #' @param method Use api method or gdc client tool (API is faster)
 #' @importFrom tools md5sum
 #' @importFrom utils untar
+#' @import httr
 #' @export
 #' @return Shows the output from the GDC transfer tools
 GDCdownload <- function(query, token.file, method = "api") {
 
     if(missing(query)) stop("Please set query argument")
-    if(is.windows()) {
-        method <- "client"
-        message("method API is not working for windows yet, changing to gdc client")
-    }
     if(!(method %in% c("api","client"))) stop("method arguments possible values are: 'api' or 'client'")
     manifest <- query$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
     colnames(manifest) <- c("id","filename","md5","size","state")
@@ -24,7 +21,6 @@ GDCdownload <- function(query, token.file, method = "api") {
     path <- unique(file.path(query$project, source,
                              gsub(" ","_", query$results[[1]]$data_category),
                              gsub(" ","_",query$results[[1]]$data_type)))
-
     # Check if the files were already downloaded by this package
     files2Download <- sapply(manifest$id, function(x) !file.exists(file.path(path,x)))
     manifest <- manifest[files2Download,]
@@ -51,21 +47,30 @@ GDCdownload <- function(query, token.file, method = "api") {
         for(i in manifest$id) move(i,file.path(path,i))
 
     } else if (nrow(manifest) != 0 & method =="api"){
-        ids <- paste0("ids=",paste(manifest$id,collapse = "&ids="))
-        writeLines(ids,"Payload")
-        name <- paste0(gsub(" |:","_",date()),".tar.gz")
-        unlink(name)
-        message(paste0("Downloading as: ", name))
-        # Is there a better way to do it using rcurl library?
-        if(query$legacy) {
-            system(paste0("curl -o ", name ," --remote-header-name --request POST 'https://gdc-api.nci.nih.gov/legacy/data' --data @Payload"))
+        if(nrow(manifest) > 1) {
+            name <- paste0(gsub(" |:","_",date()),".tar.gz")
+            unlink(name)
         } else {
-            system(paste0("curl -o ", name ," --remote-header-name --request POST 'https://gdc-api.nci.nih.gov/data' --data @Payload"))
+            # case with one file only. This is not at tar.gz
+            name <- query$results[[1]]$file_name
         }
-        success <- untar(name)
-        if(success != 0){
-            print(success)
-            stop("There was an error in the download process, please execute it again")
+        message(paste0("Downloading as: ", name))
+
+        # Is there a better way to do it using rcurl library?
+        server <- ifelse(query$legacy,"https://gdc-api.nci.nih.gov/legacy/data/", "https://gdc-api.nci.nih.gov/data/")
+        body <- list(ids=list(manifest$id))
+        bin <- POST(server,
+                    body = body,
+                    encode = "json")
+        writeBin(content(bin,"raw",encoding = "UTF-8"), name)
+
+        if(nrow(manifest) > 1) {
+            success <- untar(name)
+
+            if(success != 0){
+                print(success)
+                stop("There was an error in the download process, please execute it again")
+            }
         }
         # moving to project/data_category/data_type/file_id
         for(i in seq_along(manifest$filename)) {
@@ -90,18 +95,18 @@ GDCclientPath <- function(){
     global <- Sys.which("gdc-client")
     if(global != "") return(global)
     local <- dir(pattern = "gdc-client.*[^zip]$")
-    if(local == "gdc-client") return(dir(pattern = "gdc-client.*[^zip]$",full.names = TRUE))
+    if(length(local) > 0) return(dir(pattern = "gdc-client.*[^zip]$",full.names = TRUE))
     return("")
 }
 
 GDCclientExists <- function(){
-    return(Sys.which("gdc-client.exe") != "" || Sys.which("gdc-client") != "" || dir(pattern = "gdc-client*[^zip]$") == "gdc-client")
+    return(Sys.which("gdc-client.exe") != "" || Sys.which("gdc-client") != "" || length(dir(pattern = "gdc-client*[^zip]$") > 0))
 }
 #' @importFrom xml2 read_html
 #' @importFrom downloader download
 #' @importFrom rvest html_nodes html_attr
 GDCclientInstall <- function(){
-    if(length(GDCclientExists())) return(GDCclientPath())
+    if(GDCclientExists()) return(GDCclientPath())
 
     links <- read_html("https://gdc.nci.nih.gov/access-data/gdc-data-transfer-tool")  %>% html_nodes("a") %>% html_attr("href")
     bin <- links[grep("zip",links)]
@@ -112,7 +117,7 @@ GDCclientInstall <- function(){
     download(paste0("https://gdc.nci.nih.gov/",bin), basename(bin), mode = mode)
     unzip(basename(bin))
     Sys.chmod("gdc-client")
-    return(dir(pattern = "gdc-client*[^zip]$",full.names = TRUE))
+    return(GDCclientPath())
 }
 #' @title Download the data from TCGA using as reference the output from TCGAquery
 #' @description
