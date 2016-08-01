@@ -85,8 +85,8 @@ GDCdownload <- function(query, token.file, method = "api") {
 GDCclientPath <- function(){
     global <- Sys.which("gdc-client")
     if(global != "") return(global)
-    local <- dir(pattern = "gdc-client*[^zip]$")
-    if(local == "gdc-client") return(dir(pattern = "gdc-client*[^zip]$",full.names = TRUE))
+    local <- dir(pattern = "gdc-client.*[^zip]$")
+    if(local == "gdc-client") return(dir(pattern = "gdc-client.*[^zip]$",full.names = TRUE))
     return("")
 }
 
