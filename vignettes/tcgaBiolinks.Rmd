@@ -777,7 +777,7 @@ It uses GDC transfer tool to download gdc data doing a system call.
 For this reason some times the update will stop to show, which does not means that 
 the download process has stopped. Once the process has finished it will give a signal to R.
 
-The data from query will be save in a folder: project/data.category
+The data from query will be save in a folder: project/source/data.category (where source is harmonized or legacy)
 
 The arguments are:
 
