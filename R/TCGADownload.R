@@ -16,7 +16,8 @@ GDCdownload <- function(query, token.file, method = "api") {
     if(!(method %in% c("api","client"))) stop("method arguments possible values are: 'api' or 'client'")
     manifest <- query$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
     colnames(manifest) <- c("id","filename","md5","size","state")
-    path <- unique(file.path(query$project,
+    source <- ifelse(query$legacy,"legacy","harmonized")
+    path <- unique(file.path(query$project, source,
                              gsub(" ","_", query$results[[1]]$data_category),
                              gsub(" ","_",query$results[[1]]$data_type)))
 
