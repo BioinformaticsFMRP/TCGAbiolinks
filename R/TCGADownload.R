@@ -8,6 +8,7 @@
 #' @param method Use api method or gdc client tool (API is faster)
 #' @importFrom tools md5sum
 #' @importFrom utils untar
+#' @importFrom curl curl_download
 #' @export
 #' @return Shows the output from the GDC transfer tools
 GDCdownload <- function(query, token.file, method = "api") {
@@ -57,11 +58,10 @@ GDCdownload <- function(query, token.file, method = "api") {
         unlink(name)
         message(paste0("Downloading as: ", name))
         # Is there a better way to do it using rcurl library?
-        if(query$legacy) {
-            system(paste0("curl -o ", name ," --remote-header-name --request POST 'https://gdc-api.nci.nih.gov/legacy/data' --data @Payload"))
-        } else {
-            system(paste0("curl -o ", name ," --remote-header-name --request POST 'https://gdc-api.nci.nih.gov/data' --data @Payload"))
-        }
+        server <- ifelse(query$legacy,"https://gdc-api.nci.nih.gov/legacy/data/", "https://gdc-api.nci.nih.gov/data/")
+        url <- paste0(server,paste(manifest$id,collapse = ","))
+        message(paste0("Using as server:", server))
+        curl_download(url,name, quiet = FALSE)
         success <- untar(name)
         if(success != 0){
             print(success)
