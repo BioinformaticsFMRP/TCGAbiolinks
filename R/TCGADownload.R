@@ -13,6 +13,10 @@
 GDCdownload <- function(query, token.file, method = "api") {
 
     if(missing(query)) stop("Please set query argument")
+    if(is.windows()) {
+        method <- "client"
+        message("method API is not working for windows yet, changing to gdc client")
+    }
     if(!(method %in% c("api","client"))) stop("method arguments possible values are: 'api' or 'client'")
     manifest <- query$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
     colnames(manifest) <- c("id","filename","md5","size","state")
