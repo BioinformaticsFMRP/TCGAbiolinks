@@ -40,6 +40,8 @@ GDCdownload <- function(query, token.file, method = "api") {
         if(!missing(token.file)) cmd <- paste0(cmd," -t ", token.file)
 
         # Download all the files in the manifest using gdc client
+        message(paste0("GDCdownload will download: ",
+                       humanReadableByteCount(sum(manifest$size))))
         message(paste0("Executing GDC client with the following command:\n",cmd))
         system(cmd)
 
@@ -50,9 +52,14 @@ GDCdownload <- function(query, token.file, method = "api") {
         if(nrow(manifest) > 1) {
             name <- paste0(gsub(" |:","_",date()),".tar.gz")
             unlink(name)
+            message(paste0("GDCdownload will download: ",
+                           humanReadableByteCount(sum(manifest$size)),
+                           " compressed in a tar.gz file"))
         } else {
             # case with one file only. This is not at tar.gz
             name <- query$results[[1]]$file_name
+            message(paste0("GDCdownload will download: ",
+                           humanReadableByteCount(sum(manifest$size))))
         }
         message(paste0("Downloading as: ", name))
 
@@ -61,7 +68,7 @@ GDCdownload <- function(query, token.file, method = "api") {
         body <- list(ids=list(manifest$id))
         bin <- POST(server,
                     body = body,
-                    encode = "json")
+                    encode = "json", progress())
         writeBin(content(bin,"raw",encoding = "UTF-8"), name)
 
         if(nrow(manifest) > 1) {
@@ -91,11 +98,20 @@ GDCdownload <- function(query, token.file, method = "api") {
 }
 
 
+humanReadableByteCount <- function(bytes) {
+    unit <- 1000
+    if (bytes < unit) return (paste0(bytes + " B"))
+    exp <- floor(log(bytes) / log(unit))
+    pre <- paste0(substr("KMGTPE",exp,exp))
+    pre <- paste0(pre,"B")
+    nb <- bytes / (unit ^ exp)
+    return (paste(nb, pre))
+}
 GDCclientPath <- function(){
     global <- Sys.which("gdc-client")
     if(global != "") return(global)
-    local <- dir(pattern = "gdc-client.*[^zip]$")
-    if(length(local) > 0) return(dir(pattern = "gdc-client.*[^zip]$",full.names = TRUE))
+    local <- dir(pattern = "gdc-client*[^zip]$")
+    if(length(local) > 0) return(dir(pattern = "gdc-client*[^zip]$",full.names = TRUE))
     return("")
 }
 
