@@ -487,6 +487,7 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE){
 
         # check integrity
         if(md5sum(selected$filename) == selected$md5) break
+        unlink(selected$filename)
         message("The data downloaded might be corrupted. We will download it again")
     }
 
