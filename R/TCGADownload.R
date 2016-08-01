@@ -91,7 +91,7 @@ GDCclientPath <- function(){
 }
 
 GDCclientExists <- function(){
-    return(Sys.which("gdc-client") != "" | dir(pattern = "gdc-client*[^zip]$") == "gdc-client")
+    return(Sys.which("gdc-client.exe") != "" || Sys.which("gdc-client") != "" || dir(pattern = "gdc-client*[^zip]$") == "gdc-client")
 }
 #' @importFrom xml2 read_html
 #' @importFrom downloader download
