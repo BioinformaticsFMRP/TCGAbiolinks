@@ -8,6 +8,7 @@
 #' @param method Use api method or gdc client tool (API is faster)
 #' @importFrom tools md5sum
 #' @importFrom utils untar
+#' @import httr
 #' @export
 #' @return Shows the output from the GDC transfer tools
 GDCdownload <- function(query, token.file, method = "api") {
@@ -51,17 +52,16 @@ GDCdownload <- function(query, token.file, method = "api") {
         for(i in manifest$id) move(i,file.path(path,i))
 
     } else if (nrow(manifest) != 0 & method =="api"){
-        ids <- paste0("ids=",paste(manifest$id,collapse = "&ids="))
-        writeLines(ids,"Payload")
         name <- paste0(gsub(" |:","_",date()),".tar.gz")
         unlink(name)
         message(paste0("Downloading as: ", name))
         # Is there a better way to do it using rcurl library?
-        if(query$legacy) {
-            system(paste0("curl -o ", name ," --remote-header-name --request POST 'https://gdc-api.nci.nih.gov/legacy/data' --data @Payload"))
-        } else {
-            system(paste0("curl -o ", name ," --remote-header-name --request POST 'https://gdc-api.nci.nih.gov/data' --data @Payload"))
-        }
+        server <- ifelse(query$legacy,"https://gdc-api.nci.nih.gov/legacy/data/", "https://gdc-api.nci.nih.gov/data/")
+        body <- list(ids=list(manifest$id))
+        bin <- POST(server,
+                    body = body,
+                    encode = "json")
+        writeBin(content(bin,"raw",encoding = "UTF-8"), name)
         success <- untar(name)
         if(success != 0){
             print(success)
