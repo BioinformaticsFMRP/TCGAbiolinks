@@ -13,6 +13,10 @@
 GDCdownload <- function(query, token.file, method = "api") {
 
     if(missing(query)) stop("Please set query argument")
+    if(is.windows()) {
+        method <- "client"
+        message("method API is not working for windows yet, changing to gdc client")
+    }
     if(!(method %in% c("api","client"))) stop("method arguments possible values are: 'api' or 'client'")
     manifest <- query$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
     colnames(manifest) <- c("id","filename","md5","size","state")
@@ -85,13 +89,13 @@ GDCdownload <- function(query, token.file, method = "api") {
 GDCclientPath <- function(){
     global <- Sys.which("gdc-client")
     if(global != "") return(global)
-    local <- dir(pattern = "gdc-client*[^zip]$")
-    if(local == "gdc-client") return(dir(pattern = "gdc-client*[^zip]$",full.names = TRUE))
+    local <- dir(pattern = "gdc-client.*[^zip]$")
+    if(local == "gdc-client") return(dir(pattern = "gdc-client.*[^zip]$",full.names = TRUE))
     return("")
 }
 
 GDCclientExists <- function(){
-    return(Sys.which("gdc-client") != "" | dir(pattern = "gdc-client*[^zip]$") == "gdc-client")
+    return(Sys.which("gdc-client.exe") != "" || Sys.which("gdc-client") != "" || dir(pattern = "gdc-client*[^zip]$") == "gdc-client")
 }
 #' @importFrom xml2 read_html
 #' @importFrom downloader download
