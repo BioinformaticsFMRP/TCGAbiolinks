@@ -16,7 +16,8 @@ GDCdownload <- function(query, token.file, method = "api") {
     if(!(method %in% c("api","client"))) stop("method arguments possible values are: 'api' or 'client'")
     manifest <- query$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
     colnames(manifest) <- c("id","filename","md5","size","state")
-    path <- unique(file.path(query$project,
+    source <- ifelse(query$legacy,"legacy","harmonized")
+    path <- unique(file.path(query$project, source,
                              gsub(" ","_", query$results[[1]]$data_category),
                              gsub(" ","_",query$results[[1]]$data_type)))
 
@@ -52,7 +53,11 @@ GDCdownload <- function(query, token.file, method = "api") {
         unlink(name)
         message(paste0("Downloading as: ", name))
         # Is there a better way to do it using rcurl library?
-        system(paste0("curl -o ", name ," --remote-header-name --request POST 'https://gdc-api.nci.nih.gov/legacy/data' --data @Payload"))
+        if(query$legacy) {
+            system(paste0("curl -o ", name ," --remote-header-name --request POST 'https://gdc-api.nci.nih.gov/legacy/data' --data @Payload"))
+        } else {
+            system(paste0("curl -o ", name ," --remote-header-name --request POST 'https://gdc-api.nci.nih.gov/data' --data @Payload"))
+        }
         success <- untar(name)
         if(success != 0){
             print(success)
@@ -99,8 +104,8 @@ GDCclientInstall <- function(){
     if(is.windows()) bin <- bin[grep("windows", bin)]
     if(is.mac()) bin <- bin[grep("OSX", bin)]
     if(is.linux()) bin <- bin[grep("Ubuntu", bin)]
-
-    download(paste0("https://gdc.nci.nih.gov/",bin), basename(bin))
+    if(is.windows()) mode <- "wb" else  mode <- "w"
+    download(paste0("https://gdc.nci.nih.gov/",bin), basename(bin), mode = mode)
     unzip(basename(bin))
     Sys.chmod("gdc-client")
     return(dir(pattern = "gdc-client*[^zip]$",full.names = TRUE))
