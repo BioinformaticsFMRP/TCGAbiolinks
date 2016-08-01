@@ -75,6 +75,7 @@ Imports:
     cowplot,
     reshape2,
     gtable,
+    httr,
     sjmisc,
     matlab,
     circlize,
