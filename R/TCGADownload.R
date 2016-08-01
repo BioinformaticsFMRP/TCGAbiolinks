@@ -95,13 +95,13 @@ GDCclientPath <- function(){
 }
 
 GDCclientExists <- function(){
-    return(Sys.which("gdc-client.exe") != "" || Sys.which("gdc-client") != "" || dir(pattern = "gdc-client*[^zip]$") == "gdc-client")
+    return(Sys.which("gdc-client.exe") != "" || Sys.which("gdc-client") != "" || length(dir(pattern = "gdc-client*[^zip]$") > 0))
 }
 #' @importFrom xml2 read_html
 #' @importFrom downloader download
 #' @importFrom rvest html_nodes html_attr
 GDCclientInstall <- function(){
-    if(length(GDCclientExists())) return(GDCclientPath())
+    if(GDCclientExists()) return(GDCclientPath())
 
     links <- read_html("https://gdc.nci.nih.gov/access-data/gdc-data-transfer-tool")  %>% html_nodes("a") %>% html_attr("href")
     bin <- links[grep("zip",links)]
