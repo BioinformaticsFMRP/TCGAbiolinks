@@ -146,7 +146,7 @@ GDCquery <- function(project,
     #                  sample.type = c("Primary solid Tumor","Solid Tissue Normal"))
     #
     results <- results[!duplicated(results$cases),]
-	if(nrow(results) == 0) stop("Sorry, no results were found for this query")
+    if(nrow(results) == 0) stop("Sorry, no results were found for this query")
 
     # prepare output
     if(missing(sample.type)) sample.type <- NA
@@ -193,31 +193,31 @@ expandBarcodeInfo <- function(barcode){
 getBarcodeDefinition <- function(type = "TCGA"){
     if(type == "TCGA"){
         tissue.code <- c('01','02','03','04','05','06','07','08','09','10','11',
-              '12','13','14','20','40','50','60','61')
-    shortLetterCode <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
-                         "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
-                         "CELL","XP","XCL")
+                         '12','13','14','20','40','50','60','61')
+        shortLetterCode <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
+                             "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
+                             "CELL","XP","XCL")
 
-    tissue.definition <- c("Primary solid Tumor",
-                    "Recurrent Solid Tumor",
-                    "Primary Blood Derived Cancer - Peripheral Blood",
-                    "Recurrent Blood Derived Cancer - Bone Marrow",
-                    "Additional - New Primary",
-                    "Metastatic",
-                    "Additional Metastatic",
-                    "Human Tumor Original Cells",
-                    "Primary Blood Derived Cancer - Bone Marrow",
-                    "Blood Derived Normal",
-                    "Solid Tissue Normal",
-                    "Buccal Cell Normal",
-                    "EBV Immortalized Normal",
-                    "Bone Marrow Normal",
-                    "Control Analyte",
-                    "Recurrent Blood Derived Cancer - Peripheral Blood",
-                    "Cell Lines",
-                    "Primary Xenograft Tissue",
-                    "Cell Line Derived Xenograft Tissue")
-    aux <- data.frame(tissue.code = tissue.code,shortLetterCode,tissue.definition)
+        tissue.definition <- c("Primary solid Tumor",
+                               "Recurrent Solid Tumor",
+                               "Primary Blood Derived Cancer - Peripheral Blood",
+                               "Recurrent Blood Derived Cancer - Bone Marrow",
+                               "Additional - New Primary",
+                               "Metastatic",
+                               "Additional Metastatic",
+                               "Human Tumor Original Cells",
+                               "Primary Blood Derived Cancer - Bone Marrow",
+                               "Blood Derived Normal",
+                               "Solid Tissue Normal",
+                               "Buccal Cell Normal",
+                               "EBV Immortalized Normal",
+                               "Bone Marrow Normal",
+                               "Control Analyte",
+                               "Recurrent Blood Derived Cancer - Peripheral Blood",
+                               "Cell Lines",
+                               "Primary Xenograft Tissue",
+                               "Cell Line Derived Xenograft Tissue")
+        aux <- data.frame(tissue.code = tissue.code,shortLetterCode,tissue.definition)
     } else {
         tissue.code <- c('01','02','03','04','05','06','07','08','09','10','11',
                          '12','13','14','15','16','17','20','40','41','42','50','60','61','99')
@@ -406,15 +406,15 @@ TCGAquery_Investigate <- function(tumor,dataDEGsFiltLevelTF,topgenes){
 
             dataDEGsFiltLevelTF[k,"Pubmed"] <- x6
             message(paste("Cancer ", tumor, "with TF n. ",k, "of " ,
-                        nrow( dataDEGsFiltLevelTF)," : ", CurrentGene,
-                        "found n. ", x6, "pubmed."))
+                          nrow( dataDEGsFiltLevelTF)," : ", CurrentGene,
+                          "found n. ", x6, "pubmed."))
 
         }
 
         else{
             message(paste("Cancer ", tumor, "with TF n. ",k, "of " ,
-                        nrow( dataDEGsFiltLevelTF)," : ", CurrentGene,
-                        "no item found in pubmed."))
+                          nrow( dataDEGsFiltLevelTF)," : ", CurrentGene,
+                          "no item found in pubmed."))
             dataDEGsFiltLevelTF[k,"Pubmed"] <- 0
         }
 
@@ -451,6 +451,7 @@ TCGAquery_Investigate <- function(tumor,dataDEGsFiltLevelTF,topgenes){
 #'   https://gdc-docs.nci.nih.gov/Data/Release_Notes/Data_Release_Notes/
 #' @param tumor a valid tumor
 #' @param save.csv Write maf file into a csv document
+#' @param directory Directory/Folder where the data will downloaded. Default: GDCdata
 #' @export
 #' @importFrom data.table fread
 #' @import readr stringr
@@ -460,7 +461,7 @@ TCGAquery_Investigate <- function(tumor,dataDEGsFiltLevelTF,topgenes){
 #' @examples
 #' acc.maf <- GDCquery_Maf("ACC")
 #' @return A data frame with the maf file information
-GDCquery_Maf <- function(tumor, save.csv= FALSE){
+GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
     root <- "https://gdc-api.nci.nih.gov/data/"
     maf <- fread("https://gdc-docs.nci.nih.gov/Data/Release_Notes/Manifests/GDC_open_MAFs_manifest.txt",
                  data.table = FALSE, verbose = FALSE, showProgress = FALSE)
@@ -471,7 +472,7 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE){
                                     paste(sort(maf$tumor),collapse = "\n => ")))
 
     if (!any(grepl(tumor,maf$tumor))) stop(paste0("Please, set a valid tumor argument. Possible values:\n => ",
-                                              paste(sort(maf$tumor),collapse = "\n => ")))
+                                                  paste(sort(maf$tumor),collapse = "\n => ")))
 
     #  Info to user
     message("============================================================================")
@@ -483,22 +484,24 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE){
     if(is.windows()) mode <- "wb" else  mode <- "w"
     # Download maf
     repeat{
-        if (!file.exists(selected$filename)) download(file.path(root,selected$id),selected$filename, mode = mode)
+        if (!file.exists(file.path(directory,selected$filename)))
+            download(file.path(root,selected$id),
+                     file.path(directory,selected$filename),
+                     mode = mode)
 
         # check integrity
-        if(md5sum(selected$filename) == selected$md5) break
-        unlink(selected$filename)
+        if(md5sum(file.path(directory,selected$filename)) == selected$md5) break
+        unlink(file.path(directory,selected$filename))
         message("The data downloaded might be corrupted. We will download it again")
     }
 
     # uncompress file
-    uncompressed <- gsub(".gz","",selected$filename)
-    if (!file.exists(uncompressed)) gunzip(selected$filename, remove = FALSE)
+    uncompressed <- gsub(".gz","",file.path(directory,selected$filename))
+    if (!file.exists(uncompressed)) gunzip(file.path(directory,selected$filename), remove = FALSE)
     message(uncompressed)
     # Is there a better way??
     ret <- read_tsv(uncompressed,comment = "#")
-    if(ncol(ret) == 1)     ret <- read_csv(uncompressed,comment = "#")
-
+    if(ncol(ret) == 1) ret <- read_csv(uncompressed,comment = "#")
 
     if(save.csv) write_csv(ret,gsub("txt","csv",uncompressed))
 
