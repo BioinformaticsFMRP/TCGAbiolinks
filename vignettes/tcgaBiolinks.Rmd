@@ -783,7 +783,8 @@ The arguments are:
 
 *  **query**	A query for `GDCquery` function
 *  **token.file** A token file to download protect data (not test yet)
-*  **method** Use API method or gdc client tool (API is faster). Options: "api", "client"
+*  **method** Use API (POST method) or gdc client tool (API is faster, but the data might get corrupted in the download, and it might need to be executed again). Options: "api", "client"
+*  **directory** Directory/Folder where the data was downloaded. Default: GDCdata
 
 ### `GDCdownload`: Example of use
 ```{r, eval = FALSE}
@@ -896,8 +897,9 @@ The arguments are:
 * **save**	Save a rda object with the prepared object? Default: FALSE
 * **save.filename** Name of the rda object that will be saved if `save` is `TRUE`
 * **summarizedExperiment** Should the output be a SummarizedExperiment object? Default: `TRUE`
+* **directory** Directory/Folder where the data was downloaded. Default: GDCdata
+* **remove.files.prepared** Remove the files read? Default: FALSE. This argument will be considered only if save argument is set to true
 
-### Example of use
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 # Downloading and prepare 
@@ -914,7 +916,9 @@ query <- GDCquery(project = "TCGA-GBM",
                   legacy = TRUE, 
                   barcode = c("TCGA-OX-A56R-01A-21-A44T-20","TCGA-08-0357-01A-21-1898-20"))
 GDCdownload(query)
-data <- GDCprepare(query)
+data <- GDCprepare(query, save = TRUE, 
+                   save.filename = "gbmProteinExpression.rda",
+                   remove.files.prepared = TRUE)
 
 # Downloading and prepare using legacy
 query <- GDCquery(project = "TCGA-GBM",
@@ -923,7 +927,6 @@ query <- GDCquery(project = "TCGA-GBM",
                   barcode = c("TCGA-02-0047-01A-01D-0186-05","TCGA-06-2559-01A-01D-0788-05"))
 GDCdownload(query)
 data <- GDCprepare(query)
-
 ```
 
 
