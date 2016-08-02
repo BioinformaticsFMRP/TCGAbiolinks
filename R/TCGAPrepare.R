@@ -5,13 +5,24 @@
 #' @param query A query for GDCquery function
 #' @param save Save result as RData object?
 #' @param save.filename Name of the file to be save if empty an automatic will be created
+#' @param directory Directory/Folder where the data was downloaded. Default: GDCdata
 #' @param summarizedExperiment Create a summarizedExperiment? Default TRUE (if possible)
+#' @param remove.files.prepared Remove the files read? Default: FALSE
+#' This argument will be considered only if save argument is set to true
 #' @export
 #' @return A summarizedExperiment or a data.frame
-GDCprepare <- function(query, save = FALSE, save.filename, summarizedExperiment = TRUE){
+GDCprepare <- function(query,
+                       save = FALSE,
+                       save.filename,
+                       directory = "GDCdata",
+                       summarizedExperiment = TRUE,
+                       remove.files.prepared = FALSE){
 
     if(missing(query)) stop("Please set query parameter")
 
+    if(!save & remove.files.prepared) {
+        stop("To remove the files, please set save to TRUE. Otherwise, the data will be lost")
+    }
     # We save the files in project/source/data.category/data.type/file_id/file_name
     source <- ifelse(query$legacy,"legacy","harmonized")
     files <- file.path(query$project, source,
@@ -19,6 +30,11 @@ GDCprepare <- function(query, save = FALSE, save.filename, summarizedExperiment 
                        gsub(" ","_",query$results[[1]]$data_type),
                        gsub(" ","_",query$results[[1]]$file_id),
                        gsub(" ","_",query$results[[1]]$file_name))
+
+    files <- file.path(directory, files)
+
+    if(!all(file.exists(files))) stop(paste0("I couldn't find all the files from the query.",
+                                             "Please check directory parameter right"))
 
     if(grepl("Transcriptome Profiling", query$data.category, ignore.case = TRUE)){
         data <- readTranscriptomeProfiling(files = files,
@@ -48,8 +64,22 @@ GDCprepare <- function(query, save = FALSE, save.filename, summarizedExperiment 
         message(paste0("Saving file:",save.filename))
         save(data, file = save.filename)
         message("File saved")
+
+        # save is true, due to the check in the beggining of the code
+        if(remove.files.prepared){
+            # removes files and empty directories
+            remove.files.recursively(files)
+        }
     }
+
     return(data)
+}
+
+remove.files.recursively <- function(files){
+    files2rm <- dirname(files)
+    unlink(files2rm,recursive = TRUE)
+    files2rm <- dirname(files2rm) # data category
+    if(length(list.files(files2rm)) == 0) remove.files.recursively(files2rm)
 }
 
 readGeneExpressionQuantification <- function(files, cases, summarizedExperiment = TRUE, platform){

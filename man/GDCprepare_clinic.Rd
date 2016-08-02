@@ -4,13 +4,15 @@
 \alias{GDCprepare_clinic}
 \title{Parsing clinical xml files}
 \usage{
-GDCprepare_clinic(query, clinical.info)
+GDCprepare_clinic(query, clinical.info, directory = "GDCdata")
 }
 \arguments{
 \item{query}{Result from GDCquery, with data.category set to Clinical}
 
 \item{clinical.info}{Which information should be retrieved.
 Options: drug, admin, follow_up,radiation, patient, stage_event or new_tumor event}
+
+\item{directory}{Directory/Folder where the data was downloaded. Default: GDCdata}
 }
 \description{
 This function receives the query argument and parses the clinical xml files
