@@ -4,7 +4,8 @@
 \alias{GDCprepare}
 \title{Prepare GDC data}
 \usage{
-GDCprepare(query, save = FALSE, save.filename, summarizedExperiment = TRUE)
+GDCprepare(query, save = FALSE, save.filename, directory = "GDCdata",
+  summarizedExperiment = TRUE, remove.files.prepared = FALSE)
 }
 \arguments{
 \item{query}{A query for GDCquery function}
@@ -13,7 +14,12 @@ GDCprepare(query, save = FALSE, save.filename, summarizedExperiment = TRUE)
 
 \item{save.filename}{Name of the file to be save if empty an automatic will be created}
 
+\item{directory}{Directory/Folder where the data was downloaded. Default: GDCdata}
+
 \item{summarizedExperiment}{Create a summarizedExperiment? Default TRUE (if possible)}
+
+\item{remove.files.prepared}{Remove the files read? Default: FALSE
+This argument will be considered only if save argument is set to true}
 }
 \value{
 A summarizedExperiment or a data.frame
