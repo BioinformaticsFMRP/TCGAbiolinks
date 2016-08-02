@@ -344,6 +344,7 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 #' @param query Result from GDCquery, with data.category set to Clinical
 #' @param clinical.info Which information should be retrieved.
 #' Options: drug, admin, follow_up,radiation, patient, stage_event or new_tumor event
+#' @param directory Directory/Folder where the data was downloaded. Default: GDCdata
 #' @importFrom xml2 read_xml xml_ns
 #' @importFrom XML xmlParse getNodeSet xmlToDataFrame
 #' @export
@@ -356,7 +357,7 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 #' clinical.drug <- GDCprepare_clinic(query,"drug")
 #' clinical.radiation <- GDCprepare_clinic(query,"radiation")
 #' clinical.admin <- GDCprepare_clinic(query,"admin")
-GDCprepare_clinic <- function(query, clinical.info){
+GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
     if(missing(clinical.info)) stop("Please select a clinical information")
 
     # Get all the clincal xml files
@@ -366,6 +367,10 @@ GDCprepare_clinic <- function(query, clinical.info){
                        gsub(" ","_",query$results[[1]]$data_type),
                        gsub(" ","_",query$results[[1]]$file_id),
                        gsub(" ","_",query$results[[1]]$file_name))
+    files <- file.path(directory, files)
+    if(!all(file.exists(files))) stop(paste0("I couldn't find all the files from the query.",
+                                             "Please check directory parameter right"))
+
 
     disease <- tolower(gsub("TCGA-","",query$project))
     if(tolower(clinical.info) == "drug")      xpath <- "//rx:drug"

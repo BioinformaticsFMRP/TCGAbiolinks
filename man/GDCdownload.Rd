@@ -4,14 +4,17 @@
 \alias{GDCdownload}
 \title{Download GDC data}
 \usage{
-GDCdownload(query, token.file, method = "api")
+GDCdownload(query, token.file, method = "api", directory = "GDCdata")
 }
 \arguments{
 \item{query}{A query for GDCquery function}
 
 \item{token.file}{Token file to download controled data (only for method = "client)}
 
-\item{method}{Use api method or gdc client tool (API is faster)}
+\item{method}{Uses the API (POST method) or gdc client tool.
+API is faster, but the data might get corrupted in the download, and it might need to be executed again}
+
+\item{directory}{Directory/Folder where the data was downloaded. Default: GDCdata}
 }
 \value{
 Shows the output from the GDC transfer tools
