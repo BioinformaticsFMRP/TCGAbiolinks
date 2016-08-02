@@ -40,7 +40,8 @@ GDCprepare <- function(query,
         data <- readTranscriptomeProfiling(files = files,
                                            data.type = query$data.type,
                                            workflow.type = unique(query$results[[1]]$analysis$workflow_type),
-                                           cases = query$results[[1]]$cases)
+                                           cases = query$results[[1]]$cases,
+                                           summarizedExperiment)
     } else if(grepl("Copy Number Variation",query$data.category,ignore.case = TRUE)) {
         data <- readCopyNumberVariation(files, query$results[[1]]$cases)
     }  else if(grepl("DNA methylation",query$data.category, ignore.case = TRUE)) {
@@ -110,7 +111,12 @@ readGeneExpressionQuantification <- function(files, cases, summarizedExperiment 
     }
     setDF(df)
 
-    if (summarizedExperiment) df <- makeSEfromGeneExpressionQuantification(df,assay.list)
+    if (summarizedExperiment) {
+        df <- makeSEfromGeneExpressionQuantification(df,assay.list)
+    } else {
+        rownames(df) <- df$gene_id
+        df$gene_id <- NULL
+    }
     return(df)
 }
 makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"){
@@ -287,6 +293,7 @@ colDataPrepareTARGET <- function(barcode){
     samples <- str_match(barcode,regex)[,1]
 
     ret <- DataFrame(barcode = barcode,
+                     patient = substr(barcode, 1, 16),
                      tumor.code = substr(barcode, 8, 9),
                      case.unique.id = substr(barcode, 11, 16),
                      tissue.code = substr(barcode, 18, 19),
@@ -391,13 +398,13 @@ colDataPrepareTCGA <- function(barcode){
 }
 
 colDataPrepare <- function(barcode){
+
     # For the moment this will work only for TCGA Data
     # We should search what TARGET data means
     message("Starting to add information to samples")
 
     if(all(grepl("TARGET",barcode))) ret <- colDataPrepareTARGET(barcode)
     if(all(grepl("TCGA",barcode))) ret <- colDataPrepareTCGA(barcode)
-
     message(" => Add clinical information to samples")
     # There is a limitation on the size of the string, so this step will be splited in cases of 100
     patient.info <- NULL
@@ -431,7 +438,7 @@ colDataPrepare <- function(barcode){
             ret <- merge(ret,subtype, by = "sample", all.x = TRUE)
         }
     }
-print(dim(ret))
+    print(dim(ret))
     ret <- ret[match(barcode,ret$barcode),]
     rownames(ret) <- ret$barcode
     return(ret)
@@ -529,7 +536,7 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
     return(rse)
 }
 
-readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases) {
+readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,summarizedExperiment) {
     # Status working for:
     #  - htseq
     #  - FPKM
@@ -544,7 +551,7 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases) {
             setTxtProgressBar(pb, i)
         }
         close(pb)
-        df <- makeSEfromTranscriptomeProfiling(df,cases,workflow.type)
+        if(summarizedExperiment) df <- makeSEfromTranscriptomeProfiling(df,cases,workflow.type)
     } else if(grepl("miRNA", workflow.type) & grepl("miRNA", data.type)) {
         pb <- txtProgressBar(min = 0, max = length(files), style = 3)
         for (i in seq_along(files)) {
@@ -597,17 +604,49 @@ getBarcodeInfo <- function(barcode) {
     #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
     json <- fromJSON(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")), simplifyDataFrame = TRUE)
     results <- json$data$hits
+    submitter_id <- results$submitter_id
+
     diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
-    diagnoses$submitter_id <- gsub("_diagnosis","", diagnoses$submitter_id)
+    if(any(grepl("submitter_id", colnames(diagnoses)))) {
+        diagnoses$submitter_id <- gsub("_diagnosis","", diagnoses$submitter_id)
+    }  else {
+        diagnoses$submitter_id <- submitter_id
+    }
+    df <- diagnoses
+
     exposures <- rbindlist(results$exposures, fill = TRUE)
-    exposures$submitter_id <- gsub("_exposure","", exposures$submitter_id)
-    results$demographic$submitter_id <- gsub("_demographic","", results$demographic$submitter_id)
-    df <- merge(diagnoses,exposures, by="submitter_id", all = TRUE,sort = FALSE)
+    if(nrow(exposures) > 0) {
+        if(any(grepl("submitter_id", colnames(exposures)))) {
+            exposures$submitter_id <- gsub("_exposure","", exposures$submitter_id)
+        }  else {
+            exposures$submitter_id <- submitter_id
+        }
+    }
+    if(any(grepl("submitter_id", colnames(results$demographic)))) {
+        results$demographic$submitter_id <- gsub("_demographic","", results$demographic$submitter_id)
+    } else {
+        results$demographic$submitter_id <-submitter_id
+    }
     df <- merge(df,results$demographic, by="submitter_id", all = TRUE,sort = FALSE)
+
+    if(nrow(exposures) > 0) {
+        df <- merge(diagnoses,exposures, by="submitter_id", all = TRUE,sort = FALSE)
+    }
+
     treatments <- rbindlist(df$treatments,fill = TRUE)
-    df[,treatments:=NULL]
-    treatments$submitter_id <- gsub("_treatment","", treatments$submitter_id)
-    df <- merge(df,treatments, by="submitter_id", all = TRUE,sort = FALSE)
+
+    if(nrow(treatments) > 0) {
+        df[,treatments:=NULL]
+
+        if(any(grepl("submitter_id", colnames(treatments)))) {
+            treatments$submitter_id <- gsub("_treatment","", treatments$submitter_id)
+        } else {
+            treatments$submitter_id <-submitter_id
+        }
+        df <- merge(df,treatments, by="submitter_id", all = TRUE,sort = FALSE)
+    }
+
+
     df$bcr_patient_barcode <- df$submitter_id
     df <- cbind(df,results$project)
 
@@ -719,12 +758,12 @@ TCGAprepare_elmer <- function(data,
             data <- assay(data)
         }
 
-	if(all(grepl("\\|",rownames(data)))){
-  	      message("2 - rownames  (gene|loci) => ('ID'loci) ")
-  	      aux <- strsplit(rownames(data),"\\|")
-  	      GeneID <- unlist(lapply(aux,function(x) x[2]))
-  	      row.names(data) <- paste0("ID",GeneID)
-	}
+        if(all(grepl("\\|",rownames(data)))){
+            message("2 - rownames  (gene|loci) => ('ID'loci) ")
+            aux <- strsplit(rownames(data),"\\|")
+            GeneID <- unlist(lapply(aux,function(x) x[2]))
+            row.names(data) <- paste0("ID",GeneID)
+        }
         data <- log2(data+1)
         Exp <- data.matrix(data)
 
