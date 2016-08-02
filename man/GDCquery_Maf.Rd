@@ -4,12 +4,14 @@
 \alias{GDCquery_Maf}
 \title{Retrieve open access maf files from GDC server}
 \usage{
-GDCquery_Maf(tumor, save.csv = FALSE)
+GDCquery_Maf(tumor, save.csv = FALSE, directory = "GDCdata")
 }
 \arguments{
 \item{tumor}{a valid tumor}
 
 \item{save.csv}{Write maf file into a csv document}
+
+\item{directory}{Directory/Folder where the data will downloaded. Default: GDCdata}
 }
 \value{
 A data frame with the maf file information
