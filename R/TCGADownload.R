@@ -5,24 +5,34 @@
 #'   The data from query will be save in a folder: project/data.category
 #' @param query A query for GDCquery function
 #' @param token.file Token file to download controled data (only for method = "client)
-#' @param method Use api method or gdc client tool (API is faster)
+#' @param method Uses the API (POST method) or gdc client tool.
+#' API is faster, but the data might get corrupted in the download, and it might need to be executed again
+#' @param directory Directory/Folder where the data was downloaded. Default: GDCdata
 #' @importFrom tools md5sum
 #' @importFrom utils untar
 #' @import httr
 #' @export
 #' @return Shows the output from the GDC transfer tools
-GDCdownload <- function(query, token.file, method = "api") {
+GDCdownload <- function(query,
+                        token.file,
+                        method = "api",
+                        directory = "GDCdata") {
 
     if(missing(query)) stop("Please set query argument")
     if(!(method %in% c("api","client"))) stop("method arguments possible values are: 'api' or 'client'")
     manifest <- query$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
     colnames(manifest) <- c("id","filename","md5","size","state")
+
     source <- ifelse(query$legacy,"legacy","harmonized")
+
     path <- unique(file.path(query$project, source,
                              gsub(" ","_", query$results[[1]]$data_category),
                              gsub(" ","_",query$results[[1]]$data_type)))
+    dir.create(directory, showWarnings = FALSE, recursive = TRUE)
+    path <- file.path(directory, path)
+
     # Check if the files were already downloaded by this package
-    files2Download <- sapply(manifest$id, function(x) !file.exists(file.path(path,x)))
+    files2Download <- sapply(file.path(manifest$id,manifest$filename), function(x) !file.exists(file.path(path,x)))
     manifest <- manifest[files2Download,]
     if(nrow(manifest) != 0 & method == "client") {
         # There exists two options to download the data, using the query or using a manifest file
