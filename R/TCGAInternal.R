@@ -132,39 +132,6 @@ getNbFiles <- function(project, data.category, legacy = FALSE){
     return(nb)
 }
 
-# Get all files in the ftp directory @keywords internal
-getFileNames <- function(url) {
-
-    x <- read_html(url) %>% XML::htmlTreeParse() %>%  capture.output()
-    x <- x[grep("href", x)]
-    if (is.null(x)){
-        return(NULL)
-    }
-    x = sapply(strsplit(x, ">"), function(y) y[2])
-    if (is.null(x)){
-        return(NULL)
-    }
-    x = sapply(strsplit(x, "<"), function(y) y[1])
-    return(x)
-}
-
-
-#' @import utils
-#' @importFrom RCurl getURL
-.DownloadURL <-
-    function(Site){
-        # setInternet2(use = TRUE)
-        Site <- URLencode(Site)
-        x=  getURL(Site, ssl.verifypeer = FALSE)
-        x <- unlist(strsplit(x,"\n"))
-        return(x)
-    }
-
-.scale01 <- function(x, low = min(x), high = max(x)) {
-    x <- (x - low)/(high - low)
-    x
-}
-
 .quantileNormalization <-
     function(wd, distribution) {
     n <- nrow(wd)
