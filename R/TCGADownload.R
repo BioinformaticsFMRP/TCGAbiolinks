@@ -49,6 +49,10 @@ GDCdownload <- function(query,
     # Check if the files were already downloaded by this package
     files2Download <- sapply(file.path(manifest$id,manifest$filename), function(x) !file.exists(file.path(path,x)))
     manifest <- manifest[files2Download,]
+
+    # There is a bug in the API, if the files has the same name it will not download correctly
+    # so method should be set to client if there are files with duplicated names
+    if(nrow(manifest) > length(unique(manifest$filename))) method <- "client"
     if(nrow(manifest) != 0 & method == "client") {
         # There exists two options to download the data, using the query or using a manifest file
         # The second option was created to let users use legacy data or the API to search
@@ -91,6 +95,7 @@ GDCdownload <- function(query,
         # Is there a better way to do it using rcurl library?
         server <- ifelse(query$legacy,"https://gdc-api.nci.nih.gov/legacy/data/", "https://gdc-api.nci.nih.gov/data/")
         body <- list(ids=list(manifest$id))
+
         bin <- POST(server,
                     body = body,
                     encode = "json", progress())
