@@ -60,6 +60,7 @@ Uses GDC API to search for search, it searches for both controlled and
   open-acess data.
   For GDC data arguments project, data.category, data.type and workflow.type should be used
   For the legacy data arguments project, data.category, platform and/or file.extension should be used.
+  Please, see the vignette for a table with the possibilities.
 }
 \examples{
 query <- GDCquery(project = "TCGA-ACC",
@@ -83,5 +84,10 @@ query <- GDCquery(project = "TARGET-AML",
                   data.type = "Gene Expression Quantification",
                   workflow.type = "HTSeq - Counts",
                   barcode = c("TARGET-20-PADZCG-04A-01R","TARGET-20-PARJCR-09A-01R"))
+query <- GDCquery(project = "TCGA-ACC",
+                  data.category =  "Copy number variation",
+                  legacy = TRUE,
+                  file.type = "hg19.seg",
+                  barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
 }
 
