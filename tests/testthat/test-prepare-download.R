@@ -23,7 +23,7 @@ test_that("GDCdownload works", {
      # data will be saved in  GDCdata/TARGET-AML/legacy/Copy_number_variation/Copy_number_segmentation
     #GDCdownload(query, method = "client", directory = "example_data_dir")
     GDCdownload(query, method = "api", directory = "example_data_dir")
-    files <- file.path("GDCdata/TARGET-AML/harmonized/",
+    files <- file.path("example_data_dir/TARGET-AML/harmonized/",
                       gsub(" ","_",query$results[[1]]$data_category),
                       gsub(" ","_",query$results[[1]]$data_type),
                       query$results[[1]]$file_id,
