@@ -68,3 +68,12 @@ test_that("GDCquery can filter by file type", {
                       barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
                       expect_equal(query$results[[1]]$file_name,"AQUAE_p_TCGA_112_304_b2_N_GenomeWideSNP_6_D10_1348300.nocnv_hg19.seg.txt")
 })
+
+test_that("GDCquery_Maf works", {
+    acc.maf <- GDCquery_Maf("ACC")
+    expect_true(nrow(acc.maf) > 0)
+    acc.maf <- GDCquery_Maf("ACC", directory = "maf")
+    expect_true(nrow(acc.maf) > 0)
+    unlink("GDCdata",recursive = TRUE, force = TRUE)
+    unlink("maf",recursive = TRUE, force = TRUE)
+})
