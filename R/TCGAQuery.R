@@ -495,6 +495,7 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
                  data.table = FALSE, verbose = FALSE, showProgress = FALSE)
     maf$tumor <- unlist(lapply(maf$filename, function(x){unlist(str_split(x,"\\."))[2]}))
 
+    dir.create(directory, showWarnings = FALSE, recursive = TRUE)
     # Check input
     if (missing(tumor)) stop(paste0("Please, set tumor argument. Possible values:\n => ",
                                     paste(sort(maf$tumor),collapse = "\n => ")))
