@@ -606,6 +606,7 @@ getBarcodeInfo <- function(barcode) {
     results <- json$data$hits
     submitter_id <- results$submitter_id
 
+    # We dont have the same cols for TCGA and TARGET so we need to check them
     diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
     if(any(grepl("submitter_id", colnames(diagnoses)))) {
         diagnoses$submitter_id <- gsub("_diagnosis","", diagnoses$submitter_id)
@@ -621,20 +622,20 @@ getBarcodeInfo <- function(barcode) {
         }  else {
             exposures$submitter_id <- submitter_id
         }
-    }
-    if(any(grepl("submitter_id", colnames(results$demographic)))) {
-        results$demographic$submitter_id <- gsub("_demographic","", results$demographic$submitter_id)
-    } else {
-        results$demographic$submitter_id <-submitter_id
-    }
-    df <- merge(df,results$demographic, by="submitter_id", all = TRUE,sort = FALSE)
-
-    if(nrow(exposures) > 0) {
-        df <- merge(diagnoses,exposures, by="submitter_id", all = TRUE,sort = FALSE)
+        df <- merge(df,exposures, by="submitter_id", all = TRUE,sort = FALSE)
     }
 
-    treatments <- rbindlist(df$treatments,fill = TRUE)
+    demographic <- results$demographic
+    if(nrow(demographic) > 0) {
+        if(any(grepl("submitter_id", colnames(demographic)))) {
+            demographic$submitter_id <- gsub("_demographic","", results$demographic$submitter_id)
+        } else {
+            demographic$submitter_id <-submitter_id
+        }
+        df <- merge(df,demographic, by="submitter_id", all = TRUE,sort = FALSE)
+    }
 
+    treatments <- rbindlist(results$treatments,fill = TRUE)
     if(nrow(treatments) > 0) {
         df[,treatments:=NULL]
 
@@ -646,16 +647,17 @@ getBarcodeInfo <- function(barcode) {
         df <- merge(df,treatments, by="submitter_id", all = TRUE,sort = FALSE)
     }
 
-
     df$bcr_patient_barcode <- df$submitter_id
     df <- cbind(df,results$project)
+
+    # Adding in the same order
+    df <- df[match(barcode,df$submitter_id)]
 
     # This line should not exists, but some patients does not have clinical data
     # case: TCGA-R8-A6YH"
     # this has been reported to GDC, waiting answers
     # So we will remove this NA cases
     df <- df[!is.na(df$submitter_id),]
-
     return(df)
 }
 
