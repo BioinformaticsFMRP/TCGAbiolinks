@@ -12,6 +12,21 @@
 #' @importFrom utils untar
 #' @import httr
 #' @export
+#' @examples
+#' query <- GDCquery(project = "TCGA-ACC",
+#'                  data.category =  "Copy number variation",
+#'                  legacy = TRUE,
+#'                  file.type = "hg19.seg",
+#'                  barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01", "TCGA-OR-A5LJ-10A-01D-A29K-01"))
+#' # data will be saved in  GDCdata/TCGA-ACC/legacy/Copy_number_variation/Copy_number_segmentation
+#' GDCdownload(query, method = "api")
+#' query <- GDCquery(project = "TARGET-AML",
+#'                   data.category = "Transcriptome Profiling",
+#'                   data.type = "miRNA Expression Quantification",
+#'                   workflow.type = "BCGSC miRNA Profiling",
+#'                   barcode = c("TARGET-20-PARUDL-03A-01R","TARGET-20-PASRRB-03A-01R"))
+#' # data will be saved in  example_data_dir/TARGET-AML/harmonized/Transcriptome_Profiling/miRNA_Expression_Quantification
+#' GDCdownload(query, method = "client", directory = "example_data_dir")
 #' @return Shows the output from the GDC transfer tools
 GDCdownload <- function(query,
                         token.file,
@@ -34,6 +49,10 @@ GDCdownload <- function(query,
     # Check if the files were already downloaded by this package
     files2Download <- sapply(file.path(manifest$id,manifest$filename), function(x) !file.exists(file.path(path,x)))
     manifest <- manifest[files2Download,]
+
+    # There is a bug in the API, if the files has the same name it will not download correctly
+    # so method should be set to client if there are files with duplicated names
+    if(nrow(manifest) > length(unique(manifest$filename))) method <- "client"
     if(nrow(manifest) != 0 & method == "client") {
         # There exists two options to download the data, using the query or using a manifest file
         # The second option was created to let users use legacy data or the API to search
@@ -76,6 +95,7 @@ GDCdownload <- function(query,
         # Is there a better way to do it using rcurl library?
         server <- ifelse(query$legacy,"https://gdc-api.nci.nih.gov/legacy/data/", "https://gdc-api.nci.nih.gov/data/")
         body <- list(ids=list(manifest$id))
+
         bin <- POST(server,
                     body = body,
                     encode = "json", progress())
