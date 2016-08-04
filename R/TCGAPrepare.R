@@ -650,12 +650,14 @@ getBarcodeInfo <- function(barcode) {
     df$bcr_patient_barcode <- df$submitter_id
     df <- cbind(df,results$project)
 
+    # Adding in the same order
+    df <- df[match(barcode,df$submitter_id)]
+
     # This line should not exists, but some patients does not have clinical data
     # case: TCGA-R8-A6YH"
     # this has been reported to GDC, waiting answers
     # So we will remove this NA cases
     df <- df[!is.na(df$submitter_id),]
-
     return(df)
 }
 
