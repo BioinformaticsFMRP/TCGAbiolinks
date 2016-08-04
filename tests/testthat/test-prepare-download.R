@@ -33,3 +33,5 @@ test_that("GDCdownload works", {
     #unlink("gdc-client*",recursive = TRUE, force = TRUE)
     unlink("example_data_dir",recursive = TRUE, force = TRUE)
 })
+
+
