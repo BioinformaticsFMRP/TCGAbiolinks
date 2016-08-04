@@ -34,4 +34,9 @@ test_that("GDCdownload works", {
     unlink("example_data_dir",recursive = TRUE, force = TRUE)
 })
 
+test_that("getBarcodeInfo works", {
+    cols <- c("gender","project_id","days_to_last_follow_up","alcohol_history","cigarettes_per_day")
+    x <- getBarcodeInfo(c("TCGA-OR-A5LR", "TCGA-OR-A5LJ"))
+    expect_true(all(cols %in% colnames(x)))
+})
 
