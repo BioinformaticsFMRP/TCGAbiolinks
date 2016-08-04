@@ -12,5 +12,6 @@ test_that("EAbarplot works", {
                             nBar = 10,
                             filename="a.pdf")
     expect_true(file.exists("a.pdf"))
+    unlink("a.pdf")
 })
 
