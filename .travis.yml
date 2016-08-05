@@ -18,5 +18,5 @@ r_github_packages:
 after_success:
   -  Rscript -e 'library(covr);codecov()'
 
-r_build_args: --no-build-vignettes --no-manual --no-resave-data
-r_check_args: --no-build-vignettes --no-manual
+r_build_args:  --no-manual --no-resave-data
+r_check_args:  --no-manual
