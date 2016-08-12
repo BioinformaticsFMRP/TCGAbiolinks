@@ -15,6 +15,20 @@ test_that("GDCdownload works", {
                         query$results[[1]]$file_name)
      expect_true(all(file.exists(files)))
 
+     query <- GDCquery(project = "TCGA-ACC",
+                       data.category =  "Copy number variation",
+                       legacy = TRUE,
+                       file.type = "hg19.seg",
+                       barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
+     # data will be saved in  GDCdata/TCGA-ACC/legacy/Copy_number_variation/Copy_number_segmentation
+     GDCdownload(query, method = "api", directory = "example_data_dir")
+     files <- file.path("example_data_dir/TCGA-ACC/legacy/",
+                        gsub(" ","_",query$results[[1]]$data_category),
+                        gsub(" ","_",query$results[[1]]$data_type),
+                        query$results[[1]]$file_id,
+                        query$results[[1]]$file_name)
+     expect_true(all(file.exists(files)))
+
      query <- GDCquery(project = "TARGET-AML",
                        data.category = "Transcriptome Profiling",
                        data.type = "miRNA Expression Quantification",
