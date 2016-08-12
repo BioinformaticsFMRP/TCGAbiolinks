@@ -120,7 +120,7 @@ GDCdownload <- function(query,
                 unlink(file)
                 next
             }
-            if(file.exists(file)) move(file,file.path(path,id,file))
+            if(file.exists(file)) move(file,file.path(path,file))
         }
     } else {
         message("All samples have been already downloded")
