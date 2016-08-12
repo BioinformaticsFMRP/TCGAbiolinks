@@ -110,7 +110,8 @@ GDCdownload <- function(query,
         }
         # moving to project/data_category/data_type/file_id
         for(i in seq_along(manifest$filename)) {
-            file <- file.path(manifest$id[i], manifest$filename[i])
+            if(nrow(manifest) > 1) file <- file.path(manifest$id[i], manifest$filename[i])
+            if(nrow(manifest) == 1) file <- file.path(manifest$filename[i])
             id <- manifest$id[i]
 
             # Check status
@@ -120,7 +121,8 @@ GDCdownload <- function(query,
                 unlink(file)
                 next
             }
-            if(file.exists(file)) move(file,file.path(path,file))
+            if(nrow(manifest) > 1 & file.exists(file)) move(file,file.path(path,file))
+            if(nrow(manifest) == 1 & file.exists(file)) move(file,file.path(path,id,file))
         }
     } else {
         message("All samples have been already downloded")
