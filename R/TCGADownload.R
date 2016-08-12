@@ -49,7 +49,6 @@ GDCdownload <- function(query,
     # Check if the files were already downloaded by this package
     files2Download <- sapply(file.path(manifest$id,manifest$filename), function(x) !file.exists(file.path(path,x)))
     manifest <- manifest[files2Download,]
-
     # There is a bug in the API, if the files has the same name it will not download correctly
     # so method should be set to client if there are files with duplicated names
     if(nrow(manifest) > length(unique(manifest$filename))) method <- "client"
@@ -103,7 +102,7 @@ GDCdownload <- function(query,
 
         if(nrow(manifest) > 1) {
             success <- untar(name)
-
+            unlink(name) # remove tar
             if(success != 0){
                 print(success)
                 stop("There was an error in the download process, please execute it again")
@@ -111,8 +110,9 @@ GDCdownload <- function(query,
         }
         # moving to project/data_category/data_type/file_id
         for(i in seq_along(manifest$filename)) {
-            file <- manifest$filename[i]
+            file <- file.path(manifest$id[i], manifest$filename[i])
             id <- manifest$id[i]
+
             # Check status
             if(!(md5sum(file) == manifest$md5[i])){
                 message(paste0("File corrupted:", file))
