@@ -69,6 +69,7 @@
 #'                   file.type = "hg19.seg",
 #'                   barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
 #' @return A data frame with the results and the parameters used
+#' @importFrom  jsonlite fromJSON
 GDCquery <- function(project,
                      data.category,
                      data.type,
@@ -103,11 +104,11 @@ GDCquery <- function(project,
                              URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["'),
                              URLencode(data.category),
                              URLencode('"]}}]}'))
-    message(paste0(baseURL,paste(options.pretty, options.expand, option.size, options.filter, sep = "&")))
+    #message(paste0(baseURL,paste(options.pretty, options.expand, option.size, options.filter, sep = "&")))
+    message("Accessing GDC. This might take a while...")
     json <- fromJSON(paste0(baseURL,paste(options.pretty, options.expand,option.size, options.filter, sep = "&")), simplifyDataFrame = TRUE)
 
     results <- json$data$hits
-
 
     # get barcode of the samples
     # TARGET-20-PANLLX-09A-01R
