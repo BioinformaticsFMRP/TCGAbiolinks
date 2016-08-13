@@ -108,7 +108,7 @@ GDCdownload <- function(query,
                 stop("There was an error in the download process, please execute it again")
             }
         }
-        # moving to project/data_category/data_type/file_id
+        # moving to project/source/data_category/data_type/file_id
         for(i in seq_along(manifest$filename)) {
             if(nrow(manifest) > 1) file <- file.path(manifest$id[i], manifest$filename[i])
             if(nrow(manifest) == 1) file <- file.path(manifest$filename[i])
@@ -121,9 +121,12 @@ GDCdownload <- function(query,
                 unlink(file)
                 next
             }
-            if(nrow(manifest) > 1 & file.exists(file)) move(file,file.path(path,file))
-            if(nrow(manifest) == 1 & file.exists(file)) move(file,file.path(path,id,file))
+            if(nrow(manifest) > 1) {
+                move(file,file.path(path,file))
+            }
+            if(nrow(manifest) == 1) move(file,file.path(path,id,file))
         }
+        message("Download completed")
     } else {
         message("All samples have been already downloded")
     }
