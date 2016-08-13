@@ -583,13 +583,6 @@ readCopyNumberVariation <- function(files, cases){
     return(df)
 }
 
-# Source: https://stackoverflow.com/questions/10266963/moving-files-between-folders
-move <- function(from, to) {
-    todir <- dirname(to)
-    if (!isTRUE(file.info(todir)$isdir)) dir.create(todir, recursive=TRUE,showWarnings = FALSE)
-    file.rename(from = from,  to = to)
-}
-
 getBarcodeInfo <- function(barcode) {
     baseURL <- "https://gdc-api.nci.nih.gov/cases/?"
     options.pretty <- "pretty=true"
