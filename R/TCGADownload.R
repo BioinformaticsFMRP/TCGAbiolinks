@@ -95,11 +95,16 @@ GDCdownload <- function(query,
         server <- ifelse(query$legacy,"https://gdc-api.nci.nih.gov/legacy/data/", "https://gdc-api.nci.nih.gov/data/")
         body <- list(ids=list(manifest$id))
 
-        bin <- POST(server,
-                    body = body,
-                    encode = "json", progress())
-        writeBin(content(bin,"raw",encoding = "UTF-8"), name)
-
+        result = tryCatch({
+            bin <- POST(server,
+                        body = body,
+                        encode = "json", progress())
+            writeBin(content(bin,"raw",encoding = "UTF-8"), name)
+        }, warning = function(w) {
+        }, error = function(e) {
+            unlink(name) # remove tar
+        }, finally = {
+        })
         if(nrow(manifest) > 1) {
             success <- untar(name)
             unlink(name) # remove tar
