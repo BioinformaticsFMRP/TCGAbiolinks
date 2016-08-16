@@ -38,11 +38,11 @@ isServeOK <- function(){
 checkProjectInput <- function(project){
     projects <- getGDCprojects()
     if(missing(project)) {
-        print(knitr::kable(getGDCprojects()[,c(4:6,8)]))
+        print(knitr::kable(projects[,c(4:6,8)]))
         stop("Please set a project argument from the column project_id above")
     }
     if(!(project %in% projects$project_id)) {
-        print(knitr::kable(getGDCprojects()[,c(4:6,8)]))
+        print(knitr::kable(projects[,c(4:6,8)]))
         stop("Please set a valid project argument from the column project_id above")
     }
 }
@@ -103,7 +103,7 @@ checkBarcodeDefinition <- function(definition){
 #' projects <- getGDCprojects()
 #' @return A data frame with last GDC projects
 getGDCprojects <- function(){
-    projects <- read_tsv("https://gdc-api.nci.nih.gov/projects?size=1000&format=tsv")
+    projects <- read_tsv("https://gdc-api.nci.nih.gov/projects?size=1000&format=tsv", col_types = "ccccccc")
     projects$tumor <- unlist(lapply(projects$project_id, function(x){unlist(str_split(x,"-"))[2]}))
     return(projects)
 }
