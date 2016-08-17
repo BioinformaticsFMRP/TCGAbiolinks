@@ -106,7 +106,13 @@ GDCquery <- function(project,
                              URLencode('"]}}]}'))
     #message(paste0(baseURL,paste(options.pretty, options.expand, option.size, options.filter, sep = "&")))
     message("Accessing GDC. This might take a while...")
-    json <- fromJSON(paste0(baseURL,paste(options.pretty, options.expand,option.size, options.filter, sep = "&")), simplifyDataFrame = TRUE)
+    url <- paste0(baseURL,paste(options.pretty, options.expand,option.size, options.filter, sep = "&"))
+    json  <- tryCatch(
+        fromJSON(url, simplifyDataFrame = TRUE),
+        error = function(e) {
+            fromJSON(content(GET(url), as = "text"), simplifyDataFrame = TRUE)
+        }
+    )
 
     results <- json$data$hits
 
