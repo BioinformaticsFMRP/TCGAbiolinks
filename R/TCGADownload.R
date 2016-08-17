@@ -4,8 +4,8 @@
 #'   The user can use query argument
 #'   The data from query will be save in a folder: project/data.category
 #' @param query A query for GDCquery function
-#' @param token.file Token file to download controled data (only for method = "client)
-#' @param method Uses the API (POST method) or gdc client tool.
+#' @param token.file Token file to download controled data (only for method = "client")
+#' @param method Uses the API (POST method) or gdc client tool. Options "api", "client".
 #' API is faster, but the data might get corrupted in the download, and it might need to be executed again
 #' @param directory Directory/Folder where the data was downloaded. Default: GDCdata
 #' @importFrom tools md5sum
@@ -68,8 +68,9 @@ GDCdownload <- function(query,
         if(!missing(token.file)) cmd <- paste0(cmd," -t ", token.file)
 
         # Download all the files in the manifest using gdc client
+
         message(paste0("GDCdownload will download: ",
-                       humanReadableByteCount(sum(manifest$size))))
+                       humanReadableByteCount(sum(as.numeric(manifest$size)))))
         message(paste0("Executing GDC client with the following command:\n",cmd))
         system(cmd)
 
@@ -81,13 +82,13 @@ GDCdownload <- function(query,
             name <- paste0(gsub(" |:","_",date()),".tar.gz")
             unlink(name)
             message(paste0("GDCdownload will download: ",
-                           humanReadableByteCount(sum(manifest$size)),
+                           humanReadableByteCount(sum(as.numeric(manifest$size))),
                            " compressed in a tar.gz file"))
         } else {
             # case with one file only. This is not at tar.gz
             name <- query$results[[1]]$file_name
             message(paste0("GDCdownload will download: ",
-                           humanReadableByteCount(sum(manifest$size))))
+                           humanReadableByteCount(sum(as.numeric(manifest$size)))))
         }
         message(paste0("Downloading as: ", name))
 
