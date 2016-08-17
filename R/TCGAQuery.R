@@ -97,7 +97,7 @@ GDCquery <- function(project,
         options.expand <- "expand=cases.samples.portions.analytes.aliquots,cases.project,center,analysis"
     }
     option.size <- paste0("size=",getNbFiles(project,data.category,legacy))
-
+    option.format <- paste0("format=JSON")
     options.filter <- paste0("filters=",
                              URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
                              project,
@@ -106,11 +106,11 @@ GDCquery <- function(project,
                              URLencode('"]}}]}'))
     #message(paste0(baseURL,paste(options.pretty, options.expand, option.size, options.filter, sep = "&")))
     message("Accessing GDC. This might take a while...")
-    url <- paste0(baseURL,paste(options.pretty, options.expand,option.size, options.filter, sep = "&"))
+    url <- paste0(baseURL,paste(options.pretty, options.expand,option.size, options.filter, option.format, sep = "&"))
     json  <- tryCatch(
         fromJSON(url, simplifyDataFrame = TRUE),
         error = function(e) {
-            fromJSON(content(GET(url), as = "text"), simplifyDataFrame = TRUE)
+            fromJSON(content(GET(url), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
         }
     )
 
