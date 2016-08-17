@@ -68,8 +68,9 @@ GDCdownload <- function(query,
         if(!missing(token.file)) cmd <- paste0(cmd," -t ", token.file)
 
         # Download all the files in the manifest using gdc client
+
         message(paste0("GDCdownload will download: ",
-                       humanReadableByteCount(sum(manifest$size))))
+                       humanReadableByteCount(sum(as.numeric(manifest$size)))))
         message(paste0("Executing GDC client with the following command:\n",cmd))
         system(cmd)
 
@@ -81,13 +82,13 @@ GDCdownload <- function(query,
             name <- paste0(gsub(" |:","_",date()),".tar.gz")
             unlink(name)
             message(paste0("GDCdownload will download: ",
-                           humanReadableByteCount(sum(manifest$size)),
+                           humanReadableByteCount(sum(as.numeric(manifest$size))),
                            " compressed in a tar.gz file"))
         } else {
             # case with one file only. This is not at tar.gz
             name <- query$results[[1]]$file_name
             message(paste0("GDCdownload will download: ",
-                           humanReadableByteCount(sum(manifest$size))))
+                           humanReadableByteCount(sum(as.numeric(manifest$size)))))
         }
         message(paste0("Downloading as: ", name))
 
@@ -95,11 +96,16 @@ GDCdownload <- function(query,
         server <- ifelse(query$legacy,"https://gdc-api.nci.nih.gov/legacy/data/", "https://gdc-api.nci.nih.gov/data/")
         body <- list(ids=list(manifest$id))
 
-        bin <- POST(server,
-                    body = body,
-                    encode = "json", progress())
-        writeBin(content(bin,"raw",encoding = "UTF-8"), name)
-
+        result = tryCatch({
+            bin <- POST(server,
+                        body = body,
+                        encode = "json", progress())
+            writeBin(content(bin,"raw",encoding = "UTF-8"), name)
+        }, warning = function(w) {
+        }, error = function(e) {
+            unlink(name) # remove tar
+        }, finally = {
+        })
         if(nrow(manifest) > 1) {
             success <- untar(name)
             unlink(name) # remove tar
