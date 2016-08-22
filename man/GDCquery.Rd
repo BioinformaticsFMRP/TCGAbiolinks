@@ -5,7 +5,7 @@
 \title{Query GDC data}
 \usage{
 GDCquery(project, data.category, data.type, workflow.type, legacy = FALSE,
-  access, platform, file.type, barcode, sample.type)
+  access, platform, file.type, barcode, experimental.strategy, sample.type)
 }
 \arguments{
 \item{project}{A valid project (see list with TCGAbiolinks:::getGDCprojects()$project_id)]}
@@ -53,6 +53,12 @@ to define which file types to be used.}
 \item{barcode}{A list of barcodes to filter the files to download}
 
 \item{sample.type}{A sample type to filter the files to download}
+
+\item{experimental.stratefy}{Filter to experimental stratey. Harmonized: WXS, RNA-Seq, miRNA-Seq, Genotyping Array.
+Legacy:  WXS, RNA-Seq, miRNA-Seq, Genotyping Array,
+DNA-Seq, Methylation array, Protein expression array, WXS,CGH array, VALIDATION, Gene expression array,WGS,
+MSI-Mono-Dinucleotide Assay, miRNA expression array, Mixed strategies, AMPLICON, Exon array,
+Total RNA-Seq, Capillary sequencing, Bisulfite-Seq}
 }
 \value{
 A data frame with the results and the parameters used
