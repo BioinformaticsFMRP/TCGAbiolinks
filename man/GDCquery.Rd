@@ -5,7 +5,7 @@
 \title{Query GDC data}
 \usage{
 GDCquery(project, data.category, data.type, workflow.type, legacy = FALSE,
-  platform, file.type, barcode, sample.type)
+  access, platform, file.type, barcode, sample.type)
 }
 \arguments{
 \item{project}{A valid project (see list with TCGAbiolinks:::getGDCprojects()$project_id)]}
@@ -17,6 +17,8 @@ GDCquery(project, data.category, data.type, workflow.type, legacy = FALSE,
 \item{workflow.type}{GDC workflow type}
 
 \item{legacy}{Search in the legacy repository}
+
+\item{access}{Filter by access type. Possible values: controlled, open}
 
 \item{platform}{Example:
 \tabular{ll}{
