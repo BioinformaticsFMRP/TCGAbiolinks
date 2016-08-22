@@ -10,6 +10,22 @@
 #' @param remove.files.prepared Remove the files read? Default: FALSE
 #' This argument will be considered only if save argument is set to true
 #' @export
+#' @examples
+#' query <- GDCquery(project = "TCGA-KIRP",
+#'                   data.category = "Simple Nucleotide Variation",
+#'                   data.type = "Masked Somatic Mutation")
+#'                   GDCdownload(query, method = "api", directory = "maf")
+#' GDCdownload(query, method = "api", directory = "maf")
+#' maf <- GDCprepare(query, directory = "maf")
+#'
+#' query <- GDCquery(project = "TCGA-ACC",
+#'                    data.category =  "Copy number variation",
+#'                    legacy = TRUE,
+#'                    file.type = "hg19.seg",
+#'                    barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01", "TCGA-OR-A5LJ-10A-01D-A29K-01"))
+#' # data will be saved in  GDCdata/TCGA-ACC/legacy/Copy_number_variation/Copy_number_segmentation
+#' GDCdownload(query, method = "api")
+#' acc.cnv <- GDCprepare(query)
 #' @return A summarizedExperiment or a data.frame
 GDCprepare <- function(query,
                        save = FALSE,
@@ -48,6 +64,8 @@ GDCprepare <- function(query,
         data <- readDNAmethylation(files, query$results[[1]]$cases, summarizedExperiment, unique(query$platform))
     }  else if(grepl("Protein expression",query$data.category,ignore.case = TRUE)) {
         data <- readProteinExpression(files, query$results[[1]]$cases)
+    }  else if(grepl("Simple Nucleotide Variation",query$data.category,ignore.case = TRUE)) {
+        if(query$data.type == "Masked Somatic Mutation") data <- readSimpleNucleotideVariationMaf(files)
     }  else if(grepl("Clinical|Biospecimen", query$data.category, ignore.case = TRUE)){
         message("Mot working yet")
         # data <- readClinical(files, query$results[[1]]$cases)
@@ -81,6 +99,42 @@ remove.files.recursively <- function(files){
     unlink(files2rm,recursive = TRUE)
     files2rm <- dirname(files2rm) # data category
     if(length(list.files(files2rm)) == 0) remove.files.recursively(files2rm)
+}
+
+readSimpleNucleotideVariationMaf <- function(files){
+        ret <- read_tsv(files,
+                        comment = "#",
+                        col_types = cols(
+                            Entrez_Gene_Id = col_integer(),
+                            Start_Position = col_integer(),
+                            End_Position = col_integer(),
+                            t_depth = col_integer(),
+                            t_ref_count = col_integer(),
+                            t_alt_count = col_integer(),
+                            n_depth = col_integer(),
+                            ALLELE_NUM = col_integer(),
+                            TRANSCRIPT_STRAND = col_integer(),
+                            PICK = col_integer(),
+                            TSL = col_integer(),
+                            HGVS_OFFSET = col_integer(),
+                            MINIMISED = col_integer()))
+        if(ncol(ret) == 1) ret <- read_csv(files,
+                                           comment = "#",
+                                           col_types = cols(
+                                               Entrez_Gene_Id = col_integer(),
+                                               Start_Position = col_integer(),
+                                               End_Position = col_integer(),
+                                               t_depth = col_integer(),
+                                               t_ref_count = col_integer(),
+                                               t_alt_count = col_integer(),
+                                               n_depth = col_integer(),
+                                               ALLELE_NUM = col_integer(),
+                                               TRANSCRIPT_STRAND = col_integer(),
+                                               PICK = col_integer(),
+                                               TSL = col_integer(),
+                                               HGVS_OFFSET = col_integer(),
+                                               MINIMISED = col_integer()))
+        return(ret)
 }
 
 readGeneExpressionQuantification <- function(files, cases, summarizedExperiment = TRUE, platform){

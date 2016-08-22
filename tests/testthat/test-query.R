@@ -47,7 +47,26 @@ test_that("GDCquery can filter by barcode", {
     expect_true(all(sort(barcode) == sort(unique(query$results[[1]]$cases))))
 })
 
-test_that("GDCquery can filter by file type", {
+test_that("GDCquery can filter copy number from legacy data by file type. Case: nocnv_hg18", {
+    query <- GDCquery(project = "TCGA-ACC",
+                      data.category =  "Copy number variation",
+                      legacy = TRUE,
+                      file.type = "nocnv_hg18.seg",
+                      barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
+    expect_equal(query$results[[1]]$file_name,"AQUAE_p_TCGA_112_304_b2_N_GenomeWideSNP_6_D10_1348300.nocnv_hg18.seg.txt")
+})
+
+test_that("GDCquery can filter copy number from legacy data by file type. Case: hg19", {
+    query <- GDCquery(project = "TCGA-ACC",
+                      data.category =  "Copy number variation",
+                      legacy = TRUE,
+                      file.type = "hg19.seg",
+                      barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
+    expect_equal(query$results[[1]]$file_name,"AQUAE_p_TCGA_112_304_b2_N_GenomeWideSNP_6_D10_1348300.nocnv_hg19.seg.txt")
+})
+
+
+test_that("GDCquery can filter copy number from legacy data by file type. Case: nocnv_hg19", {
     query <- GDCquery(project = "TCGA-ACC",
                       data.category =  "Copy number variation",
                       legacy = TRUE,
@@ -55,18 +74,18 @@ test_that("GDCquery can filter by file type", {
                       barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
     expect_equal(query$results[[1]]$file_name,"AQUAE_p_TCGA_112_304_b2_N_GenomeWideSNP_6_D10_1348300.nocnv_hg19.seg.txt")
 
-    query <- GDCquery(project = "TCGA-ACC",
-                      data.category =  "Copy number variation",
-                      legacy = TRUE,
-                      file.type = "nocnv_hg18.seg",
-                      barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
-    expect_equal(query$results[[1]]$file_name,"AQUAE_p_TCGA_112_304_b2_N_GenomeWideSNP_6_D10_1348300.nocnv_hg18.seg.txt")
-    query <- GDCquery(project = "TCGA-ACC",
-                      data.category =  "Copy number variation",
-                      legacy = TRUE,
-                      file.type = "hg19.seg",
-                      barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
-                      expect_equal(query$results[[1]]$file_name,"AQUAE_p_TCGA_112_304_b2_N_GenomeWideSNP_6_D10_1348300.nocnv_hg19.seg.txt")
+})
+
+
+test_that("GDCquery can filter by access level", {
+    query <- GDCquery(project = "TCGA-KIRP",
+                      data.category = "Simple Nucleotide Variation",
+                      access = "open")
+    expect_equal(unique(query$results[[1]]$access),"open")
+    query <- GDCquery(project = "TCGA-KIRP",
+                      data.category = "Simple Nucleotide Variation",
+                      access = "controlled")
+    expect_equal(unique(query$results[[1]]$access),"controlled")
 })
 
 test_that("GDCquery_Maf works", {
@@ -75,5 +94,15 @@ test_that("GDCquery_Maf works", {
     acc.maf <- GDCquery_Maf("ACC", directory = "maf")
     expect_true(nrow(acc.maf) > 0)
     unlink("GDCdata",recursive = TRUE, force = TRUE)
+    unlink("maf",recursive = TRUE, force = TRUE)
+})
+
+test_that("Download mad using GDCquery works", {
+    query <- GDCquery(project = "TCGA-KIRP",
+                        data.category = "Simple Nucleotide Variation",
+                        data.type = "Masked Somatic Mutation")
+    GDCdownload(query, method = "api", directory = "maf")
+    maf <- GDCprepare(query, directory = "maf")
+    expect_true(nrow(maf) > 0)
     unlink("maf",recursive = TRUE, force = TRUE)
 })
