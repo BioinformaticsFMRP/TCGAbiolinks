@@ -27,4 +27,21 @@ A summarizedExperiment or a data.frame
 \description{
 Reads the data downloaded and prepare it into an R object
 }
+\examples{
+query <- GDCquery(project = "TCGA-KIRP",
+                  data.category = "Simple Nucleotide Variation",
+                  data.type = "Masked Somatic Mutation")
+                  GDCdownload(query, method = "api", directory = "maf")
+GDCdownload(query, method = "api", directory = "maf")
+maf <- GDCprepare(query, directory = "maf")
+
+query <- GDCquery(project = "TCGA-ACC",
+                   data.category =  "Copy number variation",
+                   legacy = TRUE,
+                   file.type = "hg19.seg",
+                   barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01", "TCGA-OR-A5LJ-10A-01D-A29K-01"))
+# data will be saved in  GDCdata/TCGA-ACC/legacy/Copy_number_variation/Copy_number_segmentation
+GDCdownload(query, method = "api")
+acc.cnv <- GDCprepare(query)
+}
 
