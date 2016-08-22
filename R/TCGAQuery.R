@@ -14,7 +14,7 @@
 #' @param file.type To be used in the legacy database for some platforms,
 #' to define which file types to be used.
 #' @param workflow.type GDC workflow type
-#' @param experimental.stratefy Filter to experimental stratey. Harmonized: WXS, RNA-Seq, miRNA-Seq, Genotyping Array.
+#' @param experimental.strategy Filter to experimental stratey. Harmonized: WXS, RNA-Seq, miRNA-Seq, Genotyping Array.
 #' Legacy:  WXS, RNA-Seq, miRNA-Seq, Genotyping Array,
 #' DNA-Seq, Methylation array, Protein expression array, WXS,CGH array, VALIDATION, Gene expression array,WGS,
 #' MSI-Mono-Dinucleotide Assay, miRNA expression array, Mixed strategies, AMPLICON, Exon array,
@@ -185,7 +185,10 @@ GDCquery <- function(project,
         pat <- file.type
         if(file.type == "normalized_results") pat <- "normalized_results"
         if(file.type == "results") pat <- "[^normalized_]results"
-
+        if(file.type == "nocnv_hg18" | file.type == "nocnv_hg18.seg") pat <- "nocnv_hg18"
+        if(file.type == "cnv_hg18" | file.type == "hg18.seg") pat <- "[^nocnv_]hg18.seg"
+        if(file.type == "nocnv_hg19" | file.type == "nocnv_hg19.seg") pat <- "nocnv_hg19"
+        if(file.type == "cnv_hg19" | file.type == "hg19.seg") pat <- "[^nocnv_]hg19.seg"
         results <- results[grepl(pat,results$file_name),]
     }
     # some how there are duplicated files in GDC we should remove them
