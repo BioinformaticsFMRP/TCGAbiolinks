@@ -14,6 +14,12 @@
 #' @param file.type To be used in the legacy database for some platforms,
 #' to define which file types to be used.
 #' @param workflow.type GDC workflow type
+#' @param experimental.stratefy Filter to experimental stratey. Harmonized: WXS, RNA-Seq, miRNA-Seq, Genotyping Array.
+#' Legacy:  WXS, RNA-Seq, miRNA-Seq, Genotyping Array,
+#' DNA-Seq, Methylation array, Protein expression array, WXS,CGH array, VALIDATION, Gene expression array,WGS,
+#' MSI-Mono-Dinucleotide Assay, miRNA expression array, Mixed strategies, AMPLICON, Exon array,
+#' Total RNA-Seq, Capillary sequencing, Bisulfite-Seq
+#' @param access Filter by access type. Possible values: controlled, open
 #' @param platform Example:
 #' \tabular{ll}{
 #'CGH- 1x1M_G4447A                   \tab IlluminaGA_RNASeqV2   \cr
@@ -75,9 +81,11 @@ GDCquery <- function(project,
                      data.type,
                      workflow.type,
                      legacy = FALSE,
+                     access,
                      platform,
                      file.type,
                      barcode,
+                     experimental.strategy,
                      sample.type){
 
     # Check arguments
@@ -147,6 +155,16 @@ GDCquery <- function(project,
         results <- results[substr(results$cases,1,str_length(barcode[1])) %in% barcode,]
     }
 
+    # Filter by access
+    if(!missing(access)) {
+        results <- results[grepl(access,results$access,ignore.case = TRUE),]
+    }
+
+    # Filter by experimental strategy
+    if(!missing(experimental.strategy)) {
+        results <- results[grepl(experimental.strategy,results$experimental_strategy,ignore.case = TRUE),]
+    }
+
     # Filter by data.type
     if(!missing(data.type)) {
         if(!(tolower(data.type) %in% tolower(results$data_type))) {
@@ -178,9 +196,13 @@ GDCquery <- function(project,
     #                  data.type = "Gene expression quantification",
     #                  platform = "Illumina HiSeq",
     #                  file.type = "results",
+    #                  experimental_strategy = "RNA-Seq",
     #                  sample.type = c("Primary solid Tumor","Solid Tissue Normal"))
     #
-    results <- results[!duplicated(results$cases),]
+    if(any(duplicated(results$cases))) {
+        message("Warning: there are more than one file for the same case. Please verify query results.")
+    }
+    #results <- results[!duplicated(results$cases),]
     if(nrow(results) == 0) stop("Sorry, no results were found for this query")
 
     # prepare output
@@ -536,8 +558,38 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
     if (!file.exists(uncompressed)) gunzip(file.path(directory,selected$filename), remove = FALSE)
     message(uncompressed)
     # Is there a better way??
-    ret <- read_tsv(uncompressed,comment = "#")
-    if(ncol(ret) == 1) ret <- read_csv(uncompressed,comment = "#")
+    ret <- read_tsv(uncompressed,
+                    comment = "#",
+                    col_types = cols(
+                        Entrez_Gene_Id = col_integer(),
+                        Start_Position = col_integer(),
+                        End_Position = col_integer(),
+                        t_depth = col_integer(),
+                        t_ref_count = col_integer(),
+                        t_alt_count = col_integer(),
+                        n_depth = col_integer(),
+                        ALLELE_NUM = col_integer(),
+                        TRANSCRIPT_STRAND = col_integer(),
+                        PICK = col_integer(),
+                        TSL = col_integer(),
+                        HGVS_OFFSET = col_integer(),
+                        MINIMISED = col_integer()))
+    if(ncol(ret) == 1) ret <- read_csv(uncompressed,
+                                       comment = "#",
+                                       col_types = cols(
+                                           Entrez_Gene_Id = col_integer(),
+                                           Start_Position = col_integer(),
+                                           End_Position = col_integer(),
+                                           t_depth = col_integer(),
+                                           t_ref_count = col_integer(),
+                                           t_alt_count = col_integer(),
+                                           n_depth = col_integer(),
+                                           ALLELE_NUM = col_integer(),
+                                           TRANSCRIPT_STRAND = col_integer(),
+                                           PICK = col_integer(),
+                                           TSL = col_integer(),
+                                           HGVS_OFFSET = col_integer(),
+                                           MINIMISED = col_integer()))
 
     if(save.csv) write_csv(ret,gsub("txt","csv",uncompressed))
 
