@@ -52,13 +52,13 @@ to define which file types to be used.}
 
 \item{barcode}{A list of barcodes to filter the files to download}
 
-\item{sample.type}{A sample type to filter the files to download}
-
-\item{experimental.stratefy}{Filter to experimental stratey. Harmonized: WXS, RNA-Seq, miRNA-Seq, Genotyping Array.
+\item{experimental.strategy}{Filter to experimental stratey. Harmonized: WXS, RNA-Seq, miRNA-Seq, Genotyping Array.
 Legacy:  WXS, RNA-Seq, miRNA-Seq, Genotyping Array,
 DNA-Seq, Methylation array, Protein expression array, WXS,CGH array, VALIDATION, Gene expression array,WGS,
 MSI-Mono-Dinucleotide Assay, miRNA expression array, Mixed strategies, AMPLICON, Exon array,
 Total RNA-Seq, Capillary sequencing, Bisulfite-Seq}
+
+\item{sample.type}{A sample type to filter the files to download}
 }
 \value{
 A data frame with the results and the parameters used
