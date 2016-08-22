@@ -347,6 +347,7 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 #' @param directory Directory/Folder where the data was downloaded. Default: GDCdata
 #' @importFrom xml2 read_xml xml_ns
 #' @importFrom XML xmlParse getNodeSet xmlToDataFrame
+#' @importFrom plyr rbind.fill
 #' @export
 #' @examples
 #' query <- GDCquery(project = "TCGA-COAD",
@@ -402,12 +403,13 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
         # Test if this xpath exists before parsing it
         if(gsub("\\/\\/","", unlist(stringr::str_split(xpath,":"))[1]) %in% names(xml_ns(xml))){
             df <- xmlToDataFrame(nodes = getNodeSet(doc,xpath))
+            if(NA %in% colnames(df)) df <- df[,!is.na(colnames(df))]
             if(nrow(df) == 0) next
             df$bcr_patient_barcode <- patient
             if(i == 1) {
                 clin <- df
             } else {
-                clin <- rbind(clin,df)
+                clin <- rbind.fill(clin,df)
             }
         }
     }
