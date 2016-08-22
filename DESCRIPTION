@@ -34,7 +34,6 @@ Imports:
     data.table,
     EDASeq (>= 2.0.0),
     RCurl (>= 1.95.0),
-    curl  (>= 1.1.0),
     edgeR (>= 3.0.0),
     jsonlite (>= 1.0.0),
     plyr,
