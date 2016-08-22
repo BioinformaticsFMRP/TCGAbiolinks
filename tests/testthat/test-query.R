@@ -56,13 +56,22 @@ test_that("GDCquery can filter copy number from legacy data by file type. Case: 
     expect_equal(query$results[[1]]$file_name,"AQUAE_p_TCGA_112_304_b2_N_GenomeWideSNP_6_D10_1348300.nocnv_hg18.seg.txt")
 })
 
+test_that("GDCquery can filter copy number from legacy data by file type. Case: hg18", {
+    query <- GDCquery(project = "TCGA-ACC",
+                      data.category =  "Copy number variation",
+                      legacy = TRUE,
+                      file.type = "hg18.seg",
+                      barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
+    expect_equal(query$results[[1]]$file_name,"AQUAE_p_TCGA_112_304_b2_N_GenomeWideSNP_6_D10_1348300.hg18.seg.txt")
+})
+
 test_that("GDCquery can filter copy number from legacy data by file type. Case: hg19", {
     query <- GDCquery(project = "TCGA-ACC",
                       data.category =  "Copy number variation",
                       legacy = TRUE,
                       file.type = "hg19.seg",
                       barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
-    expect_equal(query$results[[1]]$file_name,"AQUAE_p_TCGA_112_304_b2_N_GenomeWideSNP_6_D10_1348300.nocnv_hg19.seg.txt")
+    expect_equal(query$results[[1]]$file_name,"AQUAE_p_TCGA_112_304_b2_N_GenomeWideSNP_6_D10_1348300.hg19.seg.txt")
 })
 
 
