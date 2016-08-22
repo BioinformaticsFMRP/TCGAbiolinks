@@ -14,6 +14,11 @@
 #' @param file.type To be used in the legacy database for some platforms,
 #' to define which file types to be used.
 #' @param workflow.type GDC workflow type
+#' @param experimental.stratefy Filter to experimental stratey. Harmonized: WXS, RNA-Seq, miRNA-Seq, Genotyping Array.
+#' Legacy:  WXS, RNA-Seq, miRNA-Seq, Genotyping Array,
+#' DNA-Seq, Methylation array, Protein expression array, WXS,CGH array, VALIDATION, Gene expression array,WGS,
+#' MSI-Mono-Dinucleotide Assay, miRNA expression array, Mixed strategies, AMPLICON, Exon array,
+#' Total RNA-Seq, Capillary sequencing, Bisulfite-Seq
 #' @param access Filter by access type. Possible values: controlled, open
 #' @param platform Example:
 #' \tabular{ll}{
@@ -80,6 +85,7 @@ GDCquery <- function(project,
                      platform,
                      file.type,
                      barcode,
+                     experimental.strategy,
                      sample.type){
 
     # Check arguments
@@ -154,6 +160,11 @@ GDCquery <- function(project,
         results <- results[grepl(access,results$access,ignore.case = TRUE),]
     }
 
+    # Filter by experimental strategy
+    if(!missing(experimental.strategy)) {
+        results <- results[grepl(experimental.strategy,results$experimental_strategy,ignore.case = TRUE),]
+    }
+
     # Filter by data.type
     if(!missing(data.type)) {
         if(!(tolower(data.type) %in% tolower(results$data_type))) {
@@ -185,9 +196,13 @@ GDCquery <- function(project,
     #                  data.type = "Gene expression quantification",
     #                  platform = "Illumina HiSeq",
     #                  file.type = "results",
+    #                  experimental_strategy = "RNA-Seq",
     #                  sample.type = c("Primary solid Tumor","Solid Tissue Normal"))
     #
-    results <- results[!duplicated(results$cases),]
+    if(any(duplicated(results$cases))) {
+        message("Warning: there are more than one file for the same case. Please verify query results.")
+    }
+    #results <- results[!duplicated(results$cases),]
     if(nrow(results) == 0) stop("Sorry, no results were found for this query")
 
     # prepare output
