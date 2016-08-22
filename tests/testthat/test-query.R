@@ -76,6 +76,18 @@ test_that("GDCquery can filter copy number from legacy data by file type. Case: 
 
 })
 
+
+test_that("GDCquery can filter by access level", {
+    query <- GDCquery(project = "TCGA-KIRP",
+                      data.category = "Simple Nucleotide Variation",
+                      access = "open")
+    expect_equal(unique(query$results[[1]]$access),"open")
+    query <- GDCquery(project = "TCGA-KIRP",
+                      data.category = "Simple Nucleotide Variation",
+                      access = "controlled")
+    expect_equal(unique(query$results[[1]]$access),"controlled")
+})
+
 test_that("GDCquery_Maf works", {
     acc.maf <- GDCquery_Maf("ACC")
     expect_true(nrow(acc.maf) > 0)
@@ -85,7 +97,7 @@ test_that("GDCquery_Maf works", {
     unlink("maf",recursive = TRUE, force = TRUE)
 })
 
-test_that("GDCquery_Maf works", {
+test_that("Download mad using GDCquery works", {
     query <- GDCquery(project = "TCGA-KIRP",
                         data.category = "Simple Nucleotide Variation",
                         data.type = "Masked Somatic Mutation")
