@@ -57,7 +57,7 @@ Imports:
     S4Vectors,
     ComplexHeatmap (>= 1.10.2),
     R.utils,
-    SummarizedExperiment,
+    SummarizedExperiment (>= 1.2.3),
     BiocGenerics,
     GenomicFeatures,
     TxDb.Hsapiens.UCSC.hg19.knownGene,
