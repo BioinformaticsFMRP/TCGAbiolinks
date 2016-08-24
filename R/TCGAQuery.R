@@ -87,19 +87,17 @@ GDCquery <- function(project,
                      barcode,
                      experimental.strategy,
                      sample.type){
-  
-  if(sample.type==FALSE) rm(sample.type)
-  
+
   # Check arguments
   checkProjectInput(project)
   checkDataCategoriesInput(project, data.category, legacy)
-  
+
   if(!missing(sample.type)){
-    if(sample.type!=FALSE) checkBarcodeDefinition(sample.type)
+    if(all(sample.type!=FALSE)) checkBarcodeDefinition(sample.type)
   }
-  
+
   if(!legacy & !missing(platform)) message("Platform information is only available for legacy database. It will be ignored")
-  
+
   # Get manifest using the API
   baseURL <- ifelse(legacy,"https://gdc-api.nci.nih.gov/legacy/files/?","https://gdc-api.nci.nih.gov/files/?")
   options.pretty <- "pretty=true"
@@ -127,9 +125,9 @@ GDCquery <- function(project,
       fromJSON(content(GET(url), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
     }
   )
-  
+
   results <- json$data$hits
-  
+
   # get barcode of the samples
   # TARGET-20-PANLLX-09A-01R
   #print(results$cases[[1]])
@@ -141,10 +139,10 @@ GDCquery <- function(project,
                  "[:alnum:]{6}-[:alnum:]{2}-[:alnum:]{6}-[:alnum:]{3}-[:alnum:]{3}",sep = "|")
   }
   barcodes <- na.omit(unlist(lapply(results$cases,function(x) str_extract(x,pat))))
-  
+
   results$cases <- barcodes
   results$tissue.definition <- expandBarcodeInfo(barcodes)$tissue.definition
-  
+
   if(legacy & !missing(platform)){
     if(!(platform %in% results$platform)) {
       stop("Please set a valid platform argument from the list below:\n  => ", paste(unique(results$platform), collapse = "\n  => "))
@@ -154,7 +152,7 @@ GDCquery <- function(project,
 
   # Filter by sample.type
   if(!missing(sample.type)){
-    if(sample.type != FALSE) {
+    if(all(sample.type != FALSE)) {
       results <- results[tolower(results$tissue.definition) %in% tolower(sample.type),]
     }
   }
@@ -162,7 +160,7 @@ GDCquery <- function(project,
   if(!missing(barcode)) {
     results <- results[substr(results$cases,1,str_length(barcode[1])) %in% barcode,]
   }
-  
+
   # Filter by access
   if(!missing(access)) {
     results <- results[grepl(access,results$access,ignore.case = TRUE),]
@@ -171,7 +169,7 @@ GDCquery <- function(project,
   if(!missing(experimental.strategy)) {
     results <- results[grepl(experimental.strategy,results$experimental_strategy,ignore.case = TRUE),]
   }
-  
+
   # Filter by data.type
   if(!missing(data.type)) {
     if(!(tolower(data.type) %in% tolower(results$data_type))) {
@@ -179,7 +177,7 @@ GDCquery <- function(project,
     }
     results <- results[tolower(results$data_type) %in% tolower(data.type),]
   }
-  
+
   # Filter by data.type
   if(!missing(workflow.type)) {
     if(!(workflow.type %in% results$analysis$workflow_type)) {
@@ -188,7 +186,7 @@ GDCquery <- function(project,
     results <- results[results$analysis$workflow_type %in% workflow.type,]
   }
   # Filter by sample.type
-  if(!missing(file.type)){ 
+  if(!missing(file.type)){
     if(file.type!=FALSE) {
       pat <- file.type
       if(file.type == "normalized_results") pat <- "normalized_results"
@@ -216,49 +214,49 @@ GDCquery <- function(project,
   }
   #results <- results[!duplicated(results$cases),]
   if(nrow(results) == 0) stop("Sorry, no results were found for this query")
-  
+
   # prepare output
   if(missing(sample.type)) {
     sample.type <- NA
-  } else if(sample.type == FALSE) {
-    sample.type <- NA 
+  } else if(all(sample.type == FALSE)) {
+    sample.type <- NA
   }
   if(missing(data.type)) {
     data.type <- NA
   } else if(data.type == FALSE) {
-    data.type <- NA 
+    data.type <- NA
   }
   if(missing(barcode)) {
     barcode <- NA
   } else if(length(barcode) == 1) {
-    if(barcode == FALSE) barcode <- NA 
+    if(barcode == FALSE) barcode <- NA
   }
   if(missing(platform)) {
     platform <- NA
   } else if(platform == FALSE) {
-    platform <- NA 
+    platform <- NA
   }
   if(missing(file.type)) {
     file.type <- NA
   } else if(file.type == FALSE) {
-    file.type <- NA 
+    file.type <- NA
   }
   if(missing(workflow.type)) {
     workflow.type <- NA
   } else if(workflow.type == FALSE) {
-    workflow.type <- NA 
+    workflow.type <- NA
   }
   if(missing(experimental.strategy)) {
     experimental.strategy <- NA
   } else if(experimental.strategy == FALSE) {
-    experimental.strategy <- NA 
+    experimental.strategy <- NA
   }
   if(missing(access)) {
     access <- NA
   } else if(access == FALSE) {
-    access <- NA 
+    access <- NA
   }
-  
+
   ret <- data.frame(results=I(list(results)), project = project,
                     data.category = data.category,
                     data.type = data.type,
@@ -302,7 +300,7 @@ getBarcodeDefinition <- function(type = "TCGA"){
     shortLetterCode <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
                          "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
                          "CELL","XP","XCL")
-    
+
     tissue.definition <- c("Primary solid Tumor",
                            "Recurrent Solid Tumor",
                            "Primary Blood Derived Cancer - Peripheral Blood",
@@ -326,7 +324,7 @@ getBarcodeDefinition <- function(type = "TCGA"){
   } else {
     tissue.code <- c('01','02','03','04','05','06','07','08','09','10','11',
                      '12','13','14','15','16','17','20','40','41','42','50','60','61','99')
-    
+
     tissue.definition <- c("Primary solid Tumor", # 01
                            "Recurrent Solid Tumor", # 02
                            "Primary Blood Derived Cancer - Peripheral Blood", # 03
@@ -353,7 +351,7 @@ getBarcodeDefinition <- function(type = "TCGA"){
                            "Xenograft grown in mice from established cell lines", #61
                            "Granulocytes after a Ficoll separation") # 99
     aux <- DataFrame(tissue.code = tissue.code,tissue.definition)
-    
+
   }
   return(aux)
 }
@@ -440,64 +438,64 @@ TCGAquery <- function(tumor = NULL,
 #' @return table with number of pubmed's publications related to tfs and disease selected
 TCGAquery_Investigate <- function(tumor,dataDEGsFiltLevelTF,topgenes){
   site <- "http://www.ncbi.nlm.nih.gov/pubmed/?term="
-  
+
   # GenesTofix <- c("JUN","HR","HOMEZ",
   #                 "ANKAR", "REST", "BATF", "MAX", "ECD", "FOS")
   # dataDEGsFiltLevelTF <- dataDEGsFiltLevelTF[
   #                        setdiff(dataDEGsFiltLevelTFs$mRNA,GenesTofix),]
-  
+
   dataDEGsFiltLevelTF <- dataDEGsFiltLevelTF[1:topgenes,]
   Pubmed <- matrix(0, nrow(dataDEGsFiltLevelTF), 1)
   PMID <- matrix(0, nrow(dataDEGsFiltLevelTF), 1)
-  
-  
+
+
   dataDEGsFiltLevelTF <- cbind(dataDEGsFiltLevelTF,Pubmed,PMID)
   dataDEGsFiltLevelTF<-as.data.frame(dataDEGsFiltLevelTF)
-  
+
   for (k in 1:nrow( dataDEGsFiltLevelTF)){
     CurrentGene <- dataDEGsFiltLevelTF$mRNA[k]
     site2 <- paste(site,CurrentGene, "+", tumor,sep = "")
-    
+
     if(interactive() && ("ssl" %in% names(curlVersion()$features)) &&
        url.exists(site2)) {
       x = tryCatch(RCurl::getURL(site2), error = function(e) {
         RCurl::getURL(site2, ssl.verifypeer = FALSE) })
     }
-    
-    
-    
+
+
+
     if ( length(grep("No items found.",x)) != 1) {
-      
+
       if (length(grep("Display Settings",x)) == 1) {
         x6 <- 1
         dataDEGsFiltLevelTF[k,"PMID"] <- substr(
           gsub("</dt> <dd>","",unlist(strsplit(x,"PMID:"))[2]),1,8
         )
-        
+
       }
-      
-      
+
+
       if (length(grep("result_count",x))==1){
         x2a <- unlist(strsplit(x,"result_count"))[2]
-        
+
         tmpPMID2 <- unlist(strsplit(x2a,"UidCheckBox"))
         tmpPMID3 <- tmpPMID2[grep("<span>",tmpPMID2)]
         dataDEGsFiltLevelTF[k,"PMID"] <- as.character(paste(
           substr(tmpPMID3,1,8),collapse="; "))
-        
-        
+
+
         x3a <-  unlist(strsplit(x2a,"</h2>"))[1]
-        
+
         if( length(grep("of",x3a))!=1){
           x6 <- as.numeric(unlist(strsplit(x3a,": "))[2])
         } else { x6 <- as.numeric(unlist(strsplit(x3a,"of "))[2]) }
       }
-      
-      
+
+
       if (length(grep("following term was not found",x)) == 1) { x6 <- 0 }
-      
+
       if (length(grep("Search instead for",x)) == 1) { x6 <- 1 }
-      
+
       if (CurrentGene == "JUN")   { x6 <- 0 }
       if (CurrentGene == "HR")    { x6 <- 0 }
       if (CurrentGene == "HOMEZ") { x6 <- 0 }
@@ -508,26 +506,26 @@ TCGAquery_Investigate <- function(tumor,dataDEGsFiltLevelTF,topgenes){
       # if (CurrentGene =="FOS"){       x6 <- 0     }
       if (CurrentGene == "ECD")   { x6 <- 0 }
       # HR, HOMEZ, ANKAR, REST
-      
+
       dataDEGsFiltLevelTF[k,"Pubmed"] <- x6
       message(paste("Cancer ", tumor, "with TF n. ",k, "of " ,
                     nrow( dataDEGsFiltLevelTF)," : ", CurrentGene,
                     "found n. ", x6, "pubmed."))
-      
+
     }
-    
+
     else{
       message(paste("Cancer ", tumor, "with TF n. ",k, "of " ,
                     nrow( dataDEGsFiltLevelTF)," : ", CurrentGene,
                     "no item found in pubmed."))
       dataDEGsFiltLevelTF[k,"Pubmed"] <- 0
     }
-    
+
   }
-  
+
   dataDEGsFiltLevelTF <- dataDEGsFiltLevelTF[order(dataDEGsFiltLevelTF$Pubmed,
                                                    decreasing = TRUE),]
-  
+
   if( sum(dataDEGsFiltLevelTF$Pubmed == 1) != 0) {
     dataDEGsFiltLevelTF[dataDEGsFiltLevelTF$Pubmed == 1,][
       which( nchar(dataDEGsFiltLevelTF[
@@ -540,11 +538,11 @@ TCGAquery_Investigate <- function(tumor,dataDEGsFiltLevelTF,topgenes){
   if ( sum(dataDEGsFiltLevelTF$Pubmed == 0) != 0) {
     dataDEGsFiltLevelTF[dataDEGsFiltLevelTF$Pubmed == 0,"PMID"] <- 0
   }
-  
+
   tabDEGsTFPubmed$Tumor <- round(tabDEGsTFPubmed$Tumor)
   tabDEGsTFPubmed$Normal <- round(tabDEGsTFPubmed$Normal)
   tabDEGsTFPubmed$Delta <- round(tabDEGsTFPubmed$Delta)
-  
+
   return(dataDEGsFiltLevelTF)
 }
 
@@ -571,22 +569,22 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
   maf <- fread("https://gdc-docs.nci.nih.gov/Data/Release_Notes/Manifests/GDC_open_MAFs_manifest.txt",
                data.table = FALSE, verbose = FALSE, showProgress = FALSE)
   maf$tumor <- unlist(lapply(maf$filename, function(x){unlist(str_split(x,"\\."))[2]}))
-  
+
   dir.create(directory, showWarnings = FALSE, recursive = TRUE)
   # Check input
   if (missing(tumor)) stop(paste0("Please, set tumor argument. Possible values:\n => ",
                                   paste(sort(maf$tumor),collapse = "\n => ")))
-  
+
   if (!any(grepl(tumor,maf$tumor))) stop(paste0("Please, set a valid tumor argument. Possible values:\n => ",
                                                 paste(sort(maf$tumor),collapse = "\n => ")))
-  
+
   #  Info to user
   message("============================================================================")
   message(" For more information about MAF data please read the following GDC manual:")
   message(" GDC manual: https://gdc-docs.nci.nih.gov/Data/PDF/Data_UG.pdf")
   message("============================================================================")
   selected <- maf[grepl(tumor,maf$tumor,ignore.case = TRUE),]
-  
+
   if(is.windows()) mode <- "wb" else  mode <- "w"
   # Download maf
   repeat{
@@ -594,13 +592,13 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
       download(file.path(root,selected$id),
                file.path(directory,selected$filename),
                mode = mode)
-    
+
     # check integrity
     if(md5sum(file.path(directory,selected$filename)) == selected$md5) break
     unlink(file.path(directory,selected$filename))
     message("The data downloaded might be corrupted. We will download it again")
   }
-  
+
   # uncompress file
   uncompressed <- gsub(".gz","",file.path(directory,selected$filename))
   if (!file.exists(uncompressed)) gunzip(file.path(directory,selected$filename), remove = FALSE)
@@ -638,9 +636,9 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
                                        TSL = col_integer(),
                                        HGVS_OFFSET = col_integer(),
                                        MINIMISED = col_integer()))
-  
+
   if(save.csv) write_csv(ret,gsub("txt","csv",uncompressed))
-  
+
   return(ret)
 }
 
