@@ -147,7 +147,7 @@ GDCquery <- function(project,
     }
 
     # Filter by sample.type
-    if(!missing(sample.type)) {
+    if(!missing(sample.type) | sample.type!=FALSE) {
         results <- results[tolower(results$tissue.definition) %in% tolower(sample.type),]
     }
     # Filter by barcode
@@ -181,7 +181,7 @@ GDCquery <- function(project,
         results <- results[results$analysis$workflow_type %in% workflow.type,]
     }
     # Filter by sample.type
-    if(!missing(file.type)) {
+    if(!missing(file.type) | sample.type!=FALSE) {
         pat <- file.type
         if(file.type == "normalized_results") pat <- "normalized_results"
         if(file.type == "results") pat <- "[^normalized_]results"
