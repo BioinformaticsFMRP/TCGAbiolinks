@@ -165,7 +165,6 @@ GDCquery <- function(project,
   if(!missing(access)) {
     results <- results[grepl(access,results$access,ignore.case = TRUE),]
   }
-  print("fdf")
   # Filter by experimental strategy
   if(!missing(experimental.strategy)) {
     results <- results[grepl(experimental.strategy,results$experimental_strategy,ignore.case = TRUE),]
