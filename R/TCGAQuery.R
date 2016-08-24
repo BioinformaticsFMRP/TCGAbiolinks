@@ -167,7 +167,7 @@ GDCquery <- function(project,
   }
   # Filter by experimental strategy
   if(!missing(experimental.strategy)) {
-    results <- results[grepl(experimental.strategy,results$experimental_strategy,ignore.case = TRUE),]
+    results <- results[results$experimental_strategy %in% experimental.strategy,]
   }
 
   # Filter by data.type
