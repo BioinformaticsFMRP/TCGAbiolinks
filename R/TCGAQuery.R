@@ -91,7 +91,7 @@ GDCquery <- function(project,
     # Check arguments
     checkProjectInput(project)
     checkDataCategoriesInput(project, data.category, legacy)
-    if(!missing(sample.type)) checkBarcodeDefinition(sample.type)
+    if(!missing(sample.type) | sample.type!=FALSE) checkBarcodeDefinition(sample.type)
     if(!legacy & !missing(platform)) message("Platform information is only available for legacy database. It will be ignored")
 
     # Get manifest using the API
