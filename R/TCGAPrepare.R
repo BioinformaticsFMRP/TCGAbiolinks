@@ -214,7 +214,6 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
                     "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
     samples <- na.omit(unique(str_match(colnames(df),regex)[,1]))
     colData <-  colDataPrepare(samples)
-
     assays <- lapply(assays, function(x){
         colnames(x) <- NULL
         rownames(x) <- NULL
@@ -489,10 +488,11 @@ colDataPrepare <- function(barcode){
                 # Subtype information were to primary tumor in priority
                 subtype$sample <- paste0(subtype$subtype_patient,"-01A")
             }
+
             ret <- merge(ret,subtype, by = "sample", all.x = TRUE)
+
         }
     }
-    print(dim(ret))
     ret <- ret[match(barcode,ret$barcode),]
     rownames(ret) <- ret$barcode
     return(ret)
