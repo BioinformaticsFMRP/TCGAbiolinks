@@ -209,12 +209,12 @@ GDCquery <- function(project,
     if(nrow(results) == 0) stop("Sorry, no results were found for this query")
 
     # prepare output
-    if(missing(sample.type)) sample.type <- NA
-    if(missing(data.type)) data.type <- NA
-    if(missing(barcode)) barcode <- NA
-    if(missing(platform)) platform <- NA
-    if(missing(file.type)) file.type <- NA
-    if(missing(workflow.type)) workflow.type <- NA
+    if(missing(sample.type) | sample.type == FALSE ) sample.type <- NA
+    if(missing(data.type) | data.type == FALSE) data.type <- NA
+    if(missing(barcode) | barcode == FALSE) barcode <- NA
+    if(missing(platform) | platform == FALSE) platform <- NA
+    if(missing(file.type) | file.type == FALSE) file.type <- NA
+    if(missing(workflow.type) | workflow.type == FALSE) workflow.type <- NA
 
     ret <- data.frame(results=I(list(results)), project = project,
                       data.category = data.category,
