@@ -88,6 +88,16 @@ GDCquery <- function(project,
                      experimental.strategy,
                      sample.type){
 
+  if(data.category==FALSE) rm(data.category)
+  if(data.type==FALSE) rm(data.type)
+  if(workflow.type==FALSE) rm(workflow.type)
+  if(access==FALSE) rm(access)
+  if(platform==FALSE) rm(platform)
+  if(file.type==FALSE) rm(file.type)
+  if(barcode==FALSE) rm(barcode)
+  if(experimental.strategy==FALSE) rm(experimental.strategy)
+  if(sample.type==FALSE) rm(sample.type)
+  
   # Check arguments
   checkProjectInput(project)
   checkDataCategoriesInput(project, data.category, legacy)
