@@ -76,6 +76,7 @@ Imports:
     gtable,
     httr (>= 1.2.1),
     sjmisc,
+    parmigene,
     matlab,
     circlize,
     ggrepel
