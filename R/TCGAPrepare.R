@@ -598,7 +598,12 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,su
     if(grepl("HTSeq",workflow.type)){
         pb <- txtProgressBar(min = 0, max = length(files), style = 3)
         for (i in seq_along(files)) {
-            data <- read_tsv(file = files[i], col_names = FALSE)
+            data <- read_tsv(file = files[i],
+                             col_names = FALSE,
+                             col_types = cols(
+                                 X1 = col_character(),
+                                 X2 = col_double()
+                             ))
             if(!missing(cases))  colnames(data)[2] <- cases[i]
             if(i == 1) df <- data
             if(i != 1) df <- merge(df, data, by=colnames(df)[1],all = TRUE)
