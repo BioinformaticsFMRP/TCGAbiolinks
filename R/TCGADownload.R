@@ -72,10 +72,16 @@ GDCdownload <- function(query,
         message(paste0("GDCdownload will download: ",
                        humanReadableByteCount(sum(as.numeric(manifest$size)))))
         message(paste0("Executing GDC client with the following command:\n",cmd))
-        system(cmd)
+        result = tryCatch({
+            system(cmd)
+        }, warning = function(w) {
+        }, error = function(e) {
+        }, finally = {
+            # moving the file to make it more organized
+            for(i in manifest$id) move(i,file.path(path,i))
+        })
 
-        # moving the file to make it more organized
-        for(i in manifest$id) move(i,file.path(path,i))
+
 
     } else if (nrow(manifest) != 0 & method =="api"){
         if(nrow(manifest) > 1) {
@@ -105,34 +111,35 @@ GDCdownload <- function(query,
         }, error = function(e) {
             unlink(name) # remove tar
         }, finally = {
-        })
-        if(nrow(manifest) > 1) {
-            success <- untar(name)
-            unlink(name) # remove tar
-            if(success != 0){
-                print(success)
-                stop("There was an error in the download process, please execute it again")
-            }
-        }
-        # moving to project/source/data_category/data_type/file_id
-        for(i in seq_along(manifest$filename)) {
-            if(nrow(manifest) > 1) file <- file.path(manifest$id[i], manifest$filename[i])
-            if(nrow(manifest) == 1) file <- file.path(manifest$filename[i])
-            id <- manifest$id[i]
-
-            # Check status
-            if(!(md5sum(file) == manifest$md5[i])){
-                message(paste0("File corrupted:", file))
-                message("Run GDCdownload again to download it")
-                unlink(file)
-                next
-            }
             if(nrow(manifest) > 1) {
-                move(file,file.path(path,file))
+                success <- untar(name)
+                unlink(name) # remove tar
+                if(success != 0){
+                    print(success)
+                    stop("There was an error in the download process, please execute it again")
+                }
             }
-            if(nrow(manifest) == 1) move(file,file.path(path,id,file))
-        }
-        message("Download completed")
+            # moving to project/source/data_category/data_type/file_id
+            for(i in seq_along(manifest$filename)) {
+                if(nrow(manifest) > 1) file <- file.path(manifest$id[i], manifest$filename[i])
+                if(nrow(manifest) == 1) file <- file.path(manifest$filename[i])
+                id <- manifest$id[i]
+
+                # Check status
+                if(!(md5sum(file) == manifest$md5[i])){
+                    message(paste0("File corrupted:", file))
+                    message("Run GDCdownload again to download it")
+                    unlink(file)
+                    next
+                }
+                if(nrow(manifest) > 1) {
+                    move(file,file.path(path,file))
+                }
+                if(nrow(manifest) == 1) move(file,file.path(path,id,file))
+            }
+            message("Download completed")
+
+        })
     } else {
         message("All samples have been already downloded")
     }
