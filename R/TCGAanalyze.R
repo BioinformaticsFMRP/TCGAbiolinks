@@ -983,3 +983,32 @@ TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01){
 
     return(CompleteList)
 }
+
+
+#' @title Generate network 
+#' @description TCGAanalyze_analyseGRN perform gene regulatory network.
+#' @param TFs a vector of genes.
+#' @param normCounts is a matrix of gene expression with genes in rows and samples in columns.
+#' @param kNum the number of nearest neighbors to consider to estimate the mutual information.
+#' Must be less than the number of columns of normCounts.
+#' @importFrom parmigene knnmi.cross
+#' @export
+#' @return an adjacent matrix
+TCGAanalyze_analyseGRN<- function(TFs, normCounts,kNum) {
+  
+  MRcandidates <- intersect(rownames(normCounts),TFs) 
+  
+  # Mutual information between TF and genes
+  sampleNames <- colnames(normCounts)
+  geneNames <- rownames(normCounts)
+  
+  messageMI_TFgenes <- paste("Estimation of MI among [", length(MRcandidates), " TRs and ", nrow(normCounts), " genes].....", sep = "")
+  timeEstimatedMI_TFgenes1 <- length(MRcandidates)*nrow(normCounts)/1000
+  timeEstimatedMI_TFgenes <- format(timeEstimatedMI_TFgenes1*ncol(normCounts)/17000, digits = 2)
+  messageEstimation <- print(paste("I Need about ", timeEstimatedMI_TFgenes, "seconds for this MI estimation. [Processing 17000k elements /s]  "))
+  
+  system.time(miTFGenes <- knnmi.cross(normCounts[MRcandidates, ], normCounts, k = kNum))
+  
+  return(miTFGenes)
+  
+}
