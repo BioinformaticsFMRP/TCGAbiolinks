@@ -45,6 +45,7 @@ TCGAanalyze_Clustering <- function(tabDF, method,  methodHC = "ward.D2"){
 #' @param filename Filename of the image file
 #' @param width Image width
 #' @param height Image height
+#' @param datatype is a string from RangedSummarizedExperiment assay
 #' @importFrom grDevices dev.list
 #' @export
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
@@ -52,7 +53,8 @@ TCGAanalyze_Preprocessing<- function(object,
                                      cor.cut = 0,
                                      filename = NULL,
                                      width = 500,
-                                     height =500 ){
+                                     height =500,
+                                     datatype = "raw_counts"){
 
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 
@@ -91,7 +93,7 @@ TCGAanalyze_Preprocessing<- function(object,
     layout(matrix(c(1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 3, 3, 3, 4), 4, 4, byrow = TRUE))
 
     #c <- cor(exprs(object)[, order], method = "spearman")
-    c <- cor(assay(object,"raw_count")[, order], method = "spearman")
+    c <- cor(assay(object,datatype)[, order], method = "spearman")
 
     image(c, xaxt = "n", yaxt = "n",
           xlab = "Array Samples",
@@ -125,7 +127,7 @@ TCGAanalyze_Preprocessing<- function(object,
             main ="Boxplot of correlation samples by samples after normalization")
 
     samplesCor <- rowMeans(c)
-    objectWO <-  assay(object,"raw_count")[, samplesCor > cor.cut]
+    objectWO <-  assay(object,datatype)[, samplesCor > cor.cut]
     colnames(objectWO) <- colnames(object)[samplesCor > cor.cut]
 
     dev.off()
