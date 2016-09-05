@@ -47,7 +47,8 @@ GDCdownload <- function(query,
     path <- file.path(directory, path)
 
     # Check if the files were already downloaded by this package
-    files2Download <- sapply(file.path(manifest$id,manifest$filename), function(x) !file.exists(file.path(path,x)))
+
+    files2Download <- !file.exists(file.path(path,manifest$id,manifest$filename))
     manifest <- manifest[files2Download,]
     # There is a bug in the API, if the files has the same name it will not download correctly
     # so method should be set to client if there are files with duplicated names
@@ -68,7 +69,6 @@ GDCdownload <- function(query,
         if(!missing(token.file)) cmd <- paste0(cmd," -t ", token.file)
 
         # Download all the files in the manifest using gdc client
-
         message(paste0("GDCdownload will download: ",
                        humanReadableByteCount(sum(as.numeric(manifest$size)))))
         message(paste0("Executing GDC client with the following command:\n",cmd))
