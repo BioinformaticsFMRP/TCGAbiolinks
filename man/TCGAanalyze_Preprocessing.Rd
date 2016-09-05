@@ -5,7 +5,7 @@
 \title{Array Array Intensity correlation (AAIC) and correlation boxplot to define outlier}
 \usage{
 TCGAanalyze_Preprocessing(object, cor.cut = 0, filename = NULL,
-  width = 500, height = 500)
+  width = 500, height = 500, datatype = "raw_counts")
 }
 \arguments{
 \item{object}{of gene expression of class RangedSummarizedExperiment from TCGAprepare}
@@ -18,6 +18,8 @@ samples by samples. default cor.cut is 0}
 \item{width}{Image width}
 
 \item{height}{Image height}
+
+\item{datatype}{is a string from RangedSummarizedExperiment assay}
 }
 \value{
 Plot with array array intensity correlation and boxplot of correlation samples by samples
