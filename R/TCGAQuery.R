@@ -627,8 +627,11 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
                                            HGVS_OFFSET = col_integer(),
                                            MINIMISED = col_integer()))
 
-    if(save.csv) write_csv(ret,gsub("txt","csv",uncompressed))
-
+    if(save.csv) {
+        fout <- gsub("txt","csv",uncompressed)
+        write_csv(ret, fout)
+        message(paste0("File created: ", fout))
+    }
     return(ret)
 }
 
