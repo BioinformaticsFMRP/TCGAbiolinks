@@ -628,7 +628,7 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
                                            MINIMISED = col_integer()))
 
     if(save.csv) {
-        fout <- gsub("txt","csv",uncompressed)
+        fout <- paste0(uncompressed,".csv")
         write_csv(ret, fout)
         message(paste0("File created: ", fout))
     }
