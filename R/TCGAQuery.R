@@ -240,7 +240,7 @@ GDCquery <- function(project,
     #                  sample.type = c("Primary solid Tumor","Solid Tissue Normal"))
     #
     if(any(duplicated(results$cases))) {
-        message("Warning: there are more than one file for the same case. Please verify query results.")
+        warning("There are more than one file for the same case. Please verify query results.")
     }
     #results <- results[!duplicated(results$cases),]
     if(nrow(results) == 0) stop("Sorry, no results were found for this query")
@@ -627,8 +627,11 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
                                            HGVS_OFFSET = col_integer(),
                                            MINIMISED = col_integer()))
 
-    if(save.csv) write_csv(ret,gsub("txt","csv",uncompressed))
-
+    if(save.csv) {
+        fout <- paste0(uncompressed,".csv")
+        write_csv(ret, fout)
+        message(paste0("File created: ", fout))
+    }
     return(ret)
 }
 
