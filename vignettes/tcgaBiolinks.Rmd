@@ -822,7 +822,7 @@ query <- GDCquery(project = "TCGA-GBM",
                   data.category = "Gene expression",
                   data.type = "Gene expression quantification",
                   platform = "Illumina HiSeq", file.type  = "normalized_results",
-                  experimental.strategy = "RNA-seq",
+                  experimental.strategy = "RNA-Seq",
                   barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"),
                   legacy = TRUE)
 GDCdownload(query)
@@ -973,7 +973,7 @@ listSamples <- c("TCGA-E9-A1NG-11A-52R-A14M-07","TCGA-BH-A1FC-11A-32R-A13Q-07",
 query <- GDCquery(project = "TCGA-BRCA", 
                   data.category = "Gene expression",
                   data.type = "Gene Expression Quantification",
-                  experimental.strategy = "RNA-seq",
+                  experimental.strategy = "RNA-Seq",
                   platform = "Illumina HiSeq",
                   file.type = "results",
                   barcode = listSamples, 
@@ -1713,7 +1713,7 @@ query.exp <- GDCquery(project = "TCGA-BRCA",
                       data.type = "Gene expression quantification",
                       platform = "Illumina HiSeq", 
                       file.type = "results",
-                      experimental.strategy = "RNA-seq",
+                      experimental.strategy = "RNA-Seq",
                       sample.type = c("Primary solid Tumor","Solid Tissue Normal"))
 GDCdownload(query.exp)
 brca.exp <- GDCprepare(query = query.exp, save = TRUE, save.filename = "brcaExp.rda")
@@ -1849,7 +1849,7 @@ query.exp <- GDCquery(project = "TCGA-LGG",
                       data.type = "Gene expression quantification",
                       platform = "Illumina HiSeq", 
                       file.type = "results",
-                      experimental.strategy = "RNA-seq",
+                      experimental.strategy = "RNA-Seq",
                       sample.type = "Primary solid Tumor")
 GDCdownload(query.exp)
 lgg.exp <- GDCprepare(query = query.exp, save = TRUE, save.filename = "lggExp.rda")
