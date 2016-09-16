@@ -10,7 +10,7 @@ GDCprepare_clinic(query, clinical.info, directory = "GDCdata")
 \item{query}{Result from GDCquery, with data.category set to Clinical}
 
 \item{clinical.info}{Which information should be retrieved.
-Options: drug, admin, follow_up,radiation, patient, stage_event or new_tumor event}
+Options: drug, admin, follow_up,radiation, patient, stage_event or new_tumor_event}
 
 \item{directory}{Directory/Folder where the data was downloaded. Default: GDCdata}
 }
