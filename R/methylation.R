@@ -734,7 +734,7 @@ TCGAVisualize_volcano <- function(x,y,
 
     if(is.null(label)) {
         label = c("1" = "Not Significant",
-                  "2" = "Up regulared",
+                  "2" = "Up regulated",
                   "3" = "Down regulated")
     } else  {
         names(label) <- as.character(1:3)
