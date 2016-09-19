@@ -1085,7 +1085,6 @@ TCGAanalyze_DMR <- function(data,
                               x.cut = diffmean.cut,
                               y.cut = p.cut)
     }
-    if (is.null(filename)) filename <- paste0(paste(groupCol,group1,group2,"pcut",p.cut,"meancut",diffmean.cut, sep = "_"),".rda")
 
     if (save) {
 
@@ -1116,6 +1115,16 @@ TCGAanalyze_DMR <- function(data,
                         paste("p.value.adj",group2,group1,sep = "."),
                         statuscol2)
                       ],file =  csv)
+        if (is.null(filename)) {
+            filename <- paste0(paste(
+                                    gsub("_",".",groupCol),
+                                    gsub("_",".",group1),
+                                    gsub("_",".",group2),
+                                    "pcut",p.cut,
+                                    "meancut",diffmean.cut,
+                                    sep = "_"),
+                               ".rda")
+        }
 
         # saving results into R object
         save(data,file = filename)
