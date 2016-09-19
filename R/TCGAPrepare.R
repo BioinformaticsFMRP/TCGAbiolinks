@@ -482,7 +482,7 @@ colDataPrepare <- function(barcode){
         if (grepl("acc|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc|all",
                   tumor,ignore.case = TRUE)) {
             subtype <- TCGAquery_subtype(tumor)
-            colnames(subtype) <- paste0("subtype_", colnames(subtype))
+            colnames(subtype) <- paste0("subtype.", colnames(subtype))
 
             if(all(str_length(subtype$subtype_patient) == 12)){
                 # Subtype information were to primary tumor in priority
