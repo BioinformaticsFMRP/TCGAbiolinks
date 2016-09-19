@@ -26,7 +26,7 @@ the name of the group}
 \item{group2}{In case our object has more than 2 groups, you should set
 the name of the group}
 
-\item{plot.filename}{Filename. Default: volcano.pdf, volcano.svg, volcano.png}
+\item{plot.filename}{Filename. Default: volcano.pdf, volcano.svg, volcano.png. If set to FALSE, there will be no plot.}
 
 \item{ylab}{y axis text}
 
