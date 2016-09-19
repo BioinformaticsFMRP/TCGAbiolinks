@@ -887,7 +887,7 @@ TCGAVisualize_volcano <- function(x,y,
 #' the name of the group
 #' @param group2 In case our object has more than 2 groups, you should set
 #' the name of the group
-#' @param plot.filename Filename. Default: volcano.pdf, volcano.svg, volcano.png
+#' @param plot.filename Filename. Default: volcano.pdf, volcano.svg, volcano.png. If set to FALSE, there will be no plot.
 #' @param legend Legend title
 #' @param color vector of colors to be used in graph
 #' @param title main title. If not specified it will be
@@ -1072,17 +1072,19 @@ TCGAanalyze_DMR <- function(data,
     names <- NULL
     if(probe.names) names <- values(data)$probeID
 
-    TCGAVisualize_volcano(x = values(data)[,diffcol],
-                          y = values(data)[,pcol],
-                          filename = plot.filename,
-                          ylab =  ylab,
-                          xlab = xlab,
-                          title = title,
-                          legend= legend,
-                          label = label,
-                          names = names,
-                          x.cut = diffmean.cut,
-                          y.cut = p.cut)
+    if(plot.filename != FALSE) {
+        TCGAVisualize_volcano(x = values(data)[,diffcol],
+                              y = values(data)[,pcol],
+                              filename = plot.filename,
+                              ylab =  ylab,
+                              xlab = xlab,
+                              title = title,
+                              legend= legend,
+                              label = label,
+                              names = names,
+                              x.cut = diffmean.cut,
+                              y.cut = p.cut)
+    }
     if (is.null(filename)) filename <- paste0(paste(groupCol,group1,group2,"pcut",p.cut,"meancut",diffmean.cut, sep = "_"),".rda")
     if (save) save(data,file = filename)
 
