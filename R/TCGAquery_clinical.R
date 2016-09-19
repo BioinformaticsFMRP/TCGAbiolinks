@@ -397,7 +397,6 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
     clin <- NULL
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     for(i in seq_along(files)){
-        print(i)
         xmlfile <- files[i]
         xml <- read_xml(xmlfile)
         doc = xmlParse(xmlfile)
