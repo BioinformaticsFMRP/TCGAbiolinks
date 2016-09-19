@@ -1089,7 +1089,11 @@ TCGAanalyze_DMR <- function(data,
     if (save) save(data,file = filename)
 
     # saving results into a csv file
-    csv <- paste0(paste("DMR_results",groupCol,group1,group2, "pcut",p.cut,"meancut",diffmean.cut,  sep = "_"),".csv")
+    csv <- paste0(paste("DMR_results",
+                        gsub("_",".",groupCol),
+                        gsub("_",".",group1),
+                        gsub("_",".",group2),
+                        "pcut",p.cut,"meancut",diffmean.cut,  sep = "_"),".csv")
     message(paste0("Saving the results also in a csv file:"), csv)
     df <- values(data)
     if (any(hyper & sig)) df[hyper & sig,statuscol] <- paste("Hypermethylated","in", group2)
