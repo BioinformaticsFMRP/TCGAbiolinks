@@ -1086,36 +1086,40 @@ TCGAanalyze_DMR <- function(data,
                               y.cut = p.cut)
     }
     if (is.null(filename)) filename <- paste0(paste(groupCol,group1,group2,"pcut",p.cut,"meancut",diffmean.cut, sep = "_"),".rda")
-    if (save) save(data,file = filename)
 
-    # saving results into a csv file
-    csv <- paste0(paste("DMR_results",
-                        gsub("_",".",groupCol),
-                        gsub("_",".",group1),
-                        gsub("_",".",group2),
-                        "pcut",p.cut,"meancut",diffmean.cut,  sep = "_"),".csv")
-    message(paste0("Saving the results also in a csv file:"), csv)
-    df <- values(data)
-    if (any(hyper & sig)) df[hyper & sig,statuscol] <- paste("Hypermethylated","in", group2)
-    if (any(hyper & sig)) df[hyper & sig,statuscol2] <- paste("Hypomethylated","in", group1)
-    if (any(hypo & sig)) df[hypo & sig,statuscol] <- paste("Hypomethylated","in", group2)
-    if (any(hypo & sig)) df[hypo & sig,statuscol2] <- paste("Hypermethylated","in", group1)
-    # get metadata not created by this function
-    idx <- grep("mean|status|value",colnames(df),invert = TRUE)
-    write.csv2(df[,
-                  c(colnames(df)[idx],
-                    paste("mean",group1,sep = "."),
-                    paste("mean",group2,sep = "."),
-                    paste("diffmean",group1,group2,sep = "."),
-                    paste("p.value",group1,group2,sep = "."),
-                    paste("p.value.adj",group1,group2,sep = "."),
-                    statuscol,
-                    paste("diffmean",group2,group1,sep = "."),
-                    paste("p.value",group2,group1,sep = "."),
-                    paste("p.value.adj",group2,group1,sep = "."),
-                    statuscol2)
-                  ],file =  csv)
+    if (save) {
 
+        # saving results into a csv file
+        csv <- paste0(paste("DMR_results",
+                            gsub("_",".",groupCol),
+                            gsub("_",".",group1),
+                            gsub("_",".",group2),
+                            "pcut",p.cut,"meancut",diffmean.cut,  sep = "_"),".csv")
+        message(paste0("Saving the results also in a csv file:"), csv)
+        df <- values(data)
+        if (any(hyper & sig)) df[hyper & sig,statuscol] <- paste("Hypermethylated","in", group2)
+        if (any(hyper & sig)) df[hyper & sig,statuscol2] <- paste("Hypomethylated","in", group1)
+        if (any(hypo & sig)) df[hypo & sig,statuscol] <- paste("Hypomethylated","in", group2)
+        if (any(hypo & sig)) df[hypo & sig,statuscol2] <- paste("Hypermethylated","in", group1)
+        # get metadata not created by this function
+        idx <- grep("mean|status|value",colnames(df),invert = TRUE)
+        write.csv2(df[,
+                      c(colnames(df)[idx],
+                        paste("mean",group1,sep = "."),
+                        paste("mean",group2,sep = "."),
+                        paste("diffmean",group1,group2,sep = "."),
+                        paste("p.value",group1,group2,sep = "."),
+                        paste("p.value.adj",group1,group2,sep = "."),
+                        statuscol,
+                        paste("diffmean",group2,group1,sep = "."),
+                        paste("p.value",group2,group1,sep = "."),
+                        paste("p.value.adj",group2,group1,sep = "."),
+                        statuscol2)
+                      ],file =  csv)
+
+        # saving results into R object
+        save(data,file = filename)
+    }
     return(data)
 }
 
