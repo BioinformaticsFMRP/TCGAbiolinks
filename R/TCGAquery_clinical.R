@@ -384,7 +384,7 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
         follow_up_version <-  names(xml_ns(xml))[grepl("follow_up",names(xml_ns(xml)))]
         if(length(follow_up_version) > 1) {
             n <- readline(prompt=paste0("There is more than one follow up version, please select one",
-                          paste0(seq(1:length(follow_up_version)), follow_up_version)))
+                                        paste0(seq(1:length(follow_up_version)), follow_up_version)))
             follow_up_version <- follow_up_version[n]
         }
         xpath <- paste0("//", follow_up_version, ":follow_up")
@@ -427,6 +427,17 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
                 clin <- rbind.fill(clin,df)
             }
             setTxtProgressBar(pb, i)
+        }
+    }
+    if(tolower(clinical.info) == "patient") {
+        message("To get the following information please change the clinical.info argument")
+        message("=> new_tumor_events: new_tumor_event \n=> drugs: drug \n=> follow_ups: follow_up \n=> radiations: radiation")
+
+            for(i in c("new_tumor_events","drugs","follow_ups","radiations")){
+                clin[,i] <- as.character(clin[,i])
+                clin[which(clin[,i] != ""),i] <- "YES"
+                clin[which(clin[,i] == ""),i] <- "NO"
+                colnames(clin)[which(colnames(clin) == i)] <- paste0("has_",i,"_information")
         }
     }
     close(pb)
