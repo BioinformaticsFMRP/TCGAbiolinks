@@ -1573,13 +1573,13 @@ TCGAvisualize_meanMethylation(data,groupCol = "shortLetterCode",filename = NULL,
 TCGAvisualize_meanMethylation(data,groupCol = "shortLetterCode",filename = NULL, y.limits = 0)
 # Changing shapes of jitters to show subgroups
 TCGAvisualize_meanMethylation(data,
-                              groupCol  = "subtype.Pan.Glioma.DNA.Methylation.Cluster", 
+                              groupCol  = "subtype_Pan.Glioma.DNA.Methylation.Cluster", 
                               subgroupCol="vital_status", filename = NULL)
 # Sorting bars by descending mean methylation
 TCGAvisualize_meanMethylation(data,
-                              groupCol  = "subtype.Pan.Glioma.DNA.Methylation.Cluster",sort="mean.desc",filename=NULL)
+                              groupCol  = "subtype_Pan.Glioma.DNA.Methylation.Cluster",sort="mean.desc",filename=NULL)
 # Sorting bars by asc mean methylation
-TCGAvisualize_meanMethylation(data,groupCol  = "subtype.Pan.Glioma.DNA.Methylation.Cluster",
+TCGAvisualize_meanMethylation(data,groupCol  = "subtype_Pan.Glioma.DNA.Methylation.Cluster",
                               sort="mean.asc",filename=NULL)
 TCGAvisualize_meanMethylation(data,groupCol  = "vital_status",sort="mean.asc",filename=NULL)
 ```
@@ -2145,8 +2145,8 @@ the hypermutated subgroup.
 # 2.1 - Mean methylation of samples
 # -------------------------------------------
 TCGAvisualize_meanMethylation(acc.met,
-                              groupCol = "subtype.MethyLevel",
-                              subgroupCol = "subtype.Histology",
+                              groupCol = "subtype_MethyLevel",
+                              subgroupCol = "subtype_Histology",
                               group.legend  = "Groups",
                               subgroup.legend = "Histology",
                               filename = "acc_mean.png")
@@ -2170,7 +2170,7 @@ due to the wilcoxon test, taking from hours to days.
 acc.met <- subset(acc.met,subset = (rowSums(is.na(assay(acc.met))) == 0))
 
 # Volcano plot
-acc.met <- TCGAanalyze_DMR(acc.met, groupCol = "subtype.MethyLevel",
+acc.met <- TCGAanalyze_DMR(acc.met, groupCol = "subtype_MethyLevel",
                            group1 = "CIMP-high",
                            group2="CIMP-low",
                            p.cut = 10^-5,
@@ -2195,10 +2195,10 @@ of gene expression and their significance value.
 # 2.3 - DEA - Expression analysis - volcano plot
 # ------------------------------------------------
 acc.exp.aux <- subset(acc.exp, 
-                      select = colData(acc.exp)$subtype.MethyLevel %in% c("CIMP-high","CIMP-low"))
+                      select = colData(acc.exp)$subtype_MethyLevel %in% c("CIMP-high","CIMP-low"))
 
-idx <- colData(acc.exp.aux)$subtype.MethyLevel %in% c("CIMP-high")
-idx2 <- colData(acc.exp.aux)$subtype.MethyLevel %in% c("CIMP-low")
+idx <- colData(acc.exp.aux)$subtype_MethyLevel %in% c("CIMP-high")
+idx2 <- colData(acc.exp.aux)$subtype_MethyLevel %in% c("CIMP-low")
 
 dataPrep <- TCGAanalyze_Preprocessing(object = acc.exp.aux, cor.cut = 0.6)
 
