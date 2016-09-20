@@ -6,6 +6,7 @@
 #' @param groupCol Columns in colData(data) that defines the groups.
 #' @param group1 Name of group1 to be used in the analysis
 #' @param group2 Name of group2  to be used in the analysis
+#' @param save Save histogram of diffmean
 #' @import ggplot2
 #' @import graphics
 #' @importFrom grDevices png dev.off
@@ -32,7 +33,7 @@
 #' data <- diffmean(data)
 #' }
 #' @keywords internal
-diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
+diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save = FALSE) {
 
     if (is.null(groupCol)) {
         message("Please, set the groupCol parameter")
@@ -63,11 +64,12 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
     values(rowRanges(data))[,paste0("diffmean.",group2,".",group1)] <-  -diffmean
 
     # Ploting a histogram to evaluate the data
-    message("Saved histogram_diffmean.png...")
-    png(filename = "histogram_diffmean.png")
-    hist(diffmean)
-    dev.off()
-
+    if(save) {
+        message("Saved histogram_diffmean.png...")
+        png(filename = "histogram_diffmean.png")
+        hist(diffmean)
+        dev.off()
+    }
     return(data)
 }
 
@@ -521,6 +523,7 @@ TCGAvisualize_meanMethylation <- function(data,
 #' @param exact  Do a exact wilcoxon test? Default: True
 #' @param  method P-value adjustment method. Default:"BH" Benjamini-Hochberg
 #' @param cores Number of cores to be used
+#' @param save Save histogram of pvalues
 #' @return Data frame with cols p values/p values adjusted
 #' @import graphics
 #' @importFrom grDevices png dev.off pdf
@@ -557,7 +560,7 @@ calculate.pvalues <- function(data,
                               paired = FALSE,
                               method = "BH",
                               exact = TRUE,
-                              cores = 1) {
+                              cores = 1, save = FALSE) {
 
     parallel <- FALSE
     if (cores > 1){
@@ -628,21 +631,24 @@ calculate.pvalues <- function(data,
         p.value <- p.value[,2]
     }
     ## Plot a histogram
+    if(save) {
     message("Saved histogram_pvalues.png...")
     png(filename = "histogram_pvalues.png")
     hist(p.value)
     dev.off()
+    }
 
     ## Calculate the adjusted p-values by using Benjamini-Hochberg
     ## (BH) method
     p.value.adj <- p.adjust(p.value, method = method)
 
     ## Plot a histogram
-    message("Saved histogram_pvalues_adj.png")
+    if(save) {
+        message("Saved histogram_pvalues_adj.png")
     png(filename = "histogram_pvalues_adj.png")
     hist(p.value.adj)
     dev.off()
-
+    }
     #Saving the values into the object
     colp <- paste("p.value", group1, group2, sep = ".")
     values(rowRanges(data))[,colp] <-  p.value
@@ -1020,7 +1026,7 @@ TCGAanalyze_DMR <- function(data,
 
     diffcol <- paste("diffmean",group1,group2,sep = ".")
     if (!(diffcol %in% colnames(values(rowRanges(data)))) || overwrite) {
-        data <- diffmean(data,groupCol, group1 = group1, group2 = group2)
+        data <- diffmean(data,groupCol, group1 = group1, group2 = group2, save = save)
         if (!(diffcol %in% colnames(values(rowRanges(data))))) stop("Error!")
     }
     pcol <- paste("p.value.adj",group2,group1,sep = ".")
@@ -1031,7 +1037,8 @@ TCGAanalyze_DMR <- function(data,
         data <- calculate.pvalues(data, groupCol, group1, group2,
                                   paired = paired,
                                   method = adj.method,
-                                  cores = cores)
+                                  cores = cores,
+                                  save = save)
 
         # An error should not happen, if it happens (probably due to an incorret
         # user input) we will stop
