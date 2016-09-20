@@ -5,7 +5,8 @@
 \title{Calculate pvalues}
 \usage{
 calculate.pvalues(data, groupCol = NULL, group1 = NULL, group2 = NULL,
-  paired = FALSE, method = "BH", exact = TRUE, cores = 1)
+  paired = FALSE, method = "BH", exact = TRUE, cores = 1,
+  save = FALSE)
 }
 \arguments{
 \item{data}{SummarizedExperiment obtained from the TCGAPrepare}
@@ -26,6 +27,8 @@ groups}
 \item{exact}{Do a exact wilcoxon test? Default: True}
 
 \item{cores}{Number of cores to be used}
+
+\item{save}{Save histogram of pvalues}
 }
 \value{
 Data frame with cols p values/p values adjusted
