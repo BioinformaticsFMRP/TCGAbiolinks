@@ -907,6 +907,7 @@ TCGAVisualize_volcano <- function(x,y,
 #' @param overwrite Overwrite the pvalues and diffmean values if already in the object
 #' for both groups? Default: FALSE
 #' @param save Save object with results? Default: TRUE
+#' @param save.directory Directory to save the files. Default: working directory
 #' @param filename Name of the file to save the object.
 #' @param cores Number of cores to be used in the non-parametric test
 #' Default = groupCol.group1.group2.rda
@@ -961,6 +962,7 @@ TCGAanalyze_DMR <- function(data,
                             overwrite=FALSE,
                             cores = 1,
                             save=TRUE,
+                            save.directory = ".",
                             filename=NULL) {
     .e <- environment()
 
@@ -1094,6 +1096,7 @@ TCGAanalyze_DMR <- function(data,
                             gsub("_",".",group1),
                             gsub("_",".",group2),
                             "pcut",p.cut,"meancut",diffmean.cut,  sep = "_"),".csv")
+        csv <- file.path(save.directory,csv)
         message(paste0("Saving the results also in a csv file:"), csv)
         df <- values(data)
         if (any(hyper & sig)) df[hyper & sig,statuscol] <- paste("Hypermethylated","in", group2)
@@ -1124,10 +1127,11 @@ TCGAanalyze_DMR <- function(data,
                                     "meancut",diffmean.cut,
                                     sep = "_"),
                                ".rda")
+            filename <- file.path(save.directory, filename)
         }
 
         # saving results into R object
-        save(data,file = filename)
+        save(data, file = filename)
     }
     return(data)
 }
