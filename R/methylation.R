@@ -1028,7 +1028,7 @@ TCGAanalyze_DMR <- function(data,
                      gsub(" ", ".",group2),sep = ".")
     if (!(diffcol %in% colnames(values(data))) || overwrite) {
         data <- diffmean(data,groupCol, group1 = group1, group2 = group2, save = save)
-        if (!(diffcol %in% colnames(values(rowRanges(data))))) stop("Error!")
+        if (!(diffcol %in% colnames(values(rowRanges(data))))) stop(paste0("Error! Not found ", diffcol))
     }
     pcol <- paste("p.value.adj",
                   gsub(" ", ".", group2),
@@ -1047,7 +1047,7 @@ TCGAanalyze_DMR <- function(data,
 
         # An error should not happen, if it happens (probably due to an incorret
         # user input) we will stop
-        if (!(pcol %in% colnames(values(data)))) stop("Error!")
+        if (!(pcol %in% colnames(values(data))))  stop(paste0("Error! Not found ", pcol))
     }
     log <- paste0("TCGAanalyze_DMR.",group1,".",group2)
     assign(log,c("groupCol" = groupCol,
