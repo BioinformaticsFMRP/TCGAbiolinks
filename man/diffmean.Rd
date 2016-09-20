@@ -4,7 +4,8 @@
 \alias{diffmean}
 \title{Calculate diffmean methylation between two groups}
 \usage{
-diffmean(data, groupCol = NULL, group1 = NULL, group2 = NULL)
+diffmean(data, groupCol = NULL, group1 = NULL, group2 = NULL,
+  save = FALSE)
 }
 \arguments{
 \item{data}{SummarizedExperiment object obtained from TCGAPrepare}
@@ -14,6 +15,8 @@ diffmean(data, groupCol = NULL, group1 = NULL, group2 = NULL)
 \item{group1}{Name of group1 to be used in the analysis}
 
 \item{group2}{Name of group2  to be used in the analysis}
+
+\item{save}{Save histogram of diffmean}
 }
 \value{
 Saves in the rowRages(data) the columns: mean.group1, mean.group2
