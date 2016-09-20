@@ -1024,14 +1024,20 @@ TCGAanalyze_DMR <- function(data,
         label[2:3] <-  paste(label[2:3], "in", group2)
     }
 
-    diffcol <- paste("diffmean",group1,group2,sep = ".")
-    if (!(diffcol %in% colnames(values(rowRanges(data)))) || overwrite) {
+    diffcol <- paste("diffmean",
+                     gsub(" ", ".",group1),
+                     gsub(" ", ".",group2),sep = ".")
+    if (!(diffcol %in% colnames(values(data))) || overwrite) {
         data <- diffmean(data,groupCol, group1 = group1, group2 = group2, save = save)
         if (!(diffcol %in% colnames(values(rowRanges(data))))) stop("Error!")
     }
-    pcol <- paste("p.value.adj",group2,group1,sep = ".")
+    pcol <- paste("p.value.adj",
+                  gsub(" ", ".", group2),
+                  gsub(" ", ".",group1),sep = ".")
     if(!(pcol %in% colnames(values(data)))){
-        pcol <- paste("p.value.adj",group1,group2,sep = ".")
+        pcol <- paste("p.value.adj",
+                      gsub(" ", ".",group1),
+                      gsub(" ", ".",group2),sep = ".")
     }
     if (!(pcol %in% colnames(values(data))) | overwrite) {
         data <- calculate.pvalues(data, groupCol, group1, group2,
