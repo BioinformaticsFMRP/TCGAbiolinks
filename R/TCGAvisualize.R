@@ -737,8 +737,12 @@ TCGAvisualize_Heatmap <- function(data,
                                sortCol))
                 column_order <- order(df[,sortCol])
             }
-            ha <- HeatmapAnnotation(df = df,
-                                    col = col.colors)
+            if(is.null(col.colors)) {
+            ha <- HeatmapAnnotation(df = df)
+            } else {
+                ha <- HeatmapAnnotation(df = df,
+                                        col = col.colors)
+            }
         }
     }
     # STEP 2 Create heatmap
