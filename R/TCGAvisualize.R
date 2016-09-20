@@ -754,13 +754,13 @@ TCGAvisualize_Heatmap <- function(data,
     if(scale == "row"){
         message("Calculating z-scores for the rows....")
         data <- t(scale(t(data)))
-        if (type == "expression") color <- colorRamp2(seq(-4,4,0.1), gplots::greenred(length(seq(-4,4,0.1))))
-        if (type == "methylation") color <- colorRamp2(seq(-4,4,0.1), matlab::jet.colors(length(seq(-4,4,0.1))))
+        if (type == "expression") color <- colorRamp2(seq(-4,4,0.1), circlize::colorRamp2(c(-4, 0, 4), c("blue", "black", "yellow")))
+        if (type == "methylation") color <- colorRamp2(seq(-4,4,0.1), circlize::colorRamp2(c(-4, 0, 4), c("blue", "black", "red")))
     } else if(scale == "col"){
         message("Calculiating z-scores for the columns....")
         data <- scale(data)
-        if (type == "expression") color <- colorRamp2(seq(-4,4,0.1), gplots::greenred(length(seq(-4,4,0.1))))
-        if (type == "methylation") color <- colorRamp2(seq(-4,4,0.1), matlab::jet.colors(length(seq(-4,4,0.1))))
+        if (type == "expression") color <- colorRamp2(seq(-4,4,0.1), circlize::colorRamp2(c(-4, 0, 4), c("blue", "black", "yellow")))
+        if (type == "methylation") color <- colorRamp2(seq(-4,4,0.1), circlize::colorRamp2(c(-4, 0, 4), c("blue", "black", "red")))
     } else {
         if (type == "expression") color <- gplots::greenred(200)
         if (type == "methylation") color <- matlab::jet.colors(200)
