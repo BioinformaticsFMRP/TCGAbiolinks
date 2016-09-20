@@ -58,11 +58,10 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save =
     diffmean <- mean.g2 - mean.g1
 
     # Saves the result
-    values(rowRanges(data))[,paste0("mean.",group1)] <-  mean.g1
-    values(rowRanges(data))[,paste0("mean.",group2)] <-  mean.g2
-    values(rowRanges(data))[,paste0("diffmean.",group1,".",group2)] <-  diffmean
-    values(rowRanges(data))[,paste0("diffmean.",group2,".",group1)] <-  -diffmean
-
+    values(rowRanges(data))[,paste0("mean.", gsub(" ", ".",group1))] <-  mean.g1
+    values(rowRanges(data))[,paste0("mean.", gsub(" ", ".",group2))] <-  mean.g2
+    values(rowRanges(data))[,paste0("diffmean.",group1,".", gsub(" ", ".",group2))] <-  diffmean
+    values(rowRanges(data))[,paste0("diffmean.",group2,".", gsub(" ", ".",group1))] <-  -diffmean
     # Ploting a histogram to evaluate the data
     if(save) {
         message("Saved histogram_diffmean.png...")
