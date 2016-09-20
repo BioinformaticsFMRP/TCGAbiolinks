@@ -112,8 +112,11 @@ data <- SummarizedExperiment::SummarizedExperiment(
          assays=S4Vectors::SimpleList(counts=counts),
          rowRanges=rowRanges,
          colData=colData)
-SummarizedExperiment::colData(data)$group <- c(rep("group1",ncol(data)/2),
-                         rep("group2",ncol(data)/2))
-hypo.hyper <- TCGAanalyze_DMR(data, p.cut = 0.85,"group","group1","group2")
+SummarizedExperiment::colData(data)$group <- c(rep("group 1",ncol(data)/2),
+                         rep("group 2",ncol(data)/2))
+hypo.hyper <- TCGAanalyze_DMR(data, p.cut = 0.85,"group","group 1","group 2")
+SummarizedExperiment::colData(data)$group2 <- c(rep("group_1",ncol(data)/2),
+                         rep("group_2",ncol(data)/2))
+hypo.hyper <- TCGAanalyze_DMR(data, p.cut = 0.85,"group2","group_1","group_2")
 }
 
