@@ -650,13 +650,13 @@ calculate.pvalues <- function(data,
     dev.off()
     }
     #Saving the values into the object
-    colp <- paste("p.value", group1, group2, sep = ".")
+    colp <- paste("p.value",  gsub(" ", ".",group1),  gsub(" ", ".",group2), sep = ".")
     values(rowRanges(data))[,colp] <-  p.value
-    coladj <- paste("p.value.adj",group1,group2, sep = ".")
+    coladj <- paste("p.value.adj", gsub(" ", ".",group1),  gsub(" ", ".",group2), sep = ".")
     values(rowRanges(data))[,coladj] <-  p.value.adj
-    colp <- paste("p.value", group2, group1, sep = ".")
+    colp <- paste("p.value",  gsub(" ", ".",group1),  gsub(" ", ".",group2), sep = ".")
     values(rowRanges(data))[,colp] <-  p.value
-    coladj <- paste("p.value.adj",group2,group1, sep = ".")
+    coladj <- paste("p.value.adj", gsub(" ", ".",group1),  gsub(" ", ".",group2), sep = ".")
     values(rowRanges(data))[,coladj] <-  p.value.adj
 
     return(data)
