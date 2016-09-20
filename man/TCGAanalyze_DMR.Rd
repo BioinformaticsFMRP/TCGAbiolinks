@@ -12,7 +12,7 @@ TCGAanalyze_DMR(data, groupCol = NULL, group1 = NULL, group2 = NULL,
   label = NULL, xlim = NULL, ylim = NULL, p.cut = 0.01,
   probe.names = FALSE, diffmean.cut = 0.2, paired = FALSE,
   adj.method = "BH", overwrite = FALSE, cores = 1, save = TRUE,
-  filename = NULL)
+  save.directory = ".", filename = NULL)
 }
 \arguments{
 \item{data}{SummarizedExperiment obtained from the TCGAPrepare}
@@ -64,6 +64,8 @@ for both groups? Default: FALSE}
 Default = groupCol.group1.group2.rda}
 
 \item{save}{Save object with results? Default: TRUE}
+
+\item{save.directory}{Directory to save the files. Default: working directory}
 
 \item{filename}{Name of the file to save the object.}
 }
