@@ -4,7 +4,8 @@
 \alias{GDCdownload}
 \title{Download GDC data}
 \usage{
-GDCdownload(query, token.file, method = "api", directory = "GDCdata")
+GDCdownload(query, token.file, method = "api", directory = "GDCdata",
+  chunks.per.download = NULL)
 }
 \arguments{
 \item{query}{A query for GDCquery function}
@@ -15,6 +16,9 @@ GDCdownload(query, token.file, method = "api", directory = "GDCdata")
 API is faster, but the data might get corrupted in the download, and it might need to be executed again}
 
 \item{directory}{Directory/Folder where the data was downloaded. Default: GDCdata}
+
+\item{chunks.per.download}{This will make the API method download only n files a time. This might reduce the problems when
+the data size is too big and the download is failing a lot.}
 }
 \value{
 Shows the output from the GDC transfer tools
@@ -39,5 +43,7 @@ query <- GDCquery(project = "TARGET-AML",
                   barcode = c("TARGET-20-PARUDL-03A-01R","TARGET-20-PASRRB-03A-01R"))
 # data will be saved in  example_data_dir/TARGET-AML/harmonized/Transcriptome_Profiling/miRNA_Expression_Quantification
 GDCdownload(query, method = "client", directory = "example_data_dir")
+query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical")
+GDCdownload(query, chunks.per.download = 20)
 }
 
