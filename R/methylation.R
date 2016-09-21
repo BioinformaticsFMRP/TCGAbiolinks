@@ -6,6 +6,7 @@
 #' @param groupCol Columns in colData(data) that defines the groups.
 #' @param group1 Name of group1 to be used in the analysis
 #' @param group2 Name of group2  to be used in the analysis
+#' @param save Save histogram of diffmean
 #' @import ggplot2
 #' @import graphics
 #' @importFrom grDevices png dev.off
@@ -32,7 +33,7 @@
 #' data <- diffmean(data)
 #' }
 #' @keywords internal
-diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
+diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save = FALSE) {
 
     if (is.null(groupCol)) {
         message("Please, set the groupCol parameter")
@@ -57,17 +58,17 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL) {
     diffmean <- mean.g2 - mean.g1
 
     # Saves the result
-    values(rowRanges(data))[,paste0("mean.",group1)] <-  mean.g1
-    values(rowRanges(data))[,paste0("mean.",group2)] <-  mean.g2
-    values(rowRanges(data))[,paste0("diffmean.",group1,".",group2)] <-  diffmean
-    values(rowRanges(data))[,paste0("diffmean.",group2,".",group1)] <-  -diffmean
-
+    values(rowRanges(data))[,paste0("mean.", gsub(" ", ".",group1))] <-  mean.g1
+    values(rowRanges(data))[,paste0("mean.", gsub(" ", ".",group2))] <-  mean.g2
+    values(rowRanges(data))[,paste0("diffmean.",gsub(" ", ".",group1),".", gsub(" ", ".",group2))] <-  diffmean
+    values(rowRanges(data))[,paste0("diffmean.",gsub(" ", ".",group2),".", gsub(" ", ".",group1))] <-  -diffmean
     # Ploting a histogram to evaluate the data
-    message("Saved histogram_diffmean.png...")
-    png(filename = "histogram_diffmean.png")
-    hist(diffmean)
-    dev.off()
-
+    if(save) {
+        message("Saved histogram_diffmean.png...")
+        png(filename = "histogram_diffmean.png")
+        hist(diffmean)
+        dev.off()
+    }
     return(data)
 }
 
@@ -521,6 +522,7 @@ TCGAvisualize_meanMethylation <- function(data,
 #' @param exact  Do a exact wilcoxon test? Default: True
 #' @param  method P-value adjustment method. Default:"BH" Benjamini-Hochberg
 #' @param cores Number of cores to be used
+#' @param save Save histogram of pvalues
 #' @return Data frame with cols p values/p values adjusted
 #' @import graphics
 #' @importFrom grDevices png dev.off pdf
@@ -557,7 +559,7 @@ calculate.pvalues <- function(data,
                               paired = FALSE,
                               method = "BH",
                               exact = TRUE,
-                              cores = 1) {
+                              cores = 1, save = FALSE) {
 
     parallel <- FALSE
     if (cores > 1){
@@ -628,29 +630,32 @@ calculate.pvalues <- function(data,
         p.value <- p.value[,2]
     }
     ## Plot a histogram
-    message("Saved histogram_pvalues.png...")
-    png(filename = "histogram_pvalues.png")
-    hist(p.value)
-    dev.off()
+    if(save) {
+        message("Saved histogram_pvalues.png...")
+        png(filename = "histogram_pvalues.png")
+        hist(p.value)
+        dev.off()
+    }
 
     ## Calculate the adjusted p-values by using Benjamini-Hochberg
     ## (BH) method
     p.value.adj <- p.adjust(p.value, method = method)
 
     ## Plot a histogram
-    message("Saved histogram_pvalues_adj.png")
-    png(filename = "histogram_pvalues_adj.png")
-    hist(p.value.adj)
-    dev.off()
-
+    if(save) {
+        message("Saved histogram_pvalues_adj.png")
+        png(filename = "histogram_pvalues_adj.png")
+        hist(p.value.adj)
+        dev.off()
+    }
     #Saving the values into the object
-    colp <- paste("p.value", group1, group2, sep = ".")
+    colp <- paste("p.value",  gsub(" ", ".",group1),  gsub(" ", ".",group2), sep = ".")
     values(rowRanges(data))[,colp] <-  p.value
-    coladj <- paste("p.value.adj",group1,group2, sep = ".")
+    coladj <- paste("p.value.adj", gsub(" ", ".",group1),  gsub(" ", ".",group2), sep = ".")
     values(rowRanges(data))[,coladj] <-  p.value.adj
-    colp <- paste("p.value", group2, group1, sep = ".")
+    colp <- paste("p.value",  gsub(" ", ".",group2),  gsub(" ", ".",group1), sep = ".")
     values(rowRanges(data))[,colp] <-  p.value
-    coladj <- paste("p.value.adj",group2,group1, sep = ".")
+    coladj <- paste("p.value.adj", gsub(" ", ".",group2),  gsub(" ", ".",group1), sep = ".")
     values(rowRanges(data))[,coladj] <-  p.value.adj
 
     return(data)
@@ -887,7 +892,7 @@ TCGAVisualize_volcano <- function(x,y,
 #' the name of the group
 #' @param group2 In case our object has more than 2 groups, you should set
 #' the name of the group
-#' @param plot.filename Filename. Default: volcano.pdf, volcano.svg, volcano.png
+#' @param plot.filename Filename. Default: volcano.pdf, volcano.svg, volcano.png. If set to FALSE, there will be no plot.
 #' @param legend Legend title
 #' @param color vector of colors to be used in graph
 #' @param title main title. If not specified it will be
@@ -907,6 +912,7 @@ TCGAVisualize_volcano <- function(x,y,
 #' @param overwrite Overwrite the pvalues and diffmean values if already in the object
 #' for both groups? Default: FALSE
 #' @param save Save object with results? Default: TRUE
+#' @param save.directory Directory to save the files. Default: working directory
 #' @param filename Name of the file to save the object.
 #' @param cores Number of cores to be used in the non-parametric test
 #' Default = groupCol.group1.group2.rda
@@ -934,9 +940,12 @@ TCGAVisualize_volcano <- function(x,y,
 #'          assays=S4Vectors::SimpleList(counts=counts),
 #'          rowRanges=rowRanges,
 #'          colData=colData)
-#' SummarizedExperiment::colData(data)$group <- c(rep("group1",ncol(data)/2),
-#'                          rep("group2",ncol(data)/2))
-#' hypo.hyper <- TCGAanalyze_DMR(data, p.cut = 0.85,"group","group1","group2")
+#' SummarizedExperiment::colData(data)$group <- c(rep("group 1",ncol(data)/2),
+#'                          rep("group 2",ncol(data)/2))
+#' hypo.hyper <- TCGAanalyze_DMR(data, p.cut = 0.85,"group","group 1","group 2")
+#' SummarizedExperiment::colData(data)$group2 <- c(rep("group_1",ncol(data)/2),
+#'                          rep("group_2",ncol(data)/2))
+#' hypo.hyper <- TCGAanalyze_DMR(data, p.cut = 0.85,"group2","group_1","group_2")
 TCGAanalyze_DMR <- function(data,
                             groupCol=NULL,
                             group1=NULL,
@@ -961,6 +970,7 @@ TCGAanalyze_DMR <- function(data,
                             overwrite=FALSE,
                             cores = 1,
                             save=TRUE,
+                            save.directory = ".",
                             filename=NULL) {
     .e <- environment()
 
@@ -1016,29 +1026,38 @@ TCGAanalyze_DMR <- function(data,
         label[2:3] <-  paste(label[2:3], "in", group2)
     }
 
-    diffcol <- paste("diffmean",group1,group2,sep = ".")
-    if (!(diffcol %in% colnames(values(rowRanges(data)))) || overwrite) {
-        data <- diffmean(data,groupCol, group1 = group1, group2 = group2)
-        if (!(diffcol %in% colnames(values(rowRanges(data))))) stop("Error!")
+    diffcol <- paste("diffmean",
+                     gsub(" ", ".",group1),
+                     gsub(" ", ".",group2),sep = ".")
+    if (!(diffcol %in% colnames(values(data))) || overwrite) {
+        data <- diffmean(data,groupCol, group1 = group1, group2 = group2, save = save)
+        if (!(diffcol %in% colnames(values(rowRanges(data))))) {
+            stop(paste0("Error! Not found ", diffcol))
+        }
     }
-    pcol <- paste("p.value.adj",group2,group1,sep = ".")
+    pcol <- paste("p.value.adj",
+                  gsub(" ", ".", group2),
+                  gsub(" ", ".",group1),sep = ".")
     if(!(pcol %in% colnames(values(data)))){
-        pcol <- paste("p.value.adj",group1,group2,sep = ".")
+        pcol <- paste("p.value.adj",
+                      gsub(" ", ".",group1),
+                      gsub(" ", ".",group2),sep = ".")
     }
     if (!(pcol %in% colnames(values(data))) | overwrite) {
         data <- calculate.pvalues(data, groupCol, group1, group2,
                                   paired = paired,
                                   method = adj.method,
-                                  cores = cores)
+                                  cores = cores,
+                                  save = save)
 
         # An error should not happen, if it happens (probably due to an incorret
         # user input) we will stop
-        if (!(pcol %in% colnames(values(data)))) stop("Error!")
+        if (!(pcol %in% colnames(values(data))))  stop(paste0("Error! Not found ", pcol))
     }
-    log <- paste0("TCGAanalyze_DMR.",group1,".",group2)
+    log <- paste0("TCGAanalyze_DMR.",gsub(" ", ".",group1),".",gsub(" ", ".",group2))
     assign(log,c("groupCol" = groupCol,
-                 "group1" = group1,
-                 "group2" = group2,
+                 "group1" = gsub(" ", ".",group1),
+                 "group2" = gsub(" ", ".",group2),
                  "plot.filename" = plot.filename,
                  "xlim" = xlim,
                  "ylim" = ylim,
@@ -1047,8 +1066,8 @@ TCGAanalyze_DMR <- function(data,
                  "paired" = "paired",
                  "adj.method" = adj.method))
     metadata(data)[[log]] <- (eval(as.symbol(log)))
-    statuscol <- paste("status",group1,group2,sep = ".")
-    statuscol2 <- paste("status",group2,group1,sep = ".")
+    statuscol <- paste("status",gsub(" ", ".",group1),gsub(" ", ".",group2),sep = ".")
+    statuscol2 <- paste("status",gsub(" ", ".",group2),gsub(" ", ".",group1),sep = ".")
     values(data)[,statuscol] <-  "Not Significant"
     values(data)[,statuscol2] <-  "Not Significant"
 
@@ -1072,44 +1091,66 @@ TCGAanalyze_DMR <- function(data,
     names <- NULL
     if(probe.names) names <- values(data)$probeID
 
-    TCGAVisualize_volcano(x = values(data)[,diffcol],
-                          y = values(data)[,pcol],
-                          filename = plot.filename,
-                          ylab =  ylab,
-                          xlab = xlab,
-                          title = title,
-                          legend= legend,
-                          label = label,
-                          names = names,
-                          x.cut = diffmean.cut,
-                          y.cut = p.cut)
-    if (is.null(filename)) filename <- paste0(paste(groupCol,group1,group2,"pcut",p.cut,"meancut",diffmean.cut, sep = "_"),".rda")
-    if (save) save(data,file = filename)
+    if(plot.filename != FALSE) {
+        TCGAVisualize_volcano(x = values(data)[,diffcol],
+                              y = values(data)[,pcol],
+                              filename = plot.filename,
+                              ylab =  ylab,
+                              xlab = xlab,
+                              title = title,
+                              legend= legend,
+                              label = label,
+                              names = names,
+                              x.cut = diffmean.cut,
+                              y.cut = p.cut)
+    }
 
-    # saving results into a csv file
-    csv <- paste0(paste("DMR_results",groupCol,group1,group2, "pcut",p.cut,"meancut",diffmean.cut,  sep = "_"),".csv")
-    message(paste0("Saving the results also in a csv file:"), csv)
-    df <- values(data)
-    if (any(hyper & sig)) df[hyper & sig,statuscol] <- paste("Hypermethylated","in", group2)
-    if (any(hyper & sig)) df[hyper & sig,statuscol2] <- paste("Hypomethylated","in", group1)
-    if (any(hypo & sig)) df[hypo & sig,statuscol] <- paste("Hypomethylated","in", group2)
-    if (any(hypo & sig)) df[hypo & sig,statuscol2] <- paste("Hypermethylated","in", group1)
-    # get metadata not created by this function
-    idx <- grep("mean|status|value",colnames(df),invert = TRUE)
-    write.csv2(df[,
-                  c(colnames(df)[idx],
-                    paste("mean",group1,sep = "."),
-                    paste("mean",group2,sep = "."),
-                    paste("diffmean",group1,group2,sep = "."),
-                    paste("p.value",group1,group2,sep = "."),
-                    paste("p.value.adj",group1,group2,sep = "."),
-                    statuscol,
-                    paste("diffmean",group2,group1,sep = "."),
-                    paste("p.value",group2,group1,sep = "."),
-                    paste("p.value.adj",group2,group1,sep = "."),
-                    statuscol2)
-                  ],file =  csv)
+    if (save) {
 
+        # saving results into a csv file
+        csv <- paste0(paste("DMR_results",
+                            gsub("_",".",groupCol),
+                            gsub(" |_",".",group1),
+                            gsub(" |_",".",group2),
+                            "pcut",p.cut,"meancut",diffmean.cut,  sep = "_"),".csv")
+        csv <- file.path(save.directory,csv)
+        message(paste0("Saving the results also in a csv file:"), csv)
+        df <- values(data)
+        if (any(hyper & sig)) df[hyper & sig,statuscol] <- paste("Hypermethylated","in", group2)
+        if (any(hyper & sig)) df[hyper & sig,statuscol2] <- paste("Hypomethylated","in", group1)
+        if (any(hypo & sig)) df[hypo & sig,statuscol] <- paste("Hypomethylated","in", group2)
+        if (any(hypo & sig)) df[hypo & sig,statuscol2] <- paste("Hypermethylated","in", group1)
+        # get metadata not created by this function
+        idx <- grep("mean|status|value",colnames(df),invert = TRUE)
+
+        write.csv2(df[,
+                      c(colnames(df)[idx],
+                        paste("mean",gsub(" ", ".",group1),sep = "."),
+                        paste("mean",gsub(" ", ".",group2),sep = "."),
+                        paste("diffmean",gsub(" ", ".",group1),gsub(" ", ".",group2),sep = "."),
+                        paste("p.value",gsub(" ", ".",group1),gsub(" ", ".",group2),sep = "."),
+                        paste("p.value.adj",gsub(" ", ".",group1),gsub(" ", ".",group2),sep = "."),
+                        statuscol,
+                        paste("diffmean",gsub(" ", ".",group2),gsub(" ", ".",group1),sep = "."),
+                        paste("p.value",gsub(" ", ".",group2),gsub(" ", ".",group1),sep = "."),
+                        paste("p.value.adj",gsub(" ", ".",group2),gsub(" ", ".",group1),sep = "."),
+                        statuscol2)
+                      ],file =  csv)
+        if (is.null(filename)) {
+            filename <- paste0(paste(
+                gsub("_",".",groupCol),
+                gsub(" |_",".",group1),
+                gsub(" |_",".",group2),
+                "pcut",p.cut,
+                "meancut",diffmean.cut,
+                sep = "_"),
+                ".rda")
+            filename <- file.path(save.directory, filename)
+        }
+
+        # saving results into R object
+        save(data, file = filename)
+    }
     return(data)
 }
 
