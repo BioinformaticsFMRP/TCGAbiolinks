@@ -8,8 +8,8 @@
 #' @param method Uses the API (POST method) or gdc client tool. Options "api", "client".
 #' API is faster, but the data might get corrupted in the download, and it might need to be executed again
 #' @param directory Directory/Folder where the data was downloaded. Default: GDCdata
-#' @param chunks.per.download This will make the API method download only n files a time. This might reduce the problems when
-#' the data size is too big and the download is failing a lot.
+#' @param chunks.per.download This will make the API method only download n (chunks.per.download) files at a time.
+#' This may reduce the download problems when the data size is too large. Expected a integer number (example chunks.per.download = 6)
 #' @importFrom tools md5sum
 #' @importFrom utils untar
 #' @import httr
