@@ -809,6 +809,7 @@ The arguments are:
 *  **token.file** A token file to download protect data (not test yet)
 *  **method** Use API (POST method) or gdc client tool (API is faster, but the data might get corrupted in the download, and it might need to be executed again). Options: "api", "client"
 *  **directory** Directory/Folder where the data was downloaded. Default: GDCdata
+*  **chunks.per.download**  This will make the API method only download n (chunks.per.download) files at a time. This may reduce the download problems when the data size is too large.
 
 ### `GDCdownload`: Example of use
 ```{r, eval = FALSE}
@@ -828,17 +829,18 @@ query <- GDCquery(project = "TCGA-GBM",
 GDCdownload(query)
 z <- GDCprepare(query)
 
-# A function to download only 2 samples
-legacyPipeline <- function(project, data.category, platform){
+# A function to download only 20 samples
+legacyPipeline <- function(project, data.category, platform, n = 20){
     query <- GDCquery(project = project,
                       data.category = data.category,
                       platform = platform,
                       legacy = TRUE)
-    cases <- query$results[[1]]$cases[1:2] # Get two samples from the search
+    cases <- query$results[[1]]$cases[1:n] # Get two samples from the search
     query <- GDCquery(project = project,
                       data.category = data.category,
                       platform = platform,
                       legacy = TRUE,
+                      chunks.per.download = 5,
                       barcode = cases)
     GDCdownload(query)
     data <- GDCprepare(query)
