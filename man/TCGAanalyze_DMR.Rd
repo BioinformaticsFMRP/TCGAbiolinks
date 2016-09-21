@@ -12,7 +12,7 @@ TCGAanalyze_DMR(data, groupCol = NULL, group1 = NULL, group2 = NULL,
   label = NULL, xlim = NULL, ylim = NULL, p.cut = 0.01,
   probe.names = FALSE, diffmean.cut = 0.2, paired = FALSE,
   adj.method = "BH", overwrite = FALSE, cores = 1, save = TRUE,
-  filename = NULL)
+  save.directory = ".", filename = NULL)
 }
 \arguments{
 \item{data}{SummarizedExperiment obtained from the TCGAPrepare}
@@ -26,7 +26,7 @@ the name of the group}
 \item{group2}{In case our object has more than 2 groups, you should set
 the name of the group}
 
-\item{plot.filename}{Filename. Default: volcano.pdf, volcano.svg, volcano.png}
+\item{plot.filename}{Filename. Default: volcano.pdf, volcano.svg, volcano.png. If set to FALSE, there will be no plot.}
 
 \item{ylab}{y axis text}
 
@@ -64,6 +64,8 @@ for both groups? Default: FALSE}
 Default = groupCol.group1.group2.rda}
 
 \item{save}{Save object with results? Default: TRUE}
+
+\item{save.directory}{Directory to save the files. Default: working directory}
 
 \item{filename}{Name of the file to save the object.}
 }
@@ -110,8 +112,11 @@ data <- SummarizedExperiment::SummarizedExperiment(
          assays=S4Vectors::SimpleList(counts=counts),
          rowRanges=rowRanges,
          colData=colData)
-SummarizedExperiment::colData(data)$group <- c(rep("group1",ncol(data)/2),
-                         rep("group2",ncol(data)/2))
-hypo.hyper <- TCGAanalyze_DMR(data, p.cut = 0.85,"group","group1","group2")
+SummarizedExperiment::colData(data)$group <- c(rep("group 1",ncol(data)/2),
+                         rep("group 2",ncol(data)/2))
+hypo.hyper <- TCGAanalyze_DMR(data, p.cut = 0.85,"group","group 1","group 2")
+SummarizedExperiment::colData(data)$group2 <- c(rep("group_1",ncol(data)/2),
+                         rep("group_2",ncol(data)/2))
+hypo.hyper <- TCGAanalyze_DMR(data, p.cut = 0.85,"group2","group_1","group_2")
 }
 
