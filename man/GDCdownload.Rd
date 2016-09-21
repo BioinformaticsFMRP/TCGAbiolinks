@@ -17,8 +17,8 @@ API is faster, but the data might get corrupted in the download, and it might ne
 
 \item{directory}{Directory/Folder where the data was downloaded. Default: GDCdata}
 
-\item{chunks.per.download}{This will make the API method download only n files a time. This might reduce the problems when
-the data size is too big and the download is failing a lot.}
+\item{chunks.per.download}{This will make the API method only download n (chunks.per.download) files at a time.
+This may reduce the download problems when the data size is too large. Expected a integer number (example chunks.per.download = 6)}
 }
 \value{
 Shows the output from the GDC transfer tools
