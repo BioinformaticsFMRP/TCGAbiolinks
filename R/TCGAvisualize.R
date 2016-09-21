@@ -737,8 +737,12 @@ TCGAvisualize_Heatmap <- function(data,
                                sortCol))
                 column_order <- order(df[,sortCol])
             }
-            ha <- HeatmapAnnotation(df = df,
-                                    col = col.colors)
+            if(is.null(col.colors)) {
+            ha <- HeatmapAnnotation(df = df)
+            } else {
+                ha <- HeatmapAnnotation(df = df,
+                                        col = col.colors)
+            }
         }
     }
     # STEP 2 Create heatmap
@@ -750,16 +754,16 @@ TCGAvisualize_Heatmap <- function(data,
     if(scale == "row"){
         message("Calculating z-scores for the rows....")
         data <- t(scale(t(data)))
-        if (type == "expression") color <- colorRamp2(seq(-4,4,0.1), gplots::greenred(length(seq(-4,4,0.1))))
-        if (type == "methylation") color <- colorRamp2(seq(-4,4,0.1), matlab::jet.colors(length(seq(-4,4,0.1))))
+        if (type == "expression") color <- circlize::colorRamp2(c(-2, 0, 2), c("blue", "white", "yellow"))
+        if (type == "methylation") color <- circlize::colorRamp2(c(-1, 0, 1), c("blue", "white", "red"))
     } else if(scale == "col"){
         message("Calculiating z-scores for the columns....")
         data <- scale(data)
-        if (type == "expression") color <- colorRamp2(seq(-4,4,0.1), gplots::greenred(length(seq(-4,4,0.1))))
-        if (type == "methylation") color <- colorRamp2(seq(-4,4,0.1), matlab::jet.colors(length(seq(-4,4,0.1))))
+        if (type == "expression") color <- circlize::colorRamp2(c(-2, 0, 2), c("green", "white", "red"))
+        if (type == "methylation") color <- circlize::colorRamp2(c(-1, 0, 1), c("blue", "white", "red"))
     } else {
-        if (type == "expression") color <- gplots::greenred(200)
-        if (type == "methylation") color <- matlab::jet.colors(200)
+        if (type == "expression") color <- gplots::colorpanel(200,"blue", "white", "yellow")
+        if (type == "methylation") color <- gplots::colorpanel(200,"blue", "white", "red")
     }
 
     # Creating plot title
@@ -770,7 +774,8 @@ TCGAvisualize_Heatmap <- function(data,
 
     # Change label type
     if(heatmap.legend.color.bar == "continuous" && type == "methylation"){
-        heatmap_legend_param <- list(color_bar = "continuous", at = c(0,0.2,0.4,0.6,0.8, 1), legend_height = unit(3, "cm"), labels = c("0.0 (hypomethylated)",0.2,0.4,0.6,0.8,"1.0 (hypermethylated)"))
+        heatmap_legend_param <- list(color_bar = "continuous")
+        if(!scale %in% c("row","col")) heatmap_legend_param <- list(color_bar = "continuous", at = c(0,0.2,0.4,0.6,0.8, 1), legend_height = unit(3, "cm"), labels = c("0.0 (hypomethylated)",0.2,0.4,0.6,0.8,"1.0 (hypermethylated)"))
     }
     if(heatmap.legend.color.bar == "continuous" && type == "expression"){
         heatmap_legend_param <- list(color_bar = "continuous")
