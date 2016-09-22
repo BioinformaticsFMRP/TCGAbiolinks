@@ -161,6 +161,7 @@ GDCdownload.aux <- function(server, manifest, name, path){
         }
         return(1)
     }, warning = function(w) {
+        return(1)
     }, error = function(e) {
         unlink(name) # remove tar
         return(-1)
