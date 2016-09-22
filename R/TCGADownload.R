@@ -193,7 +193,7 @@ GDCclientExists <- function(){
 }
 #' @importFrom xml2 read_html
 #' @importFrom downloader download
-#' @importFrom rvest html_nodes html_attr
+#' @importFrom rvest html_nodes html_attr %>%
 GDCclientInstall <- function(){
     if(GDCclientExists()) return(GDCclientPath())
 
@@ -203,7 +203,7 @@ GDCclientInstall <- function(){
     if(is.mac()) bin <- bin[grep("OSX", bin)]
     if(is.linux()) bin <- bin[grep("Ubuntu", bin)]
     if(is.windows()) mode <- "wb" else  mode <- "w"
-    download(paste0("https://gdc.nci.nih.gov/",bin), basename(bin), mode = mode)
+    download(bin, basename(bin), mode = mode)
     unzip(basename(bin))
     Sys.chmod("gdc-client")
     return(GDCclientPath())
