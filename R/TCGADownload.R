@@ -200,7 +200,7 @@ GDCclientInstall <- function(){
 
     links <- read_html("https://gdc.nci.nih.gov/access-data/gdc-data-transfer-tool")  %>% html_nodes("a") %>% html_attr("href")
     bin <- links[grep("zip",links)]
-    if(is.windows()) bin <- bin[grep("windows", bin)]
+    if(is.windows()) bin <- bin[grep("windows", bin,ignore.case = TRUE)]
     if(is.mac()) bin <- bin[grep("OSX", bin)]
     if(is.linux()) bin <- bin[grep("Ubuntu", bin)]
     if(is.windows()) mode <- "wb" else  mode <- "w"
