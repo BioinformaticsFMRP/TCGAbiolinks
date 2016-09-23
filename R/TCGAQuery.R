@@ -200,7 +200,14 @@ GDCquery <- function(project,
     if(!is.na(access)) results <- results[grepl(access,results$access,ignore.case = TRUE),]
 
     # Filter by experimental strategy
-    if(!is.na(experimental.strategy)) results <- results[results$experimental_strategy %in% experimental.strategy,]
+    if(!is.na(experimental.strategy)) {
+        if(all(tolower(experimental.strategy) %in%  tolower(results$experimental_strategy))) {
+        results <- results[tolower(results$experimental_strategy) %in% tolower(experimental.strategy),]
+        } else {
+            message(paste0("The argument experimental_strategy does not match any of the results.\nPossible values:",
+                           paste(unique(results$experimental_strategy),collapse = "\n=>")))
+        }
+    }
 
     # Filter by data.type
     if(!is.na(data.type)) {
