@@ -163,7 +163,10 @@ TCGAanalyze_survival <- function(data,
     pvalue <- summary(coxph(
         Surv(as.numeric(data$days_to_death),event=data$s)
         ~ data$type))$logtest[3]
-
+print(pvalue)
+print(format(pvalue,
+             scientific = TRUE,
+             digits = 2))
 
     surv <- ggsurv(fit, CI = "def", plot.cens = FALSE,
                    surv.col = "gg.def",
