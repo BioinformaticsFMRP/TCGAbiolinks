@@ -654,7 +654,14 @@ getBarcodeInfo <- function(barcode) {
                              paste0('"',paste(barcode,collapse = '","')),
                              URLencode('"]}}]}'))
     #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
-    json <- fromJSON(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")), simplifyDataFrame = TRUE)
+    url <- paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&"))
+    json  <- tryCatch(
+        fromJSON(url, simplifyDataFrame = TRUE),
+        error = function(e) {
+            fromJSON(content(GET(url), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+        }
+    )
+
     results <- json$data$hits
     submitter_id <- results$submitter_id
 
