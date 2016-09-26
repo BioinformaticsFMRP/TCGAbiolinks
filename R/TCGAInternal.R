@@ -109,6 +109,7 @@ getGDCprojects <- function(){
         projects$tumor <- unlist(lapply(projects$project_id, function(x){unlist(str_split(x,"-"))[2]}))
         return(projects)
     }, error = function(e) {
+        Sys.sleep(1)
         url <- "https://gdc-api.nci.nih.gov/projects?size=1000&format=json"
         json <- fromJSON(content(GET(url), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
         projects <- json$data$hits
