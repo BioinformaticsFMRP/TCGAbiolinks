@@ -54,9 +54,11 @@ GDCdownload <- function(query,
     # Check if the files were already downloaded by this package
 
     files2Download <- !file.exists(file.path(path,manifest$id,manifest$filename))
-    if(any(files2Download == FALSE)) message("Of the ", nrow(manifest), " files for download ",
+    if(any(files2Download == FALSE)) {
+        message("Of the ", nrow(manifest), " files for download ",
                                             table(files2Download)["FALSE"] , " already exist.")
-    if(any(files2Download == FALSE)) message("We will download only those that are missing ones.")
+        if(any(files2Download == TRUE)) message("We will download only those that are missing ones.")
+    }
     manifest <- manifest[files2Download,]
     # There is a bug in the API, if the files has the same name it will not download correctly
     # so method should be set to client if there are files with duplicated names
@@ -123,7 +125,7 @@ GDCdownload <- function(query,
             }
         }
     } else {
-        message("All samples have been already downloded")
+        message("All samples have been already downloaded")
     }
 }
 
