@@ -306,8 +306,13 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
                              URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["'),
                              files.data_category,
                              URLencode('"]}}]}'))
+    url <- paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter,"format=json", sep = "&"))
+    json  <- tryCatch({
+        json <- fromJSON(url, simplifyDataFrame = TRUE)
+    }, error = function(e) {
+        json <- fromJSON(content(GET(url), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+    })
 
-    json <- fromJSON(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")), simplifyDataFrame = TRUE)
     #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
     results <- json$data$hits
     if(grepl("clinical",type,ignore.case = TRUE)) {
