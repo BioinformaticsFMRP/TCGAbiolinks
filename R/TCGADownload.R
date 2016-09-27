@@ -101,7 +101,7 @@ GDCdownload <- function(query,
                            humanReadableByteCount(sum(as.numeric(manifest$size)))))
         } else {
             # case with one file only. This is not at tar.gz
-            name <- query$results[[1]]$file_name
+            name <- manifest$filename
             message(paste0("GDCdownload will download: ",
                            humanReadableByteCount(sum(as.numeric(manifest$size)))))
         }
@@ -127,6 +127,7 @@ GDCdownload <- function(query,
     } else {
         message("All samples have been already downloaded")
     }
+    return(TRUE)
 }
 
 GDCdownload.aux <- function(server, manifest, name, path){
