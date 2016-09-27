@@ -567,7 +567,7 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
                  data.table = FALSE, verbose = FALSE, showProgress = FALSE)
     maf$tumor <- unlist(lapply(maf$filename, function(x){unlist(str_split(x,"\\."))[2]}))
 
-    dir.create(directory, showWarnings = FALSE, recursive = TRUE)
+
     # Check input
     if (missing(tumor)) stop(paste0("Please, set tumor argument. Possible values:\n => ",
                                     paste(sort(maf$tumor),collapse = "\n => ")))
@@ -580,28 +580,19 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
     message(" For more information about MAF data please read the following GDC manual:")
     message(" GDC manual: https://gdc-docs.nci.nih.gov/Data/PDF/Data_UG.pdf")
     message("============================================================================")
-    selected <- maf[grepl(tumor,maf$tumor,ignore.case = TRUE),]
 
-    if(is.windows()) mode <- "wb" else  mode <- "w"
-    # Download maf
-    repeat{
-        if (!file.exists(file.path(directory,selected$filename)))
-            download(file.path(root,selected$id),
-                     file.path(directory,selected$filename),
-                     mode = mode)
+    query <- GDCquery(paste0("TCGA-",tumor), data.category = "Simple Nucleotide Variation", data.type = "Masked Somatic Mutation")
+    GDCdownload(query, directory = directory, method = "api")
 
-        # check integrity
-        if(md5sum(file.path(directory,selected$filename)) == selected$md5) break
-        unlink(file.path(directory,selected$filename))
-        message("The data downloaded might be corrupted. We will download it again")
-    }
-
-    # uncompress file
-    uncompressed <- gsub(".gz","",file.path(directory,selected$filename))
-    if (!file.exists(uncompressed)) gunzip(file.path(directory,selected$filename), remove = FALSE)
-    message(uncompressed)
+    file <- unique(file.path(directory,
+                             query$project,
+                             ifelse(query$legacy,"legacy","harmonized"),
+                             gsub(" ","_", query$results[[1]]$data_category),
+                             gsub(" ","_",query$results[[1]]$data_type),
+                             query$results[[1]]$file_id,
+                             query$results[[1]]$file_name))
     # Is there a better way??
-    ret <- read_tsv(uncompressed,
+    ret <- read_tsv(file,
                     comment = "#",
                     col_types = cols(
                         Entrez_Gene_Id = col_integer(),
@@ -617,7 +608,7 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
                         TSL = col_integer(),
                         HGVS_OFFSET = col_integer(),
                         MINIMISED = col_integer()))
-    if(ncol(ret) == 1) ret <- read_csv(uncompressed,
+    if(ncol(ret) == 1) ret <- read_csv(file,
                                        comment = "#",
                                        col_types = cols(
                                            Entrez_Gene_Id = col_integer(),
