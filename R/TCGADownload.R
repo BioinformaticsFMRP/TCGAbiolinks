@@ -118,7 +118,7 @@ GDCdownload <- function(query,
                 manifest.aux <- manifest[((idx * step) + 1):end,]
                 size <- humanReadableByteCount(sum(as.numeric(manifest.aux$size)))
                 name.aux <- gsub(".tar",paste0("_",idx,".tar"),name)
-                message(paste0("Downloading chunk ", idx, " of ", ceiling(nrow(manifest)/step - 1)) ,
+                message(paste0("Downloading chunk ", idx, " of ", ceiling(nrow(manifest)/step - 1) ,
                                " (", nrow(manifest.aux)," files, size = ", size,") ",
                                "as ", name.aux))
                 GDCdownload.aux(server, manifest.aux, name.aux, path)
