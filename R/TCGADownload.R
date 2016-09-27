@@ -30,7 +30,7 @@
 #' # data will be saved in  example_data_dir/TARGET-AML/harmonized/Transcriptome_Profiling/miRNA_Expression_Quantification
 #' GDCdownload(query, method = "client", directory = "example_data_dir")
 #' query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical")
-#' GDCdownload(query, chunks.per.download = 20)
+#' GDCdownload(query, chunks.per.download = 200)
 #' @return Shows the output from the GDC transfer tools
 GDCdownload <- function(query,
                         token.file,
