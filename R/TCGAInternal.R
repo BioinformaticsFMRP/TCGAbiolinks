@@ -87,8 +87,8 @@ checkDataCategoriesInput <- function(project,data.category, legacy = FALSE){
 checkBarcodeDefinition <- function(definition){
     for(i in definition){
         if(!(i %in% getBarcodeDefinition()$tissue.definition)){
-        print(knitr::kable(getBarcodeDefinition()))
-        stop(i, " was not found. Please select a difinition from the table above ")
+            print(knitr::kable(getBarcodeDefinition()))
+            stop(i, " was not found. Please select a difinition from the table above ")
         }
     }
 }
@@ -103,8 +103,19 @@ checkBarcodeDefinition <- function(definition){
 #' projects <- getGDCprojects()
 #' @return A data frame with last GDC projects
 getGDCprojects <- function(){
-    projects <- read_tsv("https://gdc-api.nci.nih.gov/projects?size=1000&format=tsv", col_types = "ccccccc")
-    projects$tumor <- unlist(lapply(projects$project_id, function(x){unlist(str_split(x,"-"))[2]}))
+
+    projects  <- tryCatch({
+        url <- "https://gdc-api.nci.nih.gov/projects?size=100&format=json"
+        json <- fromJSON(content(GET(url), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+        projects <- json$data$hits
+        projects$tumor <- unlist(lapply(projects$project_id, function(x){unlist(str_split(x,"-"))[2]}))
+        return(projects)
+    }, error = function(e) {
+        Sys.sleep(1)
+        projects <- read_tsv("https://gdc-api.nci.nih.gov/projects?size=100&format=tsv", col_types = "ccccccc")
+        projects$tumor <- unlist(lapply(projects$project_id, function(x){unlist(str_split(x,"-"))[2]}))
+        return(projects)
+    })
     return(projects)
 }
 
@@ -137,33 +148,33 @@ getNbFiles <- function(project, data.category, legacy = FALSE){
 
 .quantileNormalization <-
     function(wd, distribution) {
-    n <- nrow(wd)
-    m <- ncol(wd)
-    if(!missing(distribution))
-        if(m != length(distribution))
-            stop("The reference distribution has length
+        n <- nrow(wd)
+        m <- ncol(wd)
+        if(!missing(distribution))
+            if(m != length(distribution))
+                stop("The reference distribution has length
                  different from the col dimension of the data matrix.") else
-                distribution  <-  sort(distribution)
+                     distribution  <-  sort(distribution)
 
-    o <- matrix(0, n, m)
-    for(i in 1:n)
-        o[i,] <- order(wd[i,])
-
-    j <- 1
-    tmp <- rep(0, n)
-
-    while(j <= m) {
-        if(missing(distribution)) {
-            for(i in 1:n)
-                tmp[i] <- wd[i,o[i,j]]
-            value <- mean(tmp)
-        } else value  <- distribution[j]
+        o <- matrix(0, n, m)
         for(i in 1:n)
-            wd[i,o[i,j]] <- value
-        j <- j + 1
+            o[i,] <- order(wd[i,])
+
+        j <- 1
+        tmp <- rep(0, n)
+
+        while(j <= m) {
+            if(missing(distribution)) {
+                for(i in 1:n)
+                    tmp[i] <- wd[i,o[i,j]]
+                value <- mean(tmp)
+            } else value  <- distribution[j]
+            for(i in 1:n)
+                wd[i,o[i,j]] <- value
+            j <- j + 1
+        }
+        return(wd)
     }
-    return(wd)
-}
 
 is.windows <- function() {
     Sys.info()["sysname"] == "Windows"
