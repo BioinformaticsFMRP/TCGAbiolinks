@@ -127,7 +127,6 @@ GDCdownload <- function(query,
     } else {
         message("All samples have been already downloaded")
     }
-    return(TRUE)
 }
 
 GDCdownload.aux <- function(server, manifest, name, path){
