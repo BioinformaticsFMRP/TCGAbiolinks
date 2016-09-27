@@ -113,12 +113,12 @@ GDCdownload <- function(query,
             GDCdownload.aux(server, manifest, name, path)
         } else {
             step <- chunks.per.download
-            for(idx in 0:floor(nrow(manifest)/step)){
+            for(idx in 0:ceiling(nrow(manifest)/step - 1)){
                 end <- ifelse(((idx + 1) * step) > nrow(manifest), nrow(manifest),((idx + 1) * step))
                 manifest.aux <- manifest[((idx * step) + 1):end,]
                 size <- humanReadableByteCount(sum(as.numeric(manifest.aux$size)))
                 name.aux <- gsub(".tar",paste0("_",idx,".tar"),name)
-                message(paste0("Downloading chunk ", idx, " of ", floor(nrow(manifest)/step) ,
+                message(paste0("Downloading chunk ", idx, " of ", ceiling(nrow(manifest)/step - 1)) ,
                                " (", nrow(manifest.aux)," files, size = ", size,") ",
                                "as ", name.aux))
                 GDCdownload.aux(server, manifest.aux, name.aux, path)
