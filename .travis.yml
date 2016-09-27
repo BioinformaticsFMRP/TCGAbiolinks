@@ -10,7 +10,7 @@ os:
 
 before_install:
   - sudo apt-get update -q
-  - sudo apt-get install libc6
+  - sudo apt-get install libc6 libc6-dev
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("nlme", lib="/home/travis/R-bin/lib/R/library/")'; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("roxygen2", lib="/home/travis/R-bin/lib/R/library/")'; fi
 
