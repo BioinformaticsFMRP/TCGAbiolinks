@@ -131,8 +131,8 @@ TCGAanalyze_survival <- function(data,
 ) {
     .e <- environment()
 
-    if(!all(c("vital_status", "days_to_death") %in% colnames(data)))
-        stop("Columns vital_status, days_to_death should be in data frame")
+    if(!all(c("vital_status", "days_to_death","days_to_last_follow_up") %in% colnames(data)))
+        stop("Columns vital_status, days_to_death and  days_to_last_follow_up should be in data frame")
 
     if(is.null(color)){
         color <- rainbow(length(unique(data[,clusterCol])))
@@ -145,8 +145,8 @@ TCGAanalyze_survival <- function(data,
     }
     notDead <- is.na(data$days_to_death)
 
-    if (length(notDead) > 0) {
-        data[notDead,]$days_to_death <- data[notDead,]$days_to_last_follow_up
+    if (any(notDead == TRUE)) {
+        data[notDead,"days_to_death"] <- data[notDead,"days_to_last_follow_up"]
     }
     # create a column to be used with survival package, info need
     # to be TRUE(DEAD)/FALSE (ALIVE)
