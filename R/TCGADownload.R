@@ -56,7 +56,7 @@ GDCdownload <- function(query,
     files2Download <- !file.exists(file.path(path,manifest$id,manifest$filename))
     if(any(files2Download == FALSE)) {
         message("Of the ", nrow(manifest), " files for download ",
-                                            table(files2Download)["FALSE"] , " already exist.")
+                table(files2Download)["FALSE"] , " already exist.")
         if(any(files2Download == TRUE)) message("We will download only those that are missing ones.")
     }
     manifest <- manifest[files2Download,]
@@ -201,7 +201,13 @@ GDCclientExists <- function(){
 GDCclientInstall <- function(){
     if(GDCclientExists()) return(GDCclientPath())
 
-    links <- read_html("https://gdc.nci.nih.gov/access-data/gdc-data-transfer-tool")  %>% html_nodes("a") %>% html_attr("href")
+    links = tryCatch({
+        read_html("https://gdc.nci.nih.gov/access-data/gdc-data-transfer-tool")  %>% html_nodes("a") %>% html_attr("href")
+    }, error = function(e) {
+        c("https://gdc.cancer.gov/files/public/file/gdc-client_v1.1.0_Ubuntu14.04_x64.zip",
+          "https://gdc.cancer.gov/files/public/file/gdc-client_v1.1.0_OSX_x64.zip",
+          "https://gdc.cancer.gov/files/public/file/gdc-client_v1.1.0_Windows_x64.zip")
+    })
     bin <- links[grep("zip",links)]
     if(is.windows()) bin <- bin[grep("windows", bin,ignore.case = TRUE)]
     if(is.mac()) bin <- bin[grep("OSX", bin)]
