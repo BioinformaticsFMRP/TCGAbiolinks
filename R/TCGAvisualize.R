@@ -907,7 +907,7 @@ TCGAvisualize_Heatmap <- function(data,
 #'            rep("subtype3",10)),4)
 #' df <- data.frame(cluster,subtype)
 #' plot <- TCGAvisualize_profilePlot(data = df, groupCol = "cluster", subtypeCol = "subtype",
-#'                           plot.margin=c(-4.2,-2.5,-0.5,2))
+#'                           plot.margin=c(-4.2,-2.5,0.8,1))
 #' @return A plot
 TCGAvisualize_profilePlot <- function(data = NULL,
                                       groupCol = NULL,
@@ -924,13 +924,19 @@ TCGAvisualize_profilePlot <- function(data = NULL,
                                       geom.label.size = 6.0,
                                       geom.label.color = "black") {
 
-    sjp.setTheme(theme = "scatterw",
+    sjp.setTheme(base = ggthemes::theme_few() ,
                  axis.title.size = axis.title.size,
                  axis.textsize = axis.textsize,
                  legend.size = legend.size,
                  legend.title.size = legend.title.size,
                  geom.label.size = geom.label.size,
-                 geom.label.color = geom.label.color)
+                 geom.label.color = geom.label.color,
+                 axis.linecolor = "grey",
+                 panel.backcol="white",
+                 panel.bordercol="white",
+                 panel.major.gridcol="white",
+                 panel.minor.gridcol="white",
+                 plot.backcol="white")
 
     if (is.null(groupCol)) stop("Please provide the groupCol argument")
     if (is.null(subtypeCol)) stop("Please provide the subtypeCol argument")
@@ -1023,17 +1029,18 @@ TCGAvisualize_profilePlot <- function(data = NULL,
     var.labels <- as.character(var.labels)
     var.labels[which(is.na(var.labels)==TRUE)] <- "NA"
     # Create the horizontal barplot
+
     p <- .mysjp.stackfrq(data,
-                         legendTitle = subtypeCol,
+                         legend.title = subtypeCol,
                          #axisTitle.x = groupCol,
-                         axisTitle.x = "",
+                         axis.titles = groupCol,
                          #sort.frq = "last.desc",
                          expand.grid = FALSE,
                          geom.size = width,
-                         legendLabels = as.character(var.labels),
-                         jitterValueLabels = TRUE,
+                         legend.labels = as.character(var.labels),
+                         #jitterValueLabels = TRUE,
                          #showSeparatorLine = TRUE,
-                         showValueLabels = FALSE,
+                         show.values = FALSE,
                          geom.colors = colors[1:length(var.labels)])$plot
     p <-  ggdraw(switch_axis_position(p , axis = 'y'))
 
@@ -1055,6 +1062,7 @@ TCGAvisualize_profilePlot <- function(data = NULL,
                        legend.labels = as.character(unique(groups[,2])),
                        coord.flip = FALSE,
                        show.legend = FALSE,
+                       show.n = F,
                        #showSeparatorLine = FALSE,
                        #showValueLabels = FALSE,
                        #geom.size = c(0.1,0.2,0.4,0.3),
@@ -1063,7 +1071,7 @@ TCGAvisualize_profilePlot <- function(data = NULL,
                                                  end = 0.9,
                                                  gamma = 2.2,
                                                  alpha = 0.1))$plot
-
+    save(groups, file = "trash.rda")
     p2 <- p2 +
         theme(#legend.position="none",
             #plot.margin=unit(c(-3.0,4.5,-0.75,5.5), "cm"),
@@ -1075,10 +1083,10 @@ TCGAvisualize_profilePlot <- function(data = NULL,
             axis.ticks=element_blank(),
             #axis.title.x=element_blank(),
             #axis.title.y=element_blank(),
-            #panel.background=element_blank(),
-            #panel.border=element_blank(),
-            #panel.grid.major=element_blank(),
-            #panel.grid.minor=element_blank(),
+            panel.background=element_blank(),
+            panel.border=element_blank(),
+            panel.grid.major=element_blank(),
+            panel.grid.minor=element_blank(),
             plot.background=element_blank())
 
     # put the plots together
@@ -1099,40 +1107,47 @@ TCGAvisualize_profilePlot <- function(data = NULL,
 #' @keywords internal
 #' @import sjmisc
 .mysjp.stackfrq <- function(items,
-                            legendLabels = NULL,
-                            sort.frq = NULL,
-                            weightBy = NULL,
-                            weightByTitleString = NULL,
-                            hideLegend = FALSE,
                             title = NULL,
-                            legendTitle = NULL,
-                            includeN = TRUE,
-                            axisLabels.y = NULL,
-                            breakTitleAt = 50,
-                            breakLabelsAt = 30,
-                            breakLegendTitleAt = 30,
-                            breakLegendLabelsAt = 28,
-                            gridBreaksAt = 0.2,
-                            expand.grid = FALSE,
+                            legend.title = NULL,
+                            legend.labels = NULL,
+                            axis.titles = NULL,
+                            axis.labels = NULL,
+                            weight.by = NULL,
+                            sort.frq = NULL,
+                            wrap.title = 50,
+                            wrap.labels = 30,
+                            wrap.legend.title = 30,
+                            wrap.legend.labels = 28,
                             geom.size = 0.5,
                             geom.colors = "Blues",
-                            axisTitle.x = NULL,
-                            axisTitle.y = NULL,
-                            showValueLabels = TRUE,
-                            labelDigits = 1,
-                            showPercentageAxis = TRUE,
-                            jitterValueLabels = FALSE,
-                            showItemLabels = TRUE,
-                            showSeparatorLine = FALSE,
-                            separatorLineColor = "grey80",
-                            separatorLineSize = 0.3,
+                            show.values = TRUE,
+                            show.n = TRUE,
+                            show.prc = TRUE,
+                            show.legend = TRUE,
+                            grid.breaks = 0.2,
+                            expand.grid = FALSE,
+                            digits = 1,
+                            vjust = "center",
                             coord.flip = TRUE,
-                            printPlot = TRUE) {
+                            prnt.plot = TRUE) {
     # --------------------------------------------------------
     # check param. if we have a single vector instead of
     # a data frame with several items, convert vector to data frame
     # --------------------------------------------------------
     if (!is.data.frame(items) && !is.matrix(items)) items <- as.data.frame(items)
+    # --------------------------------------------------------
+    # copy titles
+    # --------------------------------------------------------
+    if (is.null(axis.titles)) {
+        axisTitle.x <- ""
+        axisTitle.y <- ""
+    } else {
+        axisTitle.x <- axis.titles[1]
+        if (length(axis.titles) > 1)
+            axisTitle.y <- axis.titles[2]
+        else
+            axisTitle.y <- ""
+    }
     # --------------------------------------------------------
     # check sorting
     # --------------------------------------------------------
@@ -1157,79 +1172,56 @@ TCGAvisualize_profilePlot <- function(data = NULL,
         reverseOrder <- FALSE
     }
     # --------------------------------------------------------
-    # try to automatically set labels is not passed as parameter
+    # try to automatically set labels if not passed as parameter
     # --------------------------------------------------------
-    if (is.null(legendLabels)) legendLabels <- sjmisc::get_labels(items[[1]],
-                                                                  attr.only = F,
-                                                                  include.values = NULL,
-                                                                  include.non.labelled = T)
-    if (is.null(axisLabels.y)) {
-        axisLabels.y <- c()
+    if (is.null(legend.labels))
+        legend.labels <- sjmisc::get_labels(items[[1]], attr.only = F,
+                                            include.values = NULL, include.non.labelled = T)
+    if (is.null(axis.labels)) {
+        axis.labels <- c()
         # if yes, iterate each variable
         for (i in 1:ncol(items)) {
             # retrieve variable name attribute
-            vn <- sjmisc::get_label(items[[i]], def.value = colnames(items)[i])
-            # if variable has attribute, add to variableLabel list
-            if (!is.null(vn)) {
-                axisLabels.y <- c(axisLabels.y, vn)
-            } else {
-                # else break out of loop
-                axisLabels.y <- NULL
-                break
-            }
+            axis.labels <- c(axis.labels, sjmisc::get_label(items[[i]], def.value = colnames(items)[i]))
         }
     }
     # --------------------------------------------------------
-    # If axisLabels.y were not defined, simply use column names
+    # unname labels, if necessary, so we have a simple
+    # character vector
     # --------------------------------------------------------
-    if (is.null(axisLabels.y)) axisLabels.y <- colnames(items)
+    if (!is.null(names(axis.labels))) axis.labels <- as.vector(axis.labels)
     # --------------------------------------------------------
-    # unlist/ unname axis labels
+    # unname labels, if necessary, so we have a simple
+    # character vector
     # --------------------------------------------------------
-    if (!is.null(axisLabels.y)) {
-        # unlist labels, if necessary, so we have a simple
-        # character vector
-        if (is.list(axisLabels.y)) axisLabels.y <- unlistlabels(axisLabels.y)
-        # unname labels, if necessary, so we have a simple
-        # character vector
-        if (!is.null(names(axisLabels.y))) axisLabels.y <- as.vector(axisLabels.y)
-    }
+    if (!is.null(legend.labels) && !is.null(names(legend.labels))) legend.labels <- as.vector(legend.labels)
     # --------------------------------------------------------
-    # unlist/ unname axis labels
+    # if we have no legend labels, we iterate all data frame's
+    # columns to find all unique items of the data frame.
+    # In case one item has missing categories, this may be
+    # "compensated" by looking at all items, so we have the
+    # actual values of all items.
     # --------------------------------------------------------
-    if (!is.null(legendLabels)) {
-        # unlist labels, if necessary, so we have a simple
-        # character vector
-        if (is.list(legendLabels)) legendLabels <- unlistlabels(legendLabels)
-        # unname labels, if necessary, so we have a simple
-        # character vector
-        if (!is.null(names(legendLabels))) legendLabels <- as.vector(legendLabels)
-    }
-    if (is.null(legendLabels)) {
-        # if we have no legend labels, we iterate all data frame's
-        # columns to find all unique items of the data frame.
-        # In case one item has missing categories, this may be
-        # "compensated" by looking at all items, so we have the
-        # actual values of all items.
-        legendLabels <- as.character(sort(unique(unlist(
+    if (is.null(legend.labels)) {
+        legend.labels <- as.character(sort(unique(unlist(
             apply(items, 2, function(x) unique(stats::na.omit(x)))))))
     }
     # --------------------------------------------------------
     # Check whether N of each item should be included into
     # axis labels
     # --------------------------------------------------------
-    if (includeN && !is.null(axisLabels.y)) {
-        for (i in 1:length(axisLabels.y)) {
-            axisLabels.y[i] <- paste(axisLabels.y[i],
-                                     sprintf(" (n=%i)", length(stats::na.omit(items[[i]]))),
-                                     sep = "")
+    if (show.n) {
+        for (i in 1:length(axis.labels)) {
+            axis.labels[i] <- paste(axis.labels[i],
+                                    sprintf(" (n=%i)", length(stats::na.omit(items[[i]]))),
+                                    sep = "")
         }
     }
     # -----------------------------------------------
     # if we have legend labels, we know the exact
     # amount of groups
     # -----------------------------------------------
-    countlen <- length(legendLabels)
+    countlen <- length(legend.labels)
     # -----------------------------------------------
     # create cross table for stats, summary etc.
     # and weight variable. do this for each item that was
@@ -1257,20 +1249,16 @@ TCGAvisualize_profilePlot <- function(data = NULL,
         # data frame)
         # -----------------------------------------------
         # check whether counts should be weighted or not
-        if (is.null(weightBy)) {
+        if (is.null(weight.by)) {
             df <- as.data.frame(prop.table(table(variable)))
         } else {
-            df <- as.data.frame(prop.table(round(stats::xtabs(weightBy ~ variable), 0)))
+            df <- as.data.frame(prop.table(round(stats::xtabs(weight.by ~ variable), 0)))
         }
-
-        grp <- NULL
-        ypos <- NULL
-
         # give columns names
         names(df) <- c("var", "prc")
         # need to be numeric, so percentage values (see below) are
         # correctly assigned, i.e. missing categories are considered
-        df$var <- sjmisc::to_value(df$var, keep.labels = FALSE) + diff # if categories start with zero, fix this here
+        df$var <- sjmisc::to_value(df$var, keep.labels = F) + diff # if categories start with zero, fix this here
         # Create a vector of zeros
         prc <- rep(0, countlen)
         # Replace the values in prc for those indices which equal df$var
@@ -1278,9 +1266,7 @@ TCGAvisualize_profilePlot <- function(data = NULL,
         # create new data frame. We now have a data frame with all
         # variable categories abd their related percentages, including
         # zero counts, but no(!) missings!
-        mydf <- data.frame(grp = i,
-                           cat = 1:countlen,
-                           prc)
+        mydf <- data.frame(grp = i, cat = 1:countlen, prc)
         # now, append data frames
         mydat <- data.frame(rbind(mydat, mydf))
     }
@@ -1296,28 +1282,19 @@ TCGAvisualize_profilePlot <- function(data = NULL,
         dplyr::mutate(ypos = cumsum(prc) - 0.5 * prc) %>%
         dplyr::arrange(grp)
     # --------------------------------------------------------
-    # Caculate vertical adjustment to avoid overlapping labels
-    # --------------------------------------------------------
-    jvert <- rep(c(1.1, -0.1), length.out = length(unique(mydat$cat)))
-    jvert <- rep(jvert, length.out = nrow(mydat))
-    # --------------------------------------------------------
     # Prepare and trim legend labels to appropriate size
     # --------------------------------------------------------
     # wrap legend text lines
-    legendLabels <- sjmisc::word_wrap(legendLabels, breakLegendLabelsAt)
+    legend.labels <- sjmisc::word_wrap(legend.labels, wrap.legend.labels)
     # check whether we have a title for the legend
     # if yes, wrap legend title line
-    if (!is.null(legendTitle)) legendTitle <- sjmisc::word_wrap(legendTitle, breakLegendTitleAt)
+    if (!is.null(legend.title)) legend.title <- sjmisc::word_wrap(legend.title, wrap.legend.title)
     # check length of diagram title and split longer string at into new lines
     # every 50 chars
-    if (!is.null(title)) {
-        # if we have weighted values, say that in diagram's title
-        if (!is.null(weightByTitleString)) title <- paste0(title, weightByTitleString)
-        title <- sjmisc::word_wrap(title, breakTitleAt)
-    }
+    if (!is.null(title)) title <- sjmisc::word_wrap(title, wrap.title)
     # check length of x-axis-labels and split longer strings at into new lines
     # every 10 chars, so labels don't overlap
-    if (!is.null(axisLabels.y)) axisLabels.y <- sjmisc::word_wrap(axisLabels.y, breakLabelsAt)
+    if (!is.null(axis.labels)) axis.labels <- sjmisc::word_wrap(axis.labels, wrap.labels)
     # ----------------------------
     # Check if ordering was requested
     # ----------------------------
@@ -1353,67 +1330,49 @@ TCGAvisualize_profilePlot <- function(data = NULL,
         # replace old grp-order by new order
         mydat$grp <- as.factor(orderedrow)
         # reorder axis labels as well
-        axisLabels.y <- axisLabels.y[order(dummy2)]
+        axis.labels <- axis.labels[order(dummy2)]
     }
     # --------------------------------------------------------
     # check if category-oder on x-axis should be reversed
     # change category label order then
     # --------------------------------------------------------
-    if (reverseOrder && is.null(sort.frq)) axisLabels.y <- rev(axisLabels.y)
-    # --------------------------------------------------------
-    # define vertical position for labels
-    # --------------------------------------------------------
-    if (coord.flip) {
-        # if we flip coordinates, we have to use other parameters
-        # than for the default layout
-        vert <- 0.35
-    } else {
-        vert <- waiver()
-    }
+    if (reverseOrder && is.null(sort.frq)) axis.labels <- rev(axis.labels)
     # --------------------------------------------------------
     # set diagram margins
     # --------------------------------------------------------
     if (expand.grid) {
-        expgrid <- waiver()
+        expgrid <- ggplot2::waiver()
     } else {
         expgrid <- c(0, 0)
     }
     # --------------------------------------------------------
     # Set value labels and label digits
     # --------------------------------------------------------
-    mydat$labelDigits <- labelDigits
-    if (showValueLabels) {
-        if (jitterValueLabels) {
-            ggvaluelabels <-  geom_text(aes(y = ypos, label = sprintf("%.*f%%", labelDigits, 100 * prc)),
-                                        vjust = jvert)
-        } else {
-            ggvaluelabels <-  geom_text(aes(y = ypos, label = sprintf("%.*f%%", labelDigits, 100 * prc)),
-                                        vjust = vert)
-        }
+    mydat$digits <- digits
+    if (show.values) {
+        ggvaluelabels <-  geom_text(aes(y = ypos, label = sprintf("%.*f%%", digits, 100 * prc)),
+                                    vjust = vjust)
     } else {
-        ggvaluelabels <-  geom_text(label = "")
+        ggvaluelabels <-  geom_text(aes(y = ypos), label = "")
     }
     # --------------------------------------------------------
     # Set up grid breaks
     # --------------------------------------------------------
-    if (is.null(gridBreaksAt)) {
-        gridbreaks <- waiver()
+    if (is.null(grid.breaks)) {
+        gridbreaks <- ggplot2::waiver()
     } else {
-        gridbreaks <- c(seq(0, 1, by = gridBreaksAt))
+        gridbreaks <- c(seq(0, 1, by = grid.breaks))
     }
     # --------------------------------------------------------
     # check if category-oder on x-axis should be reversed
     # change x axis order then
     # --------------------------------------------------------
-    #geom.size <- c(1,geom.size)
     l <- length(unique(mydat$cat))
     w <- geom.size[seq(l +1, length(geom.size),l)]
-    #w <- c(1.5,w)
     pos <- 0.5 * (cumsum(w) + cumsum(c(0, w[-length(w)])))
     pos <- pos + 1.4
     pos <- c(1,pos)
-    mydat$grp <- as.numeric(sort(rep(pos,l)))
-
+    mydat$grp <- factor(as.numeric(sort(rep(pos,l))))
 
     if (reverseOrder && is.null(sort.frq)) {
         baseplot <- ggplot(mydat, aes(x = rev(grp), y = prc, fill = cat))
@@ -1422,39 +1381,33 @@ TCGAvisualize_profilePlot <- function(data = NULL,
     }
     baseplot <- baseplot +
         # plot bar chart
-        geom_bar(aes(x = grp, y = prc, fill = cat),stat = "identity",
-                 position = "stack", width = 0.98 *geom.size, colour="black")
-
-    # --------------------------------------------------------
-    # check whether bars should be visually separated by an
-    # additional separator line
-    # --------------------------------------------------------
-    if (showSeparatorLine) {
-        baseplot <- baseplot +
-            geom_vline(xintercept = c(seq(1.5, length(items), by = 1)),
-                       size = separatorLineSize,
-                       colour = separatorLineColor)
-    }
+        geom_bar(stat = "identity", position = "stack", width = 0.98 * geom.size)
     # -----------------
     # show/hide percentage values on x axis
     # ----------------------------
-    if (!showPercentageAxis) percent <- NULL
+    if (show.prc)
+        perc.val <- scales::percent
+    else
+        perc.val <- NULL
+    # -----------------
+    # start plot here
+    # ----------------------------
     baseplot <- baseplot +
         # show absolute and percentage value of each bar.
         ggvaluelabels +
         # no additional labels for the x- and y-axis, only diagram title
-        labs(title = title, x = axisTitle.x, y = axisTitle.y, fill = legendTitle) +
+        labs(title = title, x = axisTitle.x, y = axisTitle.y, fill = legend.title) +
         # print value labels to the x-axis.
-        # If parameter "axisLabels.y" is NULL, the category numbers (1 to ...)
+        # If parameter "axis.labels" is NULL, the category numbers (1 to ...)
         # appear on the x-axis
-        scale_x_continuous(labels = axisLabels.y, breaks = pos) +
+        scale_x_discrete(labels = axis.labels) +
         # set Y-axis, depending on the calculated upper y-range.
         # It either corresponds to the maximum amount of cases in the data set
         # (length of var) or to the highest count of var's categories.
         scale_y_continuous(breaks = gridbreaks,
                            limits = c(0, 1),
                            expand = expgrid,
-                           labels = percent)
+                           labels = perc.val)
     # check whether coordinates should be flipped, i.e.
     # swap x and y axis
     if (coord.flip) baseplot <- baseplot + coord_flip()
@@ -1462,14 +1415,14 @@ TCGAvisualize_profilePlot <- function(data = NULL,
     # set geom colors
     # ---------------------------------------------------------
     baseplot <- sjPlot:::sj.setGeomColors(baseplot,
-                                          geom.colors,
-                                          length(legendLabels),
-                                          ifelse(isTRUE(hideLegend), FALSE, TRUE),
-                                          legendLabels)
+                                 geom.colors,
+                                 length(legend.labels),
+                                 show.legend,
+                                 legend.labels)
     # ---------------------------------------------------------
     # Check whether ggplot object should be returned or plotted
     # ---------------------------------------------------------
-    if (printPlot) plot(baseplot)
+    if (prnt.plot) graphics::plot(baseplot)
     # -------------------------------------
     # return results
     # -------------------------------------
