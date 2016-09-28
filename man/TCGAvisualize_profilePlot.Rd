@@ -68,6 +68,6 @@ subtype <- rep(c(rep("subtype1",5),
            rep("subtype3",10)),4)
 df <- data.frame(cluster,subtype)
 plot <- TCGAvisualize_profilePlot(data = df, groupCol = "cluster", subtypeCol = "subtype",
-                          plot.margin=c(-4.2,-2.5,-0.5,2))
+                          plot.margin=c(-4.2,-2.5,0.8,1))
 }
 
