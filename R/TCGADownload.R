@@ -27,7 +27,8 @@
 #'                   data.type = "miRNA Expression Quantification",
 #'                   workflow.type = "BCGSC miRNA Profiling",
 #'                   barcode = c("TARGET-20-PARUDL-03A-01R","TARGET-20-PASRRB-03A-01R"))
-#' # data will be saved in  example_data_dir/TARGET-AML/harmonized/Transcriptome_Profiling/miRNA_Expression_Quantification
+#' # data will be saved in:
+#' # example_data_dir/TARGET-AML/harmonized/Transcriptome_Profiling/miRNA_Expression_Quantification
 #' GDCdownload(query, method = "client", directory = "example_data_dir")
 #' query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical")
 #' GDCdownload(query, chunks.per.download = 200)
