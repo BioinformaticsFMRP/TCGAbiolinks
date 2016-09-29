@@ -240,9 +240,6 @@ is.linux <- function() {
 #' @import ggplot2
 #' @importFrom plyr ddply
 #' @importFrom scales muted
-# @import plyr
-# @import scales
-# @import grid
 #' @import stats
 #' @keywords internal
 #' @return  a ggplot2 plot

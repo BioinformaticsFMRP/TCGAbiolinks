@@ -1648,49 +1648,6 @@ img <- readPNG("figure5star.png")
 grid.raster(img)
 ```
 
-## `TCGAvisualize_profilePlot`: Analyzing the association between cancer subtypes and clustering
-
-Sometimes we would like to see the distribution of some features in each cluster.
-We could do a barplot for each cluster in which the bars would have the
-counts of the subtypes.
-
-But here, we propose another way to display the association between cancer subtypes 
-and any kind of clustering is using the `TCGAvisualize_profilePlot` function.
-
-The profilePlot will have tree important regions, the distribuition in percentage
-of a feature inside the cluster (cental bars), 
-the distribution of the samples over the clusters (left bar),
-and the subytype distribution taking in cosideration all samples (bottom bar).
-
-The arguments of this function are:
-
-* **data** Dataframe with at least two columns (groupCol and subtypeCol)
-* **groupCol** The name of the column with the group information
-* **subtypeCol** The name of the column with the subtype information
-* **colors** A vector of colors 
-* **na.rm.groups** Remove the NA groups? DEAFULT: `FALSE`
-* **na.rm.subtypes** Remove the NA subtypes? DEAFULT: `FALSE`
-
-```{r, eval = FALSE}
-df <- TCGAquery_subtype("lgg")
-TCGAvisualize_profilePlot(df, 
-                          groupCol = "RNASeqCluster", 
-                          subtypeCol =  "IDH.1p19q.Subtype", 
-                          na.rm.groups = TRUE)
-```
-
-
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
-library(grid)
-img <- readPNG("profilePlot.png")
-grid.raster(img)
-```
-
-One possible interpretation that this plot can provide to the user is that
-if the cluster profiles ( distribution of the subtypes in each cluster) 
-are close to the subtype distribution considering all samples (bottom bar) 
-then there is no association between the subtypes and the clustering.
 
 # TCGA Downstream Analysis: Case Studies
 
@@ -1957,43 +1914,6 @@ img <- readPNG("case2_surv.png")
 grid.raster(img)
 ```
 
-Second, we will create profile plots for: IDH.1p19q.Subtype, 
-methylation cluster and age, for the EC groups.
-
-```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-TCGAvisualize_profilePlot(clin_subt,
-                          groupCol="groupsHC",
-                          subtypeCol="IDH.codel.subtype",
-                          filename = "case2_Idh.png",
-                          plot.margin = c(-4.0, -2.5, -0.5, 2),
-                          na.rm.groups = TRUE)
-```
-
-The IDH subgroup profile plot is shown below:
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
-library(grid)
-img <- readPNG("case2_Idh.png")
-grid.raster(img)
-```
-
-
-```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-TCGAvisualize_profilePlot(clin_subt,
-                          groupCol="groupsHC",
-                          subtypeCol="Supervised.DNA.Methylation.Cluster",
-                          filename = "case2_Met.png",
-                          plot.margin = c(-4.0, -2.5, -0.5, 2),
-                          na.rm.groups = TRUE)
-```
-
-The Methylation subgroup profile plot is shown below:
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
-library(grid)
-img <- readPNG("case2_Met.png")
-grid.raster(img)
-```
 
 We will also, create a heatmap of the expression.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
@@ -2043,47 +1963,6 @@ dataMut$Tumor_Sample_Barcode <- substr(dataMut$Tumor_Sample_Barcode,1,12)
 # Adding the Expression Cluster classification found before
 dataMut <- merge(dataMut, cluster, by.y="patient", by.x="Tumor_Sample_Barcode")
 dataMut <- dataMut[dataMut$Variant_Classification!=0,]
-```
-
-We can see the distribution of the subtypes Variant_Classification 
-of the gene ATRX by HC groups.
-
-```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-TCGAvisualize_profilePlot(dataMut,
-                          groupCol = "groupsHC",
-                          subtypeCol =  "Variant_Classification",
-                          na.rm.groups = FALSE,
-                          plot.margin = c(-4.0, -2.5, -1.5, 2),
-                          filename = paste0(mRNAsel,"_Mutation_Variant_Classification.png"))
-```
-
-The result is shown below:
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
-library(grid)
-img <- readPNG("ATRX_Mutation_Variant_Classification.png")
-grid.raster(img)
-```
-
-
-We can see the distribution of the subtypes Variant_Type of the gene ATRX by HC groups.
-
-
-```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-TCGAvisualize_profilePlot(dataMut,
-                          groupCol = "groupsHC",
-                          subtypeCol =  "Variant_Type",
-                          na.rm.groups = FALSE,
-                          plot.margin = c(-4.0, -2.5, -1.5, 2),
-                          filename = paste0(mRNAsel,"_Mutation_Variant_Type_in_EC_clusters.png"))
-```
-
-The result is shown below:
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
-library(grid)
-img <- readPNG("ATRX_Mutation_Variant_Type_in_EC_clusters.png")
-grid.raster(img)
 ```
 
 ## Case study n. 3: Integration of methylation and expression for ACC
