@@ -1287,6 +1287,9 @@ TCGAvisualize_starburst <- function(met,
 {
     .e <- environment()
 
+    group1 <- gsub(" ", ".",group1)
+    group2 <- gsub(" ", ".",group2)
+
     if(is.null(color)) color <- c("#000000", "#E69F00","#56B4E9", "#009E73",
                                   "red", "#0072B2","#D55E00", "#CC79A7",
                                   "purple")
