@@ -117,7 +117,8 @@ readSimpleNucleotideVariationMaf <- function(files){
                             PICK = col_integer(),
                             TSL = col_integer(),
                             HGVS_OFFSET = col_integer(),
-                            MINIMISED = col_integer()))
+                            MINIMISED = col_integer()),
+                        progress = TRUE)
         if(ncol(ret) == 1) ret <- read_csv(files,
                                            comment = "#",
                                            col_types = cols(
@@ -133,7 +134,8 @@ readSimpleNucleotideVariationMaf <- function(files){
                                                PICK = col_integer(),
                                                TSL = col_integer(),
                                                HGVS_OFFSET = col_integer(),
-                                               MINIMISED = col_integer()))
+                                               MINIMISED = col_integer()),
+                                           progress = TRUE)
         return(ret)
 }
 
@@ -877,25 +879,4 @@ TCGAprepare_Affy <- function(ClinData, PathFolder, TabCel){
 
     return(mat)
 
-}
-
-
-
-mutation.genes <- function(tumor = NULL, data=NULL){
-    df <- TCGAquery_maf(tumor)
-    DT <- data.table(df)
-    mutated.genes <- with(DT, {
-        mutated.genes <- DataFrame(
-            DT[, list(genes = list(as.character(Hugo_Symbol))), by = "bcr_patient_barcode"]
-        )
-    })
-    colnames(mutated.genes)[1] <- "patient"
-
-    if(!is.null(data)){
-        df <- merge(data,mutated.genes,all.x = TRUE, sort = FALSE, all.y= FALSE)
-        df <- df[match(data$patient,df$patient),]
-    } else {
-        df <- mutated.genes
-    }
-    return(df)
 }
