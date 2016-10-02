@@ -879,6 +879,7 @@ unlistlabels <- function(lab) {
 #' @param filename name of the pdf
 #' @param color named vector for the plot
 #' @param height pdf height
+#' @param width pdf width
 #' @param rm.empty.columns If there is no alteration in that sample, whether remove it on the oncoprint
 #' @param show.row.barplot  Show barplot annotation on rows?
 #' @param show.column.names Show column names? Default: FALSE
@@ -922,6 +923,7 @@ TCGAvisualize_oncoprint <- function (mut,
                                      annotation.position = "bottom",
                                      annotation,
                                      height,
+                                     width = 10,
                                      rm.empty.columns = FALSE,
                                      show.column.names = FALSE,
                                      show.row.barplot = TRUE,
@@ -1013,7 +1015,7 @@ TCGAvisualize_oncoprint <- function (mut,
     mat <- t(mat)
 
     if(!missing(height)) height <- length(genes)/2
-    if(!missing(filename)) pdf(filename,width = 20,height = height)
+    if(!missing(filename)) pdf(filename,width = width,height = height)
 
     if(missing(annotation)) annotation <- NULL
     if(!is.null(annotation)){
@@ -1208,7 +1210,7 @@ TCGAvisualize_oncoprint <- function (mut,
         )
     }
 
+    draw(p, heatmap_legend_side = heatmap.legend.side, annotation_legend_side = annotation.legend.side)
     if(!missing(filename)) dev.off()
 
-    draw(p, heatmap_legend_side = heatmap.legend.side, annotation_legend_side = annotation.legend.side)
 }
