@@ -560,10 +560,11 @@ mut <- GDCquery_Maf(tumor = "ACC")
 clin <- GDCquery_clinic("TCGA-ACC","clinical")
 clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_stage","race","vital_status")]
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
-                        filename = "oncoprint.png",
+                        filename = "oncoprint.pdf",
                         annotation = clin,
                         color=c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown"),
                         rows.font.size=10,
+                        width = 5,
                         heatmap.legend.side = "right",
                         dist.col = 0,
                         label.font.size = 10)
@@ -590,12 +591,13 @@ there are two main differences:
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, fig.height=6}
 clin.query <- GDCquery(project = "TCGA-BLCA", data.category = "Clinical", barcode = "TCGA-FD-A5C0")
-GDCdownload(clin.query)
+ json  <- tryCatch(GDCdownload(clin.query), 
+                   error = function(e) GDCdownload(clin.query, method = "client"))
 clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
 clinical.patient.followup <- GDCprepare_clinic(clin.query, clinical.info = "follow_up")
 clinical.index <- GDCquery_clinic("TCGA-BLCA")
 
-# Example of the secon difference:
+# Example of the second difference:
 clinical.patient[,c("vital_status","days_to_death","days_to_last_followup")]
 clinical.patient.followup[,c("vital_status","days_to_death","days_to_last_followup")]
 # indexed data is equivalent to follow ups information
@@ -1379,12 +1381,13 @@ mut <- GDCquery_Maf(tumor = "ACC")
 clin <- GDCquery_clinic("TCGA-ACC","clinical")
 clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_stage","race","vital_status")]
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
-                        filename = "oncoprint.png",
+                        filename = "oncoprint.pdf",
                         annotation = clin,
                         color=c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown"),
                         rows.font.size=10,
                         heatmap.legend.side = "right",
-                        dist.col = 0,
+                        dist.col = 0, 
+                        width = 5,
                         label.font.size = 10)
 ```
 
