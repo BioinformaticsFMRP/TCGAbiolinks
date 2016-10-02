@@ -105,13 +105,3 @@ test_that("GDCquery_Maf works", {
     unlink("GDCdata",recursive = TRUE, force = TRUE)
     unlink("maf",recursive = TRUE, force = TRUE)
 })
-
-test_that("Download maf using GDCquery works", {
-    query <- GDCquery(project = "TCGA-KIRP",
-                        data.category = "Simple Nucleotide Variation",
-                        data.type = "Masked Somatic Mutation")
-    GDCdownload(query, method = "api", directory = "maf")
-    maf <- GDCprepare(query, directory = "maf")
-    expect_true(nrow(maf) > 0)
-    unlink("maf",recursive = TRUE, force = TRUE)
-})
