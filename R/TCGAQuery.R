@@ -139,27 +139,13 @@ GDCquery <- function(project,
 
     if(!legacy & !is.na(platform)) message("Platform information is only available for legacy database. It will be ignored")
 
-    # Get manifest using the API
-    baseURL <- ifelse(legacy,"https://gdc-api.nci.nih.gov/legacy/files/?","https://gdc-api.nci.nih.gov/files/?")
-    options.pretty <- "pretty=true"
-    if(data.category == "Protein expression" & legacy) {
-        options.expand <- "expand=cases.samples.portions,cases.project,center,analysis"
-    } else if(data.category %in% c("Clinical","Biospecimen")) {
-        options.expand <- "expand=cases,cases.project,center,analysis"
-    } else {
-        options.expand <- "expand=cases.samples.portions.analytes.aliquots,cases.project,center,analysis"
-    }
-    option.size <- paste0("size=",getNbFiles(project,data.category,legacy))
-    option.format <- paste0("format=JSON")
-    options.filter <- paste0("filters=",
-                             URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
-                             project,
-                             URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["'),
-                             URLencode(data.category),
-                             URLencode('"]}}]}'))
     #message(paste0(baseURL,paste(options.pretty, options.expand, option.size, options.filter, sep = "&")))
+    url <- getGDCquery(project = project,
+                       data.category = data.category,
+                       data.type = data.type,
+                       legacy = legacy,
+                       access = acess)
     message("Accessing GDC. This might take a while...")
-    url <- paste0(baseURL,paste(options.pretty, options.expand,option.size, options.filter, option.format, sep = "&"))
     json  <- tryCatch(
         fromJSON(url, simplifyDataFrame = TRUE),
         error = function(e) {
@@ -202,7 +188,7 @@ GDCquery <- function(project,
     # Filter by experimental strategy
     if(!is.na(experimental.strategy)) {
         if(all(tolower(experimental.strategy) %in%  tolower(results$experimental_strategy))) {
-        results <- results[tolower(results$experimental_strategy) %in% tolower(experimental.strategy),]
+            results <- results[tolower(results$experimental_strategy) %in% tolower(experimental.strategy),]
         } else {
             message(paste0("The argument experimental_strategy does not match any of the results.\nPossible values:",
                            paste(unique(results$experimental_strategy),collapse = "\n=>")))
@@ -266,6 +252,40 @@ GDCquery <- function(project,
                       barcode = I(list(barcode)),
                       workflow.type = workflow.type)
     return(ret)
+}
+
+getGDCquery <- function(project, data.category, data.type, legacy, access){
+    # Get manifest using the API
+    baseURL <- ifelse(legacy,"https://gdc-api.nci.nih.gov/legacy/files/?","https://gdc-api.nci.nih.gov/files/?")
+    options.pretty <- "pretty=true"
+    if(data.category == "Protein expression" & legacy) {
+        options.expand <- "expand=cases.samples.portions,cases.project,center,analysis"
+    } else if(data.category %in% c("Clinical","Biospecimen")) {
+        options.expand <- "expand=cases,cases.project,center,analysis"
+    } else {
+        options.expand <- "expand=cases.samples.portions.analytes.aliquots,cases.project,center,analysis"
+    }
+    option.size <- paste0("size=",getNbFiles(project,data.category,legacy))
+    option.format <- paste0("format=JSON")
+    if(is.na(data.type)){
+        options.filter <- paste0("filters=",
+                                 URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
+                                 project,
+                                 URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["'),
+                                 URLencode(data.category),
+                                 URLencode('"]}}]}'))
+    } else {
+        options.filter <- paste0("filters=",
+                                 URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
+                                 project,
+                                 URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["'),
+                                 URLencode(data.category),
+                                 URLencode('"]}},{"op":"in","content":{"field":"files.data_type","value":["'),
+                                 URLencode(data.type),
+                                 URLencode('"]}}]}'))
+    }
+    url <- paste0(baseURL,paste(options.pretty, options.expand,option.size, options.filter, option.format, sep = "&"))
+    return(url)
 }
 
 expandBarcodeInfo <- function(barcode){
@@ -432,18 +452,6 @@ TCGAquery <- function(tumor = NULL,
 #' acc.maf <- GDCquery_Maf("ACC")
 #' @return A data frame with the maf file information
 GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
-    root <- "https://gdc-api.nci.nih.gov/data/"
-    maf <- fread("https://gdc-docs.nci.nih.gov/Data/Release_Notes/Manifests/GDC_open_MAFs_manifest.txt",
-                 data.table = FALSE, verbose = FALSE, showProgress = FALSE)
-    maf$tumor <- unlist(lapply(maf$filename, function(x){unlist(str_split(x,"\\."))[2]}))
-
-
-    # Check input
-    if (missing(tumor)) stop(paste0("Please, set tumor argument. Possible values:\n => ",
-                                    paste(sort(maf$tumor),collapse = "\n => ")))
-
-    if (!any(grepl(tumor,maf$tumor))) stop(paste0("Please, set a valid tumor argument. Possible values:\n => ",
-                                                  paste(sort(maf$tumor),collapse = "\n => ")))
 
     #  Info to user
     message("============================================================================")
@@ -451,56 +459,97 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
     message(" GDC manual: https://gdc-docs.nci.nih.gov/Data/PDF/Data_UG.pdf")
     message("============================================================================")
 
-    query <- GDCquery(paste0("TCGA-",tumor), data.category = "Simple Nucleotide Variation", data.type = "Masked Somatic Mutation")
-    GDCdownload(query, directory = directory, method = "api")
+    maf  = tryCatch({
+        query <- GDCquery(paste0("TCGA-",tumor), data.category = "Simple Nucleotide Variation", data.type = "Masked Somatic Mutation")
+        GDCdownload(query, directory = directory, method = "api")
+        maf <- GDCprepare(query, directory = directory)
+        maf
+    }, error = function(e) {
+        # catch
+        root <- "https://gdc-api.nci.nih.gov/data/"
+        maf <- fread("https://gdc-docs.nci.nih.gov/Data/Release_Notes/Manifests/GDC_open_MAFs_manifest.txt",
+                     data.table = FALSE, verbose = FALSE, showProgress = FALSE)
+        maf$tumor <- unlist(lapply(maf$filename, function(x){unlist(str_split(x,"\\."))[2]}))
 
-    file <- unique(file.path(directory,
-                             query$project,
-                             ifelse(query$legacy,"legacy","harmonized"),
-                             gsub(" ","_", query$results[[1]]$data_category),
-                             gsub(" ","_",query$results[[1]]$data_type),
-                             query$results[[1]]$file_id,
-                             query$results[[1]]$file_name))
-    # Is there a better way??
-    ret <- read_tsv(file,
-                    comment = "#",
-                    col_types = cols(
-                        Entrez_Gene_Id = col_integer(),
-                        Start_Position = col_integer(),
-                        End_Position = col_integer(),
-                        t_depth = col_integer(),
-                        t_ref_count = col_integer(),
-                        t_alt_count = col_integer(),
-                        n_depth = col_integer(),
-                        ALLELE_NUM = col_integer(),
-                        TRANSCRIPT_STRAND = col_integer(),
-                        PICK = col_integer(),
-                        TSL = col_integer(),
-                        HGVS_OFFSET = col_integer(),
-                        MINIMISED = col_integer()))
-    if(ncol(ret) == 1) ret <- read_csv(file,
-                                       comment = "#",
-                                       col_types = cols(
-                                           Entrez_Gene_Id = col_integer(),
-                                           Start_Position = col_integer(),
-                                           End_Position = col_integer(),
-                                           t_depth = col_integer(),
-                                           t_ref_count = col_integer(),
-                                           t_alt_count = col_integer(),
-                                           n_depth = col_integer(),
-                                           ALLELE_NUM = col_integer(),
-                                           TRANSCRIPT_STRAND = col_integer(),
-                                           PICK = col_integer(),
-                                           TSL = col_integer(),
-                                           HGVS_OFFSET = col_integer(),
-                                           MINIMISED = col_integer()))
+        dir.create(directory, showWarnings = FALSE, recursive = TRUE)
+        # Check input
+        if (missing(tumor)) stop(paste0("Please, set tumor argument. Possible values:\n => ",
+                                        paste(sort(maf$tumor),collapse = "\n => ")))
+
+        if (!any(grepl(tumor,maf$tumor))) stop(paste0("Please, set a valid tumor argument. Possible values:\n => ",
+                                                      paste(sort(maf$tumor),collapse = "\n => ")))
+
+        #  Info to user
+        message("============================================================================")
+        message(" For more information about MAF data please read the following GDC manual:")
+        message(" GDC manual: https://gdc-docs.nci.nih.gov/Data/PDF/Data_UG.pdf")
+        message("============================================================================")
+        selected <- maf[grepl(tumor,maf$tumor,ignore.case = TRUE),]
+
+        if(is.windows()) mode <- "wb" else  mode <- "w"
+        # Download maf
+        repeat{
+            if (!file.exists(file.path(directory,selected$filename)))
+                download(file.path(root,selected$id),
+                         file.path(directory,selected$filename),
+                         mode = mode)
+
+            # check integrity
+            if(md5sum(file.path(directory,selected$filename)) == selected$md5) break
+            unlink(file.path(directory,selected$filename))
+            message("The data downloaded might be corrupted. We will download it again")
+        }
+
+        # uncompress file
+        file <- gsub(".gz","",file.path(directory,selected$filename))
+        if (!file.exists(file)) gunzip(file.path(directory,selected$filename), remove = FALSE)
+
+        # Is there a better way??
+        ret <- read_tsv(file,
+                        comment = "#",
+                        col_types = cols(
+                            Entrez_Gene_Id = col_integer(),
+                            Start_Position = col_integer(),
+                            End_Position = col_integer(),
+                            t_depth = col_integer(),
+                            t_ref_count = col_integer(),
+                            t_alt_count = col_integer(),
+                            n_depth = col_integer(),
+                            ALLELE_NUM = col_integer(),
+                            TRANSCRIPT_STRAND = col_integer(),
+                            PICK = col_integer(),
+                            TSL = col_integer(),
+                            HGVS_OFFSET = col_integer(),
+                            MINIMISED = col_integer()),
+                        progress = TRUE)
+        if(ncol(ret) == 1) ret <- read_csv(file,
+                                           comment = "#",
+                                           col_types = cols(
+                                               Entrez_Gene_Id = col_integer(),
+                                               Start_Position = col_integer(),
+                                               End_Position = col_integer(),
+                                               t_depth = col_integer(),
+                                               t_ref_count = col_integer(),
+                                               t_alt_count = col_integer(),
+                                               n_depth = col_integer(),
+                                               ALLELE_NUM = col_integer(),
+                                               TRANSCRIPT_STRAND = col_integer(),
+                                               PICK = col_integer(),
+                                               TSL = col_integer(),
+                                               HGVS_OFFSET = col_integer(),
+                                               MINIMISED = col_integer()),
+                                           progress = TRUE)
+        ret
+    })
+
+
 
     if(save.csv) {
         fout <- paste0(query$project,"_maf.csv")
         write_csv(ret, fout)
         message(paste0("File created: ", fout))
     }
-    return(ret)
+    return(maf)
 }
 
 #' @title Get last maf file for the tumor
