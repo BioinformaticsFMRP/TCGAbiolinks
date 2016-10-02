@@ -555,18 +555,25 @@ mutation <- GDCquery_Maf(tumor = "LGG", save.csv = TRUE)
 
 This mutation data can be visualized through a oncoprint from the  [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) package [@ref23].
 
-```{r, echo=TRUE, message=FALSE, warning=FALSE, fig.height=6}
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
 mut <- GDCquery_Maf(tumor = "ACC")
 clin <- GDCquery_clinic("TCGA-ACC","clinical")
 clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_stage","race","vital_status")]
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
-                        filename = NULL,
+                        filename = "oncoprint.png",
                         annotation = clin,
                         color=c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown"),
                         rows.font.size=10,
                         heatmap.legend.side = "right",
                         dist.col = 0,
                         label.font.size = 10)
+```
+
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("oncoprint.png")
+grid.raster(img)
 ```
 
 ## `GDCquery_clinic` and `GDCprepare_clinic`: Working with clinical data.
@@ -1367,12 +1374,12 @@ uses the [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) to c
 * **annotation.position** Position of the annotation "bottom" or "top"
 * **label.title** Title of the label
 
-```{r, echo=TRUE, fig.height=6, message=FALSE, warning=FALSE}
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
 mut <- GDCquery_Maf(tumor = "ACC")
 clin <- GDCquery_clinic("TCGA-ACC","clinical")
 clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_stage","race","vital_status")]
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
-                        filename = NULL,
+                        filename = "oncoprint.png",
                         annotation = clin,
                         color=c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown"),
                         rows.font.size=10,
@@ -1380,6 +1387,14 @@ TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
                         dist.col = 0,
                         label.font.size = 10)
 ```
+
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("oncoprint.png")
+grid.raster(img)
+```
+
 
 The columns are the samples and the rows are genes. The upper histograms shows the number
 of mutation of each samples, the right histogram shows the number of patients that has that mutation (which 
