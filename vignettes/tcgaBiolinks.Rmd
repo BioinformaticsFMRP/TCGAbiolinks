@@ -555,18 +555,26 @@ mutation <- GDCquery_Maf(tumor = "LGG", save.csv = TRUE)
 
 This mutation data can be visualized through a oncoprint from the  [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) package [@ref23].
 
-```{r, echo=TRUE, message=FALSE, warning=FALSE, fig.height=6}
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
 mut <- GDCquery_Maf(tumor = "ACC")
 clin <- GDCquery_clinic("TCGA-ACC","clinical")
 clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_stage","race","vital_status")]
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
-                        filename = NULL,
+                        filename = "oncoprint.pdf",
                         annotation = clin,
                         color=c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown"),
                         rows.font.size=10,
+                        width = 5,
                         heatmap.legend.side = "right",
                         dist.col = 0,
                         label.font.size = 10)
+```
+
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("oncoprint.png")
+grid.raster(img)
 ```
 
 ## `GDCquery_clinic` and `GDCprepare_clinic`: Working with clinical data.
@@ -581,19 +589,33 @@ there are two main differences:
 * XML has more information: radiation, drugs information, follow-ups, biospecimen, etc. So the indexed one is only a subset of the XML files
 * The indexed data contains the updated data with the follow up informaiton. For example: if the patient is alive in the first time clinical data was collect and the in the next follow-up he is dead, the indexed data will show dead. The XML will have two fields, one for the first time saying he is alive (in the clinical part) and the follow-up saying he is dead. You can see this case here: https://gist.github.com/tiagochst/cfa384297ff0950a6489e3f4b296ecd7
 
-```{r, echo=TRUE, message=FALSE, warning=FALSE, fig.height=6}
+```{r, fig.height=6, message=FALSE, warning=FALSE, include=FALSE}
 clin.query <- GDCquery(project = "TCGA-BLCA", data.category = "Clinical", barcode = "TCGA-FD-A5C0")
-GDCdownload(clin.query)
+ json  <- tryCatch(GDCdownload(clin.query), 
+                   error = function(e) GDCdownload(clin.query, method = "client"))
 clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
 clinical.patient.followup <- GDCprepare_clinic(clin.query, clinical.info = "follow_up")
 clinical.index <- GDCquery_clinic("TCGA-BLCA")
+```
 
-# Example of the secon difference:
+```{r, eval=FALSE, fig.height=6, message=FALSE, warning=FALSE, include=TRUE}
+clin.query <- GDCquery(project = "TCGA-BLCA", data.category = "Clinical", barcode = "TCGA-FD-A5C0")
+ json  <- tryCatch(GDCdownload(clin.query), 
+                   error = function(e) GDCdownload(clin.query, method = "client"))
+clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
+clinical.patient.followup <- GDCprepare_clinic(clin.query, clinical.info = "follow_up")
+clinical.index <- GDCquery_clinic("TCGA-BLCA")
+```
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, fig.height=6}
+# Example of the second difference:
 clinical.patient[,c("vital_status","days_to_death","days_to_last_followup")]
 clinical.patient.followup[,c("vital_status","days_to_death","days_to_last_followup")]
 # indexed data is equivalent to follow ups information
-clinical.index["TCGA-FD-A5C0",c("vital_status","days_to_death","days_to_last_follow_up")]
+clinical.index[clinical.index$submitter_id=="TCGA-FD-A5C0",
+               c("vital_status","days_to_death","days_to_last_follow_up")]
 ```
+
 
 You can retrieve clinical data using the `GDCquery_clinic` function. 
 This will get only the indexed GDC clinical data. This is the same as clicking on the
@@ -1367,19 +1389,28 @@ uses the [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) to c
 * **annotation.position** Position of the annotation "bottom" or "top"
 * **label.title** Title of the label
 
-```{r, echo=TRUE, fig.height=6, message=FALSE, warning=FALSE}
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
 mut <- GDCquery_Maf(tumor = "ACC")
 clin <- GDCquery_clinic("TCGA-ACC","clinical")
 clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_stage","race","vital_status")]
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
-                        filename = NULL,
+                        filename = "oncoprint.pdf",
                         annotation = clin,
                         color=c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown"),
                         rows.font.size=10,
                         heatmap.legend.side = "right",
-                        dist.col = 0,
+                        dist.col = 0, 
+                        width = 5,
                         label.font.size = 10)
 ```
+
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("oncoprint.png")
+grid.raster(img)
+```
+
 
 The columns are the samples and the rows are genes. The upper histograms shows the number
 of mutation of each samples, the right histogram shows the number of patients that has that mutation (which 
