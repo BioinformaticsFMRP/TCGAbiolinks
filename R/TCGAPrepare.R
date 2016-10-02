@@ -117,7 +117,8 @@ readSimpleNucleotideVariationMaf <- function(files){
                             PICK = col_integer(),
                             TSL = col_integer(),
                             HGVS_OFFSET = col_integer(),
-                            MINIMISED = col_integer()))
+                            MINIMISED = col_integer()),
+                        progress = TRUE)
         if(ncol(ret) == 1) ret <- read_csv(files,
                                            comment = "#",
                                            col_types = cols(
@@ -133,7 +134,8 @@ readSimpleNucleotideVariationMaf <- function(files){
                                                PICK = col_integer(),
                                                TSL = col_integer(),
                                                HGVS_OFFSET = col_integer(),
-                                               MINIMISED = col_integer()))
+                                               MINIMISED = col_integer()),
+                                           progress = TRUE)
         return(ret)
 }
 

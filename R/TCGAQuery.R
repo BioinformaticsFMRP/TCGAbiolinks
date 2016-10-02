@@ -459,18 +459,11 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
     message(" GDC manual: https://gdc-docs.nci.nih.gov/Data/PDF/Data_UG.pdf")
     message("============================================================================")
 
-    file  = tryCatch({
+    maf  = tryCatch({
         query <- GDCquery(paste0("TCGA-",tumor), data.category = "Simple Nucleotide Variation", data.type = "Masked Somatic Mutation")
         GDCdownload(query, directory = directory, method = "api")
-
-        file <- unique(file.path(directory,
-                                 query$project,
-                                 ifelse(query$legacy,"legacy","harmonized"),
-                                 gsub(" ","_", query$results[[1]]$data_category),
-                                 gsub(" ","_",query$results[[1]]$data_type),
-                                 query$results[[1]]$file_id,
-                                 query$results[[1]]$file_name))
-        file
+        maf <- GDCprepare(query, directory = directory)
+        maf
     }, error = function(e) {
         # catch
         root <- "https://gdc-api.nci.nih.gov/data/"
@@ -510,51 +503,53 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
         # uncompress file
         file <- gsub(".gz","",file.path(directory,selected$filename))
         if (!file.exists(file)) gunzip(file.path(directory,selected$filename), remove = FALSE)
-        file
+
+        # Is there a better way??
+        ret <- read_tsv(file,
+                        comment = "#",
+                        col_types = cols(
+                            Entrez_Gene_Id = col_integer(),
+                            Start_Position = col_integer(),
+                            End_Position = col_integer(),
+                            t_depth = col_integer(),
+                            t_ref_count = col_integer(),
+                            t_alt_count = col_integer(),
+                            n_depth = col_integer(),
+                            ALLELE_NUM = col_integer(),
+                            TRANSCRIPT_STRAND = col_integer(),
+                            PICK = col_integer(),
+                            TSL = col_integer(),
+                            HGVS_OFFSET = col_integer(),
+                            MINIMISED = col_integer()),
+                        progress = TRUE)
+        if(ncol(ret) == 1) ret <- read_csv(file,
+                                           comment = "#",
+                                           col_types = cols(
+                                               Entrez_Gene_Id = col_integer(),
+                                               Start_Position = col_integer(),
+                                               End_Position = col_integer(),
+                                               t_depth = col_integer(),
+                                               t_ref_count = col_integer(),
+                                               t_alt_count = col_integer(),
+                                               n_depth = col_integer(),
+                                               ALLELE_NUM = col_integer(),
+                                               TRANSCRIPT_STRAND = col_integer(),
+                                               PICK = col_integer(),
+                                               TSL = col_integer(),
+                                               HGVS_OFFSET = col_integer(),
+                                               MINIMISED = col_integer()),
+                                           progress = TRUE)
+        ret
     })
 
-    # Is there a better way??
-    ret <- read_tsv(file,
-                    comment = "#",
-                    col_types = cols(
-                        Entrez_Gene_Id = col_integer(),
-                        Start_Position = col_integer(),
-                        End_Position = col_integer(),
-                        t_depth = col_integer(),
-                        t_ref_count = col_integer(),
-                        t_alt_count = col_integer(),
-                        n_depth = col_integer(),
-                        ALLELE_NUM = col_integer(),
-                        TRANSCRIPT_STRAND = col_integer(),
-                        PICK = col_integer(),
-                        TSL = col_integer(),
-                        HGVS_OFFSET = col_integer(),
-                        MINIMISED = col_integer()),
-                    progress = TRUE)
-    if(ncol(ret) == 1) ret <- read_csv(file,
-                                       comment = "#",
-                                       col_types = cols(
-                                           Entrez_Gene_Id = col_integer(),
-                                           Start_Position = col_integer(),
-                                           End_Position = col_integer(),
-                                           t_depth = col_integer(),
-                                           t_ref_count = col_integer(),
-                                           t_alt_count = col_integer(),
-                                           n_depth = col_integer(),
-                                           ALLELE_NUM = col_integer(),
-                                           TRANSCRIPT_STRAND = col_integer(),
-                                           PICK = col_integer(),
-                                           TSL = col_integer(),
-                                           HGVS_OFFSET = col_integer(),
-                                           MINIMISED = col_integer()),
-                                       progress = TRUE)
+
 
     if(save.csv) {
         fout <- paste0(query$project,"_maf.csv")
         write_csv(ret, fout)
         message(paste0("File created: ", fout))
     }
-    return(ret)
+    return(maf)
 }
 
 #' @title Get last maf file for the tumor
