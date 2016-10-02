@@ -589,20 +589,33 @@ there are two main differences:
 * XML has more information: radiation, drugs information, follow-ups, biospecimen, etc. So the indexed one is only a subset of the XML files
 * The indexed data contains the updated data with the follow up informaiton. For example: if the patient is alive in the first time clinical data was collect and the in the next follow-up he is dead, the indexed data will show dead. The XML will have two fields, one for the first time saying he is alive (in the clinical part) and the follow-up saying he is dead. You can see this case here: https://gist.github.com/tiagochst/cfa384297ff0950a6489e3f4b296ecd7
 
-```{r, echo=TRUE, message=FALSE, warning=FALSE, fig.height=6}
+```{r, fig.height=6, message=FALSE, warning=FALSE, include=FALSE}
 clin.query <- GDCquery(project = "TCGA-BLCA", data.category = "Clinical", barcode = "TCGA-FD-A5C0")
  json  <- tryCatch(GDCdownload(clin.query), 
                    error = function(e) GDCdownload(clin.query, method = "client"))
 clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
 clinical.patient.followup <- GDCprepare_clinic(clin.query, clinical.info = "follow_up")
 clinical.index <- GDCquery_clinic("TCGA-BLCA")
+```
 
+```{r, eval=FALSE, fig.height=6, message=FALSE, warning=FALSE, include=TRUE}
+clin.query <- GDCquery(project = "TCGA-BLCA", data.category = "Clinical", barcode = "TCGA-FD-A5C0")
+ json  <- tryCatch(GDCdownload(clin.query), 
+                   error = function(e) GDCdownload(clin.query, method = "client"))
+clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
+clinical.patient.followup <- GDCprepare_clinic(clin.query, clinical.info = "follow_up")
+clinical.index <- GDCquery_clinic("TCGA-BLCA")
+```
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, fig.height=6}
 # Example of the second difference:
 clinical.patient[,c("vital_status","days_to_death","days_to_last_followup")]
 clinical.patient.followup[,c("vital_status","days_to_death","days_to_last_followup")]
 # indexed data is equivalent to follow ups information
-clinical.index["TCGA-FD-A5C0",c("vital_status","days_to_death","days_to_last_follow_up")]
+clinical.index[clinical.index$submitter_id=="TCGA-FD-A5C0",
+               c("vital_status","days_to_death","days_to_last_follow_up")]
 ```
+
 
 You can retrieve clinical data using the `GDCquery_clinic` function. 
 This will get only the indexed GDC clinical data. This is the same as clicking on the
