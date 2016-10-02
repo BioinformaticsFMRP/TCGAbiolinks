@@ -5,7 +5,7 @@
 \title{Creating a oncoprint}
 \usage{
 TCGAvisualize_oncoprint(mut, genes, filename, color,
-  annotation.position = "bottom", annotation, height,
+  annotation.position = "bottom", annotation, height, width = 10,
   rm.empty.columns = FALSE, show.column.names = FALSE,
   show.row.barplot = TRUE, label.title = "Mutation", label.font.size = 16,
   rows.font.size = 16, dist.col = 0.5, dist.row = 0.5,
@@ -27,6 +27,8 @@ TCGAvisualize_oncoprint(mut, genes, filename, color,
 Should have a column bcr_patient_barcode with the same ID of the mutation object}
 
 \item{height}{pdf height}
+
+\item{width}{pdf width}
 
 \item{rm.empty.columns}{If there is no alteration in that sample, whether remove it on the oncoprint}
 

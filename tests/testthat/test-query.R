@@ -106,7 +106,7 @@ test_that("GDCquery_Maf works", {
     unlink("maf",recursive = TRUE, force = TRUE)
 })
 
-test_that("Download mad using GDCquery works", {
+test_that("Download maf using GDCquery works", {
     query <- GDCquery(project = "TCGA-KIRP",
                         data.category = "Simple Nucleotide Variation",
                         data.type = "Masked Somatic Mutation")
