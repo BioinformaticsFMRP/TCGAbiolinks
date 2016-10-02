@@ -1,3 +1,9 @@
+TCGAbiolinks 2.0
+---------------------------------------------------------------
+* GDC functions added (GDCquery, GDCdownload, GDCprepare,
+GDCquery_Maf, GDCprepare_clinic)
+* Removed TCGAquery_investigate, TCGAprofile_plot
+
 TCGAbiolinks 1.3.6
 ---------------------------------------------------------------
 * Starting to move the code to GDC data portal
