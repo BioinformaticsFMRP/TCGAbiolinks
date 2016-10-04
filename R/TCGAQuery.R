@@ -134,7 +134,7 @@ GDCquery <- function(project,
     # Check arguments
     checkProjectInput(project)
     checkDataCategoriesInput(project, data.category, legacy)
-
+    if(!is.na(data.type)) checkDataTypeInput(legacy = legacy, data.type = data.type)
     if(!any(is.na(sample.type))) checkBarcodeDefinition(sample.type)
 
     if(!legacy & !is.na(platform)) message("Platform information is only available for legacy database. It will be ignored")
@@ -203,14 +203,14 @@ GDCquery <- function(project,
         results <- results[tolower(results$data_type) %in% tolower(data.type),]
     }
 
-    # Filter by data.type
+    # Filter by workflow.type
     if(!is.na(workflow.type)) {
         if(!(workflow.type %in% results$analysis$workflow_type)) {
             stop("Please set a valid data.type argument from the list below:\n  => ", paste(unique(results$analysis$workflow_type), collapse = "\n  => "))
         }
         results <- results[results$analysis$workflow_type %in% workflow.type,]
     }
-    # Filter by sample.type
+    # Filter by file.type
     if(!is.na(file.type)){
         pat <- file.type
         if(file.type == "normalized_results") pat <- "normalized_results"
