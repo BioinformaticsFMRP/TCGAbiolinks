@@ -71,10 +71,10 @@ GDCprepare <- function(query,
         # data <- readClinical(files, query$results[[1]]$cases)
     } else if (grepl("Gene expression",query$data.category,ignore.case = TRUE)) {
         if(query$data.type == "Gene expression quantification")
-            data <- readGeneExpressionQuantification(files,
-                                                     query$results[[1]]$cases,
-                                                     summarizedExperiment,
-                                                     unique(query$platform))
+            data <- readGeneExpressionQuantification(files = files,
+                                                     cases = query$results[[1]]$cases,
+                                                     summarizedExperiment = summarizedExperiment,
+                                                     experimental.strategy = unique(query$results[[1]]$experimental_strategy))
         #if(query$data.type == "Gene expression quantification") data <- readGeneExpression()
     }
 
@@ -139,24 +139,19 @@ readSimpleNucleotideVariationMaf <- function(files){
         return(ret)
 }
 
-readGeneExpressionQuantification <- function(files, cases, summarizedExperiment = TRUE, platform){
+readGeneExpressionQuantification <- function(files, cases, summarizedExperiment = TRUE, experimental.strategy, platform){
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-    skip = 0
-    if(grepl("Agilent", platform)) {
-        skip = 1
-        summarizedExperiment = FALSE
-    }
-    if(grepl("HT_HG-U133A", platform)) {
-        skip = 1
-    }
+
+    skip <- ifelse(experimental.strategy == "Gene expression array",1,0)
 
     for (i in seq_along(files)) {
         data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE,skip = skip)
 
         if(!missing(cases)) {
-            assay.list <- colnames(data)[2:ncol(data)]
+            assay.list <- gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)])
+            # We will use this because there might be more than one col for each samples
             setnames(data,colnames(data)[2:ncol(data)],
-                     paste0(colnames(data)[2:ncol(data)],"_",cases[i]))
+                     paste0(gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)]),"_",cases[i]))
         }
         if (i == 1) {
             df <- data
@@ -172,6 +167,7 @@ readGeneExpressionQuantification <- function(files, cases, summarizedExperiment 
     } else {
         rownames(df) <- df$gene_id
         df$gene_id <- NULL
+        if(!missing(cases)) colnames(df)[2:ncol(df)] <- cases
     }
     return(df)
 }
@@ -209,7 +205,10 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
         names(rowRanges) <- as.character(df$external_gene_id)
     }
     assays <- lapply(assay.list, function (x) {
-        return(data.matrix(subset(df, select = grep(x,colnames(df)))))
+        print(grep(x,colnames(df),ignore.case = TRUE))
+        print(x)
+        print(colnames(df))
+        return(data.matrix(subset(df, select = grep(x,colnames(df),ignore.case = TRUE))))
     })
     names(assays) <- assay.list
     regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
