@@ -49,8 +49,8 @@ GDCprepare <- function(query,
 
     files <- file.path(directory, files)
 
-    if(!all(file.exists(files))) stop(paste0("I couldn't find all the files from the query.",
-                                             "Please check directory parameter right"))
+    if(!all(file.exists(files))) stop(paste0("I couldn't find all the files from the query. ",
+                                             "Please check if the directory parameter right or GDCdownload downloaded the samples."))
 
     if(grepl("Transcriptome Profiling", query$data.category, ignore.case = TRUE)){
         data <- readTranscriptomeProfiling(files = files,
@@ -102,47 +102,49 @@ remove.files.recursively <- function(files){
 }
 
 readSimpleNucleotideVariationMaf <- function(files){
-        ret <- read_tsv(files,
-                        comment = "#",
-                        col_types = cols(
-                            Entrez_Gene_Id = col_integer(),
-                            Start_Position = col_integer(),
-                            End_Position = col_integer(),
-                            t_depth = col_integer(),
-                            t_ref_count = col_integer(),
-                            t_alt_count = col_integer(),
-                            n_depth = col_integer(),
-                            ALLELE_NUM = col_integer(),
-                            TRANSCRIPT_STRAND = col_integer(),
-                            PICK = col_integer(),
-                            TSL = col_integer(),
-                            HGVS_OFFSET = col_integer(),
-                            MINIMISED = col_integer()),
-                        progress = TRUE)
-        if(ncol(ret) == 1) ret <- read_csv(files,
-                                           comment = "#",
-                                           col_types = cols(
-                                               Entrez_Gene_Id = col_integer(),
-                                               Start_Position = col_integer(),
-                                               End_Position = col_integer(),
-                                               t_depth = col_integer(),
-                                               t_ref_count = col_integer(),
-                                               t_alt_count = col_integer(),
-                                               n_depth = col_integer(),
-                                               ALLELE_NUM = col_integer(),
-                                               TRANSCRIPT_STRAND = col_integer(),
-                                               PICK = col_integer(),
-                                               TSL = col_integer(),
-                                               HGVS_OFFSET = col_integer(),
-                                               MINIMISED = col_integer()),
-                                           progress = TRUE)
-        return(ret)
+    ret <- read_tsv(files,
+                    comment = "#",
+                    col_types = cols(
+                        Entrez_Gene_Id = col_integer(),
+                        Start_Position = col_integer(),
+                        End_Position = col_integer(),
+                        t_depth = col_integer(),
+                        t_ref_count = col_integer(),
+                        t_alt_count = col_integer(),
+                        n_depth = col_integer(),
+                        ALLELE_NUM = col_integer(),
+                        TRANSCRIPT_STRAND = col_integer(),
+                        PICK = col_integer(),
+                        TSL = col_integer(),
+                        HGVS_OFFSET = col_integer(),
+                        MINIMISED = col_integer()),
+                    progress = TRUE)
+    if(ncol(ret) == 1) ret <- read_csv(files,
+                                       comment = "#",
+                                       col_types = cols(
+                                           Entrez_Gene_Id = col_integer(),
+                                           Start_Position = col_integer(),
+                                           End_Position = col_integer(),
+                                           t_depth = col_integer(),
+                                           t_ref_count = col_integer(),
+                                           t_alt_count = col_integer(),
+                                           n_depth = col_integer(),
+                                           ALLELE_NUM = col_integer(),
+                                           TRANSCRIPT_STRAND = col_integer(),
+                                           PICK = col_integer(),
+                                           TSL = col_integer(),
+                                           HGVS_OFFSET = col_integer(),
+                                           MINIMISED = col_integer()),
+                                       progress = TRUE)
+    return(ret)
 }
 
 readGeneExpressionQuantification <- function(files, cases, summarizedExperiment = TRUE, experimental.strategy, platform){
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
 
-    skip <- ifelse(experimental.strategy == "Gene expression array",1,0)
+    skip <- unique((ifelse(experimental.strategy == "Gene expression array",1,0)))
+
+    if(length(skip) > 1) stop("It is not possible to handle this different platforms together")
 
     for (i in seq_along(files)) {
         data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE,skip = skip)
@@ -167,7 +169,6 @@ readGeneExpressionQuantification <- function(files, cases, summarizedExperiment 
     } else {
         rownames(df) <- df$gene_id
         df$gene_id <- NULL
-        if(!missing(cases)) colnames(df)[2:ncol(df)] <- cases
     }
     return(df)
 }
@@ -460,10 +461,9 @@ colDataPrepare <- function(barcode){
     # There is a limitation on the size of the string, so this step will be splited in cases of 100
     patient.info <- NULL
     step <- 50 # more than 100 gives a bug =/
-    for(i in 0:floor(length(ret$patient)/step)){
+    for(i in 0:ceiling(length(ret$patient)/step) - 1){
         start <- 1 + step * i
-        end <- start + step - 1
-        if( end > length(ret$patient)) end <- length(ret$patient)
+        end <- ifelse(((i + 1) * step) > length(ret$patient), length(ret$patient),((i + 1) * step))
         if(is.null(patient.info)) {
             patient.info <- getBarcodeInfo(ret$patient[start:end])
         } else {
@@ -664,16 +664,21 @@ getBarcodeInfo <- function(barcode) {
     submitter_id <- results$submitter_id
 
     # We dont have the same cols for TCGA and TARGET so we need to check them
-    diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
-    if(any(grepl("submitter_id", colnames(diagnoses)))) {
-        diagnoses$submitter_id <- gsub("_diagnosis","", diagnoses$submitter_id)
-    }  else {
-        diagnoses$submitter_id <- submitter_id
-    }
-    df <- diagnoses
+    if(!is.null(results$diagnoses)) {
+        diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
+        if(any(grepl("submitter_id", colnames(diagnoses)))) {
+            diagnoses$submitter_id <- gsub("_diagnosis","", diagnoses$submitter_id)
+        }  else {
+            diagnoses$submitter_id <- submitter_id
+        }
+        df <- diagnoses
+    } else {
+        df <- as.data.frame(submitter_id)
 
-    exposures <- rbindlist(results$exposures, fill = TRUE)
-    if(nrow(exposures) > 0) {
+    }
+
+    if(!is.null(results$exposures) > 0) {
+        exposures <- rbindlist(results$exposures, fill = TRUE)
         if(any(grepl("submitter_id", colnames(exposures)))) {
             exposures$submitter_id <- gsub("_exposure","", exposures$submitter_id)
         }  else {
@@ -682,8 +687,9 @@ getBarcodeInfo <- function(barcode) {
         df <- merge(df,exposures, by="submitter_id", all = TRUE,sort = FALSE)
     }
 
-    demographic <- results$demographic
-    if(nrow(demographic) > 0) {
+
+    if(!is.null(results$demographic)) {
+        demographic <- results$demographic
         if(any(grepl("submitter_id", colnames(demographic)))) {
             demographic$submitter_id <- gsub("_demographic","", results$demographic$submitter_id)
         } else {
@@ -703,13 +709,11 @@ getBarcodeInfo <- function(barcode) {
         }
         df <- merge(df,treatments, by="submitter_id", all = TRUE,sort = FALSE)
     }
-
     df$bcr_patient_barcode <- df$submitter_id
     df <- cbind(df,results$project)
 
     # Adding in the same order
     df <- df[match(barcode,df$submitter_id)]
-
     # This line should not exists, but some patients does not have clinical data
     # case: TCGA-R8-A6YH"
     # this has been reported to GDC, waiting answers
