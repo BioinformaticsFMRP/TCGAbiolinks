@@ -118,7 +118,6 @@ stage_BRCA <- function(barcode, stage, clinical_patient_data){
 
     if (is.element(stage, names(table.stages))) {
         clinical_patient_data <- as.data.frame(clinical_patient_data)
-        print(table.stages[stage])
         stage.i <- clinical_patient_data[
             grep(table.stages[stage],
                  clinical_patient_data$pathologic_stage), ]
