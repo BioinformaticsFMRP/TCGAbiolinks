@@ -71,6 +71,68 @@ checkLegacyPlatform <- function(project,data.category, legacy = FALSE){
     }
 }
 
+checkDataTypeInput <- function(legacy, data.type){
+    if(legacy){
+        legacy.data.type <- c("Copy number segmentation",
+                              "Raw intensities",
+                              "Aligned reads",
+                              "Copy number estimate",
+                              "Simple nucleotide variation",
+                              "Gene expression quantification",
+                              "Coverage WIG",
+                              "miRNA gene quantification",
+                              "Genotypes",
+                              "miRNA isoform quantification",
+                              "Normalized copy numbers",
+                              "Isoform expression quantification",
+                              "Normalized intensities",
+                              "Tissue slide image",
+                              "Exon quantification",
+                              "Exon junction quantification",
+                              "Methylation beta value",
+                              "Unaligned reads",
+                              "Diagnostic image",
+                              "CGH array QC",
+                              "Biospecimen Supplement",
+                              "Pathology report",
+                              "Clinical Supplement",
+                              "Intensities",
+                              "Protein expression quantification",
+                              "Microsatellite instability",
+                              "Structural variation",
+                              "Auxiliary test",
+                              "Copy number QC metrics",
+                              "Intensities Log2Ratio",
+                              "Methylation array QC metrics",
+                              "Clinical data",
+                              "Copy number variation",
+                              "ABI sequence trace",
+                              "Biospecimen data",
+                              "Simple somatic mutation",
+                              "Bisulfite sequence alignment",
+                              "Methylation percentage",
+                              "Sequencing tag",
+                              "Sequencing tag counts",
+                              "LOH")
+        if(!data.type %in% legacy.data.type) {
+            print(knitr::kable(as.data.frame(legacy.data.type)))
+            stop("Please set a data.type argument from the column legacy.data.type above")
+        }
+    } else {
+        harmonized.data.type <- c("Gene Expression Quantification",
+                                  "Copy Number Segment",
+                                  "Masked Copy Number Segment",
+                                  "Isoform Expression Quantification",
+                                  "miRNA Expression Quantification",
+                                  "Biospecimen Supplement",
+                                  "Clinical Supplement",
+                                  "Masked Somatic Mutation")
+        if(!data.type %in% harmonized.data.type) {
+            print(knitr::kable(as.data.frame(harmonized.data.type)))
+            stop("Please set a data.type argument from the column harmonized.data.type above")
+        }
+    }
+}
 
 checkDataCategoriesInput <- function(project,data.category, legacy = FALSE){
     project.summary <- getProjectSummary(project, legacy)
