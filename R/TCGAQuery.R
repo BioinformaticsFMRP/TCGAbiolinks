@@ -134,7 +134,7 @@ GDCquery <- function(project,
     # Check arguments
     checkProjectInput(project)
     checkDataCategoriesInput(project, data.category, legacy)
-    checkDataTypeInput(legacy = legacy, data.type = data.type)
+    if(!is.na(data.type)) checkDataTypeInput(legacy = legacy, data.type = data.type)
     if(!any(is.na(sample.type))) checkBarcodeDefinition(sample.type)
 
     if(!legacy & !is.na(platform)) message("Platform information is only available for legacy database. It will be ignored")
