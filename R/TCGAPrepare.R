@@ -35,7 +35,12 @@ GDCprepare <- function(query,
                        remove.files.prepared = FALSE){
 
     if(missing(query)) stop("Please set query parameter")
-
+    if(any(duplicated(query$results[[1]]$cases))) {
+        dup <- query$results[[1]]$cases[duplicated(query$results[[1]]$cases)]
+        dup <- query$results[[1]][sapply(dup, function(x) grep(x,query$results[[1]]$cases)),c(2,4,9,13,15,18)]
+        print(knitr::kable(dup))
+        stop("There are samples duplicated. We will not be able to preapre it")
+    }
     if(!save & remove.files.prepared) {
         stop("To remove the files, please set save to TRUE. Otherwise, the data will be lost")
     }
@@ -461,7 +466,7 @@ colDataPrepare <- function(barcode){
     # There is a limitation on the size of the string, so this step will be splited in cases of 100
     patient.info <- NULL
     step <- 50 # more than 100 gives a bug =/
-    for(i in 0:ceiling(length(ret$patient)/step) - 1){
+    for(i in 0:(ceiling(length(ret$patient)/step) - 1)){
         start <- 1 + step * i
         end <- ifelse(((i + 1) * step) > length(ret$patient), length(ret$patient),((i + 1) * step))
         if(is.null(patient.info)) {
