@@ -205,9 +205,6 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
         names(rowRanges) <- as.character(df$external_gene_id)
     }
     assays <- lapply(assay.list, function (x) {
-        print(grep(x,colnames(df),ignore.case = TRUE))
-        print(x)
-        print(colnames(df))
         return(data.matrix(subset(df, select = grep(x,colnames(df),ignore.case = TRUE))))
     })
     names(assays) <- assay.list
