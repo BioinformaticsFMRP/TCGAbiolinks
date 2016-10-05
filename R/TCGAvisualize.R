@@ -609,6 +609,10 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @param height figure height
 #' @param sortCol Name of the column to be used to sort the columns
 #' @param title Title of the plot
+#' @param rownames.size Rownames size
+#' @param color.levels A vector with the colors (low level, middle level, high level)
+#' @param extrems Extrems of colors (vector of 3 values)
+#' @param values.label Text of the levels in the heatmap
 #' @param heatmap.legend.color.bar Heatmap legends values type.
 #' Options: "continuous", "disctrete
 #' @param scale Use z-score to make the heatmap?
@@ -672,7 +676,11 @@ TCGAvisualize_Heatmap <- function(data,
                                   cluster_rows = FALSE,
                                   cluster_columns = FALSE,
                                   sortCol,
-                                  title,
+                                  extrems = NULL,
+                                  rownames.size = 12,
+                                  title = NULL,
+                                  color.levels = NULL,
+                                  values.label = NULL,
                                   filename = "heatmap.pdf",
                                   width = 10,
                                   height = 10,
@@ -745,7 +753,12 @@ TCGAvisualize_Heatmap <- function(data,
             }
         }
     }
-    # STEP 2 Create heatmap
+        # STEP 2 Create heatmap
+    if(is.null(color.levels)) {
+        if (type == "expression") color.levels <-  c("green", "white", "red")
+        if (type == "methylation") color.levels <-  c("blue", "white", "red")
+    }
+
 
     # If we want to show differences between genes, it is good to make Z-score by samples
     # (force each sample to have zero mean and standard deviation=1).
@@ -754,42 +767,48 @@ TCGAvisualize_Heatmap <- function(data,
     if(scale == "row"){
         message("Calculating z-scores for the rows....")
         data <- t(scale(t(data)))
-        if (type == "expression") color <- circlize::colorRamp2(c(-2, 0, 2), c("blue", "white", "yellow"))
-        if (type == "methylation") color <- circlize::colorRamp2(c(-1, 0, 1), c("blue", "white", "red"))
+        all.na <- apply(data,1, function(x) all(is.na(x)))
+        data <- data[!all.na,]
     } else if(scale == "col"){
         message("Calculiating z-scores for the columns....")
         data <- scale(data)
-        if (type == "expression") color <- circlize::colorRamp2(c(-2, 0, 2), c("green", "white", "red"))
-        if (type == "methylation") color <- circlize::colorRamp2(c(-1, 0, 1), c("blue", "white", "red"))
-    } else {
-        if (type == "expression") color <- gplots::colorpanel(200,"blue", "white", "yellow")
-        if (type == "methylation") color <- gplots::colorpanel(200,"blue", "white", "red")
     }
+
+    if(is.null(extrems)) {
+        if(min(data) < 0) {
+            extrems <- c(min(data), 0, max(data))
+        } else {
+            extrems <- c(0, max(data)/2, max(data))
+        }
+    }
+    if (type == "expression") color <- circlize::colorRamp2(extrems, color.levels)
+    if (type == "methylation") color <- circlize::colorRamp2(extrems, color.levels)
 
     # Creating plot title
-    if(missing(title)) {
-        if(type == "methylation") title <- "Methylation heatmap"
+    if(is.null(title)) {
+        if(type == "methylation") title <- "DNA methylation heatmap"
         if(type == "expression") title <- "Expression heatmap"
     }
-
     # Change label type
+    heatmap_legend_param <- list()
     if(heatmap.legend.color.bar == "continuous" && type == "methylation"){
-        heatmap_legend_param <- list(color_bar = "continuous")
+        heatmap_legend_param <- c(list(color_bar = "continuous"),heatmap_legend_param)
         if(!scale %in% c("row","col")) heatmap_legend_param <- list(color_bar = "continuous", at = c(0,0.2,0.4,0.6,0.8, 1), legend_height = unit(3, "cm"), labels = c("0.0 (hypomethylated)",0.2,0.4,0.6,0.8,"1.0 (hypermethylated)"))
     }
     if(heatmap.legend.color.bar == "continuous" && type == "expression"){
-        heatmap_legend_param <- list(color_bar = "continuous")
+        heatmap_legend_param <- c(list(color_bar = "continuous"),heatmap_legend_param)
     }
-
     # Change label reference
-    if(type == "methylation") type <- "Methylation level"
-    if(type == "expression") type <- "Expression"
-
+    if(is.null(values.label)){
+        if(type == "methylation") values.label <- "DNA methylation level"
+        if(type == "expression") values.label <- "Expression"
+    }
     if(!missing(sortCol) & heatmap.legend.color.bar == "continuous"){
-        heatmap  <- Heatmap(data, name = type,
+        heatmap  <- Heatmap(data, name = values.label,
                             top_annotation = ha,
                             bottom_annotation_height = unit(3, "cm"),
                             col = color,
+                            row_names_gp =  gpar(fontsize = rownames.size),
                             show_row_names = show_row_names,
                             cluster_rows = cluster_rows,
                             cluster_columns = cluster_columns,
@@ -798,21 +817,23 @@ TCGAvisualize_Heatmap <- function(data,
                             column_title = title,
                             heatmap_legend_param = heatmap_legend_param)
     } else if(missing(sortCol) & heatmap.legend.color.bar == "continuous"){
-        heatmap  <- Heatmap(data, name = type,
+        heatmap  <- Heatmap(data, name = values.label,
                             top_annotation = ha,
                             bottom_annotation_height = unit(3, "cm"),
                             col = color,
                             show_row_names = show_row_names,
+                            row_names_gp =  gpar(fontsize = rownames.size),
                             cluster_rows = cluster_rows,
                             cluster_columns = cluster_columns,
                             show_column_names = show_column_names,
                             column_title = title,
                             heatmap_legend_param = heatmap_legend_param)
     }  else if(!missing(sortCol)){
-        heatmap  <- Heatmap(data, name = type,
+        heatmap  <- Heatmap(data, name = values.label,
                             top_annotation = ha,
                             bottom_annotation_height = unit(3, "cm"),
                             col = color,
+                            row_names_gp =  gpar(fontsize = rownames.size),
                             show_row_names = show_row_names,
                             cluster_rows = cluster_rows,
                             cluster_columns = cluster_columns,
@@ -820,10 +841,11 @@ TCGAvisualize_Heatmap <- function(data,
                             column_order = column_order,
                             column_title = title)
     } else {
-        heatmap  <- Heatmap(data, name = type,
+        heatmap  <- Heatmap(data, name = values.label,
                             top_annotation = ha,
                             bottom_annotation_height = unit(3, "cm"),
                             col = color,
+                            row_names_gp =  gpar(fontsize = rownames.size),
                             show_row_names = show_row_names,
                             cluster_rows = cluster_rows,
                             cluster_columns = cluster_columns,
