@@ -6,7 +6,8 @@
 \usage{
 TCGAvisualize_Heatmap(data, col.metadata, row.metadata, col.colors = NULL,
   row.colors = NULL, show_column_names = FALSE, show_row_names = FALSE,
-  cluster_rows = FALSE, cluster_columns = FALSE, sortCol, title,
+  cluster_rows = FALSE, cluster_columns = FALSE, sortCol,
+  rownames.size = 6, title = NULL, values.label = NULL,
   filename = "heatmap.pdf", width = 10, height = 10,
   type = "expression", scale = "none",
   heatmap.legend.color.bar = "continuous")
@@ -36,7 +37,11 @@ The code will throw a warning in case two samples are from the same patient.}
 
 \item{sortCol}{Name of the column to be used to sort the columns}
 
+\item{rownames.size}{Rownames size}
+
 \item{title}{Title of the plot}
+
+\item{values.label}{Text of the levels in the heatmap}
 
 \item{filename}{Filename to save the heatmap. Default: heatmap.png}
 
