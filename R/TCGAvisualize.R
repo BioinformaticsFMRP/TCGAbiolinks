@@ -754,8 +754,8 @@ TCGAvisualize_Heatmap <- function(data,
     if(scale == "row"){
         message("Calculating z-scores for the rows....")
         data <- t(scale(t(data)))
-        equals <- apply(data,1, function(x) all(is.na(x)))
-        data[equals,] <- 0
+        all.na <- apply(data,1, function(x) all(is.na(x)))
+        data <- data[!all.na,]
         if (type == "expression") color <- circlize::colorRamp2(c(-2, 0, 2), c("blue", "white", "yellow"))
         if (type == "methylation") color <- circlize::colorRamp2(c(-1, 0, 1), c("blue", "white", "red"))
     } else if(scale == "col"){
