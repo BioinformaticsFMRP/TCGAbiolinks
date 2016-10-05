@@ -610,6 +610,8 @@ TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, wit
 #' @param sortCol Name of the column to be used to sort the columns
 #' @param title Title of the plot
 #' @param rownames.size Rownames size
+#' @param color.levels A vector with the colors (low level, middle level, high level)
+#' @param extrems Extrems of colors (vector of 3 values)
 #' @param values.label Text of the levels in the heatmap
 #' @param heatmap.legend.color.bar Heatmap legends values type.
 #' Options: "continuous", "disctrete
@@ -674,9 +676,11 @@ TCGAvisualize_Heatmap <- function(data,
                                   cluster_rows = FALSE,
                                   cluster_columns = FALSE,
                                   sortCol,
+                                  extrems = NULL,
                                   rownames.size = 12,
-                                  title=NULL,
-                                  values.label=NULL,
+                                  title = NULL,
+                                  color.levels = NULL,
+                                  values.label = NULL,
                                   filename = "heatmap.pdf",
                                   width = 10,
                                   height = 10,
@@ -749,7 +753,12 @@ TCGAvisualize_Heatmap <- function(data,
             }
         }
     }
-    # STEP 2 Create heatmap
+        # STEP 2 Create heatmap
+    if(is.null(color.levels)) {
+        if (type == "expression") color.levels <-  c("green", "white", "red")
+        if (type == "methylation") color.levels <-  c("blue", "white", "red")
+    }
+
 
     # If we want to show differences between genes, it is good to make Z-score by samples
     # (force each sample to have zero mean and standard deviation=1).
@@ -760,17 +769,20 @@ TCGAvisualize_Heatmap <- function(data,
         data <- t(scale(t(data)))
         all.na <- apply(data,1, function(x) all(is.na(x)))
         data <- data[!all.na,]
-        if (type == "expression") color <- circlize::colorRamp2(c(min(data), 0, max(data)), c("blue", "white", "yellow"))
-        if (type == "methylation") color <- circlize::colorRamp2(c(-1, 0, 1), c("blue", "white", "red"))
     } else if(scale == "col"){
         message("Calculiating z-scores for the columns....")
         data <- scale(data)
-        if (type == "expression") color <- circlize::colorRamp2(c(min(data), 0, max(data)), c("green", "white", "red"))
-        if (type == "methylation") color <- circlize::colorRamp2(c(-1, 0, 1), c("blue", "white", "red"))
-    } else {
-        if (type == "expression") color <- gplots::colorpanel(200,"blue", "white", "yellow")
-        if (type == "methylation") color <- gplots::colorpanel(200,"blue", "white", "red")
     }
+
+    if(is.null(extrems)) {
+        if(min(data) < 0) {
+            extrems <- c(min(data), 0, max(data))
+        } else {
+            extrems <- c(0, max(data)/2, max(data))
+        }
+    }
+    if (type == "expression") color <- circlize::colorRamp2(extrems, color.levels)
+    if (type == "methylation") color <- circlize::colorRamp2(extrems, color.levels)
 
     # Creating plot title
     if(is.null(title)) {
