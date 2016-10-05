@@ -760,12 +760,12 @@ TCGAvisualize_Heatmap <- function(data,
         data <- t(scale(t(data)))
         all.na <- apply(data,1, function(x) all(is.na(x)))
         data <- data[!all.na,]
-        if (type == "expression") color <- circlize::colorRamp2(c(-2, 0, 2), c("blue", "white", "yellow"))
+        if (type == "expression") color <- circlize::colorRamp2(c(min(data), 0, max(data)), c("blue", "white", "yellow"))
         if (type == "methylation") color <- circlize::colorRamp2(c(-1, 0, 1), c("blue", "white", "red"))
     } else if(scale == "col"){
         message("Calculiating z-scores for the columns....")
         data <- scale(data)
-        if (type == "expression") color <- circlize::colorRamp2(c(-2, 0, 2), c("green", "white", "red"))
+        if (type == "expression") color <- circlize::colorRamp2(c(min(data), 0, max(data)), c("green", "white", "red"))
         if (type == "methylation") color <- circlize::colorRamp2(c(-1, 0, 1), c("blue", "white", "red"))
     } else {
         if (type == "expression") color <- gplots::colorpanel(200,"blue", "white", "yellow")
