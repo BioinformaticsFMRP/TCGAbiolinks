@@ -143,8 +143,7 @@ GDCquery <- function(project,
     url <- getGDCquery(project = project,
                        data.category = data.category,
                        data.type = data.type,
-                       legacy = legacy,
-                       access = acess)
+                       legacy = legacy)
     message("Accessing GDC. This might take a while...")
     json  <- tryCatch(
         fromJSON(url, simplifyDataFrame = TRUE),
@@ -254,7 +253,7 @@ GDCquery <- function(project,
     return(ret)
 }
 
-getGDCquery <- function(project, data.category, data.type, legacy, access){
+getGDCquery <- function(project, data.category, data.type, legacy){
     # Get manifest using the API
     baseURL <- ifelse(legacy,"https://gdc-api.nci.nih.gov/legacy/files/?","https://gdc-api.nci.nih.gov/files/?")
     options.pretty <- "pretty=true"
