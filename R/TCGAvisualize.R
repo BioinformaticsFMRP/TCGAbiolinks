@@ -674,7 +674,7 @@ TCGAvisualize_Heatmap <- function(data,
                                   cluster_rows = FALSE,
                                   cluster_columns = FALSE,
                                   sortCol,
-                                  rownames.size = 6,
+                                  rownames.size = 12,
                                   title=NULL,
                                   values.label=NULL,
                                   filename = "heatmap.pdf",
@@ -777,8 +777,8 @@ TCGAvisualize_Heatmap <- function(data,
         if(type == "methylation") title <- "DNA methylation heatmap"
         if(type == "expression") title <- "Expression heatmap"
     }
-    heatmap_legend_param <- list(row_names_gp =  gpar(fontsize = rownames.size))
     # Change label type
+    heatmap_legend_param <- list()
     if(heatmap.legend.color.bar == "continuous" && type == "methylation"){
         heatmap_legend_param <- c(list(color_bar = "continuous"),heatmap_legend_param)
         if(!scale %in% c("row","col")) heatmap_legend_param <- list(color_bar = "continuous", at = c(0,0.2,0.4,0.6,0.8, 1), legend_height = unit(3, "cm"), labels = c("0.0 (hypomethylated)",0.2,0.4,0.6,0.8,"1.0 (hypermethylated)"))
@@ -786,7 +786,6 @@ TCGAvisualize_Heatmap <- function(data,
     if(heatmap.legend.color.bar == "continuous" && type == "expression"){
         heatmap_legend_param <- c(list(color_bar = "continuous"),heatmap_legend_param)
     }
-
     # Change label reference
     if(is.null(values.label)){
         if(type == "methylation") values.label <- "DNA methylation level"
@@ -797,6 +796,7 @@ TCGAvisualize_Heatmap <- function(data,
                             top_annotation = ha,
                             bottom_annotation_height = unit(3, "cm"),
                             col = color,
+                            row_names_gp =  gpar(fontsize = rownames.size),
                             show_row_names = show_row_names,
                             cluster_rows = cluster_rows,
                             cluster_columns = cluster_columns,
@@ -810,6 +810,7 @@ TCGAvisualize_Heatmap <- function(data,
                             bottom_annotation_height = unit(3, "cm"),
                             col = color,
                             show_row_names = show_row_names,
+                            row_names_gp =  gpar(fontsize = rownames.size),
                             cluster_rows = cluster_rows,
                             cluster_columns = cluster_columns,
                             show_column_names = show_column_names,
@@ -820,6 +821,7 @@ TCGAvisualize_Heatmap <- function(data,
                             top_annotation = ha,
                             bottom_annotation_height = unit(3, "cm"),
                             col = color,
+                            row_names_gp =  gpar(fontsize = rownames.size),
                             show_row_names = show_row_names,
                             cluster_rows = cluster_rows,
                             cluster_columns = cluster_columns,
@@ -831,6 +833,7 @@ TCGAvisualize_Heatmap <- function(data,
                             top_annotation = ha,
                             bottom_annotation_height = unit(3, "cm"),
                             col = color,
+                            row_names_gp =  gpar(fontsize = rownames.size),
                             show_row_names = show_row_names,
                             cluster_rows = cluster_rows,
                             cluster_columns = cluster_columns,
