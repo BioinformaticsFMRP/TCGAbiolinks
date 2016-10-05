@@ -6,9 +6,10 @@
 \usage{
 TCGAvisualize_Heatmap(data, col.metadata, row.metadata, col.colors = NULL,
   row.colors = NULL, show_column_names = FALSE, show_row_names = FALSE,
-  cluster_rows = FALSE, cluster_columns = FALSE, sortCol, title,
-  filename = "heatmap.pdf", width = 10, height = 10,
-  type = "expression", scale = "none",
+  cluster_rows = FALSE, cluster_columns = FALSE, sortCol, extrems = NULL,
+  rownames.size = 12, title = NULL, color.levels = NULL,
+  values.label = NULL, filename = "heatmap.pdf", width = 10,
+  height = 10, type = "expression", scale = "none",
   heatmap.legend.color.bar = "continuous")
 }
 \arguments{
@@ -36,7 +37,15 @@ The code will throw a warning in case two samples are from the same patient.}
 
 \item{sortCol}{Name of the column to be used to sort the columns}
 
+\item{extrems}{Extrems of colors (vector of 3 values)}
+
+\item{rownames.size}{Rownames size}
+
 \item{title}{Title of the plot}
+
+\item{color.levels}{A vector with the colors (low level, middle level, high level)}
+
+\item{values.label}{Text of the levels in the heatmap}
 
 \item{filename}{Filename to save the heatmap. Default: heatmap.png}
 
