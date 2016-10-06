@@ -80,7 +80,13 @@ GDCprepare <- function(query,
                                                      cases = query$results[[1]]$cases,
                                                      summarizedExperiment = summarizedExperiment,
                                                      experimental.strategy = unique(query$results[[1]]$experimental_strategy))
-        #if(query$data.type == "Gene expression quantification") data <- readGeneExpression()
+
+        if(query$data.type == "miRNA gene quantification")
+            data <- readGeneExpressionQuantification(files = files,
+                                                     cases = query$results[[1]]$cases,
+                                                     summarizedExperiment = F,
+                                                     experimental.strategy = unique(query$results[[1]]$experimental_strategy))
+
     }
 
     if(save){
