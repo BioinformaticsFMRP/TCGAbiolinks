@@ -218,6 +218,8 @@ GDCquery <- function(project,
         if(file.type == "cnv_hg18" | file.type == "hg18.seg") pat <- "[^nocnv_]hg18.seg"
         if(file.type == "nocnv_hg19" | file.type == "nocnv_hg19.seg") pat <- "nocnv_hg19"
         if(file.type == "cnv_hg19" | file.type == "hg19.seg") pat <- "[^nocnv_]hg19.seg"
+        if(file.type == "mirna") pat <- "^[^hg19].*mir"
+        if(file.type == "hg19.mirna") pat <- "hg19.*mirna"
         results <- results[grepl(pat,results$file_name),]
     }
     # some how there are duplicated files in GDC we should remove them
