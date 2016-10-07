@@ -86,6 +86,9 @@ GDCprepare <- function(query,
                                                      cases = query$results[[1]]$cases,
                                                      summarizedExperiment = F,
                                                      experimental.strategy = unique(query$results[[1]]$experimental_strategy))
+        if(query$data.type == "miRNA isoform quantification")
+            data <- readmiRNAIsoformQuantification(files = files,
+                                                   cases = query$results[[1]]$cases)
 
     }
 
@@ -112,6 +115,22 @@ remove.files.recursively <- function(files){
     if(length(list.files(files2rm)) == 0) remove.files.recursively(files2rm)
 }
 
+readmiRNAIsoformQuantification <- function (files, cases){
+    pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+
+    for (i in seq_along(files)) {
+        data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+        data$barcode <- cases[i]
+        if (i == 1) {
+            df <- data
+        } else {
+            df <- rbind(df, data)
+        }
+        setTxtProgressBar(pb, i)
+    }
+    setDF(df)
+
+}
 readSimpleNucleotideVariationMaf <- function(files){
     ret <- read_tsv(files,
                     comment = "#",
