@@ -115,7 +115,7 @@ checkDataTypeInput <- function(legacy, data.type){
                               "Sequencing tag counts",
                               "LOH")
         if(!data.type %in% legacy.data.type) {
-            print(knitr::kable(as.data.frame(legacy.data.type)))
+            print(knitr::kable(as.data.frame(sort(legacy.data.type))))
             stop("Please set a data.type argument from the column legacy.data.type above")
         }
     } else {
@@ -128,7 +128,7 @@ checkDataTypeInput <- function(legacy, data.type){
                                   "Clinical Supplement",
                                   "Masked Somatic Mutation")
         if(!data.type %in% harmonized.data.type) {
-            print(knitr::kable(as.data.frame(harmonized.data.type)))
+            print(knitr::kable(as.data.frame(sort(harmonized.data.type))))
             stop("Please set a data.type argument from the column harmonized.data.type above")
         }
     }
