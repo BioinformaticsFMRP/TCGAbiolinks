@@ -1164,7 +1164,7 @@ grid.raster(img)
 library(TCGAbiolinks)
 # Survival Analysis SA
 
-clinical_patient_Cancer <- TCGAquery_clinic("TCGA-BRCA","clinical")
+clinical_patient_Cancer <- GDCquery_clinic("TCGA-BRCA","clinical")
 dataBRCAcomplete <- log2(BRCA_rnaseqv2)
 
 tokenStop<- 1
@@ -1186,9 +1186,6 @@ for( i in 1: round(nrow(dataBRCAcomplete)/100)){
 }
 
 tabSurvKMcomplete <- tabSurvKMcomplete[tabSurvKMcomplete$pvalue < 0.01,]
-tabSurvKMcomplete <- tabSurvKMcomplete[!duplicated(tabSurvKMcomplete$mRNA),]
-rownames(tabSurvKMcomplete) <-tabSurvKMcomplete$mRNA
-tabSurvKMcomplete <- tabSurvKMcomplete[,-1]
 tabSurvKMcomplete <- tabSurvKMcomplete[order(tabSurvKMcomplete$pvalue, decreasing=F),]
 
 tabSurvKMcompleteDEGs <- tabSurvKMcomplete[
@@ -1198,11 +1195,11 @@ tabSurvKMcompleteDEGs <- tabSurvKMcomplete[
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
 tabSurvKMcompleteDEGs$pvalue <- format(tabSurvKMcompleteDEGs$pvalue, scientific = TRUE)
-knitr::kable(tabSurvKMcompleteDEGs[1:10,1:4], 
+knitr::kable(tabSurvKMcompleteDEGs[1:5,1:4], 
              digits = 2,
              caption = "Table KM-survival genes after SA",
              row.names = TRUE)
-knitr::kable(tabSurvKMcompleteDEGs[1:10,5:7], 
+knitr::kable(tabSurvKMcompleteDEGs[1:5,5:7], 
              digits = 2,
              row.names = TRUE)
 ```
