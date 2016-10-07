@@ -212,15 +212,24 @@ GDCquery <- function(project,
     # Filter by file.type
     if(!is.na(file.type)){
         pat <- file.type
+        invert <- FALSE
         if(file.type == "normalized_results") pat <- "normalized_results"
         if(file.type == "results") pat <- "[^normalized_]results"
         if(file.type == "nocnv_hg18" | file.type == "nocnv_hg18.seg") pat <- "nocnv_hg18"
         if(file.type == "cnv_hg18" | file.type == "hg18.seg") pat <- "[^nocnv_]hg18.seg"
         if(file.type == "nocnv_hg19" | file.type == "nocnv_hg19.seg") pat <- "nocnv_hg19"
         if(file.type == "cnv_hg19" | file.type == "hg19.seg") pat <- "[^nocnv_]hg19.seg"
-        if(file.type == "mirna") pat <- "^[^hg19].*mir"
+        if(file.type == "mirna") {
+            pat <-  "hg19.*mirna"
+            invert <- TRUE
+        }
         if(file.type == "hg19.mirna") pat <- "hg19.*mirna"
-        results <- results[grepl(pat,results$file_name),]
+        if(file.type == "hg19.isoform") pat <- "hg19.*isoform"
+        if(file.type == "isoform") {
+            pat <-  "hg19.*isoform"
+            invert <- TRUE
+        }
+        results <- results[grep(pat,results$file_name,invert = invert),]
     }
     # some how there are duplicated files in GDC we should remove them
     # Example of problematic query
