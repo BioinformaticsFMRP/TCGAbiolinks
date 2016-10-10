@@ -130,7 +130,6 @@ GDCquery <- function(project,
         access <- NA
     }
 
-
     # Check arguments
     checkProjectInput(project)
     checkDataCategoriesInput(project, data.category, legacy)
@@ -555,7 +554,7 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
 
 
     if(save.csv) {
-        fout <- paste0(query$project,"_maf.csv")
+        fout <- file.path(directory,paste0(query$project,"_maf.csv"))
         write_csv(maf, fout)
         message(paste0("File created: ", fout))
     }
