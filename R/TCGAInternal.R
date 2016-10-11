@@ -526,28 +526,28 @@ getGistic <- function(disease) {
     # Check if downlaod was not corrupted
     if(tools::md5sum(x[1]) != readr::read_table(file.path(base,x[2]), col_names = F)$X1) stop("Error while downloading CNV data")
     untar(x[1],files = "*all_thresholded.by_genes.txt")
-    ret <- fread(paste0(gsub(".tar.gz","",x[1]),"/all_thresholded.by_genes.txt"), data.table = F)
+    file <- paste0(gsub(".tar.gz","",x[1]),"/all_thresholded.by_genes.txt")
+    print(file)
+    ret <- fread(file, data.table = FALSE, colClasses = "character")
     return(ret)
 }
-add.cnv <- function(project, genes){
+get.cnv <- function(project, genes){
     gistic <- getGistic(gsub("TCGA-","",project))
-    cnv.annotation <- t(gistic[gistic$Gene.Symbol %in% genes,-c(2:3)])
+    cnv.annotation <- t(gistic[gistic[,1] %in% genes,-c(2:3)])
     colnames(cnv.annotation) <- paste0("gisti2_",cnv.annotation[1,])
     cnv.annotation <- cnv.annotation[-1,]
     rownames(cnv.annotation) <- substr(gsub("\\.","-",rownames(cnv.annotation)),1,15)
     return(cnv.annotation)
 }
 
-add.mutation <- function(project, genes){
+get.mutation <- function(project, genes){
     # Get mutation annotation file
     maf <- GDCquery_Maf(gsub("TCGA-","",project))
     mut <- NULL
-    print(head(maf$Hugo_Symbol))
     for(i in genes) {
         if(!i %in% maf$Hugo_Symbol) {print(i); next;}
         aux <-  data.frame(patient = substr(unique(maf[maf$Hugo_Symbol %in% i,]$Tumor_Sample_Barcode),1,15), mut = TRUE)
         colnames(aux)[2] <- paste0("mut_",i)
-        print(head(aux))
         if(is.null(mut)) {
             mut <- aux
         } else {
@@ -562,5 +562,11 @@ add.mutation <- function(project, genes){
     # mut <- !is.na(mut)
 
     return(mut)
+}
+add.mut.cnv <- function(project, genes) {
+    mut <- get.mutation(project, genes)
+    cnv <- get.cnv(project, genes)
+    rownames(annotation) <- substr(annotation$sample,1,15)
+    annotation <- merge(mut, cnv, by = 0 , sort = FALSE,all=TRUE)
 }
 
