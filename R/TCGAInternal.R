@@ -514,3 +514,53 @@ GeneSplitRegulon <- function(Genelist,Sep){
 
     return(RegSplitted)
 }
+
+
+getGistic <- function(disease) {
+    base <- paste0("http://gdac.broadinstitute.org/runs/analyses__latest/data/", disease)
+    x <- read_html(base)  %>% html_nodes("a") %>% html_attr("href")
+    base <- file.path(base,tail(x,n=1))
+    x <- read_html(base)  %>% html_nodes("a") %>% html_attr("href")
+    x <- x[grep("CopyNumber_Gistic2.Level_4",x)]
+    if(!file.exists(x[1])) downloader::download(file.path(base,x[1]),x[1])
+    # Check if downlaod was not corrupted
+    if(tools::md5sum(x[1]) != readr::read_table(file.path(base,x[2]), col_names = F)$X1) stop("Error while downloading CNV data")
+    untar(x[1],files = "*all_thresholded.by_genes.txt")
+    ret <- fread(paste0(gsub(".tar.gz","",x[1]),"/all_thresholded.by_genes.txt"), data.table = F)
+    return(ret)
+}
+add.cnv <- function(project, genes){
+    gistic <- getGistic(gsub("TCGA-","",project))
+    cnv.annotation <- t(gistic[gistic$Gene.Symbol %in% genes,-c(2:3)])
+    colnames(cnv.annotation) <- paste0("gisti2_",cnv.annotation[1,])
+    cnv.annotation <- cnv.annotation[-1,]
+    rownames(cnv.annotation) <- substr(gsub("\\.","-",rownames(cnv.annotation)),1,15)
+    return(cnv.annotation)
+}
+
+add.mutation <- function(project, genes){
+    # Get mutation annotation file
+    maf <- GDCquery_Maf(gsub("TCGA-","",project))
+    mut <- NULL
+    print(head(maf$Hugo_Symbol))
+    for(i in genes) {
+        if(!i %in% maf$Hugo_Symbol) {print(i); next;}
+        aux <-  data.frame(patient = substr(unique(maf[maf$Hugo_Symbol %in% i,]$Tumor_Sample_Barcode),1,15), mut = TRUE)
+        colnames(aux)[2] <- paste0("mut_",i)
+        print(head(aux))
+        if(is.null(mut)) {
+            mut <- aux
+        } else {
+            mut <- merge(mut, aux, by = "patient", all = TRUE)
+        }
+    }
+    rownames(mut) <- mut$patient; mut$patient <- NULL
+
+    # Lets replaces NA to FALSE
+    # TRUE: has mutation
+    # FALSE: has no mutation
+    # mut <- !is.na(mut)
+
+    return(mut)
+}
+
