@@ -187,7 +187,7 @@ TCGAanalyze_survival <- function(data,
 
     label.add.n <- function(x) {
         paste0(x, " (n = ",
-               nrow(subset(data,data[,clusterCol] == x)), ")")
+               nrow(data[data[,clusterCol] == x,]), ")")
     }
 
     if(is.null(labels)){
