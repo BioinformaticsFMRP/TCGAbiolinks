@@ -566,7 +566,8 @@ get.mutation <- function(project, genes){
 add.mut.cnv <- function(project, genes) {
     mut <- get.mutation(project, genes)
     cnv <- get.cnv(project, genes)
-    rownames(annotation) <- substr(annotation$sample,1,15)
     annotation <- merge(mut, cnv, by = 0 , sort = FALSE,all=TRUE)
+    rownames(annotation) <- annotation$Row.names
+    annotation$Row.names <- NULL
 }
 
