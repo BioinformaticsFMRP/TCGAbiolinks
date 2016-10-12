@@ -596,6 +596,6 @@ get.mut.gistc.information <- function(df, project, genes) {
     df <- merge(df,info,by = "aux", all.x = TRUE, sort = FALSE)
     df$aux <- NULL
     rownames(df) <- df$barcode
-    df <- df[order,]
+    df <- DataFrame(df[order,])
     return(df)
 }
