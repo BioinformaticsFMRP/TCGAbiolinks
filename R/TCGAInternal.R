@@ -551,7 +551,7 @@ get.mutation <- function(project, genes){
     maf <- GDCquery_Maf(gsub("TCGA-","",project))
     mut <- NULL
     for(i in genes) {
-        if(!i %in% maf$Hugo_Symbol) {print(paste(i, "not found")); next;}
+        if(!i %in% maf$Hugo_Symbol) next
         aux <-  data.frame(patient = substr(unique(maf[grepl(i,maf$Hugo_Symbol,ignore.case = TRUE),]$Tumor_Sample_Barcode),1,15), mut = TRUE)
         colnames(aux)[2] <- paste0("mut_",i)
         if(is.null(mut)) {
@@ -588,7 +588,7 @@ get.mut.gistc <- function(project, genes) {
 }
 get.mut.gistc.information <- function(df, project, genes) {
     order <- rownames(df)
-    for(i in genes) if(!tolower(i) %in% tolower(TCGAbiolinks::EAGenes$Gene)) message(paste("Gene not found:", i))
+    for(i in genes) if(!tolower(i) %in% tolower(EAGenes$Gene)) message(paste("Gene not found:", i))
     info <- get.mut.gistc(project, genes)
     if(is.null(info)) return(df)
     info$aux <- rownames(info)
