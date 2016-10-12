@@ -537,7 +537,7 @@ get.cnv <- function(project, genes){
 
     gistic <- getGistic(gsub("TCGA-","",project))
     cnv.annotation <- t(gistic[tolower(gistic[,1]) %in% tolower(genes),-c(2:3)])
-    colnames(cnv.annotation) <- paste0("gisti2_",cnv.annotation[1,])
+    colnames(cnv.annotation) <- paste0("gistic2_",cnv.annotation[1,])
     cnv.annotation <- cnv.annotation[-1,]
     rownames(cnv.annotation) <- substr(gsub("\\.","-",rownames(cnv.annotation)),1,15)
     return(cnv.annotation)
