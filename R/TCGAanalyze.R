@@ -893,12 +893,15 @@ TCGAanalyze_EA <- function(GeneName,RegulonList,TableEnrichment,
     table_pathway_enriched <- table_pathway_enriched[table_pathway_enriched[,"FDR"] < FDRThresh ,]
     table_pathway_enriched <- table_pathway_enriched[order(table_pathway_enriched[,"FDR"],decreasing = FALSE),]
 
-    tmp <- table_pathway_enriched[1:topPathways,]
-    tmp <- paste(tmp[,"Pathway"],"; FDR= ", format(tmp[,"FDR"],digits = 3),"; (ng="   ,round(tmp[,"GenesInPathway"]),"); (ncommon=", format(tmp[,"CommonGenesPathway"],digits = 2), ")" ,sep = "")
-    tmp <- as.matrix(tmp)
-    topPathways_tab[1,] <- tmp
-    rm(tmp)
-
+    if(nrow(table_pathway_enriched) > 0) {
+        tmp <- table_pathway_enriched
+        tmp <- paste(tmp[,"Pathway"],"; FDR= ", format(tmp[,"FDR"],digits = 3),"; (ng="   ,round(tmp[,"GenesInPathway"]),"); (ncommon=", format(tmp[,"CommonGenesPathway"],digits = 2), ")" ,sep = "")
+        tmp <- as.matrix(tmp)
+        topPathways_tab <- topPathways_tab[,1:nrow(table_pathway_enriched)]
+        topPathways_tab[1,] <- tmp
+    } else {
+        topPathways_tab <- NA
+    }
     return(topPathways_tab)
 }
 
@@ -987,7 +990,7 @@ TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01){
 }
 
 
-#' @title Generate network 
+#' @title Generate network
 #' @description TCGAanalyze_analyseGRN perform gene regulatory network.
 #' @param TFs a vector of genes.
 #' @param normCounts is a matrix of gene expression with genes in rows and samples in columns.
@@ -997,20 +1000,20 @@ TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01){
 #' @export
 #' @return an adjacent matrix
 TCGAanalyze_analyseGRN<- function(TFs, normCounts,kNum) {
-  
-  MRcandidates <- intersect(rownames(normCounts),TFs) 
-  
+
+  MRcandidates <- intersect(rownames(normCounts),TFs)
+
   # Mutual information between TF and genes
   sampleNames <- colnames(normCounts)
   geneNames <- rownames(normCounts)
-  
+
   messageMI_TFgenes <- paste("Estimation of MI among [", length(MRcandidates), " TRs and ", nrow(normCounts), " genes].....", sep = "")
   timeEstimatedMI_TFgenes1 <- length(MRcandidates)*nrow(normCounts)/1000
   timeEstimatedMI_TFgenes <- format(timeEstimatedMI_TFgenes1*ncol(normCounts)/17000, digits = 2)
   messageEstimation <- print(paste("I Need about ", timeEstimatedMI_TFgenes, "seconds for this MI estimation. [Processing 17000k elements /s]  "))
-  
+
   system.time(miTFGenes <- knnmi.cross(normCounts[MRcandidates, ], normCounts, k = kNum))
-  
+
   return(miTFGenes)
-  
+
 }
