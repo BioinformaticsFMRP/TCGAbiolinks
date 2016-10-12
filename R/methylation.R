@@ -58,10 +58,12 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save =
     diffmean <- mean.g2 - mean.g1
 
     # Saves the result
-    values(rowRanges(data))[,paste0("mean.", gsub(" ", ".",group1))] <-  mean.g1
-    values(rowRanges(data))[,paste0("mean.", gsub(" ", ".",group2))] <-  mean.g2
-    values(rowRanges(data))[,paste0("diffmean.",gsub(" ", ".",group1),".", gsub(" ", ".",group2))] <-  diffmean
-    values(rowRanges(data))[,paste0("diffmean.",gsub(" ", ".",group2),".", gsub(" ", ".",group1))] <-  -diffmean
+    group1.col <- gsub("[[:punct:]]| ", ".", group1)
+    group2.col <- gsub("[[:punct:]]| ", ".", group2)
+    values(rowRanges(data))[,paste0("mean.", group1.col)] <-  mean.g1
+    values(rowRanges(data))[,paste0("mean.", group2.col)] <-  mean.g2
+    values(rowRanges(data))[,paste0("diffmean.",group1.col,".", group2.col)] <-  diffmean
+    values(rowRanges(data))[,paste0("diffmean.",group2.col,".", group1.col)] <-  -diffmean
     # Ploting a histogram to evaluate the data
     if(save) {
         message("Saved histogram_diffmean.png...")
@@ -649,13 +651,15 @@ calculate.pvalues <- function(data,
         dev.off()
     }
     #Saving the values into the object
-    colp <- paste("p.value",  gsub(" ", ".",group1),  gsub(" ", ".",group2), sep = ".")
+    group1.col <- gsub("[[:punct:]]| ", ".", group1)
+    group2.col <- gsub("[[:punct:]]| ", ".", group2)
+    colp <- paste("p.value",  group1.col,  group2.col, sep = ".")
     values(rowRanges(data))[,colp] <-  p.value
-    coladj <- paste("p.value.adj", gsub(" ", ".",group1),  gsub(" ", ".",group2), sep = ".")
+    coladj <- paste("p.value.adj", group1.col,  group2.col, sep = ".")
     values(rowRanges(data))[,coladj] <-  p.value.adj
-    colp <- paste("p.value",  gsub(" ", ".",group2),  gsub(" ", ".",group1), sep = ".")
+    colp <- paste("p.value",  group2.col,  group1.col, sep = ".")
     values(rowRanges(data))[,colp] <-  p.value
-    coladj <- paste("p.value.adj", gsub(" ", ".",group2),  gsub(" ", ".",group1), sep = ".")
+    coladj <- paste("p.value.adj", group2.col,  group1.col, sep = ".")
     values(rowRanges(data))[,coladj] <-  p.value.adj
 
     return(data)
@@ -1027,7 +1031,7 @@ TCGAanalyze_DMR <- function(data,
     }
     group1.col <- gsub("[[:punct:]]| ", ".", group1)
     group2.col <- gsub("[[:punct:]]| ", ".", group2)
-    diffcol <- paste("diffmean", group2.col, group1.col,sep = ".")
+    diffcol <- paste("diffmean", group1.col, group2.col,sep = ".")
     if (!(diffcol %in% colnames(values(data))) || overwrite) {
         data <- diffmean(data,groupCol, group1 = group1, group2 = group2, save = save)
         if (!(diffcol %in% colnames(values(rowRanges(data))))) {
@@ -1063,7 +1067,7 @@ TCGAanalyze_DMR <- function(data,
                  "adj.method" = adj.method))
     metadata(data)[[log]] <- (eval(as.symbol(log)))
     statuscol <- paste("status",group1.col,group2.col,sep = ".")
-    statuscol <- paste("status",group2.col,group1.col,sep = ".")
+    statuscol2 <- paste("status",group2.col,group1.col,sep = ".")
     values(data)[,statuscol] <-  "Not Significant"
     values(data)[,statuscol2] <-  "Not Significant"
 
