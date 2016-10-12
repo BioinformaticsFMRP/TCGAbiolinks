@@ -565,7 +565,7 @@ get.mutation <- function(project, genes){
     # Lets replaces NA to FALSE
     # TRUE: has mutation
     # FALSE: has no mutation
-    # mut <- !is.na(mut)
+    mut <- !is.na(mut)
 
     return(mut)
 }
