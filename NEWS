@@ -1,3 +1,27 @@
+CHANGES IN VERSION 2.2.0
+-------------------------
+
+NEW FEATURES
+    o Add GISTIC2 information and Mutation information in the summarizedExperiment while preparing GDC data
+
+SIGNIFICANT USER-LEVEL CHANGES
+    o Speed up GDCquery
+
+TCGAbiolinks 2.0
+---------------------------------------------------------------
+* GDC functions added (GDCquery, GDCdownload, GDCprepare,
+GDCquery_Maf, GDCprepare_clinic)
+* Removed TCGAquery_investigate, TCGAprofile_plot
+
+TCGAbiolinks 1.3.6
+---------------------------------------------------------------
+* Starting to move the code to GDC data portal
+
+TCGAbiolinks 1.1.26
+---------------------------------------------------------------
+* Bug fix: TCGAprepare for  IlluminaHiSeq_miRNASeq platform was
+not considering all file types
+
 TCGAbiolinks 1.1.26
 ---------------------------------------------------------------
 * Bug fix: TCGAprepare for  IlluminaHiSeq_miRNASeq platform was
