@@ -514,3 +514,88 @@ GeneSplitRegulon <- function(Genelist,Sep){
 
     return(RegSplitted)
 }
+
+
+getGistic <- function(disease) {
+    base <- paste0("http://gdac.broadinstitute.org/runs/analyses__latest/data/", disease)
+    x <- read_html(base)  %>% html_nodes("a") %>% html_attr("href")
+    base <- file.path(base,tail(x,n=1))
+    x <- read_html(base)  %>% html_nodes("a") %>% html_attr("href")
+    x <- x[grep("CopyNumber_Gistic2.Level_4",x)]
+    if(!file.exists(x[1])) downloader::download(file.path(base,x[1]),x[1])
+    # Check if downlaod was not corrupted
+    md5 <- readr::read_table(file.path(base,x[2]), col_names = FALSE, progress = FALSE)$X1
+    if(tools::md5sum(x[1]) != md5) stop("Error while downloading CNV data")
+    untar(x[1],files = "*all_thresholded.by_genes.txt")
+    file <- paste0(gsub(".tar.gz","",x[1]),"/all_thresholded.by_genes.txt")
+    ret <- fread(file, data.table = FALSE, colClasses = "character")
+    return(ret)
+}
+get.cnv <- function(project, genes){
+    if(missing(project)) stop("Argument project is missing")
+    if(missing(genes)) stop("Argument genes is missing")
+
+    gistic <- getGistic(gsub("TCGA-","",project))
+    cnv.annotation <- t(gistic[tolower(gistic[,1]) %in% tolower(genes),-c(2:3)])
+    colnames(cnv.annotation) <- paste0("gistic2_",cnv.annotation[1,])
+    cnv.annotation <- cnv.annotation[-1,]
+    rownames(cnv.annotation) <- substr(gsub("\\.","-",rownames(cnv.annotation)),1,15)
+    return(cnv.annotation)
+}
+
+get.mutation <- function(project, genes){
+    if(missing(project)) stop("Argument project is missing")
+    if(missing(genes)) stop("Argument genes is missing")
+
+    # Get mutation annotation file
+    maf <- GDCquery_Maf(gsub("TCGA-","",project))
+    mut <- NULL
+    for(i in genes) {
+        if(!i %in% maf$Hugo_Symbol) next
+        aux <-  data.frame(patient = substr(unique(maf[grepl(i,maf$Hugo_Symbol,ignore.case = TRUE),]$Tumor_Sample_Barcode),1,15), mut = TRUE)
+        colnames(aux)[2] <- paste0("mut_",i)
+        if(is.null(mut)) {
+            mut <- aux
+        } else {
+            mut <- merge(mut, aux, by = "patient", all = TRUE)
+        }
+    }
+    rownames(mut) <- mut$patient; mut$patient <- NULL
+
+    # Lets replaces NA to FALSE
+    # TRUE: has mutation
+    # FALSE: has no mutation
+    mut <- !is.na(mut)
+
+    return(mut)
+}
+get.mut.gistc <- function(project, genes) {
+    if(missing(project)) stop("Argument project is missing")
+    if(missing(genes)) stop("Argument genes is missing")
+    mut <- get.mutation(project, genes)
+    cnv <- get.cnv(project, genes)
+    if(!is.null(mut) & !is.null(cnv)) {
+        annotation <- merge(mut, cnv, by = 0 , sort = FALSE,all=TRUE)
+        rownames(annotation) <- annotation$Row.names
+        annotation$Row.names <- NULL
+        return(annotation)
+    } else if(!is.null(mut) & is.null(cnv)) {
+        return(mut)
+    } else if(is.null(mut) & !is.null(cnv)) {
+        return(cnv)
+    }
+    return(NULL)
+}
+get.mut.gistc.information <- function(df, project, genes) {
+    order <- rownames(df)
+    for(i in genes) if(!tolower(i) %in% tolower(EAGenes$Gene)) message(paste("Gene not found:", i))
+    info <- get.mut.gistc(project, genes)
+    if(is.null(info)) return(df)
+    info$aux <- rownames(info)
+    df$aux <- substr(df$barcode,1,15)
+    df <- merge(df,info,by = "aux", all.x = TRUE, sort = FALSE)
+    df$aux <- NULL
+    rownames(df) <- df$barcode
+    df <- DataFrame(df[order,])
+    return(df)
+}
