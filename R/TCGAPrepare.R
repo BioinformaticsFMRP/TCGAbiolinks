@@ -529,6 +529,11 @@ colDataPrepare <- function(barcode){
     }
     ret <- merge(ret,patient.info, by.x = "patient", by.y = "submitter_id", all.x = TRUE )
 
+    if(!"project_id" %in% colnames(ret)) {
+        aux <- getGDCprojects()[,5:6]
+        aux <- aux[aux$disease_type == unique(ret$disease_type),2]
+        ret$project_id <- as.character(aux)
+    }
     # na.omit should not be here, exceptional case
 
     if(grepl("TCGA",na.omit(unique(ret$project_id)))) {
