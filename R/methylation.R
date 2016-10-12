@@ -1025,23 +1025,19 @@ TCGAanalyze_DMR <- function(data,
                    "Hypomethylated")
         label[2:3] <-  paste(label[2:3], "in", group2)
     }
-
-    diffcol <- paste("diffmean",
-                     gsub(" ", ".",group1),
-                     gsub(" ", ".",group2),sep = ".")
+    group1.col <- gsub("[[:punct:]]| ", ".", group1)
+    group2.col <- gsub("[[:punct:]]| ", ".", group2)
+    diffcol <- paste("diffmean", group2.col, group1.col,sep = ".")
     if (!(diffcol %in% colnames(values(data))) || overwrite) {
         data <- diffmean(data,groupCol, group1 = group1, group2 = group2, save = save)
         if (!(diffcol %in% colnames(values(rowRanges(data))))) {
             stop(paste0("Error! Not found ", diffcol))
         }
     }
-    pcol <- paste("p.value.adj",
-                  gsub(" ", ".", group2),
-                  gsub(" ", ".",group1),sep = ".")
+
+    pcol <- paste("p.value.adj", group2.col, group1.col,sep = ".")
     if(!(pcol %in% colnames(values(data)))){
-        pcol <- paste("p.value.adj",
-                      gsub(" ", ".",group1),
-                      gsub(" ", ".",group2),sep = ".")
+        pcol <- paste("p.value.adj", group1.col, group2.col, sep = ".")
     }
     if (!(pcol %in% colnames(values(data))) | overwrite) {
         data <- calculate.pvalues(data, groupCol, group1, group2,
@@ -1056,8 +1052,8 @@ TCGAanalyze_DMR <- function(data,
     }
     log <- paste0("TCGAanalyze_DMR.",gsub(" ", ".",group1),".",gsub(" ", ".",group2))
     assign(log,c("groupCol" = groupCol,
-                 "group1" = gsub(" ", ".",group1),
-                 "group2" = gsub(" ", ".",group2),
+                 "group1" = group1.col,
+                 "group2" = group2.col,
                  "plot.filename" = plot.filename,
                  "xlim" = xlim,
                  "ylim" = ylim,
@@ -1066,8 +1062,8 @@ TCGAanalyze_DMR <- function(data,
                  "paired" = "paired",
                  "adj.method" = adj.method))
     metadata(data)[[log]] <- (eval(as.symbol(log)))
-    statuscol <- paste("status",gsub(" ", ".",group1),gsub(" ", ".",group2),sep = ".")
-    statuscol2 <- paste("status",gsub(" ", ".",group2),gsub(" ", ".",group1),sep = ".")
+    statuscol <- paste("status",group1.col,group2.col,sep = ".")
+    statuscol <- paste("status",group2.col,group1.col,sep = ".")
     values(data)[,statuscol] <-  "Not Significant"
     values(data)[,statuscol2] <-  "Not Significant"
 
@@ -1104,14 +1100,13 @@ TCGAanalyze_DMR <- function(data,
                               x.cut = diffmean.cut,
                               y.cut = p.cut)
     }
-
     if (save) {
 
         # saving results into a csv file
         csv <- paste0(paste("DMR_results",
                             gsub("_",".",groupCol),
-                            gsub(" |_",".",group1),
-                            gsub(" |_",".",group2),
+                            group1.col,
+                            group2.col,
                             "pcut",p.cut,"meancut",diffmean.cut,  sep = "_"),".csv")
         csv <- file.path(save.directory,csv)
         message(paste0("Saving the results also in a csv file:"), csv)
@@ -1125,22 +1120,22 @@ TCGAanalyze_DMR <- function(data,
 
         write.csv2(df[,
                       c(colnames(df)[idx],
-                        paste("mean",gsub(" ", ".",group1),sep = "."),
-                        paste("mean",gsub(" ", ".",group2),sep = "."),
-                        paste("diffmean",gsub(" ", ".",group1),gsub(" ", ".",group2),sep = "."),
-                        paste("p.value",gsub(" ", ".",group1),gsub(" ", ".",group2),sep = "."),
-                        paste("p.value.adj",gsub(" ", ".",group1),gsub(" ", ".",group2),sep = "."),
+                        paste("mean", group1.col,sep = "."),
+                        paste("mean", group2.col,sep = "."),
+                        paste("diffmean", group1.col, group2.col, sep = "."),
+                        paste("p.value", group1.col, group2.col, sep = "."),
+                        paste("p.value.adj", group1.col, group2.col, sep = "."),
                         statuscol,
-                        paste("diffmean",gsub(" ", ".",group2),gsub(" ", ".",group1),sep = "."),
-                        paste("p.value",gsub(" ", ".",group2),gsub(" ", ".",group1),sep = "."),
-                        paste("p.value.adj",gsub(" ", ".",group2),gsub(" ", ".",group1),sep = "."),
+                        paste("diffmean",group2.col,group1.col,sep = "."),
+                        paste("p.value",group2.col,group1.col,sep = "."),
+                        paste("p.value.adj",group2.col,group1.col,sep = "."),
                         statuscol2)
                       ],file =  csv)
         if (is.null(filename)) {
             filename <- paste0(paste(
                 gsub("_",".",groupCol),
-                gsub(" |_",".",group1),
-                gsub(" |_",".",group2),
+                group1.col,
+                group2.col,
                 "pcut",p.cut,
                 "meancut",diffmean.cut,
                 sep = "_"),
