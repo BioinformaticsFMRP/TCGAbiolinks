@@ -110,8 +110,8 @@ GDCprepare <- function(query,
     if((!is.null(add.gistic2.mut)) & summarizedExperiment) {
         message("=> Adding GISTIC2 and mutation information....")
         genes <- tolower(levels(EAGenes$Gene))
-        if(!all(tolower(add.gistic2.mut) %in% genes)) message(paste("These genes were not found",
-                                                                    paste(add.gistic2.mut[! tolower(add.gistic2.mut) %in% genes],collapse = "\n")))
+        if(!all(tolower(add.gistic2.mut) %in% genes)) message(paste("These genes were not found:\n",
+                                                                    paste(add.gistic2.mut[! tolower(add.gistic2.mut) %in% genes],collapse = "\n=> ")))
         add.gistic2.mut <- add.gistic2.mut[tolower(add.gistic2.mut) %in% tolower(genes)]
         if(length(add.gistic2.mut) > 0){
             info <- get.mut.gistc.information(colData(data),query$project, add.gistic2.mut)
