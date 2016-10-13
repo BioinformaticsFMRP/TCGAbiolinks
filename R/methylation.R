@@ -1286,8 +1286,8 @@ TCGAvisualize_starburst <- function(met,
 {
     .e <- environment()
 
-    group1 <- gsub(" ", ".",group1)
-    group2 <- gsub(" ", ".",group2)
+    group1.col <- gsub("[[:punct:]]| ", ".",group1)
+    group2.col <- gsub("[[:punct:]]| ", ".",group2)
 
     if(is.null(color)) color <- c("#000000", "#E69F00","#56B4E9", "#009E73",
                                   "red", "#0072B2","#D55E00", "#CC79A7",
@@ -1307,20 +1307,43 @@ TCGAvisualize_starburst <- function(met,
     }
 
     # Preparing methylation
-    pcol <- paste("p.value.adj",group1,group2,sep = ".")
+    pcol <- gsub("[[:punct:]]| ", ".",paste("p.value.adj",group1,group2,sep = "."))
     if(!(pcol %in%  colnames(met))){
-        pcol <- paste("p.value.adj",group2,group1,sep = ".")
+        pcol <- gsub("[[:punct:]]| ", ".",paste("p.value.adj",group2,group1,sep = "."))
     }
     if(!(pcol %in%  colnames(met))){
         stop("Error! p-values adjusted not found. Please, run TCGAanalyze_DMR")
     }
 
-    # somehow the merge changes the names with - to .
-    pcol <- gsub(" |-",".",pcol)
+    # Methylation matrix and expression matrix should have the same name column for merge
+    idx <- grep("Gene_symbol",colnames(met),ignore.case = TRUE)
+    colnames(met)[idx] <- "Gene_symbol"
 
-    aux <- strsplit(row.names(exp),"\\|")
-    exp$Gene_Symbol  <- unlist(lapply(aux,function(x) x[1]))
-    volcano <- merge(met, exp, by = "Gene_Symbol")
+    # Check if gene symbol columns exists
+    if(!any(grepl("Gene_symbol",colnames(met),ignore.case = FALSE))) {
+        if("mRNA" %in% colnames(exp)) {
+            if(all(grepl("\\|",exp$mRNA))) {
+                exp$Gene_symbol <- unlist(lapply(strsplit(exp$mRNA,"\\|"),function(x) x[2]))
+            } else {
+                exp$Gene_symbol <- exp$mRNA
+            }
+        } else {
+            aux <- rownames(exp)
+            if(all(grepl("\\|",aux))) {
+                exp$Gene_symbol <- unlist(lapply(strsplit(aux,"\\|"),function(x) x[2]))
+            } else {
+                exp$Gene_symbol <- aux
+            }
+            exp$Gene_symbol <- unlist(lapply(strsplit(exp$mRNA,"\\|"),function(x) x[2]))
+        }
+    } else {
+        # Check if it has the same pattern
+        idx <- grep("Gene_symbol",colnames(exp),ignore.case = TRUE)
+        colnames(exp)[idx] <- "Gene_symbol"
+    }
+
+
+    volcano <- merge(met, exp, by = "Gene_symbol")
     volcano$ID <- paste(volcano$Gene_Symbol,
                         volcano$probeID, sep = ".")
 
@@ -1330,7 +1353,7 @@ TCGAvisualize_starburst <- function(met,
     volcano[volcano$logFC > 0, "geFDR2"] <-
         -1 * volcano[volcano$logFC > 0, "geFDR"]
 
-    diffcol <- gsub(" |-",".",paste("diffmean",group1,group2,sep = "."))
+    diffcol <- gsub("[[:punct:]]| ", ".",paste("diffmean",group1,group2,sep = "."))
     volcano$meFDR <- log10(volcano[,pcol])
     volcano$meFDR2 <- volcano$meFDR
     idx <- volcano[,diffcol] > 0
