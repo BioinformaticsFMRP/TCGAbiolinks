@@ -1320,7 +1320,7 @@ TCGAvisualize_starburst <- function(met,
     colnames(met)[idx] <- "Gene_symbol"
 
     # Check if gene symbol columns exists
-    if(!any(grepl("Gene_symbol",colnames(met),ignore.case = FALSE))) {
+    if(!any(grepl("Gene_symbol",colnames(exp),ignore.case = FALSE))) {
         if("mRNA" %in% colnames(exp)) {
             if(all(grepl("\\|",exp$mRNA))) {
                 exp$Gene_symbol <- unlist(lapply(strsplit(exp$mRNA,"\\|"),function(x) x[2]))
@@ -1334,7 +1334,6 @@ TCGAvisualize_starburst <- function(met,
             } else {
                 exp$Gene_symbol <- aux
             }
-            exp$Gene_symbol <- unlist(lapply(strsplit(exp$mRNA,"\\|"),function(x) x[2]))
         }
     } else {
         # Check if it has the same pattern
@@ -1344,7 +1343,7 @@ TCGAvisualize_starburst <- function(met,
 
 
     volcano <- merge(met, exp, by = "Gene_symbol")
-    volcano$ID <- paste(volcano$Gene_Symbol,
+    volcano$ID <- paste(volcano$Gene_symbol,
                         volcano$probeID, sep = ".")
 
     # Preparing gene expression
