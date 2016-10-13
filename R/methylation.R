@@ -58,10 +58,12 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save =
     diffmean <- mean.g2 - mean.g1
 
     # Saves the result
-    values(rowRanges(data))[,paste0("mean.", gsub(" ", ".",group1))] <-  mean.g1
-    values(rowRanges(data))[,paste0("mean.", gsub(" ", ".",group2))] <-  mean.g2
-    values(rowRanges(data))[,paste0("diffmean.",gsub(" ", ".",group1),".", gsub(" ", ".",group2))] <-  diffmean
-    values(rowRanges(data))[,paste0("diffmean.",gsub(" ", ".",group2),".", gsub(" ", ".",group1))] <-  -diffmean
+    group1.col <- gsub("[[:punct:]]| ", ".", group1)
+    group2.col <- gsub("[[:punct:]]| ", ".", group2)
+    values(rowRanges(data))[,paste0("mean.", group1.col)] <-  mean.g1
+    values(rowRanges(data))[,paste0("mean.", group2.col)] <-  mean.g2
+    values(rowRanges(data))[,paste0("diffmean.",group1.col,".", group2.col)] <-  diffmean
+    values(rowRanges(data))[,paste0("diffmean.",group2.col,".", group1.col)] <-  -diffmean
     # Ploting a histogram to evaluate the data
     if(save) {
         message("Saved histogram_diffmean.png...")
@@ -649,13 +651,15 @@ calculate.pvalues <- function(data,
         dev.off()
     }
     #Saving the values into the object
-    colp <- paste("p.value",  gsub(" ", ".",group1),  gsub(" ", ".",group2), sep = ".")
+    group1.col <- gsub("[[:punct:]]| ", ".", group1)
+    group2.col <- gsub("[[:punct:]]| ", ".", group2)
+    colp <- paste("p.value",  group1.col,  group2.col, sep = ".")
     values(rowRanges(data))[,colp] <-  p.value
-    coladj <- paste("p.value.adj", gsub(" ", ".",group1),  gsub(" ", ".",group2), sep = ".")
+    coladj <- paste("p.value.adj", group1.col,  group2.col, sep = ".")
     values(rowRanges(data))[,coladj] <-  p.value.adj
-    colp <- paste("p.value",  gsub(" ", ".",group2),  gsub(" ", ".",group1), sep = ".")
+    colp <- paste("p.value",  group2.col,  group1.col, sep = ".")
     values(rowRanges(data))[,colp] <-  p.value
-    coladj <- paste("p.value.adj", gsub(" ", ".",group2),  gsub(" ", ".",group1), sep = ".")
+    coladj <- paste("p.value.adj", group2.col,  group1.col, sep = ".")
     values(rowRanges(data))[,coladj] <-  p.value.adj
 
     return(data)
@@ -1025,23 +1029,19 @@ TCGAanalyze_DMR <- function(data,
                    "Hypomethylated")
         label[2:3] <-  paste(label[2:3], "in", group2)
     }
-
-    diffcol <- paste("diffmean",
-                     gsub(" ", ".",group1),
-                     gsub(" ", ".",group2),sep = ".")
+    group1.col <- gsub("[[:punct:]]| ", ".", group1)
+    group2.col <- gsub("[[:punct:]]| ", ".", group2)
+    diffcol <- paste("diffmean", group1.col, group2.col,sep = ".")
     if (!(diffcol %in% colnames(values(data))) || overwrite) {
         data <- diffmean(data,groupCol, group1 = group1, group2 = group2, save = save)
         if (!(diffcol %in% colnames(values(rowRanges(data))))) {
             stop(paste0("Error! Not found ", diffcol))
         }
     }
-    pcol <- paste("p.value.adj",
-                  gsub(" ", ".", group2),
-                  gsub(" ", ".",group1),sep = ".")
+
+    pcol <- paste("p.value.adj", group2.col, group1.col,sep = ".")
     if(!(pcol %in% colnames(values(data)))){
-        pcol <- paste("p.value.adj",
-                      gsub(" ", ".",group1),
-                      gsub(" ", ".",group2),sep = ".")
+        pcol <- paste("p.value.adj", group1.col, group2.col, sep = ".")
     }
     if (!(pcol %in% colnames(values(data))) | overwrite) {
         data <- calculate.pvalues(data, groupCol, group1, group2,
@@ -1056,8 +1056,8 @@ TCGAanalyze_DMR <- function(data,
     }
     log <- paste0("TCGAanalyze_DMR.",gsub(" ", ".",group1),".",gsub(" ", ".",group2))
     assign(log,c("groupCol" = groupCol,
-                 "group1" = gsub(" ", ".",group1),
-                 "group2" = gsub(" ", ".",group2),
+                 "group1" = group1.col,
+                 "group2" = group2.col,
                  "plot.filename" = plot.filename,
                  "xlim" = xlim,
                  "ylim" = ylim,
@@ -1066,8 +1066,8 @@ TCGAanalyze_DMR <- function(data,
                  "paired" = "paired",
                  "adj.method" = adj.method))
     metadata(data)[[log]] <- (eval(as.symbol(log)))
-    statuscol <- paste("status",gsub(" ", ".",group1),gsub(" ", ".",group2),sep = ".")
-    statuscol2 <- paste("status",gsub(" ", ".",group2),gsub(" ", ".",group1),sep = ".")
+    statuscol <- paste("status",group1.col,group2.col,sep = ".")
+    statuscol2 <- paste("status",group2.col,group1.col,sep = ".")
     values(data)[,statuscol] <-  "Not Significant"
     values(data)[,statuscol2] <-  "Not Significant"
 
@@ -1104,14 +1104,13 @@ TCGAanalyze_DMR <- function(data,
                               x.cut = diffmean.cut,
                               y.cut = p.cut)
     }
-
     if (save) {
 
         # saving results into a csv file
         csv <- paste0(paste("DMR_results",
                             gsub("_",".",groupCol),
-                            gsub(" |_",".",group1),
-                            gsub(" |_",".",group2),
+                            group1.col,
+                            group2.col,
                             "pcut",p.cut,"meancut",diffmean.cut,  sep = "_"),".csv")
         csv <- file.path(save.directory,csv)
         message(paste0("Saving the results also in a csv file:"), csv)
@@ -1125,22 +1124,22 @@ TCGAanalyze_DMR <- function(data,
 
         write.csv2(df[,
                       c(colnames(df)[idx],
-                        paste("mean",gsub(" ", ".",group1),sep = "."),
-                        paste("mean",gsub(" ", ".",group2),sep = "."),
-                        paste("diffmean",gsub(" ", ".",group1),gsub(" ", ".",group2),sep = "."),
-                        paste("p.value",gsub(" ", ".",group1),gsub(" ", ".",group2),sep = "."),
-                        paste("p.value.adj",gsub(" ", ".",group1),gsub(" ", ".",group2),sep = "."),
+                        paste("mean", group1.col,sep = "."),
+                        paste("mean", group2.col,sep = "."),
+                        paste("diffmean", group1.col, group2.col, sep = "."),
+                        paste("p.value", group1.col, group2.col, sep = "."),
+                        paste("p.value.adj", group1.col, group2.col, sep = "."),
                         statuscol,
-                        paste("diffmean",gsub(" ", ".",group2),gsub(" ", ".",group1),sep = "."),
-                        paste("p.value",gsub(" ", ".",group2),gsub(" ", ".",group1),sep = "."),
-                        paste("p.value.adj",gsub(" ", ".",group2),gsub(" ", ".",group1),sep = "."),
+                        paste("diffmean",group2.col,group1.col,sep = "."),
+                        paste("p.value",group2.col,group1.col,sep = "."),
+                        paste("p.value.adj",group2.col,group1.col,sep = "."),
                         statuscol2)
                       ],file =  csv)
         if (is.null(filename)) {
             filename <- paste0(paste(
                 gsub("_",".",groupCol),
-                gsub(" |_",".",group1),
-                gsub(" |_",".",group2),
+                group1.col,
+                group2.col,
                 "pcut",p.cut,
                 "meancut",diffmean.cut,
                 sep = "_"),
@@ -1287,8 +1286,8 @@ TCGAvisualize_starburst <- function(met,
 {
     .e <- environment()
 
-    group1 <- gsub(" ", ".",group1)
-    group2 <- gsub(" ", ".",group2)
+    group1.col <- gsub("[[:punct:]]| ", ".",group1)
+    group2.col <- gsub("[[:punct:]]| ", ".",group2)
 
     if(is.null(color)) color <- c("#000000", "#E69F00","#56B4E9", "#009E73",
                                   "red", "#0072B2","#D55E00", "#CC79A7",
@@ -1308,21 +1307,43 @@ TCGAvisualize_starburst <- function(met,
     }
 
     # Preparing methylation
-    pcol <- paste("p.value.adj",group1,group2,sep = ".")
+    pcol <- gsub("[[:punct:]]| ", ".",paste("p.value.adj",group1,group2,sep = "."))
     if(!(pcol %in%  colnames(met))){
-        pcol <- paste("p.value.adj",group2,group1,sep = ".")
+        pcol <- gsub("[[:punct:]]| ", ".",paste("p.value.adj",group2,group1,sep = "."))
     }
     if(!(pcol %in%  colnames(met))){
         stop("Error! p-values adjusted not found. Please, run TCGAanalyze_DMR")
     }
 
-    # somehow the merge changes the names with - to .
-    pcol <- gsub(" |-",".",pcol)
+    # Methylation matrix and expression matrix should have the same name column for merge
+    idx <- grep("Gene_symbol",colnames(met),ignore.case = TRUE)
+    colnames(met)[idx] <- "Gene_symbol"
 
-    aux <- strsplit(row.names(exp),"\\|")
-    exp$Gene_Symbol  <- unlist(lapply(aux,function(x) x[1]))
-    volcano <- merge(met, exp, by = "Gene_Symbol")
-    volcano$ID <- paste(volcano$Gene_Symbol,
+    # Check if gene symbol columns exists
+    if(!any(grepl("Gene_symbol",colnames(exp),ignore.case = FALSE))) {
+        if("mRNA" %in% colnames(exp)) {
+            if(all(grepl("\\|",exp$mRNA))) {
+                exp$Gene_symbol <- unlist(lapply(strsplit(exp$mRNA,"\\|"),function(x) x[2]))
+            } else {
+                exp$Gene_symbol <- exp$mRNA
+            }
+        } else {
+            aux <- rownames(exp)
+            if(all(grepl("\\|",aux))) {
+                exp$Gene_symbol <- unlist(lapply(strsplit(aux,"\\|"),function(x) x[2]))
+            } else {
+                exp$Gene_symbol <- aux
+            }
+        }
+    } else {
+        # Check if it has the same pattern
+        idx <- grep("Gene_symbol",colnames(exp),ignore.case = TRUE)
+        colnames(exp)[idx] <- "Gene_symbol"
+    }
+
+
+    volcano <- merge(met, exp, by = "Gene_symbol")
+    volcano$ID <- paste(volcano$Gene_symbol,
                         volcano$probeID, sep = ".")
 
     # Preparing gene expression
@@ -1331,7 +1352,7 @@ TCGAvisualize_starburst <- function(met,
     volcano[volcano$logFC > 0, "geFDR2"] <-
         -1 * volcano[volcano$logFC > 0, "geFDR"]
 
-    diffcol <- gsub(" |-",".",paste("diffmean",group1,group2,sep = "."))
+    diffcol <- gsub("[[:punct:]]| ", ".",paste("diffmean",group1,group2,sep = "."))
     volcano$meFDR <- log10(volcano[,pcol])
     volcano$meFDR2 <- volcano$meFDR
     idx <- volcano[,diffcol] > 0
