@@ -518,7 +518,11 @@ GeneSplitRegulon <- function(Genelist,Sep){
 
 getGistic <- function(disease) {
     base <- paste0("http://gdac.broadinstitute.org/runs/analyses__latest/data/", disease)
-    x <- read_html(base)  %>% html_nodes("a") %>% html_attr("href")
+    x <- tryCatch({
+        read_html(base)  %>% html_nodes("a") %>% html_attr("href")
+    }, error = function(e) {
+        return(NULL)
+    })
     base <- file.path(base,tail(x,n=1))
     x <- read_html(base)  %>% html_nodes("a") %>% html_attr("href")
     x <- x[grep("CopyNumber_Gistic2.Level_4",x)]
@@ -526,7 +530,11 @@ getGistic <- function(disease) {
     # Check if downlaod was not corrupted
     md5 <- readr::read_table(file.path(base,x[2]), col_names = FALSE, progress = FALSE)$X1
     if(tools::md5sum(x[1]) != md5) stop("Error while downloading CNV data")
-    untar(x[1],files = "*all_thresholded.by_genes.txt", extras = "--wildcards")
+    if(is.linux()) {
+        untar(x[1],files = "*all_thresholded.by_genes.txt", extras = "--wildcards")
+    } else {
+        untar(x[1],files = "*all_thresholded.by_genes.txt")
+    }
     file <- paste0(gsub(".tar.gz","",x[1]),"/all_thresholded.by_genes.txt")
     ret <- fread(file, data.table = FALSE, colClasses = "character")
     return(ret)
