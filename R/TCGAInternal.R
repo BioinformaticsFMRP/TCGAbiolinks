@@ -606,8 +606,14 @@ get.mut.gistc.information <- function(df, project, genes) {
     df <- merge(df,info,by = "aux", all.x = TRUE, sort = FALSE)
     df$aux <- NULL
     mut.idx <- grep("mut_",colnames(df))
-    print(mut.idx)
     df[,mut.idx] <- !is.na(df[,mut.idx]) & df[,mut.idx] != FALSE
+    mut.idx <- grep("mut_",colnames(df))
+    for(i in paste0("mut_",genes)){
+        if(!i %in% colnames(df)) {
+            df$aux <- FALSE
+            colnames(df)[grep("aux",colnames(df))] <- i
+        }
+    }
     rownames(df) <- df$barcode
     df <- DataFrame(df[order,])
     return(df)
