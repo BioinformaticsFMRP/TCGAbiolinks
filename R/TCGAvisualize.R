@@ -746,14 +746,14 @@ TCGAvisualize_Heatmap <- function(data,
                 column_order <- order(df[,sortCol])
             }
             if(is.null(col.colors)) {
-            ha <- HeatmapAnnotation(df = df)
+                ha <- HeatmapAnnotation(df = df)
             } else {
                 ha <- HeatmapAnnotation(df = df,
                                         col = col.colors)
             }
         }
     }
-        # STEP 2 Create heatmap
+    # STEP 2 Create heatmap
     if(is.null(color.levels)) {
         if (type == "expression") color.levels <-  c("green", "white", "red")
         if (type == "methylation") color.levels <-  c("blue", "white", "red")
@@ -916,6 +916,11 @@ unlistlabels <- function(lab) {
 #' @param label.title Title of the label
 #' @param annotation.legend.side Position of the annotation legend
 #' @param heatmap.legend.side Position of the heatmap legend
+#' @param information Which column to use as informastion from MAF.
+#' Options: 1) "Variant_Classification" (The information will be "Frame_Shift_Del", "Frame_Shift_Ins",
+#'         "In_Frame_Del", "In_Frame_Ins", "Missense_Mutation",  "Nonsense_Mutation",
+#'              "Nonstop_Mutation",  "RNA",  "Silent" ,  "Splice_Site",  "Targeted_Region",  "Translation_Start_Site")
+#' 2) "Variant_Type" (The information will be INS,DEL,SNP)
 #' @importFrom ComplexHeatmap oncoPrint draw HeatmapAnnotation
 #' @importFrom grid gpar grid.rect
 #' @importFrom data.table dcast setDT setDF :=
@@ -954,6 +959,7 @@ TCGAvisualize_oncoprint <- function (mut,
                                      rows.font.size = 16,
                                      dist.col = 0.5,
                                      dist.row = 0.5,
+                                     information = "Variant_Type",
                                      row.order = FALSE,
                                      heatmap.legend.side = "bottom",
                                      annotation.legend.side = "bottom"){
@@ -967,9 +973,11 @@ TCGAvisualize_oncoprint <- function (mut,
     if(!missing(genes) & !is.null(genes)) mut <- subset(mut, mut$Hugo_Symbol %in% genes)
 
     if(!rm.empty.columns){
-        mat <- dcast(mut, Tumor_Sample_Barcode + Hugo_Symbol ~ Variant_Type,value.var = "value",fill = 0,drop = FALSE)
+        formula <- paste0("Tumor_Sample_Barcode + Hugo_Symbol ~ ", information)
+        mat <- dcast(mut, as.formula(formula),value.var = "value",fill = 0,drop = FALSE)
     } else {
-        mat <- dcast(mut, Tumor_Sample_Barcode + Hugo_Symbol ~ Variant_Type,value.var = "value",fill = 0,drop = TRUE)
+        formula <- paste0("Tumor_Sample_Barcode + Hugo_Symbol ~ ", information)
+        mat <- dcast(mut, as.formula(formula),value.var = "value",fill = 0,drop = TRUE)
     }
 
     # mutation in the file
@@ -997,25 +1005,18 @@ TCGAvisualize_oncoprint <- function (mut,
     rownames(mat) <- mat[,1]
     mat <- mat[,-1]
 
-    #rownames(mat) <-  substr(rownames(mat),1,12)
 
-    alter_fun = list(
-        background = function(x, y, w, h) {
+    alter_fun = function(x, y, w, h, v) {
+        n = sum(v)
+        h = h*0.9
+        # use `names(which(v))` to correctly map between `v` and `col`
+        if(n) {
+            grid.rect(x, y - h*0.5 + 1:n/n*h,  w-unit(dist.col, "mm"), 1/n*h,
+                      gp = gpar(fill = color[names(which(v))], col = NA), just = "top")
+        } else {
             grid.rect(x, y, w-unit(dist.col, "mm"), h-unit(dist.row, "mm"), gp = gpar(fill = color["background"], col = NA))
-        },
-        INS = function(x, y, w, h) {
-            grid.rect(x, y, w-unit(dist.col, "mm"), h-unit(dist.row, "mm"), gp = gpar(fill = color["INS"], col = NA))
-        },
-        DEL = function(x, y, w, h) {
-            grid.rect(x, y, w-unit(dist.col, "mm"), h-unit(dist.row, "mm"), gp = gpar(fill = color["DEL"], col = NA))
-        },
-        SNP = function(x, y, w, h) {
-            grid.rect(x, y, w-unit(dist.col, "mm"), h*0.33, gp = gpar(fill = color["SNP"], col = NA))
-        },
-        DNP = function(x, y, w, h) {
-            grid.rect(x, y, w-unit(dist.col, "mm"), h*0.45, gp = gpar(fill = color["DNP"], col = NA))
         }
-    )
+    }
 
     # get only the colors to the mutations
     # otherwise it gives errors
@@ -1030,9 +1031,6 @@ TCGAvisualize_oncoprint <- function (mut,
             color <- c(color[mutation.type],"background"= "#CCCCCC")
         }
     }
-    alt = intersect(names(alter_fun), c("background",as.character(mutation.type)))
-    alter_fun <- alter_fun[alt]
-
     # header are samples, rows genes
     mat <- t(mat)
 
