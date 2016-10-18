@@ -142,8 +142,10 @@ TCGAanalyze_survival <- function(data,
 
     group <- NULL
     if (is.null(clusterCol)) {
-        message("Please provide the clusterCol argument")
-        return(NULL)
+        stop("Please provide the clusterCol argument")
+    } else if(length(unique(data[,clusterCol])) == 1) {
+        stop( paste0("Sorry, but I'm expecting at least two groups\n",
+                        "  Only this group found: ", unique(data[,clusterCol])))
     }
     notDead <- is.na(data$days_to_death)
 
