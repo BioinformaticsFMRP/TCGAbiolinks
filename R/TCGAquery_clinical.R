@@ -465,6 +465,15 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
                 colnames(clin)[which(colnames(clin) == i)] <- paste0("has_",i,"_information")
         }
     }
+    if(tolower(clinical.info) == "samples") clin$samples <- NULL
+    if(tolower(clinical.info) == "portion") {
+        for(i in c("slides","analytes")){
+            clin[,i] <- as.character(clin[,i])
+            clin[which(clin[,i] != ""),i] <- "YES"
+            clin[which(clin[,i] == ""),i] <- "NO"
+            colnames(clin)[which(colnames(clin) == i)] <- paste0("has_",i,"_information")
+        }
+    }
     close(pb)
     return(clin)
 }
