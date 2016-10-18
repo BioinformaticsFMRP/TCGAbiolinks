@@ -584,6 +584,8 @@ get.mut.gistc <- function(project, genes) {
     cnv <- get.cnv(project, genes)
     if(!is.null(mut) & !is.null(cnv)) {
         annotation <- merge(mut, cnv, by = 0 , sort = FALSE,all=TRUE)
+        mut.idx <- grep("mut_",colnames(annotation))
+        annotation[,mut.idx] <- !is.na(annotation[,mut.idx]) & annotation[,mut.idx] != FALSE
         rownames(annotation) <- annotation$Row.names
         annotation$Row.names <- NULL
         return(annotation)
@@ -603,6 +605,15 @@ get.mut.gistc.information <- function(df, project, genes) {
     df$aux <- substr(df$barcode,1,15)
     df <- merge(df,info,by = "aux", all.x = TRUE, sort = FALSE)
     df$aux <- NULL
+    mut.idx <- grep("mut_",colnames(df))
+    df[,mut.idx] <- !is.na(df[,mut.idx]) & df[,mut.idx] != FALSE
+    mut.idx <- grep("mut_",colnames(df))
+    for(i in paste0("mut_",genes)){
+        if(!i %in% colnames(df)) {
+            df$aux <- FALSE
+            colnames(df)[grep("aux",colnames(df))] <- i
+        }
+    }
     rownames(df) <- df$barcode
     df <- DataFrame(df[order,])
     return(df)

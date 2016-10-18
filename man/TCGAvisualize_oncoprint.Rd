@@ -9,8 +9,8 @@ TCGAvisualize_oncoprint(mut, genes, filename, color,
   rm.empty.columns = FALSE, show.column.names = FALSE,
   show.row.barplot = TRUE, label.title = "Mutation", label.font.size = 16,
   rows.font.size = 16, dist.col = 0.5, dist.row = 0.5,
-  row.order = FALSE, heatmap.legend.side = "bottom",
-  annotation.legend.side = "bottom")
+  information = "Variant_Type", row.order = FALSE,
+  heatmap.legend.side = "bottom", annotation.legend.side = "bottom")
 }
 \arguments{
 \item{mut}{A dataframe from the mutation annotation file (see TCGAquery_maf from TCGAbiolinks)}
@@ -45,6 +45,12 @@ Should have a column bcr_patient_barcode with the same ID of the mutation object
 \item{dist.col}{distance between columns in the plot}
 
 \item{dist.row}{distance between rows in the plot}
+
+\item{information}{Which column to use as informastion from MAF.
+Options: 1) "Variant_Classification" (The information will be "Frame_Shift_Del", "Frame_Shift_Ins",
+        "In_Frame_Del", "In_Frame_Ins", "Missense_Mutation",  "Nonsense_Mutation",
+             "Nonstop_Mutation",  "RNA",  "Silent" ,  "Splice_Site",  "Targeted_Region",  "Translation_Start_Site")
+2) "Variant_Type" (The information will be INS,DEL,SNP)}
 
 \item{row.order}{Order the genes (rows). Genes with more mutations will be in the first rows}
 

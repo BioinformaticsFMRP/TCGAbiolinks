@@ -49,14 +49,19 @@ TCGAanalyze_Clustering <- function(tabDF, method,  methodHC = "ward.D2"){
 #' @importFrom grDevices dev.list
 #' @export
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
-TCGAanalyze_Preprocessing<- function(object,
+TCGAanalyze_Preprocessing <- function(object,
                                      cor.cut = 0,
                                      filename = NULL,
                                      width = 500,
-                                     height =500,
+                                     height = 500,
                                      datatype = "raw_counts"){
 
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
+
+    # This is a work around for raw_counts and raw_count
+    if(grepl("raw_count",datatype) & any(grepl("raw_count",names(assays(object))))) datatype <- names(assays(object))[grepl("raw_count",names(assays(object)))]
+    if(!any(grepl(datatype, names(assays(object))))) stop(paste0(datatype, " not found in the assay list: ",
+                                                                 paste(names(assays(object)),collapse = ", "),"\n  Please set the correct datatype argument."))
 
     if(is.null(filename)) filename <- "PreprocessingOutput.png"
     png(filename, width = width, height = height)
@@ -182,6 +187,7 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
     dataNormal <- dataGE[Genelist,samplesNT]
     colnames(dataCancer)  <- substr(colnames(dataCancer),1,12)
     cfu<-clinical_patient[clinical_patient[,"bcr_patient_barcode"] %in% substr(colnames(dataCancer),1,12),]
+    if("days_to_last_followup" %in% colnames(cfu)) colnames(cfu)[grep("days_to_last_followup",colnames(cfu))] <- "days_to_last_follow_up"
     cfu <- as.data.frame(subset(cfu, select=c("bcr_patient_barcode","days_to_death","days_to_last_follow_up","vital_status"))  )
     cfu[which(cfu$vital_status=="Alive"),"days_to_death"]<-"-Inf"
     cfu[which(cfu$vital_status=="Dead"),"days_to_last_follow_up"]<-"-Inf"
@@ -275,38 +281,32 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
             if(  dim(cfu_onlyDOWN)[1] >= 1) {
                 ttime_only_down <- cfu_onlyDOWN[, "days_to_death"]
                 deads_down<- sum(ttime_only_down > 0)
+            } else {
+                deads_down <- 0
             }
 
-            else {deads_down <-0 }
-
-
             #print(paste("deaths =",deads_complete))
-            tabSurv_Matrix[i,"Cancer Deaths"]<-deads_complete
-            tabSurv_Matrix[i,"Cancer Deaths with Top"]<- deads_top
-            tabSurv_Matrix[i,"Cancer Deaths with Down"]<- deads_down
+            tabSurv_Matrix[i,"Cancer Deaths"] <- deads_complete
+            tabSurv_Matrix[i,"Cancer Deaths with Top"] <- deads_top
+            tabSurv_Matrix[i,"Cancer Deaths with Down"] <- deads_down
 
-            tabSurv_Matrix[i,"Mean Normal"]<-  mean(mRNAselected_values_normal)
+            tabSurv_Matrix[i,"Mean Normal"] <- mean(mRNAselected_values_normal)
 
-
-
-
-
-            dataCancer_onlyTop_sample<-dataCancer[,samples_top_mRNA_selected]
-            dataCancer_onlyTop_sample_mRNASelected<- dataCancer_onlyTop_sample[rownames(dataCancer_onlyTop_sample) == mRNAselected,]
+            dataCancer_onlyTop_sample <- dataCancer[,samples_top_mRNA_selected]
+            dataCancer_onlyTop_sample_mRNASelected <- dataCancer_onlyTop_sample[rownames(dataCancer_onlyTop_sample) == mRNAselected,]
 
 
-            dataCancer_onlyDown_sample<-dataCancer[,samples_down_mRNA_selected]
-            dataCancer_onlyDown_sample_mRNASelected<- dataCancer_onlyDown_sample[rownames(dataCancer_onlyDown_sample) == mRNAselected,]
+            dataCancer_onlyDown_sample <- dataCancer[,samples_down_mRNA_selected]
+            dataCancer_onlyDown_sample_mRNASelected <- dataCancer_onlyDown_sample[rownames(dataCancer_onlyDown_sample) == mRNAselected,]
 
 
-            tabSurv_Matrix[i,"Mean Tumor Top"]<- mean(dataCancer_onlyTop_sample_mRNASelected)
-            tabSurv_Matrix[i,"Mean Tumor Down"]<- mean(dataCancer_onlyDown_sample_mRNASelected)
+            tabSurv_Matrix[i,"Mean Tumor Top"] <- mean(dataCancer_onlyTop_sample_mRNASelected)
+            tabSurv_Matrix[i,"Mean Tumor Down"] <- mean(dataCancer_onlyDown_sample_mRNASelected)
 
             ttime[!status] <- as.numeric(cfu[!status, "days_to_last_follow_up"])
             #ttime[!status] <- cfu[!status, "days_to_last_followup"]
 
-            ttime[which(ttime== -Inf)]<-0
-
+            ttime[which(ttime== -Inf)] <- 0
 
             ttime <- Surv(ttime, status)
             rownames(ttime) <- rownames(cfu)
@@ -317,17 +317,8 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
 
             #   plot(survfit(ttime ~ c(rep("top", nrow(cfu_onlyTOP)), rep("down", nrow(cfu_onlyDOWN)))), col = c("red", "green"),main= mRNAselected)
 
-
-
-
-
-            legendHigh<- paste(mRNAselected,"High")
-            legendLow<- paste(mRNAselected,"Low")
-
-
-
-
-
+            legendHigh <- paste(mRNAselected,"High")
+            legendLow  <- paste(mRNAselected,"Low")
 
             tabSurv<-survdiff(ttime  ~ c(rep("top", nrow(cfu_onlyTOP)), rep("down", nrow(cfu_onlyDOWN)) ))
             tabSurv_chis<-unlist(tabSurv)$chisq
