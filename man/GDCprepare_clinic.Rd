@@ -10,7 +10,8 @@ GDCprepare_clinic(query, clinical.info, directory = "GDCdata")
 \item{query}{Result from GDCquery, with data.category set to Clinical}
 
 \item{clinical.info}{Which information should be retrieved.
-Options: drug, admin, follow_up,radiation, patient, stage_event or new_tumor_event}
+Options Clinical: drug, admin, follow_up,radiation, patient, stage_event or new_tumor_event
+Options Biospecimen: protocol, admin, aliquot, analyte, bio_patient, sample, portion, slide}
 
 \item{directory}{Directory/Folder where the data was downloaded. Default: GDCdata}
 }
@@ -27,5 +28,13 @@ clinical <- GDCprepare_clinic(query,"patient")
 clinical.drug <- GDCprepare_clinic(query,"drug")
 clinical.radiation <- GDCprepare_clinic(query,"radiation")
 clinical.admin <- GDCprepare_clinic(query,"admin")
+query <- GDCquery(project = "TCGA-COAD",
+                  data.category = "Biospecimen",
+                  barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))
+GDCdownload(query)
+clinical <- GDCprepare_clinic(query,"admin")
+clinical.drug <- GDCprepare_clinic(query,"sample")
+clinical.radiation <- GDCprepare_clinic(query,"portion")
+clinical.admin <- GDCprepare_clinic(query,"slide")
 }
 
