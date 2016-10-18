@@ -49,14 +49,19 @@ TCGAanalyze_Clustering <- function(tabDF, method,  methodHC = "ward.D2"){
 #' @importFrom grDevices dev.list
 #' @export
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
-TCGAanalyze_Preprocessing<- function(object,
+TCGAanalyze_Preprocessing <- function(object,
                                      cor.cut = 0,
                                      filename = NULL,
                                      width = 500,
-                                     height =500,
+                                     height = 500,
                                      datatype = "raw_counts"){
 
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
+
+    # This is a work around for raw_counts and raw_count
+    if(grepl("raw_count",datatype) & any(grepl("raw_count",names(assays(object))))) datatype <- names(assays(object))[grepl("raw_count",names(assays(object)))]
+    if(!any(grepl(datatype, names(assays(object))))) stop(paste0(datatype, " not found in the assay list: ",
+                                                                 paste(names(assays(object)),collapse = ", "),"\n  Please set the correct datatype argument."))
 
     if(is.null(filename)) filename <- "PreprocessingOutput.png"
     png(filename, width = width, height = height)
