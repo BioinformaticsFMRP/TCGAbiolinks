@@ -390,35 +390,23 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
     files <- file.path(directory, files)
     if(!all(file.exists(files))) stop(paste0("I couldn't find all the files from the query.",
                                              "Please check directory parameter right"))
-
+    xpath <- NULL
 
     disease <- tolower(gsub("TCGA-","",query$project))
     if(tolower(clinical.info) == "drug")      xpath <- "//rx:drug"
-    if(tolower(clinical.info) == "admin")     xpath <- "//admin:admin"
-    if(tolower(clinical.info) == "follow_up"){
-        xmlfile <- files[1]
-        xml <- read_xml(xmlfile)
-        follow_up_version <-  names(xml_ns(xml))[grepl("follow_up",names(xml_ns(xml)))]
-        if(length(follow_up_version) > 1) {
-            n <- readline(prompt=paste0("There is more than one follow up version, please select one",
-                                        paste0(seq(1:length(follow_up_version)), follow_up_version)))
-            follow_up_version <- follow_up_version[n]
-        }
-        xpath <- paste0("//", follow_up_version, ":follow_up")
-    }
-    if(tolower(clinical.info) == "radiation") xpath <- "//rad:radiation"
-    if(tolower(clinical.info) == "patient")   xpath <- paste0("//",disease,":patient")
-    if(tolower(clinical.info) == "stage_event")     xpath <- "//shared_stage:stage_event"
-    if(tolower(clinical.info) == "new_tumor_event") xpath <- paste0("//",disease,"_nte:new_tumor_event")
-
+    else if(tolower(clinical.info) == "admin")     xpath <- "//admin:admin"
+    else if(tolower(clinical.info) == "radiation") xpath <- "//rad:radiation"
+    else if(tolower(clinical.info) == "patient")   xpath <- paste0("//",disease,":patient")
+    else if(tolower(clinical.info) == "stage_event")     xpath <- "//shared_stage:stage_event"
+    else if(tolower(clinical.info) == "new_tumor_event") xpath <- paste0("//",disease,"_nte:new_tumor_event")
     # biospecimen xpaths
-    if(tolower(clinical.info) == "sample")      xpath <- "//bio:sample"
-    if(tolower(clinical.info) == "bio_patient")      xpath <- "//bio:patient"
-    if(tolower(clinical.info) == "analyte")      xpath <- "//bio:analyte"
-    if(tolower(clinical.info) == "aliquot")      xpath <- "//bio:aliquot"
-    if(tolower(clinical.info) == "protocol")      xpath <- "//bio:protocol"
-    if(tolower(clinical.info) == "portion")      xpath <- "//bio:portion"
-    if(tolower(clinical.info) == "slide")      xpath <- "//bio:slide"
+    else if(tolower(clinical.info) == "sample")      xpath <- "//bio:sample"
+    else if(tolower(clinical.info) == "bio_patient")      xpath <- "//bio:patient"
+    else if(tolower(clinical.info) == "analyte")      xpath <- "//bio:analyte"
+    else if(tolower(clinical.info) == "aliquot")      xpath <- "//bio:aliquot"
+    else if(tolower(clinical.info) == "protocol")      xpath <- "//bio:protocol"
+    else if(tolower(clinical.info) == "portion")      xpath <- "//bio:portion"
+    else if(tolower(clinical.info) == "slide")  xpath <- "//bio:slide"
 
     clin <- NULL
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
@@ -426,6 +414,15 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
         xmlfile <- files[i]
         xml <- read_xml(xmlfile)
         doc = xmlParse(xmlfile)
+
+        if(tolower(clinical.info) == "follow_up" & is.null(xpath)){
+            follow_up_version <-  names(xml_ns(xml))[grepl("follow_up",names(xml_ns(xml)))]
+            if(length(follow_up_version) > 1) {
+                follow_up_version <- follow_up_version[length(follow_up_version)]
+            }
+            if(length(follow_up_version) == 1)  xpath <- paste0("//", follow_up_version, ":follow_up")
+            else next
+        }
 
         patient <- str_extract(xmlfile,"[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}")
         # Test if this xpath exists before parsing it
