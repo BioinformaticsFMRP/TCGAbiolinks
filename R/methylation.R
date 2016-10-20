@@ -16,7 +16,6 @@
 #'        diffmean.group1.group2; Where group1 and group2 are the names of the
 #'        groups.
 #' @examples
-#' \dontrun{
 #' nrows <- 200; ncols <- 20
 #' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
 #' rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
@@ -30,8 +29,7 @@
 #'          assays=S4Vectors::SimpleList(counts=counts),
 #'          rowRanges=rowRanges,
 #'          colData=colData)
-#' data <- diffmean(data)
-#' }
+#'  diff.mean <- diffmean(data,groupCol = "group")
 #' @keywords internal
 diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save = FALSE) {
 
@@ -65,12 +63,15 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save =
     values(rowRanges(data))[,paste0("diffmean.",group1.col,".", group2.col)] <-  diffmean
     values(rowRanges(data))[,paste0("diffmean.",group2.col,".", group1.col)] <-  -diffmean
     # Ploting a histogram to evaluate the data
-    if(save) {
-        message("Saved histogram_diffmean.png...")
-        png(filename = "histogram_diffmean.png")
-        hist(diffmean)
-        dev.off()
-    }
+    tryCatch({
+        if(save) {
+            fhist <- paste0("histogram_diffmean.",group1.col,group2.col,".png")
+            message("Saving histogram of diffmean values: ", fhist)
+            png(filename = fhist)
+            hist(diffmean)
+            dev.off()
+        }
+    })
     return(data)
 }
 
@@ -145,7 +146,7 @@ TCGAanalyze_survival <- function(data,
         stop("Please provide the clusterCol argument")
     } else if(length(unique(data[,clusterCol])) == 1) {
         stop( paste0("Sorry, but I'm expecting at least two groups\n",
-                        "  Only this group found: ", unique(data[,clusterCol])))
+                     "  Only this group found: ", unique(data[,clusterCol])))
     }
     notDead <- is.na(data$days_to_death)
 
