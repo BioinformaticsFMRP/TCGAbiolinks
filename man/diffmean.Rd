@@ -28,7 +28,6 @@ Calculate diffmean methylation of probes between two groups removing lines
    that has NA values.
 }
 \examples{
-\dontrun{
 nrows <- 200; ncols <- 20
 counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
 rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
@@ -42,8 +41,7 @@ data <- SummarizedExperiment::SummarizedExperiment(
          assays=S4Vectors::SimpleList(counts=counts),
          rowRanges=rowRanges,
          colData=colData)
-data <- diffmean(data)
-}
+ diff.mean <- diffmean(data,groupCol = "group")
 }
 \keyword{internal}
 
