@@ -67,9 +67,13 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save =
         if(save) {
             fhist <- paste0("histogram_diffmean.",group1.col,group2.col,".png")
             message("Saving histogram of diffmean values: ", fhist)
-            png(filename = fhist)
-            hist(diffmean)
-            dev.off()
+            p <- qplot(diffmean,
+                       geom="histogram",
+                       binwidth = 0.5,
+                       main = "Histogram for diffmeans",
+                       xlab = "Diffmean",
+                       fill=I("blue"))
+            ggsave(p,filename = fhist)
         }
     })
     return(data)
