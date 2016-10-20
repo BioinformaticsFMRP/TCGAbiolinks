@@ -29,7 +29,7 @@
 #'          assays=S4Vectors::SimpleList(counts=counts),
 #'          rowRanges=rowRanges,
 #'          colData=colData)
-#'  diff.mean <- diffmean(data,groupCol = "group")
+#'  diff.mean <- TCGAbiolinks:::diffmean(data,groupCol = "group")
 #' @keywords internal
 diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save = FALSE) {
 
@@ -73,7 +73,9 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save =
                        main = "Histogram for diffmeans",
                        xlab = "Diffmean",
                        fill=I("blue"))
-            ggsave(p,filename = fhist)
+            png(filename = fhist)
+            print(p)
+            dev.off()
         }
     })
     return(data)
