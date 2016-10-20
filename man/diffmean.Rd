@@ -41,7 +41,7 @@ data <- SummarizedExperiment::SummarizedExperiment(
          assays=S4Vectors::SimpleList(counts=counts),
          rowRanges=rowRanges,
          colData=colData)
- diff.mean <- diffmean(data,groupCol = "group")
+ diff.mean <- TCGAbiolinks:::diffmean(data,groupCol = "group")
 }
 \keyword{internal}
 
