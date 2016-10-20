@@ -1115,8 +1115,9 @@ TCGAanalyze_DMR <- function(data,
                             group1.col,
                             group2.col,
                             "pcut",p.cut,"meancut",diffmean.cut,  sep = "_"),".csv")
+        dir.create(save.directory,showWarnings = FALSE,recursive = TRUE)
         csv <- file.path(save.directory,csv)
-        message(paste0("Saving the results also in a csv file:"), csv)
+        message(paste0("Saving the results also in a csv file: "), csv)
         df <- values(data)
         if (any(hyper & sig)) df[hyper & sig,statuscol] <- paste("Hypermethylated","in", group2)
         if (any(hyper & sig)) df[hyper & sig,statuscol2] <- paste("Hypomethylated","in", group1)
