@@ -5,6 +5,7 @@
 \title{Differentially methylated regions Analysis}
 \usage{
 TCGAanalyze_DMR(data, groupCol = NULL, group1 = NULL, group2 = NULL,
+  calculate.pvalues.probes = "all",
   plot.filename = "methylation_volcano.pdf",
   ylab = expression(paste(-Log[10], " (FDR corrected -P values)")),
   xlab = expression(paste("DNA Methylation difference (", beta, "-values)")),
@@ -25,6 +26,10 @@ the name of the group}
 
 \item{group2}{In case our object has more than 2 groups, you should set
 the name of the group}
+
+\item{calculate.pvalues.probes}{In order to get the probes faster the user can select to calculate the pvalues
+only for the probes with a difference in DNA methylation. The default is to calculate to all probes.
+Possible values: "all", "differential". Default "all"}
 
 \item{plot.filename}{Filename. Default: volcano.pdf, volcano.svg, volcano.png. If set to FALSE, there will be no plot.}
 
