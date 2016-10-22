@@ -374,8 +374,10 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
     if(unique(query$results[[1]]$data_category) != "Biospecimen") {
         valid.clinical.info <- c("drug","admin","follow_up","radiation","patient","stage_event","new_tumor_event")
-    } else {
+    } else  if(unique(query$results[[1]]$data_category) != "Clinical") {
         valid.clinical.info <- c("protocol","admin","aliquot","analyte","bio_patient","sample", "portion", "slide")
+    } else {
+        stop("Data category should be Clinical or Biospecimen")
     }
     if(missing(clinical.info)) stop(paste0("Please set clinical.info argument:\n=> ",paste(valid.clinical.info,collapse = "\n=> ")))
     if(!(clinical.info %in% valid.clinical.info)) stop(paste0("Please set a valid clinical.info argument:\n=> ",paste(valid.clinical.info,collapse = "\n=> ")))
