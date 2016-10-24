@@ -73,11 +73,13 @@ GDCprepare <- function(query,
                                              "Please check if the directory parameter right or GDCdownload downloaded the samples."))
 
     if(grepl("Transcriptome Profiling", query$data.category, ignore.case = TRUE)){
+
         data <- readTranscriptomeProfiling(files = files,
                                            data.type = query$data.type,
                                            workflow.type = unique(query$results[[1]]$analysis$workflow_type),
                                            cases = query$results[[1]]$cases,
                                            summarizedExperiment)
+
     } else if(grepl("Copy Number Variation",query$data.category,ignore.case = TRUE)) {
         data <- readCopyNumberVariation(files, query$results[[1]]$cases)
     }  else if(grepl("DNA methylation",query$data.category, ignore.case = TRUE)) {
@@ -651,35 +653,48 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
 }
 
 readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,summarizedExperiment) {
-    # Status working for:
-    #  - htseq
-    #  - FPKM
-    #  - FPKM-UQ
-    if(grepl("HTSeq",workflow.type)){
-        pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-        for (i in seq_along(files)) {
-            data <- read_tsv(file = files[i],
-                             col_names = FALSE,
-                             col_types = cols(
-                                 X1 = col_character(),
-                                 X2 = col_double()
-                             ))
-            if(!missing(cases))  colnames(data)[2] <- cases[i]
-            if(i == 1) df <- data
-            if(i != 1) df <- merge(df, data, by=colnames(df)[1],all = TRUE)
-            setTxtProgressBar(pb, i)
-        }
-        close(pb)
-        if(summarizedExperiment) df <- makeSEfromTranscriptomeProfiling(df,cases,workflow.type)
-    } else if(grepl("miRNA", workflow.type) & grepl("miRNA", data.type)) {
-        pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-        for (i in seq_along(files)) {
-            data <- read_tsv(file = files[i], col_names = TRUE)
-            if(!missing(cases))
-                colnames(data)[2:ncol(data)] <- paste0(colnames(data)[2:ncol(data)],"_",cases[i])
+    if(grepl("Gene Expression Quantification", data.type, ignore.case = TRUE)){
 
+        # Status working for:
+        #  - htseq
+        #  - FPKM
+        #  - FPKM-UQ
+        if(grepl("HTSeq",workflow.type)){
+            pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+            for (i in seq_along(files)) {
+                data <- read_tsv(file = files[i],
+                                 col_names = FALSE,
+                                 col_types = cols(
+                                     X1 = col_character(),
+                                     X2 = col_double()
+                                 ))
+                if(!missing(cases))  colnames(data)[2] <- cases[i]
+                if(i == 1) df <- data
+                if(i != 1) df <- merge(df, data, by=colnames(df)[1],all = TRUE)
+                setTxtProgressBar(pb, i)
+            }
+            close(pb)
+            if(summarizedExperiment) df <- makeSEfromTranscriptomeProfiling(df,cases,workflow.type)
+        } else if(grepl("miRNA", workflow.type) & grepl("miRNA", data.type)) {
+            pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+            for (i in seq_along(files)) {
+                data <- read_tsv(file = files[i], col_names = TRUE)
+                if(!missing(cases))
+                    colnames(data)[2:ncol(data)] <- paste0(colnames(data)[2:ncol(data)],"_",cases[i])
+
+                if(i == 1) df <- data
+                if(i != 1) df <- merge(df, data, by=colnames(df)[1],all = TRUE)
+                setTxtProgressBar(pb, i)
+            }
+            close(pb)
+        }
+    } else if(grepl("Isoform Expression Quantification", data.type, ignore.case = TRUE)){
+        pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+        for (i in seq_along(files)) {
+            data <- read_tsv(file = files[i], col_names = TRUE, col_types = c("ccidcc"))
+            if(!missing(cases)) data$barcode <- cases[i] else data$file <- i
             if(i == 1) df <- data
-            if(i != 1) df <- merge(df, data, by=colnames(df)[1],all = TRUE)
+            if(i != 1) df <- rbind(df,data)
             setTxtProgressBar(pb, i)
         }
         close(pb)
