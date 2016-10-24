@@ -1070,7 +1070,7 @@ TCGAanalyze_DMR <- function(data,
             diff.probes <- abs(values(data)[,diffcol]) > diffmean.cut
             nb <- length(which(diff.probes == TRUE))
             if(nb == 0) stop("No probes differenly methylated")
-            print(paste0("Number of probes differenly methylated: ",b))
+            print(paste0("Number of probes differenly methylated: ",nb))
             data <- calculate.pvalues(data[diff.probes,], groupCol, group1, group2,
                                       paired = paired,
                                       method = adj.method,
