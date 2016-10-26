@@ -1054,9 +1054,9 @@ TCGAvisualize_oncoprint <- function (mut,
         get.color <- function(df,col){
             idx <- which(colnames(df) == col)
             start <- 1
-            if(idx != 1) start <- length(unique(unlist(c(df[,1:(idx-1)])))) + 1
-            end <- start + length(unique(df[,col])) -1
-            diff.colors <- c("dimgray","thistle","deeppink3","magenta4","lightsteelblue1","black",
+            if(idx != 1) start <- length(na.omit(unique(unlist(c(df[,1:(idx-1)]))))) + 1
+            end <- start + length(na.omit(unique(df[,col]))) -1
+            diff.colors <- c("purple","thistle","deeppink3","magenta4","lightsteelblue1","black",
                              "chartreuse","lightgreen","maroon4","darkslategray",
                              "lightyellow3","darkslateblue","firebrick1","aquamarine",
                              "dodgerblue4","bisque4","moccasin","indianred1",
@@ -1071,7 +1071,7 @@ TCGAvisualize_oncoprint <- function (mut,
             #print(idx/n.col)
             ret <- get.color(annotation,x)
             #ret <- rainbow(length(unique(annotation[,x])),start = idx/n.col,alpha=0.5)
-            names(ret) <- as.character(unique(annotation[,x]))
+            names(ret) <- as.character(na.omit(unique(annotation[,x])))
             return(ret)
         })
         names(col.annot) <-  colnames(annotation)
