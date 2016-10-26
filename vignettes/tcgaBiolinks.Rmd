@@ -849,9 +849,8 @@ legacyPipeline <- function(project, data.category, platform, n = 20){
                       data.category = data.category,
                       platform = platform,
                       legacy = TRUE,
-                      chunks.per.download = 5,
                       barcode = cases)
-    GDCdownload(query)
+    GDCdownload(query,chunks.per.download = 5)
     data <- GDCprepare(query)
     return(data)
 }
