@@ -1155,7 +1155,7 @@ TCGAanalyze_DMR <- function(data,
         # get metadata not created by this function
         idx <- grep("mean|status|value",colnames(df),invert = TRUE)
 
-        write_csv(df[,
+        write_csv(as.data.frame(df[,
                       c(colnames(df)[idx],
                         paste("mean", group1.col,sep = "."),
                         paste("mean", group2.col,sep = "."),
@@ -1167,7 +1167,7 @@ TCGAanalyze_DMR <- function(data,
                         paste("p.value",group2.col,group1.col,sep = "."),
                         paste("p.value.adj",group2.col,group1.col,sep = "."),
                         statuscol2)
-                      ],path =  csv)
+                      ]),path =  csv)
         if (is.null(filename)) {
             filename <- paste0(paste(
                 gsub("_",".",groupCol),
