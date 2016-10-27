@@ -1167,7 +1167,7 @@ TCGAanalyze_DMR <- function(data,
                         paste("p.value",group2.col,group1.col,sep = "."),
                         paste("p.value.adj",group2.col,group1.col,sep = "."),
                         statuscol2)
-                      ],file =  csv)
+                      ],path =  csv)
         if (is.null(filename)) {
             filename <- paste0(paste(
                 gsub("_",".",groupCol),
