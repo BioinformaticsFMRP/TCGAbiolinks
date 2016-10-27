@@ -936,6 +936,7 @@ TCGAVisualize_volcano <- function(x,y,
 #' @importFrom SummarizedExperiment colData rowRanges assay rowRanges<- values<-
 #' @importFrom S4Vectors metadata
 #' @importFrom dplyr data_frame
+#' @import readr
 #' @import utils
 #' @export
 #' @return Volcano plot saved and the given data with the results
@@ -1154,7 +1155,7 @@ TCGAanalyze_DMR <- function(data,
         # get metadata not created by this function
         idx <- grep("mean|status|value",colnames(df),invert = TRUE)
 
-        write.csv2(df[,
+        write_csv(df[,
                       c(colnames(df)[idx],
                         paste("mean", group1.col,sep = "."),
                         paste("mean", group2.col,sep = "."),
