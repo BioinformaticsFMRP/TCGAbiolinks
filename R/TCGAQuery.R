@@ -482,17 +482,10 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata"){
 
         dir.create(directory, showWarnings = FALSE, recursive = TRUE)
         # Check input
-        if (missing(tumor)) stop(paste0("Please, set tumor argument. Possible values:\n => ",
-                                        paste(sort(maf$tumor),collapse = "\n => ")))
 
         if (!any(grepl(tumor,maf$tumor))) stop(paste0("Please, set a valid tumor argument. Possible values:\n => ",
                                                       paste(sort(maf$tumor),collapse = "\n => ")))
 
-        #  Info to user
-        message("============================================================================")
-        message(" For more information about MAF data please read the following GDC manual:")
-        message(" GDC manual: https://gdc-docs.nci.nih.gov/Data/PDF/Data_UG.pdf")
-        message("============================================================================")
         selected <- maf[grepl(tumor,maf$tumor,ignore.case = TRUE),]
 
         if(is.windows()) mode <- "wb" else  mode <- "w"
