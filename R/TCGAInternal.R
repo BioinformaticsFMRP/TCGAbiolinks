@@ -562,12 +562,12 @@ get.cnv <- function(project, genes){
     return(cnv.annotation)
 }
 
-get.mutation <- function(project, genes){
+get.mutation <- function(project, genes, pipeline = pipeline){
     if(missing(project)) stop("Argument project is missing")
     if(missing(genes)) stop("Argument genes is missing")
 
     # Get mutation annotation file
-    maf <- GDCquery_Maf(gsub("TCGA-","",project))
+    maf <- GDCquery_Maf(gsub("TCGA-","",project),pipelines = pipeline)
     mut <- NULL
     for(i in genes) {
         if(!i %in% maf$Hugo_Symbol) next
@@ -588,10 +588,10 @@ get.mutation <- function(project, genes){
 
     return(mut)
 }
-get.mut.gistc <- function(project, genes) {
+get.mut.gistc <- function(project, genes,mut.pipeline) {
     if(missing(project)) stop("Argument project is missing")
     if(missing(genes)) stop("Argument genes is missing")
-    mut <- get.mutation(project, genes)
+    mut <- get.mutation(project, genes, pipeline = mut.pipeline )
     cnv <- get.cnv(project, genes)
     if(!is.null(mut) & !is.null(cnv)) {
         annotation <- merge(mut, cnv, by = 0 , sort = FALSE,all=TRUE)
@@ -607,10 +607,10 @@ get.mut.gistc <- function(project, genes) {
     }
     return(NULL)
 }
-get.mut.gistc.information <- function(df, project, genes) {
+get.mut.gistc.information <- function(df, project, genes, mut.pipeline = "muse") {
     order <- rownames(df)
     for(i in genes) if(!tolower(i) %in% tolower(EAGenes$Gene)) message(paste("Gene not found:", i))
-    info <- get.mut.gistc(project, genes)
+    info <- get.mut.gistc(project, genes, mut.pipeline = mut.pipeline)
     if(is.null(info)) return(df)
     info$aux <- rownames(info)
     df$aux <- substr(df$barcode,1,15)
