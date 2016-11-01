@@ -178,6 +178,7 @@ getGDCprojects <- function(){
         projects$tumor <- unlist(lapply(projects$project_id, function(x){unlist(str_split(x,"-"))[2]}))
         return(projects)
     })
+    if(nrow(projects) == 0) stop("I couldn't access GDC API. Please, check if it is not down.")
     return(projects)
 }
 
@@ -526,7 +527,11 @@ getGistic <- function(disease) {
     base <- file.path(base,tail(x,n=1))
     x <- read_html(base)  %>% html_nodes("a") %>% html_attr("href")
     x <- x[grep("CopyNumber_Gistic2.Level_4",x)]
-    if(!file.exists(x[1])) downloader::download(file.path(base,x[1]),x[1])
+
+    if(!file.exists(x[1])) {
+        if(is.windows()) mode <- "wb" else  mode <- "w"
+        downloader::download(file.path(base,x[1]),x[1], mode = mode)
+    }
     # Check if downlaod was not corrupted
     md5 <- readr::read_table(file.path(base,x[2]), col_names = FALSE, progress = FALSE)$X1
     if(tools::md5sum(x[1]) != md5) stop("Error while downloading CNV data")
@@ -536,7 +541,13 @@ getGistic <- function(disease) {
         untar(x[1],files = "*all_thresholded.by_genes.txt")
     }
     file <- paste0(gsub(".tar.gz","",x[1]),"/all_thresholded.by_genes.txt")
-    ret <- fread(file, data.table = FALSE, colClasses = "character")
+    ret <- tryCatch({
+        fread(file, data.table = FALSE, colClasses = "character")
+    }, error = function(e) {
+        file <- dir(pattern = "all_thresholded.by_genes.txt", recursive = T, full.names = T)
+        file <- file[grep(disease,file,ignore.case = TRUE)]
+        fread(file, data.table = FALSE, colClasses = "character")
+    })
     return(ret)
 }
 get.cnv <- function(project, genes){
