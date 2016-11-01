@@ -283,29 +283,33 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
     return(rse)
 }
 
-makeSEfromDNAmethylation <- function(df, genome="hg19"){
-    gene.location <- get.GRCh.bioMart(genome)
-    gene.GR <- GRanges(seqnames = paste0("chr", gene.location$chromosome_name),
-                       ranges = IRanges(start = gene.location$start_position,
-                                        end = gene.location$end_position),
-                       strand = gene.location$strand,
-                       symbol = gene.location$external_gene_id,
-                       EntrezID = gene.location$entrezgene)
+makeSEfromDNAmethylation <- function(df, probeInfo=NULL){
+    if(is.null(probeInfo)) {
+        gene.location <- get.GRCh.bioMart()
+        gene.GR <- GRanges(seqnames = paste0("chr", gene.location$chromosome_name),
+                           ranges = IRanges(start = gene.location$start_position,
+                                            end = gene.location$end_position),
+                           strand = gene.location$strand,
+                           symbol = gene.location$external_gene_id,
+                           EntrezID = gene.location$entrezgene)
 
-    rowRanges <- GRanges(seqnames = paste0("chr", df$Chromosome),
-                         ranges = IRanges(start = df$Genomic_Coordinate,
-                                          end = df$Genomic_Coordinate),
-                         probeID = df$Composite.Element.REF,
-                         Gene_Symbol = df$Gene_Symbol)
+        rowRanges <- GRanges(seqnames = paste0("chr", df$Chromosome),
+                             ranges = IRanges(start = df$Genomic_Coordinate,
+                                              end = df$Genomic_Coordinate),
+                             probeID = df$Composite.Element.REF,
+                             Gene_Symbol = df$Gene_Symbol)
 
-    names(rowRanges) <- as.character(df$Composite.Element.REF)
-    colData <-  colDataPrepare(colnames(df)[5:ncol(df)])
-    assay <- data.matrix(subset(df,select = c(5:ncol(df))))
+        names(rowRanges) <- as.character(df$Composite.Element.REF)
+        colData <-  colDataPrepare(colnames(df)[5:ncol(df)])
+        assay <- data.matrix(subset(df,select = c(5:ncol(df))))
+    } else {
+        rowRanges <- makeGRangesFromDataFrame(probeInfo, keep.extra.columns = T)
+        colData <-  colDataPrepare(colnames(df)[(ncol(probeInfo) + 1):ncol(df)])
+        assay <- data.matrix(subset(df,select = c((ncol(probeInfo) + 1):ncol(df))))
+    }
     colnames(assay) <- rownames(colData)
     rownames(assay) <- as.character(df$Composite.Element.REF)
-
     rse <- SummarizedExperiment(assays = assay, rowRanges = rowRanges, colData = colData)
-
 }
 
 # We will try to make this function easier to use this function in its own data
@@ -313,6 +317,8 @@ makeSEfromDNAmethylation <- function(df, genome="hg19"){
 # Instead the user should be able to add the names to his data
 # The only problem is that the data from the user will not have all the columns
 # TODO: Improve this function to be more generic as possible
+#' @importFrom GenomicRanges makeGRangesFromDataFrame
+#' @importFrom tibble as_data_frame
 readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platform){
     if (grepl("OMA00",platform)){
         pb <- txtProgressBar(min = 0, max = length(files), style = 3)
@@ -336,18 +342,21 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
         df$Composite.Element.REF <- NULL
     } else {
         pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+        skip <- ifelse(all(grepl("hg38",files)), 0,1)
+        colClasses <- NULL
+        if(!all(grepl("hg38",files))) colClasses <- c("character", # Composite Element REF
+                                                      "numeric",   # beta value
+                                                      "character", # Gene symbol
+                                                      "character", # Chromosome
+                                                      "integer")
+
         for (i in seq_along(files)) {
             data <- fread(files[i], header = TRUE, sep = "\t",
-                          stringsAsFactors = FALSE,skip = 1,
-                          colClasses=c("character", # Composite Element REF
-                                       "numeric",   # beta value
-                                       "character", # Gene symbol
-                                       "character", # Chromosome
-                                       "integer"))  # Genomic coordinate
+                          stringsAsFactors = FALSE,skip = skip, colClasses = colClasses)
             setnames(data,gsub(" ", "\\.", colnames(data)))
             if(!missing(cases)) setnames(data,2,cases[i])
             if (i == 1) {
-                setcolorder(data,c(1, 3:5, 2))
+                setcolorder(data,c(1, 3:ncol(data), 2))
                 df <- data
             } else {
                 data <- subset(data,select = c(1,2))
@@ -356,7 +365,11 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
             setTxtProgressBar(pb, i)
         }
         if (summarizedExperiment) {
-            df <- makeSEfromDNAmethylation(df)
+            if(skip == 0) {
+                df <- makeSEfromDNAmethylation(df, probeInfo = as_data_frame(df)[,grep("TCGA",colnames(df),invert = TRUE)])
+            } else {
+                df <- makeSEfromDNAmethylation(df)
+            }
         } else {
             setDF(df)
             rownames(df) <- df$Composite.Element.REF
