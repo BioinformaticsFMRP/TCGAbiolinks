@@ -6,7 +6,7 @@
 \usage{
 GDCprepare(query, save = FALSE, save.filename, directory = "GDCdata",
   summarizedExperiment = TRUE, remove.files.prepared = FALSE,
-  add.gistic2.mut = NULL)
+  add.gistic2.mut = NULL, mut.pipeline = "muse")
 }
 \arguments{
 \item{query}{A query for GDCquery function}
@@ -25,6 +25,11 @@ This argument will be considered only if save argument is set to true}
 \item{add.gistic2.mut}{If a list of genes (gene symbol) is given columns with gistic2 results from GDAC firehose and
 a column indicating if there is or not mutation in that gene (TRUE or FALSE - use the maf file for more information)
 will be added to the sample matrix in the summarized Experiment object}
+
+\item{mut.pipeline}{If add.gistic2.mut is not NULL this field will be taken in consideration.
+Four separate variant calling pipelines are implemented for GDC data harmonization.
+Options: muse, varscan2, somaticsniper, MuTect2. For more information:
+https://gdc-docs.nci.nih.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/}
 }
 \value{
 A summarizedExperiment or a data.frame
