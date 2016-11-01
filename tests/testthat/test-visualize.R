@@ -59,7 +59,7 @@ test_that("TCGAvisualize_meanMethylation works", {
 })
 
 test_that("TCGAvisualize_oncoprint works", {
-    mut <- GDCquery_Maf(tumor = "ACC")
+    mut <- GDCquery_Maf(tumor = "ACC",pipelines = "muse")
     clin <- GDCquery_clinic("TCGA-ACC","clinical")
     clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_stage","race","vital_status")]
     TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
