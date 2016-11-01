@@ -178,6 +178,7 @@ getGDCprojects <- function(){
         projects$tumor <- unlist(lapply(projects$project_id, function(x){unlist(str_split(x,"-"))[2]}))
         return(projects)
     })
+    if(nrow(projects) == 0) stop("I couldn't access GDC API. Please, check if it is not down.")
     return(projects)
 }
 
@@ -526,7 +527,11 @@ getGistic <- function(disease) {
     base <- file.path(base,tail(x,n=1))
     x <- read_html(base)  %>% html_nodes("a") %>% html_attr("href")
     x <- x[grep("CopyNumber_Gistic2.Level_4",x)]
-    if(!file.exists(x[1])) downloader::download(file.path(base,x[1]),x[1])
+
+    if(!file.exists(x[1])) {
+        if(is.windows()) mode <- "wb" else  mode <- "w"
+        downloader::download(file.path(base,x[1]),x[1], mode = mode)
+    }
     # Check if downlaod was not corrupted
     md5 <- readr::read_table(file.path(base,x[2]), col_names = FALSE, progress = FALSE)$X1
     if(tools::md5sum(x[1]) != md5) stop("Error while downloading CNV data")
@@ -536,7 +541,13 @@ getGistic <- function(disease) {
         untar(x[1],files = "*all_thresholded.by_genes.txt")
     }
     file <- paste0(gsub(".tar.gz","",x[1]),"/all_thresholded.by_genes.txt")
-    ret <- fread(file, data.table = FALSE, colClasses = "character")
+    ret <- tryCatch({
+        fread(file, data.table = FALSE, colClasses = "character")
+    }, error = function(e) {
+        file <- dir(pattern = "all_thresholded.by_genes.txt", recursive = T, full.names = T)
+        file <- file[grep(disease,file,ignore.case = TRUE)]
+        fread(file, data.table = FALSE, colClasses = "character")
+    })
     return(ret)
 }
 get.cnv <- function(project, genes){
@@ -551,12 +562,12 @@ get.cnv <- function(project, genes){
     return(cnv.annotation)
 }
 
-get.mutation <- function(project, genes){
+get.mutation <- function(project, genes, pipeline = pipeline){
     if(missing(project)) stop("Argument project is missing")
     if(missing(genes)) stop("Argument genes is missing")
 
     # Get mutation annotation file
-    maf <- GDCquery_Maf(gsub("TCGA-","",project))
+    maf <- GDCquery_Maf(gsub("TCGA-","",project),pipelines = pipeline)
     mut <- NULL
     for(i in genes) {
         if(!i %in% maf$Hugo_Symbol) next
@@ -577,10 +588,10 @@ get.mutation <- function(project, genes){
 
     return(mut)
 }
-get.mut.gistc <- function(project, genes) {
+get.mut.gistc <- function(project, genes,mut.pipeline) {
     if(missing(project)) stop("Argument project is missing")
     if(missing(genes)) stop("Argument genes is missing")
-    mut <- get.mutation(project, genes)
+    mut <- get.mutation(project, genes, pipeline = mut.pipeline )
     cnv <- get.cnv(project, genes)
     if(!is.null(mut) & !is.null(cnv)) {
         annotation <- merge(mut, cnv, by = 0 , sort = FALSE,all=TRUE)
@@ -596,10 +607,10 @@ get.mut.gistc <- function(project, genes) {
     }
     return(NULL)
 }
-get.mut.gistc.information <- function(df, project, genes) {
+get.mut.gistc.information <- function(df, project, genes, mut.pipeline = "muse") {
     order <- rownames(df)
     for(i in genes) if(!tolower(i) %in% tolower(EAGenes$Gene)) message(paste("Gene not found:", i))
-    info <- get.mut.gistc(project, genes)
+    info <- get.mut.gistc(project, genes, mut.pipeline = mut.pipeline)
     if(is.null(info)) return(df)
     info$aux <- rownames(info)
     df$aux <- substr(df$barcode,1,15)
