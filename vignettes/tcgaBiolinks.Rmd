@@ -542,16 +542,19 @@ Please, not that these tables are still incomplete.
 
 In order to download the Mutation Annotation Format (MAF), we provide the user
 with the `GDCquery_maf` function. Briefly, it will get the open acess maf files from
-[https://gdc-docs.nci.nih.gov/Data/Release_Notes/Data_Release_Notes/](https://gdc-docs.nci.nih.gov/Data/Release_Notes/Data_Release_Notes/)
+[https://gdc-docs.nci.nih.gov/Data/Release_Notes/Data_Release_Notes/](https://gdc-docs.nci.nih.gov/Data/Release_Notes/Data_Release_Notes/).
+Four separate variant calling pipelines are implemented for GDC data harmonization which are described [here](https://gdc-docs.nci.nih.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/)
 
 The arguments that will be used to filter the data are:
 
-* tumor 
+* tumor: A TCGA project without the TCGA- prefix.
 * save.csv: Save the maf as csv file
+* pipelines: Four separate variant calling pipelines are implemented for GDC data harmonization. Options: muse, varscan2, somaticsniper, MuTect2. 
 
 ```{r, eval = FALSE}
-mutation <- GDCquery_Maf(tumor = "LGG")
-mutation <- GDCquery_Maf(tumor = "LGG", save.csv = TRUE)
+acc.muse.maf <- GDCquery_Maf("ACC", pipelines = "muse")
+acc.varscan2.maf <- GDCquery_Maf("ACC", pipelines = "varscan2")
+acc.somaticsniper.maf <- GDCquery_Maf("ACC", pipelines = "somaticsniper")
 ```
 
 This mutation data can be visualized through a oncoprint from the  [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) package [@ref23].
@@ -828,15 +831,53 @@ query <- GDCquery(project = "TCGA-ACC", data.category = "Copy Number Variation",
 GDCdownload(query)
 data <- GDCprepare(query)
 
-query <- GDCquery(project = "TCGA-GBM",
+#-------------------------------------- 
+# Gene expression
+#-------------------------------------- 
+# Aligned against Hg38
+# mRNA pipeline: https://gdc-docs.nci.nih.gov/Data/Bioinformatics_Pipelines/Expression_mRNA_Pipeline/
+query.exp.hg38 <- GDCquery(project = "TCGA-GBM", 
+                  data.category = "Transcriptome Profiling", 
+                  data.type = "Gene Expression Quantification", 
+                  workflow.type = "HTSeq - FPKM-UQ",
+                  barcode =  c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"))
+GDCdownload(query.exp.hg38)
+expdat <- GDCprepare(query = query.exp.hg38,
+                     save = TRUE, 
+                     save.filename = "exp.rda")
+
+# Aligned against Hg19
+query.exp.hg19 <- GDCquery(project = "TCGA-GBM",
                   data.category = "Gene expression",
                   data.type = "Gene expression quantification",
-                  platform = "Illumina HiSeq", file.type  = "normalized_results",
+                  platform = "Illumina HiSeq", 
+                  file.type  = "normalized_results",
                   experimental.strategy = "RNA-Seq",
                   barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"),
                   legacy = TRUE)
-GDCdownload(query)
-z <- GDCprepare(query)
+GDCdownload(query.exp.hg19)
+data <- GDCprepare(query.exp.hg19)
+
+
+#-------------------------------------- 
+# DNA methylation data
+#-------------------------------------- 
+# DNA methylation aligned to hg38
+query_met.hg38 <- GDCquery(project= "TCGA-LGG", 
+                           data.category = "DNA Methylation", 
+                           platform = "Illumina Human Methylation 450", 
+                           barcode = c("TCGA-HT-8111-01A-11D-2399-05","TCGA-HT-A5R5-01A-11D-A28N-05"))
+GDCdownload(query_met.hg38)
+data.hg38 <- GDCprepare(query_met.hg38)
+
+# DNA methylation aligned to hg19
+query_meth.hg19 <- GDCquery(project= "TCGA-LGG", 
+                            data.category = "DNA methylation", 
+                            platform = "Illumina Human Methylation 450", 
+                            barcode = c("TCGA-HT-8111-01A-11D-2399-05","TCGA-HT-A5R5-01A-11D-A28N-05"), 
+                            legacy = TRUE)
+GDCdownload(query_meth.hg19)
+data.hg19 <- GDCprepare(query_meth.hg19)
 
 # A function to download only 20 samples
 legacyPipeline <- function(project, data.category, platform, n = 20){
@@ -859,7 +900,8 @@ data <- legacyPipeline("TCGA-GBM","DNA methylation","Illumina Human Methylation 
 data <- legacyPipeline("TCGA-GBM","DNA methylation","Illumina Human Methylation 450")
 data <- legacyPipeline("TCGA-GBM","DNA methylation","Illumina DNA Methylation OMA003 CPI")
 data <- legacyPipeline("TCGA-GBM","DNA methylation","Illumina DNA Methylation OMA002 CPI")
-data <- legacyPipeline("TCGA-GBM","DNA methylation","Illumina DNA Methylation OMA002 CPI")
+
+
 ```
 
 # `GDCprepare`: Preparing the data
@@ -987,7 +1029,7 @@ listSamples <- c("TCGA-E9-A1NG-11A-52R-A14M-07","TCGA-BH-A1FC-11A-32R-A13Q-07",
 # Query platform Illumina HiSeq with a list of barcode 
 query <- GDCquery(project = "TCGA-BRCA", 
                   data.category = "Gene expression",
-                  data.type = "Gene Expression Quantification",
+                  data.type = "Gene expression quantification",
                   experimental.strategy = "RNA-Seq",
                   platform = "Illumina HiSeq",
                   file.type = "results",
@@ -1248,7 +1290,7 @@ methylated CpG sites, then the results are saved in a csv file (DMR_results.grou
 
 The arguments of TCGAanalyze_DMR are:
 
-* **data** SummarizedExperiment obtained from the GDCp/repare
+* **data** SummarizedExperiment obtained from the GDCprepare
 * **groupCol**  Columns with the groups inside the SummarizedExperiment
 object. (This will be obtained by the function colData(data)
 * **group1 ** In case our object has more than 2 groups, you should set
