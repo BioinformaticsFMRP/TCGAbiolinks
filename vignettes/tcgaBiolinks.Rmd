@@ -542,16 +542,19 @@ Please, not that these tables are still incomplete.
 
 In order to download the Mutation Annotation Format (MAF), we provide the user
 with the `GDCquery_maf` function. Briefly, it will get the open acess maf files from
-[https://gdc-docs.nci.nih.gov/Data/Release_Notes/Data_Release_Notes/](https://gdc-docs.nci.nih.gov/Data/Release_Notes/Data_Release_Notes/)
+[https://gdc-docs.nci.nih.gov/Data/Release_Notes/Data_Release_Notes/](https://gdc-docs.nci.nih.gov/Data/Release_Notes/Data_Release_Notes/).
+Four separate variant calling pipelines are implemented for GDC data harmonization which are described [here](https://gdc-docs.nci.nih.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/)
 
 The arguments that will be used to filter the data are:
 
-* tumor 
+* tumor: A TCGA project without the TCGA- prefix.
 * save.csv: Save the maf as csv file
+* pipelines: Four separate variant calling pipelines are implemented for GDC data harmonization. Options: muse, varscan2, somaticsniper, MuTect2. 
 
 ```{r, eval = FALSE}
-mutation <- GDCquery_Maf(tumor = "LGG")
-mutation <- GDCquery_Maf(tumor = "LGG", save.csv = TRUE)
+acc.muse.maf <- GDCquery_Maf("ACC", pipelines = "muse")
+acc.varscan2.maf <- GDCquery_Maf("ACC", pipelines = "varscan2")
+acc.somaticsniper.maf <- GDCquery_Maf("ACC", pipelines = "somaticsniper")
 ```
 
 This mutation data can be visualized through a oncoprint from the  [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) package [@ref23].
