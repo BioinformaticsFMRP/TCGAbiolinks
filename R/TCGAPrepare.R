@@ -870,7 +870,7 @@ getBarcodeInfo <- function(barcode) {
 #' @importFrom GenomicRanges GRanges distanceToNearest
 #' @importFrom data.table data.table
 #' @importFrom IRanges IRanges
-#' @import utils TxDb.Hsapiens.UCSC.hg19.knownGene
+#' @import utils
 #' @importFrom data.table fread setnames setcolorder setDF data.table
 TCGAprepare <- function(query = NULL,
                         dir = NULL,
