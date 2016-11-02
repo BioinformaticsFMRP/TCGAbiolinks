@@ -404,14 +404,15 @@ getBarcodeDefinition <- function(type = "TCGA"){
 #' @return A data frame with the maf file information
 GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata", pipelines = NULL){
 
-    if(is.null(pipelines)) stop("Please select the pipeline argument (muse, varscan2, somaticsniper, MuTect2)")
+    if(is.null(pipelines)) stop("Please select the pipeline argument (muse, varscan2, somaticsniper, mutect)")
     if(pipelines == "varscan2") {
         workflow.type <- "VarScan2 Variant Aggregation and Masking"
     } else if(pipelines == "muse") {
         workflow.type <- "MuSE Variant Aggregation and Masking"
     } else if(pipelines == "somaticsniper") {
         workflow.type <- "SomaticSniper Variant Aggregation and Masking"
-    } else if(pipelines == "mutect2") {
+    } else if(pipelines == "mutect") {
+        workflow.type <-  "MuTect2 Variant Aggregation and Masking"
     } else {
         stop("Please select the pipeline argument (muse, varscan2, somaticsniper, mutect2)")
     }
