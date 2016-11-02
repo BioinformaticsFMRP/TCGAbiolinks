@@ -45,6 +45,10 @@
 #'  data <- GDCprepare(query,add.gistic2.mut = c("PTEN","FOXJ1"))
 #' }
 #' @return A summarizedExperiment or a data.frame
+#' @importFrom  S4Vectors DataFrame
+#' @importFrom data.table setcolorder setnames
+#' @importFrom GenomicRanges GRanges
+#' @importFrom IRanges IRanges
 GDCprepare <- function(query,
                        save = FALSE,
                        save.filename,
@@ -112,6 +116,9 @@ GDCprepare <- function(query,
             data <- readmiRNAIsoformQuantification(files = files,
                                                    cases = query$results[[1]]$cases)
 
+        if(query$data.type == "Isoform expression quantification")
+            data <- readIsoformExpressionQuantification(files = files, cases = query$results[[1]]$cases)
+
     }
 
     if((!is.null(add.gistic2.mut)) & summarizedExperiment) {
@@ -149,6 +156,32 @@ remove.files.recursively <- function(files){
     if(length(list.files(files2rm)) == 0) remove.files.recursively(files2rm)
 }
 
+
+readIsoformExpressionQuantification <- function (files, cases){
+    pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+
+    for (i in seq_along(files)) {
+        data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+
+        if(!missing(cases)) {
+            assay.list <- gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)])
+            # We will use this because there might be more than one col for each samples
+            setnames(data,colnames(data)[2:ncol(data)],
+                     paste0(gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)]),"_",cases[i]))
+        }
+        if (i == 1) {
+            df <- data
+        } else {
+            df <- merge(df, data, by=colnames(data)[1], all = TRUE)
+        }
+        setTxtProgressBar(pb, i)
+    }
+    setDF(df)
+    rownames(df) <- df[,1]
+    df[,1] <- NULL
+    return(df)
+
+}
 readmiRNAIsoformQuantification <- function (files, cases){
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
 
@@ -818,69 +851,6 @@ getBarcodeInfo <- function(barcode) {
 }
 
 
-#' @title Read the data from level 3 the experiments and prepare it
-#'  for downstream analysis into a SummarizedExperiment object.
-#' @description
-#'  This function has been replaced by GDCprepare
-#'
-#' List of accepted platforms:
-#'\itemize{
-#' \item AgilentG4502A_07_1/AgilentG4502A_07_2/AgilentG4502A_07_3
-#' \item Genome_Wide_SNP_6
-#' \item H-miRNA_8x15K/H-miRNA_8x15Kv2
-#' \item HG-U133_Plus_2
-#' \item HT_HG-U133A
-#' \item HumanMethylation27
-#' \item HumanMethylation450
-#' \item IlluminaDNAMethylation_OMA002_CPI
-#' \item IlluminaDNAMethylation_OMA003_CPI
-#' \item IlluminaGA_RNASeq
-#' \item IlluminaGA_RNASeqV2
-#' \item IlluminaHiSeq_RNASeq
-#' \item IlluminaHiSeq_RNASeqV2
-#' \item IlluminaHiSeq_TotalRNASeqV2
-#' }
-#'  \strong{Return}The default output is a SummarizedExperiment object.
-#'
-#' @return A SummarizedExperiment object (If SummarizedExperiment = \code{FALSE},
-#' a data.frame)
-#' @param query TCGAquery output
-#' @param dir Directory with the files downloaded by TCGAdownload
-#' @param samples List of samples to prepare the data
-#' @param type Filter the files to prepare.
-#' @param save Save a rda object with the prepared object?
-#'  Default: \code{FALSE}
-#' @param filename Name of the saved file
-#' @param summarizedExperiment Output as SummarizedExperiment?
-#' Default: \code{FALSE}
-#' @examples
-#' \dontrun{
-#' sample <- "TCGA-06-0939-01A-01D-1228-05"
-#' query <- TCGAquery(tumor = "GBM",samples = sample, level = 3)
-#' TCGAdownload(query,path = "exampleData",samples = sample)
-#' data <- TCGAprepare(query, dir="exampleData")
-#' }
-#' @export
-#' @importFrom stringr str_match str_trim str_detect str_match_all
-#' @importFrom SummarizedExperiment SummarizedExperiment metadata<- colData<-
-#' @importFrom S4Vectors DataFrame SimpleList
-#' @importFrom limma alias2SymbolTable
-#' @importFrom GenomicFeatures microRNAs
-#' @importFrom BiocGenerics as.data.frame
-#' @importFrom GenomicRanges GRanges distanceToNearest
-#' @importFrom data.table data.table
-#' @importFrom IRanges IRanges
-#' @import utils
-#' @importFrom data.table fread setnames setcolorder setDF data.table
-TCGAprepare <- function(query = NULL,
-                        dir = NULL,
-                        samples = NULL,
-                        type = NULL,
-                        save = FALSE,
-                        filename = NULL,
-                        summarizedExperiment = TRUE){
-    stop("TCGA data has moved from DCC server to GDC server. Please use GDCprepare function")
-}
 
 #' @title Prepare the data for ELEMR package
 #' @description Prepare the data for ELEMR package
