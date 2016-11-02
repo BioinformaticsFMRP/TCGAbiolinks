@@ -560,7 +560,7 @@ acc.somaticsniper.maf <- GDCquery_Maf("ACC", pipelines = "somaticsniper")
 This mutation data can be visualized through a oncoprint from the  [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) package [@ref23].
 
 ```{r, eval=FALSE, message=FALSE, warning=FALSE}
-mut <- GDCquery_Maf(tumor = "ACC")
+mut <- GDCquery_Maf("ACC", pipelines = "muse")
 clin <- GDCquery_clinic("TCGA-ACC","clinical")
 clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_stage","race","vital_status")]
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
@@ -1453,7 +1453,7 @@ uses the [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) to c
 * **label.title** Title of the label
 
 ```{r, eval=FALSE, message=FALSE, warning=FALSE}
-mut <- GDCquery_Maf(tumor = "ACC")
+mut <- GDCquery_Maf(tumor = "ACC", pipelines = "muse")
 clin <- GDCquery_clinic("TCGA-ACC","clinical")
 clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_stage","race","vital_status")]
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
@@ -2035,7 +2035,7 @@ grid.raster(img)
 Finally, we will take a look in the mutation genes. We will first download the maf file
 with `TCGAquery_maf`. In this example we will investigate the gene "ATRX".
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-LGGmut <- GDCquery_Maf(tumor = "LGG") 
+LGGmut <- GDCquery_Maf(tumor = "LGG", pipelines = "muse")
 # Selecting gene
 mRNAsel <- "ATRX"
 LGGselected <- LGGmut[LGGmut$Hugo_Symbol == mRNAsel,]
