@@ -39,7 +39,6 @@ Imports:
     plyr,
     knitr,
     biomaRt,
-    coin,
     gplots,
     ggplot2,
     ggthemes,
