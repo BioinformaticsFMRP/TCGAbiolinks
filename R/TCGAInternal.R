@@ -539,12 +539,6 @@ getGistic <- function(disease) {
     # Check if downlaod was not corrupted
     md5 <- readr::read_table(file.path(base,x[2]), col_names = FALSE, progress = FALSE)$X1
     if(tools::md5sum(x[1]) != md5) stop("Error while downloading CNV data")
-    print(x[1])
-    if(Sys.info()["sysname"] == "Linux") {
-        untar(x[1],files = "*all_thresholded.by_genes.txt", extras = "--wildcards")
-    } else {
-        untar(x[1],files = "*all_thresholded.by_genes.txt")
-    }
     file <- paste0(gsub(".tar.gz","",x[1]),"/all_thresholded.by_genes.txt")
     if(!file.exists(file)) {
         compressed.files <- untar(x[1], list = TRUE)
