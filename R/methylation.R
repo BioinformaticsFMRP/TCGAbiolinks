@@ -539,7 +539,6 @@ TCGAvisualize_meanMethylation <- function(data,
 #' @importFrom grDevices png dev.off pdf
 #' @import stats
 #' @importFrom parallel detectCores
-#' @importFrom coin wilcox_test wilcoxsign_test pvalue
 #' @importFrom SummarizedExperiment colData rowRanges rowRanges<- colData<-
 #' @return Data frame with two cols
 #'         p-values/p-values adjusted
@@ -561,6 +560,7 @@ TCGAvisualize_meanMethylation <- function(data,
 #' data <- calculate.pvalues(data,"group")
 #' }
 #' @importFrom plyr adply
+#' @importFrom stats wilcox.test
 #' @importFrom doParallel registerDoParallel
 #' @keywords internal
 calculate.pvalues <- function(data,
@@ -616,26 +616,9 @@ calculate.pvalues <- function(data,
                                                cluster=droplevels(
                                                    colData(data)[c(idx1,idx2),
                                                                  groupCol]))
-                             #aux <- na.omit(aux)
-                             #if(nrow(aux) == 0) return (NaN)
-                             pvalue(wilcox_test(beta ~ cluster,
-                                                data=aux,
-                                                distribution = "exact"))
-                         }, .progress = "text", .parallel = parallel
-        )
-        p.value <- p.value[,2]
-    } else {
-        p.value <- adply(assay(data),1,
-                         function(x) {
-                             aux <- data_frame(beta=x[c(idx1,idx2)],
-                                               cluster=droplevels(
-                                                   colData(data)[c(idx1,idx2),
-                                                                 groupCol]))
-                             #aux <- na.omit(aux)
-                             #if(nrow(aux) == 0) return (NaN)
-                             pvalue(wilcoxsign_test(beta ~ cluster,
-                                                    data=aux,
-                                                    distribution = exact()))
+                             wilcox.test(beta ~ cluster,
+                                                data=aux, exact = TRUE,
+                                                paired = paired)$p.value
                          }, .progress = "text", .parallel = parallel
         )
         p.value <- p.value[,2]
@@ -933,7 +916,7 @@ TCGAVisualize_volcano <- function(x,y,
 #' @param cores Number of cores to be used in the non-parametric test
 #' Default = groupCol.group1.group2.rda
 #' @import ggplot2
-#' @importFrom SummarizedExperiment colData rowRanges assay rowRanges<- values<-
+#' @importFrom SummarizedExperiment colData rowRanges assay rowRanges<- values<- SummarizedExperiment metadata<-
 #' @importFrom S4Vectors metadata
 #' @importFrom dplyr data_frame
 #' @import readr
