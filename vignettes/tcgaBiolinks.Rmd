@@ -551,12 +551,13 @@ The arguments that will be used to filter the data are:
 
 * tumor: A TCGA project without the TCGA- prefix.
 * save.csv: Save the maf as csv file
-* pipelines: Four separate variant calling pipelines are implemented for GDC data harmonization. Options: muse, varscan2, somaticsniper, MuTect2. 
+* pipelines: Four separate variant calling pipelines are implemented for GDC data harmonization. Options: muse, varscan2, somaticsniper, mutect. 
 
 ```{r, eval = FALSE}
 acc.muse.maf <- GDCquery_Maf("ACC", pipelines = "muse")
 acc.varscan2.maf <- GDCquery_Maf("ACC", pipelines = "varscan2")
 acc.somaticsniper.maf <- GDCquery_Maf("ACC", pipelines = "somaticsniper")
+acc.mutect.maf <- GDCquery_Maf("ACC", pipelines = "mutect")
 ```
 
 This mutation data can be visualized through a oncoprint from the  [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) package [@ref23].
