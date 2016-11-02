@@ -45,6 +45,7 @@
 #'  data <- GDCprepare(query,add.gistic2.mut = c("PTEN","FOXJ1"))
 #' }
 #' @return A summarizedExperiment or a data.frame
+#' @importFrom  S4Vectors DataFrame
 GDCprepare <- function(query,
                        save = FALSE,
                        save.filename,
