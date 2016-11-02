@@ -524,6 +524,10 @@ getGistic <- function(disease) {
     }, error = function(e) {
         return(NULL)
     })
+    if(is.null(x)) {
+        message("No GISTIC file found")
+        return(NULL)
+    }
     base <- file.path(base,tail(x,n=1))
     x <- read_html(base)  %>% html_nodes("a") %>% html_attr("href")
     x <- x[grep("CopyNumber_Gistic2.Level_4",x)]
