@@ -112,6 +112,9 @@ GDCprepare <- function(query,
             data <- readmiRNAIsoformQuantification(files = files,
                                                    cases = query$results[[1]]$cases)
 
+        if(query$data.type == "Isoform expression quantification")
+            data <- readIsoformExpressionQuantification(files = files, cases = query$results[[1]]$cases)
+
     }
 
     if((!is.null(add.gistic2.mut)) & summarizedExperiment) {
@@ -149,6 +152,32 @@ remove.files.recursively <- function(files){
     if(length(list.files(files2rm)) == 0) remove.files.recursively(files2rm)
 }
 
+
+readIsoformExpressionQuantification <- function (files, cases){
+    pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+
+    for (i in seq_along(files)) {
+        data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+
+        if(!missing(cases)) {
+            assay.list <- gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)])
+            # We will use this because there might be more than one col for each samples
+            setnames(data,colnames(data)[2:ncol(data)],
+                     paste0(gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)]),"_",cases[i]))
+        }
+        if (i == 1) {
+            df <- data
+        } else {
+            df <- merge(df, data, by=colnames(data)[1], all = TRUE)
+        }
+        setTxtProgressBar(pb, i)
+    }
+    setDF(df)
+    rownames(df) <- df[,1]
+    df[,1] <- NULL
+    return(df)
+
+}
 readmiRNAIsoformQuantification <- function (files, cases){
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
 
