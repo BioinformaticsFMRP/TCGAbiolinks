@@ -916,7 +916,7 @@ TCGAVisualize_volcano <- function(x,y,
 #' @param cores Number of cores to be used in the non-parametric test
 #' Default = groupCol.group1.group2.rda
 #' @import ggplot2
-#' @importFrom SummarizedExperiment colData rowRanges assay rowRanges<- values<-
+#' @importFrom SummarizedExperiment colData rowRanges assay rowRanges<- values<- SummarizedExperiment metadata<-
 #' @importFrom S4Vectors metadata
 #' @importFrom dplyr data_frame
 #' @import readr
