@@ -40,8 +40,8 @@ Reads the data downloaded and prepare it into an R object
 \examples{
 query <- GDCquery(project = "TCGA-KIRP",
                   data.category = "Simple Nucleotide Variation",
-                  data.type = "Masked Somatic Mutation")
-                  GDCdownload(query, method = "api", directory = "maf")
+                  data.type = "Masked Somatic Mutation",
+                  workflow.type = "MuSE Variant Aggregation and Masking")
 GDCdownload(query, method = "api", directory = "maf")
 maf <- GDCprepare(query, directory = "maf")
 
