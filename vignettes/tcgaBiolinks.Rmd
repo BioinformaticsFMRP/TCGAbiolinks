@@ -487,19 +487,21 @@ Please, not that these tables are still incomplete.
 
 ## Harmonized data
 
-| Data.category               | Data.type                         | Workflow Type   |
-|-----------------------------|-----------------------------------|-----------------|
-| Transcriptome Profiling     | Gene Expression Quantification    | HTSeq - Counts  |
-|                             |                                   | HTSeq - FPKM-UQ |
-|                             |                                   | HTSeq - FPKM    |
-|                             | Isoform Expression Quantification | -               |
-|                             | miRNA Expression Quantification   | -               |
-| Copy number variation       | Copy Number Segment               |                 |
-|                             | Masked Copy Number Segment        |                 |
-| Simple Nucleotide Variation |                                   |                 |
-| Raw Sequencing Data         |                                   |                 |
-| Biospecimen                 |                                   |                 |
-| Clinical                    |                                   |                 |
+| Data.category               | Data.type                         | Workflow Type   | Platform |
+|-----------------------------|-----------------------------------|-----------------|----------|
+| Transcriptome Profiling     | Gene Expression Quantification    | HTSeq - Counts  |          |
+|                             |                                   | HTSeq - FPKM-UQ |          |
+|                             |                                   | HTSeq - FPKM    |          |
+|                             | Isoform Expression Quantification | -               |          |
+|                             | miRNA Expression Quantification   | -               |          |
+| Copy number variation       | Copy Number Segment               |                 |          |
+|                             | Masked Copy Number Segment        |                 |          |
+| Simple Nucleotide Variation |                                   |                 |          |
+| Raw Sequencing Data         |                                   |                 |          |
+| Biospecimen                 |                                   |                 |          |
+| Clinical                    |                                   |                 |          |
+| DNA Methylation             |                                   |                 | Illumina Human Methylation 450| 
+|                             |                                   |                 | Illumina Human Methylation 27 |    
 
 ## Legacy data
 | Data.category               | Data.type                         | Platform                            | file.type          |
