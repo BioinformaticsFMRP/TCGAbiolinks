@@ -46,6 +46,7 @@
 #' }
 #' @return A summarizedExperiment or a data.frame
 #' @importFrom  S4Vectors DataFrame
+#' @importFrom data.table setcolorder setnames
 GDCprepare <- function(query,
                        save = FALSE,
                        save.filename,
