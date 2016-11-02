@@ -925,7 +925,7 @@ unlistlabels <- function(lab) {
 #' @importFrom grid gpar grid.rect
 #' @importFrom data.table dcast setDT setDF :=
 #' @examples
-#' mut <- GDCquery_Maf(tumor = "ACC")
+#' mut <- GDCquery_Maf(tumor = "ACC", pipelines = "muse")
 #' TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:10], rm.empty.columns = TRUE)
 #' TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:10],
 #'                  filename = "onco.pdf",
