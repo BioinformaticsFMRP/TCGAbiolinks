@@ -219,43 +219,4 @@ GDCclientInstall <- function(){
     Sys.chmod("gdc-client")
     return(GDCclientPath())
 }
-#' @title Download the data from TCGA using as reference the output from TCGAquery
-#' @description
-#'      The TCGAdownload function will download the data using as reference
-#'      the the lines of the TCGAquery search result.
-#'
-#'      There is an option to download the entire tar.gz folder or download
-#'      specific files using the \emph{type} parameter or the \emph{samples}
-#'      parameter
-#'
-#'      The outpufiles will be saved into the path parameters. If this path does
-#'      not exists the package will try to create the directories.
-#'
-#'      By default, if a sample was already downloaded the function will not
-#'      download again, unless the force parameter is set to \code{TRUE}
-#'
-#' @param data The TCGAquery output
-#' @param path Directory to save the downloaded data
-#' @param type Filter the files that will be downloaded by
-#'  type. Example:"rsem.genes.results"
-#' @param samples List of samples to download data
-#' @param force Download files even if it was already downladed?
-#' Default: \code{FALSE}
-#' @examples
-#' \dontrun{
-#' samples <- c("TCGA-26-1442-01A-01R-1850-01")
-#' query <- TCGAquery(tumor = "gbm",
-#'                    platform = "IlluminaHiSeq_RNASeqV2",
-#'                    level = "3",
-#'                    samples = samples)
-#' TCGAdownload(query,path = "RNA",
-#'              samples = samples,
-#'              type ="rsem.genes.results")
-#' }
-#' @export
-#' @return Download TCGA data into the given path
-#' @family data functions
-TCGAdownload <- function(data = NULL, path = ".", type = NULL, samples = NULL, force = FALSE) {
-    stop("TCGA data has moved from DCC server to GDC server. Please use GDCdownload function")
-}
 
