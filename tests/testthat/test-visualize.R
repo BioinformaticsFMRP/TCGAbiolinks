@@ -24,7 +24,8 @@ test_that("TCGAvisualize_meanMethylation works", {
                                   "TCGA-12-0829-01A-01D-0392-05", "TCGA-06-0155-01B-01D-0521-05",
                                   "TCGA-02-0099-01A-01D-0199-05", "TCGA-19-4068-01A-01D-1228-05",
                                   "TCGA-19-1788-01A-01D-0595-05", "TCGA-16-0848-01A-01D-0392-05"))
-    GDCdownload(query, method = "api")
+    tryCatch(GDCdownload(query, method = "api",chunks.per.download = 20),
+             error = function(e) GDCdownload(query, method = "api"))
     data <- GDCprepare(query)
 
     # setting y limits: lower 0, upper 1
