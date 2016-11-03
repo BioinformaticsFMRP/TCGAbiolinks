@@ -27,7 +27,10 @@ GDCquery_Maf uses the following guide to download maf files
 }
 \examples{
 acc.muse.maf <- GDCquery_Maf("ACC", pipelines = "muse")
-acc.varscan2.maf <- GDCquery_Maf("ACC", pipelines = "varscan2")
-acc.somaticsniper.maf <- GDCquery_Maf("ACC", pipelines = "somaticsniper")
+\dontrun{
+  acc.varscan2.maf <- GDCquery_Maf("ACC", pipelines = "varscan2")
+   acc.somaticsniper.maf <- GDCquery_Maf("ACC", pipelines = "somaticsniper")
+   acc.mutect.maf <- GDCquery_Maf("ACC", pipelines = "mutect")
+}
 }
 
