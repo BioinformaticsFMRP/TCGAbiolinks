@@ -524,23 +524,27 @@ getGistic <- function(disease) {
     }, error = function(e) {
         return(NULL)
     })
+    if(is.null(x)) {
+        message("No GISTIC file found")
+        return(NULL)
+    }
     base <- file.path(base,tail(x,n=1))
     x <- read_html(base)  %>% html_nodes("a") %>% html_attr("href")
     x <- x[grep("CopyNumber_Gistic2.Level_4",x)]
 
     if(!file.exists(x[1])) {
-        if(is.windows()) mode <- "wb" else  mode <- "w"
+        if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
         downloader::download(file.path(base,x[1]),x[1], mode = mode)
     }
     # Check if downlaod was not corrupted
     md5 <- readr::read_table(file.path(base,x[2]), col_names = FALSE, progress = FALSE)$X1
     if(tools::md5sum(x[1]) != md5) stop("Error while downloading CNV data")
-    if(is.linux()) {
-        untar(x[1],files = "*all_thresholded.by_genes.txt", extras = "--wildcards")
-    } else {
-        untar(x[1],files = "*all_thresholded.by_genes.txt")
-    }
     file <- paste0(gsub(".tar.gz","",x[1]),"/all_thresholded.by_genes.txt")
+    if(!file.exists(file)) {
+        compressed.files <- untar(x[1], list = TRUE)
+        compressed.files <- compressed.files[grepl("all_thresholded.by_genes.txt", compressed.files)]
+        untar(x[1],files = compressed.files )
+    }
     ret <- tryCatch({
         fread(file, data.table = FALSE, colClasses = "character")
     }, error = function(e) {
