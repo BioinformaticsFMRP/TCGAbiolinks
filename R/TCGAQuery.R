@@ -399,8 +399,11 @@ getBarcodeDefinition <- function(type = "TCGA"){
 #' @importFrom tools md5sum
 #' @examples
 #' acc.muse.maf <- GDCquery_Maf("ACC", pipelines = "muse")
-#' acc.varscan2.maf <- GDCquery_Maf("ACC", pipelines = "varscan2")
-#' acc.somaticsniper.maf <- GDCquery_Maf("ACC", pipelines = "somaticsniper")
+#' \dontrun{
+#'   acc.varscan2.maf <- GDCquery_Maf("ACC", pipelines = "varscan2")
+#'    acc.somaticsniper.maf <- GDCquery_Maf("ACC", pipelines = "somaticsniper")
+#'    acc.mutect.maf <- GDCquery_Maf("ACC", pipelines = "mutect")
+#' }
 #' @return A data frame with the maf file information
 GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata", pipelines = NULL){
 
@@ -511,18 +514,3 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata", pipeline
     return(maf)
 }
 
-#' @title Get last maf file for the tumor
-#' @description
-#'    This function has been replaced. Use GDCquery_maf
-#' @param tumor tumor type to filter the search
-#' @param center Center name to filter the search
-#' @param archive.name Archive name to filter the search
-#' @examples
-#' \dontrun{
-#'  query <- TCGAquery_maf(tumor = 'lgg')
-#' }
-#' @export
-#' @return list of samples for a tumor
-TCGAquery_maf <- function(tumor = NULL, center = NULL, archive.name = NULL){
-    stop("TCGA data has moved from DCC server to GDC server. Please use GDCquery_Maf function")
-}
