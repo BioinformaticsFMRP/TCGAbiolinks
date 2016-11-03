@@ -7,10 +7,11 @@
 TCGAvisualize_oncoprint(mut, genes, filename, color,
   annotation.position = "bottom", annotation, height, width = 10,
   rm.empty.columns = FALSE, show.column.names = FALSE,
-  show.row.barplot = TRUE, label.title = "Mutation", label.font.size = 16,
-  rows.font.size = 16, dist.col = 0.5, dist.row = 0.5,
-  information = "Variant_Type", row.order = FALSE,
-  heatmap.legend.side = "bottom", annotation.legend.side = "bottom")
+  show.row.barplot = TRUE, label.title = "Mutation",
+  column.names.size = 8, label.font.size = 16, rows.font.size = 16,
+  dist.col = 0.5, dist.row = 0.5, information = "Variant_Type",
+  row.order = FALSE, heatmap.legend.side = "bottom",
+  annotation.legend.side = "bottom")
 }
 \arguments{
 \item{mut}{A dataframe from the mutation annotation file (see TCGAquery_maf from TCGAbiolinks)}
@@ -38,6 +39,8 @@ Should have a column bcr_patient_barcode with the same ID of the mutation object
 
 \item{label.title}{Title of the label}
 
+\item{column.names.size}{Size of the fonts of the columns names}
+
 \item{label.font.size}{Size of the fonts}
 
 \item{rows.font.size}{Size of the fonts}
@@ -52,7 +55,7 @@ Options: 1) "Variant_Classification" (The information will be "Frame_Shift_Del",
              "Nonstop_Mutation",  "RNA",  "Silent" ,  "Splice_Site",  "Targeted_Region",  "Translation_Start_Site")
 2) "Variant_Type" (The information will be INS,DEL,SNP)}
 
-\item{row.order}{Order the genes (rows). Genes with more mutations will be in the first rows}
+\item{row.order}{Order the genes (rows) Default:FALSE. Genes with more mutations will be in the first rows}
 
 \item{heatmap.legend.side}{Position of the heatmap legend}
 
