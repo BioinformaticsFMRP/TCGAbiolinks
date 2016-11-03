@@ -955,6 +955,7 @@ TCGAvisualize_oncoprint <- function (mut,
                                      show.column.names = FALSE,
                                      show.row.barplot = TRUE,
                                      label.title = "Mutation",
+                                     column.names.size = 8,
                                      label.font.size = 16,
                                      rows.font.size = 16,
                                      dist.col = 0.5,
@@ -1099,6 +1100,7 @@ TCGAvisualize_oncoprint <- function (mut,
                        show_row_barplot = show.row.barplot,
                        column_order = NULL, # Do not sort the columns
                        alter_fun = alter_fun, col = color,
+                       column_names_gp = gpar(fontsize = column.names.size),
                        row_names_gp = gpar(fontsize = rows.font.size),  # set size for row names
                        pct_gp = gpar(fontsize = rows.font.size), # set size for percentage labels
                        axis_gp = gpar(fontsize = rows.font.size),# size of axis
@@ -1118,6 +1120,7 @@ TCGAvisualize_oncoprint <- function (mut,
         p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                        row_order = NULL,
                        remove_empty_columns = FALSE,
+                       column_names_gp = gpar(fontsize = column.names.size),
                        show_row_barplot = show.row.barplot,
                        show_column_names = show.column.names,
                        column_order = NULL, # Do not sort the columns
@@ -1142,6 +1145,7 @@ TCGAvisualize_oncoprint <- function (mut,
         p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                        row_order = NULL,
                        remove_empty_columns = FALSE,
+                       column_names_gp = gpar(fontsize = column.names.size),
                        show_column_names = show.column.names,
                        show_row_barplot = show.row.barplot,
                        column_order = NULL, # Do not sort the columns
@@ -1168,6 +1172,7 @@ TCGAvisualize_oncoprint <- function (mut,
                        show_row_barplot = show.row.barplot,
                        column_order = NULL, # Do not sort the columns
                        alter_fun = alter_fun, col = color,
+                       column_names_gp = gpar(fontsize = column.names.size),
                        row_names_gp = gpar(fontsize = rows.font.size),  # set size for row names
                        pct_gp = gpar(fontsize = rows.font.size), # set size for percentage labels
                        axis_gp = gpar(fontsize = rows.font.size),# size of axis
@@ -1186,6 +1191,7 @@ TCGAvisualize_oncoprint <- function (mut,
 
         p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                        remove_empty_columns = FALSE,
+                       column_names_gp = gpar(fontsize = column.names.size),
                        show_row_barplot = show.row.barplot,
                        show_column_names = show.column.names,
                        column_order = NULL, # Do not sort the columns
@@ -1213,6 +1219,7 @@ TCGAvisualize_oncoprint <- function (mut,
                        show_row_barplot = show.row.barplot,
                        column_order = NULL, # Do not sort the columns
                        alter_fun = alter_fun, col = color,
+                       column_names_gp = gpar(fontsize = column.names.size),
                        row_names_gp = gpar(fontsize = rows.font.size),  # set size for row names
                        pct_gp = gpar(fontsize = rows.font.size), # set size for percentage labels
                        axis_gp = gpar(fontsize = rows.font.size),# size of axis
