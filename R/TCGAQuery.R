@@ -166,7 +166,7 @@ GDCquery <- function(project,
     results$cases <- barcodes
     results$tissue.definition <- expandBarcodeInfo(barcodes)$tissue.definition
 
-    if(legacy & !is.na(platform)){
+    if(!is.na(platform)){
         if(!(platform %in% results$platform)) {
             stop("Please set a valid platform argument from the list below:\n  => ", paste(unique(results$platform), collapse = "\n  => "))
         }
