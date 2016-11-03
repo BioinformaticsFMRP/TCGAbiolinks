@@ -760,6 +760,7 @@ TCGAquery_subtype <- function(tumor){
                  "ovca"= "doi:10.1038/nature10166",
                  "pancan"="doi:10.1016/j.cell.2014.06.049",
                  "prad"="doi:10.1016/j.cell.2015.10.025",
+                 "read"="doi:10.1038/nature11252",
                  "skcm"="doi:10.1016/j.cell.2015.05.044",
                  "stad"="doi:10.1038/nature13480",
                  "thca"="doi:10.1016/j.cell.2014.09.050",
