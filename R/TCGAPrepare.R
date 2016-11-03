@@ -695,7 +695,6 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
                          ensembl_gene_id = data$ensembl_gene_id,
                          external_gene_name = data$external_gene_name)
     names(rowRanges) <- as.character(data$ensembl_gene_id)
-    save(assays,rowRanges,colData,file = "test2.rda")
     rse <- SummarizedExperiment(assays=assays,
                                 rowRanges=rowRanges,
                                 colData=colData)
