@@ -906,10 +906,11 @@ unlistlabels <- function(lab) {
 #' @param show.row.barplot  Show barplot annotation on rows?
 #' @param show.column.names Show column names? Default: FALSE
 #' @param rows.font.size Size of the fonts
+#' @param column.names.size Size of the fonts of the columns names
 #' @param dist.col distance between columns in the plot
 #' @param dist.row distance between rows in the plot
 #' @param label.font.size Size of the fonts
-#' @param row.order Order the genes (rows). Genes with more mutations will be in the first rows
+#' @param row.order Order the genes (rows) Default:FALSE. Genes with more mutations will be in the first rows
 #' @param annotation Matrix or data frame with the annotation.
 #' Should have a column bcr_patient_barcode with the same ID of the mutation object
 #' @param annotation.position Position of the annotation "bottom" or "top"
@@ -969,6 +970,7 @@ TCGAvisualize_oncoprint <- function (mut,
     if(missing(mut))   stop("Missing mut argument")
     mut <- setDT(mut)
     mut$value <- 1
+    if(rm.empty.columns == FALSE) all.samples <- unique(mut$Tumor_Sample_Barcode)
 
     mut$Hugo_Symbol <- as.character(mut$Hugo_Symbol)
     if(!missing(genes) & !is.null(genes)) mut <- subset(mut, mut$Hugo_Symbol %in% genes)
@@ -1005,6 +1007,12 @@ TCGAvisualize_oncoprint <- function (mut,
     mat <- setDF(dcast(mat, Tumor_Sample_Barcode~Hugo_Symbol, value.var="value",fill=""))
     rownames(mat) <- mat[,1]
     mat <- mat[,-1]
+
+    if(rm.empty.columns == FALSE) {
+        aux <- data.frame(row.names = all.samples[!all.samples %in% rownames(mat)])
+        aux[,colnames(mat)] <- ""
+        mat <- rbind(mat,aux)
+    }
 
 
     alter_fun = function(x, y, w, h, v) {
