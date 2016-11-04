@@ -15,7 +15,7 @@ GDCquery_Maf(tumor, save.csv = FALSE, directory = "GDCdata",
 \item{directory}{Directory/Folder where the data will downloaded. Default: GDCdata}
 
 \item{pipelines}{Four separate variant calling pipelines are implemented for GDC data harmonization.
-Options: muse, varscan2, somaticsniper, MuTect2. For more information:
+Options: muse, varscan2, somaticsniper, mutect2. For more information:
 https://gdc-docs.nci.nih.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/}
 }
 \value{
@@ -30,7 +30,7 @@ acc.muse.maf <- GDCquery_Maf("ACC", pipelines = "muse")
 \dontrun{
   acc.varscan2.maf <- GDCquery_Maf("ACC", pipelines = "varscan2")
    acc.somaticsniper.maf <- GDCquery_Maf("ACC", pipelines = "somaticsniper")
-   acc.mutect.maf <- GDCquery_Maf("ACC", pipelines = "mutect")
+   acc.mutect.maf <- GDCquery_Maf("ACC", pipelines = "mutect2")
 }
 }
 
