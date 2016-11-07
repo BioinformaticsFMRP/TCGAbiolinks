@@ -290,6 +290,7 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
                              strand = df$strand,
                              gene_id = df$external_gene_id,
                              entrezgene = df$entrezgene,
+                             ensembl_gene_id = df$ensembl_gene_id,
                              transcript_id = subset(df, select = 5))
         names(rowRanges) <- as.character(df$gene_id)
         assay.list <- assay.list[which(assay.list != "transcript_id")]
@@ -299,7 +300,8 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
                                               end = df$end_position),
                              strand = df$strand,
                              gene_id = df$external_gene_id,
-                             entrezgene = df$entrezgene)
+                             entrezgene = df$entrezgene,
+                             ensembl_gene_id = df$ensembl_gene_id)
         names(rowRanges) <- as.character(df$external_gene_id)
     }
     assays <- lapply(assay.list, function (x) {
