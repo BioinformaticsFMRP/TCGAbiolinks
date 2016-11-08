@@ -981,8 +981,8 @@ TCGAanalyze_DMR <- function(data,
         stop(paste0("Sorry, but I'm expecting a Summarized Experiment object, but I got a: ", class(data)))
     }
     # Check if object has NAs
-    if(any(is.na(assay(data)))){
-        stop(paste0("Sorry, but we found some NA in your data, please either remove/or replace them"))
+    if(any(rowSums(!is.na(assay(data))))== 0){
+        stop(paste0("Sorry, but we found some probes with NA for all samples in your data, please either remove/or replace them"))
     }
 
     if (is.null(groupCol)) {
