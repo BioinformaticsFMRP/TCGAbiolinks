@@ -353,6 +353,7 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 #' @importFrom xml2 read_xml xml_ns
 #' @importFrom XML xmlParse getNodeSet xmlToDataFrame
 #' @importFrom plyr rbind.fill
+#' @importFrom dplyr mutate_each
 #' @export
 #' @examples
 #' query <- GDCquery(project = "TCGA-COAD",
@@ -410,6 +411,62 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
     else if(tolower(clinical.info) == "portion")      xpath <- "//bio:portion"
     else if(tolower(clinical.info) == "slide")  xpath <- "//bio:slide"
 
+    clin <- parseXML(files,xpath,clinical.info)
+
+    if(tolower(clinical.info) == "patient") {
+        composed.cols <- c("new_tumor_events","drugs","follow_ups","radiations")
+        composed.cols <- composed.cols[composed.cols %in% colnames(clin)]
+        message("To get the following information please change the clinical.info argument")
+        message("=> new_tumor_events: new_tumor_event \n=> drugs: drug \n=> follow_ups: follow_up \n=> radiations: radiation")
+
+        for(i in composed.cols){
+            clin[,i] <- as.character(clin[,i])
+            clin[which(clin[,i] != ""),i] <- "YES"
+            clin[which(clin[,i] == ""),i] <- "NO"
+            colnames(clin)[which(colnames(clin) == i)] <- paste0("has_",i,"_information")
+        }
+        if("stage_event" %in% colnames(clin)) {
+            message("Adding stage event information")
+            aux <- parseXML(files,"//shared_stage:stage_event","stage_event")
+            colnames(aux)[1:(length(colnames(aux)) - 1)] <- paste0("stage_event_",colnames(aux)[1:(length(colnames(aux)) - 1)])
+            clin <- merge(clin, aux, by = "bcr_patient_barcode" , sort = FALSE, all.x = TRUE)
+            clin$stage_event <- NULL
+        }
+        if("primary_pathology" %in% colnames(clin)) {
+            message("Adding primary pathology information")
+            aux <- parseXML(files,paste0("//",disease,":primary_pathology"),"primary_pathology")
+            # Last column is the idx to merge
+            colnames(aux)[1:(length(colnames(aux)) - 1)] <- paste0("primary_pathology_",colnames(aux)[1:(length(colnames(aux)) - 1)])
+            clin <- merge(clin, aux, by = "bcr_patient_barcode" , sort = FALSE, all.x = TRUE)
+            clin$primary_pathology <- NULL
+        }
+
+    }
+    if(tolower(clinical.info) == "samples") clin$samples <- NULL
+    if(tolower(clinical.info) == "portion") {
+        for(i in c("slides","analytes")){
+            clin[,i] <- as.character(clin[,i])
+            clin[which(clin[,i] != ""),i] <- "YES"
+            clin[which(clin[,i] == ""),i] <- "NO"
+            colnames(clin)[which(colnames(clin) == i)] <- paste0("has_",i,"_information")
+        }
+    }
+    if(is.null(clin)) {
+        message("No information found")
+        return(NULL)
+    }
+    # Converting factor to numeric and double
+    out <- clin %>%
+        mutate_each(
+            funs(
+                type.convert(as.character(.), as.is = TRUE, numerals = "warn.loss")
+            )
+        )
+    return(out)
+}
+
+
+parseXML <- function(files, xpath, clinical.info ){
     clin <- NULL
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     for(i in seq_along(files)){
@@ -451,26 +508,6 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
                 clin <- rbind.fill(clin,df)
             }
             setTxtProgressBar(pb, i)
-        }
-    }
-    if(tolower(clinical.info) == "patient") {
-        message("To get the following information please change the clinical.info argument")
-        message("=> new_tumor_events: new_tumor_event \n=> drugs: drug \n=> follow_ups: follow_up \n=> radiations: radiation")
-
-            for(i in c("new_tumor_events","drugs","follow_ups","radiations")){
-                clin[,i] <- as.character(clin[,i])
-                clin[which(clin[,i] != ""),i] <- "YES"
-                clin[which(clin[,i] == ""),i] <- "NO"
-                colnames(clin)[which(colnames(clin) == i)] <- paste0("has_",i,"_information")
-        }
-    }
-    if(tolower(clinical.info) == "samples") clin$samples <- NULL
-    if(tolower(clinical.info) == "portion") {
-        for(i in c("slides","analytes")){
-            clin[,i] <- as.character(clin[,i])
-            clin[which(clin[,i] != ""),i] <- "YES"
-            clin[which(clin[,i] == ""),i] <- "NO"
-            colnames(clin)[which(colnames(clin) == i)] <- paste0("has_",i,"_information")
         }
     }
     close(pb)
