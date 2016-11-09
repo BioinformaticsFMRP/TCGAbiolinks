@@ -353,7 +353,7 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 #' @importFrom xml2 read_xml xml_ns
 #' @importFrom XML xmlParse getNodeSet xmlToDataFrame
 #' @importFrom plyr rbind.fill
-#' @importFrom dplyr mutate_each
+#' @importFrom dplyr mutate_each funs
 #' @export
 #' @examples
 #' query <- GDCquery(project = "TCGA-COAD",
