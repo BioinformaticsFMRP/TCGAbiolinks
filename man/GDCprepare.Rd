@@ -6,7 +6,7 @@
 \usage{
 GDCprepare(query, save = FALSE, save.filename, directory = "GDCdata",
   summarizedExperiment = TRUE, remove.files.prepared = FALSE,
-  add.gistic2.mut = NULL, mut.pipeline = "muse")
+  add.gistic2.mut = NULL, mut.pipeline = "mutect2")
 }
 \arguments{
 \item{query}{A query for GDCquery function}
