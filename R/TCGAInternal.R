@@ -561,7 +561,7 @@ get.cnv <- function(project, genes){
     gistic <- getGistic(gsub("TCGA-","",project))
     cnv.annotation <- t(gistic[tolower(gistic[,1]) %in% tolower(genes),-c(2:3)])
     colnames(cnv.annotation) <- paste0("gistic2_",cnv.annotation[1,])
-    cnv.annotation <- cnv.annotation[-1,]
+    cnv.annotation <- cnv.annotation[-1,, drop = FALSE]
     rownames(cnv.annotation) <- substr(gsub("\\.","-",rownames(cnv.annotation)),1,15)
     return(cnv.annotation)
 }
@@ -611,7 +611,7 @@ get.mut.gistc <- function(project, genes,mut.pipeline) {
     }
     return(NULL)
 }
-get.mut.gistc.information <- function(df, project, genes, mut.pipeline = "muse") {
+get.mut.gistc.information <- function(df, project, genes, mut.pipeline = "mutect2") {
     order <- rownames(df)
     for(i in genes) if(!tolower(i) %in% tolower(EAGenes$Gene)) message(paste("Gene not found:", i))
     info <- get.mut.gistc(project, genes, mut.pipeline = mut.pipeline)

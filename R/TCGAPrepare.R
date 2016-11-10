@@ -56,7 +56,7 @@ GDCprepare <- function(query,
                        summarizedExperiment = TRUE,
                        remove.files.prepared = FALSE,
                        add.gistic2.mut = NULL,
-                       mut.pipeline = "muse"){
+                       mut.pipeline = "mutect2"){
 
     if(missing(query)) stop("Please set query parameter")
     if(any(duplicated(query$results[[1]]$cases))) {
