@@ -38,6 +38,7 @@ Imports:
     jsonlite (>= 1.0.0),
     plyr,
     knitr,
+    methods,
     biomaRt,
     gplots,
     ggplot2,
