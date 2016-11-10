@@ -462,12 +462,12 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
                 type.convert(as.character(.), as.is = TRUE, numerals = "warn.loss")
             )
         )
-        
+
     # Change columns back to factor
     for(i in colnames(out)[!grepl("has_",colnames(out))]) {
         if(class(out[,i]) == "character" &  length(unique(out[,i])) < nrow(out)/2)
-            out[,i]) <-  as.factor(out[,i]))
-    }    
+            out[,i] <-  as.factor(out[,i])
+    }
     return(out)
 }
 
