@@ -99,6 +99,7 @@ Input: data with gene expression/methylation expression
    Output: starburst plot
 }
 \examples{
+library(SummarizedExperiment)
 nrows <- 20000; ncols <- 20
 counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
 ranges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(5000, 15000)),
@@ -117,10 +118,10 @@ met <- data
 exp <- data.frame(row.names=sprintf("ID\%03d", 1:20000),
                   logFC=runif(20000, -5, 5),
                   FDR=runif(20000, 0.01, 1))
-SummarizedExperiment::rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
-SummarizedExperiment::rowRanges(met)$diffmean.g2.g1 <- -1*(SummarizedExperiment::rowRanges(met)$diffmean.g1.g2)
-SummarizedExperiment::rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
-SummarizedExperiment::rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
+rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
+rowRanges(met)$diffmean.g2.g1 <- -1*(rowRanges(met)$diffmean.g1.g2)
+rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
+rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
 result <- TCGAvisualize_starburst(met,exp,
                                   exp.p.cut = 0.05, met.p.cut = 0.05,
                                   group1="g1",group2="g2",
