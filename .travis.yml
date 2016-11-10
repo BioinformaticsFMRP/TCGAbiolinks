@@ -1,5 +1,6 @@
 language: r
 sudo: true
+cache: packages
 bioc_required: true
 warnings_are_errors: false
 
