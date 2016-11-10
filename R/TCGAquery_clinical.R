@@ -462,6 +462,12 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
                 type.convert(as.character(.), as.is = TRUE, numerals = "warn.loss")
             )
         )
+        
+    # Change columns back to factor
+    for(i in colnames(out)[!grepl("has_",colnames(out))]) {
+        if(class(out[,i]) == "character" &  length(unique(out[,i])) < nrow(out)/2)
+            out[,i]) <-  as.factor(out[,i]))
+    }    
     return(out)
 }
 
@@ -513,54 +519,6 @@ parseXML <- function(files, xpath, clinical.info ){
     close(pb)
     return(clin)
 }
-
-#' @title Get the clinical information
-#' @description
-#'   This function has been replaced. Use GDCquery_clinic
-#' @param tumor a character vector indicating cancer type Examples:
-#' \tabular{lllll}{
-#'OV   \tab BRCA \tab CESC \tab ESCA \tab PCPG\cr
-#'LUSC \tab LGG  \tab SKCM \tab KICH \tab CHOL\cr
-#'GBM  \tab UCEC \tab PRAD \tab PAAD \tab THYM\cr
-#'KIRC \tab THCA \tab SARC \tab LAML \tab TGCT\cr
-#'COAD \tab KIRP \tab HNSC \tab ACC  \tab UVM \cr
-#'READ \tab BLCA \tab DLBC \tab UCS  \tab FPPP\cr
-#'LUAD \tab LIHC \tab STAD \tab MESO \tab CNTL
-#'}
-#'
-#' For information about cancer types: https://tcga-data.nci.nih.gov/tcga/
-#' @param clinical_data_type a character vector indicating the types of
-#' clinical data. Besides TCGA data, we created the clinical_patient_updated,
-#' which is the clinical_patient file with the last follow up information from the last
-#' follow up file.
-#'  Example:
-#' \tabular{ll}{
-#' biospecimen_aliquot \tab biospecimen_analyte \cr
-#' biospecimen_cqcf \tab biospecimen_diagnostic_slides \cr
-#' biospecimen_normal_control \tab biospecimen_portion \cr
-#' biospecimen_protocol \tab biospecimen_sample \cr
-#' biospecimen_shipment_portion \tab biospecimen_slide \cr
-#' biospecimen_tumor_sample \tab clinical_cqcf \cr
-#' clinical_follow_up_v1.0 \tab clinical_follow_up_v1.5 \cr
-#' clinical_follow_up_v2.0 \tab clinical_follow_up_v2.1 \cr
-#' clinical_follow_up_v4.0 \tab clinical_follow_up_v4.0_nte \cr
-#' clinical_nte \tab  clinical_omf_v4.0 \cr
-#' clinical_patient \tab  clinical_radiation \cr
-#' ssf_normal_controls  \tab  ssf_tumor_samples \cr
-#' clinical_follow_up_v1.0_nte \cr clinical_patient_updated (TCGAbiolinks only)
-#'}
-#' @param samples List of barcodes to get the clinical data
-#' @param path Directory to save the downloaded data default getwd()
-#' @export
-#' @return clinic data
-#' @examples
-#' \dontrun{
-#' data <- TCGAquery_clinic("LGG","clinical_drug")
-#' }
-TCGAquery_clinic <- function(tumor, clinical_data_type, samples, path = getwd()){
-    stop("TCGA data has moved from DCC server to GDC server. Please use GDCquery_clinic function")
-}
-
 
 update.clinical.with.last.followup <- function(clin){
 
@@ -685,84 +643,6 @@ TCGAquery_clinicFilt <- function(barcode,
 
     return(x)
 }
-
-load.maf <- function(){
-    if (requireNamespace("xml2", quietly = TRUE) & requireNamespace("rvest", quietly = TRUE) ) {
-        tables <- xml2::read_html("https://wiki.nci.nih.gov/display/TCGA/TCGA+MAF+Files")
-        tables <-  rvest::html_table(tables)
-        # Table one is junk
-        tables[[1]] <- NULL
-
-        # get which tables are from the tumor
-        all.df <- data.frame()
-        for(tumor in unique(TCGAbiolinks::TCGAquery()$Disease)) {
-
-            idx <- which(mapply(function(x) {
-                any(grepl(tumor,(x[,1]), ignore.case = TRUE))
-            },tables) == TRUE)
-            df <- lapply(idx,function(x) tables[x])
-
-            if(length(df) == 0) next
-            # merge the data frame in the lists
-            if(length(idx) > 1) {
-                df <- Reduce(function(...) merge(..., all=TRUE), df)
-            }  else if(length(idx) == 1) {
-                df <- Reduce(function(...) merge(..., all=TRUE), df)
-                df <- df[[1]]
-                colnames(df) <- gsub(" ",".", colnames(df))
-                colnames(df) <- gsub(":",".", colnames(df))
-            }
-
-            # Remove obsolete/protected
-            df <- subset(df, df$Deploy.Status == "Available")
-            df <- subset(df, df$Protection.Status == "Public")
-
-            if(nrow(df) == 0) next
-
-            df$Tumor <- tumor
-            all.df <- rbind(all.df,df)
-        }
-
-        all.df[,"Deploy.Location"] <- gsub("/dccfiles_prod/tcgafiles/",
-                                           "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/",
-                                           all.df[,"Deploy.Location"] )
-    }
-    return(all.df)
-}
-
-get.mutation.matrix <- function(barcode,query){
-    maf <- load.maf()
-    maf <- maf[order(as.Date(maf$Deploy.Date, "%d-%b-%Y")),]
-    aux <- plyr::ddply(maf, .(Tumor), function(x) x[c(nrow(x)), ])
-
-    ret <- NULL
-    for(disease in unique(query$Disease)){
-        df <- aux[aux$Tumor == disease,]
-        message(paste0("Downloading maf file",df$MAF.File.Name))
-        if(is.windows()) mode <- "wb" else  mode <- "w"
-        if (!file.exists(df$MAF.File.Name))
-            downloader::download(df$Deploy.Location,df$MAF.File.Name, quiet = FALSE,mode = mode)
-
-        mutation.matrix <- read.table(df$MAF.File.Name, fill = TRUE,
-                                      comment.char = "#", header = TRUE, sep = "\t", quote='')
-        mutation.matrix <- mutation.matrix[substr(mutation.matrix$Tumor_Sample_Barcode,1,15) %in% substr(barcode,1,15),]
-        if(nrow(mutation.matrix) == 0) {
-            next
-        }
-        # Fazer um subset de acordo com as amostras que eu tenho
-        mutation.matrix <- data.table::setDT(mutation.matrix)
-        mutation.matrix <- reshape2::acast(mutation.matrix, Tumor_Sample_Barcode~Hugo_Symbol, value.var="Variant_Type")
-        mutation.matrix[which(mutation.matrix > 0)] <- 1
-        if(is.null(ret)) {
-            ret <- mutation.matrix
-        }  else{
-            ret <- plyr::rbind.fill(as.data.frame(ret),as.data.frame(mutation.matrix))
-            ret[is.na(ret)] <- 0
-        }
-    }
-    return(ret)
-}
-
 
 #' @title Retrieve molecular subtypes for a given tumor
 #' @description
