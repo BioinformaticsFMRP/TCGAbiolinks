@@ -15,12 +15,6 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("roxygen2", lib="/home/travis/R-bin/lib/R/library/")'; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update ; fi
 
-install:
-  - cp ../travis-tool.sh travis-tool.sh
-  # - ./travis-tool.sh install_bioc SummarizedExperiment S4Vectors
-  # Installs all packages in the DESCRIPTION file.
-  - ./travis-tool.sh install_bioc_deps
-
 r_github_packages:
   - jimhester/covr
 
