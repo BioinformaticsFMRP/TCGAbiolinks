@@ -82,13 +82,11 @@ GDCprepare <- function(query,
                                              "Please check if the directory parameter right or GDCdownload downloaded the samples."))
 
     if(grepl("Transcriptome Profiling", query$data.category, ignore.case = TRUE)){
-
         data <- readTranscriptomeProfiling(files = files,
-                                           data.type = query$data.type,
+                                           data.type = ifelse(!is.na(query$data.type),query$data.type,  unique(query$results[[1]]$data_type)),
                                            workflow.type = unique(query$results[[1]]$analysis$workflow_type),
                                            cases = query$results[[1]]$cases,
                                            summarizedExperiment)
-
     } else if(grepl("Copy Number Variation",query$data.category,ignore.case = TRUE)) {
         data <- readCopyNumberVariation(files, query$results[[1]]$cases)
     }  else if(grepl("DNA methylation",query$data.category, ignore.case = TRUE)) {
