@@ -100,10 +100,12 @@ TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
 #' @param clinical_patient_data clinical_patient_data
 #' @keywords internal
 #' @return stage_BRCA
-# @examples
-# # clin <- TCGAquery_clinic("BRCA","clinical_patient")
-# clin <- clinBRCA
-# stage_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"stage_IX",clin)
+#' @examples
+#' clin.query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",
+#'                       barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"))
+#' tryCatch(GDCdownload(clin.query), error = function(e) GDCdownload(clin.query, method = "client"))
+#' clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
+#' stage_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"stage_IX",clinical.patient)
 stage_BRCA <- function(barcode, stage, clinical_patient_data){
     table.stages <- c("Stage I$|Stage IA$|Stage IB$", "Stage I$", "Stage IA$",
                       "Stage IB$", "Stage II$|Stage IIA$|Stage IIB$",
@@ -115,12 +117,12 @@ stage_BRCA <- function(barcode, stage, clinical_patient_data){
                              "stage_IIX", "stage_IIA", "stage_IIB",
                              "stage_IIIX","stage_IIIA", "stage_IIIB",
                              "stage_IIIC", "stage_IV")
-
+    print(is.element(stage, names(table.stages)))
     if (is.element(stage, names(table.stages))) {
         clinical_patient_data <- as.data.frame(clinical_patient_data)
         stage.i <- clinical_patient_data[
             grep(table.stages[stage],
-                 clinical_patient_data$pathologic_stage), ]
+                 clinical_patient_data$stage_event_pathologic_stage), ]
         stage.i <- stage.i[,"bcr_patient_barcode"]
         samples <- substr(barcode, 1, 12)
         barcode <- intersect(samples,stage.i)
@@ -138,16 +140,18 @@ stage_BRCA <- function(barcode, stage, clinical_patient_data){
 #' @param clinical_patient_data clinical_patient_data
 #' @keywords internal
 #' @return stage_BRCA
-# @examples
-# # clin <- TCGAquery_clinic("BRCA","clinical_patient")
-# clin <- clinBRCA
-# gender_BRCA (c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"FEMALE",clin)
+#' @examples
+#' clin.query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",
+#'                       barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"))
+#' tryCatch(GDCdownload(clin.query), error = function(e) GDCdownload(clin.query, method = "client"))
+#' clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
+#' gender_BRCA (c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"FEMALE",clinical.patient)
 gender_BRCA <- function(barcode, gender, clinical_patient_data){
 
-    if (is.element(gender,c("MALE", "FEMALE"))) {
+    if (is.element(tolower(gender),c("male", "female"))) {
         clinical_patient_data <- as.data.frame(clinical_patient_data)
         s.gender <- as.data.frame(clinical_patient_data)[
-            grep(paste0("^", gender,"$"), clinical_patient_data$gender),
+            grep(paste0("^", gender,"$"), clinical_patient_data$gender,ignore.case = TRUE),
             ][,"bcr_patient_barcode"]
         samples <- substr(barcode, 1, 12)
         #find common patients between FEMALE and barcode data
@@ -167,11 +171,13 @@ gender_BRCA <- function(barcode, gender, clinical_patient_data){
 #' @param clinical_patient_data clinical_patient_data
 #' @keywords internal
 #' @return ER_status_BRCA
-# @examples
-# # clin <- TCGAquery_clinic("BRCA","clinical_patient")
-# clin <- clinBRCA
-# ER_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
-# "Positive",clin)
+#' @examples
+#' clin.query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",
+#'                       barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"))
+#' tryCatch(GDCdownload(clin.query), error = function(e) GDCdownload(clin.query, method = "client"))
+#' clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
+#' ER_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
+#' "Positive",clinical.patient)
 ER_status_BRCA <- function(barcode,ER, clinical_patient_data){
     ## ER should be "Positive" or "Negative"
     # consider only barcode and ER status
@@ -198,11 +204,13 @@ ER_status_BRCA <- function(barcode,ER, clinical_patient_data){
 #' @param clinical_patient_data clinical_patient_data
 #' @keywords internal
 #' @return PR_status_BRCA
-# @examples
-# # clin <- TCGAquery_clinic("BRCA","clinical_patient")
-# clin <- clinBRCA
-# PR_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
-# "Positive",clin)
+#' @examples
+#' clin.query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",
+#'                       barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"))
+#' tryCatch(GDCdownload(clin.query), error = function(e) GDCdownload(clin.query, method = "client"))
+#' clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
+#' PR_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
+#'                "Positive",clinical.patient)
 PR_status_BRCA  <- function(barcode,PR, clinical_patient_data){
     ## PR should be "Positive" or "Negative"
 
@@ -210,7 +218,7 @@ PR_status_BRCA  <- function(barcode,PR, clinical_patient_data){
         #for breast cancer
         status <- as.data.frame(clinical_patient_data)[
             grep(paste0("^", PR, "$"),
-                 clinical_patient_data$pr_status_by_ihc), ][,"bcr_patient_barcode"]
+                 clinical_patient_data$breast_carcinoma_progesterone_receptor_status), ][,"bcr_patient_barcode"]
 
         samples <- substr(barcode, 1, 12)
         #find common patients between PR status and barcode data
@@ -231,11 +239,13 @@ PR_status_BRCA  <- function(barcode,PR, clinical_patient_data){
 #' @param clinical_patient_data clinical_patient_data
 #' @keywords internal
 #' @return HER_status_BRCA
-# @examples
-# # clin <- TCGAquery_clinic("BRCA","clinical_patient")
-# clin <- clinBRCA
-# HER_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
-# "Positive",clin)
+#' @examples
+#' clin.query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",
+#'                       barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"))
+#' tryCatch(GDCdownload(clin.query), error = function(e) GDCdownload(clin.query, method = "client"))
+#' clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
+#' HER_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
+#' "Positive",clinical.patient)
 HER_status_BRCA  <- function(barcode, HER, clinical_patient_data){
     if (is.element(HER, c("Positive", "Negative"))) {
         clinical_patient_data <- as.data.frame(clinical_patient_data)
@@ -256,22 +266,8 @@ HER_status_BRCA  <- function(barcode, HER, clinical_patient_data){
 
 }
 
-#' @title clinical_data_site_cancer
-#' @description
-#'   clinical_data_site_cancer
-#' @param cancer cancer
-#' @keywords internal
-# @examples clinical_data_site_cancer("gbm")
-#' @return clinical_data_site_cancer
-clinical_data_site_cancer <- function(cancer){
-    return(paste0("https://tcga-data.nci.nih.gov/tcgafiles/",
-                  "ftp_auth/distro_ftpusers/anonymous/tumor/",
-                  cancer,"/bcr/biotab/clin/"))
-}
 
-
-
-#' @title Get DDC clinical data
+#' @title Get GDC clinical data
 #' @description
 #' GDCquery_clinic will download all clinical information from the API
 #' as the one with using the button from each project
@@ -555,28 +551,12 @@ update.clinical.with.last.followup <- function(clin){
 #' @export
 #' @return List of samples that matches the filters
 #' @examples
-#' # clin <- TCGAquery_clinic("BRCA","clinical_patient")
-#' clin <- clinBRCA
-#' bar <- c("TCGA-G9-6378-02A-11R-1789-07", "TCGA-CH-5767-04A-11R-1789-07",
-#'         "TCGA-G9-6332-60A-11R-1789-07", "TCGA-G9-6336-01A-11R-1789-07",
-#'         "TCGA-G9-6336-11A-11R-1789-07", "TCGA-G9-7336-11A-11R-1789-07",
-#'         "TCGA-G9-7336-04A-11R-1789-07", "TCGA-G9-7336-14A-11R-1789-07",
-#'         "TCGA-G9-7036-04A-11R-1789-07", "TCGA-G9-7036-02A-11R-1789-07",
-#'         "TCGA-G9-7036-11A-11R-1789-07", "TCGA-G9-7036-03A-11R-1789-07",
-#'         "TCGA-G9-7036-10A-11R-1789-07", "TCGA-BH-A1ES-10A-11R-1789-07",
-#'         "TCGA-BH-A1F0-10A-11R-1789-07", "TCGA-BH-A0BZ-02A-11R-1789-07",
-#'         "TCGA-B6-A0WY-04A-11R-1789-07", "TCGA-BH-A1FG-04A-11R-1789-08",
-#'         "TCGA-D8-A1JS-04A-11R-2089-08", "TCGA-AN-A0FN-11A-11R-8789-08",
-#'         "TCGA-AR-A2LQ-12A-11R-8799-08", "TCGA-AR-A2LH-03A-11R-1789-07",
-#'         "TCGA-BH-A1F8-04A-11R-5789-07", "TCGA-AR-A24T-04A-55R-1789-07",
-#'         "TCGA-AO-A0J5-05A-11R-1789-07", "TCGA-BH-A0B4-11A-12R-1789-07",
-#'         "TCGA-B6-A1KN-60A-13R-1789-07", "TCGA-AO-A0J5-01A-11R-1789-07",
-#'         "TCGA-AO-A0J5-01A-11R-1789-07", "TCGA-G9-6336-11A-11R-1789-07",
-#'         "TCGA-G9-6380-11A-11R-1789-07", "TCGA-G9-6380-01A-11R-1789-07",
-#'         "TCGA-G9-6340-01A-11R-1789-07","TCGA-G9-6340-11A-11R-1789-07")
-#'
-#' TCGAquery_clinicFilt(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),clin,
-#' HER="Positive", gender="FEMALE",ER="Positive")
+#' clin.query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",
+#'                       barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"))
+#' tryCatch(GDCdownload(clin.query), error = function(e) GDCdownload(clin.query, method = "client"))
+#' clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
+#' TCGAquery_clinicFilt(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),clinical.patient,
+#'                      HER="Positive", gender="FEMALE",ER="Positive")
 TCGAquery_clinicFilt <- function(barcode,
                                  clinical_patient_data,
                                  HER=NULL,
