@@ -45,13 +45,11 @@ from survival package
 }
 }
 \examples{
-\dontrun{
- clinical_patient_Cancer <- TCGAquery_clinic("brca","clinical_patient")
+ clinical_patient_Cancer <- GDCquery_clinic("TCGA-BRCA","clinical")
  dataBRCAcomplete <- log2(BRCA_rnaseqv2)
  # Selecting only 10 genes for example
  dataBRCAcomplete <- dataBRCAcomplete[1:10,]
  tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,dataBRCAcomplete,
  Genelist = rownames(dataBRCAcomplete), Survresult = FALSE,ThreshTop=0.67,ThreshDown=0.33)
-}
 }
 
