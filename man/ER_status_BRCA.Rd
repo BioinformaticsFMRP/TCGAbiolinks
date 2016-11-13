@@ -19,13 +19,5 @@ ER_status_BRCA
 \description{
 ER_status_BRCA
 }
-\examples{
-clin.query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",
-                      barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"))
-tryCatch(GDCdownload(clin.query), error = function(e) GDCdownload(clin.query, method = "client"))
-clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
-ER_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
-"Positive",clinical.patient)
-}
 \keyword{internal}
 
