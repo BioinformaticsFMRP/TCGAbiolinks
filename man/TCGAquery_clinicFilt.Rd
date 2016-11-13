@@ -10,8 +10,7 @@ TCGAquery_clinicFilt(barcode, clinical_patient_data, HER = NULL, ER = NULL,
 \arguments{
 \item{barcode}{List of barcodes}
 
-\item{clinical_patient_data}{clinical_patient_data obtained with clinic function
-Ex: clinical_patient_data <- TCGAquery_clinic("LGG","clinical_patient")}
+\item{clinical_patient_data}{clinical_patient_data obtained with clinic function}
 
 \item{HER}{her2 neu immunohistochemistry receptor status: "Positive" or "Negative"}
 
