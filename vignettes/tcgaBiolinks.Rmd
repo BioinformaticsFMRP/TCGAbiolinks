@@ -748,9 +748,12 @@ SS <- TCGAquery_SampleTypes(bar,c("TP","NB"))
 SSS <- TCGAquery_MatchedCoupledSampleTypes(bar,c("NT","TP"))
 
 # Get clinical data
-clinical_brca_data <- TCGAquery_clinic("brca","clinical_patient")
+clin.query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",
+                       barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"))
+tryCatch(GDCdownload(clin.query), error = function(e) GDCdownload(clin.query, method = "client"))
+clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
 female_erpos_herpos <- TCGAquery_clinicFilt(bar,
-                                            clinical_brca_data, 
+                                            clinical.patient, 
                                             HER="Positive", 
                                             gender="FEMALE", 
                                             ER="Positive")
@@ -776,11 +779,15 @@ bar <- c("TCGA-G9-6378-02A-11R-1789-07", "TCGA-CH-5767-04A-11R-1789-07",
          "TCGA-G9-6380-11A-11R-1789-07", "TCGA-G9-6380-01A-11R-1789-07",
          "TCGA-G9-6340-01A-11R-1789-07","TCGA-G9-6340-11A-11R-1789-07")
 
-female_erpos_herpos <- TCGAquery_clinicFilt(bar, 
-                                            clinBRCA, 
-                                            HER = "Positive", 
-                                            gender = "FEMALE", 
-                                            ER = "Positive")
+clin.query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",
+                       barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"))
+tryCatch(GDCdownload(clin.query), error = function(e) GDCdownload(clin.query, method = "client"))
+clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
+female_erpos_herpos <- TCGAquery_clinicFilt(bar,
+                                            clinical.patient, 
+                                            HER="Positive", 
+                                            gender="FEMALE", 
+                                            ER="Positive")
 print(female_erpos_herpos)
 ```
 
