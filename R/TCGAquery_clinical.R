@@ -100,12 +100,6 @@ TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
 #' @param clinical_patient_data clinical_patient_data
 #' @keywords internal
 #' @return stage_BRCA
-#' @examples
-#' clin.query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",
-#'                       barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"))
-#' tryCatch(GDCdownload(clin.query), error = function(e) GDCdownload(clin.query, method = "client"))
-#' clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
-#' stage_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"stage_IX",clinical.patient)
 stage_BRCA <- function(barcode, stage, clinical_patient_data){
     table.stages <- c("Stage I$|Stage IA$|Stage IB$", "Stage I$", "Stage IA$",
                       "Stage IB$", "Stage II$|Stage IIA$|Stage IIB$",
@@ -171,13 +165,6 @@ gender_BRCA <- function(barcode, gender, clinical_patient_data){
 #' @param clinical_patient_data clinical_patient_data
 #' @keywords internal
 #' @return ER_status_BRCA
-#' @examples
-#' clin.query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",
-#'                       barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"))
-#' tryCatch(GDCdownload(clin.query), error = function(e) GDCdownload(clin.query, method = "client"))
-#' clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
-#' ER_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
-#' "Positive",clinical.patient)
 ER_status_BRCA <- function(barcode,ER, clinical_patient_data){
     ## ER should be "Positive" or "Negative"
     # consider only barcode and ER status
@@ -204,13 +191,6 @@ ER_status_BRCA <- function(barcode,ER, clinical_patient_data){
 #' @param clinical_patient_data clinical_patient_data
 #' @keywords internal
 #' @return PR_status_BRCA
-#' @examples
-#' clin.query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",
-#'                       barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"))
-#' tryCatch(GDCdownload(clin.query), error = function(e) GDCdownload(clin.query, method = "client"))
-#' clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
-#' PR_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
-#'                "Positive",clinical.patient)
 PR_status_BRCA  <- function(barcode,PR, clinical_patient_data){
     ## PR should be "Positive" or "Negative"
 
@@ -239,13 +219,6 @@ PR_status_BRCA  <- function(barcode,PR, clinical_patient_data){
 #' @param clinical_patient_data clinical_patient_data
 #' @keywords internal
 #' @return HER_status_BRCA
-#' @examples
-#' clin.query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",
-#'                       barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"))
-#' tryCatch(GDCdownload(clin.query), error = function(e) GDCdownload(clin.query, method = "client"))
-#' clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
-#' HER_status_BRCA(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),
-#' "Positive",clinical.patient)
 HER_status_BRCA  <- function(barcode, HER, clinical_patient_data){
     if (is.element(HER, c("Positive", "Negative"))) {
         clinical_patient_data <- as.data.frame(clinical_patient_data)
