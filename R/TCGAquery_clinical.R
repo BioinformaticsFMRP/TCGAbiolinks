@@ -516,23 +516,6 @@ parseXML <- function(files, xpath, clinical.info ){
     return(clin)
 }
 
-update.clinical.with.last.followup <- function(clin){
-
-    for(disease in unique(clin$disease)){
-        aux <- clinical.table[,disease]
-        files <- rownames(clinical.table[which(aux==1),])
-        # get last follow up files not nte
-        files <- sort(files[grepl("follow",files) & !grepl("nte",files)],decreasing = T)[1]
-
-        follow <- TCGAquery_clinic(disease,files)
-
-        colnames(follow) [colnames(follow) %in% colnames(clin)]
-        aux <- plyr::ddply(follow, .(bcr_patient_barcode), function(x) x[c(nrow(x)), ])
-        aux <- aux[aux$bcr_patient_barcode %in% clin$bcr_patient_barcode,colnames(aux) %in% colnames(clin)]
-        clin[na.omit(match(aux$bcr_patient_barcode,clin$bcr_patient_barcode)),match(colnames(aux),colnames(clin))] <- aux
-    }
-    return(clin)
-}
 
 #' @title Filter samples using clinical data
 #' @description
@@ -540,7 +523,6 @@ update.clinical.with.last.followup <- function(clin){
 #'   Filters available: HER, ER,gender,PR, stage.
 #' @param barcode List of barcodes
 #' @param clinical_patient_data clinical_patient_data obtained with clinic function
-#' Ex: clinical_patient_data <- TCGAquery_clinic("LGG","clinical_patient")
 #' @param HER  her2 neu immunohistochemistry receptor status: "Positive" or "Negative"
 #' @param gender "MALE" or "FEMALE"
 #' @param PR  Progesterone receptor status: "Positive" or "Negative"
