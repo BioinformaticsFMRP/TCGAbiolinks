@@ -2,7 +2,7 @@ Package: TCGAbiolinks
 Type: Package
 Title: TCGAbiolinks: An R/Bioconductor package for integrative analysis with
     TCGA data
-Version: 2.3.8
+Version: 2.3.9
 Date: 2015-12-13
 Author: Antonio Colaprico,
     Tiago Chedraoui Silva,
@@ -70,7 +70,7 @@ Imports:
     parmigene,
     matlab,
     circlize,
-    ggrepel
+    ggrepel (>= 0.6.3)
 Description: The aim of TCGAbiolinks is : i) facilitate the TCGA open-access
     data retrieval, ii) prepare the data using the appropriate pre-processing
     strategies, iii) provide the means to carry out different standard analyses
