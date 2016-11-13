@@ -2,7 +2,7 @@
 % Please edit documentation in R/TCGAquery_clinical.R
 \name{GDCquery_clinic}
 \alias{GDCquery_clinic}
-\title{Get DDC clinical data}
+\title{Get GDC clinical data}
 \usage{
 GDCquery_clinic(project, type = "clinical", save.csv = FALSE)
 }
