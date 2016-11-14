@@ -606,6 +606,12 @@ colDataPrepare <- function(barcode){
 
         }
     }
+
+    # Add purity information from http://www.nature.com/articles/ncomms9971
+    # purity  <- getPurityinfo()
+    # ret <- merge(ret, purity, by = "sample", all.x = TRUE, sort = FALSE)
+
+    # Put data in the right order
     ret <- ret[match(barcode,ret$barcode),]
     rownames(ret) <- ret$barcode
     return(ret)
@@ -920,6 +926,17 @@ TCGAprepare_elmer <- function(data,
         return (Met)
     }
 }
+
+# Is this
+# @import From gdata read.xls
+#getPurityinfo <- function(){
+#    message("Adding purity information from: doi:10.1038/ncomms9971")
+#    x <- read.xls("http://www.nature.com/article-assets/npg/ncomms/2015/151204/ncomms9971/extref/ncomms9971-s2.xlsx", na.strings=c("NA","#DIV/0!","NaN"), skip = 2)
+#    x <- x[,c(1,3:7)]
+#    colnames(x)[1] <- "sample"
+#    return(x)
+#}
+
 
 #' @title Prepare CEL files into an AffyBatch.
 #' @description Prepare CEL files into an AffyBatch.
