@@ -609,20 +609,18 @@ calculate.pvalues <- function(data,
         )
     }
 
-    if(!paired){
-        p.value <- adply(assay(data),1,
-                         function(x) {
-                             aux <- data_frame(beta=x[c(idx1,idx2)],
-                                               cluster=droplevels(
-                                                   colData(data)[c(idx1,idx2),
-                                                                 groupCol]))
-                             wilcox.test(beta ~ cluster,
-                                                data=aux, exact = TRUE,
-                                                paired = paired)$p.value
-                         }, .progress = "text", .parallel = parallel
-        )
-        p.value <- p.value[,2]
-    }
+    p.value <- adply(assay(data),1,
+                     function(x) {
+                         aux <- data_frame(beta=x[c(idx1,idx2)],
+                                           cluster=droplevels(
+                                               colData(data)[c(idx1,idx2),
+                                                             groupCol]))
+                         wilcox.test(beta ~ cluster,
+                                     data=aux, #exact = TRUE,
+                                     paired = paired)$p.value
+                     }, .progress = "text", .parallel = parallel
+    )
+    p.value <- p.value[,2]
     ## Plot a histogram
     if(save) {
         message("Saved histogram_pvalues.png...")
@@ -1140,18 +1138,18 @@ TCGAanalyze_DMR <- function(data,
         idx <- grep("mean|status|value",colnames(df),invert = TRUE)
 
         write_csv(as.data.frame(df[,
-                      c(colnames(df)[idx],
-                        paste("mean", group1.col,sep = "."),
-                        paste("mean", group2.col,sep = "."),
-                        paste("diffmean", group1.col, group2.col, sep = "."),
-                        paste("p.value", group1.col, group2.col, sep = "."),
-                        paste("p.value.adj", group1.col, group2.col, sep = "."),
-                        statuscol,
-                        paste("diffmean",group2.col,group1.col,sep = "."),
-                        paste("p.value",group2.col,group1.col,sep = "."),
-                        paste("p.value.adj",group2.col,group1.col,sep = "."),
-                        statuscol2)
-                      ]),path =  csv)
+                                   c(colnames(df)[idx],
+                                     paste("mean", group1.col,sep = "."),
+                                     paste("mean", group2.col,sep = "."),
+                                     paste("diffmean", group1.col, group2.col, sep = "."),
+                                     paste("p.value", group1.col, group2.col, sep = "."),
+                                     paste("p.value.adj", group1.col, group2.col, sep = "."),
+                                     statuscol,
+                                     paste("diffmean",group2.col,group1.col,sep = "."),
+                                     paste("p.value",group2.col,group1.col,sep = "."),
+                                     paste("p.value.adj",group2.col,group1.col,sep = "."),
+                                     statuscol2)
+                                   ]),path =  csv)
         if (is.null(filename)) {
             filename <- paste0(paste(
                 gsub("_",".",groupCol),
