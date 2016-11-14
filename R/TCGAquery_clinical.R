@@ -134,12 +134,6 @@ stage_BRCA <- function(barcode, stage, clinical_patient_data){
 #' @param clinical_patient_data clinical_patient_data
 #' @keywords internal
 #' @return stage_BRCA
-#' @examples
-#' clin.query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",
-#'                       barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"))
-#' tryCatch(GDCdownload(clin.query), error = function(e) GDCdownload(clin.query, method = "client"))
-#' clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
-#' gender_BRCA (c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"),"FEMALE",clinical.patient)
 gender_BRCA <- function(barcode, gender, clinical_patient_data){
 
     if (is.element(tolower(gender),c("male", "female"))) {
