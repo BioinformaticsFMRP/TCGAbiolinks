@@ -83,7 +83,7 @@ GDCprepare <- function(query,
 
     if(grepl("Transcriptome Profiling", query$data.category, ignore.case = TRUE)){
         data <- readTranscriptomeProfiling(files = files,
-                                           data.type = ifelse(!is.na(query$data.type),query$data.type,  unique(query$results[[1]]$data_type)),
+                                           data.type = ifelse(!is.na(query$data.type),  as.character(query$data.type),  unique(query$results[[1]]$data_type)),
                                            workflow.type = unique(query$results[[1]]$analysis$workflow_type),
                                            cases = query$results[[1]]$cases,
                                            summarizedExperiment)
@@ -726,19 +726,20 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,su
             }
             close(pb)
             if(summarizedExperiment) df <- makeSEfromTranscriptomeProfiling(df,cases,workflow.type)
-        } else if(grepl("miRNA", workflow.type) & grepl("miRNA", data.type)) {
-            pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-            for (i in seq_along(files)) {
-                data <- read_tsv(file = files[i], col_names = TRUE)
-                if(!missing(cases))
-                    colnames(data)[2:ncol(data)] <- paste0(colnames(data)[2:ncol(data)],"_",cases[i])
-
-                if(i == 1) df <- data
-                if(i != 1) df <- merge(df, data, by=colnames(df)[1],all = TRUE)
-                setTxtProgressBar(pb, i)
-            }
-            close(pb)
         }
+    } else if(grepl("miRNA", workflow.type, ignore.case = TRUE) & grepl("miRNA", data.type, ignore.case)) {
+        pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+        for (i in seq_along(files)) {
+            data <- read_tsv(file = files[i], col_names = TRUE,col_types = "cidc")
+            if(!missing(cases))
+                colnames(data)[2:ncol(data)] <- paste0(colnames(data)[2:ncol(data)],"_",cases[i])
+
+            if(i == 1) df <- data
+            if(i != 1) df <- merge(df, data, by=colnames(df)[1],all = TRUE)
+            setTxtProgressBar(pb, i)
+        }
+        close(pb)
+
     } else if(grepl("Isoform Expression Quantification", data.type, ignore.case = TRUE)){
         pb <- txtProgressBar(min = 0, max = length(files), style = 3)
         for (i in seq_along(files)) {
