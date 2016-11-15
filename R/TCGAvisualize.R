@@ -1010,8 +1010,10 @@ TCGAvisualize_oncoprint <- function (mut,
 
     if(rm.empty.columns == FALSE) {
         aux <- data.frame(row.names = all.samples[!all.samples %in% rownames(mat)])
-        aux[,colnames(mat)] <- ""
-        mat <- rbind(mat,aux)
+        if(nrow(aux) > 0) {
+            aux[,colnames(mat)] <- ""
+            mat <- rbind(mat,aux)
+        }
     }
 
 
