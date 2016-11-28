@@ -639,12 +639,20 @@ get.GRCh.bioMart <- function(genome="hg19") {
                         "ensembl_gene_id",
                         "external_gene_name")
     }
-    message(paste0("Downloading genome information. Using: ",
-                   listDatasets(ensembl)[listDatasets(ensembl)$dataset=="hsapiens_gene_ensembl",]$description))
-    chrom <- c(1:22, "X", "Y")
-    gene.location <- getBM(attributes = attributes,
-                           filters = c("chromosome_name"),
-                           values = list(chrom), mart = ensembl)
+    description <- listDatasets(ensembl)[listDatasets(ensembl)$dataset=="hsapiens_gene_ensembl",]$description
+    message(paste0("Downloading genome information. Using: ", description))
+
+    filename <-  paste0(gsub("[[:punct:]]| ", "_",description),".rda")
+    if(!file.exists(filename)) {
+        chrom <- c(1:22, "X", "Y")
+        gene.location <- getBM(attributes = attributes,
+                               filters = c("chromosome_name"),
+                               values = list(chrom), mart = ensembl)
+        save(gene.location, file = filename)
+    } else {
+        message("Loading")
+        gene.location <- get(load(filename))
+    }
 
     return(gene.location)
 }
