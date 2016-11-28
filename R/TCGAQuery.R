@@ -76,6 +76,7 @@
 #'                   barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
 #' @return A data frame with the results and the parameters used
 #' @importFrom  jsonlite fromJSON
+#' @importFrom knitr kable
 GDCquery <- function(project,
                      data.category,
                      data.type,
@@ -174,7 +175,15 @@ GDCquery <- function(project,
     }
 
     # Filter by sample.type
-    if(!any(is.na(sample.type))) results <- results[tolower(results$tissue.definition) %in% tolower(sample.type),]
+    if(!any(is.na(sample.type))) {
+        if(!any(tolower(results$tissue.definition) %in% tolower(sample.type))) {
+            aux <- as.data.frame(table(results$tissue.definition))
+            aux <- aux[aux$Freq>0,]
+            print(kable(aux,row.names=FALSE,col.names = c("sample.type","Number of samples")))
+            stop("Please set a valid data.type argument from the list above.")
+        }
+        results <- results[tolower(results$tissue.definition) %in% tolower(sample.type),]
+    }
     # Filter by barcode
     if(!any(is.na(barcode))) results <- results[substr(results$cases,1,str_length(barcode[1])) %in% barcode,]
 
@@ -244,8 +253,6 @@ GDCquery <- function(project,
     }
     #results <- results[!duplicated(results$cases),]
     if(nrow(results) == 0) stop("Sorry, no results were found for this query")
-
-
 
     ret <- data.frame(results=I(list(results)), project = project,
                       data.category = data.category,
