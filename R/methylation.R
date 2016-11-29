@@ -161,7 +161,7 @@ TCGAanalyze_survival <- function(data,
     }
     # create a column to be used with survival package, info need
     # to be TRUE(DEAD)/FALSE (ALIVE)
-    data$s <- grepl("dead",data$vital_status,ignore.case = TRUE)
+    data$s <- grepl("dead|deceased",data$vital_status,ignore.case = TRUE)
 
     # Column with groups
     data$type <- as.factor(data[,clusterCol])
@@ -218,6 +218,7 @@ TCGAanalyze_survival <- function(data,
     if(add.legend == TRUE){
         if(legend.position == "inside"){
             surv <- surv +  theme(legend.justification=c(1,1),
+                                  plot.title = element_text(hjust = 0.5),
                                   legend.background = element_rect(colour = "black"),
                                   legend.position=c(1,1))
         } else {
@@ -706,7 +707,9 @@ TCGAVisualize_volcano <- function(x,y,
                                   filename = "volcano.pdf",
                                   ylab =  expression(paste(-Log[10],
                                                            " (FDR corrected -P values)")),
-                                  xlab=NULL, title=NULL, legend=NULL,
+                                  xlab=NULL,
+                                  title="Volcano plot",
+                                  legend=NULL,
                                   label=NULL, xlim=NULL, ylim=NULL,
                                   color = c("black", "red", "green"),
                                   names=NULL,
@@ -791,6 +794,7 @@ TCGAVisualize_volcano <- function(x,y,
                            panel.grid.major = element_blank(),
                            panel.grid.minor = element_blank(),
                            legend.text = element_text(size = 10),
+                           plot.title = element_text(hjust = 0.5),
                            axis.line.x=element_line(colour = "black"),
                            axis.line.y=element_line(colour = "black"),
                            legend.position="top",
@@ -1554,7 +1558,7 @@ TCGAvisualize_starburst <- function(met,
               axis.line.y=element_line(colour = "black"),
               legend.position="top",
               legend.key = element_rect(colour = 'white'),
-              plot.title = element_text(face = "bold", size = 16),
+              plot.title = element_text(face = "bold", size = 16,hjust = 0.5),
               legend.text = element_text(size = 14),
               legend.title = element_text(size = 14),
               axis.text= element_text(size = 14),
