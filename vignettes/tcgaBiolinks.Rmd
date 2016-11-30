@@ -487,14 +487,14 @@ Please, not that these tables are still incomplete.
 
 ## Harmonized data
 
-| Data.category               | Data.type                         | Workflow Type   | Platform |
+| data.category               | data.type                         |  workflow.type   | platform |
 |-----------------------------|-----------------------------------|-----------------|----------|
 | Transcriptome Profiling     | Gene Expression Quantification    | HTSeq - Counts  |          |
 |                             |                                   | HTSeq - FPKM-UQ |          |
 |                             |                                   | HTSeq - FPKM    |          |
 |                             | Isoform Expression Quantification | -               |          |
 |                             | miRNA Expression Quantification   | -               |          |
-| Copy number variation       | Copy Number Segment               |                 |          |
+| Copy Number Variation       | Copy Number Segment               |                 |          |
 |                             | Masked Copy Number Segment        |                 |          |
 | Simple Nucleotide Variation |                                   |                 |          |
 | Raw Sequencing Data         |                                   |                 |          |
@@ -504,16 +504,15 @@ Please, not that these tables are still incomplete.
 |                             |                                   |                 | Illumina Human Methylation 27 |    
 
 ## Legacy data
-| Data.category               | Data.type                         | Platform                            | file.type          |
+| data.category               | data.type                         | platform                            | file.type          |
 |-----------------------------|-----------------------------------|-------------------------------------|--------------------|
-| Transcriptome Profiling     |                                   |                                     |                    |
 | Copy number variation       | -                                 | Affymetrix SNP Array 6.0            | nocnv_hg18.seg     |
 |                             | -                                 | Affymetrix SNP Array 6.0            | hg18.seg           |
 |                             | -                                 | Affymetrix SNP Array 6.0            | nocnv_hg19.seg     |
 |                             | -                                 | Affymetrix SNP Array 6.0            | hg19.seg           |
 |                             | -                                 | Illumina HiSeq                      | -                  |
-| Simple Nucleotide Variation |                                   |                                     |                    |
-| Raw Sequencing Data         |                                   |                                     |                    |
+| Simple nucleotide variation |                                   |                                     |                    |
+| Raw sequencing data         |                                   |                                     |                    |
 | Biospecimen                 |                                   |                                     |                    |
 | Clinical                    |                                   |                                     |                    |
 | Protein expression          |                                   | MDA RPPA Core                       | -                  |
@@ -536,8 +535,7 @@ Please, not that these tables are still incomplete.
 |                             |                                   | Illumina DNA Methylation OMA003 CPI | -                  |
 |                             |                                   | Illumina DNA Methylation OMA002 CPI | -                  |
 |                             |                                   | Illumina Hi Seq                     |                    |
-| Raw Microarray Data         |                                   |                                     |                    |
-| Structural Rearrangement    |                                   |                                     |                    |
+| Raw microarray data         |                                   |                                     |                    |
 | Other                       |                                   |                                     |                    |
 
 ## `GDCquery_maf`: Working with mutation files.
@@ -1661,7 +1659,7 @@ of the subgroups. Example: shapes = c(21,23) if for two levels
 * **y.limits** Change lower/upper y-axis limit 
 
 Other examples using the parameters:
-```{r, echo=TRUE, fig.height=5, message=FALSE, warning=FALSE}
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
 # setting y limits: lower 0, upper 1
 TCGAvisualize_meanMethylation(data,groupCol = "shortLetterCode",filename = NULL, y.limits = c(0,1))
 # setting y limits: lower 0
