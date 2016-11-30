@@ -161,7 +161,7 @@ TCGAanalyze_survival <- function(data,
     }
     # create a column to be used with survival package, info need
     # to be TRUE(DEAD)/FALSE (ALIVE)
-    data$s <- grepl("dead",data$vital_status,ignore.case = TRUE)
+    data$s <- grepl("dead|deceased",data$vital_status,ignore.case = TRUE)
 
     # Column with groups
     data$type <- as.factor(data[,clusterCol])
@@ -218,6 +218,7 @@ TCGAanalyze_survival <- function(data,
     if(add.legend == TRUE){
         if(legend.position == "inside"){
             surv <- surv +  theme(legend.justification=c(1,1),
+                                  plot.title = element_text(hjust = 0.5),
                                   legend.background = element_rect(colour = "black"),
                                   legend.position=c(1,1))
         } else {
@@ -337,7 +338,7 @@ TCGAvisualize_meanMethylation <- function(data,
                                           legend.position = "top",
                                           legend.title.position = "top",
                                           legend.ncols = 3,
-                                          add.axis.x.text = FALSE,
+                                          add.axis.x.text = TRUE,
                                           width=10,
                                           height=10,
                                           dpi=600,
@@ -361,9 +362,9 @@ TCGAvisualize_meanMethylation <- function(data,
     }
 
     if (!is.null(subgroupCol)){
-        df <- data.frame(mean = mean, groups = groups, subgroups = subgroups)
+        df <- data.frame(mean = mean, groups = groups, subgroups = subgroups, samples = colnames(data))
     } else {
-        df <- data.frame(mean = mean, groups = groups)
+        df <- data.frame(mean = mean, groups = groups,samples = colnames(data))
     }
     message("==================== DATA Summary ====================")
     data.summary <- ddply(df, .(groups), summarize,
@@ -429,7 +430,7 @@ TCGAvisualize_meanMethylation <- function(data,
     } else if(sort == "median.desc") {
         x <- reorder(df$groups, -df$mean, FUN="median")
     }
-
+    x <- droplevels(x)
     if (is.null(labels)) {
         labels <- levels(x)
         labels <-  sapply(labels,label.add.n)
@@ -460,8 +461,7 @@ TCGAvisualize_meanMethylation <- function(data,
     }
     if(add.axis.x.text){
         axis.text.x <- element_text(angle = axis.text.x.angle,
-                                    vjust = 0.5,
-                                    size = 16)
+                                    vjust = 0.5)
     } else {
         axis.text.x <-  element_blank()
     }
@@ -469,21 +469,16 @@ TCGAvisualize_meanMethylation <- function(data,
     p <- p + scale_x_discrete(limits=levels(x))
     p <- p + ylab(ylab) + xlab(xlab) + labs(title = title) +
         labs(shape=subgroup.legend, color=group.legend) +
-        theme_bw() +
+        theme_minimal() +
         theme(axis.title.x = element_text(face = "bold", size = 20),
               axis.text.x = axis.text.x,
               axis.title.y = element_text(face = "bold",
                                           size = 20),
               axis.text.y = element_text(size = 16),
-              plot.title = element_text(face = "bold", size = 16),
+              plot.title = element_text(face = "bold", size = 16, hjust = 0.5),
               legend.text = element_text(size = 14),
               legend.title = element_text(size = 14),
               axis.text= element_text(size = 22),
-              panel.border = element_blank(),
-              panel.grid.major = element_blank(),
-              panel.grid.minor = element_blank(),
-              axis.line.x=element_line(colour = "black"),
-              axis.line.y=element_line(colour = "black"),
               legend.position=legend.position,
               legend.key = element_rect(colour = 'white')) +
         guides(fill=guide_legend(ncol=legend.ncols,title.position = legend.title.position, title.hjust =0.5))
@@ -706,7 +701,9 @@ TCGAVisualize_volcano <- function(x,y,
                                   filename = "volcano.pdf",
                                   ylab =  expression(paste(-Log[10],
                                                            " (FDR corrected -P values)")),
-                                  xlab=NULL, title=NULL, legend=NULL,
+                                  xlab=NULL,
+                                  title="Volcano plot",
+                                  legend=NULL,
                                   label=NULL, xlim=NULL, ylim=NULL,
                                   color = c("black", "red", "green"),
                                   names=NULL,
@@ -791,6 +788,7 @@ TCGAVisualize_volcano <- function(x,y,
                            panel.grid.major = element_blank(),
                            panel.grid.minor = element_blank(),
                            legend.text = element_text(size = 10),
+                           plot.title = element_text(hjust = 0.5),
                            axis.line.x=element_line(colour = "black"),
                            axis.line.y=element_line(colour = "black"),
                            legend.position="top",
@@ -1554,7 +1552,7 @@ TCGAvisualize_starburst <- function(met,
               axis.line.y=element_line(colour = "black"),
               legend.position="top",
               legend.key = element_rect(colour = 'white'),
-              plot.title = element_text(face = "bold", size = 16),
+              plot.title = element_text(face = "bold", size = 16,hjust = 0.5),
               legend.text = element_text(size = 14),
               legend.title = element_text(size = 14),
               axis.text= element_text(size = 14),
