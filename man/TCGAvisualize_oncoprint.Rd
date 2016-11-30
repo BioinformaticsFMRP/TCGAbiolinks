@@ -68,7 +68,7 @@ A oncoprint plot
 Creating a oncoprint
 }
 \examples{
-mut <- GDCquery_Maf(tumor = "ACC", pipelines = "muse")
+mut <- GDCquery_Maf(tumor = "ACC", pipelines = "mutect")
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:10], rm.empty.columns = TRUE)
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:10],
                  filename = "onco.pdf",
