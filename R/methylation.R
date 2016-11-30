@@ -659,8 +659,9 @@ calculate.pvalues <- function(data,
 #'    Observation: This function automatically is called by TCGAanalyse_DMR
 #' @param x x-axis data
 #' @param y y-axis data
-#' @param y.cut p-values threshold. Default: 0.01
-#' @param x.cut  x-axis threshold. Default: 0.0
+#' @param y.cut p-values threshold.
+#' @param x.cut  x-axis threshold. Default: 0.0 If you give only one number (e.g. 0.2) the cut-offs will be
+#'  -0.2 and 0.2. Or you can give diffenrent cutt-ofs as a vector (e.g. c(-0.3,0.4))
 #' @param filename Filename. Default: volcano.pdf, volcano.svg, volcano.png
 #' @param legend Legend title
 #' @param color vector of colors to be used in graph
@@ -694,6 +695,9 @@ calculate.pvalues <- function(data,
 #'                       names = rep("AAAA",length(x)), legend = "Status",
 #'                       names.fill = FALSE)
 #' TCGAVisualize_volcano(x,y,filename = NULL,y.cut = 10000000,x.cut=0.8,
+#'                       names = as.character(1:length(x)), legend = "Status",
+#'                       names.fill = TRUE, highlight = c("1","2"),show="both")
+#' TCGAVisualize_volcano(x,y,filename = NULL,y.cut = 10000000,x.cut=c(-0.3,0.8),
 #'                       names = as.character(1:length(x)), legend = "Status",
 #'                       names.fill = TRUE, highlight = c("1","2"),show="both")
 #' while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
@@ -738,20 +742,30 @@ TCGAVisualize_volcano <- function(x,y,
     # get significant data
     sig <-  y < y.cut
     sig[is.na(sig)] <- FALSE
+
+    # If x.cut
+    if(length(x.cut) == 1) {
+        x.cut.min <- -x.cut
+        x.cut.max <- x.cut
+    }
+    if(length(x.cut) == 2) {
+        x.cut.min <- x.cut[1]
+        x.cut.max <- x.cut[2]
+    }
+
     # hypermethylated/up regulated samples compared to old state
-    up <- x  > x.cut
+    up <- x  > x.cut.max
     up[is.na(up)] <- FALSE
     if (any(up & sig)) threshold[up & sig] <- "2"
 
     # hypomethylated/ down regulated samples compared to old state
-    down <-  x < (-x.cut)
+    down <-  x < x.cut.min
     down[is.na(down)] <- FALSE
     if (any(down & sig)) threshold[down & sig] <- "3"
 
     if(!is.null(highlight)){
         idx <- which(names %in% highlight)
         if(length(idx) >0 ){
-            print(idx)
             threshold[which(names %in% highlight)]  <- "4"
             color <- c(color,highlight.color)
             names(color) <- as.character(1:4)
@@ -774,9 +788,9 @@ TCGAVisualize_volcano <- function(x,y,
                 environment = .e) +
         geom_point() +
         ggtitle(title) + ylab(ylab) + xlab(xlab) +
-        geom_vline(aes(xintercept = -x.cut),
-                   colour = "black",linetype = "dashed") +
-        geom_vline(aes(xintercept = x.cut),
+        geom_vline(aes(xintercept = x.cut.min),
+                   colour = "black", linetype = "dashed") +
+        geom_vline(aes(xintercept = x.cut.max),
                    colour = "black", linetype = "dashed") +
         geom_hline(aes(yintercept = -1 * log10(y.cut)),
                    colour = "black", linetype = "dashed") +

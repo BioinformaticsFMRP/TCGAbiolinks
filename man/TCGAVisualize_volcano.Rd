@@ -6,10 +6,10 @@
 \usage{
 TCGAVisualize_volcano(x, y, filename = "volcano.pdf",
   ylab = expression(paste(-Log[10], " (FDR corrected -P values)")),
-  xlab = NULL, title = NULL, legend = NULL, label = NULL, xlim = NULL,
-  ylim = NULL, color = c("black", "red", "green"), names = NULL,
-  names.fill = TRUE, show.names = "significant", x.cut = 0,
-  y.cut = 0.01, height = 5, width = 10, highlight = NULL,
+  xlab = NULL, title = "Volcano plot", legend = NULL, label = NULL,
+  xlim = NULL, ylim = NULL, color = c("black", "red", "green"),
+  names = NULL, names.fill = TRUE, show.names = "significant",
+  x.cut = 0, y.cut = 0.01, height = 5, width = 10, highlight = NULL,
   highlight.color = "orange", names.size = 4, dpi = 300)
 }
 \arguments{
@@ -45,9 +45,10 @@ Should be the same size of x and y}
 
 \item{show.names}{What names will be showd? Possibilities: "both", "significant", "highlighted"}
 
-\item{x.cut}{x-axis threshold. Default: 0.0}
+\item{x.cut}{x-axis threshold. Default: 0.0 If you give only one number (e.g. 0.2) the cut-offs will be
+-0.2 and 0.2. Or you can give diffenrent cutt-ofs as a vector (e.g. c(-0.3,0.4))}
 
-\item{y.cut}{p-values threshold. Default: 0.01}
+\item{y.cut}{p-values threshold.}
 
 \item{height}{Figure height}
 
@@ -81,6 +82,9 @@ TCGAVisualize_volcano(x,y,filename = NULL,y.cut = 10000000,x.cut=0.8,
                       names = rep("AAAA",length(x)), legend = "Status",
                       names.fill = FALSE)
 TCGAVisualize_volcano(x,y,filename = NULL,y.cut = 10000000,x.cut=0.8,
+                      names = as.character(1:length(x)), legend = "Status",
+                      names.fill = TRUE, highlight = c("1","2"),show="both")
+TCGAVisualize_volcano(x,y,filename = NULL,y.cut = 10000000,x.cut=c(-0.3,0.8),
                       names = as.character(1:length(x)), legend = "Status",
                       names.fill = TRUE, highlight = c("1","2"),show="both")
 while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
