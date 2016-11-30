@@ -1659,7 +1659,7 @@ of the subgroups. Example: shapes = c(21,23) if for two levels
 * **y.limits** Change lower/upper y-axis limit 
 
 Other examples using the parameters:
-```{r, echo=TRUE, fig.height=5, message=FALSE, warning=FALSE}
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
 # setting y limits: lower 0, upper 1
 TCGAvisualize_meanMethylation(data,groupCol = "shortLetterCode",filename = NULL, y.limits = c(0,1))
 # setting y limits: lower 0
