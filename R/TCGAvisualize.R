@@ -926,7 +926,7 @@ unlistlabels <- function(lab) {
 #' @importFrom grid gpar grid.rect
 #' @importFrom data.table dcast setDT setDF :=
 #' @examples
-#' mut <- GDCquery_Maf(tumor = "ACC", pipelines = "muse")
+#' mut <- GDCquery_Maf(tumor = "ACC", pipelines = "mutect")
 #' TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:10], rm.empty.columns = TRUE)
 #' TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:10],
 #'                  filename = "onco.pdf",
@@ -1050,8 +1050,11 @@ TCGAvisualize_oncoprint <- function (mut,
 
     if(missing(annotation)) annotation <- NULL
     if(!is.null(annotation)){
+        if(!"bcr_patient_barcode" %in% colnames(annotation))
+            stop("bcr_patient_barcode column should be in the annotation")
         idx <- match(substr(colnames(mat),1,12),annotation$bcr_patient_barcode)
-
+        if(all(is.na(idx)))
+            stop(" We couldn't match the columns names with the bcr_patient_barcode column in the annotation object")
         annotation <- annotation[idx,]
 
         annotation$bcr_patient_barcode <- NULL

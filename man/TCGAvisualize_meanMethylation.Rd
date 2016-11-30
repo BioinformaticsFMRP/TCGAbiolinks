@@ -11,9 +11,8 @@ TCGAvisualize_meanMethylation(data, groupCol = NULL, subgroupCol = NULL,
   xlab = NULL, title = "Mean DNA methylation", labels = NULL,
   group.legend = NULL, subgroup.legend = NULL, color = NULL,
   y.limits = NULL, sort, order, legend.position = "top",
-  legend.title.position = "top", legend.ncols = 3,
-  add.axis.x.text = FALSE, width = 10, height = 10, dpi = 600,
-  axis.text.x.angle = 90)
+  legend.title.position = "top", legend.ncols = 3, add.axis.x.text = TRUE,
+  width = 10, height = 10, dpi = 600, axis.text.x.angle = 90)
 }
 \arguments{
 \item{data}{SummarizedExperiment object obtained from TCGAPrepare}
