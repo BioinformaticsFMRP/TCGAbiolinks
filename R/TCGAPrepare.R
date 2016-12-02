@@ -272,14 +272,12 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
     if(all(grepl("\\|",df[,1]))){
         aux <- strsplit(df$gene_id,"\\|")
         GeneID <- unlist(lapply(aux,function(x) x[2]))
-        df$entrezid <- as.numeric(GeneID)
-        GeneSymbol <- unlist(lapply(aux,function(x) x[1]))
-        df$external_gene_id <- as.character(GeneSymbol)
+        df$entrezgene <- as.numeric(GeneID)
     } else {
         df$external_gene_id <- as.character(df[,1])
     }
 
-    df <- merge(df, gene.location, by="external_gene_id")
+    df <- merge(df, gene.location, by="entrezgene")
 
     if("transcript_id" %in% assay.list){
         rowRanges <- GRanges(seqnames = paste0("chr", df$chromosome_name),
