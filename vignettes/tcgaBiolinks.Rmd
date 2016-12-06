@@ -1775,7 +1775,7 @@ The code is divided in 4 case study:
 * 4. Elmer pipeline (KIRC)
 
 
-## Arguments definition
+## Case study n. 1: Pan Cancer downstream analysis BRCA
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(SummarizedExperiment)
 library(TCGAbiolinks)
