@@ -152,40 +152,12 @@ GDCquery <- function(project,
 
     results <- json$data$hits
 
-    # get barcode of the samples
-    # TARGET-20-PANLLX-09A-01R
-    #print(results$cases[[1]])
-    if(data.category %in% c("Clinical","Biospecimen")) {
-        pat <- paste("TCGA-[:alnum:]{2}-[:alnum:]{4}",
-                     "TARGET-[:alnum:]{2}-[:alnum:]{6}",sep = "|")
-    } else {
-        pat <- paste("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}-[:alnum:]{3}-[:alnum:]{2,3}-[:alnum:]{4}-[:alnum:]{2}",
-                     "[:alnum:]{6}-[:alnum:]{2}-[:alnum:]{6}-[:alnum:]{3}-[:alnum:]{3}",sep = "|")
-    }
-    barcodes <- na.omit(unlist(lapply(results$cases,function(x) str_extract(x,pat))))
-
-    results$cases <- barcodes
-    results$tissue.definition <- expandBarcodeInfo(barcodes)$tissue.definition
-
     if(!is.na(platform)){
         if(!(platform %in% results$platform)) {
             stop("Please set a valid platform argument from the list below:\n  => ", paste(unique(results$platform), collapse = "\n  => "))
         }
         results <- results[tolower(results$platform) %in% tolower(platform),]
     }
-
-    # Filter by sample.type
-    if(!any(is.na(sample.type))) {
-        if(!any(tolower(results$tissue.definition) %in% tolower(sample.type))) {
-            aux <- as.data.frame(table(results$tissue.definition))
-            aux <- aux[aux$Freq>0,]
-            print(kable(aux,row.names=FALSE,col.names = c("sample.type","Number of samples")))
-            stop("Please set a valid data.type argument from the list above.")
-        }
-        results <- results[tolower(results$tissue.definition) %in% tolower(sample.type),]
-    }
-    # Filter by barcode
-    if(!any(is.na(barcode))) results <- results[substr(results$cases,1,str_length(barcode[1])) %in% barcode,]
 
     # Filter by access
     if(!is.na(access)) results <- results[grepl(access,results$access,ignore.case = TRUE),]
@@ -215,6 +187,8 @@ GDCquery <- function(project,
         }
         results <- results[results$analysis$workflow_type %in% workflow.type,]
     }
+
+
     # Filter by file.type
     if(!is.na(file.type)){
         pat <- file.type
@@ -236,6 +210,36 @@ GDCquery <- function(project,
             invert <- TRUE
         }
         results <- results[grep(pat,results$file_name,invert = invert),]
+    }
+
+    # get barcode of the samples
+    if(data.category %in% c("Clinical","Biospecimen")) {
+        pat <- paste("TCGA-[:alnum:]{2}-[:alnum:]{4}",
+                     "TARGET-[:alnum:]{2}-[:alnum:]{6}",sep = "|")
+    } else {
+        pat <- paste("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}-[:alnum:]{3}-[:alnum:]{2,3}-[:alnum:]{4}-[:alnum:]{2}",
+                     "[:alnum:]{6}-[:alnum:]{2}-[:alnum:]{6}-[:alnum:]{3}-[:alnum:]{3}",sep = "|")
+    }
+    barcodes <- unlist(lapply(results$cases,function(x) {
+        str <- str_extract(x,pat);
+        ifelse(all(is.na(str)), NA,str[!is.na(str)])
+    }))
+
+
+    results$cases <- barcodes
+    results$tissue.definition <- expandBarcodeInfo(barcodes)$tissue.definition
+
+    # Filter by barcode
+    if(!any(is.na(barcode))) results <- results[substr(results$cases,1,str_length(barcode[1])) %in% barcode,]
+    # Filter by sample.type
+    if(!any(is.na(sample.type))) {
+        if(!any(tolower(results$tissue.definition) %in% tolower(sample.type))) {
+            aux <- as.data.frame(table(results$tissue.definition))
+            aux <- aux[aux$Freq>0,]
+            print(kable(aux,row.names=FALSE,col.names = c("sample.type","Number of samples")))
+            stop("Please set a valid data.type argument from the list above.")
+        }
+        results <- results[tolower(results$tissue.definition) %in% tolower(sample.type),]
     }
     # some how there are duplicated files in GDC we should remove them
     # Example of problematic query
