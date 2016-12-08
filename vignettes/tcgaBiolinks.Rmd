@@ -456,17 +456,49 @@ with the following arguments:
 The next subsections will detail each of the search arguments.
 Below, we show some search examples:
 ```{r, eval = FALSE}
+#---------------------------------------------------------------
+#  For available entries and combinations please se table below
+#---------------------------------------------------------------
+
+# Gene expression aligned against Hg38
 query <- GDCquery(project = "TARGET-AML",
                   data.category = "Transcriptome Profiling",
                   data.type = "Gene Expression Quantification", 
                   workflow.type = "HTSeq - Counts")
 
-# Using legacy
+
+# Using sample type to get only Primary solid Tumor samples and Solid Tissue Normal
+query.mirna <- GDCquery(project = "TCGA-ACC", 
+                        data.category = "Transcriptome Profiling", 
+                        data.type = "miRNA Expression Quantification",
+                        sample.type = c("Primary solid Tumor","Solid Tissue Normal"))
+
+# Example Using legacy to accessing hg19 and filtering by barcode
 query <- GDCquery(project = "TCGA-GBM",
                   data.category = "DNA methylation", 
                   platform = "Illumina Human Methylation 27", 
                   legacy = TRUE,
                   barcode = c("TCGA-02-0047-01A-01D-0186-05","TCGA-06-2559-01A-01D-0788-05"))
+
+# Gene expression aligned against hg19.
+query.exp.hg19 <- GDCquery(project = "TCGA-GBM",
+                  data.category = "Gene expression",
+                  data.type = "Gene expression quantification",
+                  platform = "Illumina HiSeq", 
+                  file.type  = "normalized_results",
+                  experimental.strategy = "RNA-Seq",
+                  barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"),
+                  legacy = TRUE)
+
+# Searching idat file for DNA methylation
+query <- GDCquery(project = "TCGA-OV",
+                  data.category = "Raw microarray data",
+                  data.type = "Raw intensities", 
+                  experimental.strategy = "Methylation array", 
+                  legacy = TRUE,
+                  file.type = ".idat",
+                  platform = "Illumina Human Methylation 450")
+
 ```
 
 The list of projects is below:
@@ -535,7 +567,8 @@ Please, not that these tables are still incomplete.
 |                             |                                   | Illumina DNA Methylation OMA003 CPI | -                  |
 |                             |                                   | Illumina DNA Methylation OMA002 CPI | -                  |
 |                             |                                   | Illumina Hi Seq                     |                    |
-| Raw microarray data         |                                   |                                     |                    |
+| Raw microarray data         |  Raw intensities                  | Illumina Human Methylation 450      |  idat              |
+|                             |                                   | Illumina Human Methylation 27       |  idat              |
 | Other                       |                                   |                                     |                    |
 
 ## `GDCquery_maf`: Working with mutation files.
@@ -909,7 +942,33 @@ data <- legacyPipeline("TCGA-GBM","DNA methylation","Illumina Human Methylation 
 data <- legacyPipeline("TCGA-GBM","DNA methylation","Illumina DNA Methylation OMA003 CPI")
 data <- legacyPipeline("TCGA-GBM","DNA methylation","Illumina DNA Methylation OMA002 CPI")
 
-
+#-------------------------------------------------------
+# Example to  idat files from TCGA projects
+#-------------------------------------------------------
+projects <- TCGAbiolinks:::getGDCprojects()$project_id
+projects <- projects[grepl('^TCGA',projects,perl=T)]
+match.file.cases.all <- NULL
+for(proj in projects){
+    print(proj)
+    query <- GDCquery(project = proj,
+                      data.category = "Raw microarray data",
+                      data.type = "Raw intensities", 
+                      experimental.strategy = "Methylation array", 
+                      legacy = TRUE,
+                      file.type = ".idat",
+                      platform = "Illumina Human Methylation 450")
+    match.file.cases <- query$results[[1]][,c("file_name","cases")]
+    match.file.cases$project <- proj
+    match.file.cases.all <- rbind(match.file.cases.all,match.file.cases)
+    tryCatch(GDCdownload(query, method = "api",chunks.per.download = 20),
+             error = function(e) GDCdownload(query, method = "client"))
+}
+# This will create a map between idat file name, cases (barcode) and project
+readr::write_tsv(match.file.cases.all, path =  "idat_filename_case.txt")
+# code to move all files to local folder
+for(file in dir(".",pattern = ".idat", recursive = T)){
+    TCGAbiolinks::move(file,basename(file))
+}
 ```
 
 # `GDCprepare`: Preparing the data
@@ -1753,7 +1812,7 @@ The code is divided in 4 case study:
 * 4. Elmer pipeline (KIRC)
 
 
-## Arguments definition
+## Case study n. 1: Pan Cancer downstream analysis BRCA
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(SummarizedExperiment)
 library(TCGAbiolinks)
