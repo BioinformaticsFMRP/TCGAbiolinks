@@ -1799,6 +1799,60 @@ grid.raster(img)
 ```
 
 
+
+
+# GDC Downstream Pipeline
+
+## HTSeq data: Downstream analysis BRCA
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+
+CancerProject <- "TCGA-BRCA"
+DataDirectory <- paste0("GDC_",gsub("-","_",CancerProject))
+FileNameData <- paste0(DataDirectory, "_","HTSeq_Counts",".rda")
+
+query <- GDCquery(project = CancerProject,
+                  data.category = "Transcriptome Profiling",
+                  data.type = "Gene Expression Quantification", 
+                  workflow.type = "HTSeq - Counts")
+
+samplesDown <- query$results[[1]]$cases
+
+dataSmTP <- TCGAquery_SampleTypes(barcode = samplesDown,
+                                  typesample = "TP")
+
+dataSmNT <- TCGAquery_SampleTypes(barcode = samplesDown,
+                                  typesample = "NT")
+dataSmTP_short <- dataSmTP[1:10]
+dataSmNT_short <- dataSmNT[1:10]
+
+queryDown <- GDCquery(project = CancerProject, 
+                      data.category = "Gene expression",
+                      data.type = "Gene expression quantification",
+                      platform = "Illumina HiSeq", 
+                      file.type = "results",
+                      barcode = c(dataSmTP_short, dataSmNT_short),
+                      experimental.strategy = "RNA-Seq",
+                      legacy = TRUE)
+
+queryDown <- GDCquery(project = CancerProject, 
+                      data.category = "Transcriptome Profiling",
+                      data.type = "Gene Expression Quantification", 
+                      workflow.type = "HTSeq - Counts", 
+                      #file.type = "results",
+                      barcode = c(dataSmTP_short, dataSmNT_short))
+                    
+GDCdownload(query = queryDown,
+            directory = DataDirectory)
+
+dataPrep <- GDCprepare(query = queryDown, 
+                       save = TRUE, 
+                       directory =  DataDirectory,
+                       save.filename = FileNameData)
+
+```
+
+
+
 # TCGA Downstream Analysis: Case Studies
 
 ### Introduction 
