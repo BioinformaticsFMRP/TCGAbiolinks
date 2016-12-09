@@ -1006,3 +1006,35 @@ TCGAanalyze_analyseGRN<- function(TFs, normCounts,kNum) {
   return(miTFGenes)
 
 }
+
+#' @title Generate pathview graph
+#' @description TCGAanalyze_Pathview pathway based data integration and visualization.
+#' @param dataDEGs dataDEGs
+#' @param pathwayKEGG pathwayKEGG
+#' @importFrom clusterProfiler bitr
+#' @importFrom pathview pathview
+#' @export
+#' @return an adjacent matrix
+TCGAanalyze_Pathview <- function(dataDEGs, pathwayKEGG = "hsa05200" ){
+  # Converting Gene symbol to gene ID
+
+  eg = as.data.frame(bitr(dataDEGsFiltLevel$mRNA,
+                          fromType="SYMBOL",
+                          toType="ENTREZID",
+                          annoDb="org.Hs.eg.db"))
+  eg <- eg[!duplicated(eg$SYMBOL),]
+  dataDEGsFiltLevel <- dataDEGsFiltLevel[dataDEGsFiltLevel$mRNA %in% eg$SYMBOL,]
+  dataDEGsFiltLevel <- dataDEGsFiltLevel[order(dataDEGsFiltLevel$mRNA,decreasing=FALSE),]
+  eg <- eg[order(eg$SYMBOL,decreasing=FALSE),]
+  dataDEGsFiltLevel$GeneID <- eg$ENTREZID
+  dataDEGsFiltLevel_sub <- subset(dataDEGsFiltLevel, select = c("GeneID", "logFC"))
+  genelistDEGs <- as.numeric(dataDEGsFiltLevel_sub$logFC)
+  names(genelistDEGs) <- dataDEGsFiltLevel_sub$GeneID
+  
+
+  hsa05200 <- pathview(gene.data  = genelistDEGs,
+                       pathway.id = pathwayKEGG,
+                       species    = "hsa",
+                       limit      = list(gene=as.integer(max(abs(genelistDEGs)))))
+  
+}
