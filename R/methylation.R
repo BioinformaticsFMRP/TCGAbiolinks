@@ -204,9 +204,11 @@ TCGAanalyze_survival <- function(data,
     if(is.null(labels)){
         labels <- sapply(levels(data$type),label.add.n)
     }
-    surv <- surv + scale_colour_manual(name = legend,
-                                       labels = labels,
-                                       values=color)
+    # This will be used to remove the following messsage
+    # Scale for 'colour' is already present. Adding another scale for 'colour', which will replace the existing scale.
+    suppressMessages({
+        surv <- surv + scale_colour_manual(name = legend, labels = labels,values=color)
+    })
     if(add.points){
         surv <- surv + geom_point(aes(colour = group),
                                   shape = 3,size = 2)
@@ -240,6 +242,7 @@ TCGAanalyze_survival <- function(data,
 
     if(!is.null(filename)) {
         ggsave(surv, filename = filename, width = width, height = height, dpi = dpi)
+        message(paste0("File saved as: ", filename))
     } else {
         return(surv)
     }
