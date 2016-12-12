@@ -1,7 +1,9 @@
 language: r
+r: bioc-devel
 sudo: true
 cache: packages
 bioc_required: true
+bioc_use_devel: true
 warnings_are_errors: false
 
 os:
@@ -14,6 +16,28 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("nlme", lib="/home/travis/R-bin/lib/R/library/")'; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("roxygen2", lib="/home/travis/R-bin/lib/R/library/")'; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update ; fi
+
+bioc_packages:
+    BiocStyle
+    GenomicRanges
+    Biobase
+    affy
+    EDASeq
+    edgeR
+    biomaRt
+    IRanges
+    supraHex
+    S4Vectors
+    ComplexHeatmap
+    SummarizedExperiment
+    BiocGenerics
+    GenomicFeatures
+    TxDb.Hsapiens.UCSC.hg19.knownGene
+    limma
+    genefilter
+    ConsensusClusterPlus
+    pathview
+    clusterProfiler
 
 r_github_packages:
   - jimhester/covr
