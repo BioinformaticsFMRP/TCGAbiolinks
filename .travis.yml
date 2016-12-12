@@ -1,5 +1,7 @@
 language: r
-r: bioc-devel
+r:
+  - bioc-devel
+  - bioc-release
 sudo: true
 cache: packages
 bioc_required: true
@@ -10,25 +12,13 @@ os:
   - linux
   - osx
 
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - gcc-4.9
-      - g++-4.9
-
-
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update -q ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install libc6 libc6-dev ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("nlme", lib="/home/travis/R-bin/lib/R/library/")'; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("roxygen2", lib="/home/travis/R-bin/lib/R/library/")'; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update ; fi
-  - mkdir ~/.R
-  - cat <<EOF > ~/.R/Makevars
-  - CXX1X=g++-4.9
-  - CXX1XSTD=-std=c++11
+  - if [[ "$TRAVIS_R_VERSION_STRING" = 'bioc-devel' ]]; then mkdir ~/.R && echo 'CXX1X=g++ -std=c++0x -g -O2 -fPIC' > ~/.R/Makevars; fi
 
 r-packages:
   - testthat
@@ -58,12 +48,25 @@ bioc_packages:
   - ConsensusClusterPlus
   - pathview
   - clusterProfiler
+  - BiocCheck
+  - fgsea
 
 r_github_packages:
   - jimhester/covr
+
+after_script:
+  - ls -lah
+  - FILE=$(ls -1t *.tar.gz | head -n 1)
+  - Rscript -e "library(BiocCheck); BiocCheck(\"${FILE}\")
 
 after_success:
   -  Rscript -e 'library(covr);codecov()'
 
 r_build_args: --no-build-vignettes --no-manual --no-resave-data
 r_check_args: --no-build-vignettes --no-manual
+
+# Something happend to osx bioc-devel builds
+matrix:
+  exclude:
+  - os: osx
+    r: bioc-devel
