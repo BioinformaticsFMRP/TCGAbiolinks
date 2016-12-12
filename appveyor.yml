@@ -26,7 +26,7 @@ on_failure:
 
 environment:
   matrix:
-    - R_VERSION: release
+    - R_VERSION: devel
       R_ARCH: x64
       USE_RTOOLS: true
 
