@@ -17,6 +17,13 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("roxygen2", lib="/home/travis/R-bin/lib/R/library/")'; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update ; fi
 
+r-packages:
+  - testthat
+  - knitr
+  - markdown
+  - DBI
+  - RSQLite
+
 bioc_packages:
   - BiocStyle
   - GenomicRanges
