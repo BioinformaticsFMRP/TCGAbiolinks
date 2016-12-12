@@ -253,7 +253,7 @@ GDCquery <- function(project,
     #                  sample.type = c("Primary solid Tumor","Solid Tissue Normal"))
     #
     if(any(duplicated(results$cases))) {
-        message("Warning: There are more than one file for the same case. Please verify query results.")
+        message("Warning: There are more than one file for the same case. Please verify query results. You can use the command View(query$results[[1]]) in rstudio")
     }
     #results <- results[!duplicated(results$cases),]
     if(nrow(results) == 0) stop("Sorry, no results were found for this query")
