@@ -977,10 +977,10 @@ TCGAvisualize_oncoprint <- function (mut,
 
     if(!rm.empty.columns){
         formula <- paste0("Tumor_Sample_Barcode + Hugo_Symbol ~ ", information)
-        mat <- dcast(mut, as.formula(formula),value.var = "value",fill = 0,drop = FALSE)
+        suppressMessages({mat <- dcast(mut, as.formula(formula),value.var = "value",fill = 0,drop = FALSE)})
     } else {
         formula <- paste0("Tumor_Sample_Barcode + Hugo_Symbol ~ ", information)
-        mat <- dcast(mut, as.formula(formula),value.var = "value",fill = 0,drop = TRUE)
+        suppressMessages({mat <- dcast(mut, as.formula(formula),value.var = "value",fill = 0,drop = TRUE)})
     }
 
     # mutation in the file
@@ -1251,6 +1251,9 @@ TCGAvisualize_oncoprint <- function (mut,
     }
 
     draw(p, heatmap_legend_side = heatmap.legend.side, annotation_legend_side = annotation.legend.side)
-    if(!missing(filename)) dev.off()
+    if(!missing(filename)) {
+        dev.off()
+        message(paste0("File saved as: ", filename ))
+    }
 
 }
