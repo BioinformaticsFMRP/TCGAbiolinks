@@ -64,6 +64,8 @@ Imports:
     RColorBrewer,
     doParallel,
     dplyr,
+    clusterProfiler,
+    pathview,
     parallel,
     xml2,
     httr (>= 1.2.1),
