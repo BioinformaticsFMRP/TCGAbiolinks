@@ -10,12 +10,25 @@ os:
   - linux
   - osx
 
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-4.9
+      - g++-4.9
+
+
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update -q ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install libc6 libc6-dev ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("nlme", lib="/home/travis/R-bin/lib/R/library/")'; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("roxygen2", lib="/home/travis/R-bin/lib/R/library/")'; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update ; fi
+  - mkdir ~/.R
+  - cat <<EOF > ~/.R/Makevars
+  - CXX1X=g++-4.9
+  - CXX1XSTD=-std=c++11
 
 r-packages:
   - testthat
