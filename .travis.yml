@@ -1,6 +1,5 @@
 language: r
 r:
-  - bioc-devel
   - bioc-release
 sudo: true
 cache: packages
@@ -73,9 +72,3 @@ after_success:
 
 r_build_args: --no-build-vignettes --no-manual --no-resave-data
 r_check_args: --no-build-vignettes --no-manual
-
-# Something happend to osx bioc-devel builds
-matrix:
-  exclude:
-  - os: osx
-    r: bioc-devel
