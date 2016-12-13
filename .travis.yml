@@ -26,6 +26,8 @@ r-packages:
   - markdown
   - DBI
   - RSQLite
+  - R6
+  - whisker
 
 bioc_packages:
   - BiocStyle
