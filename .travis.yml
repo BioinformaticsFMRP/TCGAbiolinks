@@ -17,6 +17,7 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install libc6 libc6-dev ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("nlme", lib="/home/travis/R-bin/lib/R/library/")'; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("roxygen2", lib="/home/travis/R-bin/lib/R/library/")'; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then Rscript -e 'install.packages("R6", lib="/home/travis/R-bin/lib/R/library/")'; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update ; fi
   - if [[ "$TRAVIS_R_VERSION_STRING" = 'bioc-devel' ]]; then mkdir ~/.R && echo 'CXX1X=g++ -std=c++0x -g -O2 -fPIC' > ~/.R/Makevars; fi
 
@@ -53,7 +54,9 @@ bioc_packages:
   - fgsea
 
 r_github_packages:
+  - eddelbuettel/digest
   - kevinushey/rex
+  - kevinushey/later
   - jimhester/crayon
   - edwindj/whisker
   - jimhester/withr
