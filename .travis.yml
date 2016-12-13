@@ -27,7 +27,6 @@ r-packages:
   - DBI
   - RSQLite
   - R6
-  - whisker
 
 bioc_packages:
   - BiocStyle
@@ -54,7 +53,12 @@ bioc_packages:
   - fgsea
 
 r_github_packages:
+  - kevinushey/rex
+  - jimhester/crayon
+  - edwindj/whisker
+  - jimhester/withr
   - jimhester/covr
+
 
 after_script:
   - ls -lah
