@@ -1854,8 +1854,8 @@ dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
                                   method = "quantile", 
                                   qnt.cut =  0.25)   
 
-dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmNT],
-                            mat2 = dataFilt[,dataSmTP],
+dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmTP_short],
+                            mat2 = dataFilt[,dataSmNT_short],
                             Cond1type = "Normal",
                             Cond2type = "Tumor",
                             fdr.cut = 0.01 ,
@@ -1865,6 +1865,65 @@ dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmNT],
 ```
 
 
+## miRNA expression data: Downstream analysis BRCA
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+require(TCGAbiolinks)
+
+CancerProject <- "TCGA-BRCA"
+DataDirectory <- paste0("../GDC/",gsub("-","_",CancerProject))
+FileNameData <- paste0(DataDirectory, "_","miRNA_gene_quantification",".rda")
+
+query.miR <- GDCquery(project = CancerProject, 
+                  data.category = "Gene expression",
+                  data.type = "miRNA gene quantification",
+                  file.type = "hg19.mirna",
+                  legacy = TRUE)
+
+samplesDown.miR <- query.miR$results[[1]]$cases
+
+dataSmTP.miR <- TCGAquery_SampleTypes(barcode = samplesDown.miR,
+                                  typesample = "TP")
+
+dataSmNT.miR <- TCGAquery_SampleTypes(barcode = samplesDown.miR,
+                                  typesample = "NT")
+dataSmTP_short.miR <- dataSmTP.miR[1:10]
+dataSmNT_short.miR <- dataSmNT.miR[1:10]
+
+queryDown.miR <- GDCquery(project = CancerProject, 
+                      data.category = "Gene expression",
+                      data.type = "miRNA gene quantification",
+                      file.type = "hg19.mirna",
+                      legacy = TRUE,
+                      barcode = c(dataSmTP_short.miR, dataSmNT_short.miR))
+
+GDCdownload(query = queryDown.miR,
+            directory = DataDirectory)
+
+dataAssy.miR <- GDCprepare(query = queryDown.miR, 
+                           save = TRUE, 
+                           save.filename = FileNameData, 
+                           summarizedExperiment = TRUE,
+                           directory =DataDirectory )
+rownames(dataAssy.miR) <- dataAssy.miR$miRNA_ID
+
+# using read_count's data 
+read_countData <-  colnames(dataAssy.miR)[grep("count", colnames(dataAssy.miR))]
+dataAssy.miR <- dataAssy.miR[,read_countData]
+colnames(dataAssy.miR) <- gsub("read_count_","", colnames(dataAssy.miR))
+
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataAssy.miR,
+                                  method = "quantile", 
+                                  qnt.cut =  0.25)   
+
+dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmNT_short.miR],
+                            mat2 = dataFilt[,dataSmTP_short.miR],
+                            Cond1type = "Normal",
+                            Cond2type = "Tumor",
+                            fdr.cut = 0.01 ,
+                            logFC.cut = 1,
+                            method = "glmLRT")  
+
+```
 
 # TCGA Downstream Analysis: Case Studies
 
