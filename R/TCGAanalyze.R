@@ -54,7 +54,7 @@ TCGAanalyze_Preprocessing <- function(object,
                                      filename = NULL,
                                      width = 500,
                                      height = 500,
-                                     datatype = "raw_counts"){
+                                     datatype = names(assays(object))[1]){
 
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 
