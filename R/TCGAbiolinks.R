@@ -95,13 +95,19 @@ NULL
 #' @format A data frame with 3649 rows and 6 variables
 NULL
 
-#' geneInfo for normalization
+#' geneInfo for normalization of RNAseq data
 #' @docType data
 #' @keywords internal
 #' @name geneInfo
 #' @format A data frame with 20531 rows and 2 variables
 NULL
 
+#' geneInfoHT for normalization of HTseq data
+#' @docType data
+#' @keywords internal
+#' @name geneInfoHT
+#' @format A data frame with 23486 rows and 2 variables
+NULL
 
 #' TCGA data matrix BRCA DEGs Pubmed
 #' @docType data
