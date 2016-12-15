@@ -47,6 +47,7 @@ TCGAanalyze_Clustering <- function(tabDF, method,  methodHC = "ward.D2"){
 #' @param height Image height
 #' @param datatype is a string from RangedSummarizedExperiment assay
 #' @importFrom grDevices dev.list
+#' @importFrom SummarizedExperiment assays 
 #' @export
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
 TCGAanalyze_Preprocessing <- function(object,
