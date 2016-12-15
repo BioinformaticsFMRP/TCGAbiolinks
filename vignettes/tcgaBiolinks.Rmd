@@ -1839,6 +1839,29 @@ dataPrep <- GDCprepare(query = queryDown,
                        directory =  DataDirectory,
                        save.filename = FileNameData)
 
+dataPrep <- TCGAanalyze_Preprocessing(object = dataPrep, 
+                                      cor.cut = 0.6)                      
+
+dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
+                                      geneInfo = geneInfoHT,
+                                      method = "gcContent") 
+
+boxplot(dataPrep, outline = FALSE)
+
+boxplot(dataNorm, outline = FALSE)
+
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
+                                  method = "quantile", 
+                                  qnt.cut =  0.25)   
+
+dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmNT],
+                            mat2 = dataFilt[,dataSmTP],
+                            Cond1type = "Normal",
+                            Cond2type = "Tumor",
+                            fdr.cut = 0.01 ,
+                            logFC.cut = 1,
+                            method = "glmLRT")  
+
 ```
 
 
