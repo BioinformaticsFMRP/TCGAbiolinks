@@ -37,6 +37,8 @@ Imports:
     edgeR (>= 3.0.0),
     jsonlite (>= 1.0.0),
     plyr,
+    c3net,
+    minet,
     knitr,
     methods,
     biomaRt,
