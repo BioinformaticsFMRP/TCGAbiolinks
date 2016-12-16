@@ -110,6 +110,7 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save =
 #' @importFrom scales percent
 #' @importFrom ggthemes theme_base
 #' @importFrom ggrepel geom_text_repel
+#' @importFrom gridExtra rbind.gtable
 #' @export
 #' @return Survival plot
 #' @examples
@@ -203,7 +204,7 @@ TCGAanalyze_survival <- function(data,
             g1 <- ggplotGrob(surv$plot)
             g2 <- ggplotGrob(surv$table)
             min_ncol <- min(ncol(g2), ncol(g1))
-            g <- gridExtra::rbind.gtable(g1[, 1:min_ncol], g2[, 1:min_ncol], size="last")
+            g <- rbind.gtable(g1[, 1:min_ncol], g2[, 1:min_ncol], size="last")
             ggsave(g, filename = filename, width = width, height = height, dpi = dpi)
         }
     } else {
