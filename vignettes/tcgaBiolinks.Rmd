@@ -742,7 +742,7 @@ getclinical <- function(proj){
                 # add suffix manually if it already exists
                 replicated <- which(grep("bcr_patient_barcode",colnames(aux), value = T,invert = T) %in% colnames(clinical))
                 colnames(aux)[replicated] <- paste0(colnames(aux)[replicated],".",i)
-                clinical <- merge(clinical,aux,by = "bcr_patient_barcode", all = TRUE)
+                if(!is.null(aux)) clinical <- merge(clinical,aux,by = "bcr_patient_barcode", all = TRUE)
             }
             readr::write_csv(clinical,path = paste0(proj,"_clinical_from_XML.csv")) # Save the clinical data into a csv file
             return(clinical)
@@ -1322,13 +1322,16 @@ The arguments of `TCGAanalyze_survival` are:
 *  **clusterCol** Column with groups to plot. This is a mandatory field, 
 the caption will be based in this column
 *  **legend** Legend title of the figure
-*  **cutoff** xlim This parameter will be a limit in the x-axis. 
+*  **xlim** xlim This parameter will be a limit in the x-axis. 
 That means, that patients with days_to_deth > cutoff will be set to Alive.
 *  **main**	 main title of the plot
 *  **ylab**	y-axis text of the plot
 *  **xlab** x-axis text of the plot
 *  **filename**	 The name of the pdf file
 *  **color** Define the colors of the lines.
+*  **pvalue** Show pvalue in the plot. 
+*  **risk.table** 	Show or not the risk table
+*  **conf.int** 	Show confidence intervals for point estimaes of survival curves.
 
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
