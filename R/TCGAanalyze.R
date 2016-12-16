@@ -47,7 +47,7 @@ TCGAanalyze_Clustering <- function(tabDF, method,  methodHC = "ward.D2"){
 #' @param height Image height
 #' @param datatype is a string from RangedSummarizedExperiment assay
 #' @importFrom grDevices dev.list
-#' @importFrom SummarizedExperiment assays 
+#' @importFrom SummarizedExperiment assays
 #' @export
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
 TCGAanalyze_Preprocessing <- function(object,
@@ -1017,12 +1017,12 @@ TCGAanalyze_analyseGRN<- function(TFs, normCounts,kNum) {
 #' @export
 #' @return an adjacent matrix
 TCGAanalyze_Pathview <- function(dataDEGs, pathwayKEGG = "hsa05200" ){
-  # Converting Gene symbol to gene ID
 
+  # Converting Gene symbol to gene ID
   eg = as.data.frame(bitr(dataDEGsFiltLevel$mRNA,
                           fromType="SYMBOL",
                           toType="ENTREZID",
-                          annoDb="org.Hs.eg.db"))
+                          OrgDb="org.Hs.eg.db"))
   eg <- eg[!duplicated(eg$SYMBOL),]
   dataDEGsFiltLevel <- dataDEGsFiltLevel[dataDEGsFiltLevel$mRNA %in% eg$SYMBOL,]
   dataDEGsFiltLevel <- dataDEGsFiltLevel[order(dataDEGsFiltLevel$mRNA,decreasing=FALSE),]
@@ -1031,13 +1031,12 @@ TCGAanalyze_Pathview <- function(dataDEGs, pathwayKEGG = "hsa05200" ){
   dataDEGsFiltLevel_sub <- subset(dataDEGsFiltLevel, select = c("GeneID", "logFC"))
   genelistDEGs <- as.numeric(dataDEGsFiltLevel_sub$logFC)
   names(genelistDEGs) <- dataDEGsFiltLevel_sub$GeneID
-  
 
   hsa05200 <- pathview(gene.data  = genelistDEGs,
                        pathway.id = pathwayKEGG,
                        species    = "hsa",
                        limit      = list(gene=as.integer(max(abs(genelistDEGs)))))
-  
+
 }
 
 
@@ -1058,6 +1057,6 @@ TCGAanalyze_networkInference <- function(data, optionMethod = "clr" ){
     net <- minet(data, method = optionMethod)
   }
   return(net)
-  
+
 }
 
