@@ -25,6 +25,7 @@ Imports:
     downloader (>= 0.4),
     survminer,
     grDevices,
+    gridExtra,
     graphics,
     tibble,
     GenomicRanges,
