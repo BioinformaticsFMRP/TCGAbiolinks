@@ -715,6 +715,72 @@ clinical.slide <- GDCprepare_clinic(query, clinical.info = "slide")
 clinical.portion <- GDCprepare_clinic(query, clinical.info = "portion")
 ```
 
+To get all the information for TGCA samples you can use the script below:
+```{r, eval = FALSE}
+# This code will get all clinical indexed data from TCGA
+library(TCGAbiolinks)
+library(data.table)
+clinical <- TCGAbiolinks:::getGDCprojects()$project_id %>% 
+            regexPipes::grep("TCGA",value=T) %>% 
+            sort %>% 
+            plyr::alply(1,GDCquery_clinic, .progress = "text") %>% 
+            rbindlist
+readr::write_csv(clinical,path = paste0("all_clin_indexed.csv"))
+
+# This code will get all clinical XML data from TCGA
+getclinical <- function(proj){
+    message(proj)
+    while(1){
+        result = tryCatch({
+            query <- GDCquery(project = proj, data.category = "Clinical")
+            GDCdownload(query)
+            clinical <- GDCprepare_clinic(query, clinical.info = "patient")
+            before <- ".clinical"
+            for(i in c("admin","radiation","follow_up","drug","new_tumor_event")){
+                message(i)
+                aux <- GDCprepare_clinic(query, clinical.info = i)
+                if(!is.null(aux)) clinical <- merge(clinical,aux,by = "bcr_patient_barcode",suffixes= c(before,paste0(".",i)), all = TRUE)
+                before <- paste0(".",i)
+            }
+            readr::write_csv(clinical,path = paste0(proj,"_clinical_from_XML.csv")) # Save the clinical data into a csv file
+            return(clinical)
+        }, error = function(e) {
+            message(paste0("Error clinical: ", proj))
+        })
+    }
+}
+clinical <- TCGAbiolinks:::getGDCprojects()$project_id %>% 
+    regexPipes::grep("TCGA",value=T) %>% 
+    sort %>% 
+    plyr::alply(1,getclinical, .progress = "text") %>% 
+    rbindlist(fill = TRUE) %>% setDF
+readr::write_csv(clinical,path = paste0("all_clin_XML.csv"))
+
+# Get all batch numbers for each patient
+library(TCGAbiolinks)
+getBatch <- function(proj){
+    message(proj)
+    while(1){
+        result = tryCatch({
+            query <- GDCquery(project = proj, data.category = "Biospecimen")
+            GDCdownload(query)
+            clinical <- GDCprepare_clinic(query, clinical.info = "admin")
+            readr::write_csv(clinical,path = paste0(proj,"_batch_from_XML.csv")) # Save the clinical data into a csv file
+            return(clinical)
+        }, error = function(e) {
+            message(paste0("Error clinical: ", proj))
+        })
+    }
+}
+biospecimen <- TCGAbiolinks:::getGDCprojects()$project_id %>% 
+    regexPipes::grep("TCGA",value=T) %>% 
+    sort %>% 
+    plyr::alply(1,getBatch, .progress = "text") %>% 
+    rbindlist(fill = TRUE) %>% setDF
+
+readr::write_csv(biospecimen,path = paste0("biospecimen_from_XML.csv"))
+```
+
 
 Also, some functions to work with clinical data are provided.
 
