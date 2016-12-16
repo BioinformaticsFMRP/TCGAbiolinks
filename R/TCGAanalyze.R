@@ -47,6 +47,7 @@ TCGAanalyze_Clustering <- function(tabDF, method,  methodHC = "ward.D2"){
 #' @param height Image height
 #' @param datatype is a string from RangedSummarizedExperiment assay
 #' @importFrom grDevices dev.list
+#' @importFrom SummarizedExperiment assays 
 #' @export
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
 TCGAanalyze_Preprocessing <- function(object,
@@ -54,7 +55,7 @@ TCGAanalyze_Preprocessing <- function(object,
                                      filename = NULL,
                                      width = 500,
                                      height = 500,
-                                     datatype = "raw_counts"){
+                                     datatype = names(assays(object))[1]){
 
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 
