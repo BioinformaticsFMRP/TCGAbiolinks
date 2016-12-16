@@ -90,7 +90,7 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save =
 #' @param clusterCol Column with groups to plot. This is a mandatory field, the
 #' caption will be based in this column
 #' @param legend Legend title of the figure
-#' @param cutoff xlim This parameter will be a limit in the x-axis. That means, that
+#' @param xlim This parameter will be a limit in the x-axis. That means, that
 #' patients with days_to_deth > cutoff will be set to Alive.
 #' @param main main title of the plot
 #' @param labels labels of the plot
@@ -98,17 +98,14 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save =
 #' @param xlab x axis text of the plot
 #' @param filename The name of the pdf file.
 #' @param color Define the colors of the lines.
+#' @param risk.table show or not the risk table
 #' @param width Image width
 #' @param height Image height
-#' @param print.value Print pvalue in the plot? Default: TRUE
-#' @param legend.position Legend position ("top", "right","left","bottom")
-#' @param legend.title.position  Legend title position ("top", "right","left","bottom")
-#' @param legend.ncols Number of columns of the legend
-#' @param add.legend If true, legend is created. Otherwise names will
-#' be added to the last point in the lines.
-#' @param add.points If true, shows each death at the line of survival curves
+#' @param pvalue show p-value of log-rank test
+#' @param conf.int  show confidence intervals for point estimaes of survival curves.
+#' @param ... Further arguments passed to \link[survminer]{ggsurvplot}.
 #' @param dpi Figure quality
-#' @importFrom GGally ggsurv
+#' @importFrom survminer ggsurvplot
 #' @importFrom survival survfit Surv
 #' @importFrom scales percent
 #' @importFrom ggthemes theme_base
@@ -118,11 +115,18 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save =
 #' @examples
 #' clin <- GDCquery_clinic("TCGA-LGG", type = "clinical", save.csv = FALSE)
 #' TCGAanalyze_survival(clin, clusterCol="gender")
+#' TCGAanalyze_survival(clin, clusterCol="gender", xlim = 1000)
+#' TCGAanalyze_survival(clin,
+#'                      clusterCol="gender",
+#'                      risk.table = FALSE,
+#'                      conf.int = FALSE,
+#'                      color = c("pink","blue"))
 TCGAanalyze_survival <- function(data,
                                  clusterCol = NULL,
                                  legend = "Legend",
                                  labels = NULL,
-                                 cutoff = 0,
+                                 risk.table = TRUE,
+                                 xlim = NULL,
                                  main = "Kaplan-Meier Overall Survival Curves",
                                  ylab = "Probability of survival",
                                  xlab = "Time since diagnosis (days)",
@@ -131,12 +135,9 @@ TCGAanalyze_survival <- function(data,
                                  height = 8,
                                  width = 12,
                                  dpi = 300,
-                                 legend.position = "inside",
-                                 legend.title.position = "top",
-                                 legend.ncols = 1,
-                                 add.legend = TRUE,
-                                 print.value = TRUE,
-                                 add.points = TRUE
+                                 pvalue = TRUE,
+                                 conf.int = TRUE,
+                                 ...
 ) {
     .e <- environment()
 
@@ -165,84 +166,46 @@ TCGAanalyze_survival <- function(data,
 
     # Column with groups
     data$type <- as.factor(data[,clusterCol])
-
+    data <-  data[,c("days_to_death","s","type")]
     # create the formula for survival analysis
     f.m <- formula(Surv(as.numeric(data$days_to_death),event=data$s) ~ data$type)
-    fit <- survfit(f.m, data = data)
-
-    # calculating p-value
-    pvalue <- summary(coxph(
-        Surv(as.numeric(data$days_to_death),event=data$s)
-        ~ data$type))$logtest[3]
-
-
-    surv <- ggsurv(fit, CI = "def", plot.cens = FALSE,
-                   surv.col = "gg.def",
-                   cens.col = "red", lty.est = 1,
-                   lty.ci = 2, cens.shape = 3,
-                   back.white = TRUE,
-                   xlab = xlab, ylab = ylab, main = main)
-
-    if (print.value){
-        surv <- surv + annotate("text",x = -Inf,y = -Inf, hjust = -0.1,
-                                vjust = -1.0, size = 6,
-                                label = paste0("Log-Rank P-value = ",
-                                               format(pvalue,
-                                                      scientific = TRUE,
-                                                      digits = 2)))
-    }
-
-    if (cutoff != 0) {
-        surv <- surv + ggplot2::coord_cartesian(xlim = c(0, cutoff))
-    }
+    fit <- do.call(survfit, list(formula = f.m, data = data))
 
     label.add.n <- function(x) {
         paste0(x, " (n = ",
-               nrow(data[data[,clusterCol] == x,]), ")")
+               nrow(data[data[,"type"] == x,]), ")")
     }
 
     if(is.null(labels)){
         labels <- sapply(levels(data$type),label.add.n)
     }
-    # This will be used to remove the following messsage
-    # Scale for 'colour' is already present. Adding another scale for 'colour', which will replace the existing scale.
-    suppressMessages({
-        surv <- surv + scale_colour_manual(name = legend, labels = labels,values=color)
-    })
-    if(add.points){
-        surv <- surv + geom_point(aes(colour = group),
-                                  shape = 3,size = 2)
-    }
-    surv <- surv + guides(linetype = FALSE) +
-        scale_y_continuous(labels = scales::percent) +
-        theme_base()
+    if(!is.null(xlim)) xlim <- c(0, xlim)
 
-    if(add.legend == TRUE){
-        if(legend.position == "inside"){
-            surv <- surv +  theme(legend.justification=c(1,1),
-                                  plot.title = element_text(hjust = 0.5),
-                                  legend.background = element_rect(colour = "black"),
-                                  legend.position=c(1,1))
-        } else {
-            surv <- surv +  theme(legend.position=legend.position)
-        }
-        surv <- surv +
-            guides(color=guide_legend(override.aes=list(size=3)),
-                   fill=guide_legend(ncol=legend.ncols,title.position = legend.title.position, title.hjust =0.5))
+    surv <- ggsurvplot(
+        fit,                     # survfit object with calculated statistics.
+        risk.table = risk.table,       # show risk table.
+        pval = pvalue,             # show p-value of log-rank test.
+        conf.int = conf.int,         # show confidence intervals for point estimaes of survival curves.
+        xlim = xlim,         # present narrower X axis, but not affect survival estimates.
+        main = main,
+        xlab = xlab,   # customize X axis label.
+        ggtheme = theme_light(), # customize plot and risk table with a theme.
+        legend.title = legend,
+        legend.labs = labels,    # change legend labels.
+        palette =  color # custom color palettes.
+    )
 
-    }
-
-    if(add.legend == FALSE){
-        surv <- surv +  geom_text_repel(data=ddply(surv$data, .(group), function(x) x[nrow(x), ]),
-                                        aes(label = group, color = factor(group)),
-                                        segment.color = '#555555', segment.size = 0.0,
-                                        size = 3, show.legend = FALSE) +
-            theme(legend.position="none")
-    }
 
     if(!is.null(filename)) {
-        ggsave(surv, filename = filename, width = width, height = height, dpi = dpi)
+        ggsave(surv$plot, filename = filename, width = width, height = height, dpi = dpi)
         message(paste0("File saved as: ", filename))
+        if(risk.table){
+            g1 <- ggplotGrob(surv$plot)
+            g2 <- ggplotGrob(surv$table)
+            min_ncol <- min(ncol(g2), ncol(g1))
+            g <- gridExtra::rbind.gtable(g1[, 1:min_ncol], g2[, 1:min_ncol], size="last")
+            ggsave(g, filename = filename, width = width, height = height, dpi = dpi)
+        }
     } else {
         return(surv)
     }
