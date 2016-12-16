@@ -59,5 +59,11 @@ columns for groups.
 \examples{
 clin <- GDCquery_clinic("TCGA-LGG", type = "clinical", save.csv = FALSE)
 TCGAanalyze_survival(clin, clusterCol="gender")
+TCGAanalyze_survival(clin, clusterCol="gender", xlim = 1000)
+TCGAanalyze_survival(clin,
+                     clusterCol="gender",
+                     risk.table = FALSE,
+                     conf.int = FALSE,
+                     color = c("pink","blue"))
 }
 
