@@ -752,35 +752,13 @@ getclinical <- function(proj){
     }
 }
 clinical <- TCGAbiolinks:::getGDCprojects()$project_id %>% 
-    regexPipes::grep("TCGA",value=T) %>% 
-    sort %>% 
+    regexPipes::grep("TCGA",value=T) %>% sort %>% 
     plyr::alply(1,getclinical, .progress = "text") %>% 
-    rbindlist(fill = TRUE) %>% setDF
-readr::write_csv(clinical,path = paste0("all_clin_XML.csv"))
-
-# Get all batch numbers for each patient
-library(TCGAbiolinks)
-getBatch <- function(proj){
-    message(proj)
-    while(1){
-        result = tryCatch({
-            query <- GDCquery(project = proj, data.category = "Biospecimen")
-            GDCdownload(query)
-            clinical <- GDCprepare_clinic(query, clinical.info = "admin")
-            readr::write_csv(clinical,path = paste0(proj,"_batch_from_XML.csv")) # Save the clinical data into a csv file
-            return(clinical)
-        }, error = function(e) {
-            message(paste0("Error clinical: ", proj))
-        })
-    }
-}
-biospecimen <- TCGAbiolinks:::getGDCprojects()$project_id %>% 
-    regexPipes::grep("TCGA",value=T) %>% 
-    sort %>% 
-    plyr::alply(1,getBatch, .progress = "text") %>% 
-    rbindlist(fill = TRUE) %>% setDF
-
-readr::write_csv(biospecimen,path = paste0("biospecimen_from_XML.csv"))
+    rbindlist(fill = TRUE) %>% setDF %>% subset(!duplicated(clinical))
+readr::write_csv(clinical,path = "all_clin_XML.csv")
+# result: https://drive.google.com/open?id=0B0-8N2fjttG-WWxSVE5MSGpva1U
+# Obs: this table has multiple lines for each patient, as the patient might have several followups, drug treatments,
+# new tumor events etc...
 ```
 
 
