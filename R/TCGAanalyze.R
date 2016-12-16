@@ -1039,3 +1039,25 @@ TCGAanalyze_Pathview <- function(dataDEGs, pathwayKEGG = "hsa05200" ){
                        limit      = list(gene=as.integer(max(abs(genelistDEGs)))))
   
 }
+
+
+#' @title infer gene regulatory networks
+#' @description TCGAanalyze_networkInference taking expression data as input, this will return an adjacency matrix of interactions
+#' @param data expression data, genes in columns, samples in rows
+#' @param optionMethod inference method, chose from aracne, c3net, clr and mrnet
+#' @importFrom c3net c3net
+#' @importFrom minet minet
+#' @export
+#' @return an adjacent matrix
+TCGAanalyze_networkInference <- function(data, optionMethod = "clr" ){
+  # Converting Gene symbol to gene ID
+
+  if(optionMethod == "c3net"){
+    net <- c3net(t(data))
+  }else{
+    net <- minet(data, method = optionMethod)
+  }
+  return(net)
+  
+}
+
