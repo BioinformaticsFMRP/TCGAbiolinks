@@ -23,7 +23,7 @@ Depends:
     R (>= 3.2)
 Imports:
     downloader (>= 0.4),
-    GGally,
+    survminer,
     grDevices,
     graphics,
     tibble,
