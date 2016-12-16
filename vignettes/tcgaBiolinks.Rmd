@@ -738,6 +738,7 @@ getclinical <- function(proj){
             for(i in c("admin","radiation","follow_up","drug","new_tumor_event")){
                 message(i)
                 aux <- GDCprepare_clinic(query, clinical.info = i)
+                if(is.null(aux)) next
                 # add suffix manually if it already exists
                 replicated <- which(grep("bcr_patient_barcode",colnames(aux), value = T,invert = T) %in% colnames(clinical))
                 colnames(aux)[replicated] <- paste0(colnames(aux)[replicated],".",i)
