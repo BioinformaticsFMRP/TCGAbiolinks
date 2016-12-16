@@ -347,7 +347,7 @@ references:
    year: 2016 
 
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Working with TCGAbiolinks package}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -713,6 +713,52 @@ clinical.admin <- GDCprepare_clinic(query, clinical.info = "admin")
 clinical.sample <- GDCprepare_clinic(query, clinical.info = "sample")
 clinical.slide <- GDCprepare_clinic(query, clinical.info = "slide")
 clinical.portion <- GDCprepare_clinic(query, clinical.info = "portion")
+```
+
+To get all the information for TGCA samples you can use the script below:
+```{r, eval = FALSE}
+# This code will get all clinical indexed data from TCGA
+library(TCGAbiolinks)
+library(data.table)
+clinical <- TCGAbiolinks:::getGDCprojects()$project_id %>% 
+            regexPipes::grep("TCGA",value=T) %>% 
+            sort %>% 
+            plyr::alply(1,GDCquery_clinic, .progress = "text") %>% 
+            rbindlist
+readr::write_csv(clinical,path = paste0("all_clin_indexed.csv"))
+
+# This code will get all clinical XML data from TCGA
+getclinical <- function(proj){
+    message(proj)
+    while(1){
+        result = tryCatch({
+            query <- GDCquery(project = proj, data.category = "Clinical")
+            GDCdownload(query)
+            clinical <- GDCprepare_clinic(query, clinical.info = "patient")
+            for(i in c("admin","radiation","follow_up","drug","new_tumor_event")){
+                message(i)
+                aux <- GDCprepare_clinic(query, clinical.info = i)
+                if(is.null(aux)) next
+                # add suffix manually if it already exists
+                replicated <- which(grep("bcr_patient_barcode",colnames(aux), value = T,invert = T) %in% colnames(clinical))
+                colnames(aux)[replicated] <- paste0(colnames(aux)[replicated],".",i)
+                clinical <- merge(clinical,aux,by = "bcr_patient_barcode", all = TRUE)
+            }
+            readr::write_csv(clinical,path = paste0(proj,"_clinical_from_XML.csv")) # Save the clinical data into a csv file
+            return(clinical)
+        }, error = function(e) {
+            message(paste0("Error clinical: ", proj))
+        })
+    }
+}
+clinical <- TCGAbiolinks:::getGDCprojects()$project_id %>% 
+    regexPipes::grep("TCGA",value=T) %>% sort %>% 
+    plyr::alply(1,getclinical, .progress = "text") %>% 
+    rbindlist(fill = TRUE) %>% setDF %>% subset(!duplicated(clinical))
+readr::write_csv(clinical,path = "all_clin_XML.csv")
+# result: https://drive.google.com/open?id=0B0-8N2fjttG-WWxSVE5MSGpva1U
+# Obs: this table has multiple lines for each patient, as the patient might have several followups, drug treatments,
+# new tumor events etc...
 ```
 
 
@@ -1807,7 +1853,7 @@ grid.raster(img)
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 
 CancerProject <- "TCGA-BRCA"
-DataDirectory <- paste0("GDC_",gsub("-","_",CancerProject))
+DataDirectory <- paste0("../GDC/",gsub("-","_",CancerProject))
 FileNameData <- paste0(DataDirectory, "_","HTSeq_Counts",".rda")
 
 query <- GDCquery(project = CancerProject,
@@ -1826,19 +1872,9 @@ dataSmTP_short <- dataSmTP[1:10]
 dataSmNT_short <- dataSmNT[1:10]
 
 queryDown <- GDCquery(project = CancerProject, 
-                      data.category = "Gene expression",
-                      data.type = "Gene expression quantification",
-                      platform = "Illumina HiSeq", 
-                      file.type = "results",
-                      barcode = c(dataSmTP_short, dataSmNT_short),
-                      experimental.strategy = "RNA-Seq",
-                      legacy = TRUE)
-
-queryDown <- GDCquery(project = CancerProject, 
                       data.category = "Transcriptome Profiling",
                       data.type = "Gene Expression Quantification", 
                       workflow.type = "HTSeq - Counts", 
-                      #file.type = "results",
                       barcode = c(dataSmTP_short, dataSmNT_short))
                     
 GDCdownload(query = queryDown,
@@ -1849,9 +1885,91 @@ dataPrep <- GDCprepare(query = queryDown,
                        directory =  DataDirectory,
                        save.filename = FileNameData)
 
+dataPrep <- TCGAanalyze_Preprocessing(object = dataPrep, 
+                                      cor.cut = 0.6)                      
+
+dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
+                                      geneInfo = geneInfoHT,
+                                      method = "gcContent") 
+
+boxplot(dataPrep, outline = FALSE)
+
+boxplot(dataNorm, outline = FALSE)
+
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
+                                  method = "quantile", 
+                                  qnt.cut =  0.25)   
+
+dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmTP_short],
+                            mat2 = dataFilt[,dataSmNT_short],
+                            Cond1type = "Normal",
+                            Cond2type = "Tumor",
+                            fdr.cut = 0.01 ,
+                            logFC.cut = 1,
+                            method = "glmLRT")  
+
 ```
 
 
+## miRNA expression data: Downstream analysis BRCA
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+require(TCGAbiolinks)
+
+CancerProject <- "TCGA-BRCA"
+DataDirectory <- paste0("../GDC/",gsub("-","_",CancerProject))
+FileNameData <- paste0(DataDirectory, "_","miRNA_gene_quantification",".rda")
+
+query.miR <- GDCquery(project = CancerProject, 
+                  data.category = "Gene expression",
+                  data.type = "miRNA gene quantification",
+                  file.type = "hg19.mirna",
+                  legacy = TRUE)
+
+samplesDown.miR <- query.miR$results[[1]]$cases
+
+dataSmTP.miR <- TCGAquery_SampleTypes(barcode = samplesDown.miR,
+                                  typesample = "TP")
+
+dataSmNT.miR <- TCGAquery_SampleTypes(barcode = samplesDown.miR,
+                                  typesample = "NT")
+dataSmTP_short.miR <- dataSmTP.miR[1:10]
+dataSmNT_short.miR <- dataSmNT.miR[1:10]
+
+queryDown.miR <- GDCquery(project = CancerProject, 
+                      data.category = "Gene expression",
+                      data.type = "miRNA gene quantification",
+                      file.type = "hg19.mirna",
+                      legacy = TRUE,
+                      barcode = c(dataSmTP_short.miR, dataSmNT_short.miR))
+
+GDCdownload(query = queryDown.miR,
+            directory = DataDirectory)
+
+dataAssy.miR <- GDCprepare(query = queryDown.miR, 
+                           save = TRUE, 
+                           save.filename = FileNameData, 
+                           summarizedExperiment = TRUE,
+                           directory =DataDirectory )
+rownames(dataAssy.miR) <- dataAssy.miR$miRNA_ID
+
+# using read_count's data 
+read_countData <-  colnames(dataAssy.miR)[grep("count", colnames(dataAssy.miR))]
+dataAssy.miR <- dataAssy.miR[,read_countData]
+colnames(dataAssy.miR) <- gsub("read_count_","", colnames(dataAssy.miR))
+
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataAssy.miR,
+                                  method = "quantile", 
+                                  qnt.cut =  0.25)   
+
+dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmNT_short.miR],
+                            mat2 = dataFilt[,dataSmTP_short.miR],
+                            Cond1type = "Normal",
+                            Cond2type = "Tumor",
+                            fdr.cut = 0.01 ,
+                            logFC.cut = 1,
+                            method = "glmLRT")  
+
+```
 
 # TCGA Downstream Analysis: Case Studies
 
