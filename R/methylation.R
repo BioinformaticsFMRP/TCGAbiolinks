@@ -115,6 +115,12 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save =
 #' @examples
 #' clin <- GDCquery_clinic("TCGA-LGG", type = "clinical", save.csv = FALSE)
 #' TCGAanalyze_survival(clin, clusterCol="gender")
+#' TCGAanalyze_survival(clin, clusterCol="gender", xlim = 1000)
+#' TCGAanalyze_survival(clin,
+#'                      clusterCol="gender",
+#'                      risk.table = FALSE,
+#'                      conf.int = FALSE,
+#'                      color = c("pink","blue"))
 TCGAanalyze_survival <- function(data,
                                  clusterCol = NULL,
                                  legend = "Legend",
@@ -173,6 +179,8 @@ TCGAanalyze_survival <- function(data,
     if(is.null(labels)){
         labels <- sapply(levels(data$type),label.add.n)
     }
+    if(!is.null(xlim)) xlim <- c(0, xlim)
+
     surv <- ggsurvplot(
         fit,                     # survfit object with calculated statistics.
         risk.table = risk.table,       # show risk table.
