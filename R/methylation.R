@@ -90,14 +90,13 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save =
 #' @param clusterCol Column with groups to plot. This is a mandatory field, the
 #' caption will be based in this column
 #' @param legend Legend title of the figure
-#' @param xlim This parameter will be a limit in the x-axis. That means, that
-#' patients with days_to_deth > cutoff will be set to Alive.
+#' @param xlim x axis limits e.g. xlim = c(0, 1000). Present narrower X axis, but not affect survival estimates.
 #' @param main main title of the plot
 #' @param labels labels of the plot
 #' @param ylab y axis text of the plot
 #' @param xlab x axis text of the plot
 #' @param filename The name of the pdf file.
-#' @param color Define the colors of the lines.
+#' @param color Define the colors/Pallete for lines.
 #' @param risk.table show or not the risk table
 #' @param width Image width
 #' @param height Image height
@@ -122,6 +121,12 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save =
 #'                      risk.table = FALSE,
 #'                      conf.int = FALSE,
 #'                      color = c("pink","blue"))
+#' TCGAanalyze_survival(clin,
+#'                      clusterCol="gender",
+#'                      risk.table = FALSE,
+#'                      xlim = c(100,1000),
+#'                      conf.int = FALSE,
+#'                      color = c("Dark2"))
 TCGAanalyze_survival <- function(data,
                                  clusterCol = NULL,
                                  legend = "Legend",
@@ -180,20 +185,20 @@ TCGAanalyze_survival <- function(data,
     if(is.null(labels)){
         labels <- sapply(levels(data$type),label.add.n)
     }
-    if(!is.null(xlim)) xlim <- c(0, xlim)
 
     surv <- ggsurvplot(
-        fit,                     # survfit object with calculated statistics.
-        risk.table = risk.table,       # show risk table.
+        fit,                       # survfit object with calculated statistics.
+        risk.table = risk.table,   # show risk table.
         pval = pvalue,             # show p-value of log-rank test.
-        conf.int = conf.int,         # show confidence intervals for point estimaes of survival curves.
-        xlim = xlim,         # present narrower X axis, but not affect survival estimates.
-        main = main,
-        xlab = xlab,   # customize X axis label.
-        ggtheme = theme_light(), # customize plot and risk table with a theme.
-        legend.title = legend,
-        legend.labs = labels,    # change legend labels.
-        palette =  color # custom color palettes.
+        conf.int = conf.int,       # show confidence intervals for point estimaes of survival curves.
+        xlim = xlim,               # present narrower X axis, but not affect survival estimates.
+        main = main,               # Title
+        xlab = xlab,               # customize X axis label.
+        ggtheme = theme_light(),   # customize plot and risk table with a theme.
+        legend.title = legend,     # Legend title
+        legend.labs = labels,      # change legend labels.
+        palette =  color,          # custom color palettes.
+        ...
     )
 
 
