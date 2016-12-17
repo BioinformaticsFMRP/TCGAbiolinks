@@ -1322,8 +1322,7 @@ The arguments of `TCGAanalyze_survival` are:
 *  **clusterCol** Column with groups to plot. This is a mandatory field, 
 the caption will be based in this column
 *  **legend** Legend title of the figure
-*  **xlim** xlim This parameter will be a limit in the x-axis. 
-That means, that patients with days_to_deth > cutoff will be set to Alive.
+*  **xlim** xlim x axis limits e.g. xlim = c(0, 1000). Present narrower X axis, but not affect survival estimates. 
 *  **main**	 main title of the plot
 *  **ylab**	y-axis text of the plot
 *  **xlab** x-axis text of the plot
@@ -1708,7 +1707,7 @@ data <- tryCatch({
             GDCdownload(query, method = "api", chunks.per.download = 2)
             GDCdownload(query, method = "api")
             data <- GDCprepare(query)
-             data
+            data
     }, error = function(e) {
          nrows <- 200; ncols <- 21
          counts <- matrix(runif(nrows * ncols, 0, 1), nrows)
