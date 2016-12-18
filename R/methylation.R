@@ -963,8 +963,8 @@ TCGAanalyze_DMR <- function(data,
     if(class(data)!= class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
         stop(paste0("Sorry, but I'm expecting a Summarized Experiment object, but I got a: ", class(data)))
     }
-    # Check if object has NAs
-    if(any(rowSums(!is.na(assay(data))))== 0){
+    # Check if object has NAs for all samples
+    if(any(rowSums(!is.na(assay(data)))== 0)){
         stop(paste0("Sorry, but we found some probes with NA for all samples in your data, please either remove/or replace them"))
     }
 
@@ -1025,11 +1025,13 @@ TCGAanalyze_DMR <- function(data,
     }
     if (!(pcol %in% colnames(values(data))) | overwrite) {
         if(calculate.pvalues.probes == "all"){
+            suppressWarnings({
             data <- calculate.pvalues(data, groupCol, group1, group2,
                                       paired = paired,
                                       method = adj.method,
                                       cores = cores,
                                       save = save)
+            })
         } else  if(calculate.pvalues.probes == "differential"){
             message(paste0("Caculating p-values only for probes with a difference of mean methylation equal or higher than ", diffmean.cut))
             print(diffcol)
