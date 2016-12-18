@@ -230,7 +230,7 @@ GDCquery <- function(project,
     results$tissue.definition <- expandBarcodeInfo(barcodes)$tissue.definition
 
     # Filter by barcode
-    if(!any(is.na(barcode))) results <- results[sapply(barcode, function(x) grep(x, results$cases,ignore.case = TRUE)),]
+    if(!any(is.na(barcode))) results <- results[unlist(sapply(barcode, function(x) grep(x, results$cases,ignore.case = TRUE))),]
     # Filter by sample.type
     if(!any(is.na(sample.type))) {
         if(!any(tolower(results$tissue.definition) %in% tolower(sample.type))) {
