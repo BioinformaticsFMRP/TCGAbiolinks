@@ -342,7 +342,7 @@ TCGAvisualize_meanMethylation <- function(data,
     data.summary <- ddply(df, .(groups), summarize,
                           Mean=mean(mean), Median=median(mean),
                           Max = max(mean),Min=min(mean))
-    print(kable(data.summary))
+    print(data.summary)
     message("==================== END DATA Summary ====================")
 
     #comb2by2 <- combinations(length(levels(droplevels(df$groups))),
@@ -365,7 +365,7 @@ TCGAvisualize_meanMethylation <- function(data,
             )
         }
         message("==================== T test results ====================")
-        print(kable(mat.pvalue))
+        print(mat.pvalue)
         message("==================== END T test results ====================")
 
     }
@@ -442,15 +442,8 @@ TCGAvisualize_meanMethylation <- function(data,
     p <- p + ylab(ylab) + xlab(xlab) + labs(title = title) +
         labs(shape=subgroup.legend, color=group.legend) +
         theme_minimal() +
-        theme(axis.title.x = element_text(face = "bold", size = 20),
-              axis.text.x = axis.text.x,
-              axis.title.y = element_text(face = "bold",
-                                          size = 20),
-              axis.text.y = element_text(size = 16),
-              plot.title = element_text(face = "bold", size = 16, hjust = 0.5),
-              legend.text = element_text(size = 14),
-              legend.title = element_text(size = 14),
-              axis.text= element_text(size = 22),
+        theme(axis.text.x = axis.text.x,
+              plot.title = element_text(face = "bold", hjust = 0.5),
               legend.position=legend.position,
               legend.key = element_rect(colour = 'white')) +
         guides(fill=guide_legend(ncol=legend.ncols,title.position = legend.title.position, title.hjust =0.5))
@@ -467,7 +460,7 @@ TCGAvisualize_meanMethylation <- function(data,
                                                 digits = 2)))
     }
     if(!is.null(y.limits)){
-        p <- p + expand_limits(x = 0, y = y.limits )
+        p <- p + expand_limits(y = y.limits )
     }
 
     # saving box plot to analyse it
