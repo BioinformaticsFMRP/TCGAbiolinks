@@ -94,7 +94,8 @@ GDCprepare <- function(query,
     }  else if(grepl("Protein expression",query$data.category,ignore.case = TRUE)) {
         data <- readProteinExpression(files, query$results[[1]]$cases)
     }  else if(grepl("Simple Nucleotide Variation",query$data.category,ignore.case = TRUE)) {
-        if(query$data.type == "Masked Somatic Mutation") data <- readSimpleNucleotideVariationMaf(files)
+        if(grepl("Masked Somatic Mutation",query$data.type,ignore.case = TRUE) | source == "legacy")
+            suppressWarnings(data <- readSimpleNucleotideVariationMaf(files))
     }  else if(grepl("Clinical|Biospecimen", query$data.category, ignore.case = TRUE)){
         message("Mot working yet")
         # data <- readClinical(files, query$results[[1]]$cases)
