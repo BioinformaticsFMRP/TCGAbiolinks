@@ -23,8 +23,7 @@ caption will be based in this column}
 
 \item{risk.table}{show or not the risk table}
 
-\item{xlim}{This parameter will be a limit in the x-axis. That means, that
-patients with days_to_deth > cutoff will be set to Alive.}
+\item{xlim}{x axis limits e.g. xlim = c(0, 1000). Present narrower X axis, but not affect survival estimates.}
 
 \item{main}{main title of the plot}
 
@@ -34,7 +33,7 @@ patients with days_to_deth > cutoff will be set to Alive.}
 
 \item{filename}{The name of the pdf file.}
 
-\item{color}{Define the colors of the lines.}
+\item{color}{Define the colors/Pallete for lines.}
 
 \item{height}{Image height}
 
@@ -65,5 +64,11 @@ TCGAanalyze_survival(clin,
                      risk.table = FALSE,
                      conf.int = FALSE,
                      color = c("pink","blue"))
+TCGAanalyze_survival(clin,
+                     clusterCol="gender",
+                     risk.table = FALSE,
+                     xlim = c(100,1000),
+                     conf.int = FALSE,
+                     color = c("Dark2"))
 }
 
