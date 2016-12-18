@@ -51,6 +51,10 @@ test_that("GDCquery can filter by barcode", {
                       barcode = barcode)
     expect_true(all(sort(barcode) == sort(unique(query$results[[1]]$cases))))
 
+    # Will work if barcode was not found
+    query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",
+                           barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"))
+    expect_true(!all(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q") %in% query$results[[1]]$cases))
 })
 
 test_that("GDCquery can filter copy number from legacy data by file type. Case: nocnv_hg18", {
