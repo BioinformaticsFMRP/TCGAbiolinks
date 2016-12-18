@@ -307,21 +307,21 @@ getGDCquery <- function(project, data.category, data.type, legacy){
 }
 
 expandBarcodeInfo <- function(barcode){
-    if(all(grepl("TARGET",barcode))) {
+    if(any(grepl("TARGET",barcode))) {
         ret <- DataFrame(barcode = barcode,
                          code = substr(barcode, 8, 9),
                          case.unique.id = substr(barcode, 11, 16),
                          tissue.code = substr(barcode, 18, 19),
                          nucleic.acid.code = substr(barcode, 24, 24))
-        ret <- merge(ret,getBarcodeDefinition(), by = "tissue.code", sort = FALSE)
+        ret <- merge(ret,getBarcodeDefinition(), by = "tissue.code", sort = FALSE, all.x = TRUE)
         ret <- ret[match(barcode,ret$barcode),]
     }
-    if(all(grepl("TCGA",barcode))) {
+    if(any(grepl("TCGA",barcode))) {
         ret <- data.frame(barcode = barcode,
                           patient = substr(barcode, 1, 12),
                           sample = substr(barcode, 1, 16),
                           tissue.code = substr(barcode, 14, 15))
-        ret <- merge(ret,getBarcodeDefinition(), by = "tissue.code", sort = FALSE)
+        ret <- merge(ret,getBarcodeDefinition(), by = "tissue.code", sort = FALSE, all.x = TRUE)
         ret <- ret[match(barcode,ret$barcode),]
     }
     return(ret)
