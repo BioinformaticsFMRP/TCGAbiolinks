@@ -221,7 +221,7 @@ GDCquery <- function(project,
                      "[:alnum:]{6}-[:alnum:]{2}-[:alnum:]{6}-[:alnum:]{3}-[:alnum:]{3}",sep = "|")
     }
     barcodes <- unlist(lapply(results$cases,function(x) {
-        str <- str_extract(x,pat);
+        str <- str_extract_all(x,pat) %>% unlist %>% paste(collapse = ",")
         ifelse(all(is.na(str)), NA,str[!is.na(str)])
     }))
 
@@ -230,7 +230,7 @@ GDCquery <- function(project,
     results$tissue.definition <- expandBarcodeInfo(barcodes)$tissue.definition
 
     # Filter by barcode
-    if(!any(is.na(barcode))) results <- results[substr(results$cases,1,str_length(barcode[1])) %in% barcode,]
+    if(!any(is.na(barcode))) results <- results[unlist(sapply(barcode, function(x) grep(x, results$cases,ignore.case = TRUE))),]
     # Filter by sample.type
     if(!any(is.na(sample.type))) {
         if(!any(tolower(results$tissue.definition) %in% tolower(sample.type))) {
