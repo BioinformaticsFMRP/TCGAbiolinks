@@ -165,25 +165,29 @@ TCGAanalyze_Preprocessing <- function(object,
 #' @param ThreshTop is a quantile threshold to identify samples with high expression of a gene
 #' @param ThreshDown is a quantile threshold to identify samples with low expression of a gene
 #' @param p.cut p.values threshold. Default: 0.05
+#' @param group1 a string containing the barcode list of the samples in in control group
+#' @param group2 a string containing the barcode list of the samples in in disease group
 #' @importFrom survival Surv survdiff survfit
 #' @export
 #' @return table with survival genes pvalues from KM.
 #' @examples
 #'  clinical_patient_Cancer <- GDCquery_clinic("TCGA-BRCA","clinical")
 #'  dataBRCAcomplete <- log2(BRCA_rnaseqv2)
-#'  # Selecting only 10 genes for example
-#'  dataBRCAcomplete <- dataBRCAcomplete[1:10,]
+#'  # Selecting only 100 genes for example
+#'  dataBRCAcomplete <- dataBRCAcomplete[1:100,]
+#'  dataGE <- dataBRCAcomplete
+#'  group1 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
+#'  group2 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
+#'  
 #'  tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,dataBRCAcomplete,
 #'  Genelist = rownames(dataBRCAcomplete), Survresult = FALSE,ThreshTop=0.67,ThreshDown=0.33)
 TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
-                                 ThreshTop=0.67, ThreshDown=0.33,p.cut=0.05){
+                                 ThreshTop=0.67, ThreshDown=0.33,p.cut=0.05,
+                                 group1, group2){
 
-
-    samplesNT <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
-    samplesTP <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
     Genelist <- intersect(rownames(dataGE),Genelist)
-    dataCancer <- dataGE[Genelist,samplesTP]
-    dataNormal <- dataGE[Genelist,samplesNT]
+    dataCancer <- dataGE[Genelist,group2]
+    dataNormal <- dataGE[Genelist,group1]
     colnames(dataCancer)  <- substr(colnames(dataCancer),1,12)
     cfu<-clinical_patient[clinical_patient[,"bcr_patient_barcode"] %in% substr(colnames(dataCancer),1,12),]
     if("days_to_last_followup" %in% colnames(cfu)) colnames(cfu)[grep("days_to_last_followup",colnames(cfu))] <- "days_to_last_follow_up"
@@ -357,6 +361,14 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
     tabSurvKM <- tabSurvKM[,-1]
     tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing=FALSE),]
 
+    #'  group1 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
+    #'  group2 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
+    
+    colnames(tabSurvKM) <- gsub("Cancer","Group2",colnames(tabSurvKM))
+    colnames(tabSurvKM) <- gsub("Tumor","Group2",colnames(tabSurvKM))
+    colnames(tabSurvKM) <- gsub("Normal","Group1",colnames(tabSurvKM))
+    
+    
     return(tabSurvKM)
 }
 
