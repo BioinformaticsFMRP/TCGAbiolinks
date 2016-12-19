@@ -2028,13 +2028,17 @@ TCGAanalyze_SurvivalKM function; starting with 3,390 DEGs genes we found 555
 significantly genes with p.value <0.05. 
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+
+group1 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
+group2 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
+
 dataSurv <- TCGAanalyze_SurvivalKM(clinical_patient = dataClin,
                                    dataGE = dataFilt,
                                    Genelist = rownames(dataDEGs),
                                    Survresult = FALSE,
                                    ThreshTop = 0.67,
                                    ThreshDown = 0.33,
-                                   p.cut = 0.05)
+                                   p.cut = 0.05, group1, group2)
 ```
 
 Cox-regression analysis was used to compute survival multivariate curves, and cox 
