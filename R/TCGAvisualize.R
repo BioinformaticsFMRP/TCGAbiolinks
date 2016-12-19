@@ -207,6 +207,9 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
 #' @param dataDEGsFiltLevel table with DEGs, log Fold Change (FC), false discovery rate (FDR),
 #' the gene expression level, etc, from function TCGAanalyze_LevelTab.
 #' @param ntopgenes number of DEGs genes to plot in PCA
+#' @param group1 a string containing the barcode list of the samples in in control group
+#' @param group2 a string containing the barcode list of the samples in in disease group
+#' the name of the group
 #' @import ggplot2
 #' @export
 #' @return principal components analysis (PCA) plot of PC1 and PC2
@@ -217,14 +220,17 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
 #' # quantile filter of genes
 #' dataFilt <- TCGAanalyze_Filtering(tabDF = dataBRCA, method = "quantile", qnt.cut =  0.25)
 #' # Principal Component Analysis plot for ntop selected DEGs
-#' pca <- TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
+#'     # selection of normal samples "NT" 
+#'     group1 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
+#'     # selection of normal samples "TP" 
+#'     group2 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
+#' pca <- TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200, group1, group2)
 #' if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
-TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
+TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes,group1, group2) {
     ComparisonSelected <- "Normal vs Tumor"
     TitlePlot <- paste0("PCA ", "top ", ntopgenes,
                         " Up and down diff.expr genes between ",
                         ComparisonSelected)
-
 
     dataFilt <- dataFilt[!duplicated(GenesCutID(rownames(dataFilt))),]
     rownames(dataFilt) <- GenesCutID(rownames(dataFilt))
@@ -235,21 +241,14 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes) {
     color1 <- "blue"
     color2 <- "red"
 
-    # selection of normal samples "NT"
-    samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt),
-                                       typesample = c("NT"))
-    # selection of tumor samples "TP"
-    samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt),
-                                       typesample = c("TP"))
-
-    nsample1 <- length(samplesNT)
-    nsample2 <- length(samplesTP)
+    nsample1 <- length(group1)
+    nsample2 <- length(group2)
 
     #sampleColors <- rep(c(color1,color2), c(nsample1, nsample2))
-    #sampleColors <- rep(c("blue","red"), c(length(samplesNT),
-    #                     length(samplesTP)))
-    sampleColors <- c(rep("blue", length(samplesNT)),
-                      rep("red", length(samplesTP)))
+    #sampleColors <- rep(c("blue","red"), c(length(group1),
+    #                     length(group2)))
+    sampleColors <- c(rep("blue", length(group1)),
+                      rep("red", length(group2)))
 
 
     names(sampleColors) <- colnames(expr2)
