@@ -4,7 +4,7 @@
 \alias{TCGAvisualize_PCA}
 \title{Principal components analysis (PCA) plot}
 \usage{
-TCGAvisualize_PCA(dataFilt, dataDEGsFiltLevel, ntopgenes)
+TCGAvisualize_PCA(dataFilt, dataDEGsFiltLevel, ntopgenes, group1, group2)
 }
 \arguments{
 \item{dataFilt}{A filtered dataframe or numeric matrix where each row represents a gene,
@@ -14,6 +14,11 @@ each column represents a sample from function TCGAanalyze_Filtering}
 the gene expression level, etc, from function TCGAanalyze_LevelTab.}
 
 \item{ntopgenes}{number of DEGs genes to plot in PCA}
+
+\item{group1}{a string containing the barcode list of the samples in group1}
+
+\item{group2}{a string containing the barcode list of the samples in group2
+the name of the group}
 }
 \value{
 principal components analysis (PCA) plot of PC1 and PC2
@@ -29,7 +34,11 @@ method = "geneLength")
 # quantile filter of genes
 dataFilt <- TCGAanalyze_Filtering(tabDF = dataBRCA, method = "quantile", qnt.cut =  0.25)
 # Principal Component Analysis plot for ntop selected DEGs
-pca <- TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
+    # selection of normal samples "NT" 
+    group1 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
+    # selection of normal samples "NT" 
+    group2 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
+pca <- TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200, group1, group2)
 if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 }
 
