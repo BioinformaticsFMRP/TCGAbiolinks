@@ -1550,6 +1550,9 @@ The arguments of this function are:
 * **dataFilt** The expression matrix after normalization and quantile filter
 * **dataDEGsFiltLevel** The TCGAanalyze_LevelTab output
 * **ntopgenes** number of DEGs genes to plot in PCA
+* ** group1 a string containing the barcode list of the samples in control group
+* ** group2 a string containing the barcode list of the samples in disease group
+
 
 ```{r, eval = FALSE}
 # normalization of genes
@@ -1560,8 +1563,13 @@ dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
                                   method = "quantile", 
                                   qnt.cut =  0.25)
 
+# selection of normal samples "NT" 
+group1 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
+# selection of normal samples "TP" 
+group2 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
+
 # Principal Component Analysis plot for ntop selected DEGs
-TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
+ pca <- TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200, group1, group2)
 ```
 
 The result is shown below:
