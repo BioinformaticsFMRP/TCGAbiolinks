@@ -15,9 +15,9 @@ the gene expression level, etc, from function TCGAanalyze_LevelTab.}
 
 \item{ntopgenes}{number of DEGs genes to plot in PCA}
 
-\item{group1}{a string containing the barcode list of the samples in group1}
+\item{group1}{a string containing the barcode list of the samples in in control group}
 
-\item{group2}{a string containing the barcode list of the samples in group2
+\item{group2}{a string containing the barcode list of the samples in in disease group
 the name of the group}
 }
 \value{
@@ -36,7 +36,7 @@ dataFilt <- TCGAanalyze_Filtering(tabDF = dataBRCA, method = "quantile", qnt.cut
 # Principal Component Analysis plot for ntop selected DEGs
     # selection of normal samples "NT" 
     group1 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
-    # selection of normal samples "NT" 
+    # selection of normal samples "TP" 
     group2 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 pca <- TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200, group1, group2)
 if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
