@@ -5,7 +5,7 @@
 \title{survival analysis (SA) univariate with Kaplan-Meier (KM) method.}
 \usage{
 TCGAanalyze_SurvivalKM(clinical_patient, dataGE, Genelist, Survresult,
-  ThreshTop = 0.67, ThreshDown = 0.33, p.cut = 0.05)
+  ThreshTop = 0.67, ThreshDown = 0.33, p.cut = 0.05, group1, group2)
 }
 \arguments{
 \item{clinical_patient}{is a data.frame using function 'clinic' with information
@@ -23,6 +23,10 @@ days_to_last_follow_up , vital_status, etc}
 \item{ThreshDown}{is a quantile threshold to identify samples with low expression of a gene}
 
 \item{p.cut}{p.values threshold. Default: 0.05}
+
+\item{group1}{a string containing the barcode list of the samples in in control group}
+
+\item{group2}{a string containing the barcode list of the samples in in disease group}
 }
 \value{
 table with survival genes pvalues from KM.
@@ -47,9 +51,15 @@ from survival package
 \examples{
  clinical_patient_Cancer <- GDCquery_clinic("TCGA-BRCA","clinical")
  dataBRCAcomplete <- log2(BRCA_rnaseqv2)
- # Selecting only 10 genes for example
- dataBRCAcomplete <- dataBRCAcomplete[1:10,]
+ # Selecting only 100 genes for example
+ dataBRCAcomplete <- dataBRCAcomplete[1:100,]
+ dataGE <- dataBRCAcomplete
+ group1 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
+ group2 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
+ 
  tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,dataBRCAcomplete,
  Genelist = rownames(dataBRCAcomplete), Survresult = FALSE,ThreshTop=0.67,ThreshDown=0.33)
+ group1 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
+ group2 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
 }
 
