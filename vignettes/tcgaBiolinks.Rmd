@@ -597,7 +597,7 @@ acc.mutect.maf <- GDCquery_Maf("ACC", pipelines = "mutect")
 This mutation data can be visualized through a oncoprint from the  [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) package [@ref23].
 
 ```{r, eval=FALSE, message=FALSE, warning=FALSE}
-mut <- GDCquery_Maf("ACC", pipelines = "muse")
+mut <- GDCquery_Maf("ACC", pipelines = "mutect2")
 clin <- GDCquery_clinic("TCGA-ACC","clinical")
 clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_stage","race","vital_status")]
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
@@ -605,7 +605,7 @@ TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
                         annotation = clin,
                         color=c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown"),
                         rows.font.size=10,
-                        width = 5,
+                        width = 10,
                         heatmap.legend.side = "right",
                         dist.col = 0,
                         label.font.size = 10)
