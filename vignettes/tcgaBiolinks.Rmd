@@ -597,7 +597,7 @@ acc.mutect.maf <- GDCquery_Maf("ACC", pipelines = "mutect")
 This mutation data can be visualized through a oncoprint from the  [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) package [@ref23].
 
 ```{r, eval=FALSE, message=FALSE, warning=FALSE}
-mut <- GDCquery_Maf("ACC", pipelines = "muse")
+mut <- GDCquery_Maf("ACC", pipelines = "mutect2")
 clin <- GDCquery_clinic("TCGA-ACC","clinical")
 clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_stage","race","vital_status")]
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
@@ -605,7 +605,7 @@ TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
                         annotation = clin,
                         color=c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown"),
                         rows.font.size=10,
-                        width = 5,
+                        width = 10,
                         heatmap.legend.side = "right",
                         dist.col = 0,
                         label.font.size = 10)
@@ -1550,6 +1550,9 @@ The arguments of this function are:
 * **dataFilt** The expression matrix after normalization and quantile filter
 * **dataDEGsFiltLevel** The TCGAanalyze_LevelTab output
 * **ntopgenes** number of DEGs genes to plot in PCA
+* ** group1 a string containing the barcode list of the samples in control group
+* ** group2 a string containing the barcode list of the samples in disease group
+
 
 ```{r, eval = FALSE}
 # normalization of genes
@@ -1560,8 +1563,13 @@ dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
                                   method = "quantile", 
                                   qnt.cut =  0.25)
 
+# selection of normal samples "NT" 
+group1 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
+# selection of normal samples "TP" 
+group2 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
+
 # Principal Component Analysis plot for ntop selected DEGs
-TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200)
+ pca <- TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200, group1, group2)
 ```
 
 The result is shown below:
@@ -2020,13 +2028,17 @@ TCGAanalyze_SurvivalKM function; starting with 3,390 DEGs genes we found 555
 significantly genes with p.value <0.05. 
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+
+group1 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
+group2 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
+
 dataSurv <- TCGAanalyze_SurvivalKM(clinical_patient = dataClin,
                                    dataGE = dataFilt,
                                    Genelist = rownames(dataDEGs),
                                    Survresult = FALSE,
                                    ThreshTop = 0.67,
                                    ThreshDown = 0.33,
-                                   p.cut = 0.05)
+                                   p.cut = 0.05, group1, group2)
 ```
 
 Cox-regression analysis was used to compute survival multivariate curves, and cox 
