@@ -152,6 +152,11 @@ GDCquery <- function(project,
 
     results <- json$data$hits
 
+    if(is.null(dim(results))) {
+        message("Sorry! There is no result for your query. Please check in GDC the data available")
+        return (NULL)
+    }
+
     if(!is.na(platform)){
         if(!(platform %in% results$platform)) {
             stop("Please set a valid platform argument from the list below:\n  => ", paste(unique(results$platform), collapse = "\n  => "))
