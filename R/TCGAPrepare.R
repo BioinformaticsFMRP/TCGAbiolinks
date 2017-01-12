@@ -587,24 +587,27 @@ colDataPrepare <- function(barcode){
         ret$project_id <- as.character(aux)
     }
     # na.omit should not be here, exceptional case
+    out <- NULL
+    for(proj in na.omit(unique(ret$project_id))){
+        if(grepl("TCGA",proj,ignore.case = TRUE)) {
+            message(" => Adding subtype information to samples")
+            tumor <- gsub("TCGA-","",proj)
+            if (grepl("acc|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc|all",
+                      tumor,ignore.case = TRUE)) {
+                subtype <- TCGAquery_subtype(tumor)
+                colnames(subtype) <- paste0("subtype_", colnames(subtype))
 
-    if(grepl("TCGA",na.omit(unique(ret$project_id)))) {
-        message(" => Adding subtype information to samples")
-        tumor <- gsub("TCGA-","",na.omit(unique(ret$project_id)))
-        if (grepl("acc|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc|all",
-                  tumor,ignore.case = TRUE)) {
-            subtype <- TCGAquery_subtype(tumor)
-            colnames(subtype) <- paste0("subtype_", colnames(subtype))
-
-            if(all(str_length(subtype$subtype_patient) == 12)){
-                # Subtype information were to primary tumor in priority
-                subtype$sample <- paste0(subtype$subtype_patient,"-01A")
+                if(all(str_length(subtype$subtype_patient) == 12)){
+                    # Subtype information were to primary tumor in priority
+                    subtype$sample <- paste0(subtype$subtype_patient,"-01A")
+                }
+                ret.aux <- ret[ret$sample %in% subtype$sample,]
+                ret.aux <- merge(ret.aux,subtype, by = "sample", all.x = TRUE)
+                out <- rbind.fill(out,ret.aux)
             }
-
-            ret <- merge(ret,subtype, by = "sample", all.x = TRUE)
-
         }
     }
+    ret <- out
 
     # Add purity information from http://www.nature.com/articles/ncomms9971
     # purity  <- getPurityinfo()
