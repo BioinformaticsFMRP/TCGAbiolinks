@@ -607,7 +607,9 @@ colDataPrepare <- function(barcode){
             }
         }
     }
-    ret <- out
+    # We need to put together the samples with subtypes with samples without subytpes
+    ret.aux <- ret[!ret$sample %in% out$sample,]
+    ret <- rbind.fill(out,ret.aux)
 
     # Add purity information from http://www.nature.com/articles/ncomms9971
     # purity  <- getPurityinfo()
