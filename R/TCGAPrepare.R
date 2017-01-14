@@ -586,6 +586,8 @@ colDataPrepare <- function(barcode){
         aux <- aux[aux$disease_type == unique(ret$disease_type),2]
         ret$project_id <- as.character(aux)
     }
+    # remove letter from 01A 01B etc
+    ret$sample.aux <- substr(ret$sample,1,15)
     # na.omit should not be here, exceptional case
     out <- NULL
     for(proj in na.omit(unique(ret$project_id))){
@@ -599,10 +601,10 @@ colDataPrepare <- function(barcode){
 
                 if(all(str_length(subtype$subtype_patient) == 12)){
                     # Subtype information were to primary tumor in priority
-                    subtype$sample <- paste0(subtype$subtype_patient,"-01A")
+                    subtype$sample.aux <- paste0(subtype$subtype_patient,"-01")
                 }
-                ret.aux <- ret[ret$sample %in% subtype$sample,]
-                ret.aux <- merge(ret.aux,subtype, by = "sample", all.x = TRUE)
+                ret.aux <- ret[ret$sample.aux %in% subtype$sample.aux,]
+                ret.aux <- merge(ret.aux,subtype, by = "sample.aux", all.x = TRUE)
                 out <- rbind.fill(out,ret.aux)
             }
         }
@@ -610,7 +612,7 @@ colDataPrepare <- function(barcode){
     # We need to put together the samples with subtypes with samples without subytpes
     ret.aux <- ret[!ret$sample %in% out$sample,]
     ret <- rbind.fill(out,ret.aux)
-
+    ret$sample.aux <- NULL
     # Add purity information from http://www.nature.com/articles/ncomms9971
     # purity  <- getPurityinfo()
     # ret <- merge(ret, purity, by = "sample", all.x = TRUE, sort = FALSE)
