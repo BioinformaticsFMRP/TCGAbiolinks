@@ -586,26 +586,33 @@ colDataPrepare <- function(barcode){
         aux <- aux[aux$disease_type == unique(ret$disease_type),2]
         ret$project_id <- as.character(aux)
     }
+    # remove letter from 01A 01B etc
+    ret$sample.aux <- substr(ret$sample,1,15)
     # na.omit should not be here, exceptional case
+    out <- NULL
+    for(proj in na.omit(unique(ret$project_id))){
+        if(grepl("TCGA",proj,ignore.case = TRUE)) {
+            message(" => Adding subtype information to samples")
+            tumor <- gsub("TCGA-","",proj)
+            if (grepl("acc|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc|all",
+                      tumor,ignore.case = TRUE)) {
+                subtype <- TCGAquery_subtype(tumor)
+                colnames(subtype) <- paste0("subtype_", colnames(subtype))
 
-    if(grepl("TCGA",na.omit(unique(ret$project_id)))) {
-        message(" => Adding subtype information to samples")
-        tumor <- gsub("TCGA-","",na.omit(unique(ret$project_id)))
-        if (grepl("acc|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc|all",
-                  tumor,ignore.case = TRUE)) {
-            subtype <- TCGAquery_subtype(tumor)
-            colnames(subtype) <- paste0("subtype_", colnames(subtype))
-
-            if(all(str_length(subtype$subtype_patient) == 12)){
-                # Subtype information were to primary tumor in priority
-                subtype$sample <- paste0(subtype$subtype_patient,"-01A")
+                if(all(str_length(subtype$subtype_patient) == 12)){
+                    # Subtype information were to primary tumor in priority
+                    subtype$sample.aux <- paste0(subtype$subtype_patient,"-01")
+                }
+                ret.aux <- ret[ret$sample.aux %in% subtype$sample.aux,]
+                ret.aux <- merge(ret.aux,subtype, by = "sample.aux", all.x = TRUE)
+                out <- rbind.fill(out,ret.aux)
             }
-
-            ret <- merge(ret,subtype, by = "sample", all.x = TRUE)
-
         }
     }
-
+    # We need to put together the samples with subtypes with samples without subytpes
+    ret.aux <- ret[!ret$sample %in% out$sample,]
+    ret <- rbind.fill(out,ret.aux)
+    ret$sample.aux <- NULL
     # Add purity information from http://www.nature.com/articles/ncomms9971
     # purity  <- getPurityinfo()
     # ret <- merge(ret, purity, by = "sample", all.x = TRUE, sort = FALSE)
@@ -618,40 +625,52 @@ colDataPrepare <- function(barcode){
 
 #' @importFrom biomaRt getBM useMart listDatasets
 get.GRCh.bioMart <- function(genome="hg19") {
-    if (genome == "hg19"){
-        # for hg19
-        ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
-                           host = "feb2014.archive.ensembl.org",
-                           path = "/biomart/martservice" ,
-                           dataset = "hsapiens_gene_ensembl")
-        attributes <- c("chromosome_name",
-                        "start_position",
-                        "end_position", "strand",
-                        "ensembl_gene_id", "entrezgene",
-                        "external_gene_id")
-    } else {
-        # for hg38
-        ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
-        attributes <- c("chromosome_name",
-                        "start_position",
-                        "end_position", "strand",
-                        "ensembl_gene_id",
-                        "external_gene_name")
-    }
-    description <- listDatasets(ensembl)[listDatasets(ensembl)$dataset=="hsapiens_gene_ensembl",]$description
-    message(paste0("Downloading genome information. Using: ", description))
+    tries <- 0L
+    msg <- character()
+    while (tries < 3L) {
+        gene.location <- tryCatch({
+            if (genome == "hg19"){
+                # for hg19
+                ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
+                                   host = "feb2014.archive.ensembl.org",
+                                   path = "/biomart/martservice" ,
+                                   dataset = "hsapiens_gene_ensembl")
+                attributes <- c("chromosome_name",
+                                "start_position",
+                                "end_position", "strand",
+                                "ensembl_gene_id", "entrezgene",
+                                "external_gene_id")
+            } else {
+                # for hg38
+                ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+                attributes <- c("chromosome_name",
+                                "start_position",
+                                "end_position", "strand",
+                                "ensembl_gene_id",
+                                "external_gene_name")
+            }
+            description <- listDatasets(ensembl)[listDatasets(ensembl)$dataset=="hsapiens_gene_ensembl",]$description
+            message(paste0("Downloading genome information (try:", tries,") Using: ", description))
 
-    filename <-  paste0(gsub("[[:punct:]]| ", "_",description),".rda")
-    if(!file.exists(filename)) {
-        chrom <- c(1:22, "X", "Y")
-        gene.location <- getBM(attributes = attributes,
-                               filters = c("chromosome_name"),
-                               values = list(chrom), mart = ensembl)
-        save(gene.location, file = filename)
-    } else {
-        message("Loading")
-        gene.location <- get(load(filename))
+            filename <-  paste0(gsub("[[:punct:]]| ", "_",description),".rda")
+            if(!file.exists(filename)) {
+                chrom <- c(1:22, "X", "Y")
+                gene.location <- getBM(attributes = attributes,
+                                       filters = c("chromosome_name"),
+                                       values = list(chrom), mart = ensembl)
+                save(gene.location, file = filename)
+            } else {
+                message("Loading from disk")
+                gene.location <- get(load(filename))
+            }
+            gene.location
+        }, error = function(e) {
+            msg <<- conditionMessage(e)
+            tries <<- tries + 1L
+        })
+        if(!is.null(gene.location)) break
     }
+    if (tries == 3L) stop("failed to get URL after 3 tries:", "\n  error: ", msg)
 
     return(gene.location)
 }
