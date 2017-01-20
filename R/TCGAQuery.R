@@ -208,7 +208,8 @@ GDCquery <- function(project,
             pat <-  "hg19.*mirna"
             invert <- TRUE
         }
-        if(file.type == "hg19.mirna") pat <- "hg19.*mirna"
+        # if(file.type == "hg19.mirna") pat <- "hg19.mirna"
+        # if(file.type == "hg19.mirbase20.mirna") pat <- "hg19.mirbase20.mirna"
         if(file.type == "hg19.isoform") pat <- "hg19.*isoform"
         if(file.type == "isoform") {
             pat <-  "hg19.*isoform"
