@@ -560,6 +560,7 @@ Please, not that these tables are still incomplete.
 |                             |                                   |                                     | gene.txt           |
 |                             | Isoform expression quantification |                                     |                    |
 |                             | miRNA gene quantification         |                                     | hg19.mirna         |
+|                             |                                   |                                     | hg19.mirbase20     |
 |                             |                                   |                                     | mirna              |
 |                             | Exon junction quantification      |                                     |                    |
 |                             | Exon quantification               |                                     |                    |
