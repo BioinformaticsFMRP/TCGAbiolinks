@@ -188,7 +188,7 @@ GDCquery <- function(project,
     # Filter by workflow.type
     if(!is.na(workflow.type)) {
         if(!(workflow.type %in% results$analysis$workflow_type)) {
-            stop("Please set a valid data.type argument from the list below:\n  => ", paste(unique(results$analysis$workflow_type), collapse = "\n  => "))
+            stop("Please set a valid workflow.type argument from the list below:\n  => ", paste(unique(results$analysis$workflow_type), collapse = "\n  => "))
         }
         results <- results[results$analysis$workflow_type %in% workflow.type,]
     }
@@ -243,7 +243,7 @@ GDCquery <- function(project,
             aux <- as.data.frame(table(results$tissue.definition))
             aux <- aux[aux$Freq>0,]
             print(kable(aux,row.names=FALSE,col.names = c("sample.type","Number of samples")))
-            stop("Please set a valid data.type argument from the list above.")
+            stop("Please set a valid sample.type argument from the list above.")
         }
         results <- results[tolower(results$tissue.definition) %in% tolower(sample.type),]
     }
