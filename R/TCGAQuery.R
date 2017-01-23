@@ -137,21 +137,29 @@ GDCquery <- function(project,
     if(!is.na(data.type)) checkDataTypeInput(legacy = legacy, data.type = data.type)
     if(!any(is.na(sample.type))) checkBarcodeDefinition(sample.type)
 
-    #message(paste0(baseURL,paste(options.pretty, options.expand, option.size, options.filter, sep = "&")))
-    url <- getGDCquery(project = project,
-                       data.category = data.category,
-                       data.type = data.type,
-                       legacy = legacy)
-    message("Accessing GDC. This might take a while...")
-    json  <- tryCatch(
-        fromJSON(url, simplifyDataFrame = TRUE),
-        error = function(e) {
-            fromJSON(content(GET(url), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+    results <- NULL
+    for(proj in project){
+        url <- getGDCquery(project = proj,
+                           data.category = data.category,
+                           data.type = data.type,
+                           legacy = legacy)
+        message("Project: ",proj,". Accessing GDC. This might take a while...")
+        json  <- tryCatch(
+            fromJSON(url, simplifyDataFrame = TRUE),
+            error = function(e) {
+                fromJSON(content(GET(url), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+            }
+        )
+       json$data$hits$acl <- NULL
+       json$data$hits$project <- proj
+        if("analysis" %in% colnames(json$data$hits)){
+            analysis <- json$data$hits$analysis
+            colnames(analysis)[2:ncol(analysis)] <- paste0("analysis_", colnames(analysis)[2:ncol(analysis)])
+            json$data$hits$analysis <- NULL
+            json$data$hits <- cbind(json$data$hits, analysis)
         }
-    )
-
-    results <- json$data$hits
-
+        results <- rbind(results,json$data$hits,make.row.names = FALSE)
+    }
     if(is.null(dim(results))) {
         message("Sorry! There is no result for your query. Please check in GDC the data available")
         return (NULL)
@@ -187,10 +195,10 @@ GDCquery <- function(project,
 
     # Filter by workflow.type
     if(!is.na(workflow.type)) {
-        if(!(workflow.type %in% results$analysis$workflow_type)) {
-            stop("Please set a valid workflow.type argument from the list below:\n  => ", paste(unique(results$analysis$workflow_type), collapse = "\n  => "))
+        if(!(workflow.type %in% results$analysis_workflow_type)) {
+            stop("Please set a valid workflow.type argument from the list below:\n  => ", paste(unique(results$analysis_workflow_type), collapse = "\n  => "))
         }
-        results <- results[results$analysis$workflow_type %in% workflow.type,]
+        results <- results[results$analysis_workflow_type %in% workflow.type,]
     }
 
 
@@ -264,7 +272,8 @@ GDCquery <- function(project,
     #results <- results[!duplicated(results$cases),]
     if(nrow(results) == 0) stop("Sorry, no results were found for this query")
 
-    ret <- data.frame(results=I(list(results)), project = project,
+    ret <- data.frame(results=I(list(results)),
+                      project = I(list(project)),
                       data.category = data.category,
                       data.type = data.type,
                       legacy = legacy,
