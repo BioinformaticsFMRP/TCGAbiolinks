@@ -64,3 +64,13 @@ test_that("GDCprepare accepts more than one project", {
     expect_true(all(c("TCGA-ACC","TCGA-GBM") %in% SummarizedExperiment::colData(obj)$project_id))
 
 })
+test_that("Accecpts more than one platform", {
+    cases <- c("TCGA-27-1831-01A-01D-0788-05","TCGA-S9-A6WP-01A-12D-A34D-05")
+    query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
+                          legacy = TRUE,
+                          data.category = "DNA methylation",
+                          barcode = cases,
+                          platform = c("Illumina Human Methylation 450", "Illumina Human Methylation 27"))
+    GDCdownload(query.met, method = "api", directory = "ex")
+    obj <- GDCprepare(query.met,  directory = "ex")
+})
