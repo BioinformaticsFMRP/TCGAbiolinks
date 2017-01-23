@@ -8,7 +8,7 @@ GDCquery(project, data.category, data.type, workflow.type, legacy = FALSE,
   access, platform, file.type, barcode, experimental.strategy, sample.type)
 }
 \arguments{
-\item{project}{A valid project (see list with TCGAbiolinks:::getGDCprojects()$project_id)]}
+\item{project}{A list of valid project (see list with TCGAbiolinks:::getGDCprojects()$project_id)]}
 
 \item{data.category}{A valid project (see list with TCGAbiolinks:::getProjectSummary(project))}
 
@@ -74,7 +74,7 @@ Uses GDC API to search for search, it searches for both controlled and
 query <- GDCquery(project = "TCGA-ACC",
                   data.category = "Copy Number Variation",
                   data.type = "Copy Number Segment")
-query.met <- GDCquery(project = "TCGA-GBM",
+query.met <- GDCquery(project = c("TCGA-GBM","TCGA-GBM"),
                       legacy = TRUE,
                       data.category = "DNA methylation",
                       platform = "Illumina Human Methylation 450")
