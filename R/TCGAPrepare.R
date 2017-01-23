@@ -84,7 +84,7 @@ GDCprepare <- function(query,
     if(grepl("Transcriptome Profiling", query$data.category, ignore.case = TRUE)){
         data <- readTranscriptomeProfiling(files = files,
                                            data.type = ifelse(!is.na(query$data.type),  as.character(query$data.type),  unique(query$results[[1]]$data_type)),
-                                           workflow.type = unique(query$results[[1]]$analysis$workflow_type),
+                                           workflow.type = unique(query$results[[1]]$analysis_workflow_type),
                                            cases = query$results[[1]]$cases,
                                            summarizedExperiment)
     } else if(grepl("Copy Number Variation",query$data.category,ignore.case = TRUE)) {
