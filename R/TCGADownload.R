@@ -32,6 +32,13 @@
 #' GDCdownload(query, method = "client", directory = "example_data_dir")
 #' query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical")
 #' GDCdownload(query, chunks.per.download = 200)
+#' \dontrun{
+#'     acc.gbm <- GDCquery(project =  c("TCGA-ACC","TCGA-GBM"),
+#'                         data.category = "Transcriptome Profiling",
+#'                         data.type = "Gene Expression Quantification",
+#'                         workflow.type = "HTSeq - Counts")
+#'     GDCdownload(acc.gbm, method = "api", directory = "example", chunks.per.download = 50)
+#' }
 #' @return Shows the output from the GDC transfer tools
 GDCdownload <- function(query,
                         token.file,
@@ -40,7 +47,9 @@ GDCdownload <- function(query,
                         chunks.per.download = NULL) {
 
     if(missing(query)) stop("Please set query argument")
+
     if(!(method %in% c("api","client"))) stop("method arguments possible values are: 'api' or 'client'")
+
     manifest <- query$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
     colnames(manifest) <- c("id","filename","md5","size","state")
 
