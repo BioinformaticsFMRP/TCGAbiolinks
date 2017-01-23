@@ -5,7 +5,7 @@
 #'   For GDC data arguments project, data.category, data.type and workflow.type should be used
 #'   For the legacy data arguments project, data.category, platform and/or file.extension should be used.
 #'   Please, see the vignette for a table with the possibilities.
-#' @param project A valid project (see list with TCGAbiolinks:::getGDCprojects()$project_id)]
+#' @param project A list of valid project (see list with TCGAbiolinks:::getGDCprojects()$project_id)]
 #' @param data.category A valid project (see list with TCGAbiolinks:::getProjectSummary(project))
 #' @param data.type A data type to filter the files to download
 #' @param sample.type A sample type to filter the files to download
@@ -51,7 +51,7 @@
 #' query <- GDCquery(project = "TCGA-ACC",
 #'                   data.category = "Copy Number Variation",
 #'                   data.type = "Copy Number Segment")
-#' query.met <- GDCquery(project = "TCGA-GBM",
+#' query.met <- GDCquery(project = c("TCGA-GBM","TCGA-GBM"),
 #'                       legacy = TRUE,
 #'                       data.category = "DNA methylation",
 #'                       platform = "Illumina Human Methylation 450")
@@ -89,87 +89,114 @@ GDCquery <- function(project,
                      experimental.strategy,
                      sample.type){
 
-    # prepare output
-    if(missing(sample.type)) {
-        sample.type <- NA
-    } else if(all(sample.type == FALSE)) {
-        sample.type <- NA
-    }
-    if(missing(data.type)) {
-        data.type <- NA
-    } else if(data.type == FALSE) {
-        data.type <- NA
-    }
-    if(missing(barcode)) {
-        barcode <- NA
-    } else if(length(barcode) == 1) {
-        if(barcode == FALSE) barcode <- NA
-    }
-    if(missing(platform)) {
-        platform <- NA
-    } else if(platform == FALSE) {
-        platform <- NA
-    }
-    if(missing(file.type)) {
-        file.type <- NA
-    } else if(file.type == FALSE) {
-        file.type <- NA
-    }
-    if(missing(workflow.type)) {
-        workflow.type <- NA
-    } else if(workflow.type == FALSE) {
-        workflow.type <- NA
-    }
-    if(missing(experimental.strategy)) {
-        experimental.strategy <- NA
-    } else if(experimental.strategy == FALSE) {
-        experimental.strategy <- NA
-    }
-    if(missing(access)) {
-        access <- NA
-    } else if(access == FALSE) {
-        access <- NA
-    }
-
+    suppressWarnings({
+        # prepare output
+        if(missing(sample.type)) {
+            sample.type <- NA
+        } else if(all(sample.type == FALSE)) {
+            sample.type <- NA
+        }
+        if(missing(data.type)) {
+            data.type <- NA
+        } else if(data.type == FALSE) {
+            data.type <- NA
+        }
+        if(missing(barcode)) {
+            barcode <- NA
+        } else if(length(barcode) == 1) {
+            if(barcode == FALSE) barcode <- NA
+        }
+        if(missing(platform)) {
+            platform <- NA
+        } else if(platform == FALSE) {
+            platform <- NA
+        }
+        if(missing(file.type)) {
+            file.type <- NA
+        } else if(file.type == FALSE) {
+            file.type <- NA
+        }
+        if(missing(workflow.type)) {
+            workflow.type <- NA
+        } else if(workflow.type == FALSE) {
+            workflow.type <- NA
+        }
+        if(missing(experimental.strategy)) {
+            experimental.strategy <- NA
+        } else if(experimental.strategy == FALSE) {
+            experimental.strategy <- NA
+        }
+        if(missing(access)) {
+            access <- NA
+        } else if(access == FALSE) {
+            access <- NA
+        }
+    })
+    print.header("GDCquery: Searching in GDC database","section")
     # Check arguments
     checkProjectInput(project)
     checkDataCategoriesInput(project, data.category, legacy)
     if(!is.na(data.type)) checkDataTypeInput(legacy = legacy, data.type = data.type)
     if(!any(is.na(sample.type))) checkBarcodeDefinition(sample.type)
 
-    #message(paste0(baseURL,paste(options.pretty, options.expand, option.size, options.filter, sep = "&")))
-    url <- getGDCquery(project = project,
-                       data.category = data.category,
-                       data.type = data.type,
-                       legacy = legacy)
-    message("Accessing GDC. This might take a while...")
-    json  <- tryCatch(
-        fromJSON(url, simplifyDataFrame = TRUE),
-        error = function(e) {
-            fromJSON(content(GET(url), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+    results <- NULL
+    print.header("Accessing GDC. This might take a while...","subsection")
+    for(proj in project){
+        url <- getGDCquery(project = proj,
+                           data.category = data.category,
+                           data.type = data.type,
+                           legacy = legacy)
+        message("ooo Project: ", proj)
+        json  <- tryCatch(
+            fromJSON(url, simplifyDataFrame = TRUE),
+            error = function(e) {
+                fromJSON(content(GET(url), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+            }
+        )
+        json$data$hits$acl <- NULL
+        json$data$hits$project <- proj
+        if("analysis" %in% colnames(json$data$hits)){
+            if(is.data.frame(json$data$hits$analysis)){
+                analysis <- json$data$hits$analysis
+                colnames(analysis)[2:ncol(analysis)] <- paste0("analysis_", colnames(analysis)[2:ncol(analysis)])
+                json$data$hits$analysis <- NULL
+                json$data$hits <- cbind(json$data$hits, analysis)
+            }
         }
-    )
-
-    results <- json$data$hits
-
+        if("center" %in% colnames(json$data$hits)){
+            if(is.data.frame(json$data$hits$center)){
+                center <- json$data$hits$center
+                colnames(center)[2:ncol(center)] <- paste0("center_", colnames(center)[2:ncol(center)])
+                json$data$hits$center <- NULL
+                json$data$hits <- cbind(json$data$hits, center)
+            }
+        }
+        results <- rbind(results,json$data$hits,make.row.names = FALSE)
+    }
     if(is.null(dim(results))) {
         message("Sorry! There is no result for your query. Please check in GDC the data available")
         return (NULL)
     }
-
-    if(!is.na(platform)){
-        if(!(platform %in% results$platform)) {
-            stop("Please set a valid platform argument from the list below:\n  => ", paste(unique(results$platform), collapse = "\n  => "))
+    print.header("Filtering results","subsection")
+    suppressWarnings({
+        if(!is.na(platform)){
+            if(!(all(platform %in% results$platform))){
+                stop("Please set a valid platform argument from the list below:\n  => ", paste(unique(results$platform), collapse = "\n  => "))
+            }
+            message("ooo By platform")
+            results <- results[tolower(results$platform) %in% tolower(platform),]
         }
-        results <- results[tolower(results$platform) %in% tolower(platform),]
-    }
+    })
 
     # Filter by access
-    if(!is.na(access)) results <- results[grepl(access,results$access,ignore.case = TRUE),]
-
+    if(!is.na(access)) {
+        message("ooo By access")
+        results <- results[grepl(access,results$access,ignore.case = TRUE),]
+    }
     # Filter by experimental strategy
     if(!is.na(experimental.strategy)) {
         if(all(tolower(experimental.strategy) %in%  tolower(results$experimental_strategy))) {
+            message("ooo By experimental.strategy")
             results <- results[tolower(results$experimental_strategy) %in% tolower(experimental.strategy),]
         } else {
             message(paste0("The argument experimental_strategy does not match any of the results.\nPossible values:",
@@ -182,20 +209,23 @@ GDCquery <- function(project,
         if(!(tolower(data.type) %in% tolower(results$data_type))) {
             stop("Please set a valid data.type argument from the list below:\n  => ", paste(unique(results$data_type), collapse = "\n  => "))
         }
+        message("ooo By data.type")
         results <- results[tolower(results$data_type) %in% tolower(data.type),]
     }
 
     # Filter by workflow.type
     if(!is.na(workflow.type)) {
-        if(!(workflow.type %in% results$analysis$workflow_type)) {
-            stop("Please set a valid workflow.type argument from the list below:\n  => ", paste(unique(results$analysis$workflow_type), collapse = "\n  => "))
+        if(!(workflow.type %in% results$analysis_workflow_type)) {
+            stop("Please set a valid workflow.type argument from the list below:\n  => ", paste(unique(results$analysis_workflow_type), collapse = "\n  => "))
         }
-        results <- results[results$analysis$workflow_type %in% workflow.type,]
+        message("ooo By workflow.type")
+        results <- results[results$analysis_workflow_type %in% workflow.type,]
     }
 
 
     # Filter by file.type
     if(!is.na(file.type)){
+        message("ooo By file.type")
         pat <- file.type
         invert <- FALSE
         if(file.type == "normalized_results") pat <- "normalized_results"
@@ -226,6 +256,7 @@ GDCquery <- function(project,
         pat <- paste("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}-[:alnum:]{3}-[:alnum:]{2,3}-[:alnum:]{4}-[:alnum:]{2}",
                      "[:alnum:]{6}-[:alnum:]{2}-[:alnum:]{6}-[:alnum:]{3}-[:alnum:]{3}",sep = "|")
     }
+
     barcodes <- unlist(lapply(results$cases,function(x) {
         str <- str_extract_all(x,pat) %>% unlist %>% paste(collapse = ",")
         ifelse(all(is.na(str)), NA,str[!is.na(str)])
@@ -236,7 +267,10 @@ GDCquery <- function(project,
     results$tissue.definition <- expandBarcodeInfo(barcodes)$tissue.definition
 
     # Filter by barcode
-    if(!any(is.na(barcode))) results <- results[unlist(sapply(barcode, function(x) grep(x, results$cases,ignore.case = TRUE))),]
+    if(!any(is.na(barcode))) {
+        message("ooo By barcode")
+        results <- results[unlist(sapply(barcode, function(x) grep(x, results$cases,ignore.case = TRUE))),]
+    }
     # Filter by sample.type
     if(!any(is.na(sample.type))) {
         if(!any(tolower(results$tissue.definition) %in% tolower(sample.type))) {
@@ -245,6 +279,7 @@ GDCquery <- function(project,
             print(kable(aux,row.names=FALSE,col.names = c("sample.type","Number of samples")))
             stop("Please set a valid sample.type argument from the list above.")
         }
+        message("ooo By sample.type")
         results <- results[tolower(results$tissue.definition) %in% tolower(sample.type),]
     }
     # some how there are duplicated files in GDC we should remove them
@@ -258,13 +293,18 @@ GDCquery <- function(project,
     #                  experimental_strategy = "RNA-Seq",
     #                  sample.type = c("Primary solid Tumor","Solid Tissue Normal"))
     #
+    print.header("Checcking data","subsection")
+    message("ooo Check if there are duplicated cases")
     if(any(duplicated(results$cases))) {
         message("Warning: There are more than one file for the same case. Please verify query results. You can use the command View(query$results[[1]]) in rstudio")
     }
-    #results <- results[!duplicated(results$cases),]
+
+    message("ooo Check if there results for the query")
     if(nrow(results) == 0) stop("Sorry, no results were found for this query")
 
-    ret <- data.frame(results=I(list(results)), project = project,
+    print.header("Preparing output","section")
+    ret <- data.frame(results=I(list(results)),
+                      project = I(list(project)),
                       data.category = data.category,
                       data.type = data.type,
                       legacy = legacy,
