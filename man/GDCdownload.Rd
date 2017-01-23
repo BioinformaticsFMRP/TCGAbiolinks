@@ -46,5 +46,12 @@ query <- GDCquery(project = "TARGET-AML",
 GDCdownload(query, method = "client", directory = "example_data_dir")
 query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical")
 GDCdownload(query, chunks.per.download = 200)
+\dontrun{
+    acc.gbm <- GDCquery(project =  c("TCGA-ACC","TCGA-GBM"),
+                        data.category = "Transcriptome Profiling",
+                        data.type = "Gene Expression Quantification",
+                        workflow.type = "HTSeq - Counts")
+    GDCdownload(acc.gbm, method = "api", directory = "example", chunks.per.download = 50)
+}
 }
 
