@@ -624,3 +624,10 @@ get.mut.gistc.information <- function(df, project, genes, mut.pipeline = "mutect
     df <- DataFrame(df[order,])
     return(df)
 }
+
+
+print.header <- function(text, type ="section"){
+    message(paste(rep("-",nchar(text) + 3),collapse = ""))
+    message(paste(ifelse(type=="section","o","oo"),text))
+    message(paste(rep("-",nchar(text)+ 3),collapse = ""))
+}
