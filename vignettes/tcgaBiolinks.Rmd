@@ -446,7 +446,7 @@ You can easily search GDC data using the `GDCquery` function.
 Using a summary of filters as used in the TCGA portal, the function works
 with the following arguments:
 
-* **project** A valid project (see table below)
+* **project** A list of valid project (see table below)
 * **data.category** A valid project (see list with getProjectSummary(project))
 * **data.type** A data type to filter the files to download
 * **sample.type** A sample type to filter the files to download (See table below)
@@ -469,6 +469,11 @@ query <- GDCquery(project = "TARGET-AML",
                   data.type = "Gene Expression Quantification", 
                   workflow.type = "HTSeq - Counts")
 
+# All DNA methylation data for TCGA-GBM and TCGA-GBM
+query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
+                      legacy = TRUE,
+                      data.category = "DNA methylation",
+                      platform = c("Illumina Human Methylation 450", "Illumina Human Methylation 27"))
 
 # Using sample type to get only Primary solid Tumor samples and Solid Tissue Normal
 query.mirna <- GDCquery(project = "TCGA-ACC", 

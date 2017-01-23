@@ -41,22 +41,11 @@ checkProjectInput <- function(project){
         print(knitr::kable(projects[,c(4:6,8)]))
         stop("Please set a project argument from the column project_id above")
     }
-    if(!(project %in% projects$project_id)) {
-        print(knitr::kable(projects[,c(4:6,8)]))
-        stop("Please set a valid project argument from the column project_id above")
-    }
-}
-
-checkTumorInput <- function(tumor){
-    projects <- getGDCprojects()
-    if(missing(tumor)) {
-        print(knitr::kable(projects[,c(4:6,8)]))
-        stop("Please set a project argument from the column project_id above")
-    }
-    if(!(project %in% projects$tumor)) {
-        print(knitr::kable(projects[,c(4:6,8)]))
-        stop("Please set a valid project argument from the column project_id above")
-    }
+    for(proj in project)
+        if(!(proj %in% projects$project_id)) {
+            print(knitr::kable(projects[,c(4:6,8)]))
+            stop("Please set a valid project argument from the column project_id above. Project ", proj, " was not found.")
+        }
 }
 
 checkLegacyPlatform <- function(project,data.category, legacy = FALSE){
@@ -135,14 +124,16 @@ checkDataTypeInput <- function(legacy, data.type){
 }
 
 checkDataCategoriesInput <- function(project,data.category, legacy = FALSE){
-    project.summary <- getProjectSummary(project, legacy)
-    if(missing(data.category)) {
-        print(knitr::kable(project.summary$data_categories))
-        stop("Please set a data.category argument from the column data_category above")
-    }
-    if(!(data.category %in% project.summary$data_categories$data_category)) {
-        print(knitr::kable(project.summary$data_categories))
-        stop("Please set a valid data.category argument from the column data_category above")
+    for(proj in project){
+        project.summary <- getProjectSummary(proj, legacy)
+        if(missing(data.category)) {
+            print(knitr::kable(project.summary$data_categories))
+            stop("Please set a data.category argument from the column data_category above")
+        }
+        if(!(data.category %in% project.summary$data_categories$data_category)) {
+            print(knitr::kable(project.summary$data_categories))
+            stop("Please set a valid data.category argument from the column data_category above. We could not validade the data.category for project ", proj)
+        }
     }
 }
 
@@ -632,4 +623,11 @@ get.mut.gistc.information <- function(df, project, genes, mut.pipeline = "mutect
     rownames(df) <- df$barcode
     df <- DataFrame(df[order,])
     return(df)
+}
+
+
+print.header <- function(text, type ="section"){
+    message(paste(rep("-",nchar(text) + 3),collapse = ""))
+    message(paste(ifelse(type=="section","o","oo"),text))
+    message(paste(rep("-",nchar(text)+ 3),collapse = ""))
 }
