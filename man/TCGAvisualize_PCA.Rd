@@ -34,9 +34,9 @@ method = "geneLength")
 # quantile filter of genes
 dataFilt <- TCGAanalyze_Filtering(tabDF = dataBRCA, method = "quantile", qnt.cut =  0.25)
 # Principal Component Analysis plot for ntop selected DEGs
-    # selection of normal samples "NT" 
+    # selection of normal samples "NT"
     group1 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
-    # selection of normal samples "TP" 
+    # selection of normal samples "TP"
     group2 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 pca <- TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200, group1, group2)
 if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
