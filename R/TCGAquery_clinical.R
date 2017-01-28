@@ -101,7 +101,7 @@ TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
 #' @param type A valid type. Options "clinical", "Biospecimen"  (see list with getGDCprojects()$project_id)]
 #' @param save.csv Write clinical information into a csv document
 #' @export
-#' @importFrom data.table rbindlist
+#' @importFrom data.table rbindlist as.data.table
 #' @importFrom jsonlite fromJSON
 #' @examples
 #' clin <- GDCquery_clinic("TCGA-ACC", type = "clinical", save.csv = TRUE)
@@ -136,23 +136,50 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 
     #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
     results <- json$data$hits
+
     if(grepl("clinical",type,ignore.case = TRUE)) {
-        diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
-        diagnoses$submitter_id <- gsub("_diagnosis","", diagnoses$submitter_id)
-        exposures <- rbindlist(results$exposures, fill = TRUE)
-        exposures$submitter_id <- gsub("_exposure","", exposures$submitter_id)
-        results$demographic$submitter_id <- gsub("_demographic","", results$demographic$submitter_id)
-        df <- merge(diagnoses,exposures, by="submitter_id", all = TRUE)
-        df <- merge(df,results$demographic, by="submitter_id", all = TRUE)
-        treatments <- rbindlist(df$treatments,fill = TRUE)
-        df[,treatments:=NULL]
-        treatments$submitter_id <- gsub("_treatment","", treatments$submitter_id)
-        df <- merge(df,treatments, by="submitter_id", all = TRUE)
-        df$bcr_patient_barcode <- df$submitter_id
-        df$disease <- gsub("TCGA-|TARGET-", "", project)
+        if(grepl("TCGA",project)) {
+            df <- rbindlist(results$diagnoses, fill = TRUE)
+            df$submitter_id <- gsub("_diagnosis","", df$submitter_id)
+            if("exposures" %in% colnames(results)){
+                exposures <- rbindlist(results$exposures, fill = TRUE)
+                exposures <- exposures[,-c("updated_datetime","state","created_datetime")]
+                exposures$submitter_id <- gsub("_exposure","", exposures$submitter_id)
+                df <- merge(df,exposures, by="submitter_id", all = TRUE)
+            }
+            if("demographic" %in% colnames(results)){
+                results$demographic$submitter_id <- gsub("_demographic","", results$demographic$submitter_id)
+                aux <-
+                df <- merge(df,as.data.table(results$demographic)[,-c("updated_datetime","state","created_datetime")], by="submitter_id", all = TRUE)
+            }
+            if("treatments" %in% colnames(results)){
+                treatments <- rbindlist(df$treatments,fill = TRUE)
+                df[,treatments:=NULL]
+                treatments$submitter_id <- gsub("_treatment","", treatments$submitter_id)
+                df <- merge(df,as.data.table(treatments)[,-c("updated_datetime","state","created_datetime")], by="submitter_id", all = TRUE)
+            }
+            df$bcr_patient_barcode <- df$submitter_id
+            df$disease <- gsub("TCGA-|TARGET-", "", project)
+        } else {
+            df <- rbindlist(results$diagnoses, fill = TRUE)
+            if("exposures" %in% colnames(results)){
+                exposures <- rbindlist(results$exposures, fill = TRUE)
+                df <- cbind(df,exposures)
+            }
+            if("treatments" %in% colnames(results)){
+                treatments <- rbindlist(results$treatments, fill = TRUE)
+                df[,treatments:=NULL]
+                df <- cbind(df,treatments)
+            }
+            if("demographic" %in% colnames(results)){
+                df <- cbind(df,results$demographic)
+            }
+            df$disease <- gsub("TCGA-|TARGET-", "", project)
+        }
     } else {
         df <- rbindlist(results$samples,fill = TRUE)
     }
+
 
     #y <- data.frame(diagnosis=I(results$diagnoses), demographic=results$demographic,exposures=I(results$exposures))
     if(save.csv){
