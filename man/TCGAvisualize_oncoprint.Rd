@@ -10,7 +10,7 @@ TCGAvisualize_oncoprint(mut, genes, filename, color,
   show.row.barplot = TRUE, label.title = "Mutation",
   column.names.size = 8, label.font.size = 16, rows.font.size = 16,
   dist.col = 0.5, dist.row = 0.5, information = "Variant_Type",
-  row.order = FALSE, heatmap.legend.side = "bottom",
+  row.order = TRUE, col.order = TRUE, heatmap.legend.side = "bottom",
   annotation.legend.side = "bottom")
 }
 \arguments{
@@ -55,7 +55,9 @@ Options: 1) "Variant_Classification" (The information will be "Frame_Shift_Del",
              "Nonstop_Mutation",  "RNA",  "Silent" ,  "Splice_Site",  "Targeted_Region",  "Translation_Start_Site")
 2) "Variant_Type" (The information will be INS,DEL,SNP)}
 
-\item{row.order}{Order the genes (rows) Default:FALSE. Genes with more mutations will be in the first rows}
+\item{row.order}{Order the genes (rows) Default:TRUE. Genes with more mutations will be in the first rows}
+
+\item{col.order}{Order columns. Default:TRUE.}
 
 \item{heatmap.legend.side}{Position of the heatmap legend}
 
