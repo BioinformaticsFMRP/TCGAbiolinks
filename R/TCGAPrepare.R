@@ -97,7 +97,7 @@ GDCprepare <- function(query,
         if(grepl("Masked Somatic Mutation",query$data.type,ignore.case = TRUE) | source == "legacy")
             suppressWarnings(data <- readSimpleNucleotideVariationMaf(files))
     }  else if(grepl("Clinical|Biospecimen", query$data.category, ignore.case = TRUE)){
-        message("Mot working yet")
+        message("Not working yet")
         # data <- readClinical(files, query$results[[1]]$cases)
     } else if (grepl("Gene expression",query$data.category,ignore.case = TRUE)) {
         if(query$data.type == "Gene expression quantification")
