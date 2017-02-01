@@ -245,7 +245,12 @@ GDCquery <- function(project,
             pat <-  "hg19.*isoform"
             invert <- TRUE
         }
-        results <- results[grep(pat,results$file_name,invert = invert),]
+        idx <- grep(pat,results$file_name,invert = invert)
+        if(length(idx) == 0) {
+            print(knitr::kable(sort(results$file_name)[1:10],col.names = "Files"))
+            stop("We were not able to filter using this file type. Examples of available files are above. Please check the vignette for possible entries")
+        }
+        results <- results[idx,]
     }
 
     # get barcode of the samples
