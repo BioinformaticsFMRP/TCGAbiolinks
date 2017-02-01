@@ -475,8 +475,11 @@ TCGAanalyze_Filtering <- function(tabDF,method,
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
 
+    # Check if we have a SE, we need a gene expression matrix
+    if(is(tabDF,"SummarizedExperiment")) tabDF <- assay(tabDF)
+
     geneInfo <- geneInfo[!is.na(geneInfo[,1]),]
-    geneInfo <-as.data.frame(geneInfo)
+    geneInfo <- as.data.frame(geneInfo)
     geneInfo$geneLength <- as.numeric(as.character(geneInfo$geneLength))
     geneInfo$gcContent <- as.numeric(as.character(geneInfo$gcContent))
 
