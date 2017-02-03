@@ -178,7 +178,7 @@ datatable(as.data.frame(values(data)),
 ```
 
 
-## Clinical data
+# Clinical data
 
 
 <div class="panel panel-info">
@@ -200,7 +200,7 @@ There are two main differences:
 </div>
 </div>
 
-### Clinical data: Get clinical indexed data
+## Clinical data: Get clinical indexed data
 
 In this example we will fetch clinical indexed data.
 
@@ -209,12 +209,12 @@ clinical <- GDCquery_clinic(project = "TCGA-LUAD", type = "clinical")
 ```
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 datatable(clinical, filter = 'top', 
-              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
-              rownames = FALSE)
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+          rownames = FALSE)
 ```
 
 
-### Clinical data: Parse XML clinical data
+## Clinical data: Parse XML clinical data
 
 In this example we will fetch clinical data directly from the clinical XML files.
 
@@ -247,7 +247,7 @@ clinical.admin <- GDCprepare_clinic(query, clinical.info = "admin")
 datatable(clinical.admin, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
 ```
 
-### Clinical data inconsistencies
+## Clinical data inconsistencies
 
 <div class="panel panel-danger">
 <div class="panel-heading">Clinical data inconsistencies</div>
@@ -305,7 +305,7 @@ clinical.patient %>% select(bcr_patient_barcode,neoplasm_histologic_grade) %>% d
 
 ```
 
-## Mutation data
+# Mutation data
 
 This exmaple will download MAF (mutation annotation files) for variant calling pipeline muse.
 Pipelines options are: muse, varscan2, somaticsniper, mutect. For more information please access
