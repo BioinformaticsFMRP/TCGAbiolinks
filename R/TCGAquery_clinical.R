@@ -180,10 +180,15 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
         df <- rbindlist(results$samples,fill = TRUE)
     }
 
-
-    #y <- data.frame(diagnosis=I(results$diagnoses), demographic=results$demographic,exposures=I(results$exposures))
     if(save.csv){
-        if(grepl("biospecimen",type))  df[,portions:=NULL]
+        if(grepl("biospecimen",type))  {
+            df[,portions:=NULL]
+            message("Portion column is a list, it will be removed. Please check object with save.csv argument as FALSE")
+        }
+        if(grepl("clinical",type))  {
+            df[,treatments:=NULL]
+            message("Treatments column is a list, it will be removed. Please check object with save.csv argument as FALSE")
+        }
         write_csv(df,paste0(project,"_",type,".csv"))
     }
     setDF(df)
