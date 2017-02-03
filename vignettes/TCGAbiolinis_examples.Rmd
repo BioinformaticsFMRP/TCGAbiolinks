@@ -1,0 +1,329 @@
+---
+title: "TCGAbioinks: examples using GDC api"
+output: 
+    html_document:
+        toc: true
+        number_sections: true
+        toc_depth: 3
+        toc_float: true
+        code_folding: show
+        highlight: espresso
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+knitr::opts_knit$set(progress = FALSE)
+```
+
+
+TCGAbiolinks is able to access The National Cancer Institute (NCI) Genomic Data Commons (GDC) thourogh their  
+[GDC Application Programming Interface (API)](https://gdc.cancer.gov/developers/gdc-application-programming-interface-api) 
+to search, download and prepare relevant data for data analysis in R. 
+
+You may install the stable version from Biocondcutor, or the development version using devtools::install_github('BioinformaticsFMRP/TCGAbiolinks').
+
+Please use [Github issues](https://github.com/BioinformaticsFMRP/TCGAbiolinks/issues) if you want to file bug reports or feature requests.
+
+```{r message=FALSE, warning=FALSE}
+library(TCGAbiolinks)
+library(SummarizedExperiment)
+library(dplyr)
+library(DT)
+```
+
+# Useful queries
+
+<div class="panel panel-info">
+<div class="panel-heading">Data query: different sources</div>
+<div class="panel-body">
+
+
+There are two available sources to download GDC data using TCGAbiolunks:
+- GDC Legacy Archive : provides access to an unmodified copy of data that was previously stored in
+  [CGHub](https://cghub.ucsc.edu/) and in the TCGA Data Portal hosted by the TCGA Data Coordinating Center (DCC), in which uses
+  as references GRCh37 (hg19) and GRCh36 (hg18).
+- GDC harmonized database: data available was harmonized against GRCh38 (hg38) using GDC Bioinformatics Pipelines
+  which provides methods to the standardization of biospecimen and
+  clinical data.
+
+</div>
+</div>
+
+## Recurrent tumor samples
+
+In this example we will access the harmonized database (`legacy = FALSE`) and search for all DNA methylation data for recurrent glioblastoma multiform (GBM) and low grade gliomas (LGG) samples.
+
+
+```{r message=FALSE, warning=FALSE}
+query <- GDCquery(project = c("TCGA-GBM", "TCGA-LGG"),
+                  data.category = "DNA Methylation",
+                  legacy = FALSE,
+                  platform = c("Illumina Human Methylation 450"),
+                  sample.type = "Recurrent Solid Tumor"
+)
+datatable(query$results[[1]], 
+              filter = 'top',
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = FALSE)
+```
+
+
+
+## Finding the match between file names and barcode for Controlled data.
+
+This exmaple shows how the user can search for breast cancer Raw Sequencing Data ("Controlled") 
+and verify the name of the files and the barcodes associated with it.
+
+```{r message=FALSE, warning=FALSE}
+query <- GDCquery(project = c("TCGA-BRCA"),
+                  data.category = "Raw Sequencing Data",  
+                  sample.type = "Primary solid Tumor")
+# Only first 100 to make render faster
+datatable(query$results[[1]][1:100,c("file_name","cases")], 
+              filter = 'top',
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = FALSE)
+```
+
+# Downloading data e preparing for analysis
+
+<div class="panel panel-info">
+<div class="panel-heading">Data download: Methods differences</div>
+<div class="panel-body">
+
+
+There are two methods to download GDC data using TCGAbiolunks:
+- client: this method creates a MANIFEST file and download the data using [GDC Data Transfer Tool](https://gdc.cancer.gov/access-data/gdc-data-transfer-tool)
+    this method is more reliable but it might be slower compared to the api method.
+- api: this methods used the [GDC Application Programming Interface (API)](https://gdc.cancer.gov/developers/gdc-application-programming-interface-api) to downlaod the data.
+    This will create a MANIFEST file and the data downloaded will be compressed into a tar.gz file. If the size and the number of the files are too big this tar.gz will be too big
+    whicih might have a high probability of download failure. To solve that we created the `chunks.per.download` argument which will split the files
+    into small chunks, for example, if chunks.per.download is equal to 10 we will download only 10 files inside each tar.gz.
+
+</div>
+</div>
+<div class="panel panel-info">
+<div class="panel-heading">Data prepared: SummarizedExperiment object</div>
+<div class="panel-body">
+
+
+A [SummarizedExperiment object](http://www.nature.com/nmeth/journal/v12/n2/fig_tab/nmeth.3252_F2.html) 
+has three main matrices that can be accessed using the [SummarizedExperiment package](http://bioconductor.org/packages/SummarizedExperiment/)): 
+
+- Sample matrix information is accessed via `colData(data)`: stores sample information. TCGAbiolinks will add indexed clinical data and subtype information from marker TCGA papers.
+- Assay matrix information is accessed via `assay(data)`: stores molecular data 
+- Feature matrix information (gene information) is accessed via `rowRanges(data)`: stores metadata about the features, including their genomic ranges
+
+</div>
+</div>
+
+## Search and download data from legacy database using GDC api method
+
+In this example we will download gene expression data from legacy database (data 
+aligned against genome of reference hg19) using GDC api method and  we will show object data and metadata.
+```{r results = 'hide', message=FALSE, warning=FALSE}
+query <- GDCquery(project = "TCGA-GBM",
+                           data.category = "Gene expression",
+                           data.type = "Gene expression quantification",
+                           platform = "Illumina HiSeq", 
+                           file.type  = "normalized_results",
+                           experimental.strategy = "RNA-Seq",
+                           barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"),
+                           legacy = TRUE)
+GDCdownload(query, method = "api", chunks.per.download = 10)
+data <- GDCprepare(query)
+```
+```{r message=FALSE, warning=FALSE}
+# Gene expression aligned against hg19.
+datatable(as.data.frame(colData(data)), 
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = FALSE)
+# Only first 100 to make render faster
+datatable(assay(data)[1:100,], 
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = TRUE)
+
+rowRanges(data)
+```
+
+
+## Search and download data for two samples from database
+
+In this example we will download gene expression quantification from harmonized database 
+(data aligned against genome of reference hg38) using GDC Data Transfer Tool. 
+Also, it shows the object data and metadata.
+
+```{r results = 'hide', message=FALSE, warning=FALSE}
+# Gene expression aligned against hg38
+query <- GDCquery(project = "TCGA-GBM",
+                  data.category = "Transcriptome Profiling",
+                  data.type = "Gene Expression Quantification", 
+                  workflow.type = "HTSeq - Counts",
+                  barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"))
+GDCdownload(query, method = "client")
+data <- GDCprepare(query)
+```
+```{r message=FALSE, warning=FALSE}
+datatable(as.data.frame(colData(data)), 
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = FALSE)
+
+datatable(assay(data)[1:100,], 
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = TRUE)
+
+datatable(as.data.frame(values(data)),
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = TRUE)
+```
+
+
+## Clinical data
+
+
+<div class="panel panel-info">
+<div class="panel-heading">Clinical data: different sources</div>
+<div class="panel-body">
+
+In GDC database the clinical data can be retrieved from two sources:
+
+- indexed clinical: a refined clinical data that is created using the XML files.
+- XML files
+
+There are two main differences:
+
+- XML has more information: radiation, drugs information, follow-ups, biospecimen, etc. So the indexed one is only a subset of the XML files
+- The indexed data contains the updated data with the follow up informaiton. 
+  For example: if the patient is alive in the first time clinical data was collect and the in the next follow-up he is dead, 
+  the indexed data will show dead. The XML will have two fields, one for the first time saying he is alive (in the clinical part) and the follow-up saying he is dead. You can see this case here: 
+
+</div>
+</div>
+
+### Clinical data: Get clinical indexed data
+
+In this example we will fetch clinical indexed data.
+
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
+clinical <- GDCquery_clinic(project = "TCGA-LUAD", type = "clinical")
+```
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+datatable(clinical, filter = 'top', 
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+              rownames = FALSE)
+```
+
+
+### Clinical data: Parse XML clinical data
+
+In this example we will fetch clinical data directly from the clinical XML files.
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Clinical", 
+                  barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))
+GDCdownload(query)
+clinical <- GDCprepare_clinic(query, clinical.info = "patient")
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+datatable(clinical, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+```
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+clinical.drug <- GDCprepare_clinic(query, clinical.info = "drug")
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+datatable(clinical.drug, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+```
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+clinical.radiation <- GDCprepare_clinic(query, clinical.info = "radiation")
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+datatable(clinical.radiation, options = list(scrollX = TRUE,  keys = TRUE), rownames = FALSE)
+```
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+clinical.admin <- GDCprepare_clinic(query, clinical.info = "admin")
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+datatable(clinical.admin, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+```
+
+### Clinical data inconsistencies
+
+<div class="panel panel-danger">
+<div class="panel-heading">Clinical data inconsistencies</div>
+<div class="panel-body">
+
+Some inconsisentecies have been found in the indexed clinical data and are being
+investigated by the GDC team. These inconsistencies are:
+
+- ***Vital status*** field is not correctly updated 
+- ***Tumor Grade*** field is not being filled
+- ***Progression or Recurrence*** field is not being filled
+
+</div>
+</div>
+
+#### Vital status inconsistancie
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+# Get XML files and parse them
+clin.query <- GDCquery(project = "TCGA-READ", data.category = "Clinical", barcode = "TCGA-F5-6702")
+GDCdownload(clin.query)
+clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
+clinical.patient.followup <- GDCprepare_clinic(clin.query, clinical.info = "follow_up")
+
+# Get indexed data
+clinical.index <- GDCquery_clinic("TCGA-READ")
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+select(clinical.patient,vital_status,days_to_death,days_to_last_followup) %>% datatable
+select(clinical.patient.followup, vital_status,days_to_death,days_to_last_followup) %>% datatable
+# Vital status should be the same in the follow up table 
+filter(clinical.index,submitter_id == "TCGA-F5-6702") %>% select(vital_status,days_to_death,days_to_last_follow_up) %>% datatable
+```
+#### Progression or Recurrence and Grande inconsistancie
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+# Get XML files and parse them
+recurrent.samples <- GDCquery(project = "TCGA-LIHC",
+                             data.category = "Transcriptome Profiling",
+                             data.type = "Gene Expression Quantification", 
+                             workflow.type = "HTSeq - Counts",
+                             sample.type = 	"Recurrent Solid Tumor")$results[[1]] %>% select(cases)
+recurrent.patients <- substr(recurrent.samples$cases,1,12)
+clin.query <- GDCquery(project = "TCGA-LIHC", data.category = "Clinical", barcode = recurrent.patients)
+GDCdownload(clin.query)
+clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient") 
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+# Get indexed data
+GDCquery_clinic("TCGA-LIHC") %>% filter(submitter_id %in% recurrent.patients) %>% 
+    select(progression_or_recurrence,days_to_recurrence,tumor_grade) %>% datatable
+
+# XML data
+clinical.patient %>% select(bcr_patient_barcode,neoplasm_histologic_grade) %>% datatable
+
+```
+
+## Mutation data
+
+This exmaple will download MAF (mutation annotation files) for variant calling pipeline muse.
+Pipelines options are: muse, varscan2, somaticsniper, mutect. For more information please access
+[GDC docs](https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/).
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+acc.maf <- GDCquery_Maf("ACC", pipelines = "muse")
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+# Only first 100 to make render faster
+datatable(acc.maf[1:100,],
+              filter = 'top',
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = FALSE)
+```
+
+# Session Information
+
+```{r message=FALSE}
+devtools::session_info('TCGAbiolinks')
+```
