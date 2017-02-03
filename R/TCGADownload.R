@@ -123,7 +123,7 @@ GDCdownload <- function(query,
             tryCatch({
                 GDCdownload.aux(server, manifest, name, path)
             }, error = function(e) {
-                message("Dowload failted. We will retry with smaller chuncks")
+                message("Download failed. We will retry with smaller chuncks")
                 # split in groups of 100 MB
                 step <- ceiling(100000000/manifest$size[1])
                 if(step == 0) step <- 1
