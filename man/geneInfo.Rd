@@ -9,4 +9,3 @@
 geneInfo for normalization of RNAseq data
 }
 \keyword{internal}
-

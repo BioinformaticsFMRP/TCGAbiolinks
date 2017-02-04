@@ -124,4 +124,3 @@ SummarizedExperiment::colData(data)$group2 <- c(rep("group_1",ncol(data)/2),
                          rep("group_2",ncol(data)/2))
 hypo.hyper <- TCGAanalyze_DMR(data, p.cut = 0.85,"group2","group_1","group_2")
 }
-

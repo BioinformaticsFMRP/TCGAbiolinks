@@ -62,4 +62,3 @@ from survival package
  group1 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
  group2 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
 }
-
