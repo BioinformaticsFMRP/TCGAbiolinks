@@ -23,5 +23,5 @@ Differentially expression analysis (DEA) using limma package.
 \dontrun{
 to add example
 }
+query <- TCGAquery(tumor = "lgg")
 }
-

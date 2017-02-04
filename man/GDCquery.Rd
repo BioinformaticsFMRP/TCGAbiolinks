@@ -98,4 +98,3 @@ query <- GDCquery(project = "TCGA-ACC",
                   file.type = "hg19.seg",
                   barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
 }
-
