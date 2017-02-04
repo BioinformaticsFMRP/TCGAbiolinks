@@ -1,6 +1,7 @@
 context("Analyse")
 
 test_that("TCGAanalyze_survival creates pdf", {
+    sink("/dev/null");
     clin <- GDCquery_clinic("TCGA-ACC", type = "clinical", save.csv = FALSE)
     TCGAanalyze_survival(clin,clusterCol="gender",filename = "test.pdf")
     expect_true(file.exists("test.pdf"))
@@ -244,7 +245,7 @@ test_that("Results from TCGAanalyze_DEA and DMR in starburst plot are correct", 
                     result.met.cut.inv[2,]$logFC < 0 & result.met.cut.inv[2,]$diffmean.group2.group1 < 0)
     unlink("DMR_results_group_group1_group2_pcut_0.85_meancut_0.2.csv")
     unlink("group_group1_group2_pcut_0.85_meancut_0.2.rda")
-    unlink("histogram_diffmean.png")
+    unlink("histogram_diffmean.group1group2.png")
     unlink("histogram_pvalues.png")
     unlink("histogram_pvalues_adj.png")
     unlink("methylation_volcano.pdf")
