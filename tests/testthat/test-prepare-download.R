@@ -75,4 +75,6 @@ test_that("Accecpts more than one platform", {
     obj <- GDCprepare(query.met,  directory = "ex")
     expect_true(all(c("TCGA-LGG","TCGA-GBM") %in% SummarizedExperiment::colData(obj)$project_id))
     unlink("ex",recursive = TRUE, force = TRUE)
+    unlink("MANIFEST.txt",recursive = TRUE, force = TRUE)
+    unlink("Homo_sapiens_gene*",recursive = TRUE, force = TRUE)
 })
