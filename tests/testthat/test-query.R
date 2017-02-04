@@ -15,7 +15,7 @@ test_that("GDCquery accepts more than one project", {
     expect_equal(nrow(acc.gbm$results[[1]]), sum(nrow(acc$results[[1]]),nrow(gbm$results[[1]])))
     expect_true(nrow(dplyr::anti_join(acc$results[[1]],acc.gbm$results[[1]])) == 0)
     expect_true(nrow(dplyr::anti_join(gbm$results[[1]],acc.gbm$results[[1]])) == 0)
-    expect_true(nrow(anti_join(acc.gbm$results[[1]],acc$results[[1]])) == nrow(gbm$results[[1]]))
+    expect_true(nrow(dplyr::anti_join(acc.gbm$results[[1]],acc$results[[1]])) == nrow(gbm$results[[1]]))
 })
 
 test_that("GDCquery can filter by sample.type", {
