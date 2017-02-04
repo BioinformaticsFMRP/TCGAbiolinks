@@ -178,7 +178,7 @@ TCGAanalyze_Preprocessing <- function(object,
 #'  dataGE <- dataBRCAcomplete
 #'  group1 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
 #'  group2 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
-#'  
+#'
 #'  tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,dataBRCAcomplete,
 #'  Genelist = rownames(dataBRCAcomplete), Survresult = FALSE,ThreshTop=0.67,ThreshDown=0.33)
 TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
@@ -363,12 +363,12 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
 
     #'  group1 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
     #'  group2 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
-    
+
     colnames(tabSurvKM) <- gsub("Cancer","Group2",colnames(tabSurvKM))
     colnames(tabSurvKM) <- gsub("Tumor","Group2",colnames(tabSurvKM))
     colnames(tabSurvKM) <- gsub("Normal","Group1",colnames(tabSurvKM))
-    
-    
+
+
     return(tabSurvKM)
 }
 
@@ -928,8 +928,6 @@ TCGAanalyze_EA <- function(GeneName,RegulonList,TableEnrichment,
 #' @export
 #' @return List of list with tables in 2 by 2 comparison
 #' of the top-ranked genes from a linear model fitted by DEA's limma
-#' @examples
-#' query <- TCGAquery(tumor = "lgg")
 TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01){
 
     Pdatatable <- phenoData(AffySet)
