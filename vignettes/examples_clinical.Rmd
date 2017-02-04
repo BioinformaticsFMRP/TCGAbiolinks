@@ -1,5 +1,5 @@
 ---
-title: "TCGAbioinks: clinical examples"
+title: "Clinical examples"
 ---
 
 ```{r setup, include=FALSE}
