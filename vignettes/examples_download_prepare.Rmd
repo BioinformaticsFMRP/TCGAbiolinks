@@ -1,0 +1,107 @@
+---
+title: "TCGAbioinks: mutation examples"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+knitr::opts_knit$set(progress = FALSE)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(TCGAbiolinks)
+library(SummarizedExperiment)
+library(dplyr)
+library(DT)
+```
+
+# Downloading data e preparing for analysis
+
+<div class="panel panel-info">
+<div class="panel-heading">Data download: Methods differences</div>
+<div class="panel-body">
+
+
+There are two methods to download GDC data using TCGAbiolunks:
+- client: this method creates a MANIFEST file and download the data using [GDC Data Transfer Tool](https://gdc.cancer.gov/access-data/gdc-data-transfer-tool)
+    this method is more reliable but it might be slower compared to the api method.
+- api: this methods used the [GDC Application Programming Interface (API)](https://gdc.cancer.gov/developers/gdc-application-programming-interface-api) to downlaod the data.
+    This will create a MANIFEST file and the data downloaded will be compressed into a tar.gz file. If the size and the number of the files are too big this tar.gz will be too big
+    whicih might have a high probability of download failure. To solve that we created the `chunks.per.download` argument which will split the files
+    into small chunks, for example, if chunks.per.download is equal to 10 we will download only 10 files inside each tar.gz.
+
+</div>
+</div>
+<div class="panel panel-info">
+<div class="panel-heading">Data prepared: SummarizedExperiment object</div>
+<div class="panel-body">
+
+
+A [SummarizedExperiment object](http://www.nature.com/nmeth/journal/v12/n2/fig_tab/nmeth.3252_F2.html) 
+has three main matrices that can be accessed using the [SummarizedExperiment package](http://bioconductor.org/packages/SummarizedExperiment/)): 
+
+- Sample matrix information is accessed via `colData(data)`: stores sample information. TCGAbiolinks will add indexed clinical data and subtype information from marker TCGA papers.
+- Assay matrix information is accessed via `assay(data)`: stores molecular data 
+- Feature matrix information (gene information) is accessed via `rowRanges(data)`: stores metadata about the features, including their genomic ranges
+
+</div>
+</div>
+
+## Search and download data from legacy database using GDC api method
+
+In this example we will download gene expression data from legacy database (data 
+aligned against genome of reference hg19) using GDC api method and  we will show object data and metadata.
+```{r results = 'hide', message=FALSE, warning=FALSE}
+query <- GDCquery(project = "TCGA-GBM",
+                           data.category = "Gene expression",
+                           data.type = "Gene expression quantification",
+                           platform = "Illumina HiSeq", 
+                           file.type  = "normalized_results",
+                           experimental.strategy = "RNA-Seq",
+                           barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"),
+                           legacy = TRUE)
+GDCdownload(query, method = "api", chunks.per.download = 10)
+data <- GDCprepare(query)
+```
+```{r message=FALSE, warning=FALSE}
+# Gene expression aligned against hg19.
+datatable(as.data.frame(colData(data)), 
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = FALSE)
+# Only first 100 to make render faster
+datatable(assay(data)[1:100,], 
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = TRUE)
+
+rowRanges(data)
+```
+
+
+## Search and download data for two samples from database
+
+In this example we will download gene expression quantification from harmonized database 
+(data aligned against genome of reference hg38) using GDC Data Transfer Tool. 
+Also, it shows the object data and metadata.
+
+```{r results = 'hide', message=FALSE, warning=FALSE}
+# Gene expression aligned against hg38
+query <- GDCquery(project = "TCGA-GBM",
+                  data.category = "Transcriptome Profiling",
+                  data.type = "Gene Expression Quantification", 
+                  workflow.type = "HTSeq - Counts",
+                  barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"))
+GDCdownload(query, method = "client")
+data <- GDCprepare(query)
+```
+```{r message=FALSE, warning=FALSE}
+datatable(as.data.frame(colData(data)), 
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = FALSE)
+
+datatable(assay(data)[1:100,], 
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = TRUE)
+
+datatable(as.data.frame(values(data)),
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = TRUE)
+```
