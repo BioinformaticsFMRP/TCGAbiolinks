@@ -1,7 +1,6 @@
 context("Download AND PREPARE")
 
 test_that("GDCdownload API method for two files is working ", {
-    sink("/dev/null");
     query <- GDCquery(project = "TCGA-ACC",
                       data.category =  "Copy number variation",
                       legacy = TRUE,
