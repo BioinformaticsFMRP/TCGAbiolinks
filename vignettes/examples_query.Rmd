@@ -1,0 +1,70 @@
+---
+title: "TCGAbioinks: mutation examples"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+knitr::opts_knit$set(progress = FALSE)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(TCGAbiolinks)
+library(SummarizedExperiment)
+library(dplyr)
+library(DT)
+```
+
+
+# Useful queries
+
+<div class="panel panel-info">
+<div class="panel-heading">Data query: different sources</div>
+<div class="panel-body">
+
+
+There are two available sources to download GDC data using TCGAbiolunks:
+- GDC Legacy Archive : provides access to an unmodified copy of data that was previously stored in
+  [CGHub](https://cghub.ucsc.edu/) and in the TCGA Data Portal hosted by the TCGA Data Coordinating Center (DCC), in which uses
+  as references GRCh37 (hg19) and GRCh36 (hg18).
+- GDC harmonized database: data available was harmonized against GRCh38 (hg38) using GDC Bioinformatics Pipelines
+  which provides methods to the standardization of biospecimen and
+  clinical data.
+
+</div>
+</div>
+
+## Recurrent tumor samples
+
+In this example we will access the harmonized database (`legacy = FALSE`) and search for all DNA methylation data for recurrent glioblastoma multiform (GBM) and low grade gliomas (LGG) samples.
+
+
+```{r message=FALSE, warning=FALSE}
+query <- GDCquery(project = c("TCGA-GBM", "TCGA-LGG"),
+                  data.category = "DNA Methylation",
+                  legacy = FALSE,
+                  platform = c("Illumina Human Methylation 450"),
+                  sample.type = "Recurrent Solid Tumor"
+)
+datatable(query$results[[1]], 
+              filter = 'top',
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = FALSE)
+```
+
+
+
+## Finding the match between file names and barcode for Controlled data.
+
+This exmaple shows how the user can search for breast cancer Raw Sequencing Data ("Controlled") 
+and verify the name of the files and the barcodes associated with it.
+
+```{r message=FALSE, warning=FALSE}
+query <- GDCquery(project = c("TCGA-BRCA"),
+                  data.category = "Raw Sequencing Data",  
+                  sample.type = "Primary solid Tumor")
+# Only first 100 to make render faster
+datatable(query$results[[1]][1:100,c("file_name","cases")], 
+              filter = 'top',
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = FALSE)
+```
