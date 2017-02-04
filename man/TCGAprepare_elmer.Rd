@@ -28,4 +28,3 @@ df <- data.frame(runif(200, 1e5, 1e6),runif(200, 1e5, 1e6))
 rownames(df) <- sprintf("?|\%03d", 1:200)
 df <- TCGAprepare_elmer(df,platform="IlluminaHiSeq_RNASeqV2")
 }
-

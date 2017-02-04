@@ -54,4 +54,3 @@ GDCdownload(query, chunks.per.download = 200)
     GDCdownload(acc.gbm, method = "api", directory = "example", chunks.per.download = 50)
 }
 }
-
