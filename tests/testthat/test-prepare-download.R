@@ -1,6 +1,7 @@
 context("Download AND PREPARE")
 
 test_that("GDCdownload API method for two files is working ", {
+    sink("/dev/null");
     query <- GDCquery(project = "TCGA-ACC",
                       data.category =  "Copy number variation",
                       legacy = TRUE,
@@ -44,3 +45,36 @@ test_that("getBarcodeInfo works", {
 
 })
 
+test_that("GDCprepare accepts more than one project", {
+    cases <-  c("TCGA-OR-A5JX-01A-11D-A29H-01", "TCGA-OR-A5J3-01A-11D-A29H-01",
+                "TCGA-02-0010-10A-01D-0182-01","TCGA-14-0871-01A-01D-0384-01")
+    acc.gbm <- GDCquery(project =  c("TCGA-ACC","TCGA-GBM"),
+                        data.category = "Copy Number Variation",
+                        data.type = "Copy Number Segment",
+                        barcode = cases)
+    GDCdownload(acc.gbm, method = "api", directory = "ex")
+    obj <- GDCprepare(acc.gbm,  directory = "ex")
+    expect_true(all(cases %in% obj$Sample))
+    acc.gbm<- GDCquery(project =  c("TCGA-ACC","TCGA-GBM"),
+                        data.category = "Transcriptome Profiling",
+                        data.type = "Gene Expression Quantification",
+                        workflow.type = "HTSeq - Counts",
+                        barcode = substr(cases,1,12))
+    GDCdownload(acc.gbm, method = "api", directory = "ex")
+    obj <- GDCprepare(acc.gbm,  directory = "ex")
+    expect_true(all(c("TCGA-ACC","TCGA-GBM") %in% SummarizedExperiment::colData(obj)$project_id))
+})
+test_that("Accecpts more than one platform", {
+    cases <- c("TCGA-27-1831-01A-01D-0788-05","TCGA-S9-A6WP-01A-12D-A34D-05")
+    query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
+                          legacy = TRUE,
+                          data.category = "DNA methylation",
+                          barcode = cases,
+                          platform = c("Illumina Human Methylation 450", "Illumina Human Methylation 27"))
+    GDCdownload(query.met, method = "api", directory = "ex")
+    obj <- GDCprepare(query.met,  directory = "ex")
+    expect_true(all(c("TCGA-LGG","TCGA-GBM") %in% SummarizedExperiment::colData(obj)$project_id))
+    unlink("ex",recursive = TRUE, force = TRUE)
+    unlink("MANIFEST.txt",recursive = TRUE, force = TRUE)
+    unlink("Homo_sapiens_gene*",recursive = TRUE, force = TRUE)
+})
