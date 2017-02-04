@@ -1,0 +1,31 @@
+---
+title: "TCGAbioinks: examples using GDC api"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+knitr::opts_knit$set(progress = FALSE)
+```
+
+
+TCGAbiolinks is able to access The National Cancer Institute (NCI) Genomic Data Commons (GDC) thourogh their  
+[GDC Application Programming Interface (API)](https://gdc.cancer.gov/developers/gdc-application-programming-interface-api) 
+to search, download and prepare relevant data for data analysis in R. 
+
+You may install the stable version from Biocondcutor, or the development version using devtools::install_github('BioinformaticsFMRP/TCGAbiolinks').
+
+Please use [Github issues](https://github.com/BioinformaticsFMRP/TCGAbiolinks/issues) if you want to file bug reports or feature requests.
+
+To run the examples please load the following libraries:
+```{r sourceCode, message=FALSE, warning=FALSE}
+library(TCGAbiolinks)
+library(SummarizedExperiment)
+library(dplyr)
+library(DT)
+```
+
+# Session info
+```{r}
+version
+packageVersion("TCGAbiolinks")
+```
