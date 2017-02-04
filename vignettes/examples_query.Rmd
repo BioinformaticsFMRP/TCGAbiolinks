@@ -22,7 +22,7 @@ library(DT)
 <div class="panel-body">
 
 
-There are two available sources to download GDC data using TCGAbiolunks:
+There are two available sources to download GDC data using TCGAbiolinks:
 - GDC Legacy Archive : provides access to an unmodified copy of data that was previously stored in
   [CGHub](https://cghub.ucsc.edu/) and in the TCGA Data Portal hosted by the TCGA Data Coordinating Center (DCC), in which uses
   as references GRCh37 (hg19) and GRCh36 (hg18).
@@ -45,7 +45,7 @@ query <- GDCquery(project = c("TCGA-GBM", "TCGA-LGG"),
                   platform = c("Illumina Human Methylation 450"),
                   sample.type = "Recurrent Solid Tumor"
 )
-datatable(query$results[[1]], 
+datatable(getResults(query), 
               filter = 'top',
               options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
               rownames = FALSE)
@@ -63,7 +63,7 @@ query <- GDCquery(project = c("TCGA-BRCA"),
                   data.category = "Raw Sequencing Data",  
                   sample.type = "Primary solid Tumor")
 # Only first 100 to make render faster
-datatable(query$results[[1]][1:100,c("file_name","cases")], 
+datatable(getResults(query, rows = 1:100,cols = c("file_name","cases")), 
               filter = 'top',
               options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
               rownames = FALSE)

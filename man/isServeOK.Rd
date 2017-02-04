@@ -16,4 +16,3 @@ Check GDC server status using the api
 \examples{
 status <- isServeOK()
 }
-

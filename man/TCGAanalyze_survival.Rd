@@ -71,4 +71,3 @@ TCGAanalyze_survival(clin,
                      conf.int = FALSE,
                      color = c("Dark2"))
 }
-
