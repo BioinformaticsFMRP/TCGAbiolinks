@@ -65,4 +65,3 @@ acc.cnv <- GDCprepare(query)
  data <- GDCprepare(query,add.gistic2.mut = c("PTEN","FOXJ1"))
 }
 }
-

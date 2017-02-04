@@ -134,4 +134,3 @@ result <- TCGAvisualize_starburst(SummarizedExperiment::values(met),
                                   diffmean.cut=0.0,
                                   names=TRUE, circle = FALSE)
 }
-

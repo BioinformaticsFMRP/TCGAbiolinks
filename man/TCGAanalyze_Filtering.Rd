@@ -40,4 +40,3 @@ geneInfo = geneInfo,
 method = "geneLength")
 dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm, method = "quantile", qnt.cut = 0.25)
 }
-
