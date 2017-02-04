@@ -26,9 +26,8 @@ on_failure:
 
 environment:
   matrix:
-    - R_VERSION: devel
+    - R_VERSION: release
       R_ARCH: x64
-      USE_RTOOLS: true
 
   _R_CHECK_FORCE_SUGGESTS_: false
 
