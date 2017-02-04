@@ -22,4 +22,3 @@ TCGAquery_MatchedCoupledSampleTypes
                              "TCGA-B0-4698-02Z-00-DX1"),
                              c("TP","TR"))
 }
-

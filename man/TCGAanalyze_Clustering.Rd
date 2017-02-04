@@ -26,4 +26,3 @@ Hierarchical cluster analysis using several methods such as
 ward.D", "ward.D2", "single", "complete", "average" (= UPGMA), "mcquitty" (= WPGMA),
 "median" (= WPGMC) or "centroid" (= UPGMC).
 }
-
