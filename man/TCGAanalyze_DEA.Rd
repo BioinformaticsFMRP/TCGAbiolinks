@@ -57,4 +57,3 @@ samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT],
                       dataFilt[,samplesTP],"Normal", "Tumor")
 }
-

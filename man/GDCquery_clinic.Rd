@@ -24,4 +24,3 @@ as the one with using the button from each project
 clin <- GDCquery_clinic("TCGA-ACC", type = "clinical", save.csv = TRUE)
 clin <- GDCquery_clinic("TCGA-ACC", type = "biospecimen", save.csv = TRUE)
 }
-

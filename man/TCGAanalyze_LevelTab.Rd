@@ -48,4 +48,3 @@ dataTN <- dataFilt[,samplesNT]
 dataDEGsFiltLevel <- TCGAanalyze_LevelTab(dataDEGsFilt,"Tumor","Normal",
 dataTP,dataTN)
 }
-
