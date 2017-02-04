@@ -17,4 +17,3 @@ The functions you're likely to need from \pkg{TCGAbiolinks} is
 Otherwise refer to the vignettes to see
 how to format the documentation.
 }
-

@@ -112,4 +112,3 @@ TCGAvisualize_Heatmap(dat,
                     show_row_names=TRUE)
 if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 }
-

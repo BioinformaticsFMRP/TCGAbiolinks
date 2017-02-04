@@ -30,4 +30,3 @@ It defines a square symmetric matrix of pearson correlation among samples.
 According this matrix and boxplot of correlation samples by samples it is possible
 to find samples with low correlation that can be identified as possible outliers.
 }
-

@@ -35,4 +35,3 @@ LabelTitle = "pip2",
 withrows = FALSE,
 size = "small")
 }
-

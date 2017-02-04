@@ -9,4 +9,3 @@
 geneInfoHT for normalization of HTseq data
 }
 \keyword{internal}
-
