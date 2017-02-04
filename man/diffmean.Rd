@@ -44,4 +44,3 @@ data <- SummarizedExperiment::SummarizedExperiment(
  diff.mean <- TCGAbiolinks:::diffmean(data,groupCol = "group")
 }
 \keyword{internal}
-

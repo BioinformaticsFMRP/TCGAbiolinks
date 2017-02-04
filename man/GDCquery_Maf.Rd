@@ -33,4 +33,3 @@ acc.muse.maf <- GDCquery_Maf("ACC", pipelines = "muse")
    acc.mutect.maf <- GDCquery_Maf("ACC", pipelines = "mutect2")
 }
 }
-

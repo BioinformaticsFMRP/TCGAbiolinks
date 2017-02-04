@@ -631,3 +631,25 @@ print.header <- function(text, type ="section"){
     message(paste(ifelse(type=="section","o","oo"),text))
     message(paste(rep("-",nchar(text)+ 3),collapse = ""))
 }
+
+#' @title Get the results table from query
+#' @description
+#' Get the results table from query, it can select columns with cols argument
+#' and return a number of rows using rows argument.
+#' @param query A object from GDCquery
+#' @param rows Rows identifiers (row numbers)
+#' @param cols Columns identifiers (col names)
+#' @export
+#' @examples
+#' query <- GDCquery(project = "TCGA-GBM",
+#'                   data.category = "Transcriptome Profiling",
+#'                   data.type = "Gene Expression Quantification",
+#'                   workflow.type = "HTSeq - Counts",
+#'                   barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"))
+#' results <- getResults(query)
+getResults <- function(query, rows, cols){
+    if(missing(cols) & missing(rows)) return(query$results[[1]])
+    if(missing(cols) & !missing(rows)) return(query$results[[1]][rows,])
+    if(!missing(cols) & missing(rows)) return(query$results[[1]][,cols])
+    if(!missing(cols) & !missing(rows)) return(query$results[[1]][rows,cols])
+}
