@@ -11,4 +11,3 @@ TCGA Table with version, number of samples and size (Mbyte) of
 BRCA IlluminaHiSeq_RNASeqV2 Level 3
 }
 \keyword{internal}
-
