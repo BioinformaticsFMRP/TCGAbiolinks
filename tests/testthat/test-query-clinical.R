@@ -1,7 +1,6 @@
 context("query_clinical")
 
 test_that("TCGAquery_SampleTypes returns the correct barcodes", {
-    sink("/dev/null");
     barcode <- c("TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1")
     expect_equal(TCGAquery_SampleTypes(barcode,c("TR")),barcode[2])
     expect_equal(TCGAquery_SampleTypes(barcode,c("TP","TR")),barcode)
