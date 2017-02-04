@@ -16,4 +16,3 @@ getGDCprojects uses the following api to get projects
 \examples{
 projects <- getGDCprojects()
 }
-

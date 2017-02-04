@@ -1,6 +1,7 @@
 context("Analyse")
 
 test_that("TCGAanalyze_survival creates pdf", {
+    sink("/dev/null");
     clin <- GDCquery_clinic("TCGA-ACC", type = "clinical", save.csv = FALSE)
     TCGAanalyze_survival(clin,clusterCol="gender",filename = "test.pdf")
     expect_true(file.exists("test.pdf"))
@@ -26,6 +27,40 @@ test_that("TCGAanalyze_DMR ask for the missing parameters", {
     expect_message(TCGAanalyze_DMR(data, p.cut = 0.85),"Please, set the groupCol parameter")
     expect_null(TCGAanalyze_DMR(data, p.cut = 0.85,"group"))
     expect_message(TCGAanalyze_DMR(data, p.cut = 0.85,"group"),"Please, set the group1 and group2 parameters")
+})
+
+test_that("TCGAanalyze_DMR is handling NAs correctly", {
+    nrows <- 2; ncols <- 20
+    counts <- matrix(c(rep(0.9,20),rep(0.1,20)), nrows)
+    counts[1,1] <- NA
+    rowRanges <- GenomicRanges::GRanges((rep("chr1",2)),
+                                        IRanges::IRanges(c(2000,2000), width=100),
+                                        strand=c("+","-"),
+                                        feature_id=sprintf("ID%03d", 1:2))
+    colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
+                                    row.names=LETTERS[1:20],
+                                    group=rep(c("group1","group2"),c(10,10)))
+    data <- SummarizedExperiment::SummarizedExperiment(
+        assays=S4Vectors::SimpleList(counts=counts),
+        rowRanges=rowRanges,
+        colData=colData)
+    SummarizedExperiment::colData(data)$group <- c(rep("group1",10),  rep("group2",10))
+    hypo.hyper <- TCGAanalyze_DMR(data, p.cut = 0.85,"group","group1","group2")
+    result <- values(hypo.hyper)[1,]
+    expect_equal(result$mean.group1,0.9)
+    expect_equal(result$mean.group2,0.1)
+    expect_equal(result$diffmean.group1.group2 , -0.8)
+    expect_equal(result$status.group1.group2 , "Hypomethylated")
+    expect_equal(result$diffmean.group2.group1 , 0.8)
+    expect_equal(result$status.group2.group1 , "Hypermethylated")
+
+    counts[1,] <- NA
+    data <- SummarizedExperiment::SummarizedExperiment(
+        assays=S4Vectors::SimpleList(counts=counts),
+        rowRanges=rowRanges,
+        colData=colData)
+    expect_error(TCGAanalyze_DMR(data, p.cut = 0.85,"group","group1","group2"),
+                   "Sorry, but we found some probes with NA for all samples in your data, please either remove/or replace them")
 })
 
 test_that("Results of TCGAanalyze_DEA inverting groups changes signal and order of the signals are right", {
@@ -210,7 +245,7 @@ test_that("Results from TCGAanalyze_DEA and DMR in starburst plot are correct", 
                     result.met.cut.inv[2,]$logFC < 0 & result.met.cut.inv[2,]$diffmean.group2.group1 < 0)
     unlink("DMR_results_group_group1_group2_pcut_0.85_meancut_0.2.csv")
     unlink("group_group1_group2_pcut_0.85_meancut_0.2.rda")
-    unlink("histogram_diffmean.png")
+    unlink("histogram_diffmean.group1group2.png")
     unlink("histogram_pvalues.png")
     unlink("histogram_pvalues_adj.png")
     unlink("methylation_volcano.pdf")
