@@ -1,0 +1,33 @@
+---
+title: "TCGAbioinks: mutation examples"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+knitr::opts_knit$set(progress = FALSE)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(TCGAbiolinks)
+library(SummarizedExperiment)
+library(dplyr)
+library(DT)
+```
+
+
+# Mutation data
+
+This exmaple will download MAF (mutation annotation files) for variant calling pipeline muse.
+Pipelines options are: muse, varscan2, somaticsniper, mutect. For more information please access
+[GDC docs](https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/).
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+acc.maf <- GDCquery_Maf("ACC", pipelines = "muse")
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+# Only first 100 to make render faster
+datatable(acc.maf[1:100,],
+              filter = 'top',
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+              rownames = FALSE)
+```
