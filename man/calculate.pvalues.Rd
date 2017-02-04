@@ -67,4 +67,3 @@ data <- calculate.pvalues(data,"group")
 }
 }
 \keyword{internal}
-

@@ -1,5 +1,5 @@
 ---
-title: "TCGAbioinks: mutation examples"
+title: "Download and prepare examples"
 ---
 
 ```{r setup, include=FALSE}

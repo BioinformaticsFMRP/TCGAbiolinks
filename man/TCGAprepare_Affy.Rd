@@ -24,4 +24,3 @@ Prepare CEL files into an AffyBatch.
 to add example
 }
 }
-

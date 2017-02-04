@@ -37,4 +37,3 @@ clinical.drug <- GDCprepare_clinic(query,"sample")
 clinical.radiation <- GDCprepare_clinic(query,"portion")
 clinical.admin <- GDCprepare_clinic(query,"slide")
 }
-
