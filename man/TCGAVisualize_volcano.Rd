@@ -89,4 +89,3 @@ TCGAVisualize_volcano(x,y,filename = NULL,y.cut = 10000000,x.cut=c(-0.3,0.8),
                       names.fill = TRUE, highlight = c("1","2"),show="both")
 while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 }
-
