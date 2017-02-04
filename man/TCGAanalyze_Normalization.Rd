@@ -46,4 +46,3 @@ TCGAanalyze_Normalization allows user to normalize mRNA transcripts and miRNA,
 \examples{
 dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 }
-
