@@ -72,3 +72,7 @@ after_success:
 
 r_build_args: --no-build-vignettes --no-manual --no-resave-data
 r_check_args: --no-build-vignettes --no-manual
+
+notifications:
+  slack: omics-team:mp8k727GslFLZPQrmuvOkCcc
+  email: false
