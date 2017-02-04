@@ -66,4 +66,3 @@ Biplot for Principal Components using ggplot2
 Vincent Q. Vu.
 }
 \keyword{internal}
-

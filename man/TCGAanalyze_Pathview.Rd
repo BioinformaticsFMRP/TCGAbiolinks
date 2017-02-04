@@ -17,4 +17,3 @@ an adjacent matrix
 \description{
 TCGAanalyze_Pathview pathway based data integration and visualization.
 }
-
