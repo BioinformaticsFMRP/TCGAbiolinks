@@ -1,7 +1,6 @@
 context("Analyse")
 
 test_that("TCGAanalyze_survival creates pdf", {
-    sink("/dev/null");
     clin <- GDCquery_clinic("TCGA-ACC", type = "clinical", save.csv = FALSE)
     TCGAanalyze_survival(clin,clusterCol="gender",filename = "test.pdf")
     expect_true(file.exists("test.pdf"))
