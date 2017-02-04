@@ -101,7 +101,5 @@ datatable(assay(data)[1:100,],
               options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
               rownames = TRUE)
 
-datatable(as.data.frame(values(data)),
-              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-              rownames = TRUE)
+rowRanges(data)
 ```
