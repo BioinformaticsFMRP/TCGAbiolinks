@@ -923,7 +923,7 @@ legacyPipeline <- function(project, data.category, platform, n = 20){
                       data.category = data.category,
                       platform = platform,
                       legacy = TRUE)
-    cases <- query$results[[1]]$cases[1:n] # Get two samples from the search
+    cases <- getResults(query, rows = 1:n, cols="cases") # Get two samples from the search
     query <- GDCquery(project = project,
                       data.category = data.category,
                       platform = platform,
@@ -954,7 +954,7 @@ for(proj in projects){
                       legacy = TRUE,
                       file.type = ".idat",
                       platform = "Illumina Human Methylation 450")
-    match.file.cases <- query$results[[1]][,c("file_name","cases")]
+    match.file.cases <- getResults(query,cols=c("cases","file_name"))
     match.file.cases$project <- proj
     match.file.cases.all <- rbind(match.file.cases.all,match.file.cases)
     tryCatch(GDCdownload(query, method = "api",chunks.per.download = 20),
@@ -1823,7 +1823,7 @@ query <- GDCquery(project = CancerProject,
                   data.type = "Gene Expression Quantification", 
                   workflow.type = "HTSeq - Counts")
 
-samplesDown <- query$results[[1]]$cases
+samplesDown <- getResults(query,cols=c("cases"))
 
 dataSmTP <- TCGAquery_SampleTypes(barcode = samplesDown,
                                   typesample = "TP")
@@ -1887,7 +1887,7 @@ query.miR <- GDCquery(project = CancerProject,
                   file.type = "hg19.mirna",
                   legacy = TRUE)
 
-samplesDown.miR <- query.miR$results[[1]]$cases
+samplesDown.miR <- getResults(query.miR,cols=c("cases"))
 
 dataSmTP.miR <- TCGAquery_SampleTypes(barcode = samplesDown.miR,
                                   typesample = "TP")
@@ -1968,9 +1968,9 @@ dataSubt <- TCGAquery_subtype(tumor = "BRCA")
 dataClin <- GDCquery_clinic(project = "TCGA-BRCA","clinical") 
 
 # Which samples are primary solid tumor
-dataSmTP <- TCGAquery_SampleTypes(query.exp$results[[1]]$cases,"TP") 
+dataSmTP <- TCGAquery_SampleTypes(getResults(query.exp,cols="cases"),"TP") 
 # which samples are solid tissue normal
-dataSmNT <- TCGAquery_SampleTypes(query.exp$results[[1]]$cases,"NT")
+dataSmNT <- TCGAquery_SampleTypes(getResults(query.exp,cols="cases"),"NT")
 ```
 
 Using `TCGAnalyze_DEA`, we identified 3,390 differentially expression genes (DEG) (log 
