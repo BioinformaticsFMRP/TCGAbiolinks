@@ -105,4 +105,4 @@ VignetteBuilder: knitr
 LazyData: true
 URL: https://github.com/BioinformaticsFMRP/TCGAbiolinks
 BugReports: https://github.com/BioinformaticsFMRP/TCGAbiolinks/issues
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.0

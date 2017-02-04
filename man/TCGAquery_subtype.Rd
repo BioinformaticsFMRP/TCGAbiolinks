@@ -22,4 +22,3 @@ TCGAquery_subtype Retrieve molecular subtypes for a given tumor
 \examples{
 dataSubt <- TCGAquery_subtype(tumor = "lgg")
 }
-

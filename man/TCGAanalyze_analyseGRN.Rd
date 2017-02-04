@@ -20,4 +20,3 @@ an adjacent matrix
 \description{
 TCGAanalyze_analyseGRN perform gene regulatory network.
 }
-
