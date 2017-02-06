@@ -1,9 +1,11 @@
 html_document:
   self_contained: false
-  number_sections: yes
+  number_sections: no
   theme: flatly
   highlight: tango
   mathjax: null
+  toc: true
+  toc_float: true
   toc_depth: 2
   css: include/site.css
   includes:
