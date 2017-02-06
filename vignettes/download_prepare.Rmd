@@ -1,9 +1,9 @@
 ---
-title: "Download and prepare examples"
+title: "TCGAbiolinks: Downloading and preparing files for analysis"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(progress = FALSE)
 ```
 
@@ -14,14 +14,21 @@ library(dplyr)
 library(DT)
 ```
 
-# Downloading data e preparing for analysis
+**TCGAbiolinks** has provided a few functions to download and prepare data from GDC for analysis.
+This section starts by explaning the different downloads methods and the SummarizedExperiment object, which 
+is the default data structure used in TCGAbiolinks, followed by some examples.
+
+
+---
+
+# Downloading and preparing data for analysis
 
 <div class="panel panel-info">
 <div class="panel-heading">Data download: Methods differences</div>
 <div class="panel-body">
 
 
-There are two methods to download GDC data using TCGAbiolunks:
+There are two methods to download GDC data using TCGAbiolinks:
 - client: this method creates a MANIFEST file and download the data using [GDC Data Transfer Tool](https://gdc.cancer.gov/access-data/gdc-data-transfer-tool)
     this method is more reliable but it might be slower compared to the api method.
 - api: this methods used the [GDC Application Programming Interface (API)](https://gdc.cancer.gov/developers/gdc-application-programming-interface-api) to downlaod the data.
