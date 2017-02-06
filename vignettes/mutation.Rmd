@@ -1,9 +1,9 @@
 ---
-title: "Mutation examples"
+title: "TCGAbiolinks: Searching and downloading mutation files"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(progress = FALSE)
 ```
 
@@ -14,6 +14,12 @@ library(dplyr)
 library(DT)
 ```
 
+
+**TCGAbiolinks** has provided a few functions to download mutation data from GDC.
+This section shows how to use the function `GDCquery_Maf`.
+
+
+---
 
 # Mutation data
 
@@ -26,7 +32,7 @@ acc.maf <- GDCquery_Maf("ACC", pipelines = "muse")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 # Only first 100 to make render faster
-datatable(acc.maf[1:100,],
+datatable(acc.maf[1:50,],
               filter = 'top',
               options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
               rownames = FALSE)
