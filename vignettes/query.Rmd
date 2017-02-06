@@ -1,12 +1,19 @@
 ---
-title: "Query examples"
+title: "TCGAbiolinks: Searching GDC database"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(progress = FALSE)
 ```
 
+
+**TCGAbiolinks** has provided a few functions to search GDC database.
+This section starts by explaining the different GDC sources (Harmonized and Legacy Archive), followed by some examples
+how to access them.
+
+
+---
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 library(TCGAbiolinks)
 library(SummarizedExperiment)
@@ -133,7 +140,7 @@ datatable(getResults(query, rows = 1:100,cols = c("file_name","cases")),
 ```
 
 
-# Legacy archive  examples
+# Legacy archive examples
 
 ## DNA methylation
 
