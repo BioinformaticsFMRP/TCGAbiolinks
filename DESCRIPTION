@@ -94,6 +94,7 @@ biocViews: DNAMethylation,
     DifferentialExpression,
     Pathways,
     Network,
+    Sequencing,
     Survival
 Suggests:
     testthat,
