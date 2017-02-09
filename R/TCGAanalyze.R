@@ -888,8 +888,8 @@ TCGAanalyze_EA <- function(GeneName,RegulonList,TableEnrichment,
                 current_pathway_commongenes_num_with_percent <- gsub(" ","",paste(current_pathway_commongenes_num, current_pathway_commongenes_percent,"pv=",format(FisherpvalueTF,digits=2)))
                 table_pathway_enriched[i,"CommonGenesPathway"] <- length(genes_common_pathway_TFregulon)
                 table_pathway_enriched[i,"GenesInPathway"] <- length(genes_from_current_pathway_from_EA)
-                table_pathway_enriched[i,"PercentPathway"] <-  as.numeric(table_pathway_enriched[i,"CommonGenesPathway"]) / as.numeric(table_pathway_enriched[i,"GenesInPathway"])  *100
-                table_pathway_enriched[i,"PercentRegulon"] <-  as.numeric(table_pathway_enriched[i,"CommonGenesPathway"]) / length(RegulonList)  *100
+                table_pathway_enriched[i,"PercentPathway"] <- as.numeric(table_pathway_enriched[i,"CommonGenesPathway"]) / as.numeric(table_pathway_enriched[i,"GenesInPathway"])  *100
+                table_pathway_enriched[i,"PercentRegulon"] <- as.numeric(table_pathway_enriched[i,"CommonGenesPathway"]) / length(RegulonList)  *100
             } }
     }
     table_pathway_enriched <- table_pathway_enriched[order(table_pathway_enriched[,"Pvalue"],decreasing = FALSE),]
@@ -902,7 +902,7 @@ TCGAanalyze_EA <- function(GeneName,RegulonList,TableEnrichment,
         tmp <- table_pathway_enriched
         tmp <- paste(tmp[,"Pathway"],"; FDR= ", format(tmp[,"FDR"],digits = 3),"; (ng="   ,round(tmp[,"GenesInPathway"]),"); (ncommon=", format(tmp[,"CommonGenesPathway"],digits = 2), ")" ,sep = "")
         tmp <- as.matrix(tmp)
-        topPathways_tab <- topPathways_tab[,1:nrow(table_pathway_enriched)]
+        topPathways_tab <- topPathways_tab[,1:nrow(table_pathway_enriched),drop=FALSE]
         topPathways_tab[1,] <- tmp
     } else {
         topPathways_tab <- NA
