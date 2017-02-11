@@ -89,6 +89,7 @@ GDCquery <- function(project,
                      experimental.strategy,
                      sample.type){
 
+    isServeOK()
     suppressWarnings({
         # prepare output
         if(missing(sample.type)) {
