@@ -45,7 +45,7 @@ GDCdownload <- function(query,
                         method = "api",
                         directory = "GDCdata",
                         chunks.per.download = NULL) {
-
+    isServeOK()
     if(missing(query)) stop("Please set query argument")
 
     if(!(method %in% c("api","client"))) stop("method arguments possible values are: 'api' or 'client'")
