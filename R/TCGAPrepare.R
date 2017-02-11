@@ -58,6 +58,7 @@ GDCprepare <- function(query,
                        add.gistic2.mut = NULL,
                        mut.pipeline = "mutect2"){
 
+    isServeOK()
     if(missing(query)) stop("Please set query parameter")
     if(any(duplicated(query$results[[1]]$cases))) {
         dup <- query$results[[1]]$cases[duplicated(query$results[[1]]$cases)]
