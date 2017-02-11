@@ -29,8 +29,10 @@
 #' status <- isServeOK()
 #' @return Return true if status is ok
 isServeOK <- function(){
-    status <- fromJSON("https://gdc-api.nci.nih.gov/status",simplifyDataFrame = TRUE)$status
-    if(status != "OK") stop("GDC server down, try to use this package later")
+    tryCatch({
+        status <- fromJSON("https://gdc-api.nci.nih.gov/status",simplifyDataFrame = TRUE)$status
+        if(status != "OK") stop("GDC server down, try to use this package later")
+    },error = function(e) stop("GDC server down, try to use this package later"))
     return(TRUE)
 }
 
