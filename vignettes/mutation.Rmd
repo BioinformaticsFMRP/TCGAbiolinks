@@ -2,9 +2,9 @@
 title: "TCGAbiolinks: Searching and downloading mutation files"
 date: "`r BiocStyle::doc_date()`"
 vignette: >
+  %\VignetteEncoding{UTF-8}
   %\VignetteIndexEntry{"TCGAbiolinks: Searching and downloading mutation files"}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
