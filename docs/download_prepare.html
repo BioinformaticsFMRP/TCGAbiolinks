@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+<meta name="date" content="2017-02-19" />
+
+<title>TCGAbiolinks: Downloading and preparing files for analysis</title>
+
+<script src="download_prepare_files/jquery-1.12.4/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="download_prepare_files/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="download_prepare_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="download_prepare_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="download_prepare_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="download_prepare_files/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="download_prepare_files/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="download_prepare_files/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="download_prepare_files/navigation-1.1/tabsets.js"></script>
+<script src="download_prepare_files/htmlwidgets-0.8/htmlwidgets.js"></script>
+<script src="download_prepare_files/datatables-binding-0.2/datatables.js"></script>
+<link href="download_prepare_files/dt-core-1.10.12/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="download_prepare_files/dt-core-1.10.12/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="download_prepare_files/dt-core-1.10.12/js/jquery.dataTables.min.js"></script>
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 70px;
+}
+p code {
+  white-space: inherit;
+}
+.panel-heading {
+  text-align: center;
+}
+</style>
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+
+<script src="libs/jquery/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap/css/flatly.min.css" rel="stylesheet" />
+<script src="libs/bootstrap/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap/shim/respond.min.js"></script>
+<script src="libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="libs/datatables-binding/datatables.js"></script>
+<link href="libs/dt-core/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="libs/dt-core/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="libs/dt-core/js/jquery.dataTables.min.js"></script>
+<link href="libs/nouislider/jquery.nouislider.min.css" rel="stylesheet" />
+<script src="libs/nouislider/jquery.nouislider.min.js"></script>
+<link href="libs/selectize/selectize.bootstrap3.css" rel="stylesheet" />
+<script src="libs/selectize/selectize.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<style type="text/css">
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; background-color: #f8f8f8; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+pre, code { background-color: #f8f8f8; }
+code > span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code > span.dt { color: #204a87; } /* DataType */
+code > span.dv { color: #0000cf; } /* DecVal */
+code > span.bn { color: #0000cf; } /* BaseN */
+code > span.fl { color: #0000cf; } /* Float */
+code > span.ch { color: #4e9a06; } /* Char */
+code > span.st { color: #4e9a06; } /* String */
+code > span.co { color: #8f5902; font-style: italic; } /* Comment */
+code > span.ot { color: #8f5902; } /* Other */
+code > span.al { color: #ef2929; } /* Alert */
+code > span.fu { color: #000000; } /* Function */
+code > span.er { color: #a40000; font-weight: bold; } /* Error */
+code > span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #000000; } /* Constant */
+code > span.sc { color: #000000; } /* SpecialChar */
+code > span.vs { color: #4e9a06; } /* VerbatimString */
+code > span.ss { color: #4e9a06; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #000000; } /* Variable */
+code > span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code > span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code > span.ex { } /* Extension */
+code > span.at { color: #c4a000; } /* Attribute */
+code > span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code > span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="include/site.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; background-color: #f8f8f8; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+pre, code { background-color: #f8f8f8; }
+code > span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code > span.dt { color: #204a87; } /* DataType */
+code > span.dv { color: #0000cf; } /* DecVal */
+code > span.bn { color: #0000cf; } /* BaseN */
+code > span.fl { color: #0000cf; } /* Float */
+code > span.ch { color: #4e9a06; } /* Char */
+code > span.st { color: #4e9a06; } /* String */
+code > span.co { color: #8f5902; font-style: italic; } /* Comment */
+code > span.ot { color: #8f5902; } /* Other */
+code > span.al { color: #ef2929; } /* Alert */
+code > span.fu { color: #000000; } /* Function */
+code > span.er { color: #a40000; font-weight: bold; } /* Error */
+code > span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #000000; } /* Constant */
+code > span.sc { color: #000000; } /* SpecialChar */
+code > span.vs { color: #4e9a06; } /* VerbatimString */
+code > span.ss { color: #4e9a06; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #000000; } /* Variable */
+code > span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code > span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code > span.ex { } /* Extension */
+code > span.at { color: #c4a000; } /* Attribute */
+code > span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code > span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="include/site.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a href="#" class="navbar-left"><img  src="include/logo.png" height="42" width="170"vspace=10 hspace=10"></a>
+      <a class="navbar-brand" href="./">Introduction</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li><a href="query.html">Query</a></li>
+        <li><a href="download_prepare.html">Download & Prepare</a></li>
+        <li><a href="clinical.html">Clinical data</a></li>
+        <li><a href="mutation.html">Mutation</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="https://github.com/BioinformaticsFMRP/TCGAbiolinks" title="View Source on Github"><i class="fa fa-github fa-lg"></i></a></li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</nav><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">TCGAbiolinks: Downloading and preparing files for analysis</h1>
+<h4 class="date"><em>19 February 2017</em></h4>
+
+</div>
+
+
+<p><strong>TCGAbiolinks</strong> has provided a few functions to download and prepare data from GDC for analysis. This section starts by explaning the different downloads methods and the SummarizedExperiment object, which is the default data structure used in TCGAbiolinks, followed by some examples.</p>
+<hr />
+<div id="downloading-and-preparing-data-for-analysis" class="section level1">
+<h1>Downloading and preparing data for analysis</h1>
+<div class="panel panel-info">
+<div class="panel-heading">
+Data download: Methods differences
+</div>
+<div class="panel-body">
+<p>There are two methods to download GDC data using TCGAbiolinks:</p>
+<ul>
+<li>client: this method creates a MANIFEST file and download the data using <a href="https://gdc.cancer.gov/access-data/gdc-data-transfer-tool">GDC Data Transfer Tool</a> this method is more reliable but it might be slower compared to the api method.</li>
+<li>api: this methods used the <a href="https://gdc.cancer.gov/developers/gdc-application-programming-interface-api">GDC Application Programming Interface (API)</a> to downlaod the data. This will create a MANIFEST file and the data downloaded will be compressed into a tar.gz file. If the size and the number of the files are too big this tar.gz will be too big whicih might have a high probability of download failure. To solve that we created the <code>chunks.per.download</code> argument which will split the files into small chunks, for example, if chunks.per.download is equal to 10 we will download only 10 files inside each tar.gz.</li>
+</ul>
+</div>
+</div>
+<div class="panel panel-info">
+<div class="panel-heading">
+Data prepared: SummarizedExperiment object
+</div>
+<div class="panel-body">
+<p>A <a href="http://www.nature.com/nmeth/journal/v12/n2/fig_tab/nmeth.3252_F2.html">SummarizedExperiment object</a> has three main matrices that can be accessed using the <a href="http://bioconductor.org/packages/SummarizedExperiment/">SummarizedExperiment package</a>):</p>
+<ul>
+<li>Sample matrix information is accessed via <code>colData(data)</code>: stores sample information. TCGAbiolinks will add indexed clinical data and subtype information from marker TCGA papers.</li>
+<li>Assay matrix information is accessed via <code>assay(data)</code>: stores molecular data</li>
+<li>Feature matrix information (gene information) is accessed via <code>rowRanges(data)</code>: stores metadata about the features, including their genomic ranges</li>
+</ul>
+</div>
+</div>
+<div id="search-and-download-data-from-legacy-database-using-gdc-api-method" class="section level2">
+<h2>Search and download data from legacy database using GDC api method</h2>
+<p>In this example we will download gene expression data from legacy database (data aligned against genome of reference hg19) using GDC api method and we will show object data and metadata.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">query &lt;-<span class="st"> </span><span class="kw">GDCquery</span>(<span class="dt">project =</span> <span class="st">&quot;TCGA-GBM&quot;</span>,
+                           <span class="dt">data.category =</span> <span class="st">&quot;Gene expression&quot;</span>,
+                           <span class="dt">data.type =</span> <span class="st">&quot;Gene expression quantification&quot;</span>,
+                           <span class="dt">platform =</span> <span class="st">&quot;Illumina HiSeq&quot;</span>,
+                           <span class="dt">file.type  =</span> <span class="st">&quot;normalized_results&quot;</span>,
+                           <span class="dt">experimental.strategy =</span> <span class="st">&quot;RNA-Seq&quot;</span>,
+                           <span class="dt">barcode =</span> <span class="kw">c</span>(<span class="st">&quot;TCGA-14-0736-02A-01R-2005-01&quot;</span>, <span class="st">&quot;TCGA-06-0211-02A-02R-2005-01&quot;</span>),
+                           <span class="dt">legacy =</span> <span class="ot">TRUE</span>)
+<span class="kw">GDCdownload</span>(query, <span class="dt">method =</span> <span class="st">&quot;api&quot;</span>, <span class="dt">chunks.per.download =</span> <span class="dv">10</span>)
+data &lt;-<span class="st"> </span><span class="kw">GDCprepare</span>(query)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Gene expression aligned against hg19.</span>
+<span class="kw">datatable</span>(<span class="kw">as.data.frame</span>(<span class="kw">colData</span>(data)),
+              <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">scrollX =</span> <span class="ot">TRUE</span>, <span class="dt">keys =</span> <span class="ot">TRUE</span>, <span class="dt">pageLength =</span> <span class="dv">5</span>),
+              <span class="dt">rownames =</span> <span class="ot">FALSE</span>)</code></pre></div>
+<div id="htmlwidget-8e0ed546b735e07f69da" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-8e0ed546b735e07f69da">{"x":{"filter":"none","data":[["TCGA-14-0736","TCGA-06-0211"],["TCGA-14-0736-02A-01R-2005-01","TCGA-06-0211-02A-02R-2005-01"],["TCGA-14-0736-02A","TCGA-06-0211-02A"],["TR","TR"],["Recurrent Solid Tumor","Recurrent Solid Tumor"],["not reported","not reported"],["not reported","not reported"],["2016-09-02T19:04:00.238395-05:00","2016-09-02T19:13:32.303626-05:00"],["c71.9","c71.9"],["not reported","not reported"],[18219,17515],["dead","dead"],["9440/3","9440/3"],[460,360],[null,null],[460,360],[null,null],[null,null],["c2cca6a5-69cd-5e31-b0e9-fa80d38e1375","cec1bfa2-94cf-5bf5-ad44-d1aad1c78586"],["not reported","not reported"],[{"days_to_treatment":[null],"updated_datetime":["2016-09-02T19:04:00.238395-05:00"],"created_datetime":[null],"submitter_id":["TCGA-14-0736_treatment"],"treatment_id":["c928e322-8e7b-5d9f-953d-98f3f0dfcfdb"],"state":[null],"therapeutic_agents":[null],"treatment_intent_type":[null],"treatment_or_therapy":[null]},{"days_to_treatment":[null],"updated_datetime":["2016-09-02T19:13:32.303626-05:00"],"created_datetime":[null],"submitter_id":["TCGA-06-0211_treatment"],"treatment_id":["165ec844-ba8b-5b1b-9ef9-457d62fa15e0"],"state":[null],"therapeutic_agents":[null],"treatment_intent_type":[null],"treatment_or_therapy":[null]}],["c71.9","c71.9"],[-18219,-17515],["not reported","not reported"],["not reported","not reported"],["c71.9","c71.9"],[null,null],[null,null],[null,null],["2016-09-02T19:04:00.238395-05:00","2016-09-02T19:13:32.303626-05:00"],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],["93758177-ffbb-567a-8ae4-04ad1d48cb45","68b17566-c576-5237-badd-6e1979a8f86f"],["2016-09-02T19:04:00.238395-05:00","2016-09-02T19:13:32.303626-05:00"],[null,null],["male","male"],[null,null],[1950,1950],["black or african american","white"],["e597a52f-1c28-5248-a751-22d810af3013","fe9a665e-6e67-5c8c-ac4f-b316f44db506"],["not reported","not hispanic or latino"],[2000,1997],["TCGA-14-0736","TCGA-06-0211"],[null,null],["Glioblastoma Multiforme","Glioblastoma Multiforme"],[true,true],["legacy","legacy"],["Brain","Brain"],["TCGA-GBM","TCGA-GBM"],["Glioblastoma Multiforme","Glioblastoma Multiforme"],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>patient\u003c/th>\n      <th>barcode\u003c/th>\n      <th>sample\u003c/th>\n      <th>shortLetterCode\u003c/th>\n      <th>definition\u003c/th>\n      <th>classification_of_tumor\u003c/th>\n      <th>last_known_disease_status\u003c/th>\n      <th>updated_datetime.x\u003c/th>\n      <th>primary_diagnosis\u003c/th>\n      <th>tumor_stage\u003c/th>\n      <th>age_at_diagnosis\u003c/th>\n      <th>vital_status\u003c/th>\n      <th>morphology\u003c/th>\n      <th>days_to_death\u003c/th>\n      <th>days_to_last_known_disease_status\u003c/th>\n      <th>days_to_last_follow_up\u003c/th>\n      <th>state.x\u003c/th>\n      <th>days_to_recurrence\u003c/th>\n      <th>diagnosis_id\u003c/th>\n      <th>tumor_grade\u003c/th>\n      <th>treatments\u003c/th>\n      <th>tissue_or_organ_of_origin\u003c/th>\n      <th>days_to_birth\u003c/th>\n      <th>progression_or_recurrence\u003c/th>\n      <th>prior_malignancy\u003c/th>\n      <th>site_of_resection_or_biopsy\u003c/th>\n      <th>created_datetime.x\u003c/th>\n      <th>cigarettes_per_day\u003c/th>\n      <th>weight\u003c/th>\n      <th>updated_datetime.y\u003c/th>\n      <th>alcohol_history\u003c/th>\n      <th>alcohol_intensity\u003c/th>\n      <th>bmi\u003c/th>\n      <th>years_smoked\u003c/th>\n      <th>height\u003c/th>\n      <th>created_datetime.y\u003c/th>\n      <th>state.y\u003c/th>\n      <th>exposure_id\u003c/th>\n      <th>updated_datetime\u003c/th>\n      <th>created_datetime\u003c/th>\n      <th>gender\u003c/th>\n      <th>state\u003c/th>\n      <th>year_of_birth\u003c/th>\n      <th>race\u003c/th>\n      <th>demographic_id\u003c/th>\n      <th>ethnicity\u003c/th>\n      <th>year_of_death\u003c/th>\n      <th>bcr_patient_barcode\u003c/th>\n      <th>dbgap_accession_number\u003c/th>\n      <th>disease_type\u003c/th>\n      <th>released\u003c/th>\n      <th>state.1\u003c/th>\n      <th>primary_site\u003c/th>\n      <th>project_id\u003c/th>\n      <th>name\u003c/th>\n      <th>subtype_patient\u003c/th>\n      <th>subtype_Tissue.source.site\u003c/th>\n      <th>subtype_Study\u003c/th>\n      <th>subtype_BCR\u003c/th>\n      <th>subtype_Whole.exome\u003c/th>\n      <th>subtype_Whole.genome\u003c/th>\n      <th>subtype_RNAseq\u003c/th>\n      <th>subtype_SNP6\u003c/th>\n      <th>subtype_U133a\u003c/th>\n      <th>subtype_HM450\u003c/th>\n      <th>subtype_HM27\u003c/th>\n      <th>subtype_RPPA\u003c/th>\n      <th>subtype_Histology\u003c/th>\n      <th>subtype_Grade\u003c/th>\n      <th>subtype_Age..years.at.diagnosis.\u003c/th>\n      <th>subtype_Gender\u003c/th>\n      <th>subtype_Survival..months.\u003c/th>\n      <th>subtype_Vital.status..1.dead.\u003c/th>\n      <th>subtype_Karnofsky.Performance.Score\u003c/th>\n      <th>subtype_Mutation.Count\u003c/th>\n      <th>subtype_Percent.aneuploidy\u003c/th>\n      <th>subtype_IDH.status\u003c/th>\n      <th>subtype_X1p.19q.codeletion\u003c/th>\n      <th>subtype_IDH.codel.subtype\u003c/th>\n      <th>subtype_MGMT.promoter.status\u003c/th>\n      <th>subtype_Chr.7.gain.Chr.10.loss\u003c/th>\n      <th>subtype_Chr.19.20.co.gain\u003c/th>\n      <th>subtype_TERT.promoter.status\u003c/th>\n      <th>subtype_TERT.expression..log2.\u003c/th>\n      <th>subtype_TERT.expression.status\u003c/th>\n      <th>subtype_ATRX.status\u003c/th>\n      <th>subtype_DAXX.status\u003c/th>\n      <th>subtype_Telomere.Maintenance\u003c/th>\n      <th>subtype_BRAF.V600E.status\u003c/th>\n      <th>subtype_BRAF.KIAA1549.fusion\u003c/th>\n      <th>subtype_ABSOLUTE.purity\u003c/th>\n      <th>subtype_ABSOLUTE.ploidy\u003c/th>\n      <th>subtype_ESTIMATE.stromal.score\u003c/th>\n      <th>subtype_ESTIMATE.immune.score\u003c/th>\n      <th>subtype_ESTIMATE.combined.score\u003c/th>\n      <th>subtype_Original.Subtype\u003c/th>\n      <th>subtype_Transcriptome.Subtype\u003c/th>\n      <th>subtype_Pan.Glioma.RNA.Expression.Cluster\u003c/th>\n      <th>subtype_IDH.specific.RNA.Expression.Cluster\u003c/th>\n      <th>subtype_Pan.Glioma.DNA.Methylation.Cluster\u003c/th>\n      <th>subtype_IDH.specific.DNA.Methylation.Cluster\u003c/th>\n      <th>subtype_Supervised.DNA.Methylation.Cluster\u003c/th>\n      <th>subtype_Random.Forest.Sturm.Cluster\u003c/th>\n      <th>subtype_RPPA.cluster\u003c/th>\n      <th>subtype_Telomere.length.estimate.in.blood.normal..Kb.\u003c/th>\n      <th>subtype_Telomere.length.estimate.in.tumor..Kb.\u003c/th>\n    \u003c/tr>\n  \u003c/thead>\n\u003c/table>","options":{"scrollX":true,"keys":true,"pageLength":5,"columnDefs":[{"className":"dt-right","targets":[10,13,15,22,42,46,69,71,72,73,74,75,83,90,91,92,93,94,104,105]}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Only first 100 to make render faster</span>
+<span class="kw">datatable</span>(<span class="kw">assay</span>(data)[<span class="dv">1</span>:<span class="dv">100</span>,],
+              <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">scrollX =</span> <span class="ot">TRUE</span>, <span class="dt">keys =</span> <span class="ot">TRUE</span>, <span class="dt">pageLength =</span> <span class="dv">5</span>),
+              <span class="dt">rownames =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<div id="htmlwidget-a237e7eda2a29cebc519" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-a237e7eda2a29cebc519">{"x":{"filter":"none","data":[["A1BG","A2M","NAT1","NAT2","RP11-986E7.7","SERPINA3","AADAC","AAMP","AANAT","AARS","ABAT","ABCA1","ABCA2","ABCA3","ABCB7","ABCF1","ABCA4","ABL1","AOC1","ABL2","ABO","ABR","ACAA1","ACACA","ACACB","ACADL","ACADM","ACADS","ACADSB","ACADVL","ACAT1","ACAT2","ASIC2","ASIC1","ACHE","ACLY","ACO1","ACR","ACO2","ACOX1","ACP1","ACP2","ACP5","ACPP","ACRV1","ACTA1","ACTA2","ACTB","ACTG1","ACTC1","ACTG1","ACTG2","ACTN4","ACTL6A","ACTN1","ACTN2","ACTN3","ACVR1","ACVR1B","ACVR2A","ACVR2B","ACVRL1","ABHD14A-ACY1","ACY1","ACYP1","ACYP2","ADA","ADAM8","ADAM10","ADAR","ADARB1","ADARB2","ADCY1","ADCY2","ADCY3","ADCY5","ADCY6","ADCY7","ADCY8","ADCY9","ADCYAP1","ADCYAP1R1","ADD1","ADD2","ADD3","PLIN2","ADH1A","ADH1B","ADH1C","ADH4","ADH5","ADH6","ADH7","ADK","ADM","ADORA1","ADORA2A","ADORA2B","ADORA3","ADPRH"],[798.1285,11681.6573,164.5998,5.637,206399.0981,206399.0981,1.1274,2933.4837,6.7644,2280.7215,3155.5806,603.1567,1472.3788,1293.1229,484.7802,446.4487,18.0383,660.6539,5.637,214.2052,3.3822,2803.8331,2510.7103,713.6415,215.3326,19.1657,1593.0101,617.8129,845.5468,3729.301,2186.0203,798.0496,51.8602,666.2909,340.4735,2450.9583,462.2322,1.1274,3761.6122,1823.1793,2855.6933,1331.4543,209.6956,68.7711,24.8027,6.7644,3622.8523,91187.1477,91187.1477,109.3574,92041.7136,449.8309,1817.3732,1834.2728,2447.5761,273.9572,0,1096.956,724.9154,268.3202,43.9684,437.4295,1269.4927,1269.4927,113.867,2062.0068,383.3145,160.0902,497.1815,3366.4036,198.4216,31.5671,295.3777,3311.1612,947.8241,95.8286,412.6268,373.168,360.7666,242.3901,50.7328,1485.9076,5171.3641,241.2627,5449.8309,980.8343,0,12.4014,1.1274,10.1466,6350.6201,0,7.8918,622.3224,1158.9628,1304.3968,93.4837,160.0902,2538.8952,243.5175],[402.2892,33835.5229,70.9712,4.2689,45121.6649,45121.6649,0.5336,1717.1825,1.0672,2982.9242,3705.4429,4425.2668,1202.7748,1669.1569,518.143,1393.2764,14.4077,2362.3266,3.2017,625.4002,1.6009,3422.6254,1758.2711,854.8559,143.5432,8.5379,1067.7695,322.8388,228.9221,3490.9178,1196.905,576.873,16.5422,925.2935,528.8154,3894.8773,991.9957,1.6009,2753.6286,1632.3372,1708.6446,1658.4845,235.3255,64.0342,0.5336,11.206,2716.1153,171440.2348,171440.2348,19.2102,82494.6638,108.8581,7321.5315,1176.0939,8993.5966,471.7182,0.5336,631.27,902.8815,281.2166,204.9093,677.1612,332.7375,332.7375,101.921,617.9296,217.1825,353.2551,1567.2359,4405.5496,192.1025,3.2017,762.0064,988.794,910.7524,143.5432,917.2892,536.8196,290.2882,575.2401,70.9712,219.8506,5548.0256,842.5827,1668.0896,2570.9712,0,0,0,0,3086.9797,0.5336,0.5336,469.0502,1236.9264,1727.8549,188.3671,187.8335,1847.9189,355.3895]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> \u003c/th>\n      <th>TCGA-14-0736-02A-01R-2005-01\u003c/th>\n      <th>TCGA-06-0211-02A-02R-2005-01\u003c/th>\n    \u003c/tr>\n  \u003c/thead>\n\u003c/table>","options":{"scrollX":true,"keys":true,"pageLength":5,"columnDefs":[{"className":"dt-right","targets":[1,2]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rowRanges</span>(data)</code></pre></div>
+<pre><code>## GRanges object with 21022 ranges and 3 metadata columns:
+##                seqnames                 ranges strand |      gene_id
+##                   &lt;Rle&gt;              &lt;IRanges&gt;  &lt;Rle&gt; |  &lt;character&gt;
+##           A1BG    chr19   [58856544, 58864865]      - |         A1BG
+##            A2M    chr12   [ 9220260,  9268825]      - |          A2M
+##           NAT1     chr8   [18027986, 18081198]      + |         NAT1
+##           NAT2     chr8   [18248755, 18258728]      + |         NAT2
+##   RP11-986E7.7    chr14   [95058395, 95090983]      + | RP11-986E7.7
+##            ...      ...                    ...    ... .          ...
+##            FTX     chrX [ 73183790,  73513409]      - |          FTX
+##   TMED7-TICAM2     chr5 [114914339, 114961858]      - | TMED7-TICAM2
+##          TMED7     chr5 [114949205, 114968689]      - |        TMED7
+##         TICAM2     chr5 [114914339, 114961876]      - |       TICAM2
+##    SLC25A5-AS1     chrX [118599997, 118603061]      - |  SLC25A5-AS1
+##                entrezgene ensembl_gene_id
+##                 &lt;numeric&gt;     &lt;character&gt;
+##           A1BG          1 ENSG00000121410
+##            A2M          2 ENSG00000175899
+##           NAT1          9 ENSG00000171428
+##           NAT2         10 ENSG00000156006
+##   RP11-986E7.7         12 ENSG00000273259
+##            ...        ...             ...
+##            FTX  100302692 ENSG00000230590
+##   TMED7-TICAM2  100302736 ENSG00000251201
+##          TMED7  100302736 ENSG00000134970
+##         TICAM2  100302736 ENSG00000243414
+##    SLC25A5-AS1  100303728 ENSG00000224281
+##   -------
+##   seqinfo: 24 sequences from an unspecified genome; no seqlengths</code></pre>
+</div>
+<div id="search-and-download-data-for-two-samples-from-database" class="section level2">
+<h2>Search and download data for two samples from database</h2>
+<p>In this example we will download gene expression quantification from harmonized database (data aligned against genome of reference hg38) using GDC Data Transfer Tool. Also, it shows the object data and metadata.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Gene expression aligned against hg38</span>
+query &lt;-<span class="st"> </span><span class="kw">GDCquery</span>(<span class="dt">project =</span> <span class="st">&quot;TCGA-GBM&quot;</span>,
+                  <span class="dt">data.category =</span> <span class="st">&quot;Transcriptome Profiling&quot;</span>,
+                  <span class="dt">data.type =</span> <span class="st">&quot;Gene Expression Quantification&quot;</span>,
+                  <span class="dt">workflow.type =</span> <span class="st">&quot;HTSeq - Counts&quot;</span>,
+                  <span class="dt">barcode =</span> <span class="kw">c</span>(<span class="st">&quot;TCGA-14-0736-02A-01R-2005-01&quot;</span>, <span class="st">&quot;TCGA-06-0211-02A-02R-2005-01&quot;</span>))
+<span class="kw">GDCdownload</span>(query, <span class="dt">method =</span> <span class="st">&quot;client&quot;</span>)
+data &lt;-<span class="st"> </span><span class="kw">GDCprepare</span>(query)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">datatable</span>(<span class="kw">as.data.frame</span>(<span class="kw">colData</span>(data)),
+              <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">scrollX =</span> <span class="ot">TRUE</span>, <span class="dt">keys =</span> <span class="ot">TRUE</span>, <span class="dt">pageLength =</span> <span class="dv">5</span>),
+              <span class="dt">rownames =</span> <span class="ot">FALSE</span>)</code></pre></div>
+<div id="htmlwidget-615ee3903c1424f3823b" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-615ee3903c1424f3823b">{"x":{"filter":"none","data":[["TCGA-14-0736","TCGA-06-0211"],["TCGA-14-0736-02A-01R-2005-01","TCGA-06-0211-02A-02R-2005-01"],["TCGA-14-0736-02A","TCGA-06-0211-02A"],["TR","TR"],["Recurrent Solid Tumor","Recurrent Solid Tumor"],["not reported","not reported"],["not reported","not reported"],["2016-09-02T19:04:00.238395-05:00","2016-09-02T19:13:32.303626-05:00"],["c71.9","c71.9"],["not reported","not reported"],[18219,17515],["dead","dead"],["9440/3","9440/3"],[460,360],[null,null],[460,360],[null,null],[null,null],["c2cca6a5-69cd-5e31-b0e9-fa80d38e1375","cec1bfa2-94cf-5bf5-ad44-d1aad1c78586"],["not reported","not reported"],[{"days_to_treatment":[null],"updated_datetime":["2016-09-02T19:04:00.238395-05:00"],"created_datetime":[null],"submitter_id":["TCGA-14-0736_treatment"],"treatment_id":["c928e322-8e7b-5d9f-953d-98f3f0dfcfdb"],"state":[null],"therapeutic_agents":[null],"treatment_intent_type":[null],"treatment_or_therapy":[null]},{"days_to_treatment":[null],"updated_datetime":["2016-09-02T19:13:32.303626-05:00"],"created_datetime":[null],"submitter_id":["TCGA-06-0211_treatment"],"treatment_id":["165ec844-ba8b-5b1b-9ef9-457d62fa15e0"],"state":[null],"therapeutic_agents":[null],"treatment_intent_type":[null],"treatment_or_therapy":[null]}],["c71.9","c71.9"],[-18219,-17515],["not reported","not reported"],["not reported","not reported"],["c71.9","c71.9"],[null,null],[null,null],[null,null],["2016-09-02T19:04:00.238395-05:00","2016-09-02T19:13:32.303626-05:00"],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],["93758177-ffbb-567a-8ae4-04ad1d48cb45","68b17566-c576-5237-badd-6e1979a8f86f"],["2016-09-02T19:04:00.238395-05:00","2016-09-02T19:13:32.303626-05:00"],[null,null],["male","male"],[null,null],[1950,1950],["black or african american","white"],["e597a52f-1c28-5248-a751-22d810af3013","fe9a665e-6e67-5c8c-ac4f-b316f44db506"],["not reported","not hispanic or latino"],[2000,1997],["TCGA-14-0736","TCGA-06-0211"],[null,null],["Glioblastoma Multiforme","Glioblastoma Multiforme"],[true,true],["legacy","legacy"],["Brain","Brain"],["TCGA-GBM","TCGA-GBM"],["Glioblastoma Multiforme","Glioblastoma Multiforme"],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>patient\u003c/th>\n      <th>barcode\u003c/th>\n      <th>sample\u003c/th>\n      <th>shortLetterCode\u003c/th>\n      <th>definition\u003c/th>\n      <th>classification_of_tumor\u003c/th>\n      <th>last_known_disease_status\u003c/th>\n      <th>updated_datetime.x\u003c/th>\n      <th>primary_diagnosis\u003c/th>\n      <th>tumor_stage\u003c/th>\n      <th>age_at_diagnosis\u003c/th>\n      <th>vital_status\u003c/th>\n      <th>morphology\u003c/th>\n      <th>days_to_death\u003c/th>\n      <th>days_to_last_known_disease_status\u003c/th>\n      <th>days_to_last_follow_up\u003c/th>\n      <th>state.x\u003c/th>\n      <th>days_to_recurrence\u003c/th>\n      <th>diagnosis_id\u003c/th>\n      <th>tumor_grade\u003c/th>\n      <th>treatments\u003c/th>\n      <th>tissue_or_organ_of_origin\u003c/th>\n      <th>days_to_birth\u003c/th>\n      <th>progression_or_recurrence\u003c/th>\n      <th>prior_malignancy\u003c/th>\n      <th>site_of_resection_or_biopsy\u003c/th>\n      <th>created_datetime.x\u003c/th>\n      <th>cigarettes_per_day\u003c/th>\n      <th>weight\u003c/th>\n      <th>updated_datetime.y\u003c/th>\n      <th>alcohol_history\u003c/th>\n      <th>alcohol_intensity\u003c/th>\n      <th>bmi\u003c/th>\n      <th>years_smoked\u003c/th>\n      <th>height\u003c/th>\n      <th>created_datetime.y\u003c/th>\n      <th>state.y\u003c/th>\n      <th>exposure_id\u003c/th>\n      <th>updated_datetime\u003c/th>\n      <th>created_datetime\u003c/th>\n      <th>gender\u003c/th>\n      <th>state\u003c/th>\n      <th>year_of_birth\u003c/th>\n      <th>race\u003c/th>\n      <th>demographic_id\u003c/th>\n      <th>ethnicity\u003c/th>\n      <th>year_of_death\u003c/th>\n      <th>bcr_patient_barcode\u003c/th>\n      <th>dbgap_accession_number\u003c/th>\n      <th>disease_type\u003c/th>\n      <th>released\u003c/th>\n      <th>state.1\u003c/th>\n      <th>primary_site\u003c/th>\n      <th>project_id\u003c/th>\n      <th>name\u003c/th>\n      <th>subtype_patient\u003c/th>\n      <th>subtype_Tissue.source.site\u003c/th>\n      <th>subtype_Study\u003c/th>\n      <th>subtype_BCR\u003c/th>\n      <th>subtype_Whole.exome\u003c/th>\n      <th>subtype_Whole.genome\u003c/th>\n      <th>subtype_RNAseq\u003c/th>\n      <th>subtype_SNP6\u003c/th>\n      <th>subtype_U133a\u003c/th>\n      <th>subtype_HM450\u003c/th>\n      <th>subtype_HM27\u003c/th>\n      <th>subtype_RPPA\u003c/th>\n      <th>subtype_Histology\u003c/th>\n      <th>subtype_Grade\u003c/th>\n      <th>subtype_Age..years.at.diagnosis.\u003c/th>\n      <th>subtype_Gender\u003c/th>\n      <th>subtype_Survival..months.\u003c/th>\n      <th>subtype_Vital.status..1.dead.\u003c/th>\n      <th>subtype_Karnofsky.Performance.Score\u003c/th>\n      <th>subtype_Mutation.Count\u003c/th>\n      <th>subtype_Percent.aneuploidy\u003c/th>\n      <th>subtype_IDH.status\u003c/th>\n      <th>subtype_X1p.19q.codeletion\u003c/th>\n      <th>subtype_IDH.codel.subtype\u003c/th>\n      <th>subtype_MGMT.promoter.status\u003c/th>\n      <th>subtype_Chr.7.gain.Chr.10.loss\u003c/th>\n      <th>subtype_Chr.19.20.co.gain\u003c/th>\n      <th>subtype_TERT.promoter.status\u003c/th>\n      <th>subtype_TERT.expression..log2.\u003c/th>\n      <th>subtype_TERT.expression.status\u003c/th>\n      <th>subtype_ATRX.status\u003c/th>\n      <th>subtype_DAXX.status\u003c/th>\n      <th>subtype_Telomere.Maintenance\u003c/th>\n      <th>subtype_BRAF.V600E.status\u003c/th>\n      <th>subtype_BRAF.KIAA1549.fusion\u003c/th>\n      <th>subtype_ABSOLUTE.purity\u003c/th>\n      <th>subtype_ABSOLUTE.ploidy\u003c/th>\n      <th>subtype_ESTIMATE.stromal.score\u003c/th>\n      <th>subtype_ESTIMATE.immune.score\u003c/th>\n      <th>subtype_ESTIMATE.combined.score\u003c/th>\n      <th>subtype_Original.Subtype\u003c/th>\n      <th>subtype_Transcriptome.Subtype\u003c/th>\n      <th>subtype_Pan.Glioma.RNA.Expression.Cluster\u003c/th>\n      <th>subtype_IDH.specific.RNA.Expression.Cluster\u003c/th>\n      <th>subtype_Pan.Glioma.DNA.Methylation.Cluster\u003c/th>\n      <th>subtype_IDH.specific.DNA.Methylation.Cluster\u003c/th>\n      <th>subtype_Supervised.DNA.Methylation.Cluster\u003c/th>\n      <th>subtype_Random.Forest.Sturm.Cluster\u003c/th>\n      <th>subtype_RPPA.cluster\u003c/th>\n      <th>subtype_Telomere.length.estimate.in.blood.normal..Kb.\u003c/th>\n      <th>subtype_Telomere.length.estimate.in.tumor..Kb.\u003c/th>\n    \u003c/tr>\n  \u003c/thead>\n\u003c/table>","options":{"scrollX":true,"keys":true,"pageLength":5,"columnDefs":[{"className":"dt-right","targets":[10,13,15,22,42,46,69,71,72,73,74,75,83,90,91,92,93,94,104,105]}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">datatable</span>(<span class="kw">assay</span>(data)[<span class="dv">1</span>:<span class="dv">100</span>,],
+              <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">scrollX =</span> <span class="ot">TRUE</span>, <span class="dt">keys =</span> <span class="ot">TRUE</span>, <span class="dt">pageLength =</span> <span class="dv">5</span>),
+              <span class="dt">rownames =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<div id="htmlwidget-cbe4afb1463d0ab645f9" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-cbe4afb1463d0ab645f9">{"x":{"filter":"none","data":[["ENSG00000000003","ENSG00000000005","ENSG00000000419","ENSG00000000457","ENSG00000000460","ENSG00000000938","ENSG00000000971","ENSG00000001036","ENSG00000001084","ENSG00000001167","ENSG00000001460","ENSG00000001461","ENSG00000001497","ENSG00000001561","ENSG00000001617","ENSG00000001626","ENSG00000001629","ENSG00000001630","ENSG00000001631","ENSG00000002016","ENSG00000002079","ENSG00000002330","ENSG00000002549","ENSG00000002586","ENSG00000002587","ENSG00000002726","ENSG00000002745","ENSG00000002746","ENSG00000002822","ENSG00000002834","ENSG00000002919","ENSG00000002933","ENSG00000003056","ENSG00000003096","ENSG00000003137","ENSG00000003147","ENSG00000003249","ENSG00000003393","ENSG00000003400","ENSG00000003402","ENSG00000003436","ENSG00000003509","ENSG00000003756","ENSG00000003987","ENSG00000003989","ENSG00000004059","ENSG00000004139","ENSG00000004142","ENSG00000004399","ENSG00000004455","ENSG00000004468","ENSG00000004478","ENSG00000004487","ENSG00000004534","ENSG00000004660","ENSG00000004700","ENSG00000004766","ENSG00000004776","ENSG00000004777","ENSG00000004779","ENSG00000004799","ENSG00000004809","ENSG00000004838","ENSG00000004846","ENSG00000004848","ENSG00000004864","ENSG00000004866","ENSG00000004897","ENSG00000004939","ENSG00000004948","ENSG00000004961","ENSG00000004975","ENSG00000005001","ENSG00000005007","ENSG00000005020","ENSG00000005022","ENSG00000005059","ENSG00000005073","ENSG00000005075","ENSG00000005100","ENSG00000005102","ENSG00000005108","ENSG00000005156","ENSG00000005175","ENSG00000005187","ENSG00000005189","ENSG00000005194","ENSG00000005206","ENSG00000005238","ENSG00000005243","ENSG00000005249","ENSG00000005302","ENSG00000005339","ENSG00000005379","ENSG00000005381","ENSG00000005421","ENSG00000005436","ENSG00000005448","ENSG00000005469","ENSG00000005471"],[4282,34,899,293,143,286,1482,1245,738,321,355,1452,606,1509,205,3,1809,65,512,221,7,2799,4506,19369,707,12,33,105,386,2681,2452,4744,1527,398,204,265,1079,496,288,1310,569,347,1075,145,97,6028,133,4188,1026,4360,920,2106,1523,469,941,305,573,1860,214,2462,447,20,1107,3,89,474,1273,1091,5,13,738,609,2,744,3041,8275,2041,105,2160,337,6,467,429,738,26,101,2022,607,523,1686,685,1115,595,449,71,6,368,634,1124,72],[3853,8,1785,551,378,683,1257,2985,1119,1242,231,1192,1513,282,1100,34,4786,262,1602,579,6,2548,6767,28062,838,13,146,262,1250,9673,1895,4736,3384,1250,90,482,1623,1312,475,2845,1168,542,4863,63,1603,7486,765,5418,7711,6122,728,4149,4604,3249,489,1048,1484,3041,2296,3055,503,7,137,0,1787,1520,1712,2457,24,7,1088,1765,1,4339,1613,11047,4189,4,3455,1210,9,488,1223,990,31,154,2936,3010,1894,706,1237,1649,3031,574,13,3,650,1280,1730,150]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> \u003c/th>\n      <th>TCGA-14-0736-02A-01R-2005-01\u003c/th>\n      <th>TCGA-06-0211-02A-02R-2005-01\u003c/th>\n    \u003c/tr>\n  \u003c/thead>\n\u003c/table>","options":{"scrollX":true,"keys":true,"pageLength":5,"columnDefs":[{"className":"dt-right","targets":[1,2]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rowRanges</span>(data)</code></pre></div>
+<pre><code>## GRanges object with 57251 ranges and 3 metadata columns:
+##                   seqnames                 ranges strand | ensembl_gene_id
+##                      &lt;Rle&gt;              &lt;IRanges&gt;  &lt;Rle&gt; |     &lt;character&gt;
+##   ENSG00000000003     chrX [100627109, 100639991]      - | ENSG00000000003
+##   ENSG00000000005     chrX [100584802, 100599885]      + | ENSG00000000005
+##   ENSG00000000419    chr20 [ 50934867,  50958555]      - | ENSG00000000419
+##   ENSG00000000457     chr1 [169849631, 169894267]      - | ENSG00000000457
+##   ENSG00000000460     chr1 [169662007, 169854080]      + | ENSG00000000460
+##               ...      ...                    ...    ... .             ...
+##   ENSG00000281904     chr2   [90365737, 90367699]      + | ENSG00000281904
+##   ENSG00000281909    chr15   [22480439, 22484840]      - | ENSG00000281909
+##   ENSG00000281910    chr16   [58559796, 58559931]      - | ENSG00000281910
+##   ENSG00000281912     chr1   [45303910, 45305619]      + | ENSG00000281912
+##   ENSG00000281920     chr2   [65623272, 65628424]      + | ENSG00000281920
+##                   external_gene_name original_ensembl_gene_id
+##                          &lt;character&gt;              &lt;character&gt;
+##   ENSG00000000003             TSPAN6       ENSG00000000003.13
+##   ENSG00000000005               TNMD        ENSG00000000005.5
+##   ENSG00000000419               DPM1       ENSG00000000419.11
+##   ENSG00000000457              SCYL3       ENSG00000000457.12
+##   ENSG00000000460           C1orf112       ENSG00000000460.15
+##               ...                ...                      ...
+##   ENSG00000281904      CH17-132F21.5        ENSG00000281904.1
+##   ENSG00000281909      RP11-439M15.1        ENSG00000281909.1
+##   ENSG00000281910           SNORA50A        ENSG00000281910.1
+##   ENSG00000281912          LINC01144        ENSG00000281912.1
+##   ENSG00000281920      RP11-418H16.1        ENSG00000281920.1
+##   -------
+##   seqinfo: 24 sequences from an unspecified genome; no seqlengths</code></pre>
+</div>
+</div>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+    // active menu
+    var href = window.location.pathname;
+    href = href.substr(href.lastIndexOf('/') + 1);
+    if (href === '') href = './';
+    $('a[href="' + href + '"]').parent().addClass('active');
+});
+</script>
+<script>
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+
+</body>
+</html>
