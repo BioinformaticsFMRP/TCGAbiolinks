@@ -185,21 +185,25 @@ TCGAanalyze_survival <- function(data,
     if(is.null(labels)){
         labels <- sapply(levels(data$type),label.add.n)
     }
-
-    surv <- ggsurvplot(
-        fit,                       # survfit object with calculated statistics.
-        risk.table = risk.table,   # show risk table.
-        pval = pvalue,             # show p-value of log-rank test.
-        conf.int = conf.int,       # show confidence intervals for point estimaes of survival curves.
-        xlim = xlim,               # present narrower X axis, but not affect survival estimates.
-        main = main,               # Title
-        xlab = xlab,               # customize X axis label.
-        ggtheme = theme_light(),   # customize plot and risk table with a theme.
-        legend.title = legend,     # Legend title
-        legend.labs = labels,      # change legend labels.
-        palette =  color,          # custom color palettes.
-        ...
-    )
+    if(length(xlim) == 1) {
+        xlim <- c(0,xlim)
+    }
+    suppressWarnings({
+        surv <- ggsurvplot(
+            fit,                       # survfit object with calculated statistics.
+            risk.table = risk.table,   # show risk table.
+            pval = pvalue,             # show p-value of log-rank test.
+            conf.int = conf.int,       # show confidence intervals for point estimaes of survival curves.
+            xlim = xlim,               # present narrower X axis, but not affect survival estimates.
+            main = main,               # Title
+            xlab = xlab,               # customize X axis label.
+            ggtheme = theme_light(),   # customize plot and risk table with a theme.
+            legend.title = legend,     # Legend title
+            legend.labs = labels,      # change legend labels.
+            palette =  color,          # custom color palettes.
+            ...
+        )
+    })
 
 
     if(!is.null(filename)) {
@@ -1019,11 +1023,11 @@ TCGAanalyze_DMR <- function(data,
     if (!(pcol %in% colnames(values(data))) | overwrite) {
         if(calculate.pvalues.probes == "all"){
             suppressWarnings({
-            data <- calculate.pvalues(data, groupCol, group1, group2,
-                                      paired = paired,
-                                      method = adj.method,
-                                      cores = cores,
-                                      save = save)
+                data <- calculate.pvalues(data, groupCol, group1, group2,
+                                          paired = paired,
+                                          method = adj.method,
+                                          cores = cores,
+                                          save = save)
             })
         } else  if(calculate.pvalues.probes == "differential"){
             message(paste0("Caculating p-values only for probes with a difference of mean methylation equal or higher than ", diffmean.cut))
