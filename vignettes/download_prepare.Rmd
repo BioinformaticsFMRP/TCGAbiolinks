@@ -1,5 +1,10 @@
 ---
 title: "TCGAbiolinks: Downloading and preparing files for analysis"
+date: "`r BiocStyle::doc_date()`"
+vignette: >
+  %\VignetteIndexEntry{"TCGAbiolinks: Downloading and preparing files for analysis"}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
