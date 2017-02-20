@@ -1,5 +1,10 @@
 ---
 title: "TCGAbiolinks: Downloading and preparing files for analysis"
+date: "`r BiocStyle::doc_date()`"
+vignette: >
+  %\VignetteIndexEntry{"TCGAbiolinks: Downloading and preparing files for analysis"}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -29,6 +34,7 @@ is the default data structure used in TCGAbiolinks, followed by some examples.
 
 
 There are two methods to download GDC data using TCGAbiolinks:
+
 - client: this method creates a MANIFEST file and download the data using [GDC Data Transfer Tool](https://gdc.cancer.gov/access-data/gdc-data-transfer-tool)
     this method is more reliable but it might be slower compared to the api method.
 - api: this methods used the [GDC Application Programming Interface (API)](https://gdc.cancer.gov/developers/gdc-application-programming-interface-api) to downlaod the data.
