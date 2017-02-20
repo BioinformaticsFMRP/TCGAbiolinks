@@ -13,4 +13,3 @@ html_document:
     in_header: include/header.html
     before_body: include/before_body.html
     after_body: include/after_body.html
-  keep_md: yes
