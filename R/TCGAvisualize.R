@@ -774,10 +774,10 @@ TCGAvisualize_Heatmap <- function(data,
     }
 
     if(is.null(extrems)) {
-        if(min(data) < 0) {
-            extrems <- c(min(data), (max(data) + min(data))/2, max(data))
+        if(min(data,na.rm = T) < 0) {
+            extrems <- c(min(data,na.rm = T), (max(data,na.rm = T) + min(data,na.rm = T))/2, max(data,na.rm = T))
         } else {
-            extrems <- c(0, max(data)/2, max(data))
+            extrems <- c(0, max(data,na.rm = T)/2, max(data,na.rm = T))
         }
     }
     if (type == "expression") color <- circlize::colorRamp2(extrems, color.levels)
