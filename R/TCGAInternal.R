@@ -509,7 +509,7 @@ GeneSplitRegulon <- function(Genelist,Sep){
     return(RegSplitted)
 }
 
-
+#' @import selectr
 getGistic <- function(disease) {
     base <- paste0("http://gdac.broadinstitute.org/runs/analyses__latest/data/", disease)
     x <- tryCatch({
