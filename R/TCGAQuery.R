@@ -491,9 +491,10 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata", pipeline
 
     #  Info to user
     message("============================================================================")
-    message(" For more information about MAF data please read the following GDC manual:")
+    message(" For more information about MAF data please read the following GDC manual and web pages:")
     message(" GDC manual: https://gdc-docs.nci.nih.gov/Data/PDF/Data_UG.pdf")
-    message("https://gdc-docs.nci.nih.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/")
+    message(" https://gdc-docs.nci.nih.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/")
+    message(" https://gdc.cancer.gov/about-gdc/variant-calling-gdc")
     message("============================================================================")
 
     maf  = tryCatch({
