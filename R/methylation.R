@@ -573,13 +573,10 @@ calculate.pvalues <- function(data,
         )
     }
 
-    p.value <- adply(assay(data),1,
+    val <- assay(data)
+    p.value <- adply(val,1,
                      function(x) {
-                         aux <- data_frame(beta=x[c(idx1,idx2)],
-                                           cluster=droplevels(
-                                               colData(data)[c(idx1,idx2),
-                                                             groupCol]))
-                         wilcox.test(beta ~ cluster,
+                         wilcox.test(x[idx1],x[idx2],
                                      data=aux, #exact = TRUE,
                                      paired = paired)$p.value
                      }, .progress = "text", .parallel = parallel
