@@ -576,6 +576,8 @@ get.mutation <- function(project, genes, pipeline = pipeline){
             mut <- merge(mut, aux, by = "patient", all = TRUE)
         }
     }
+    if(is.null(mut)) return(NULL)
+
     rownames(mut) <- mut$patient; mut$patient <- NULL
 
     # Lets replaces NA to FALSE
@@ -607,15 +609,14 @@ get.mut.gistc <- function(project, genes,mut.pipeline) {
 get.mut.gistc.information <- function(df, project, genes, mut.pipeline = "mutect2") {
     order <- rownames(df)
     for(i in genes) if(!tolower(i) %in% tolower(EAGenes$Gene)) message(paste("Gene not found:", i))
-    info <- get.mut.gistc(project, genes, mut.pipeline = mut.pipeline)
+    info <- as.data.frame(get.mut.gistc(project, genes, mut.pipeline = mut.pipeline))
     if(is.null(info)) return(df)
     info$aux <- rownames(info)
     df$aux <- substr(df$barcode,1,15)
     df <- merge(df,info,by = "aux", all.x = TRUE, sort = FALSE)
     df$aux <- NULL
     mut.idx <- grep("mut_",colnames(df))
-    df[,mut.idx] <- !is.na(df[,mut.idx]) & df[,mut.idx] != FALSE
-    mut.idx <- grep("mut_",colnames(df))
+    if(length(mut.idx) > 0) df[,mut.idx] <- !is.na(df[,mut.idx]) & df[,mut.idx] != FALSE
     for(i in paste0("mut_",genes)){
         if(!i %in% colnames(df)) {
             df$aux <- FALSE
