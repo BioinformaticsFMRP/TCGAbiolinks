@@ -2,7 +2,7 @@ Package: TCGAbiolinks
 Type: Package
 Title: TCGAbiolinks: An R/Bioconductor package for integrative analysis with
     TCGA data
-Version: 2.3.16
+Version: 2.3.17
 Date: 2016-12-7
 Author: Antonio Colaprico,
     Tiago Chedraoui Silva,
@@ -55,6 +55,7 @@ Imports:
     utils,
     dnet,
     igraph,
+    selectr,
     supraHex,
     S4Vectors,
     ComplexHeatmap (>= 1.10.2),
@@ -106,4 +107,4 @@ VignetteBuilder: knitr
 LazyData: true
 URL: https://github.com/BioinformaticsFMRP/TCGAbiolinks
 BugReports: https://github.com/BioinformaticsFMRP/TCGAbiolinks/issues
-RoxygenNote: 6.0.0
+RoxygenNote: 6.0.1
