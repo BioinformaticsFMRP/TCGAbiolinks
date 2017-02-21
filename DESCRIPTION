@@ -55,6 +55,7 @@ Imports:
     utils,
     dnet,
     igraph,
+    selectr,
     supraHex,
     S4Vectors,
     ComplexHeatmap (>= 1.10.2),
@@ -106,4 +107,4 @@ VignetteBuilder: knitr
 LazyData: true
 URL: https://github.com/BioinformaticsFMRP/TCGAbiolinks
 BugReports: https://github.com/BioinformaticsFMRP/TCGAbiolinks/issues
-RoxygenNote: 6.0.0
+RoxygenNote: 6.0.1
