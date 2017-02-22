@@ -580,9 +580,11 @@ Please, not that these tables are still incomplete.
 |                             |                                   | Illumina Human Methylation 27       |  idat              |
 | Other                       |                                   |                                     |                    |
 
-## `GDCquery_maf`: Working with mutation files.
+## Working with mutation files.
 
-In order to download the Mutation Annotation Format (MAF), we provide the user
+### `GDCquery_maf`: Mutation Annotation Format (MAF) aligned against hg38
+
+In order to download the Mutation Annotation Format (MAF) aligned against hg38, we provide the user
 with the `GDCquery_maf` function. Briefly, it will get the open acess maf files from
 [https://gdc-docs.nci.nih.gov/Data/Release_Notes/Data_Release_Notes/](https://gdc-docs.nci.nih.gov/Data/Release_Notes/Data_Release_Notes/).
 Four separate variant calling pipelines are implemented for GDC data harmonization which are described [here](https://gdc-docs.nci.nih.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/)
@@ -622,6 +624,31 @@ library(png)
 library(grid)
 img <- readPNG("oncoprint.png")
 grid.raster(img)
+```
+
+### Mutation Annotation Format (MAF) aligned against hg19
+
+In order to download the Mutation Annotation Format (MAF) aligned against hg19,
+the user will need to use `GDCquery` with `legacy = TRUE`, `GDCdownload` and `GDCprepare`.
+
+```{r, message=FALSE, warning=FALSE}
+query.maf.hg19 <- GDCquery(project = "TCGA-COAD", 
+                           data.category = "Simple nucleotide variation", 
+                           data.type = "Simple somatic mutation",
+                           access = "open", 
+                           legacy = TRUE)
+# Check maf availables
+knitr::kable(getResults(query.maf.hg19)[,c("created_datetime","file_name")]) 
+```
+```{r, eval = FALSE}
+query.maf.hg19 <- GDCquery(project = "TCGA-COAD", 
+                           data.category = "Simple nucleotide variation", 
+                           data.type = "Simple somatic mutation",
+                           access = "open", 
+                           file.type = "gsc_COAD_pairs.aggregated.capture.tcga.uuid.automated.somatic.maf",
+                           legacy = TRUE)
+GDCdownload(query.maf.hg19)
+coad.mutect.maf <- GDCprepare(query.maf.hg19)
 ```
 
 ## `GDCquery_clinic` and `GDCprepare_clinic`: Working with clinical data.
@@ -997,8 +1024,8 @@ Examples of query, download, prepare can be found in this [gist](https://gist.gi
 |                             | -                                 | Affymetrix SNP Array 6.0            | hg18.seg           | Working         |
 |                             | -                                 | Affymetrix SNP Array 6.0            | nocnv_hg19.seg     | Working         |
 |                             | -                                 | Affymetrix SNP Array 6.0            | hg19.seg           | Working         |
-|                             | -                                 | Illumina HiSeq                      | -                  | Working         |
-| Simple Nucleotide Variation |                                   |                                     |                    |                 |
+|                             | -                                 | Illumina HiSeq                      | Several            | Working         |
+| Simple Nucleotide Variation | Simple somatic mutation           |                                     |                    |                 |
 | Raw Sequencing Data         |                                   |                                     |                    |                 |
 | Biospecimen                 |                                   |                                     |                    |                 |
 | Clinical                    |                                   |                                     |                    |                 |
