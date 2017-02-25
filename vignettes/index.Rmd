@@ -1,42 +1,149 @@
 ---
-title: "Introduction"
+bibliography: bibliography.bib
 date: "`r BiocStyle::doc_date()`"
 vignette: >
-  %\VignetteIndexEntry{"Introduction"}
+  %\VignetteIndexEntry{"TCGAbiolinksGUI: Introduction"}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(progress = FALSE)
+# Introduction
+
+TCGAbiolinksGUI was created to help users more comfortable with graphical user interfaces (GUI) to search, download and analyze Cancer data. 
+It offers a graphical user interface to the R/Bioconductor package [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/) [@TCGAbiolinks], which is able to access The National Cancer Institute (NCI) Genomic Data Commons (GDC) thorough its  
+[GDC Application Programming Interface (API)](https://gdc.cancer.gov/developers/gdc-application-programming-interface-api).
+Additional packages from Bioconductor are included, such as [ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/) package [@Gu20052016] to aid in visualizing the data, 
+[ELMER](http://bioconductor.org/packages/ELMER/) [@yao2015inferring] to identify regulatory enhancers using gene expression + DNA methylation data + motif analysis and 
+[Pathview](http://bioconductor.org/packages/pathview/) [@luo2013pathview] for pathway-based data integration and visualization.
+
+The GUI was created using [Shiny](https://shiny.rstudio.com/), a Web Application Framework for R, and uses
+several packages to provide advanced features that can enhance Shiny apps, such as [shinyjs](https://github.com/daattali/shinyjs) to add JavaScript actions for the app,
+[shinydashboard](https://github.com/rstudio/shinydashboard) to add dashboards and [shinyFiles](https://github.com/thomasp85/shinyFiles) to provide an API for client side access to the server file system. 
+A running version of the GUI is found in (shinyapps.io)[https://tcgabiolinksgui.shinyapps.io/demo/]
+
+# Starting with TCGAbiolinksGUI 
+
+## Installation 
+
+To install the package from the (Bioconductor repository)[http://bioconductor.org/packages/TCGAbiolinksGUI/] please use the following
+code. To date, the package is only available in the (devel version of Bioconductor)[https://www.bioconductor.org/developers/how-to/useDevel/], but it should be available in the release version until May 2017. 
+
+```{r, eval = FALSE}
+source("https://bioconductor.org/biocLite.R")
+biocLite("TCGAbiolinksGUI", dependencies = TRUE)
+```
+
+To install the development version of the package via GitHub:
+
+```{r, eval = FALSE}
+source("https://bioconductor.org/biocLite.R")
+deps <- c("pathview","clusterProfiler","ELMER", "DO.db","GO.db", "ComplexHeatmap","EDASeq", "TCGAbiolinks")
+for(pkg in deps)  if (!pkg %in% installed.packages()) biocLite(pkg, dependencies = TRUE)
+deps <- c("devtools","shape","shiny","readr","googleVis","shinydashboard","shinyFiles","shinyjs","shinyBS")
+for(pkg in deps)  if (!pkg %in% installed.packages())  install.packages(pkg,dependencies = TRUE)
+devtools::install_github("BioinformaticsFMRP/TCGAbiolinksGUI")
+```
+
+## Docker image
+
+TCGAbiolinksGUI is available as Docker image, which can be easily run on Mac OS, Windows and Linux systems. The image can be obtained from Docker Hub: https://hub.docker.com/r/tiagochst/tcgabiolinksgui/
+
+Download image:
+```{bash, eval = FALSE}
+docker pull tiagochst/tcgabiolinksgui
+```
+
+To run R from the command line:
+```{bash, eval = FALSE}
+docker run -ti tiagochst/tcgabiolinksgui R
+```
+
+To run RStudio Server (user: rstudio, password: rstudio): 
+```{bash, eval = FALSE}
+docker run -p 8787:8787 tiagochst/tcgabiolinksgui
+```
+
+For more information please check: https://docs.docker.com/
+
+## Quick start
+
+The following commands should be used to start the graphical user interface.
+
+```{r, eval = FALSE}
+library(TCGAbiolinksGUI)
+TCGAbiolinksGUI()
 ```
 
 
-TCGAbiolinks is able to access The National Cancer Institute (NCI) Genomic Data Commons (GDC) thorough its  
-[GDC Application Programming Interface (API)](https://gdc.cancer.gov/developers/gdc-application-programming-interface-api) 
-to search, download and prepare relevant data for analysis in R. 
+## Video tutorials
 
-# Installation
-You can install the stable version from [Bioconductor](http://bioconductor.org/packages/release/bioc/html/TCGAbiolinks.html), or the development version using:
-```{r message=FALSE, warning=FALSE, eval=FALSE}
-devtools::install_github('BioinformaticsFMRP/TCGAbiolinks')
+To facilitate the use of this package, we have created some tutorial videos demonstrating the tool.
+Some sections have video tutorials that if clicked will redirect to the video on youtube.
+For the complete list of videos, please check this [youtube list](https://www.youtube.com/playlist?list=PLoDzAKMJh15m40f7OqOLAW0nJwkVStJIJ).
+
+## PDF tutorials
+
+For each section we created some PDFs with detailing the steps of each section: 
+[Link to folder with PDFs](https://drive.google.com/drive/folders/0B0-8N2fjttG-Q25ldVVmUTVOTk0?usp=sharing)
+
+## Question and issues
+Please use [Github issues](https://github.com/BioinformaticsFMRP/TCGAbiolinksGUI/issues) if you want to file bug reports or feature requests.
+
+## Data input summary
+```{r table2, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "  
+| Menu                    | Sub-menu                          | Button             | Data input  |
+|---------------------------------|-----------------------------------|------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| Clinical analysis       | Profile Plot                      | Select file        | A table with at least two categorical columns  |
+| Clinical analysis       | Survival Plot                     | Select file        | A table with at least the following columns: days_to_death, days_to_last_followup and one column with a group |
+| Epigenetic analysis     | Differential methylation analysis | Select data (.rda) | A summarizedExperiment object |
+| Epigenetic analysis     | Volcano Plot                      | Select results     | A csv file with the following pattern: DMR_results_GroupCol_group1_group2_pcut_1e-30_meancut_0.55.csv  (Where GroupCol, group1, group2 are the names of the columns selected in the  DMR steps. |
+| Epigenetic analysis     | Heatmap plot                      | Select file        | A summarizedExperiment object  |
+| Epigenetic analysis     | Heatmap plot                      | Select results     | Same as Epigenetic analysis >Volcano Plot > Select results |
+| Epigenetic analysis     | Mean DNA methylation              | Select file        | A summarizedExperiment object |
+| Transcriptomic Analysis | Volcano Plot                      | Select results     | A csv file with the following pattern: DEA_results_GroupCol_group1_group2_pcut_1e-30_meancut_0.55.csv (Where GroupCol, group1, group2 are the names of the columns selected in the DEA steps. |
+| Transcriptomic Analysis | Heatmap plot                      | Select file        | A summarizedExperiment object  |
+| Transcriptomic Analysis | OncoPrint plot                      | Select MAF file        | A MAF file (columns needed: Hugo_Symbol,Tumor_Sample_Barcode,Variant_Type) |   |
+| Transcriptomic Analysis | OncoPrint plot                      | Select Annotation file        | A file with at least the following columns: bcr_patient_barcode  |    |
+|  Integrative analysis   | Starburst plot                      | DMR result        | A csv file with the following pattern: DMR_results_GroupCol_group1_group2_pcut_1e-30_meancut_0.55.csv (Where GroupCol, group1, group2 are the names of the columns selected in the DMR steps.  |
+|  Integrative analysis   | Starburst plot                      | DEA result        | A csv file with the following pattern: DEA_results_GroupCol_group1_group2_pcut_1e-30_meancut_0.55.csv (Where GroupCol, group1, group2 are the names of the columns selected in the DEA steps.  |
+|  Integrative analysis   | ELMER                      | Create mee > Select DNA methylation object         | An rda file with a summarized Experiment object |   
+|  Integrative analysis   | ELMER                      | Select results > Select expression object         |  An rda file with the RNAseq data frame |   
+|  Integrative analysis   | ELMER                      | Select mee         | An rda file with a mee object |   
+|  Integrative analysis   | ELMER                      | Select results         | An rda file with the results of the ELMER analysis |   
+"
+cat(tabl) 
 ```
+# Citation
 
-# Question and issues
-Please use [Github issues](https://github.com/BioinformaticsFMRP/TCGAbiolinks/issues) if you want to file bug reports or feature requests.
+Please cite both TCGAbiolinks package and TCGAbiolinksGUI: 
 
-# Required libraries
+* Silva TC, Colaprico A, Olsen C, Bontempi G, Ceccarelli M, Berman BP. , and Noushmehr H. "TCGAbiolinksGUI: A Graphical User Interface to analyze cancer molecular and clinical data."Bioinformatics -  Submitted for review.
+* Colaprico A, Silva TC, Olsen C, Garofano L, Cava C, Garolini D, Sabedot T, Malta TM, Pagnotta SM, Castiglioni I, Ceccarelli M, Bontempi G and Noushmehr H. "TCGAbiolinks: an R/Bioconductor package for integrative analysis of TCGA data." Nucleic acids research (2015): gkv1507.
 
-The examples in this tutorial use the following libraries: 
-```{r message=FALSE, warning=FALSE, include=TRUE}
-library(TCGAbiolinks)
-library(dplyr)
-library(DT)
-```
+Other related publications to this package:
+
+* "TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages". F1000Research [10.12688/f1000research.8923.1](http://dx.doi.org/doi:10.12688/f1000research.8923.1) [@10.12688/f1000research.8923.2]
+
+If you used ELMER please cite:
+
+* Yao, L., Shen, H., Laird, P. W., Farnham, P. J., & Berman, B. P. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome Biol 16 (2015): 105.
+* Yao, Lijing, Benjamin P. Berman, and Peggy J. Farnham. "Demystifying the secret mission of enhancers: linking distal regulatory elements to target genes." Critical reviews in biochemistry and molecular biology 50.6 (2015): 550-573.
+
+If you used OncoPrint plot and Heatmap Plot please cite:
+
+* Gu, Zuguang, Roland Eils, and Matthias Schlesner. "Complex heatmaps reveal patterns and correlations in multidimensional genomic data." Bioinformatics (2016): btw313
+
+If you used Pathway plot please cite:
+
+* Luo, Weijun, Brouwer and Cory (2013). “Pathview: an R/Bioconductor package for pathway-based data integration and visualization.” Bioinformatics, 29(14), pp. 1830-1831.
 
 # Session info
-```{r}
-version
-packageVersion("TCGAbiolinks")
+```{r, include=FALSE}
+library(TCGAbiolinksGUI)
 ```
+```{r}
+sessionInfo()
+```
+
+# References
