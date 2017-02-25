@@ -1875,7 +1875,8 @@ dataPrep <- GDCprepare(query = queryDown,
                        save.filename = FileNameData)
 
 dataPrep <- TCGAanalyze_Preprocessing(object = dataPrep, 
-                                      cor.cut = 0.6)                      
+                                      cor.cut = 0.6,
+                                      datatype = "HTSeq - Counts")                      
 
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
                                       geneInfo = geneInfoHT,
