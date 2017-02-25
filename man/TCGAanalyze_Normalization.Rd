@@ -10,7 +10,8 @@ TCGAanalyze_Normalization(tabDF, geneInfo, method = "geneLength")
 \item{tabDF}{Rnaseq numeric matrix, each row represents a gene,
 each column represents a sample}
 
-\item{geneInfo}{Information matrix of 20531 genes about geneLength and gcContent}
+\item{geneInfo}{Information matrix of 20531 genes about geneLength and gcContent.
+Two objects are provided: TCGAbiolinks::geneInfoHT,TCGAbiolinks::geneInfo}
 
 \item{method}{is method of normalization such as 'gcContent' or 'geneLength'}
 }
