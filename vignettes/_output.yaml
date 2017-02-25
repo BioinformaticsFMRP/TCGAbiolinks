@@ -1,6 +1,6 @@
 html_document:
   self_contained: false
-  number_sections: no
+  number_sections: true
   theme: flatly
   highlight: tango
   mathjax: null
@@ -13,3 +13,5 @@ html_document:
     in_header: include/header.html
     before_body: include/before_body.html
     after_body: include/after_body.html
+    css: include/site.css
+  bibliography: bibliography.bib
