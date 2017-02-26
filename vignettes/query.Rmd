@@ -79,18 +79,25 @@ with the following arguments:
 * **platform** Experimental data platform (HumanMethylation450, AgilentG4502A_07 etc). Used only for legacy repository
 * **file.type** A string to filter files, based on its names. Used only for legacy repository
 
+## project options
 The options for the field `project` are below:
 ```{r, eval = TRUE, echo = FALSE}
-knitr::kable(TCGAbiolinks:::getGDCprojects(), digits = 2,
-             caption = "List of projects",row.names = FALSE)
+datatable(TCGAbiolinks:::getGDCprojects(),
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 10), 
+          rownames = FALSE,
+          caption = "List of projects")
 ```
 
+## sample.type options
 The options for the field `sample.type` are below:
 ```{r, eval = TRUE, echo = FALSE}
-knitr::kable(TCGAbiolinks:::getBarcodeDefinition(), digits = 2,
-             caption = "List sample types",row.names = FALSE,)
+datatable(TCGAbiolinks:::getBarcodeDefinition(),
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 10), 
+          rownames = FALSE,
+          caption = "List sample types")
 ```
-
 
 The other fields (data.category, data.type, workflow.type, platform, file.type) can be found below. 
 Please, not that these tables are still incomplete.
