@@ -62,6 +62,95 @@ For more information check [TCGA wiki](https://wiki.nci.nih.gov/display/TCGA/TCG
 </div>
 </div>
 
+# Searching arguments
+
+You can easily search GDC data using the `GDCquery` function.
+
+Using a summary of filters as used in the TCGA portal, the function works
+with the following arguments:
+
+* **project** A list of valid project (it can be more than one) (see table below)
+* **data.category** A valid project (see list with getProjectSummary(project))
+* **data.type** A data type to filter the files to download
+* **sample.type** A sample type to filter the files to download (See table below)
+* **workflow.type** GDC workflow type
+* **barcode** A list of barcodes to filter the files to download (can be partial barcodes)
+* **legacy** Access legacy archive data (hg19 and hg18 data) instead of harmonized data? Default: FALSE
+* **platform** Experimental data platform (HumanMethylation450, AgilentG4502A_07 etc). Used only for legacy repository
+* **file.type** A string to filter files, based on its names. Used only for legacy repository
+
+The options for the field `project` are below:
+```{r, eval = TRUE, echo = FALSE}
+knitr::kable(TCGAbiolinks:::getGDCprojects(), digits = 2,
+             caption = "List of projects",row.names = FALSE)
+```
+
+The options for the field `sample.type` are below:
+```{r, eval = TRUE, echo = FALSE}
+knitr::kable(TCGAbiolinks:::getBarcodeDefinition(), digits = 2,
+             caption = "List sample types",row.names = FALSE,)
+```
+
+
+The other fields (data.category, data.type, workflow.type, platform, file.type) can be found below. 
+Please, not that these tables are still incomplete.
+
+## Harmonized data options (`legacy = FALSE`)
+
+| data.category               | data.type                         |  workflow.type   | platform |
+|-----------------------------|-----------------------------------|-----------------|----------|
+| Transcriptome Profiling     | Gene Expression Quantification    | HTSeq - Counts  |          |
+|                             |                                   | HTSeq - FPKM-UQ |          |
+|                             |                                   | HTSeq - FPKM    |          |
+|                             | Isoform Expression Quantification | -               |          |
+|                             | miRNA Expression Quantification   | -               |          |
+| Copy Number Variation       | Copy Number Segment               |                 |          |
+|                             | Masked Copy Number Segment        |                 |          |
+| Simple Nucleotide Variation |                                   |                 |          |
+| Raw Sequencing Data         |                                   |                 |          |
+| Biospecimen                 |                                   |                 |          |
+| Clinical                    |                                   |                 |          |
+| DNA Methylation             |                                   |                 | Illumina Human Methylation 450| 
+|                             |                                   |                 | Illumina Human Methylation 27 |    
+
+## Legacy archive data  options (`legacy = TRUE`)
+| data.category               | data.type                         | platform                            | file.type          |
+|-----------------------------|-----------------------------------|-------------------------------------|--------------------|
+| Copy number variation       | -                                 | Affymetrix SNP Array 6.0            | nocnv_hg18.seg     |
+|                             | -                                 | Affymetrix SNP Array 6.0            | hg18.seg           |
+|                             | -                                 | Affymetrix SNP Array 6.0            | nocnv_hg19.seg     |
+|                             | -                                 | Affymetrix SNP Array 6.0            | hg19.seg           |
+|                             | -                                 | Illumina HiSeq                      | -                  |
+| Simple nucleotide variation | Simple somatic mutation           |                                     |                    |
+| Raw sequencing data         |                                   |                                     |                    |
+| Biospecimen                 |                                   |                                     |                    |
+| Clinical                    |                                   |                                     |                    |
+| Protein expression          |                                   | MDA RPPA Core                       | -                  |
+| Gene expression             | Gene expression quantification    | Illumina HiSeq                      | normalized_results |
+|                             |                                   | Illumina HiSeq                      | results            |
+|                             |                                   | HT_HG-U133A                         | -                  |
+|                             |                                   | AgilentG4502A_07_2                  | -                  |
+|                             |                                   | AgilentG4502A_07_1                  | -                  |
+|                             |                                   | HuEx-1_0-st-v2                      | FIRMA.txt          |
+|                             |                                   |                                     | gene.txt           |
+|                             | Isoform expression quantification |                                     |                    |
+|                             | miRNA gene quantification         |                                     | hg19.mirna         |
+|                             |                                   |                                     | hg19.mirbase20     |
+|                             |                                   |                                     | mirna              |
+|                             | Exon junction quantification      |                                     |                    |
+|                             | Exon quantification               |                                     |                    |
+|                             | miRNA isoform quantification      |                                     | hg19.isoform       |
+|                             |                                   |                                     | isoform            |
+| DNA methylation             |                                   | Illumina Human Methylation 450      | -                  |
+|                             |                                   | Illumina Human Methylation 27       | -                  |
+|                             |                                   | Illumina DNA Methylation OMA003 CPI | -                  |
+|                             |                                   | Illumina DNA Methylation OMA002 CPI | -                  |
+|                             |                                   | Illumina Hi Seq                     |                    |
+| Raw microarray data         |  Raw intensities                  | Illumina Human Methylation 450      |  idat              |
+|                             |                                   | Illumina Human Methylation 27       |  idat              |
+| Other                       |                                   |                                     |                    |
+
+
 # Harmonized database examples
 
 ## DNA methylation data: Recurrent tumor samples
