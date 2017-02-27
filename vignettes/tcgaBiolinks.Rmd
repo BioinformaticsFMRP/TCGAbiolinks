@@ -1067,7 +1067,7 @@ The arguments are:
 * **summarizedExperiment** Should the output be a SummarizedExperiment object? Default: `TRUE`
 * **directory** Directory/Folder where the data was downloaded. Default: GDCdata
 * **remove.files.prepared** Remove the files read? Default: FALSE. This argument will be considered only if save argument is set to true
-* **add.gistic2.mut** 	If a list of genes (gene symbol) is given columns with gistic2 results from GDAC firehose and a column indicating if there is or not mutation in that gene (TRUE or FALSE - use the maf file for more information) will be added to the sample matrix in the summarized Experiment object
+* **add.gistic2.mut** 	If a list of genes (gene symbol) is given columns with gistic2 results from GDAC firehose (hg19) and a column indicating if there is or not mutation in that gene (hg38) (TRUE or FALSE - use the maf file for more information) will be added to the sample matrix in the summarized Experiment object
 
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
@@ -1128,16 +1128,16 @@ query <- GDCquery(project = "TCGA-BRCA",
                   legacy = TRUE)
 
 # Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
-GDCAdownload(query)
+GDCdownload(query)
 
 # Prepare expression matrix with geneID in the rows and samples (barcode) in the columns
 # rsem.genes.results as values
-BRCARnaseq_assay <- GDCprepare(query)
+BRCARnaseqSE <- GDCprepare(query)
 
-BRCAMatrix <- assay(BRCARnaseq_assay,"raw_counts")
+BRCAMatrix <- assay(BRCARnaseqSE,"raw_count") # or BRCAMatrix <- assay(BRCARnaseqSE,"raw_count")
 
 # For gene expression if you need to see a boxplot correlation and AAIC plot to define outliers you can run
-BRCARnaseq_CorOutliers <- TCGAanalyze_Preprocessing(BRCARnaseq_assay)
+BRCARnaseq_CorOutliers <- TCGAanalyze_Preprocessing(BRCARnaseqSE)
 ```
 
 The result is shown below:
