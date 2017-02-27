@@ -102,7 +102,7 @@ query <- GDCquery(project = "TCGA-GBM",
                   data.type = "Gene Expression Quantification", 
                   workflow.type = "HTSeq - Counts",
                   barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"))
-GDCdownload(query, method = "client")
+tryCatch(GDCdownload(query, method = "client"),error = function(e)GDCdownload(query))
 data <- GDCprepare(query)
 ```
 ```{r message=FALSE, warning=FALSE}
