@@ -1,5 +1,5 @@
 html_document:
-  self_contained: false
+  self_contained: true
   number_sections: no
   theme: flatly
   highlight: tango
