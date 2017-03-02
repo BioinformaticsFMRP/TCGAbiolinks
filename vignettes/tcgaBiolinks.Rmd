@@ -581,7 +581,6 @@ Please, not that these tables are still incomplete.
 | Other                       |                                   |                                     |                    |
 
 ## Working with mutation files.
-
 ### `GDCquery_maf`: Mutation Annotation Format (MAF) aligned against hg38
 
 In order to download the Mutation Annotation Format (MAF) aligned against hg38, we provide the user
