@@ -414,7 +414,7 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
     #axis(side = 1, at = pretty(range(toPlot[, 3])), col = "red", line=2.5)
     #axis(side = 3, at = pretty(range(toPlot[, 3])), col = "red")
 
-    if ( is.character( nRGTab)) {
+    if (is.null(nrow(nRGTab))) {
         nRG <- length(nRGTab)
     } else {
         nRG <- nRGTab[tf, "RegSizeTF"]
