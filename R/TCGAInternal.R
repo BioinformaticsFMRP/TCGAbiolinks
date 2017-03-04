@@ -553,7 +553,7 @@ get.cnv <- function(project, genes){
 
     gistic <- getGistic(gsub("TCGA-","",project))
     cnv.annotation <- t(gistic[tolower(gistic[,1]) %in% tolower(genes),-c(2:3)])
-    colnames(cnv.annotation) <- paste0("gistic2_",cnv.annotation[1,])
+    colnames(cnv.annotation) <- paste0("gistic2_hg19_",cnv.annotation[1,])
     cnv.annotation <- cnv.annotation[-1,, drop = FALSE]
     rownames(cnv.annotation) <- substr(gsub("\\.","-",rownames(cnv.annotation)),1,15)
     return(cnv.annotation)
@@ -569,7 +569,7 @@ get.mutation <- function(project, genes, pipeline = pipeline){
     for(i in genes) {
         if(!i %in% maf$Hugo_Symbol) next
         aux <-  data.frame(patient = substr(unique(maf[grepl(i,maf$Hugo_Symbol,ignore.case = TRUE),]$Tumor_Sample_Barcode),1,15), mut = TRUE)
-        colnames(aux)[2] <- paste0("mut_",i)
+        colnames(aux)[2] <- paste0("mut_hg38_",i)
         if(is.null(mut)) {
             mut <- aux
         } else {
@@ -594,7 +594,7 @@ get.mut.gistc <- function(project, genes,mut.pipeline) {
     cnv <- get.cnv(project, genes)
     if(!is.null(mut) & !is.null(cnv)) {
         annotation <- merge(mut, cnv, by = 0 , sort = FALSE,all=TRUE)
-        mut.idx <- grep("mut_",colnames(annotation))
+        mut.idx <- grep("mut_hg38_",colnames(annotation))
         annotation[,mut.idx] <- !is.na(annotation[,mut.idx]) & annotation[,mut.idx] != FALSE
         rownames(annotation) <- annotation$Row.names
         annotation$Row.names <- NULL
@@ -615,9 +615,9 @@ get.mut.gistc.information <- function(df, project, genes, mut.pipeline = "mutect
     df$aux <- substr(df$barcode,1,15)
     df <- merge(df,info,by = "aux", all.x = TRUE, sort = FALSE)
     df$aux <- NULL
-    mut.idx <- grep("mut_",colnames(df))
+    mut.idx <- grep("mut_hg38_",colnames(df))
     if(length(mut.idx) > 0) df[,mut.idx] <- !is.na(df[,mut.idx]) & df[,mut.idx] != FALSE
-    for(i in paste0("mut_",genes)){
+    for(i in paste0("mut_hg38_",genes)){
         if(!i %in% colnames(df)) {
             df$aux <- FALSE
             colnames(df)[grep("aux",colnames(df))] <- i

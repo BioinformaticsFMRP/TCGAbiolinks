@@ -463,7 +463,8 @@ TCGAanalyze_Filtering <- function(tabDF,method,
 #'    }
 #' @param tabDF Rnaseq numeric matrix, each row represents a gene,
 #' each column represents a sample
-#' @param geneInfo Information matrix of 20531 genes about geneLength and gcContent
+#' @param geneInfo Information matrix of 20531 genes about geneLength and gcContent.
+#' Two objects are provided: TCGAbiolinks::geneInfoHT,TCGAbiolinks::geneInfo
 #' @param method is method of normalization such as 'gcContent' or 'geneLength'
 #' @importFrom EDASeq newSeqExpressionSet withinLaneNormalization
 #'  betweenLaneNormalization exprs counts offst
