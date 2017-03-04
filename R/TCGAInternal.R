@@ -656,3 +656,24 @@ getResults <- function(query, rows, cols){
     if(!missing(cols) & missing(rows)) return(query$results[[1]][,cols])
     if(!missing(cols) & !missing(rows)) return(query$results[[1]][rows,cols])
 }
+
+
+getURL <- function(URL, FUN, ..., N.TRIES=1L) {
+    N.TRIES <- as.integer(N.TRIES)
+    stopifnot(length(N.TRIES) == 1L, !is.na(N.TRIES))
+
+    while (N.TRIES >= 0L) {
+        result <- tryCatch(FUN(URL, ...), error=identity)
+        if (!inherits(result, "error"))
+            break
+        N.TRIES <- N.TRIES - 1L
+    }
+
+    if (N.TRIES == 0L) {
+        stop("'getURL()' failed:",
+             "\n  URL: ", URL,
+             "\n  error: ", conditionMessage(result))
+    }
+
+    result
+}
