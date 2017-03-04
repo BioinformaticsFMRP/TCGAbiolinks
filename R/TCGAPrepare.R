@@ -817,9 +817,9 @@ getBarcodeInfo <- function(barcode) {
     #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
     url <- paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&"))
     json  <- tryCatch(
-        fromJSON(url, simplifyDataFrame = TRUE),
+        getURL(url,fromJSON,simplifyDataFrame = TRUE),
         error = function(e) {
-            fromJSON(content(GET(url), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+            fromJSON(content(getURL(url,GET), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
         }
     )
 
