@@ -499,7 +499,7 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
         tmp <- which(geneNames[, 1] == "?")
         geneNames[tmp, 1] <- geneNames[tmp, 2]
         tmp <- table(geneNames[,1])
-        tmp <- which(geneNames[,1] == names(tmp[which(tmp > 1)]))
+        tmp <- which(geneNames[,1] %in% names(tmp[which(tmp > 1)]))
         geneNames[tmp, 1] <- paste(geneNames[tmp, 1], geneNames[tmp, 2], sep = ".")
         tmp <- table(geneNames[,1])
         rownames(tabDF) <- geneNames[,1]
