@@ -162,7 +162,7 @@ GDCdownload.aux <- function(server, manifest, name, path){
         bin <- POST(server,
                     body =  list(ids=list(manifest$id)),
                     encode = "json", progress())
-        writeBin(content(bin,"raw",encoding = "UTF-8"), name)
+        writeBin(getURL(bin,content, as= "raw",encoding = "UTF-8"), name)
 
         if(nrow(manifest) > 1) {
             success <- untar(name)
