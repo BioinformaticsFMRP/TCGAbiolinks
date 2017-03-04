@@ -51,7 +51,7 @@
 #' query <- GDCquery(project = "TCGA-ACC",
 #'                   data.category = "Copy Number Variation",
 #'                   data.type = "Copy Number Segment")
-#' query.met <- GDCquery(project = c("TCGA-GBM","TCGA-GBM"),
+#' query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
 #'                       legacy = TRUE,
 #'                       data.category = "DNA methylation",
 #'                       platform = "Illumina Human Methylation 450")
@@ -149,9 +149,9 @@ GDCquery <- function(project,
                            legacy = legacy)
         message("ooo Project: ", proj)
         json  <- tryCatch(
-            fromJSON(url, simplifyDataFrame = TRUE),
+            getURL(url,fromJSON,simplifyDataFrame = TRUE),
             error = function(e) {
-                fromJSON(content(GET(url), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+                fromJSON(content(getURL(url,GET), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
             }
         )
         json$data$hits$acl <- NULL
@@ -506,8 +506,11 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata", pipeline
     }, error = function(e) {
         # catch
         root <- "https://gdc-api.nci.nih.gov/data/"
-        maf <- fread("https://gdc-docs.nci.nih.gov/Data/Release_Notes/Manifests/GDC_open_MAFs_manifest.txt",
-                     data.table = FALSE, verbose = FALSE, showProgress = FALSE)
+        maf <- getURL("https://gdc-docs.nci.nih.gov/Data/Release_Notes/Manifests/GDC_open_MAFs_manifest.txt",
+                      fread,
+                      data.table = FALSE,
+                      verbose = FALSE,
+                      showProgress = FALSE)
         maf$tumor <- unlist(lapply(maf$filename, function(x){unlist(str_split(x,"\\."))[2]}))
 
         dir.create(directory, showWarnings = FALSE, recursive = TRUE)
@@ -521,11 +524,11 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata", pipeline
         if(is.windows()) mode <- "wb" else  mode <- "w"
         # Download maf
         repeat{
-            if (!file.exists(file.path(directory,selected$filename)))
-                download(file.path(root,selected$id),
-                         file.path(directory,selected$filename),
-                         mode = mode)
-
+            if (!file.exists(file.path(directory,selected$filename))){
+                getURL(file.path(root,selected$id),download,
+                       destfile = file.path(directory,selected$filename),
+                       mode = mode)
+            }
             # check integrity
             if(md5sum(file.path(directory,selected$filename)) == selected$md5) break
             unlink(file.path(directory,selected$filename))
