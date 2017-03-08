@@ -95,7 +95,7 @@ In this example we will download gene expression quantification from harmonized 
 (data aligned against genome of reference hg38) using GDC Data Transfer Tool. 
 Also, it shows the object data and metadata.
 
-```{r results = 'hide', message=FALSE, warning=FALSE}
+```{r results = 'hide',eval = FALSE, message=FALSE, warning=FALSE}
 # Gene expression aligned against hg38
 query <- GDCquery(project = "TCGA-GBM",
                   data.category = "Transcriptome Profiling",
