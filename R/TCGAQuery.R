@@ -77,6 +77,7 @@
 #' @return A data frame with the results and the parameters used
 #' @importFrom  jsonlite fromJSON
 #' @importFrom knitr kable
+#' @importFrom httr timeout
 GDCquery <- function(project,
                      data.category,
                      data.type,
@@ -149,9 +150,9 @@ GDCquery <- function(project,
                            legacy = legacy)
         message("ooo Project: ", proj)
         json  <- tryCatch(
-            getURL(url,fromJSON,simplifyDataFrame = TRUE),
+            getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
             error = function(e) {
-                fromJSON(content(getURL(url,GET), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+                fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
             }
         )
         json$data$hits$acl <- NULL

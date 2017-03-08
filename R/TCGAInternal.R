@@ -658,7 +658,7 @@ getResults <- function(query, rows, cols){
 }
 
 
-getURL <- function(URL, FUN, ..., N.TRIES=1L) {
+getURL <- function(URL, FUN, ..., N.TRIES=3L) {
     N.TRIES <- as.integer(N.TRIES)
     stopifnot(length(N.TRIES) == 1L, !is.na(N.TRIES))
 
