@@ -346,6 +346,20 @@ references:
   issued:
    year: 2016 
 
+- id: fishbein2017comprehensive
+  title: "Comprehensive Molecular Characterization of Pheochromocytoma and Paraganglioma"
+  author: 
+  - family:  Fishbein, Lauren and Leshchiner, Ignaty and Walter, Vonn and Danilova, Ludmila and Robertson, A Gordon and Johnson, Amy R and Lichtenberg, Tara M and Murray, Bradley A and Ghayee, Hans K and Else, Tobias and others
+  given:
+  journal: Cancer Cell
+  URL: "http://dx.doi.org/10.1016/j.ccell.2017.01.001"
+  DOI: "10.1016/j.ccell.2017.01.001"
+  volume: 31
+  number: 2
+  pages: 181-193
+  issued:
+   year: 2017    
+
 vignette: >
   %\VignetteIndexEntry{Working with TCGAbiolinks package}
   %\VignetteEngine{knitr::rmarkdown}
@@ -360,7 +374,11 @@ knitr::opts_chunk$set(cache=FALSE)
 ```{r, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
 devtools::load_all(".")
 ```
-
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(SummarizedExperiment)
+library(dplyr)
+library(DT)
+```
 ## Updates
 Recently the TCGA data has been moved from the DCC server to 
 The National Cancer Institute (NCI) Genomic Data Commons (GDC) Data Portal 
@@ -377,7 +395,7 @@ The big change is that the GDC data is harmonized against GRCh38. However, not a
 data has been harmonized yet. The old TCGA data can be acessed through GDC legacy Archive,
 in which the majority of data can be found.
 
-More information about the project can be found in [GCD FAQS](https://gdc.nci.nih.gov/about-gdc/gdc-faqs)
+More information about the project can be found in [GDC FAQS](https://gdc.nci.nih.gov/about-gdc/gdc-faqs)
 
 The functions `TCGAquery`, `TCGAdownload`, `TCGAPrepare`, `TCGAquery_maf`, 
 `TCGAquery_clinical`, were replaced by 
@@ -849,8 +867,27 @@ SSS <- TCGAquery_MatchedCoupledSampleTypes(bar,c("NT","TP"))
 
 The Cancer Genome Atlas (TCGA) Research Network has reported integrated genome-wide 
 studies of various diseases. We have added some of the subtypes defined by these
-report in our package. The ACC[@ref22], BRCA [@ref11], COAD [@ref12], GBM [@ref8], HNSC [@ref14], KICH [@ref15], KIRC[@ref21], KIRP [@ref20], LGG [@ref8], LUAD [@ref9], 
-LUSC[@ref16], PRAD[@ref19], READ [@ref12],  SKCM [@ref13], STAD [@ref10], THCA [@ref18], UCEC [@ref17] tumors have data added. 
+report in our package:
+
+- [ACC](doi:10.1016/j.ccell.2016.04.002)[@ref22]
+- [BRCA](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3465532/)[@ref11]
+- [COAD](http://www.nature.com/nature/journal/v487/n7407/abs/nature11252.html) [@ref12] 
+- [GBM](http://dx.doi.org/10.1016/j.cell.2015.12.028) [@ref8]
+- [HNSC](http://www.nature.com/nature/journal/v517/n7536/abs/nature14129.html) [@ref14]
+- [KICH](http://www.sciencedirect.com/science/article/pii/S1535610814003043) [@ref15]
+- [KIRC](http://www.nature.com/nature/journal/v499/n7456/abs/nature12222.html)[@ref21] 
+- [KIRP](http://www.nejm.org/doi/full/10.1056/NEJMoa1505917) [@ref20] 
+- [LGG](http://dx.doi.org/10.1016/j.cell.2015.12.028)[@ref8] 
+- [LUAD](http://www.nature.com/nature/journal/v511/n7511/abs/nature13385.html) [@ref9] 
+- [LUSC](http://www.nature.com/nature/journal/v489/n7417/abs/nature11404.html)pcpg
+- [PCPG](http://dx.doi.org/10.1016/j.ccell.2017.01.001)[@fishbein2017comprehensive]
+- [PRAD](http://www.sciencedirect.com/science/article/pii/S0092867415013392)[@ref19] 
+- [READ](http://www.nature.com/nature/journal/v487/n7407/abs/nature11252.html) [@ref12] 
+- [SKCM](http://www.sciencedirect.com/science/article/pii/S0092867415006340) [@ref13] 
+- [STAD](http://www.nature.com/nature/journal/v511/n7511/abs/nature13385.html) [@ref10] 
+- [THCA](http://www.sciencedirect.com/science/article/pii/S0092867414012380) [@ref18] 
+- [UCEC](http://www.nature.com/nature/journal/v497/n7447/abs/nature12113.html) [@ref17]
+
 These subtypes will be automatically added in the summarizedExperiment
 object through TCGAprepare. But you can also use the `TCGAquery_subtype` function
 to retrive this information.
@@ -865,9 +902,11 @@ LGG_path_subtypes <- TCGAquery_subtype(tumor = "lgg")
 A subset of the lgg subytpe is shown below:
 
 ```{r, eval = TRUE, echo = FALSE}
-knitr::kable(lgg.gbm.subtype[1:10,c(1,2,3,4)], digits = 2, 
-             caption = "Table with LGG molecular subtypes from TCGAquery_subtype",
-             row.names = TRUE)
+datatable(lgg.gbm.subtype[1:10,],
+          caption = "Table with LGG molecular subtypes from TCGAquery_subtype",
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
 ```
 
 
