@@ -129,9 +129,9 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
                              URLencode('"]}}]}'))
     url <- paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter,"format=json", sep = "&"))
     json  <- tryCatch(
-        getURL(url,fromJSON,simplifyDataFrame = TRUE),
+        getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
         error = function(e) {
-            fromJSON(content(getURL(url,GET), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+            fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
         }
     )
 
@@ -389,7 +389,7 @@ parseXML <- function(files, xpath, clinical.info ){
 #' dataSubt <- TCGAquery_subtype(tumor = "lgg")
 #' @return a data.frame with barcode and molecular subtypes
 TCGAquery_subtype <- function(tumor){
-    if (grepl("acc|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc|all",
+    if (grepl("acc|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|pcpg|kirp|kirc|all",
               tumor,ignore.case = TRUE)) {
 
         doi <- c("acc"="doi:10.1016/j.ccell.2016.04.002",
@@ -408,6 +408,7 @@ TCGAquery_subtype <- function(tumor){
                  "lusc"="doi:10.1038/nature11404",
                  "ovca"= "doi:10.1038/nature10166",
                  "pancan"="doi:10.1016/j.cell.2014.06.049",
+                 "pcpg"="http://dx.doi.org/10.1016/j.ccell.2017.01.001",
                  "prad"="doi:10.1016/j.cell.2015.10.025",
                  "read"="doi:10.1038/nature11252",
                  "skcm"="doi:10.1016/j.cell.2015.05.044",
