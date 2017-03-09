@@ -596,7 +596,7 @@ colDataPrepare <- function(barcode){
         if(grepl("TCGA",proj,ignore.case = TRUE)) {
             message(" => Adding subtype information to samples")
             tumor <- gsub("TCGA-","",proj)
-            if (grepl("acc|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc|all",
+            if (grepl("acc|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|pcpg|kirp|kirc|all",
                       tumor,ignore.case = TRUE)) {
                 subtype <- TCGAquery_subtype(tumor)
                 colnames(subtype) <- paste0("subtype_", colnames(subtype))
