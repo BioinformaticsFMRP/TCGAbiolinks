@@ -596,7 +596,7 @@ colDataPrepare <- function(barcode){
         if(grepl("TCGA",proj,ignore.case = TRUE)) {
             message(" => Adding subtype information to samples")
             tumor <- gsub("TCGA-","",proj)
-            if (grepl("acc|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|kirp|kirc|all",
+            if (grepl("acc|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|pcpg|kirp|kirc|all",
                       tumor,ignore.case = TRUE)) {
                 subtype <- TCGAquery_subtype(tumor)
                 colnames(subtype) <- paste0("subtype_", colnames(subtype))
@@ -817,9 +817,9 @@ getBarcodeInfo <- function(barcode) {
     #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
     url <- paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&"))
     json  <- tryCatch(
-        getURL(url,fromJSON,simplifyDataFrame = TRUE),
+        getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
         error = function(e) {
-            fromJSON(content(getURL(url,GET), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+            fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
         }
     )
 
