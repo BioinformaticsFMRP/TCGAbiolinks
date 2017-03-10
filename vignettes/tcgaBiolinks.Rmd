@@ -879,7 +879,7 @@ report in our package:
 - [KIRP](http://www.nejm.org/doi/full/10.1056/NEJMoa1505917) [@ref20] 
 - [LGG](http://dx.doi.org/10.1016/j.cell.2015.12.028)[@ref8] 
 - [LUAD](http://www.nature.com/nature/journal/v511/n7511/abs/nature13385.html) [@ref9] 
-- [LUSC](http://www.nature.com/nature/journal/v489/n7417/abs/nature11404.html)pcpg
+- [LUSC](http://www.nature.com/nature/journal/v489/n7417/abs/nature11404.html)[@ref16] 
 - [PCPG](http://dx.doi.org/10.1016/j.ccell.2017.01.001)[@fishbein2017comprehensive]
 - [PRAD](http://www.sciencedirect.com/science/article/pii/S0092867415013392)[@ref19] 
 - [READ](http://www.nature.com/nature/journal/v487/n7407/abs/nature11252.html) [@ref12] 
