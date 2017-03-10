@@ -15,12 +15,25 @@ devtools::install_github(repo = "BioinformaticsFMRP/TCGAbiolinks")
 ```
 ------------------------------------------------------------------------
 
+### Docker image ###
+
+TCGAbiolinks is available as Docker image (self-contained environments that contain everything needed to run the software), 
+which can be easily run on Mac OS, Windows and Linux systems. 
+
+This [PDF](https://drive.google.com/open?id=0B0-8N2fjttG-QXp5LVlPQnVQejg) show how to install and execute the image.
+
+The image can be obtained from Docker Hub: https://hub.docker.com/r/tiagochst/tcgabiolinksgui/
+
+For more information please check: https://docs.docker.com/ and https://www.bioconductor.org/help/docker/
+
+
 ### Manual ###
 
 http://bioconductor.org/packages/devel/bioc/vignettes/TCGAbiolinks/inst/doc/tcgaBiolinks.html
 http://bioinformaticsfmrp.github.io/TCGAbiolinks/
 
 ------------------------------------------------------------------------
+
 
 ## Citation
 
