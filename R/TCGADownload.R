@@ -70,8 +70,10 @@ GDCdownload <- function(query,
         if(any(files2Download == TRUE)) message("We will download only those that are missing ones.")
     }
     manifest <- manifest[files2Download,]
+
     # There is a bug in the API, if the files has the same name it will not download correctly
     # so method should be set to client if there are files with duplicated names
+    # However for clinical XML recurrent and primary are the same file. So we will ignore that case
     if(nrow(manifest) > length(unique(manifest$filename))) method <- "client"
     if(nrow(manifest) != 0 & method == "client") {
         # There exists two options to download the data, using the query or using a manifest file
@@ -100,8 +102,6 @@ GDCdownload <- function(query,
             # moving the file to make it more organized
             for(i in manifest$id) move(i,file.path(path,i))
         })
-
-
 
     } else if (nrow(manifest) != 0 & method =="api"){
         if(nrow(manifest) > 1) {
