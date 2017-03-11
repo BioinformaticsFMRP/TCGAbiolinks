@@ -101,8 +101,6 @@ GDCdownload <- function(query,
             for(i in manifest$id) move(i,file.path(path,i))
         })
 
-
-
     } else if (nrow(manifest) != 0 & method =="api"){
         if(nrow(manifest) > 1) {
             name <- paste0(gsub(" |:","_",date()),".tar.gz")
