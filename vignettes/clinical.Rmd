@@ -140,7 +140,7 @@ recurrent.samples <- GDCquery(project = "TCGA-LIHC",
                              data.type = "Gene Expression Quantification", 
                              workflow.type = "HTSeq - Counts",
                              sample.type = 	"Recurrent Solid Tumor")$results[[1]] %>% select(cases)
-recurrent.patients <- substr(recurrent.samples$cases,1,12)
+recurrent.patients <- unique(substr(recurrent.samples$cases,1,12))
 clin.query <- GDCquery(project = "TCGA-LIHC", data.category = "Clinical", barcode = recurrent.patients)
 GDCdownload(clin.query)
 clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient") 
