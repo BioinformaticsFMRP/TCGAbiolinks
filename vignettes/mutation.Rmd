@@ -1,5 +1,5 @@
 ---
-title: "TCGAbiolinks: Searching and downloading mutation files"
+title: "TCGAbiolinks: Searching, downloading and visualizing mutation files"
 date: "`r BiocStyle::doc_date()`"
 vignette: >
   %\VignetteIndexEntry{"TCGAbiolinks: Mutation data"}
@@ -20,33 +20,32 @@ library(DT)
 ```
 
 
+# Search and Download
+
 **TCGAbiolinks** has provided a few functions to download mutation data from GDC.
 There are two options to download the data:
 
 1. Use `GDCquery_Maf` which will download MAF aligned against hg38
 2. Use `GDCquery`, `GDCdownload` and `GDCpreprare` to downoad MAF aligned against hg19
 
-
----
-
-# Mutation data (hg38)
+## Mutation data (hg38)
 
 This exmaple will download MAF (mutation annotation files) for variant calling pipeline muse.
-Pipelines options are: muse, varscan2, somaticsniper, mutect. For more information please access
+Pipelines options are: `muse`, `varscan2`, `somaticsniper`, `mutect`. For more information please access
 [GDC docs](https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/).
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
-acc.maf <- GDCquery_Maf("ACC", pipelines = "muse")
+maf <- GDCquery_Maf("CHOL", pipelines = "muse")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 # Only first 50 to make render faster
-datatable(acc.maf[1:50,],
-              filter = 'top',
-              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-              rownames = FALSE)
+datatable(maf[1:20,],
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
 ```
 
-# Mutation data (hg19)
+## Mutation data (hg19)
 
 This exmaple will download MAF (mutation annotation files) aligned against hg19 (Old TCGA maf files)
 
@@ -77,9 +76,28 @@ maf <- GDCprepare(query.maf.hg19)
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 # Only first 50 to make render faster
-datatable(maf[1:50,],
+datatable(maf[1:20,],
           filter = 'top',
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = FALSE)
 ```
 
+# Visualize the data
+To visualize the data you can use the Bioconductor package [maftools](https://bioconductor.org/packages/release/bioc/html/maftools.html). For more information, please check is [vignette](https://bioconductor.org/packages/release/bioc/vignettes/maftools/inst/doc/maftools.html#rainfall-plots).
+
+
+```{r  results = "hide",echo = TRUE, message = FALSE, warning = FALSE}
+library(maftools)
+maf <- GDCquery_Maf("CHOL", pipelines = "muse") %>% read.maf(removeSilent = TRUE, useAll = FALSE)
+datatable(getSampleSummary(maf),
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
+plotmafSummary(maf = maf, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE)
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+oncoplot(maf = maf, top = 10, removeNonMutated = TRUE)
+titv = titv(maf = maf, plot = FALSE, useSyn = TRUE)
+#plot titv summary
+plotTiTv(res = titv)
+```
