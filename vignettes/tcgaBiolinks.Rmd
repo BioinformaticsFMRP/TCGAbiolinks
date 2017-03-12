@@ -1791,22 +1791,33 @@ of the subgroups. Example: shapes = c(21,23) if for two levels
 
 Other examples using the parameters:
 ```{r, echo=TRUE, fig.height=4, fig.width=7, out.width = 7, out.heigh=5, message=FALSE, warning=FALSE}
-
 # setting y limits: lower 0, upper 1
-TCGAvisualize_meanMethylation(data,groupCol = "shortLetterCode",filename = NULL, y.limits = c(0,1))
+TCGAvisualize_meanMethylation(data,groupCol = "shortLetterCode", 
+                              filename = NULL, y.limits = c(0,1))
 # setting y limits: lower 0
-TCGAvisualize_meanMethylation(data,groupCol = "shortLetterCode",filename = NULL, y.limits = 0)
+TCGAvisualize_meanMethylation(data,groupCol = "shortLetterCode", 
+                              filename = NULL, y.limits = 0)
+
 # Changing shapes of jitters to show subgroups
 TCGAvisualize_meanMethylation(data,
-                              groupCol  = "subtype_Pan.Glioma.DNA.Methylation.Cluster", 
-                              subgroupCol="vital_status", filename = NULL)
+                              groupCol = "subtype_Pan.Glioma.DNA.Methylation.Cluster", 
+                              subgroupCol ="vital_status", filename = NULL)
+
 # Sorting bars by descending mean methylation
 TCGAvisualize_meanMethylation(data,
-                              groupCol  = "subtype_Pan.Glioma.DNA.Methylation.Cluster",sort="mean.desc",filename=NULL)
+                              groupCol = "subtype_Pan.Glioma.DNA.Methylation.Cluster",
+                              sort="mean.desc",
+                              filename=NULL)
 # Sorting bars by asc mean methylation
-TCGAvisualize_meanMethylation(data,groupCol  = "subtype_Pan.Glioma.DNA.Methylation.Cluster",
-                              sort="mean.asc",filename=NULL)
-TCGAvisualize_meanMethylation(data,groupCol  = "vital_status",sort="mean.asc",filename=NULL)
+TCGAvisualize_meanMethylation(data,
+                              groupCol = "subtype_Pan.Glioma.DNA.Methylation.Cluster",
+                              sort = "mean.asc",
+                              filename=NULL)
+
+TCGAvisualize_meanMethylation(data,
+                              groupCol = "vital_status",
+                              sort = "mean.asc",
+                              filename=NULL)
 ```
 
 
