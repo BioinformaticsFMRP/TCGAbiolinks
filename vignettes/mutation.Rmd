@@ -28,8 +28,6 @@ There are two options to download the data:
 1. Use `GDCquery_Maf` which will download MAF aligned against hg38
 2. Use `GDCquery`, `GDCdownload` and `GDCpreprare` to downoad MAF aligned against hg19
 
-
-
 ## Mutation data (hg38)
 
 This exmaple will download MAF (mutation annotation files) for variant calling pipeline muse.
@@ -37,14 +35,14 @@ Pipelines options are: `muse`, `varscan2`, `somaticsniper`, `mutect`. For more i
 [GDC docs](https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/).
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
-acc.maf <- GDCquery_Maf("CHOL", pipelines = "muse")
+maf <- GDCquery_Maf("CHOL", pipelines = "muse")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 # Only first 50 to make render faster
-datatable(acc.maf[1:20,],
-              filter = 'top',
-              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-              rownames = FALSE)
+datatable(maf[1:20,],
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
 ```
 
 ## Mutation data (hg19)
