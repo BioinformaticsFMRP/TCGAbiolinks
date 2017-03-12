@@ -10,6 +10,7 @@
 
 
 
+<meta name="date" content="2017-03-12" />
 
 <title>Introduction</title>
 
@@ -423,7 +424,7 @@ div.tocify {
 
 
 <h1 class="title toc-ignore">Introduction</h1>
-<h4 class="date"><em>2 March 2017</em></h4>
+<h4 class="date"><em>12 March 2017</em></h4>
 
 </div>
 
@@ -432,6 +433,8 @@ div.tocify {
 <a href="https://gdc.cancer.gov/developers/gdc-application-programming-interface-api">GDC Application Programming Interface (API)</a> to search, download and prepare relevant data for analysis in R.</p>
 <div id="installation" class="section level1">
 <h1>Installation</h1>
+<div id="r" class="section level2">
+<h2>R</h2>
 <p>You can install the stable version from <a href="http://bioconductor.org/packages/release/bioc/html/TCGAbiolinks.html">Bioconductor</a>, or the development version using:</p>
 <ul>
 <li>Stable version:</li>
@@ -439,9 +442,17 @@ div.tocify {
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">source</span>(<span class="st">&quot;https://bioconductor.org/biocLite.R&quot;</span>)
 <span class="kw">biocLite</span>(<span class="st">&quot;TCGAbiolinks&quot;</span>)</code></pre></div>
 <ul>
-<li>Development version</li>
+<li>Development version:</li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">devtools::<span class="kw">install_github</span>(<span class="st">'BioinformaticsFMRP/TCGAbiolinks'</span>)</code></pre></div>
+</div>
+<div id="docker-image" class="section level2">
+<h2>Docker image</h2>
+<p>If you prefer to use docker, TCGAbiolinks and TCGAbiolinksGUI are available as Docker image (self-contained environments that contain everything needed to run the software), which can be easily run on Mac OS, Windows and Linux systems.</p>
+<p>This <a href="https://drive.google.com/open?id=0B0-8N2fjttG-QXp5LVlPQnVQejg">PDF</a> show how to install and execute the image.</p>
+<p>The image can be obtained from Docker Hub: <a href="https://hub.docker.com/r/tiagochst/tcgabiolinksgui/" class="uri">https://hub.docker.com/r/tiagochst/tcgabiolinksgui/</a></p>
+<p>For more information please check: <a href="https://docs.docker.com/" class="uri">https://docs.docker.com/</a> and <a href="https://www.bioconductor.org/help/docker/" class="uri">https://www.bioconductor.org/help/docker/</a></p>
+</div>
 </div>
 <div id="question-and-issues" class="section level1">
 <h1>Question and issues</h1>
