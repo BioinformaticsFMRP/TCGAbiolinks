@@ -63,7 +63,7 @@ has three main matrices that can be accessed using the [SummarizedExperiment pac
 
 In this example we will download gene expression data from legacy database (data 
 aligned against genome of reference hg19) using GDC api method and  we will show object data and metadata.
-```{r results = 'hide', message=FALSE, eval = FALSE, warning=FALSE}
+```{r results = 'hide', message=FALSE, warning=FALSE}
 query <- GDCquery(project = "TCGA-GBM",
                            data.category = "Gene expression",
                            data.type = "Gene expression quantification",
@@ -75,7 +75,7 @@ query <- GDCquery(project = "TCGA-GBM",
 GDCdownload(query, method = "api", chunks.per.download = 10)
 data <- GDCprepare(query)
 ```
-```{r message=FALSE,eval = FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE}
 # Gene expression aligned against hg19.
 datatable(as.data.frame(colData(data)), 
               options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
