@@ -72,7 +72,7 @@ GDCprepare <- function(query,
     }
     # We save the files in project/source/data.category/data.type/file_id/file_name
     source <- ifelse(query$legacy,"legacy","harmonized")
-    files <- file.path(query$project, source,
+    files <- file.path(query$results[[1]]$project, source,
                        gsub(" ","_",query$results[[1]]$data_category),
                        gsub(" ","_",query$results[[1]]$data_type),
                        gsub(" ","_",query$results[[1]]$file_id),
