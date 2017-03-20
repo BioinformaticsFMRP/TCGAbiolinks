@@ -662,7 +662,7 @@ getURL <- function(URL, FUN, ..., N.TRIES=3L) {
     N.TRIES <- as.integer(N.TRIES)
     stopifnot(length(N.TRIES) == 1L, !is.na(N.TRIES))
 
-    while (N.TRIES >= 0L) {
+    while (N.TRIES > 0L) {
         result <- tryCatch(FUN(URL, ...), error=identity)
         if (!inherits(result, "error"))
             break
