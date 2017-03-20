@@ -501,9 +501,13 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata", pipeline
 
     query <- GDCquery(paste0("TCGA-",tumor), data.category = "Simple Nucleotide Variation", data.type = "Masked Somatic Mutation", workflow.type = workflow.type)
     if(nrow(query$results[[1]]) == 0) stop("No MAF file found for this type of workflow")
-    GDCdownload(query, directory = directory, method = "api")
-    maf <- GDCprepare(query, directory = directory)
+    tryCatch({
+        GDCdownload(query, directory = directory, method = "api")
+    }, error = function(e) {
+        GDCdownload(query, directory = directory, method = "client")
+    })
 
+    maf <- GDCprepare(query, directory = directory)
 
     if(save.csv) {
         fout <- file.path(directory,paste0(query$project,"_maf.csv"))
