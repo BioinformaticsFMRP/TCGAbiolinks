@@ -499,87 +499,15 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata", pipeline
     message(" https://gdc.cancer.gov/about-gdc/variant-calling-gdc")
     message("============================================================================")
 
-    maf  = tryCatch({
-        query <- GDCquery(paste0("TCGA-",tumor), data.category = "Simple Nucleotide Variation", data.type = "Masked Somatic Mutation", workflow.type = workflow.type)
-        if(nrow(query$results[[1]]) == 0) stop("No MAF file found for this type of workflow")
+    query <- GDCquery(paste0("TCGA-",tumor), data.category = "Simple Nucleotide Variation", data.type = "Masked Somatic Mutation", workflow.type = workflow.type)
+    if(nrow(query$results[[1]]) == 0) stop("No MAF file found for this type of workflow")
+    tryCatch({
         GDCdownload(query, directory = directory, method = "api")
-        maf <- GDCprepare(query, directory = directory)
-        maf
     }, error = function(e) {
-        # catch
-        root <- "https://gdc-api.nci.nih.gov/data/"
-        maf <- getURL("https://gdc-docs.nci.nih.gov/Data/Release_Notes/Manifests/GDC_open_MAFs_manifest.txt",
-                      fread,
-                      data.table = FALSE,
-                      verbose = FALSE,
-                      showProgress = FALSE)
-        maf$tumor <- unlist(lapply(maf$filename, function(x){unlist(str_split(x,"\\."))[2]}))
-
-        dir.create(directory, showWarnings = FALSE, recursive = TRUE)
-        # Check input
-
-        if (!any(grepl(tumor,maf$tumor))) stop(paste0("Please, set a valid tumor argument. Possible values:\n => ",
-                                                      paste(sort(maf$tumor),collapse = "\n => ")))
-
-        selected <- maf[grepl(tumor,maf$tumor,ignore.case = TRUE),]
-
-        if(is.windows()) mode <- "wb" else  mode <- "w"
-        # Download maf
-        repeat{
-            if (!file.exists(file.path(directory,selected$filename))){
-                getURL(file.path(root,selected$id),download,
-                       destfile = file.path(directory,selected$filename),
-                       mode = mode)
-            }
-            # check integrity
-            if(md5sum(file.path(directory,selected$filename)) == selected$md5) break
-            unlink(file.path(directory,selected$filename))
-            message("The data downloaded might be corrupted. We will download it again")
-        }
-
-        # uncompress file
-        file <- gsub(".gz","",file.path(directory,selected$filename))
-        if (!file.exists(file)) gunzip(file.path(directory,selected$filename), remove = FALSE)
-
-        # Is there a better way??
-        ret <- read_tsv(file,
-                        comment = "#",
-                        col_types = cols(
-                            Entrez_Gene_Id = col_integer(),
-                            Start_Position = col_integer(),
-                            End_Position = col_integer(),
-                            t_depth = col_integer(),
-                            t_ref_count = col_integer(),
-                            t_alt_count = col_integer(),
-                            n_depth = col_integer(),
-                            ALLELE_NUM = col_integer(),
-                            TRANSCRIPT_STRAND = col_integer(),
-                            PICK = col_integer(),
-                            TSL = col_integer(),
-                            HGVS_OFFSET = col_integer(),
-                            MINIMISED = col_integer()),
-                        progress = TRUE)
-        if(ncol(ret) == 1) ret <- read_csv(file,
-                                           comment = "#",
-                                           col_types = cols(
-                                               Entrez_Gene_Id = col_integer(),
-                                               Start_Position = col_integer(),
-                                               End_Position = col_integer(),
-                                               t_depth = col_integer(),
-                                               t_ref_count = col_integer(),
-                                               t_alt_count = col_integer(),
-                                               n_depth = col_integer(),
-                                               ALLELE_NUM = col_integer(),
-                                               TRANSCRIPT_STRAND = col_integer(),
-                                               PICK = col_integer(),
-                                               TSL = col_integer(),
-                                               HGVS_OFFSET = col_integer(),
-                                               MINIMISED = col_integer()),
-                                           progress = TRUE)
-        ret
+        GDCdownload(query, directory = directory, method = "client")
     })
 
-
+    maf <- GDCprepare(query, directory = directory)
 
     if(save.csv) {
         fout <- file.path(directory,paste0(query$project,"_maf.csv"))
