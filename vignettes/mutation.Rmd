@@ -34,10 +34,10 @@ This exmaple will download MAF (mutation annotation files) for variant calling p
 Pipelines options are: `muse`, `varscan2`, `somaticsniper`, `mutect`. For more information please access
 [GDC docs](https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/).
 
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE, eval = FALSE}
 maf <- GDCquery_Maf("CHOL", pipelines = "muse")
 ```
-```{r  echo = TRUE, message = FALSE, warning = FALSE}
+```{r  echo = TRUE, message = FALSE, warning = FALSE,eval = FALSE}
 # Only first 50 to make render faster
 datatable(maf[1:20,],
           filter = 'top',
@@ -50,21 +50,21 @@ datatable(maf[1:20,],
 This exmaple will download MAF (mutation annotation files) aligned against hg19 (Old TCGA maf files)
 
 
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval = FALSE}
 query.maf.hg19 <- GDCquery(project = "TCGA-CHOL", 
                            data.category = "Simple nucleotide variation", 
                            data.type = "Simple somatic mutation",
                            access = "open", 
                            legacy = TRUE)
 ```
-```{r  echo = TRUE, message = FALSE, warning = FALSE}
+```{r  echo = TRUE, message = FALSE, warning = FALSE,eval = FALSE}
 # Check maf availables
 datatable(select(getResults(query.maf.hg19),-contains("cases")),
           filter = 'top',
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 10), 
           rownames = FALSE)
 ```
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval = FALSE}
 query.maf.hg19 <- GDCquery(project = "TCGA-CHOL", 
                            data.category = "Simple nucleotide variation", 
                            data.type = "Simple somatic mutation",
@@ -74,7 +74,7 @@ query.maf.hg19 <- GDCquery(project = "TCGA-CHOL",
 GDCdownload(query.maf.hg19)
 maf <- GDCprepare(query.maf.hg19)
 ```
-```{r  echo = TRUE, message = FALSE, warning = FALSE}
+```{r  echo = TRUE, message = FALSE, warning = FALSE,eval = FALSE}
 # Only first 50 to make render faster
 datatable(maf[1:20,],
           filter = 'top',
@@ -86,7 +86,7 @@ datatable(maf[1:20,],
 To visualize the data you can use the Bioconductor package [maftools](https://bioconductor.org/packages/release/bioc/html/maftools.html). For more information, please check is [vignette](https://bioconductor.org/packages/release/bioc/vignettes/maftools/inst/doc/maftools.html#rainfall-plots).
 
 
-```{r  results = "hide",echo = TRUE, message = FALSE, warning = FALSE}
+```{r  results = "hide",echo = TRUE, message = FALSE, warning = FALSE,eval = FALSE}
 library(maftools)
 maf <- GDCquery_Maf("CHOL", pipelines = "muse") %>% read.maf(removeSilent = TRUE, useAll = FALSE)
 datatable(getSampleSummary(maf),
@@ -95,7 +95,7 @@ datatable(getSampleSummary(maf),
           rownames = FALSE)
 plotmafSummary(maf = maf, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE)
 ```
-```{r  echo = TRUE, message = FALSE, warning = FALSE}
+```{r  echo = TRUE, message = FALSE, warning = FALSE,eval = FALSE}
 oncoplot(maf = maf, top = 10, removeNonMutated = TRUE)
 titv = titv(maf = maf, plot = FALSE, useSyn = TRUE)
 #plot titv summary
