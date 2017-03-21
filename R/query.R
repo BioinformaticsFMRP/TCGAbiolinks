@@ -510,7 +510,7 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata", pipeline
     maf <- GDCprepare(query, directory = directory)
 
     if(save.csv) {
-        fout <- file.path(directory,paste0(query$project,"_maf.csv"))
+        fout <- file.path(directory,gsub("\\.gz", "\\.csv",getResults(query)$file_name))
         write_csv(maf, fout)
         message(paste0("File created: ", fout))
     }
