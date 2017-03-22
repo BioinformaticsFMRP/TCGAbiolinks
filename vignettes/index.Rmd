@@ -2,7 +2,7 @@
 title: "Introduction"
 date: "`r BiocStyle::doc_date()`"
 vignette: >
-  %\VignetteIndexEntry{"Introduction"}
+  %\VignetteIndexEntry{"1. Introduction"}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
