@@ -2,7 +2,7 @@
 title: "TCGAbiolinks: Clinical data"
 date: "`r BiocStyle::doc_date()`"
 vignette: >
-  %\VignetteIndexEntry{"TCGAbiolinks: Clinical data"}
+  %\VignetteIndexEntry{"4. Clinical data"}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
