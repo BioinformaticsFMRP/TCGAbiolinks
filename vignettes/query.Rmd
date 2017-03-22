@@ -2,7 +2,7 @@
 title: "TCGAbiolinks: Searching GDC database"
 date: "`r BiocStyle::doc_date()`"
 vignette: >
-  %\VignetteIndexEntry{"TCGAbiolinks: Searching GDC database"}
+  %\VignetteIndexEntry{"2. Searching GDC database"}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
