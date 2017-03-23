@@ -790,13 +790,13 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,su
 
 # Reads Copy Number Variation files to a data frame, basically it will rbind it
 readCopyNumberVariation <- function(files, cases){
-    message("Reading a copy  number variation")
+    message("Reading copy number variation files")
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     for (i in seq_along(files)) {
         data <- read_tsv(file = files[i], col_names = TRUE, col_types = "ccnnnd")
         if(!missing(cases)) data$Sample <- cases[i]
         if(i == 1) df <- data
-        if(i != 1) df <- rbind(df, data, make.row.names = FALSE)
+        if(i != 1) df <- rbind(df, data)
         setTxtProgressBar(pb, i)
     }
     close(pb)
