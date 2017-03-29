@@ -96,6 +96,93 @@ clinical.admin <- GDCprepare_clinic(query, clinical.info = "admin")
 datatable(clinical.admin, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
 ```
 
+# Get legacy clinical data
+
+The clincal data types available in legacy database are:
+
+* Biospecimen data (Biotab format)
+* Tissue slide image (SVS format)
+* Clinical Supplement (XML format)
+* Pathology report (PDF)
+* Clinical data (Biotab format)
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+# Tissue slide image files
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Clinical", 
+                  data.type = "Tissue slide image",
+                  legacy = TRUE,
+                  barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")) 
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+query %>% getResults %>% datatable
+```
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+# Pathology report
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Clinical", 
+                  data.type = "Pathology report",
+                  legacy = TRUE,
+                  barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))  
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+query %>% getResults %>% datatable
+```
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+# Tissue slide image
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Clinical", 
+                  data.type = "Tissue slide image",
+                  legacy = TRUE,
+                  barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")) 
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+query %>% getResults %>% datatable
+```
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+# Clinical Supplement
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Clinical", 
+                  data.type = "Clinical Supplement",
+                  legacy = TRUE,
+                  barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")) 
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+query %>% getResults %>% datatable
+```
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+# Clinical data
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Clinical", 
+                  data.type = "Clinical data",
+                  legacy = TRUE,
+                  file.type = "txt")  
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+query %>% getResults %>% select(-matches("cases"))%>% datatable
+```
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+GDCdownload(query)
+clinical.biotab <- GDCprepare(query)
+
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+names(clinical.biotab)
+datatable(clinical.biotab$clinical_radiation_coad)
+```
+
+
 # Clinical data inconsistencies
 
 <div class="panel panel-danger">
@@ -154,3 +241,4 @@ GDCquery_clinic("TCGA-LIHC") %>% filter(submitter_id %in% recurrent.patients) %>
 clinical.patient %>% select(bcr_patient_barcode,neoplasm_histologic_grade) %>% datatable
 
 ```
+
