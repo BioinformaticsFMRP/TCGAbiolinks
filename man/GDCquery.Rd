@@ -74,11 +74,10 @@ Uses GDC API to search for search, it searches for both controlled and
 query <- GDCquery(project = "TCGA-ACC",
                   data.category = "Copy Number Variation",
                   data.type = "Copy Number Segment")
-query <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
-                  legacy = TRUE,
-                  data.category = "DNA methylation",
-                  data.type = "Methylation beta value",
-                  platform = "Illumina Human Methylation 450")
+query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
+                      legacy = TRUE,
+                      data.category = "DNA methylation",
+                      platform = "Illumina Human Methylation 450")
 query <- GDCquery(project = "TARGET-AML",
                   data.category = "Transcriptome Profiling",
                   data.type = "miRNA Expression Quantification",

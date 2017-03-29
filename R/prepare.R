@@ -34,6 +34,7 @@
 #' # data will be saved in  GDCdata/TCGA-ACC/legacy/Copy_number_variation/Copy_number_segmentation
 #' GDCdownload(query, method = "api")
 #' acc.cnv <- GDCprepare(query)
+#'
 #' \dontrun{
 #'  query <- GDCquery(project = "TCGA-GBM",
 #'                    legacy = TRUE,
@@ -61,7 +62,7 @@ GDCprepare <- function(query,
 
     isServeOK()
     if(missing(query)) stop("Please set query parameter")
-    if(any(duplicated(query$results[[1]]$cases))) {
+    if(any(duplicated(query$results[[1]]$cases)) & query$data.type != "Clinical data") {
         dup <- query$results[[1]]$cases[duplicated(query$results[[1]]$cases)]
         dup <- query$results[[1]][sapply(dup, function(x) grep(x,query$results[[1]]$cases)),c(2,4,9,13,15,18)]
         print(knitr::kable(dup))
@@ -99,8 +100,7 @@ GDCprepare <- function(query,
         if(grepl("Masked Somatic Mutation",query$data.type,ignore.case = TRUE) | source == "legacy")
             suppressWarnings(data <- readSimpleNucleotideVariationMaf(files))
     }  else if(grepl("Clinical|Biospecimen", query$data.category, ignore.case = TRUE)){
-        message("Not working yet")
-        # data <- readClinical(files, query$results[[1]]$cases)
+        data <- readClinical(files, query$data.type, query$results[[1]]$cases)
     } else if (grepl("Gene expression",query$data.category,ignore.case = TRUE)) {
         if(query$data.type == "Gene expression quantification")
             data <- readGeneExpressionQuantification(files = files,
@@ -156,7 +156,15 @@ remove.files.recursively <- function(files){
     files2rm <- dirname(files2rm) # data category
     if(length(list.files(files2rm)) == 0) remove.files.recursively(files2rm)
 }
-
+readClinical <- function(files, data.type, cases){
+    if(data.type == "Clinical data"){
+        suppressMessages({
+        ret <- plyr::alply(files,.margins = 1,readr::read_tsv, .progress = "text")
+        })
+        names(ret) <- gsub("nationwidechildrens.org_","",gsub(".txt","",basename(files)))
+    }
+    return(ret)
+}
 
 readIsoformExpressionQuantification <- function (files, cases){
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
@@ -790,13 +798,13 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,su
 
 # Reads Copy Number Variation files to a data frame, basically it will rbind it
 readCopyNumberVariation <- function(files, cases){
-    message("Reading a copy  number variation")
+    message("Reading copy number variation files")
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     for (i in seq_along(files)) {
         data <- read_tsv(file = files[i], col_names = TRUE, col_types = "ccnnnd")
         if(!missing(cases)) data$Sample <- cases[i]
         if(i == 1) df <- data
-        if(i != 1) df <- rbind(df, data, make.row.names = FALSE)
+        if(i != 1) df <- rbind(df, data)
         setTxtProgressBar(pb, i)
     }
     close(pb)
