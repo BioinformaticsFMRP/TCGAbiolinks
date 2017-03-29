@@ -9,14 +9,14 @@ library(dplyr)
 library(DT)
 
 ## ----results = 'hide', echo=TRUE, message=FALSE, warning=FALSE-----------
-acc.maf <- GDCquery_Maf("ACC", pipelines = "muse")
+maf <- GDCquery_Maf("CHOL", pipelines = "muse")
 
 ## ----echo = TRUE, message = FALSE, warning = FALSE-----------------------
 # Only first 50 to make render faster
-datatable(acc.maf[1:50,],
-              filter = 'top',
-              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-              rownames = FALSE)
+datatable(maf[1:20,],
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
 
 ## ----results = 'hide', echo=TRUE, message=FALSE, warning=FALSE-----------
 query.maf.hg19 <- GDCquery(project = "TCGA-CHOL", 
@@ -44,8 +44,23 @@ maf <- GDCprepare(query.maf.hg19)
 
 ## ----echo = TRUE, message = FALSE, warning = FALSE-----------------------
 # Only first 50 to make render faster
-datatable(maf[1:50,],
+datatable(maf[1:20,],
           filter = 'top',
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = FALSE)
+
+## ----results = "hide",echo = TRUE, message = FALSE, warning = FALSE------
+library(maftools)
+maf <- GDCquery_Maf("CHOL", pipelines = "muse") %>% read.maf(removeSilent = TRUE, useAll = FALSE)
+datatable(getSampleSummary(maf),
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
+plotmafSummary(maf = maf, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE)
+
+## ----echo = TRUE, message = FALSE, warning = FALSE-----------------------
+oncoplot(maf = maf, top = 10, removeNonMutated = TRUE)
+titv = titv(maf = maf, plot = FALSE, useSyn = TRUE)
+#plot titv summary
+plotTiTv(res = titv)
 
