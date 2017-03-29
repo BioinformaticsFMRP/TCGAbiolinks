@@ -310,7 +310,7 @@ GDCquery <- function(project,
 
     message("ooo Check if there are duplicated cases")
     if(any(duplicated(results$cases))) {
-        message("Warning: There are more than one file for the same case. Please verify query results. You can use the command View(query$results[[1]]) in rstudio")
+        message("Warning: There are more than one file for the same case. Please verify query results. You can use the command View(getResults(query)) in rstudio")
     }
 
     message("ooo Check if there results for the query")
