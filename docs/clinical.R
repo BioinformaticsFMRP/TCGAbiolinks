@@ -45,6 +45,69 @@ clinical.admin <- GDCprepare_clinic(query, clinical.info = "admin")
 datatable(clinical.admin, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
 
 ## ----results = 'hide', echo=TRUE, message=FALSE, warning=FALSE-----------
+# Tissue slide image files
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Clinical", 
+                  data.type = "Tissue slide image",
+                  legacy = TRUE,
+                  barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")) 
+
+## ----echo=TRUE, message=FALSE, warning=FALSE-----------------------------
+query %>% getResults %>% datatable
+
+## ----results = 'hide', echo=TRUE, message=FALSE, warning=FALSE-----------
+# Pathology report
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Clinical", 
+                  data.type = "Pathology report",
+                  legacy = TRUE,
+                  barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))  
+
+## ----echo=TRUE, message=FALSE, warning=FALSE-----------------------------
+query %>% getResults %>% datatable
+
+## ----results = 'hide', echo=TRUE, message=FALSE, warning=FALSE-----------
+# Tissue slide image
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Clinical", 
+                  data.type = "Tissue slide image",
+                  legacy = TRUE,
+                  barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")) 
+
+## ----echo=TRUE, message=FALSE, warning=FALSE-----------------------------
+query %>% getResults %>% datatable
+
+## ----results = 'hide', echo=TRUE, message=FALSE, warning=FALSE-----------
+# Clinical Supplement
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Clinical", 
+                  data.type = "Clinical Supplement",
+                  legacy = TRUE,
+                  barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")) 
+
+## ----echo=TRUE, message=FALSE, warning=FALSE-----------------------------
+query %>% getResults %>% datatable
+
+## ----results = 'hide', echo=TRUE, message=FALSE, warning=FALSE-----------
+# Clinical data
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Clinical", 
+                  data.type = "Clinical data",
+                  legacy = TRUE,
+                  file.type = "txt")  
+
+## ----echo=TRUE, message=FALSE, warning=FALSE-----------------------------
+query %>% getResults %>% select(-matches("cases"))%>% datatable
+
+## ----results = 'hide', echo=TRUE, message=FALSE, warning=FALSE-----------
+GDCdownload(query)
+clinical.biotab <- GDCprepare(query)
+
+## ----echo=TRUE, message=FALSE, warning=FALSE-----------------------------
+names(clinical.biotab)
+datatable(clinical.biotab$clinical_radiation_coad)
+
+## ----results = 'hide', echo=TRUE, message=FALSE, warning=FALSE-----------
 # Get XML files and parse them
 clin.query <- GDCquery(project = "TCGA-READ", data.category = "Clinical", barcode = "TCGA-F5-6702")
 GDCdownload(clin.query)
