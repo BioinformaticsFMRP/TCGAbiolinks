@@ -174,7 +174,6 @@ query %>% getResults %>% select(-matches("cases"))%>% datatable
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
 GDCdownload(query)
 clinical.biotab <- GDCprepare(query)
-
 ```
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
