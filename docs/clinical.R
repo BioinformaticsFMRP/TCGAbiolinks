@@ -53,7 +53,7 @@ query <- GDCquery(project = "TCGA-COAD",
                   barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")) 
 
 ## ----echo=TRUE, message=FALSE, warning=FALSE-----------------------------
-query %>% getResults %>% datatable
+query %>% getResults %>% datatable(options = list(scrollX = TRUE, keys = TRUE))
 
 ## ----results = 'hide', echo=TRUE, message=FALSE, warning=FALSE-----------
 # Pathology report
@@ -75,7 +75,7 @@ query <- GDCquery(project = "TCGA-COAD",
                   barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")) 
 
 ## ----echo=TRUE, message=FALSE, warning=FALSE-----------------------------
-query %>% getResults %>% datatable
+query %>% getResults %>% datatable(options = list(scrollX = TRUE, keys = TRUE))
 
 ## ----results = 'hide', echo=TRUE, message=FALSE, warning=FALSE-----------
 # Clinical Supplement
@@ -86,7 +86,7 @@ query <- GDCquery(project = "TCGA-COAD",
                   barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")) 
 
 ## ----echo=TRUE, message=FALSE, warning=FALSE-----------------------------
-query %>% getResults %>% datatable
+query %>% getResults %>% datatable(options = list(scrollX = TRUE, keys = TRUE))
 
 ## ----results = 'hide', echo=TRUE, message=FALSE, warning=FALSE-----------
 # Clinical data
@@ -97,7 +97,7 @@ query <- GDCquery(project = "TCGA-COAD",
                   file.type = "txt")  
 
 ## ----echo=TRUE, message=FALSE, warning=FALSE-----------------------------
-query %>% getResults %>% select(-matches("cases"))%>% datatable
+query %>% getResults %>% select(-matches("cases"))%>% datatable(options = list(scrollX = TRUE, keys = TRUE))
 
 ## ----results = 'hide', echo=TRUE, message=FALSE, warning=FALSE-----------
 GDCdownload(query)
@@ -105,7 +105,7 @@ clinical.biotab <- GDCprepare(query)
 
 ## ----echo=TRUE, message=FALSE, warning=FALSE-----------------------------
 names(clinical.biotab)
-datatable(clinical.biotab$clinical_radiation_coad)
+datatable(clinical.biotab$clinical_radiation_coad, options = list(scrollX = TRUE, keys = TRUE))
 
 ## ----results = 'hide', echo=TRUE, message=FALSE, warning=FALSE-----------
 # Get XML files and parse them
