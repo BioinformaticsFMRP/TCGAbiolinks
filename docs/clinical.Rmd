@@ -116,7 +116,7 @@ query <- GDCquery(project = "TCGA-COAD",
 ```
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
-query %>% getResults %>% datatable
+query %>% getResults %>% datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
@@ -142,7 +142,7 @@ query <- GDCquery(project = "TCGA-COAD",
 ```
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
-query %>% getResults %>% datatable
+query %>% getResults %>% datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
@@ -155,7 +155,7 @@ query <- GDCquery(project = "TCGA-COAD",
 ```
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
-query %>% getResults %>% datatable
+query %>% getResults %>% datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
@@ -168,7 +168,7 @@ query <- GDCquery(project = "TCGA-COAD",
 ```
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
-query %>% getResults %>% select(-matches("cases"))%>% datatable
+query %>% getResults %>% select(-matches("cases"))%>% datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
@@ -178,7 +178,7 @@ clinical.biotab <- GDCprepare(query)
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 names(clinical.biotab)
-datatable(clinical.biotab$clinical_radiation_coad)
+datatable(clinical.biotab$clinical_radiation_coad, options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 
