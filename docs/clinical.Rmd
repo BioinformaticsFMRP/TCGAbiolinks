@@ -129,7 +129,7 @@ query <- GDCquery(project = "TCGA-COAD",
 ```
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
-query %>% getResults %>% datatable
+query %>% getResults %>% datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
