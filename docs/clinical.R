@@ -64,7 +64,7 @@ query <- GDCquery(project = "TCGA-COAD",
                   barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))  
 
 ## ----echo=TRUE, message=FALSE, warning=FALSE-----------------------------
-query %>% getResults %>% datatable
+query %>% getResults %>% datatable(options = list(scrollX = TRUE, keys = TRUE))
 
 ## ----results = 'hide', echo=TRUE, message=FALSE, warning=FALSE-----------
 # Tissue slide image
