@@ -51,11 +51,11 @@ TCGAanalyze_Clustering <- function(tabDF, method,  methodHC = "ward.D2"){
 #' @export
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
 TCGAanalyze_Preprocessing <- function(object,
-                                     cor.cut = 0,
-                                     filename = NULL,
-                                     width = 500,
-                                     height = 500,
-                                     datatype = names(assays(object))[1]){
+                                      cor.cut = 0,
+                                      filename = NULL,
+                                      width = 500,
+                                      height = 500,
+                                      datatype = names(assays(object))[1]){
 
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 
@@ -511,8 +511,8 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
 
         timeEstimated <- format(ncol(tabDF)*nrow(tabDF)/80000,digits = 2)
         message(messageEstimation <- paste("I Need about ", timeEstimated,
-                                         "seconds for this Complete Normalization Upper Quantile",
-                                         " [Processing 80k elements /s]  "))
+                                           "seconds for this Complete Normalization Upper Quantile",
+                                           " [Processing 80k elements /s]  "))
 
         ffData  <- as.data.frame(geneInfo)
         rawCounts <- floor(rawCounts)
@@ -556,8 +556,8 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
 
         timeEstimated <- format(ncol(tabDF)*nrow(tabDF)/80000,digits = 2)
         message(messageEstimation <- paste("I Need about ", timeEstimated,
-                                         "seconds for this Complete Normalization Upper Quantile",
-                                         " [Processing 80k elements /s]  "))
+                                           "seconds for this Complete Normalization Upper Quantile",
+                                           " [Processing 80k elements /s]  "))
 
         message("Step 1 of 4: newSeqExpressionSet ...")
         system.time(tabDF_norm <- EDASeq::newSeqExpressionSet(tabDF, featureData = geneInfo))
@@ -625,15 +625,15 @@ TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type,method = "exactTest",
 
     message("----------------------- DEA -------------------------------")
     message(message1 <- paste( "there are Cond1 type", Cond1type ,"in ",
-                             Cond1num, "samples"))
+                               Cond1num, "samples"))
     message(message2 <- paste( "there are Cond2 type", Cond2type ,"in ",
-                             Cond2num, "samples"))
+                               Cond2num, "samples"))
     message(message3 <- paste( "there are ", nrow(TOC) ,
-                             "features as miRNA or genes "))
+                               "features as miRNA or genes "))
 
     timeEstimated <- format(ncol(TOC)*nrow(TOC)/elementsRatio,digits = 2)
     message(messageEstimation <- paste("I Need about ", timeEstimated,
-                                     "seconds for this DEA. [Processing 30k elements /s]  "))
+                                       "seconds for this DEA. [Processing 30k elements /s]  "))
 
     # Reading in the data and creating a DGEList object
     colnames(TOC) <- paste0('s',1:ncol(TOC))
@@ -732,9 +732,9 @@ TCGAanalyze_LevelTab <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
 
     for (i in 1:nrow(TF_enriched)) {
         TableLevel[i,typeCond1] <- mean(as.numeric(TableCond1[rownames(TableCond1) %in%
-                                                       TF_enriched[i] , ]))
+                                                                  TF_enriched[i] , ]))
         TableLevel[i,typeCond2] <- mean(as.numeric(TableCond2[rownames(TableCond2) %in%
-                                                       TF_enriched[i] , ]))
+                                                                  TF_enriched[i] , ]))
     }
 
 
@@ -1005,20 +1005,20 @@ TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01){
 #' @return an adjacent matrix
 TCGAanalyze_analyseGRN<- function(TFs, normCounts,kNum) {
 
-  MRcandidates <- intersect(rownames(normCounts),TFs)
+    MRcandidates <- intersect(rownames(normCounts),TFs)
 
-  # Mutual information between TF and genes
-  sampleNames <- colnames(normCounts)
-  geneNames <- rownames(normCounts)
+    # Mutual information between TF and genes
+    sampleNames <- colnames(normCounts)
+    geneNames <- rownames(normCounts)
 
-  messageMI_TFgenes <- paste("Estimation of MI among [", length(MRcandidates), " TRs and ", nrow(normCounts), " genes].....", sep = "")
-  timeEstimatedMI_TFgenes1 <- length(MRcandidates)*nrow(normCounts)/1000
-  timeEstimatedMI_TFgenes <- format(timeEstimatedMI_TFgenes1*ncol(normCounts)/17000, digits = 2)
-  messageEstimation <- print(paste("I Need about ", timeEstimatedMI_TFgenes, "seconds for this MI estimation. [Processing 17000k elements /s]  "))
+    messageMI_TFgenes <- paste("Estimation of MI among [", length(MRcandidates), " TRs and ", nrow(normCounts), " genes].....", sep = "")
+    timeEstimatedMI_TFgenes1 <- length(MRcandidates)*nrow(normCounts)/1000
+    timeEstimatedMI_TFgenes <- format(timeEstimatedMI_TFgenes1*ncol(normCounts)/17000, digits = 2)
+    messageEstimation <- print(paste("I Need about ", timeEstimatedMI_TFgenes, "seconds for this MI estimation. [Processing 17000k elements /s]  "))
 
-  system.time(miTFGenes <- knnmi.cross(normCounts[MRcandidates, ], normCounts, k = kNum))
+    system.time(miTFGenes <- knnmi.cross(normCounts[MRcandidates, ], normCounts, k = kNum))
 
-  return(miTFGenes)
+    return(miTFGenes)
 
 }
 
@@ -1032,24 +1032,24 @@ TCGAanalyze_analyseGRN<- function(TFs, normCounts,kNum) {
 #' @return an adjacent matrix
 TCGAanalyze_Pathview <- function(dataDEGs, pathwayKEGG = "hsa05200" ){
 
-  # Converting Gene symbol to gene ID
-  eg = as.data.frame(bitr(dataDEGsFiltLevel$mRNA,
-                          fromType="SYMBOL",
-                          toType="ENTREZID",
-                          OrgDb="org.Hs.eg.db"))
-  eg <- eg[!duplicated(eg$SYMBOL),]
-  dataDEGsFiltLevel <- dataDEGsFiltLevel[dataDEGsFiltLevel$mRNA %in% eg$SYMBOL,]
-  dataDEGsFiltLevel <- dataDEGsFiltLevel[order(dataDEGsFiltLevel$mRNA,decreasing=FALSE),]
-  eg <- eg[order(eg$SYMBOL,decreasing=FALSE),]
-  dataDEGsFiltLevel$GeneID <- eg$ENTREZID
-  dataDEGsFiltLevel_sub <- subset(dataDEGsFiltLevel, select = c("GeneID", "logFC"))
-  genelistDEGs <- as.numeric(dataDEGsFiltLevel_sub$logFC)
-  names(genelistDEGs) <- dataDEGsFiltLevel_sub$GeneID
+    # Converting Gene symbol to gene ID
+    eg = as.data.frame(bitr(dataDEGsFiltLevel$mRNA,
+                            fromType="SYMBOL",
+                            toType="ENTREZID",
+                            OrgDb="org.Hs.eg.db"))
+    eg <- eg[!duplicated(eg$SYMBOL),]
+    dataDEGsFiltLevel <- dataDEGsFiltLevel[dataDEGsFiltLevel$mRNA %in% eg$SYMBOL,]
+    dataDEGsFiltLevel <- dataDEGsFiltLevel[order(dataDEGsFiltLevel$mRNA,decreasing=FALSE),]
+    eg <- eg[order(eg$SYMBOL,decreasing=FALSE),]
+    dataDEGsFiltLevel$GeneID <- eg$ENTREZID
+    dataDEGsFiltLevel_sub <- subset(dataDEGsFiltLevel, select = c("GeneID", "logFC"))
+    genelistDEGs <- as.numeric(dataDEGsFiltLevel_sub$logFC)
+    names(genelistDEGs) <- dataDEGsFiltLevel_sub$GeneID
 
-  hsa05200 <- pathview(gene.data  = genelistDEGs,
-                       pathway.id = pathwayKEGG,
-                       species    = "hsa",
-                       limit      = list(gene=as.integer(max(abs(genelistDEGs)))))
+    hsa05200 <- pathview(gene.data  = genelistDEGs,
+                         pathway.id = pathwayKEGG,
+                         species    = "hsa",
+                         limit      = list(gene=as.integer(max(abs(genelistDEGs)))))
 
 }
 
@@ -1063,14 +1063,229 @@ TCGAanalyze_Pathview <- function(dataDEGs, pathwayKEGG = "hsa05200" ){
 #' @export
 #' @return an adjacent matrix
 TCGAanalyze_networkInference <- function(data, optionMethod = "clr" ){
-  # Converting Gene symbol to gene ID
+    # Converting Gene symbol to gene ID
 
-  if(optionMethod == "c3net"){
-    net <- c3net(t(data))
-  }else{
-    net <- minet(data, method = optionMethod)
-  }
-  return(net)
+    if(optionMethod == "c3net"){
+        net <- c3net(t(data))
+    }else{
+        net <- minet(data, method = optionMethod)
+    }
+    return(net)
 
 }
 
+
+#' Creates a plot for GAIA ouptut (all significant aberrant regions.)
+#' @description
+#' This function is a auxiliary function to visualize GAIA ouptut
+#' (all significant aberrant regions.)
+#' @param calls A matrix with the following columns: Chromossome, Aberration Kind
+#' Region Start, Region End, Region Size and score
+#' @param threshold Score threshold (orange horizontal line in the plot)
+#' @export
+#' @importFrom graphics abline axis legend plot points
+#' @return A plot with all significant aberrant regions.
+#' @examples
+#' call <- data.frame("Chromossome" = rep(9,100),
+#'                    "Aberration Kind" = rep(c(-2,-1,0,1,2),20),
+#'                    "Region Start [bp]" = 18259823:18259922,
+#'                    "Region End [bp]" = 18259823:18259922,
+#'                    "score" = rep(c(1,2,3,4),25))
+#'  gaiaCNVplot(call,threshold = 0.01)
+#'  call <- data.frame("Chromossome" = rep(c(1,9),50),
+#'                     "Aberration Kind" = rep(c(-2,-1,0,1,2),20),
+#'                     "Region Start [bp]" = 18259823:18259922,
+#'                     "Region End [bp]" = 18259823:18259922,
+#'                     "score" = rep(c(1,2,3,4),25))
+#'  gaiaCNVplot(call,threshold = 0.01)
+gaiaCNVplot <- function (calls,  threshold = 0.01) {
+    Calls <- calls[order(calls[,grep("start",colnames(calls),ignore.case = TRUE)]),]
+    Calls <- Calls[order(Calls[,grep("chr",colnames(calls),ignore.case = TRUE)]),]
+    rownames(Calls) <- NULL
+    Chromo <- Calls[,grep("chr",colnames(calls),ignore.case = TRUE)]
+    Gains <- apply(Calls,1,function(x) ifelse(x[grep("aberration",colnames(calls),ignore.case = TRUE)] == 1, x["score"], 0))
+    Losses <- apply(Calls,1,function(x) ifelse(x[grep("aberration",colnames(calls),ignore.case = TRUE)] == 0, x["score"], 0))
+    plot(Gains,
+         ylim = c(-max(Calls[,"score"]+2), max(Calls[,"score"]+2)),
+         type = "h",
+         col = "red",
+         xlab = "Chromosome",
+         ylab = "Score",
+         xaxt = "n")
+    points(-(Losses), type = "h", col = "blue")
+    # Draw origin line
+    abline(h = 0, cex = 4)
+    # Draw threshold lines
+    abline(h = -log10(threshold), col = "orange", cex = 4, main="test")
+    abline(h = log10(threshold), col = "orange", cex = 4, main="test")
+
+    uni.chr <- unique(Chromo)
+    temp <- rep(0, length(uni.chr))
+    for (i in 1:length(uni.chr)) {
+        temp[i] <- max(which(uni.chr[i] == Chromo))
+    }
+    for (i in 1:length(temp)) {
+        abline(v = temp[i], col = "black", lty = "dashed")
+    }
+    nChroms <- length(uni.chr)
+    begin <- c()
+    for (d in 1:nChroms) {
+        chrom <- sum(Chromo == uni.chr[d])
+        begin <- append(begin, chrom)
+    }
+    temp2 <- rep(0, nChroms)
+    for (i in 1:nChroms) {
+        if (i == 1) {
+            temp2[1] <- (begin[1] * 0.5)
+        }
+        else if (i > 1) {
+            temp2[i] <- temp[i - 1] + (begin[i] * 0.5)
+        }
+    }
+    uni.chr[uni.chr==23] <- "X"
+    uni.chr[uni.chr==24] <- "Y"
+    for (i in 1:length(temp)) {
+        axis(1, at = temp2[i], labels = uni.chr[i], cex.axis = 1)
+    }
+    legend(x=1,y=max(Calls[,"score"]+2), y.intersp=0.8, c("Amp"), pch=15, col=c("red"), text.font=3)
+    legend(x=1,y=-max(Calls[,"score"]+0.5), y.intersp=0.8, c("Del"), pch=15, col=c("blue"), text.font=3)
+}
+
+#' Get a matrix of interactions of genes from biogrid
+#' @description
+#' Using biogrid database, it will create a matrix of gene interations.
+#' If columns A and row B has value 1, it means the gene A and gene B interatcs.
+#' @param tmp.biogrid Biogrid table
+#' @export
+#' @param names.genes List of genes to filter from output. Default: consider all genes
+#' @return A matrix with 1 for genes that interacts, 0 for no interaction.
+#' @examples
+#' names.genes.de <- c("PLCB1","MCL1","PRDX4","TTF2","TACC3", "PARP4","LSM1")
+#' tmp.biogrid <- data.frame("Official.Symbol.Interactor.A" = names.genes.de,
+#'                           "Official.Symbol.Interactor.B" = rev(names.genes.de))
+#' net.biogrid.de <- getAdjacencyBiogrid(tmp.biogrid, names.genes.de)
+#' \dontrun{
+#'   file <- paste0("http://thebiogrid.org/downloads/archives/",
+#'                  "Release%20Archive/BIOGRID-3.4.133/BIOGRID-ALL-3.4.133.tab2.zip")
+#'   downloader::download(file,basename(file))
+#'   unzip(basename(file),junkpaths =TRUE)
+#'   tmp.biogrid <- read.csv(gsub("zip","txt",basename(file)),
+#'                           header=TRUE, sep="\t", stringsAsFactors=FALSE)
+#'   names.genes.de <- c("PLCB1","MCL1","PRDX4","TTF2","TACC3", "PARP4","LSM1")
+#'   net.biogrid.de <- getAdjacencyBiogrid(tmp.biogrid, names.genes.de)
+#' }
+getAdjacencyBiogrid <- function(tmp.biogrid, names.genes = NULL){
+    it.a <- grep("Symbol",colnames(tmp.biogrid),value = TRUE)[1]
+    it.b <- grep("Symbol",colnames(tmp.biogrid),value = TRUE)[2]
+
+    if(is.null(names.genes)){
+        names.genes <- sort(union(unique(tmp.biogrid[,it.a]), unique(tmp.biogrid[,it.b])))
+        ind <- seq(1,nrow(tmp.biogrid))
+    } else {
+        ind.A <- which(tmp.biogrid[,it.a] %in% names.genes)
+        ind.B <- which(tmp.biogrid[,it.b] %in% names.genes)
+        ind <- intersect(ind.A,ind.B)
+    }
+
+    mat.biogrid <- matrix(0, nrow=length(names.genes),
+                          ncol=length(names.genes),
+                          dimnames=list(names.genes, names.genes))
+
+    for(i in ind){
+        mat.biogrid[tmp.biogrid[i,it.a], tmp.biogrid[i,it.b]] <- mat.biogrid[tmp.biogrid[i,it.b], tmp.biogrid[i,it.a]] <- 1
+    }
+    diag(mat.biogrid) <- 0
+
+    return(mat.biogrid)
+}
+
+#' Get GDC samples with both DNA methylation (HM450K) and Gene expression data from
+#' GDC databse
+#' @description
+#' For a given TCGA project it gets the  samples (barcode) with both DNA methylation and Gene expression data
+#' from GDC database
+#' @param project A GDC project
+#' @param n Number of samples to return. If NULL return all (default)
+#' @param legacy Access legacy (hg19) or harmonized database (hg38).
+#' @return A vector of barcodes
+#' @export
+#' @examples
+#' # Get ACC samples with both  DNA methylation (HM450K) and gene expression aligned to hg19
+#' samples <- matchedMetExp("TCGA-ACC", legacy = TRUE)
+matchedMetExp <- function(project, legacy = FALSE, n = NULL){
+    if(legacy) {
+        # get primary solid tumor samples: DNA methylation
+        message("Download DNA methylation information")
+        met450k <- GDCquery(project = project,
+                            data.category = "DNA methylation",
+                            platform = "Illumina Human Methylation 450",
+                            legacy = TRUE,
+                            sample.type = c("Primary solid Tumor"))
+
+        # get primary solid tumor samples: RNAseq
+        message("Download gene expression information")
+        exp <- GDCquery(project = project,
+                        data.category = "Gene expression",
+                        data.type = "Gene expression quantification",
+                        platform = "Illumina HiSeq",
+                        file.type  = "results",
+                        sample.type = c("Primary solid Tumor"),
+                        legacy = TRUE)
+    } else {
+        # get primary solid tumor samples: DNA methylation
+        message("Download DNA methylation information")
+        met450k <- GDCquery(project = project,
+                            data.category = "DNA Methylation",
+                            platform = "Illumina Human Methylation 450",
+                            sample.type = c("Primary solid Tumor"))
+
+        # get primary solid tumor samples: RNAseq
+        message("Download gene expression information")
+        exp <- GDCquery(project = project,
+                          data.category = "Transcriptome Profiling",
+                          data.type = "Gene Expression Quantification",
+                          workflow.type = "HTSeq - Counts")
+
+
+    }
+    met450k.tp <-  met450k$results[[1]]$cases
+    # Get patients with samples in both platforms
+    exp.tp <-  exp$results[[1]]$cases
+    patients <- unique(substr(exp.tp,1,15)[substr(exp.tp,1,12) %in% substr(met450k.tp,1,12)] )
+    if(!is.null(n)) patients <- patients[1:n] # get only n samples
+    return(patients)
+}
+
+#' Create a Summary table for each sample in a project saying if it contains
+#' or not files for a certain data category
+#' @description
+#' Create a Summary table for each sample in a project saying if it contains
+#' or not files for a certain data category
+#' @param project A GDC project
+#' @param legacy Access legacy (hg19) or harmonized database (hg38).
+#' @return A data frame
+#' @export
+#' @importFrom stats xtabs
+#' @examples
+#' summary <- getDataCategorySummary("TCGA-ACC", legacy = TRUE)
+getDataCategorySummary <- function(project, legacy = FALSE){
+    baseURL <- ifelse(legacy,"https://gdc-api.nci.nih.gov/legacy/files/?","https://gdc-api.nci.nih.gov/files/?")
+    url <- paste0(baseURL,"&expand=cases&size=100000&fields=cases.submitter_id,data_category&filters=",
+                  URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
+                  URLencode(project),
+                  URLencode('"]}}]}'))
+
+    json  <- tryCatch(
+        getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
+        error = function(e) {
+            fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+        }
+    )
+    json <- json$data$hits
+    json$submitter_id <- unlist(lapply(json$cases, function(x) paste0(x$submitter_id,collapse = ",")))
+    json$cases <- NULL
+    json <- json[!duplicated(json),]
+    json <- json[stringr::str_length(json$submitter_id) == 12,]
+    ret <- as.data.frame.matrix(xtabs(~ submitter_id + data_category , json))
+    return(ret)
+}
