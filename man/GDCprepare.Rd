@@ -54,6 +54,7 @@ query <- GDCquery(project = "TCGA-ACC",
 # data will be saved in  GDCdata/TCGA-ACC/legacy/Copy_number_variation/Copy_number_segmentation
 GDCdownload(query, method = "api")
 acc.cnv <- GDCprepare(query)
+
 \dontrun{
  query <- GDCquery(project = "TCGA-GBM",
                    legacy = TRUE,
