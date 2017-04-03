@@ -92,7 +92,7 @@ rowRanges(data)
 ## Search and download data for two samples from database
 
 In this example we will download gene expression quantification from harmonized database 
-(data aligned against genome of reference hg38) using GDC Data Transfer Tool. 
+(data aligned against genome of reference hg38). 
 Also, it shows the object data and metadata.
 
 ```{r results = 'hide', message=FALSE, warning=FALSE}
@@ -102,7 +102,7 @@ query <- GDCquery(project = "TCGA-GBM",
                   data.type = "Gene Expression Quantification", 
                   workflow.type = "HTSeq - Counts",
                   barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"))
-tryCatch(GDCdownload(query, method = "client"),error = function(e)GDCdownload(query))
+GDCdownload(query)
 data <- GDCprepare(query)
 ```
 ```{r message=FALSE, warning=FALSE}
