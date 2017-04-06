@@ -45,6 +45,19 @@ clinical.admin <- GDCprepare_clinic(query, clinical.info = "admin")
 datatable(clinical.admin, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
 
 ## ----results = 'hide', echo=TRUE, message=FALSE, warning=FALSE-----------
+
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Other",
+                  legacy = TRUE,access = "open",
+                  data.type = "Auxiliary test",
+                   barcode = c("TCGA-AD-A5EJ","TCGA-DM-A0X9"))  
+GDCdownload(query)
+msi_results <- GDCprepare_clinic(query, "msi")
+
+## ----echo=TRUE, message=FALSE, warning=FALSE-----------------------------
+datatable(msi_results, options = list(scrollX = TRUE, keys = TRUE))
+
+## ----results = 'hide', echo=TRUE, message=FALSE, warning=FALSE-----------
 # Tissue slide image files
 query <- GDCquery(project = "TCGA-COAD", 
                   data.category = "Clinical", 
