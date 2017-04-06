@@ -227,12 +227,14 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 #' clinical.radiation <- GDCprepare_clinic(query,"portion")
 #' clinical.admin <- GDCprepare_clinic(query,"slide")
 GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
-    if(unique(query$results[[1]]$data_category) != "Biospecimen") {
+    if(unique(query$results[[1]]$data_category) == "Clinical") {
         valid.clinical.info <- c("drug","admin","follow_up","radiation","patient","stage_event","new_tumor_event")
-    } else  if(unique(query$results[[1]]$data_category) != "Clinical") {
+    } else  if(unique(query$results[[1]]$data_category) == "Biospecimen" ) {
         valid.clinical.info <- c("protocol","admin","aliquot","analyte","bio_patient","sample", "portion", "slide")
+    } else  if(unique(query$results[[1]]$data_category) == "Other") {
+        valid.clinical.info <- c("admin","msi")
     } else {
-        stop("Data category should be Clinical or Biospecimen")
+        stop("Data category should be Clinical or Biospecimen or Other (auxiliary files)")
     }
     if(missing(clinical.info)) stop(paste0("Please set clinical.info argument:\n=> ",paste(valid.clinical.info,collapse = "\n=> ")))
     if(!(clinical.info %in% valid.clinical.info)) stop(paste0("Please set a valid clinical.info argument:\n=> ",paste(valid.clinical.info,collapse = "\n=> ")))
@@ -264,7 +266,7 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
     else if(tolower(clinical.info) == "protocol")      xpath <- "//bio:protocol"
     else if(tolower(clinical.info) == "portion")      xpath <- "//bio:portion"
     else if(tolower(clinical.info) == "slide")  xpath <- "//bio:slide"
-
+    else if(tolower(clinical.info)  == "msi")  xpath <- "//auxiliary:microsatellite_instability_test_result"
     clin <- parseXML(files,xpath,clinical.info)
 
     if(tolower(clinical.info) == "patient") {
