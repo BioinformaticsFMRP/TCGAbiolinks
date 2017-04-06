@@ -256,6 +256,7 @@ GDCquery <- function(project,
     }
 
     # get barcode of the samples
+
     if(data.category %in% c("Clinical","Biospecimen")) {
         pat <- paste("TCGA-[:alnum:]{2}-[:alnum:]{4}",
                      "TARGET-[:alnum:]{2}-[:alnum:]{6}",sep = "|")
@@ -263,13 +264,19 @@ GDCquery <- function(project,
         pat <- paste("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}-[:alnum:]{3}-[:alnum:]{2,3}-[:alnum:]{4}-[:alnum:]{2}",
                      "[:alnum:]{6}-[:alnum:]{2}-[:alnum:]{6}-[:alnum:]{3}-[:alnum:]{3}",sep = "|")
     }
-
-    barcodes <- unlist(lapply(results$cases,function(x) {
-        str <- str_extract_all(x,pat) %>% unlist %>% paste(collapse = ",")
-        ifelse(all(is.na(str)), NA,str[!is.na(str)])
-    }))
-
-
+    if(!unique(results$data_type) == "Auxiliary test") {
+        barcodes <- unlist(lapply(results$cases,function(x) {
+            str <- str_extract_all(x,pat) %>% unlist %>% paste(collapse = ",")
+            ifelse(all(is.na(str)), NA,str[!is.na(str)])
+        }))
+    } else { # auxiliary fies case
+        pat <- paste("TCGA-[:alnum:]{2}-[:alnum:]{4}",
+                     "TARGET-[:alnum:]{2}-[:alnum:]{6}",sep = "|")
+        barcodes <- unlist(lapply(results$file_name,function(x) {
+            str <- str_extract_all(x,pat) %>% unlist %>% paste(collapse = ",")
+            ifelse(all(is.na(str)), NA,str[!is.na(str)])
+        }))
+    }
     results$cases <- barcodes
     results$tissue.definition <- expandBarcodeInfo(barcodes)$tissue.definition
 
