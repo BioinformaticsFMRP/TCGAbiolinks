@@ -37,9 +37,9 @@ rowRanges(data)
 query <- GDCquery(project = "TCGA-GBM",
                   data.category = "Transcriptome Profiling",
                   data.type = "Gene Expression Quantification", 
-                  workflow.type = "HTSeq - Counts",
+                  workflow.type = "HTSeq - FPKM-UQ",
                   barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"))
-tryCatch(GDCdownload(query, method = "client"),error = function(e)GDCdownload(query))
+GDCdownload(query)
 data <- GDCprepare(query)
 
 ## ----message=FALSE, warning=FALSE----------------------------------------
