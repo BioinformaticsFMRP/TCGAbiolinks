@@ -147,7 +147,9 @@ GDCquery <- function(project,
         url <- getGDCquery(project = proj,
                            data.category = data.category,
                            data.type = data.type,
-                           legacy = legacy)
+                           legacy = legacy,
+                           workflow.type = workflow.type,
+                           platform = platform)
         message("ooo Project: ", proj)
         json  <- tryCatch(
             getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
@@ -180,15 +182,13 @@ GDCquery <- function(project,
         return (NULL)
     }
     print.header("Filtering results","subsection")
-    suppressWarnings({
-        if(!is.na(platform)){
-            if(!(all(platform %in% results$platform))){
-                stop("Please set a valid platform argument from the list below:\n  => ", paste(unique(results$platform), collapse = "\n  => "))
-            }
-            message("ooo By platform")
-            results <- results[tolower(results$platform) %in% tolower(platform),]
+    if(!any(is.na(platform))){
+        if(!(all(platform %in% results$platform))){
+            stop("Please set a valid platform argument from the list below:\n  => ", paste(unique(results$platform), collapse = "\n  => "))
         }
-    })
+        message("ooo By platform")
+        results <- results[tolower(results$platform) %in% tolower(platform),]
+    }
 
     # Filter by access
     if(!is.na(access)) {
@@ -339,7 +339,7 @@ GDCquery <- function(project,
     return(ret)
 }
 
-getGDCquery <- function(project, data.category, data.type, legacy){
+getGDCquery <- function(project, data.category, data.type, legacy, workflow.type,platform){
     # Get manifest using the API
     baseURL <- ifelse(legacy,"https://gdc-api.nci.nih.gov/legacy/files/?","https://gdc-api.nci.nih.gov/files/?")
     options.pretty <- "pretty=true"
@@ -352,24 +352,43 @@ getGDCquery <- function(project, data.category, data.type, legacy){
     }
     option.size <- paste0("size=",getNbFiles(project,data.category,legacy))
     option.format <- paste0("format=JSON")
-    if(is.na(data.type)){
-        options.filter <- paste0("filters=",
-                                 URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
-                                 project,
-                                 URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["'),
-                                 URLencode(data.category),
-                                 URLencode('"]}}]}'))
-    } else {
-        options.filter <- paste0("filters=",
-                                 URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
-                                 project,
-                                 URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["'),
-                                 URLencode(data.category),
-                                 URLencode('"]}},{"op":"in","content":{"field":"files.data_type","value":["'),
+
+    options.filter <- paste0("filters=",
+                             URLencode('{"op":"and","content":['),
+                             URLencode('{"op":"in","content":{"field":"cases.project.project_id","value":["'),
+                             project,
+                             URLencode('"]}}'),
+                             URLencode(',{"op":"in","content":{"field":"files.data_category","value":["'),
+                             URLencode(data.category),
+                             URLencode('"]}}'))
+
+    if(!is.na(data.type)){
+        options.filter <- paste0(options.filter,
+                                 URLencode(',{"op":"in","content":{"field":"files.data_type","value":["'),
                                  URLencode(data.type),
-                                 URLencode('"]}}]}'))
+                                 URLencode('"]}}'))
     }
-    url <- paste0(baseURL,paste(options.pretty, options.expand,option.size, options.filter, option.format, sep = "&"))
+    if(!is.na(workflow.type)){
+        options.filter <- paste0(options.filter,
+                                 URLencode(',{"op":"in","content":{"field":"files.analysis.workflow_type","value":["'),
+                                 URLencode(workflow.type),
+                                 URLencode('"]}}'))
+    }
+    if(!any(is.na(platform))){
+        options.filter <- paste0(options.filter,
+                                 URLencode(',{"op":"in","content":{"field":"files.platform","value":["'),
+                                 URLencode(paste0(platform, collapse = '","')),
+                                 URLencode('"]}}'))
+    }
+
+    options.filter <- paste0(options.filter, URLencode(']}'))
+    url <- paste0(baseURL,paste(options.pretty,
+                                options.expand,
+                                option.size,
+                                options.filter,
+                                option.format,
+                                sep = "&"))
+
     return(url)
 }
 
@@ -506,7 +525,12 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata", pipeline
     message(" https://gdc.cancer.gov/about-gdc/variant-calling-gdc")
     message("============================================================================")
 
-    query <- GDCquery(paste0("TCGA-",tumor), data.category = "Simple Nucleotide Variation", data.type = "Masked Somatic Mutation", workflow.type = workflow.type)
+    query <- GDCquery(paste0("TCGA-",tumor),
+                      data.category = "Simple Nucleotide Variation",
+                      data.type = "Masked Somatic Mutation",
+                      workflow.type = workflow.type,
+                      access = "open")
+
     if(nrow(query$results[[1]]) == 0) stop("No MAF file found for this type of workflow")
     tryCatch({
         GDCdownload(query, directory = directory, method = "api")

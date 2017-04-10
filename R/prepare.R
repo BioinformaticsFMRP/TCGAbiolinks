@@ -656,7 +656,11 @@ get.GRCh.bioMart <- function(genome="hg19") {
                                 "external_gene_id")
             } else {
                 # for hg38
-                ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+                ensembl <- tryCatch({
+                    useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+                },  error = function(e) {
+                    useMart("ensembl", dataset = "hsapiens_gene_ensembl", host = "uswest.ensembl.org")
+                })
                 attributes <- c("chromosome_name",
                                 "start_position",
                                 "end_position", "strand",
