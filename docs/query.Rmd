@@ -104,59 +104,20 @@ Please, not that these tables are still incomplete.
 
 ## Harmonized data options (`legacy = FALSE`)
 
-| data.category               | data.type                         |  workflow.type   | platform |
-|-----------------------------|-----------------------------------|-----------------|----------|
-| Transcriptome Profiling     | Gene Expression Quantification    | HTSeq - Counts  |          |
-|                             |                                   | HTSeq - FPKM-UQ |          |
-|                             |                                   | HTSeq - FPKM    |          |
-|                             | Isoform Expression Quantification | -               |          |
-|                             | miRNA Expression Quantification   | -               |          |
-| Copy Number Variation       | Copy Number Segment               |                 |          |
-|                             | Masked Copy Number Segment        |                 |          |
-| Simple Nucleotide Variation |                                   |                 |          |
-| Raw Sequencing Data         |                                   |                 |          |
-| Biospecimen                 |                                   |                 |          |
-| Clinical                    |                                   |                 |          |
-| DNA Methylation             |                                   |                 | Illumina Human Methylation 450| 
-|                             |                                   |                 | Illumina Human Methylation 27 |    
+```{r}
+datatable(readr::read_csv("https://docs.google.com/spreadsheets/d/1f98kFdj9mxVDc1dv4xTZdx8iWgUiDYO-qiFJINvmTZs/export?format=csv&gid=2046985454"),
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 40), 
+          rownames = FALSE)
+```
 
 ## Legacy archive data  options (`legacy = TRUE`)
-| data.category               | data.type                         | platform                            | file.type          |
-|-----------------------------|-----------------------------------|-------------------------------------|--------------------|
-| Copy number variation       | -                                 | Affymetrix SNP Array 6.0            | nocnv_hg18.seg     |
-|                             | -                                 | Affymetrix SNP Array 6.0            | hg18.seg           |
-|                             | -                                 | Affymetrix SNP Array 6.0            | nocnv_hg19.seg     |
-|                             | -                                 | Affymetrix SNP Array 6.0            | hg19.seg           |
-|                             | -                                 | Illumina HiSeq                      | -                  |
-| Simple nucleotide variation | Simple somatic mutation           |                                     |                    |
-| Raw sequencing data         |                                   |                                     |                    |
-| Biospecimen                 |                                   |                                     |                    |
-| Clinical                    |                                   |                                     |                    |
-| Protein expression          |                                   | MDA RPPA Core                       | -                  |
-| Gene expression             | Gene expression quantification    | Illumina HiSeq                      | normalized_results |
-|                             |                                   | Illumina HiSeq                      | results            |
-|                             |                                   | HT_HG-U133A                         | -                  |
-|                             |                                   | AgilentG4502A_07_2                  | -                  |
-|                             |                                   | AgilentG4502A_07_1                  | -                  |
-|                             |                                   | HuEx-1_0-st-v2                      | FIRMA.txt          |
-|                             |                                   |                                     | gene.txt           |
-|                             | Isoform expression quantification |                                     |                    |
-|                             | miRNA gene quantification         |                                     | hg19.mirna         |
-|                             |                                   |                                     | hg19.mirbase20     |
-|                             |                                   |                                     | mirna              |
-|                             | Exon junction quantification      |                                     |                    |
-|                             | Exon quantification               |                                     |                    |
-|                             | miRNA isoform quantification      |                                     | hg19.isoform       |
-|                             |                                   |                                     | isoform            |
-| DNA methylation             |                                   | Illumina Human Methylation 450      | -                  |
-|                             |                                   | Illumina Human Methylation 27       | -                  |
-|                             |                                   | Illumina DNA Methylation OMA003 CPI | -                  |
-|                             |                                   | Illumina DNA Methylation OMA002 CPI | -                  |
-|                             |                                   | Illumina Hi Seq                     |                    |
-| Raw microarray data         |  Raw intensities                  | Illumina Human Methylation 450      |  idat              |
-|                             |                                   | Illumina Human Methylation 27       |  idat              |
-| Other                       |                                   |                                     |                    |
-
+```{r}
+datatable(readr::read_csv("https://docs.google.com/spreadsheets/d/1f98kFdj9mxVDc1dv4xTZdx8iWgUiDYO-qiFJINvmTZs/export?format=csv&gid=1817673686"),
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 40), 
+          rownames = FALSE)
+```
 
 # Harmonized database examples
 
