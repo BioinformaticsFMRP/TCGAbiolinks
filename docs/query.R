@@ -22,6 +22,18 @@ datatable(TCGAbiolinks:::getBarcodeDefinition(),
           rownames = FALSE,
           caption = "List sample types")
 
+## ------------------------------------------------------------------------
+datatable(readr::read_csv("https://docs.google.com/spreadsheets/d/1f98kFdj9mxVDc1dv4xTZdx8iWgUiDYO-qiFJINvmTZs/export?format=csv&gid=2046985454"),
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 40), 
+          rownames = FALSE)
+
+## ------------------------------------------------------------------------
+datatable(readr::read_csv("https://docs.google.com/spreadsheets/d/1f98kFdj9mxVDc1dv4xTZdx8iWgUiDYO-qiFJINvmTZs/export?format=csv&gid=1817673686"),
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 40), 
+          rownames = FALSE)
+
 ## ----message=FALSE, warning=FALSE----------------------------------------
 query <- GDCquery(project = c("TCGA-GBM", "TCGA-LGG"),
                   data.category = "DNA Methylation",
