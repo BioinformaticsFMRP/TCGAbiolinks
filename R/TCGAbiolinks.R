@@ -37,36 +37,6 @@ NULL
 NULL
 
 
-#' TCGA Table with version, number of samples and size (Mbyte) of
-#' BRCA IlluminaHiSeq_RNASeqV2 Level 3
-#' @docType data
-#' @keywords internal
-#' @name BRCA_RNASeqV2_version
-#' @format A data frame with 12 rows and 4 variables
-NULL
-
-
-#' tabPackage1
-#' @docType data
-#' @keywords internal
-#' @name tabPackage1
-#' @format A data frame with 40 rows and 3 variables
-NULL
-
-#' tabPackage2
-#' @docType data
-#' @keywords internal
-#' @name tabPackage2
-#' @format A data frame with 40 rows and 3 variables
-NULL
-
-#' tabPackageKey
-#' @docType data
-#' @keywords internal
-#' @name tabPackageKey
-#' @format A data frame with 40 rows and 3 variables
-NULL
-
 #' TCGA data matrix BRCA
 #' @docType data
 #' @keywords internal
@@ -107,13 +77,6 @@ NULL
 #' @keywords internal
 #' @name geneInfoHT
 #' @format A data frame with 23486 rows and 2 variables
-NULL
-
-#' TCGA data matrix BRCA DEGs Pubmed
-#' @docType data
-#' @keywords internal
-#' @name tabDEGsTFPubmed
-#' @format A data frame with 10 rows and 8 variables
 NULL
 
 #' TCGA batch information from Biospecimen Metadata Browser
