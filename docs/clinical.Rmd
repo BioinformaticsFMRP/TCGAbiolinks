@@ -96,6 +96,33 @@ clinical.admin <- GDCprepare_clinic(query, clinical.info = "admin")
 datatable(clinical.admin, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
 ```
 
+
+## Microsatellite data
+
+
+MSI-Mono-Dinucleotide Assay is performed to test a panel of four mononucleotide repeat loci (polyadenine tracts BAT25, BAT26, BAT40, and transforming growth factor receptor type II) and three dinucleotide repeat loci (CA repeats in D2S123, D5S346, and D17S250). Two additional pentanucleotide loci (Penta D and Penta E) are included in this assay to evaluate sample identity. Multiplex fluorescent-labeled PCR and capillary electrophoresis were used to identify MSI if a variation in the number of microsatellite repeats was detected between tumor and matched non-neoplastic tissue or mononuclear blood cells. Equivocal or failed markers were re-evaluated by singleplex PCR.
+
+classifications: microsatellite-stable (MSS), low level MSI (MSI-L) if less than 40% of markers were altered and high level MSI (MSI-H) if greater than 40% of markers were altered.
+
+Reference: [TCGA wiki](https://wiki.nci.nih.gov/display/TCGA/Microsatellite+data)
+
+Level 3 data is included in BCR clinical-based submissions and can be downloaded as follows:
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Other",
+                  legacy = TRUE,access = "open",
+                  data.type = "Auxiliary test",
+                   barcode = c("TCGA-AD-A5EJ","TCGA-DM-A0X9"))  
+GDCdownload(query)
+msi_results <- GDCprepare_clinic(query, "msi")
+```
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+datatable(msi_results, options = list(scrollX = TRUE, keys = TRUE))
+```
+
+
 # Get legacy clinical data
 
 The clincal data types available in legacy database are:
@@ -240,4 +267,5 @@ GDCquery_clinic("TCGA-LIHC") %>% filter(submitter_id %in% recurrent.patients) %>
 clinical.patient %>% select(bcr_patient_barcode,neoplasm_histologic_grade) %>% datatable
 
 ```
+
 
