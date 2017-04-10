@@ -159,7 +159,7 @@ remove.files.recursively <- function(files){
 readClinical <- function(files, data.type, cases){
     if(data.type == "Clinical data"){
         suppressMessages({
-        ret <- plyr::alply(files,.margins = 1,readr::read_tsv, .progress = "text")
+            ret <- plyr::alply(files,.margins = 1,readr::read_tsv, .progress = "text")
         })
         names(ret) <- gsub("nationwidechildrens.org_","",gsub(".txt","",basename(files)))
     }
@@ -253,8 +253,9 @@ readGeneExpressionQuantification <- function(files, cases, summarizedExperiment 
     if(length(skip) > 1) stop("It is not possible to handle this different platforms together")
 
     for (i in seq_along(files)) {
-        data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE,skip = skip)
-
+        suppressWarnings({
+            data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE,skip = skip)
+        })
         if(!missing(cases)) {
             assay.list <- gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)])
             # We will use this because there might be more than one col for each samples
@@ -284,11 +285,12 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
         aux <- strsplit(df$gene_id,"\\|")
         GeneID <- unlist(lapply(aux,function(x) x[2]))
         df$entrezgene <- as.numeric(GeneID)
+        df <- merge(df, gene.location, by="entrezgene")
     } else {
         df$external_gene_id <- as.character(df[,1])
+        df <- merge(df, gene.location, by="external_gene_id")
     }
 
-    df <- merge(df, gene.location, by="entrezgene")
 
     if("transcript_id" %in% assay.list){
         rowRanges <- GRanges(seqnames = paste0("chr", df$chromosome_name),
@@ -311,8 +313,10 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
                              ensembl_gene_id = df$ensembl_gene_id)
         names(rowRanges) <- as.character(df$external_gene_id)
     }
-    assays <- lapply(assay.list, function (x) {
-        return(data.matrix(subset(df, select = grep(x,colnames(df),ignore.case = TRUE))))
+    suppressWarnings({
+        assays <- lapply(assay.list, function (x) {
+            return(data.matrix(subset(df, select = grep(x,colnames(df),ignore.case = TRUE))))
+        })
     })
     names(assays) <- assay.list
     regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
