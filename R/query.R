@@ -264,7 +264,7 @@ GDCquery <- function(project,
         pat <- paste("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}-[:alnum:]{3}-[:alnum:]{2,3}-[:alnum:]{4}-[:alnum:]{2}",
                      "[:alnum:]{6}-[:alnum:]{2}-[:alnum:]{6}-[:alnum:]{3}-[:alnum:]{3}",sep = "|")
     }
-    if(!unique(results$data_type) == "Auxiliary test") {
+    if(!all(unique(results$data_type) == "Auxiliary test")) {
         barcodes <- unlist(lapply(results$cases,function(x) {
             str <- str_extract_all(x,pat) %>% unlist %>% paste(collapse = ",")
             ifelse(all(is.na(str)), NA,str[!is.na(str)])
