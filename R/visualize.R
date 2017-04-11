@@ -523,69 +523,7 @@ TCGAvisualize_BarPlot <- function(DFfilt,
     message(paste("Plot saved in: ", file.path(getwd(),filename)))
 }
 
-#' @title Visaulize results in format of latex tables.
-#' @description Visaulize results in format of latex tables.
-#' @param Table write
-#' @param rowsForPage write
-#' @param TableTitle write
-#' @param LabelTitle write
-#' @param withrows write
-#' @param size size selected for font, 'small', 'tiny'
-#' @importFrom xtable xtable
-#' @importFrom gplots greenred
-#' @examples
-#' library(stringr)
-#' tabDEGsTFPubmed$PMID <- str_sub(tabDEGsTFPubmed$PMID,0,30)
-#' TCGAvisualize_Tables(Table = tabDEGsTFPubmed,
-#' rowsForPage = 5,
-#' TableTitle = "pip",
-#' LabelTitle = "pip2",
-#' withrows = FALSE,
-#' size = "small")
-#' @export
-#' @return table in latex format to use in beamer presentation or sweave files
-TCGAvisualize_Tables <- function(Table, rowsForPage, TableTitle, LabelTitle, withrows, size){
-    numberOfprint<-ceiling(nrow(Table)/rowsForPage)
-    vectorFirst<-matrix(0,numberOfprint,1)
-    vectorLast<-matrix(0,numberOfprint,1)
 
-    i<-0
-    for(i in 1:numberOfprint){
-        vectorFirst[i]<-rowsForPage*i
-        vectorLast[i]<-rowsForPage*i+1
-    }
-
-    i<-1
-    for(i in 1:numberOfprint){
-        if (round(nrow(Table)/rowsForPage) == 1 ) {
-
-            Table_current<-Table[i:nrow(Table),]
-            tablePrint_Table_current<-xtable(Table_current, caption = paste(TableTitle,"(",i,")"),label = gsub(" ","",paste(LabelTitle,".",i)) , size= size)
-            print(tablePrint_Table_current,include.rownames = withrows)
-        }
-
-        else{
-            print(i)
-            if( i == 1 ) {
-                Table_current<-Table[i:vectorFirst[i],]
-                tablePrint_Table_current<-xtable(Table_current, caption = paste(TableTitle,"(",i,")"),label = gsub(" ","",paste(LabelTitle,".",i)) , size=size)
-                print(tablePrint_Table_current,include.rownames = withrows)
-            }
-
-            else if (i==numberOfprint) {
-                Table_current<-Table[vectorLast[i-1]:nrow(Table),]
-                tablePrint_Table_current<-xtable(Table_current, caption = paste(TableTitle,"(",i,")"),label = gsub(" ","",paste(LabelTitle,".",i)) , size= size)
-                print(tablePrint_Table_current,include.rownames = withrows)
-            }
-            else{
-                Table_current<-Table[vectorLast[i-1]:vectorFirst[i],]
-                tablePrint_Table_current<-xtable(Table_current, caption = paste(TableTitle,"(",i,")"),label = gsub(" ","",paste(LabelTitle,".",i)) , size= size)
-                print(tablePrint_Table_current,include.rownames = withrows)
-            }
-        }
-    }
-
-}
 #' @title Heatmap with more sensible behavior using heatmap.plus
 #' @description Heatmap with more sensible behavior using heatmap.plus
 #' @param data The object to with the heatmap data (expression, methylation)
