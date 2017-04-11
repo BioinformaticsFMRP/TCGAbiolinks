@@ -122,6 +122,11 @@ GDCdownload <- function(query,
 
             server <- ifelse(query$legacy,"https://gdc-api.nci.nih.gov/legacy/data/", "https://gdc-api.nci.nih.gov/data/")
 
+            if(is.null(chunks.per.download) & sum(as.numeric(manifest$size)) > 10^9) {
+                message("The total size of files is big. We will download files in chunks")
+                chunks.per.download <- floor(10^9/mean(as.numeric(manifest$size)))
+            }
+
             if(is.null(chunks.per.download)) {
                 message(paste0("Downloading as: ", name))
                 tryCatch({
