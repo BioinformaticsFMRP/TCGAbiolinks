@@ -354,33 +354,17 @@ getGDCquery <- function(project, data.category, data.type, legacy, workflow.type
     option.format <- paste0("format=JSON")
 
     options.filter <- paste0("filters=",
-                             URLencode('{"op":"and","content":['),
+                             URLencode('{"op":"and","content":['),  # Start json request
                              URLencode('{"op":"in","content":{"field":"cases.project.project_id","value":["'),
                              project,
-                             URLencode('"]}}'),
-                             URLencode(',{"op":"in","content":{"field":"files.data_category","value":["'),
-                             URLencode(data.category),
                              URLencode('"]}}'))
 
-    if(!is.na(data.type)){
-        options.filter <- paste0(options.filter,
-                                 URLencode(',{"op":"in","content":{"field":"files.data_type","value":["'),
-                                 URLencode(data.type),
-                                 URLencode('"]}}'))
-    }
-    if(!is.na(workflow.type)){
-        options.filter <- paste0(options.filter,
-                                 URLencode(',{"op":"in","content":{"field":"files.analysis.workflow_type","value":["'),
-                                 URLencode(workflow.type),
-                                 URLencode('"]}}'))
-    }
-    if(!any(is.na(platform))){
-        options.filter <- paste0(options.filter,
-                                 URLencode(',{"op":"in","content":{"field":"files.platform","value":["'),
-                                 URLencode(paste0(platform, collapse = '","')),
-                                 URLencode('"]}}'))
-    }
+    if(!is.na(data.category))  options.filter <- paste0(options.filter,addFilter("files.data_category", data.category))
+    if(!is.na(data.type))  options.filter <- paste0(options.filter,addFilter("files.data_type", data.type))
+    if(!is.na(workflow.type))  options.filter <- paste0(options.filter,addFilter("files.analysis.workflow_type", workflow.type))
+    if(!any(is.na(platform))) options.filter <- paste0(options.filter,addFilter("files.platform", platform))
 
+    # Close json request
     options.filter <- paste0(options.filter, URLencode(']}'))
     url <- paste0(baseURL,paste(options.pretty,
                                 options.expand,
@@ -388,8 +372,18 @@ getGDCquery <- function(project, data.category, data.type, legacy, workflow.type
                                 options.filter,
                                 option.format,
                                 sep = "&"))
-
     return(url)
+}
+
+addFilter <- function(field, values){
+    ret <- paste0(
+        URLencode(',{"op":"in","content":{"field":"'),
+        URLencode(field),
+        URLencode('","value":["'),
+        URLencode(paste0(values, collapse = '","')),
+        URLencode('"]}}')
+    )
+    return(ret)
 }
 
 expandBarcodeInfo <- function(barcode){
