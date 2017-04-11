@@ -600,6 +600,9 @@ colDataPrepare <- function(barcode){
         aux <- aux[aux$disease_type == unique(ret$disease_type),2]
         ret$project_id <- as.character(aux)
     }
+    # There is no subtype info for target, return as it is
+    if(all(grepl("TARGET",barcode))) return(ret)
+
     # remove letter from 01A 01B etc
     ret$sample.aux <- substr(ret$sample,1,15)
     # na.omit should not be here, exceptional case
@@ -637,7 +640,7 @@ colDataPrepare <- function(barcode){
     return(ret)
 }
 
-#' @importFrom biomaRt getBM useMart listDatasets
+#' @importFrom biomaRt getBM useMart listDatasets useEnsembl
 get.GRCh.bioMart <- function(genome="hg19") {
     tries <- 0L
     msg <- character()
@@ -657,10 +660,14 @@ get.GRCh.bioMart <- function(genome="hg19") {
             } else {
                 # for hg38
                 ensembl <- tryCatch({
-                    useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+                    useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl",
+                               mirror = "useast")
                 },  error = function(e) {
-                    useMart("ensembl", dataset = "hsapiens_gene_ensembl", host = "uswest.ensembl.org")
+                    useEnsembl("ensembl",
+                               dataset = "hsapiens_gene_ensembl",
+                               mirror = "uswest")
                 })
+
                 attributes <- c("chromosome_name",
                                 "start_position",
                                 "end_position", "strand",
