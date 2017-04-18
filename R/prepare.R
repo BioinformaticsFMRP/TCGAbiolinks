@@ -129,7 +129,10 @@ GDCprepare <- function(query,
                                                                     paste(add.gistic2.mut[! tolower(add.gistic2.mut) %in% genes],collapse = "\n=> ")))
         add.gistic2.mut <- add.gistic2.mut[tolower(add.gistic2.mut) %in% tolower(genes)]
         if(length(add.gistic2.mut) > 0){
-            info <- get.mut.gistc.information(colData(data),query$project, add.gistic2.mut, mut.pipeline = mut.pipeline)
+            info <- colData(data)
+            for(i in unlist(query$project)){
+                info <- get.mut.gistc.information(info,i, add.gistic2.mut, mut.pipeline = mut.pipeline)
+            }
             colData(data) <- info
         }
     }
