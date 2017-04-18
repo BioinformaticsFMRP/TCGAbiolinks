@@ -129,7 +129,10 @@ GDCprepare <- function(query,
                                                                     paste(add.gistic2.mut[! tolower(add.gistic2.mut) %in% genes],collapse = "\n=> ")))
         add.gistic2.mut <- add.gistic2.mut[tolower(add.gistic2.mut) %in% tolower(genes)]
         if(length(add.gistic2.mut) > 0){
-            info <- get.mut.gistc.information(colData(data),query$project, add.gistic2.mut, mut.pipeline = mut.pipeline)
+            info <- colData(data)
+            for(i in unlist(query$project)){
+                info <- get.mut.gistc.information(info,i, add.gistic2.mut, mut.pipeline = mut.pipeline)
+            }
             colData(data) <- info
         }
     }
@@ -674,7 +677,8 @@ get.GRCh.bioMart <- function(genome="hg19") {
                                 "ensembl_gene_id",
                                 "external_gene_name")
             }
-            description <- listDatasets(ensembl)[listDatasets(ensembl)$dataset=="hsapiens_gene_ensembl",]$description
+            db.datasets <- listDatasets(ensembl)
+            description <- db.datasets[db.datasets$dataset=="hsapiens_gene_ensembl",]$description
             message(paste0("Downloading genome information (try:", tries,") Using: ", description))
 
             filename <-  paste0(gsub("[[:punct:]]| ", "_",description),".rda")
