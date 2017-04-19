@@ -677,7 +677,8 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
                                 "ensembl_gene_id",
                                 "external_gene_name")
             }
-            description <- listDatasets(ensembl)[listDatasets(ensembl)$dataset=="hsapiens_gene_ensembl",]$description
+            db.datasets <- listDatasets(ensembl)
+            description <- db.datasets[db.datasets$dataset=="hsapiens_gene_ensembl",]$description
             message(paste0("Downloading genome information (try:", tries,") Using: ", description))
 
             filename <-  paste0(gsub("[[:punct:]]| ", "_",description),".rda")
