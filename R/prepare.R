@@ -644,7 +644,7 @@ colDataPrepare <- function(barcode){
 }
 
 #' @importFrom biomaRt getBM useMart listDatasets useEnsembl
-get.GRCh.bioMart <- function(genome="hg19") {
+get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
     tries <- 0L
     msg <- character()
     while (tries < 3L) {
@@ -701,6 +701,15 @@ get.GRCh.bioMart <- function(genome="hg19") {
     }
     if (tries == 3L) stop("failed to get URL after 3 tries:", "\n  error: ", msg)
 
+    if(as.granges) {
+        gene.location$strand[gene.location$strand == 1] <- "+"
+        gene.location$strand[gene.location$strand == -1] <- "-"
+        gene.location$chromosome_name <- paste0("chr",gene.location$chromosome_name)
+        gene.location <- makeGRangesFromDataFrame(gene.location, seqnames.field = "chromosome_name",
+                                                  start.field = "start_position",
+                                                  end.field = "end_position",
+                                                  keep.extra.columns = TRUE) # considering the whole gene no their promoters
+    }
     return(gene.location)
 }
 
