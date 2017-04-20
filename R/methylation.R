@@ -183,7 +183,9 @@ TCGAanalyze_survival <- function(data,
     }
 
     if(is.null(labels)){
-        labels <- sapply(levels(data$type),label.add.n)
+        d <- survminer::surv_summary(fit, data = data)
+        order <- unname(sapply(levels(d$strata), function(x) unlist(str_split(x, "="))[2]))
+        labels <- sapply(order,label.add.n)
     }
     if(length(xlim) == 1) {
         xlim <- c(0,xlim)
