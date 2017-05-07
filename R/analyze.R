@@ -616,8 +616,14 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
 #' dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT],
 #'                       dataFilt[,samplesTP],"Normal", "Tumor")
 #' @return table with DEGs containing for each gene logFC, logCPM, pValue,and FDR
-TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type,method = "exactTest",
-                            fdr.cut = 1, logFC.cut = 0, elementsRatio = 30000) {
+TCGAanalyze_DEA <- function(mat1,
+                            mat2,
+                            Cond1type,
+                            Cond2type,
+                            method = "exactTest",
+                            fdr.cut = 1,
+                            logFC.cut = 0,
+                            elementsRatio = 30000) {
 
     TOC <- cbind(mat1,mat2)
     Cond1num <- ncol(mat1)
@@ -650,8 +656,8 @@ TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type,method = "exactTest",
         # Results visualization
         logFC_table <- tested$table
         tableDEA <- edgeR::topTags(tested,n = nrow(tested$table))$table
-        tableDEA <- tableDEA[tableDEA$FDR < fdr.cut,]
-        tableDEA <- tableDEA[abs(tableDEA$logFC) > logFC.cut,]
+        tableDEA <- tableDEA[tableDEA$FDR <= fdr.cut,]
+        tableDEA <- tableDEA[abs(tableDEA$logFC) >= logFC.cut,]
     }
 
     if (method == "glmLRT"){
@@ -670,11 +676,33 @@ TCGAanalyze_DEA <- function(mat1,mat2,Cond1type,Cond2type,method = "exactTest",
         tableDEA <- tableDEA[tableDEA$FDR < fdr.cut,]
         tableDEA <- tableDEA[abs(tableDEA$logFC) > logFC.cut,]
     }
-
+    if(all(grepl("ENSG",rownames(tableDEA)))) tableDEA <- cbind(map.ensg(genes = rownames(tableDEA)))
     message("----------------------- END DEA -------------------------------")
 
     return(tableDEA)
 
+}
+
+#' @importFrom biomaRt getBM useMart listDatasets
+map.ensg <- function(genome = "hg38", genes) {
+    if (genome == "hg19"){
+        # for hg19
+        ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
+                           host = "feb2014.archive.ensembl.org",
+                           path = "/biomart/martservice" ,
+                           dataset = "hsapiens_gene_ensembl")
+        attributes <- c("ensembl_gene_id", "entrezgene","external_gene_id")
+    } else {
+        # for hg38
+        ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+        attributes <- c("ensembl_gene_id", "entrezgene","external_gene_name")
+    }
+    gene.location <- getBM(attributes = attributes,
+                           filters = c("ensembl_gene_id"),
+                           values = list(genes), mart = ensembl)
+    colnames(gene.location) <-  c("ensembl_gene_id", "entrezgene","external_gene_name")
+    gene.location <- gene.location[match(genes,gene.location$ensembl_gene_id),]
+    return(gene.location)
 }
 
 #' @title Adding information related to DEGs genes from DEA as mean values in two conditions.
