@@ -615,6 +615,7 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
 #' samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 #' dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT],
 #'                       dataFilt[,samplesTP],"Normal", "Tumor")
+#'
 #' @return table with DEGs containing for each gene logFC, logCPM, pValue,and FDR
 TCGAanalyze_DEA <- function(mat1,
                             mat2,
@@ -676,7 +677,7 @@ TCGAanalyze_DEA <- function(mat1,
         tableDEA <- tableDEA[tableDEA$FDR < fdr.cut,]
         tableDEA <- tableDEA[abs(tableDEA$logFC) > logFC.cut,]
     }
-    if(all(grepl("ENSG",rownames(tableDEA)))) tableDEA <- cbind(map.ensg(genes = rownames(tableDEA)))
+    if(all(grepl("ENSG",rownames(tableDEA)))) tableDEA <- cbind(tableDEA,map.ensg(genes = rownames(tableDEA)))
     message("----------------------- END DEA -------------------------------")
 
     return(tableDEA)
