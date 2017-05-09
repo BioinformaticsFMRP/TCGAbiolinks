@@ -739,8 +739,12 @@ map.ensg <- function(genome = "hg38", genes) {
 #' dataTN <- dataFilt[,samplesNT]
 #' dataDEGsFiltLevel <- TCGAanalyze_LevelTab(dataDEGsFilt,"Tumor","Normal",
 #' dataTP,dataTN)
-TCGAanalyze_LevelTab <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
-                                 TableCond1,TableCond2,typeOrder = TRUE) {
+TCGAanalyze_LevelTab <- function(FC_FDR_table_mRNA,
+                                 typeCond1,
+                                 typeCond2,
+                                 TableCond1,
+                                 TableCond2,
+                                 typeOrder = TRUE) {
 
     TF_enriched <- as.matrix(rownames(FC_FDR_table_mRNA))
     TableLevel <- matrix(0,nrow(TF_enriched),6)
@@ -774,6 +778,7 @@ TCGAanalyze_LevelTab <- function(FC_FDR_table_mRNA,typeCond1,typeCond2,
                                     decreasing = typeOrder),]
 
     rownames(TableLevel) <-  TableLevel[,"mRNA"]
+    if(all(grepl("ENSG",rownames(TableLevel)))) TableLevel <- cbind(TableLevel,map.ensg(genes = rownames(TableLevel)))
     return(TableLevel)
 }
 
