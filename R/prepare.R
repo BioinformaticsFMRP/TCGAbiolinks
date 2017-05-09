@@ -604,8 +604,12 @@ colDataPrepare <- function(barcode){
         ret$project_id <- as.character(aux)
     }
     # There is no subtype info for target, return as it is
-    if(all(grepl("TARGET",barcode))) return(ret)
-
+    if(all(grepl("TARGET",barcode))) {
+        # Put data in the right order
+        ret <- ret[match(barcode,ret$barcode),]
+        rownames(ret) <- ret$barcode
+        return(ret)
+    }
     # remove letter from 01A 01B etc
     ret$sample.aux <- substr(ret$sample,1,15)
     # na.omit should not be here, exceptional case
