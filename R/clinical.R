@@ -29,6 +29,9 @@
 #'  TCGAquery_SampleTypes(barcode,"TR")
 #'  # Returns both barcode
 #'  TCGAquery_SampleTypes(barcode,c("TR","TP"))
+#'  barcode <- c("TARGET-20-PANSBH-14A-02D","TARGET-20-PANSBH-01A-02D",
+#'               "TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1")
+#'   TCGAquery_SampleTypes(barcode,c("TR","TP"))
 #' @return a list of samples / barcode filtered by type sample selected
 TCGAquery_SampleTypes <- function(barcode,typesample){
     # Tumor AND Solid Tissue Normal NOT FROM THE SAME PATIENTS
@@ -39,15 +42,15 @@ TCGAquery_SampleTypes <- function(barcode,typesample){
                            "CELL","XP","XCL")
 
     if (sum(is.element(typesample,names(table.code))) == length(typesample)) {
+        string <- sapply(barcode,function(x) substr(unlist(stringr::str_split(x,"-"))[4],1,2))
 
-        string <- substr(barcode, 14, 15)
         barcode.all <- NULL
         for (sample.i in typesample) {
             barcode.all <- union(barcode.all,
                                  barcode[grep(table.code[sample.i], string)])
         }
         return(barcode.all)
-    }else{
+    } else {
         return("Error message: one or more sample types do not exist")
     }
 }
@@ -61,6 +64,12 @@ TCGAquery_SampleTypes <- function(barcode,typesample){
 #'  TCGAquery_MatchedCoupledSampleTypes(c("TCGA-B0-4698-01Z-00-DX1",
 #'                              "TCGA-B0-4698-02Z-00-DX1"),
 #'                              c("TP","TR"))
+#'  barcode <- c("TARGET-20-PANSBH-02A-02D","TARGET-20-PANSBH-01A-02D",
+#'               "TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1",
+#'               "TARGET-20-PANSZZ-02A-02D","TARGET-20-PANSZZ-11A-02D",
+#'               "TCGA-B0-4699-01Z-00-DX1","TCGA-B0-4699-02Z-00-DX1"
+#'               )
+#'   TCGAquery_MatchedCoupledSampleTypes(barcode,c("TR","TP"))
 #' @export
 #' @return a list of samples / barcode filtered by type sample selected
 TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
@@ -76,10 +85,11 @@ TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
 
     if(sum(is.element(typesample,names(table.code))) == length(typesample)) {
 
-        string <- substr(barcode, 14, 15)
+        string <- sapply(barcode,function(x) substr(unlist(stringr::str_split(x,"-"))[4],1,2))
         barcode.1 <- barcode[grep(table.code[typesample[1]], string)]
         barcode.2 <- barcode[grep(table.code[typesample[2]], string)]
-        barcode.common <- intersect(substr(barcode.1,1,12), substr(barcode.2,1,12))
+        barcode.common <- intersect(sapply(barcode.1,function(x) paste(unlist(stringr::str_split(x,"-"))[1:3],collapse = "-")),
+                                    sapply(barcode.2,function(x) paste(unlist(stringr::str_split(x,"-"))[1:3],collapse = "-")))
         if(length(barcode.common) > 0){
             idx1 <- unlist(lapply(barcode.common, function(x) grep(x,barcode.1)))
             idx2 <- unlist(lapply(barcode.common, function(x) grep(x,barcode.2)))
