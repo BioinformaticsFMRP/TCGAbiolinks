@@ -21,4 +21,10 @@ TCGAquery_MatchedCoupledSampleTypes
  TCGAquery_MatchedCoupledSampleTypes(c("TCGA-B0-4698-01Z-00-DX1",
                              "TCGA-B0-4698-02Z-00-DX1"),
                              c("TP","TR"))
+ barcode <- c("TARGET-20-PANSBH-02A-02D","TARGET-20-PANSBH-01A-02D",
+              "TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1",
+              "TARGET-20-PANSZZ-02A-02D","TARGET-20-PANSZZ-11A-02D",
+              "TCGA-B0-4699-01Z-00-DX1","TCGA-B0-4699-02Z-00-DX1"
+              )
+  TCGAquery_MatchedCoupledSampleTypes(barcode,c("TR","TP"))
 }
