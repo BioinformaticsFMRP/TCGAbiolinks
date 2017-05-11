@@ -42,4 +42,7 @@ barcode <- c("TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1")
  TCGAquery_SampleTypes(barcode,"TR")
  # Returns both barcode
  TCGAquery_SampleTypes(barcode,c("TR","TP"))
+ barcode <- c("TARGET-20-PANSBH-14A-02D","TARGET-20-PANSBH-01A-02D",
+              "TCGA-B0-4698-01Z-00-DX1","TCGA-CZ-4863-02Z-00-DX1")
+  TCGAquery_SampleTypes(barcode,c("TR","TP"))
 }
