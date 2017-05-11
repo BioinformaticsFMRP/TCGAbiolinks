@@ -53,39 +53,38 @@ TCGAanalyze_Clustering <- function(tabDF, method,  methodHC = "ward.D2"){
 TCGAanalyze_Preprocessing <- function(object,
                                       cor.cut = 0,
                                       filename = NULL,
-                                      width = 500,
-                                      height = 500,
+                                      width = 1000,
+                                      height = 1000,
                                       datatype = names(assays(object))[1]){
 
-    if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 
     # This is a work around for raw_counts and raw_count
-    if(grepl("raw_count",datatype) & any(grepl("raw_count",names(assays(object))))) datatype <- names(assays(object))[grepl("raw_count",names(assays(object)))]
-    if(!any(grepl(datatype, names(assays(object))))) stop(paste0(datatype, " not found in the assay list: ",
-                                                                 paste(names(assays(object)),collapse = ", "),"\n  Please set the correct datatype argument."))
+    if(grepl("raw_count",datatype) & any(grepl("raw_count",names(assays(object)))))
+        datatype <- names(assays(object))[grepl("raw_count",names(assays(object)))]
 
+    if(!any(grepl(datatype, names(assays(object)))))
+        stop(paste0(datatype, " not found in the assay list: ",
+             paste(names(assays(object)),collapse = ", "),"\n  Please set the correct datatype argument."))
+
+    if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
     if(is.null(filename)) filename <- "PreprocessingOutput.png"
     png(filename, width = width, height = height)
-
-    # array array IC after RMA
-    #object <-BRCARnaseq_assay
-
-    #object<-eset_COMBAT
-    #ArrayIndex = as.character(1:length(sampleNames(object)))
-    ArrayIndex = as.character(1:length( colData(object)$sample))
+    par(oma=c(10,10,10,10))
+    ArrayIndex <-  as.character(1:length( colData(object)$barcode))
 
     pmat_new <- matrix(0, length(ArrayIndex),4)
-    colnames(pmat_new) <-c("Disease","platform","SampleID","Study")
-    rownames(pmat_new)<- as.character(colData(object)$sample)
+    colnames(pmat_new) <- c("Disease","platform","SampleID","Study")
+    rownames(pmat_new) <- as.character(colData(object)$barcode)
     pmat_new <- as.data.frame(pmat_new)
-    pmat_new$Disease <-as.character(colData(object)$shortLetterCode)
+    pmat_new$Disease <- as.character(colData(object)$tissue.definition)
     pmat_new$platform <-"platform"
-    pmat_new$SampleID <- as.character(colData(object)$sample)
-    pmat_new$Study<-"study"
+    pmat_new$SampleID <- as.character(colData(object)$barcode)
+    pmat_new$Study <- "study"
 
     tabGroupCol <-cbind(pmat_new, Color = matrix(0,nrow(pmat_new),1))
-    tabGroupCol[which(tabGroupCol$Disease=="TP"),"Color"]<-"red"
-    tabGroupCol[which(tabGroupCol$Disease=="NT"),"Color"]<-"blue"
+    for(i in seq_along(unique(tabGroupCol$Disease))){
+        tabGroupCol[which(tabGroupCol$Disease == tabGroupCol$Disease[i]),"Color"] <- rainbow(length(unique(tabGroupCol$Disease)))[i]
+    }
 
     #    pmat <- as.matrix(pData(phenoData(object)))
     pmat <- pmat_new
@@ -98,45 +97,46 @@ TCGAanalyze_Preprocessing <- function(object,
     for (i in 2:length(ArrayIndex)) { arraypos2[i - 1] <- (arraypos[i] + arraypos[i - 1])/2 }
     layout(matrix(c(1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 3, 3, 3, 4), 4, 4, byrow = TRUE))
 
-    #c <- cor(exprs(object)[, order], method = "spearman")
     c <- cor(assay(object,datatype)[, order], method = "spearman")
 
     image(c, xaxt = "n", yaxt = "n",
-          xlab = "Array Samples",
-          ylab = "Array Samples",
+          #xlab = "Array Samples",
+          #ylab = "Array Samples",
           main = "Array-Array Intensity Correlation after RMA")
-    #abline(h = arraypos2, v = arraypos2)
 
-    for ( i in 1:length(names(table(tabGroupCol$Color)) )){
+    for (i in 1:length(names(table(tabGroupCol$Color)) )){
         currentCol <- names(table(tabGroupCol$Color))[i]
         pos.col <- arraypos[which(tabGroupCol$Color == currentCol)]
         lab.col <- colnames(c)[which(tabGroupCol$Color == currentCol)]
-        axis(1, labels = lab.col , at = pos.col, col = currentCol,lwd = 6,las =2)
-        axis(2, labels = lab.col , at = pos.col, col = currentCol,lwd = 6,las =2)
+        #axis(1, labels = lab.col , at = pos.col, col = currentCol,lwd = 6,las = 2)
+        axis(2, labels = lab.col , at = pos.col, col = currentCol,lwd = 6,las = 2)
     }
 
-    m = matrix(pretty(c, 10), nrow = 1, ncol = length(pretty(c, 10)))
+    m <-  matrix(pretty(c, 10), nrow = 1, ncol = length(pretty(c, 10)))
 
     image(m, xaxt = "n", yaxt = "n", ylab = "Correlation Coefficient")
 
-    axis(2, labels = as.list(pretty(c, 10)),
+    axis(2,
+         labels = as.list(pretty(c, 10)),
          at = seq(0, 1, by = (1/(length(pretty(c,  10)) - 1))))
 
     abline(h = seq((1/(length(pretty(c, 10)) - 1))/2,
                    1 - (1/(length(pretty(c, 10)) - 1)),
                    by = (1/(length(pretty(c, 10)) - 1))))
-
-    boxplot(c, outline = FALSE,
+    box()
+    boxplot(c,
+            outline = FALSE,
             las =2,
             lwd = 6,
+            # names = NULL,
             col = tabGroupCol$Color,
             main ="Boxplot of correlation samples by samples after normalization")
+    dev.off()
 
     samplesCor <- rowMeans(c)
     objectWO <-  assay(object,datatype)[, samplesCor > cor.cut]
     colnames(objectWO) <- colnames(object)[samplesCor > cor.cut]
 
-    dev.off()
     return(objectWO)
 }
 
