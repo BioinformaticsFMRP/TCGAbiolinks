@@ -432,11 +432,6 @@ TCGAanalyze_Filtering <- function(tabDF,method,
     return( tabDF_Filt)
 }
 
-
-
-
-
-
 #' @title normalization mRNA transcripts and miRNA using EDASeq package.
 #' @description
 #'   TCGAanalyze_Normalization allows user to normalize mRNA transcripts and miRNA,
@@ -778,7 +773,7 @@ TCGAanalyze_LevelTab <- function(FC_FDR_table_mRNA,
                                     decreasing = typeOrder),]
 
     rownames(TableLevel) <-  TableLevel[,"mRNA"]
-    if(all(grepl("ENSG",rownames(TableLevel)))) TableLevel <- cbind(TableLevel,map.ensg(genes = rownames(TableLevel)))
+    if(all(grepl("ENSG",rownames(TableLevel)))) TableLevel <- cbind(TableLevel,map.ensg(genes = rownames(TableLevel))[,2:3])
     return(TableLevel)
 }
 
