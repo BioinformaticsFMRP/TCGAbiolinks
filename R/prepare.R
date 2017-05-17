@@ -438,7 +438,7 @@ colDataPrepareTARGET <- function(barcode){
     tissue.code <- c('01','02','03','04','05','06','07','08','09','10','11',
                      '12','13','14','15','16','17','20','40','41','42','50','60','61','99')
 
-    tissue.definition <- c("Primary solid Tumor", # 01
+    definition <- c("Primary solid Tumor", # 01
                            "Recurrent Solid Tumor", # 02
                            "Primary Blood Derived Cancer - Peripheral Blood", # 03
                            "Recurrent Blood Derived Cancer - Bone Marrow", # 04
@@ -463,7 +463,7 @@ colDataPrepareTARGET <- function(barcode){
                            "Xenograft from patient not grown as intermediate on plastic tissue culture dish", # 60
                            "Xenograft grown in mice from established cell lines", #61
                            "Granulocytes after a Ficoll separation") # 99
-    aux <- DataFrame(tissue.code = tissue.code,tissue.definition)
+    aux <- DataFrame(tissue.code = tissue.code,definition)
 
     # in case multiple equal barcode
     regex <- paste0("[:alnum:]{5}-[:alnum:]{2}-[:alnum:]{6}",
