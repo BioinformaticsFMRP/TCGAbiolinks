@@ -76,7 +76,7 @@ TCGAanalyze_Preprocessing <- function(object,
     colnames(pmat_new) <- c("Disease","platform","SampleID","Study")
     rownames(pmat_new) <- as.character(colData(object)$barcode)
     pmat_new <- as.data.frame(pmat_new)
-    pmat_new$Disease <- as.character(colData(object)$tissue.definition)
+    pmat_new$Disease <- as.character(colData(object)$definition)
     pmat_new$platform <-"platform"
     pmat_new$SampleID <- as.character(colData(object)$barcode)
     pmat_new$Study <- "study"
