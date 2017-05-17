@@ -812,6 +812,7 @@ TCGAVisualize_volcano <- function(x,y,
                     size = names.size, show.legend = FALSE,
                     fontface = 'bold', color = 'white',
                     box.padding = unit(0.35, "lines"),
+                    segment.colour = "grey",
                     point.padding = unit(0.3, "lines")
                 ) +   scale_fill_manual(values=color[as.numeric(important)])
             }  else {
@@ -819,6 +820,7 @@ TCGAVisualize_volcano <- function(x,y,
                     data = subset(df, threshold %in% important),
                     aes(label = names[idx]),
                     size = names.size, show.legend = FALSE,
+                    segment.colour = "grey",
                     fontface = 'bold', color = 'black',
                     point.padding = unit(0.3, "lines"),
                     box.padding = unit(0.5, 'lines')
