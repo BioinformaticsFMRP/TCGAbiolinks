@@ -44,6 +44,9 @@ There are two methods to download GDC data using TCGAbiolinks:
 
 </div>
 </div>
+
+
+
 <div class="panel panel-info">
 <div class="panel-heading">Data prepared: SummarizedExperiment object</div>
 <div class="panel-body">
@@ -58,6 +61,35 @@ has three main matrices that can be accessed using the [SummarizedExperiment pac
 
 </div>
 </div>
+
+<div class="panel panel-warning">
+<div class="panel-heading">Summarized Experiment: annotation information</div>
+<div class="panel-body">
+
+
+When using the funciton `GDCprepare` there is an argument called `SummarizedExperiment`
+which defines the output type a Summarized Experiment (default option) or a data frame.
+To create a summarized Experiment object we annotate the data with genomic positions
+with last patch release version of the genome available. 
+For legacy data (data aligned to hg19) TCGAbiolinks is using GRCh37.p13 and for 
+harmonized data (data aligned to hg38) now it is using GRCh38.p7 (May 2017).
+
+Unfortunately, some of the updates changes/remove gene symbols, change coordinates, etc. 
+Which might introduce some loss of data. For example, if the gene was removed we cannot map
+it anymore and that information will be lost in the `SummarizedExperiment`.
+
+If you set `SummarizedExperiment` to `FALSE`, you will get the data unmofied 
+just as they are in the files and ad your own annotation.
+
+Also, there are no updated for DNA methylation data. But the last metadata available can be found
+here: [http://zwdzwd.github.io/InfiniumAnnotation](http://zwdzwd.github.io/InfiniumAnnotation)
+
+Related discussions: [issue 91](https://github.com/BioinformaticsFMRP/TCGAbiolinks/issues/91),
+[issue 50](https://github.com/BioinformaticsFMRP/TCGAbiolinks/issues/50)
+
+</div>
+</div>
+
 
 ## Search and download data from legacy database using GDC api method
 
