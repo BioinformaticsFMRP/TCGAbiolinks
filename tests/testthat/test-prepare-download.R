@@ -57,7 +57,7 @@ test_that("GDCprepare accepts more than one project", {
     acc.gbm<- GDCquery(project =  c("TCGA-ACC","TCGA-GBM"),
                         data.category = "Transcriptome Profiling",
                         data.type = "Gene Expression Quantification",
-                        workflow.type = "HTSeq - Counts",
+                        workflow.type = "HTSeq - FPKM-UQ",
                         barcode = substr(cases,1,12))
     GDCdownload(acc.gbm, method = "api", directory = "ex")
     obj <- GDCprepare(acc.gbm,  directory = "ex")
