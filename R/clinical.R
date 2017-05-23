@@ -277,7 +277,28 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
     else if(tolower(clinical.info) == "portion")      xpath <- "//bio:portion"
     else if(tolower(clinical.info) == "slide")  xpath <- "//bio:slide"
     else if(tolower(clinical.info)  == "msi")  xpath <- "//auxiliary:microsatellite_instability_test_result"
-    clin <- parseXML(files,xpath,clinical.info)
+
+    if(tolower(clinical.info) == "follow_up") {
+        follow_up_version <- sort(unique(unlist(sapply(files,function(x) {
+            n <- names(xml_ns(read_xml(x)))
+            n[grepl("follow_up",n)]
+        }))))
+        if(length(follow_up_version) > 1) {
+            message("We found more than one follow up version!")
+            message("We will parse all and add a collumn (follow_up_version) to identify each version")
+        }
+        clin <- plyr::adply(follow_up_version, 1,function(x){
+            message("Parsing follow up version: ", x)
+            xpath <- paste0("//", x, ":follow_up")
+            clin <- parseXML(files,xpath,clinical.info)
+            clin$follow_up_version <- x
+            return(clin)
+        }, .id = "follow_up_version")
+        col_idx <- grep("follow_up_version", names(clin))
+        clin <- clin[, c(col_idx, (1:ncol(clin))[-col_idx])]
+    } else {
+        clin <- parseXML(files,xpath,clinical.info)
+    }
 
     if(tolower(clinical.info) == "patient") {
         composed.cols <- c("new_tumor_events","drugs","follow_ups","radiations")
@@ -340,20 +361,13 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
 
 parseXML <- function(files, xpath, clinical.info ){
     clin <- NULL
+
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+
     for(i in seq_along(files)){
         xmlfile <- files[i]
         xml <- read_xml(xmlfile)
         doc = xmlParse(xmlfile)
-
-        if(tolower(clinical.info) == "follow_up" & is.null(xpath)){
-            follow_up_version <-  names(xml_ns(xml))[grepl("follow_up",names(xml_ns(xml)))]
-            if(length(follow_up_version) > 1) {
-                follow_up_version <- follow_up_version[length(follow_up_version)]
-            }
-            if(length(follow_up_version) == 1)  xpath <- paste0("//", follow_up_version, ":follow_up")
-            else next
-        }
 
         patient <- str_extract(xmlfile,"[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}")
         # Test if this xpath exists before parsing it
