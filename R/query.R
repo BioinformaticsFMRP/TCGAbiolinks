@@ -154,6 +154,8 @@ GDCquery <- function(project,
         json  <- tryCatch(
             getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
             error = function(e) {
+                message(paste("Error: ", e, sep = " "))
+                message("We will retry to access GDC!")
                 fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
             }
         )
