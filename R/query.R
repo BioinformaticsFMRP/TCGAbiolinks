@@ -135,6 +135,7 @@ GDCquery <- function(project,
         }
     })
     print.header("GDCquery: Searching in GDC database","section")
+    message("Genome of reference: ",ifelse(legacy,"hg19","hg38"))
     # Check arguments
     checkProjectInput(project)
     checkDataCategoriesInput(project, data.category, legacy)
