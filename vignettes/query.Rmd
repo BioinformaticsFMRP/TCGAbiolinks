@@ -35,6 +35,7 @@ library(DT)
 
 
 There are two available sources to download GDC data using TCGAbiolinks:
+
 - GDC Legacy Archive : provides access to an unmodified copy of data that was previously stored in
   [CGHub](https://cghub.ucsc.edu/) and in the TCGA Data Portal hosted by the TCGA Data Coordinating Center (DCC), in which uses
   as references GRCh37 (hg19) and GRCh36 (hg18).
