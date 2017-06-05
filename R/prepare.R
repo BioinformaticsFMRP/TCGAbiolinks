@@ -586,7 +586,7 @@ colDataPrepare <- function(barcode){
     message(" => Add clinical information to samples")
     # There is a limitation on the size of the string, so this step will be splited in cases of 100
     patient.info <- NULL
-    step <- 50 # more than 100 gives a bug =/
+    step <- 20 # more than 50 gives a bug =/
     for(i in 0:(ceiling(length(ret$patient)/step) - 1)){
         start <- 1 + step * i
         end <- ifelse(((i + 1) * step) > length(ret$patient), length(ret$patient),((i + 1) * step))
@@ -859,7 +859,7 @@ getBarcodeInfo <- function(barcode) {
     json  <- tryCatch(
         getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
         error = function(e) {
-            fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+            message(e)
         }
     )
 
