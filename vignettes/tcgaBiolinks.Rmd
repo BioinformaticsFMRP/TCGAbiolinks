@@ -1651,68 +1651,6 @@ img <- readPNG("PCAtop200DEGs.png")
 grid.raster(img)
 ```
 
-## `TCGAvisualize_SurvivalCoxNET` Survival Analysis: Cox Regression and dnet package
-
-TCGAvisualize_SurvivalCoxNET can help an user to identify a group of 
-survival genes that are significant from univariate Kaplan Meier 
-Analysis and also for Cox Regression.
-
-It shows in the end a network build with community of genes with similar range of pvalues from
-Cox regression (same color) and that interaction among those genes is already validated in
-literatures using the STRING database (version 9.1).
-
-```{r, eval = FALSE}
-library(TCGAbiolinks)
-# Survival Analysis SA
-
-clinical_patient_Cancer <- TCGAquery_clinic("brca","clinical_patient")
-dataBRCAcomplete <- log2(BRCA_rnaseqv2)
-
-tokenStop<- 1
-
-tabSurvKMcomplete <- NULL
-
-for( i in 1: round(nrow(dataBRCAcomplete)/100)){
-    message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
-    tokenStart <- tokenStop
-    tokenStop <-100*i
-    tabSurvKM <- TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
-                                        dataBRCAcomplete,
-                                        Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
-                                        Survresult = F,ThreshTop=0.67,ThreshDown=0.33)
-    tabSurvKMcomplete <- rbind(tabSurvKMcomplete,tabSurvKM)
-}
-
-tabSurvKMcomplete <- tabSurvKMcomplete[tabSurvKMcomplete$pvalue < 0.01,]
-tabSurvKMcomplete <- tabSurvKMcomplete[!duplicated(tabSurvKMcomplete$mRNA),]
-rownames(tabSurvKMcomplete) <-tabSurvKMcomplete$mRNA
-tabSurvKMcomplete <- tabSurvKMcomplete[,-1]
-tabSurvKMcomplete <- tabSurvKMcomplete[order(tabSurvKMcomplete$pvalue, decreasing=F),]
-
-tabSurvKMcompleteDEGs <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% dataDEGsFiltLevel$mRNA,]
-
-tflist <- EAGenes[EAGenes$Family == "transcription regulator","Gene"]
-tabSurvKMcomplete_onlyTF <- tabSurvKMcomplete[rownames(tabSurvKMcomplete) %in% tflist,]
-
-TabCoxNet <- TCGAvisualize_SurvivalCoxNET(clinical_patient_Cancer,dataBRCAcomplete,
-                                          Genelist = rownames(tabSurvKMcompleteDEGs),
-                                          scoreConfidence = 700,
-                                          titlePlot = "TCGAvisualize_SurvivalCoxNET Example")
-```
-
-In particular the survival analysis with kaplan meier and cox regression allow user to reduce the feature / number of genes significant for survival. And using 'dnet' pipeline with 'TCGAvisualize_SurvivalCoxNET' function the user can further filter those genes according some already validated interaction according STRING database.
-This is important because the user can have an idea about the biology inside the 
-survival discrimination and further investigate in a sub-group of genes that are working in as synergistic effect influencing the risk of survival.
-In the following picture the user can see some community of genes with same color and survival pvalues.
-
-The result is shown below:
-```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
-library(png)
-library(grid)
-img <- readPNG("SurvivalCoxNETOutput.png")
-grid.raster(img)
-```
-
 ## `TCGAvisualize_meanMethylation`: Mean DNA Methylation Analysis
 Using the data and calculating the mean DNA methylation per group, it is possible 
 to create a mean DNA methylation boxplot with the function 
@@ -2381,32 +2319,7 @@ GDCdownload(query.exp)
 acc.exp <- GDCprepare(query = query.exp, save = TRUE, save.filename = "accExp.rda")
 ```
 
-We will first investigate the mean methylation of the methylation groups and highlight 
-the hypermutated subgroup. 
-
-```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-#--------------------------------------------
-# STEP 2: Analysis
-#--------------------------------------------
-# 2.1 - Mean methylation of samples
-# -------------------------------------------
-TCGAvisualize_meanMethylation(acc.met,
-                              groupCol = "subtype_MethyLevel",
-                              subgroupCol = "subtype_Histology",
-                              group.legend  = "Groups",
-                              subgroup.legend = "Histology",
-                              filename = "acc_mean.png")
-```
-
-The figure resulted from the code above is shown below:
-```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
-library(grid)
-img <- readPNG("acc_mean.png")
-grid.raster(img)
-```
-
-For DNA methylation, we do a DMR (different methylated region) analysis, which will give the difference of DNA methylation for the probes of the groups and their significance value.
+For DNA methylation, we perform a DMR (different methylated region) analysis, which will give the difference of DNA methylation for the probes of the groups and their significance value.
 The output can be seen in a volcano plot. 
 Note: Depending on the number of samples this function can be very slow
 due to the wilcoxon test, taking from hours to days.

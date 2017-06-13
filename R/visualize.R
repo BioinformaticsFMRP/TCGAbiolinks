@@ -20,8 +20,6 @@
 #' }
 #' @importFrom igraph subgraph.edges layout.fruchterman.reingold
 #'             spinglass.community degree E communities crossing V V<-
-#' @importFrom dnet dRDataLoader dNetInduce dNetPipeline
-#'             visNet dCommSignif
 #' @importFrom supraHex visColormap visColoralpha
 #' @importFrom grDevices dev.list
 #' @details TCGAvisualize_SurvivalCoxNET allow user to perform the complete workflow using coxph
@@ -56,8 +54,6 @@
 #' @importFrom survival coxph
 #' @importFrom igraph subgraph.edges layout.fruchterman.reingold
 #'             spinglass.community degree E communities crossing V V<-
-#' @importFrom dnet dRDataLoader dNetInduce dNetPipeline
-#'             visNet dCommSignif
 #' @importFrom supraHex visColormap visColoralpha
 #' @importFrom grDevices dev.list
 #' @export
@@ -70,13 +66,17 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
                                          scoreConfidence = 700,
                                          titlePlot = "TCGAvisualize_SurvivalCoxNET Example"){
 
+    if (!requireNamespace("dnet", quietly = TRUE)) {
+        stop("dnet package is needed for this function to work. Please install it.",
+             call. = FALSE)
+    }
     #clinical_patient<- dataClin
     #dataGE <- dataFilt
     #Genelist <- rownames(dataSurv)
     #scoreConfidence = 700
 
     combined_score <- NULL
-    if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
+    if (!(is.null(dev.list()["RStudioGD"]))) dev.off()
 
     pdf("SurvivalCoxNETOutput.pdf", width = 15, height = 10)
 
@@ -712,10 +712,10 @@ TCGAvisualize_Heatmap <- function(data,
     }
 
     if(is.null(extrems)) {
-        if(min(data,na.rm = T) < 0) {
-            extrems <- c(min(data,na.rm = T), (max(data,na.rm = T) + min(data,na.rm = T))/2, max(data,na.rm = T))
+        if(min(data,na.rm = TRUE) < 0) {
+            extrems <- c(min(data,na.rm = TRUE), (max(data,na.rm = TRUE) + min(data,na.rm = TRUE))/2, max(data,na.rm = TRUE))
         } else {
-            extrems <- c(0, max(data,na.rm = T)/2, max(data,na.rm = T))
+            extrems <- c(0, max(data,na.rm = TRUE)/2, max(data,na.rm = TRUE))
         }
     }
     if (type == "expression") color <- circlize::colorRamp2(extrems, color.levels)
