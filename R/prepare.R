@@ -111,7 +111,7 @@ GDCprepare <- function(query,
         if(query$data.type == "miRNA gene quantification")
             data <- readGeneExpressionQuantification(files = files,
                                                      cases = query$results[[1]]$cases,
-                                                     summarizedExperiment = F,
+                                                     summarizedExperiment = FALSE,
                                                      experimental.strategy = unique(query$results[[1]]$experimental_strategy))
         if(query$data.type == "miRNA isoform quantification")
             data <- readmiRNAIsoformQuantification(files = files,
@@ -357,7 +357,7 @@ makeSEfromDNAmethylation <- function(df, probeInfo=NULL){
         colData <-  colDataPrepare(colnames(df)[5:ncol(df)])
         assay <- data.matrix(subset(df,select = c(5:ncol(df))))
     } else {
-        rowRanges <- makeGRangesFromDataFrame(probeInfo, keep.extra.columns = T)
+        rowRanges <- makeGRangesFromDataFrame(probeInfo, keep.extra.columns = TRUE)
         colData <-  colDataPrepare(colnames(df)[(ncol(probeInfo) + 1):ncol(df)])
         assay <- data.matrix(subset(df,select = c((ncol(probeInfo) + 1):ncol(df))))
     }
@@ -1011,9 +1011,6 @@ TCGAprepare_elmer <- function(data,
 #' @param ClinData write
 #' @param PathFolder write
 #' @param TabCel write
-#' @importFrom affy ReadAffy
-#' @importFrom affy rma
-#' @importFrom Biobase exprs
 #' @examples
 #' \dontrun{
 #' to add example
@@ -1021,12 +1018,19 @@ TCGAprepare_elmer <- function(data,
 #' @export
 #' @return Normalizd Expression data from Affy eSets
 TCGAprepare_Affy <- function(ClinData, PathFolder, TabCel){
+    if (!requireNamespace("affy", quietly = TRUE)) {
+        stop("affy package is needed for this function to work. Please install it.",
+             call. = FALSE)
+    }
+    if (!requireNamespace("Biobase", quietly = TRUE)) {
+        stop("affy package is needed for this function to work. Please install it.",
+             call. = FALSE)
+    }
+    affy_batch <- affy::ReadAffy(filenames=as.character(paste(TabCel$samples, ".CEL", sep="")))
 
-    affy_batch <- ReadAffy(filenames=as.character(paste(TabCel$samples, ".CEL", sep="")))
+    eset <- affy::rma(affy_batch)
 
-    eset <- rma(affy_batch)
-
-    mat <- exprs(eset)
+    mat <- Biobase::exprs(eset)
 
     return(mat)
 
