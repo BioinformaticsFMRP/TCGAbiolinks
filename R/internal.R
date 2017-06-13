@@ -541,7 +541,7 @@ getGistic <- function(disease) {
     ret <- tryCatch({
         fread(file, data.table = FALSE, colClasses = "character")
     }, error = function(e) {
-        file <- dir(pattern = "all_thresholded.by_genes.txt", recursive = T, full.names = T)
+        file <- dir(pattern = "all_thresholded.by_genes.txt", recursive = TRUE, full.names = TRUE)
         file <- file[grep(disease,file,ignore.case = TRUE)]
         fread(file, data.table = FALSE, colClasses = "character")
     })
@@ -643,6 +643,7 @@ print.header <- function(text, type ="section"){
 #' @param rows Rows identifiers (row numbers)
 #' @param cols Columns identifiers (col names)
 #' @export
+#' @return Table with query results
 #' @examples
 #' query <- GDCquery(project = "TCGA-GBM",
 #'                   data.category = "Transcriptome Profiling",
