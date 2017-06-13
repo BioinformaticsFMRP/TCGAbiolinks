@@ -14,7 +14,7 @@ install:
 
 build_script:
   - travis-tool.sh install_bioc_deps
-  - travis-tool.sh install_bioc BiocStyle GenomicRanges Biobase affy EDASeq edgeR biomaRt IRanges supraHex S4Vectors ComplexHeatmap SummarizedExperiment DO.db BiocGenerics GenomicFeatures TxDb.Hsapiens.UCSC.hg19.knownGene limma genefilter ConsensusClusterPlus pathview clusterProfiler
+  - travis-tool.sh install_bioc BiocStyle GenomeInfoDbData GenomicRanges Biobase affy EDASeq edgeR biomaRt IRanges supraHex S4Vectors ComplexHeatmap SummarizedExperiment DO.db BiocGenerics GenomicFeatures TxDb.Hsapiens.UCSC.hg19.knownGene limma genefilter ConsensusClusterPlus pathview clusterProfiler
   - travis-tool.sh install_deps
 
 test_script:
