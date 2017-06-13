@@ -1,8 +1,8 @@
 Package: TCGAbiolinks
 Type: Package
 Title: TCGAbiolinks: An R/Bioconductor package for integrative analysis with GDC data
-Version: 2.5.3
-Date: 2016-12-7
+Version: 2.5.4
+Date: 2017-06-7
 Author: Antonio Colaprico,
     Tiago Chedraoui Silva,
     Catharina Olsen,
@@ -27,22 +27,17 @@ Imports:
     gridExtra,
     graphics,
     tibble,
+    grid,
     GenomicRanges,
     XML (>= 3.98.0),
-    Biobase,
-    affy,
-    xtable,
     data.table,
     EDASeq (>= 2.0.0),
     edgeR (>= 3.0.0),
     jsonlite (>= 1.0.0),
     plyr,
-    c3net,
-    minet,
     knitr,
     methods,
     biomaRt,
-    gplots,
     ggplot2,
     ggthemes,
     survival,
@@ -52,7 +47,6 @@ Imports:
     rvest (>= 0.3.0),
     stats,
     utils,
-    dnet,
     igraph,
     selectr,
     supraHex,
@@ -60,7 +54,6 @@ Imports:
     ComplexHeatmap (>= 1.10.2),
     R.utils,
     SummarizedExperiment (>= 1.4.0),
-    limma,
     genefilter,
     ConsensusClusterPlus,
     readr,
@@ -70,9 +63,9 @@ Imports:
     clusterProfiler,
     pathview,
     parallel,
+    tools,
     xml2,
     httr (>= 1.2.1),
-    parmigene,
     matlab,
     circlize,
     ggrepel (>= 0.6.3)
@@ -101,7 +94,14 @@ Suggests:
     BiocStyle,
     rmarkdown,
     devtools,
-    maftools
+    maftools,
+    parmigene,
+    c3net,
+    minet,
+    dnet,
+    Biobase,
+    affy,
+    limma
 VignetteBuilder: knitr
 LazyData: true
 URL: https://github.com/BioinformaticsFMRP/TCGAbiolinks

@@ -1,10 +1,11 @@
 #' @title Hierarchical cluster analysis
 #' @description Hierarchical cluster analysis using several methods such as
-#' ward.D", "ward.D2", "single", "complete", "average" (= UPGMA), "mcquitty" (= WPGMA),
-#' "median" (= WPGMC) or "centroid" (= UPGMC).
+#'  ward.D", "ward.D2", "single", "complete", "average" (= UPGMA),
+#'  "mcquitty" (= WPGMA), "median" (= WPGMC) or "centroid" (= UPGMC).
 #' @param tabDF is a dataframe or numeric matrix, each row represents a gene,
 #' each column represents a sample come from TCGAPrepare.
-#' @param method is method to be used for generic cluster such as 'hclust' or 'consensus'
+#' @param method is method to be used for generic cluster such as 'hclust'
+#' or 'consensus'
 #' @param methodHC is method to be used for Hierarchical cluster.
 #' @import stats
 #' @importFrom ConsensusClusterPlus ConsensusClusterPlus
@@ -64,7 +65,8 @@ TCGAanalyze_Preprocessing <- function(object,
 
     if(!any(grepl(datatype, names(assays(object)))))
         stop(paste0(datatype, " not found in the assay list: ",
-             paste(names(assays(object)),collapse = ", "),"\n  Please set the correct datatype argument."))
+                    paste(names(assays(object)),collapse = ", "),
+                    "\n  Please set the correct datatype argument."))
 
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
     if(is.null(filename)) filename <- "PreprocessingOutput.png"
@@ -945,12 +947,6 @@ TCGAanalyze_EA <- function(GeneName,RegulonList,TableEnrichment,
 #' @param FC.cut write
 #' @param AffySet A matrix-like data object containing log-ratios or log-expression values
 #' for a series of arrays, with rows corresponding to genes and columns to samples
-#' @importFrom limma lmFit
-#' @importFrom limma eBayes
-#' @importFrom limma makeContrasts
-#' @importFrom limma contrasts.fit
-#' @importFrom limma toptable
-#' @importFrom Biobase phenoData
 #' @examples
 #' \dontrun{
 #' to add example
@@ -959,23 +955,30 @@ TCGAanalyze_EA <- function(GeneName,RegulonList,TableEnrichment,
 #' @return List of list with tables in 2 by 2 comparison
 #' of the top-ranked genes from a linear model fitted by DEA's limma
 TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01){
-
-    Pdatatable <- phenoData(AffySet)
+    if (!requireNamespace("Biobase", quietly = TRUE)) {
+        stop("affy package is needed for this function to work. Please install it.",
+             call. = FALSE)
+    }
+    if (!requireNamespace("limma", quietly = TRUE)) {
+        stop("affy package is needed for this function to work. Please install it.",
+             call. = FALSE)
+    }
+    Pdatatable <- Biobase::phenoData(AffySet)
 
     f <- factor(Pdatatable$Disease)
     groupColors<-names(table(f))
 
-    tmp<-matrix(0,length(groupColors),length(groupColors))
+    tmp <- matrix(0,length(groupColors),length(groupColors))
     colnames(tmp) <- groupColors
     rownames(tmp) <- groupColors
     tmp[upper.tri(tmp)] <- 1
 
 
-    sample_tab<-Pdatatable
+    sample_tab <- Pdatatable
     f <- factor(Pdatatable$Disease)
     design <- model.matrix(~0+f)
     colnames(design) <- levels(f)
-    fit <- lmFit(AffySet, design) ## fit is an object of class MArrayLM.
+    fit <- limma::lmFit(AffySet, design) ## fit is an object of class MArrayLM.
 
     groupColors <- names(table(Pdatatable$Disease))
 
@@ -1000,10 +1003,10 @@ TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01){
 
                     print( paste(i, j, Comparison,"to do..." ))
 
-                    cont.matrix <- makeContrasts(I=Comparison,levels=design)
+                    cont.matrix <- limmamakeContrasts(I=Comparison,levels=design)
 
-                    fit2 <- contrasts.fit(fit, cont.matrix)
-                    fit2 <- eBayes(fit2)
+                    fit2 <- limmacontrasts.fit(fit, cont.matrix)
+                    fit2 <- limma::eBayes(fit2)
 
 
 
@@ -1029,11 +1032,13 @@ TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01){
 #' @param normCounts is a matrix of gene expression with genes in rows and samples in columns.
 #' @param kNum the number of nearest neighbors to consider to estimate the mutual information.
 #' Must be less than the number of columns of normCounts.
-#' @importFrom parmigene knnmi.cross
 #' @export
 #' @return an adjacent matrix
 TCGAanalyze_analyseGRN<- function(TFs, normCounts,kNum) {
-
+    if (!requireNamespace("parmigene", quietly = TRUE)) {
+        stop("parmigene package is needed for this function to work. Please install it.",
+             call. = FALSE)
+    }
     MRcandidates <- intersect(rownames(normCounts),TFs)
 
     # Mutual information between TF and genes
@@ -1087,16 +1092,22 @@ TCGAanalyze_Pathview <- function(dataDEGs, pathwayKEGG = "hsa05200" ){
 #' @description TCGAanalyze_networkInference taking expression data as input, this will return an adjacency matrix of interactions
 #' @param data expression data, genes in columns, samples in rows
 #' @param optionMethod inference method, chose from aracne, c3net, clr and mrnet
-#' @importFrom c3net c3net
-#' @importFrom minet minet
 #' @export
 #' @return an adjacent matrix
 TCGAanalyze_networkInference <- function(data, optionMethod = "clr" ){
     # Converting Gene symbol to gene ID
-
     if(optionMethod == "c3net"){
+        if (!requireNamespace("c3net", quietly = TRUE)) {
+            stop("c3net package is needed for this function to work. Please install it.",
+                 call. = FALSE)
+        }
+
         net <- c3net(t(data))
     }else{
+        if (!requireNamespace("minet", quietly = TRUE)) {
+            stop("minet package is needed for this function to work. Please install it.",
+                 call. = FALSE)
+        }
         net <- minet(data, method = optionMethod)
     }
     return(net)
@@ -1271,9 +1282,9 @@ matchedMetExp <- function(project, legacy = FALSE, n = NULL){
         # get primary solid tumor samples: RNAseq
         message("Download gene expression information")
         exp <- GDCquery(project = project,
-                          data.category = "Transcriptome Profiling",
-                          data.type = "Gene Expression Quantification",
-                          workflow.type = "HTSeq - Counts")
+                        data.category = "Transcriptome Profiling",
+                        data.type = "Gene Expression Quantification",
+                        workflow.type = "HTSeq - Counts")
 
 
     }
