@@ -217,7 +217,8 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 #' @importFrom xml2 read_xml xml_ns
 #' @importFrom XML xmlParse getNodeSet xmlToDataFrame
 #' @importFrom plyr rbind.fill
-#' @importFrom dplyr mutate_each funs
+#' @importFrom dplyr mutate_all funs
+#' @return A data frame with the parsed values from the XML
 #' @export
 #' @examples
 #' query <- GDCquery(project = "TCGA-COAD",
@@ -344,7 +345,7 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
     }
     # Converting factor to numeric and double
     out <- clin %>%
-        mutate_each(
+        mutate_all(
             funs(
                 type.convert(as.character(.), as.is = TRUE, numerals = "warn.loss")
             )

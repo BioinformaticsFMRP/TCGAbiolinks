@@ -10,7 +10,8 @@ TCGAanalyze_Clustering(tabDF, method, methodHC = "ward.D2")
 \item{tabDF}{is a dataframe or numeric matrix, each row represents a gene,
 each column represents a sample come from TCGAPrepare.}
 
-\item{method}{is method to be used for generic cluster such as 'hclust' or 'consensus'}
+\item{method}{is method to be used for generic cluster such as 'hclust'
+or 'consensus'}
 
 \item{methodHC}{is method to be used for Hierarchical cluster.}
 }
@@ -23,6 +24,6 @@ consensusMatrix (numerical matrix), consensusTree (hclust), consensusClass
 }
 \description{
 Hierarchical cluster analysis using several methods such as
-ward.D", "ward.D2", "single", "complete", "average" (= UPGMA), "mcquitty" (= WPGMA),
-"median" (= WPGMC) or "centroid" (= UPGMC).
+ ward.D", "ward.D2", "single", "complete", "average" (= UPGMA),
+ "mcquitty" (= WPGMA), "median" (= WPGMC) or "centroid" (= UPGMC).
 }
