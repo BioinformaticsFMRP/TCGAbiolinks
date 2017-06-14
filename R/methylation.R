@@ -579,7 +579,6 @@ calculate.pvalues <- function(data,
     p.value <- adply(val,1,
                      function(x) {
                          wilcox.test(x[idx1],x[idx2],
-                                     data=aux, #exact = TRUE,
                                      paired = paired)$p.value
                      }, .progress = "text", .parallel = parallel
     )
