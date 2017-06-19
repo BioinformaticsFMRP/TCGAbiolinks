@@ -74,7 +74,7 @@ query.maf.hg19 <- GDCquery(project = "TCGA-CHOL",
 GDCdownload(query.maf.hg19)
 maf <- GDCprepare(query.maf.hg19)
 ```
-```{r  echo = TRUE, message = FALSE, warning = FALSE}
+```{r  echo = TRUE,eval =F, message = FALSE, warning = FALSE}
 # Only first 50 to make render faster
 datatable(maf[1:20,],
           filter = 'top',
