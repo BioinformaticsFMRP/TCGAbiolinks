@@ -52,7 +52,7 @@ Please use [Github issues](https://github.com/BioinformaticsFMRP/TCGAbiolinks/is
 # Required libraries
 
 The examples in this tutorial use the following libraries: 
-```{r message=FALSE, warning=FALSE, include=TRUE}
+```{r message=FALSE, warning=FALSE, include=TRUE, eval = FALSE}
 library(TCGAbiolinks)
 library(dplyr)
 library(DT)
