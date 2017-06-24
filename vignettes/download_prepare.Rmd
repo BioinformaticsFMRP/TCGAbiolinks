@@ -127,7 +127,7 @@ In this example we will download gene expression quantification from harmonized 
 (data aligned against genome of reference hg38).
 Also, it shows the object data and metadata.
 
-```{r results = 'hide', message=FALSE, warning=FALSE}
+```{r results = 'hide', message=FALSE, warning=FALSE, eval = F}
 # Gene expression aligned against hg38
 query <- GDCquery(project = "TCGA-GBM",
                   data.category = "Transcriptome Profiling",
@@ -137,7 +137,7 @@ query <- GDCquery(project = "TCGA-GBM",
 GDCdownload(query)
 data <- GDCprepare(query)
 ```
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, eval=F}
 datatable(as.data.frame(colData(data)), 
               options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
               rownames = FALSE)
