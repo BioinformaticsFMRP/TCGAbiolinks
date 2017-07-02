@@ -160,7 +160,7 @@ checkBarcodeDefinition <- function(definition){
 getGDCprojects <- function(){
 
     projects  <- tryCatch({
-        projects <- read_tsv("https://gdc-api.nci.nih.gov/projects?size=1000&format=tsv", col_types = "ccccccc")
+        projects <- read_tsv("https://gdc-api.nci.nih.gov/projects?size=1000&format=tsv", col_types = "cccccccc")
         projects$tumor <- unlist(lapply(projects$project_id, function(x){unlist(str_split(x,"-"))[2]}))
         return(projects)
     }, error = function(e) {
