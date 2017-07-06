@@ -439,30 +439,30 @@ colDataPrepareTARGET <- function(barcode){
                      '12','13','14','15','16','17','20','40','41','42','50','60','61','99')
 
     definition <- c("Primary solid Tumor", # 01
-                           "Recurrent Solid Tumor", # 02
-                           "Primary Blood Derived Cancer - Peripheral Blood", # 03
-                           "Recurrent Blood Derived Cancer - Bone Marrow", # 04
-                           "Additional - New Primary", # 05
-                           "Metastatic", # 06
-                           "Additional Metastatic", # 07
-                           "Tissue disease-specific post-adjuvant therapy", # 08
-                           "Primary Blood Derived Cancer - Bone Marrow", # 09
-                           "Blood Derived Normal", # 10
-                           "Solid Tissue Normal",  # 11
-                           "Buccal Cell Normal",   # 12
-                           "EBV Immortalized Normal", # 13
-                           "Bone Marrow Normal", # 14
-                           "Fibroblasts from Bone Marrow Normal", # 15
-                           "Mononuclear Cells from Bone Marrow Normal", # 16
-                           "Lymphatic Tissue Normal (including centroblasts)", # 17
-                           "Control Analyte", # 20
-                           "Recurrent Blood Derived Cancer - Peripheral Blood", # 40
-                           "Blood Derived Cancer- Bone Marrow, Post-treatment", # 41
-                           "Blood Derived Cancer- Peripheral Blood, Post-treatment", # 42
-                           "Cell line from patient tumor", # 50
-                           "Xenograft from patient not grown as intermediate on plastic tissue culture dish", # 60
-                           "Xenograft grown in mice from established cell lines", #61
-                           "Granulocytes after a Ficoll separation") # 99
+                    "Recurrent Solid Tumor", # 02
+                    "Primary Blood Derived Cancer - Peripheral Blood", # 03
+                    "Recurrent Blood Derived Cancer - Bone Marrow", # 04
+                    "Additional - New Primary", # 05
+                    "Metastatic", # 06
+                    "Additional Metastatic", # 07
+                    "Tissue disease-specific post-adjuvant therapy", # 08
+                    "Primary Blood Derived Cancer - Bone Marrow", # 09
+                    "Blood Derived Normal", # 10
+                    "Solid Tissue Normal",  # 11
+                    "Buccal Cell Normal",   # 12
+                    "EBV Immortalized Normal", # 13
+                    "Bone Marrow Normal", # 14
+                    "Fibroblasts from Bone Marrow Normal", # 15
+                    "Mononuclear Cells from Bone Marrow Normal", # 16
+                    "Lymphatic Tissue Normal (including centroblasts)", # 17
+                    "Control Analyte", # 20
+                    "Recurrent Blood Derived Cancer - Peripheral Blood", # 40
+                    "Blood Derived Cancer- Bone Marrow, Post-treatment", # 41
+                    "Blood Derived Cancer- Peripheral Blood, Post-treatment", # 42
+                    "Cell line from patient tumor", # 50
+                    "Xenograft from patient not grown as intermediate on plastic tissue culture dish", # 60
+                    "Xenograft grown in mice from established cell lines", #61
+                    "Granulocytes after a Ficoll separation") # 99
     aux <- DataFrame(tissue.code = tissue.code,definition)
 
     # in case multiple equal barcode
@@ -575,8 +575,15 @@ colDataPrepareTCGA <- function(barcode){
     return(DataFrame(ret))
 }
 
+#' @examples
+#' \dontrun{
+#'   query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
+#'                         legacy = TRUE,
+#'                         data.category = "DNA methylation",
+#'                         platform = c("Illumina Human Methylation 450", "Illumina Human Methylation 27"))
+#'   colDataPrepare(getResults(query.met)$cases)
+#' }
 colDataPrepare <- function(barcode){
-
     # For the moment this will work only for TCGA Data
     # We should search what TARGET data means
     message("Starting to add information to samples")
@@ -586,16 +593,32 @@ colDataPrepare <- function(barcode){
     message(" => Add clinical information to samples")
     # There is a limitation on the size of the string, so this step will be splited in cases of 100
     patient.info <- NULL
-    step <- 20 # more than 50 gives a bug =/
-    for(i in 0:(ceiling(length(ret$patient)/step) - 1)){
-        start <- 1 + step * i
-        end <- ifelse(((i + 1) * step) > length(ret$patient), length(ret$patient),((i + 1) * step))
-        if(is.null(patient.info)) {
-            patient.info <- getBarcodeInfo(ret$patient[start:end])
-        } else {
-            patient.info <- rbind(patient.info,getBarcodeInfo(ret$patient[start:end]))
+
+    patient.info <- tryCatch({
+        step <- 20 # more than 50 gives a bug =/
+        for(i in 0:(ceiling(length(ret$patient)/step) - 1)){
+            start <- 1 + step * i
+            end <- ifelse(((i + 1) * step) > length(ret$patient), length(ret$patient),((i + 1) * step))
+            if(is.null(patient.info)) {
+                patient.info <- getBarcodeInfo(ret$patient[start:end])
+            } else {
+                patient.info <- rbind(patient.info,getBarcodeInfo(ret$patient[start:end]))
+            }
         }
-    }
+        patient.info
+    }, error = function(e) {
+        step <- 2 # more than 50 gives a bug =/
+        for(i in 0:(ceiling(length(ret$patient)/step) - 1)){
+            start <- 1 + step * i
+            end <- ifelse(((i + 1) * step) > length(ret$patient), length(ret$patient),((i + 1) * step))
+            if(is.null(patient.info)) {
+                patient.info <- getBarcodeInfo(ret$patient[start:end])
+            } else {
+                patient.info <- rbind(patient.info,getBarcodeInfo(ret$patient[start:end]))
+            }
+        }
+        patient.info
+    })
     ret <- merge(ret,patient.info, by.x = "patient", by.y = "submitter_id", all.x = TRUE )
 
     if(!"project_id" %in% colnames(ret)) {
