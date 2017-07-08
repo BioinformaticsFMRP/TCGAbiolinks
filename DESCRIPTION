@@ -60,8 +60,6 @@ Imports:
     RColorBrewer,
     doParallel,
     dplyr,
-    clusterProfiler,
-    pathview,
     parallel,
     tools,
     xml2,
@@ -89,7 +87,6 @@ biocViews: DNAMethylation,
     Sequencing,
     Survival
 Suggests:
-    testthat,
     png,
     BiocStyle,
     rmarkdown,
@@ -101,7 +98,10 @@ Suggests:
     dnet,
     Biobase,
     affy,
-    limma
+    testthat,
+    limma,
+    pathview,
+    clusterProfiler
 VignetteBuilder: knitr
 LazyData: true
 URL: https://github.com/BioinformaticsFMRP/TCGAbiolinks
