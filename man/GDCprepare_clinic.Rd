@@ -15,6 +15,9 @@ Options Biospecimen: protocol, admin, aliquot, analyte, bio_patient, sample, por
 
 \item{directory}{Directory/Folder where the data was downloaded. Default: GDCdata}
 }
+\value{
+A data frame with the parsed values from the XML
+}
 \description{
 This function receives the query argument and parses the clinical xml files
 based on the desired information

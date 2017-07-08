@@ -70,7 +70,6 @@ A oncoprint plot
 Creating a oncoprint
 }
 \examples{
-\dontrun{
 mut <- GDCquery_Maf(tumor = "ACC", pipelines = "mutect")
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:10], rm.empty.columns = TRUE)
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:10],
@@ -86,5 +85,5 @@ TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
                 heatmap.legend.side = "right",
                 dist.col = 0,
                 label.font.size = 10)
-}
+
 }
