@@ -13,6 +13,9 @@ getResults(query, rows, cols)
 
 \item{cols}{Columns identifiers (col names)}
 }
+\value{
+Table with query results
+}
 \description{
 Get the results table from query, it can select columns with cols argument
 and return a number of rows using rows argument.
