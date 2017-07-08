@@ -1063,8 +1063,10 @@ TCGAanalyze_analyseGRN<- function(TFs, normCounts,kNum) {
 #' @export
 #' @return an adjacent matrix
 #' @examples
-#' dataDEGs <- data.frame(mRNA = c("TP53","TP63","TP73"), logFC = c(1,2,3))
-#' TCGAanalyze_Pathview(dataDEGs)
+#' \dontrun{
+#'   dataDEGs <- data.frame(mRNA = c("TP53","TP63","TP73"), logFC = c(1,2,3))
+#'   TCGAanalyze_Pathview(dataDEGs)
+#' }
 TCGAanalyze_Pathview <- function(dataDEGs, pathwayKEGG = "hsa05200" ){
     if (!requireNamespace("clusterProfiler", quietly = TRUE)) {
         stop("clusterProfiler needed for this function to work. Please install it.",
