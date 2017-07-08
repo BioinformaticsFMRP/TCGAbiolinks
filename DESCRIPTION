@@ -47,9 +47,7 @@ Imports:
     rvest (>= 0.3.0),
     stats,
     utils,
-    igraph,
     selectr,
-    supraHex,
     S4Vectors,
     ComplexHeatmap (>= 1.10.2),
     R.utils,
@@ -101,7 +99,9 @@ Suggests:
     testthat,
     limma,
     pathview,
-    clusterProfiler
+    clusterProfiler,
+    igraph,
+    supraHex
 VignetteBuilder: knitr
 LazyData: true
 URL: https://github.com/BioinformaticsFMRP/TCGAbiolinks
