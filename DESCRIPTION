@@ -1,7 +1,7 @@
 Package: TCGAbiolinks
 Type: Package
 Title: TCGAbiolinks: An R/Bioconductor package for integrative analysis with GDC data
-Version: 2.5.4
+Version: 2.5.5
 Date: 2017-06-7
 Author: Antonio Colaprico,
     Tiago Chedraoui Silva,
@@ -47,9 +47,7 @@ Imports:
     rvest (>= 0.3.0),
     stats,
     utils,
-    igraph,
     selectr,
-    supraHex,
     S4Vectors,
     ComplexHeatmap (>= 1.10.2),
     R.utils,
@@ -60,8 +58,6 @@ Imports:
     RColorBrewer,
     doParallel,
     dplyr,
-    clusterProfiler,
-    pathview,
     parallel,
     tools,
     xml2,
@@ -89,7 +85,6 @@ biocViews: DNAMethylation,
     Sequencing,
     Survival
 Suggests:
-    testthat,
     png,
     BiocStyle,
     rmarkdown,
@@ -101,7 +96,12 @@ Suggests:
     dnet,
     Biobase,
     affy,
-    limma
+    testthat,
+    limma,
+    pathview,
+    clusterProfiler,
+    igraph,
+    supraHex
 VignetteBuilder: knitr
 LazyData: true
 URL: https://github.com/BioinformaticsFMRP/TCGAbiolinks
