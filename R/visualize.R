@@ -176,7 +176,7 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
     vdegrees <- igraph::degree(net)
     ## highlight different communities
     mark.groups <- igraph::communities(com)
-    mark.col <- supsupraHex::visColoralpha(mcolors, alpha=0.2)
+    mark.col <- supraHex::visColoralpha(mcolors, alpha=0.2)
     mark.border <- supraHex::visColoralpha(mcolors, alpha=0.2)
     edge.color <- c("#C0C0C0", "#000000")[igraph::crossing(com,net)+1]
     edge.color <- supraHex::visColoralpha(edge.color, alpha=0.5)
