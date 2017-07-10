@@ -180,8 +180,14 @@ move <- function(from, to) {
     if(file.exists(from)){
         todir <- dirname(to)
         if (!isTRUE(file.info(todir)$isdir)) dir.create(todir, recursive=TRUE,showWarnings = FALSE)
-        file.rename(from = from,  to = to)
-        if(dirname(from) != ".") unlink(dirname(from),recursive=TRUE,force = TRUE)
+        tryCatch(file.copy(from = from,  to = to), warning = function(w) print(w),error = function(e) print(e))
+        if(dirname(from) != ".") {
+            unlink(dirname(from),recursive=TRUE,force = TRUE)
+        } else {
+            unlink(from)
+        }
+    } else {
+        stop(paste0("I could not find the file: ", from))
     }
 }
 
