@@ -160,6 +160,22 @@ GDCquery <- function(project,
                 fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
             }
         )
+        if(json$data$pagination$count == 0) {
+            url <- getGDCquery(project = proj,
+                               data.category = data.category,
+                               data.type = data.type,
+                               legacy = legacy,
+                               workflow.type = NA,
+                               platform = NA)
+            json  <- tryCatch(
+                getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
+                error = function(e) {
+                    message(paste("Error: ", e, sep = " "))
+                    message("We will retry to access GDC!")
+                    fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+                }
+            )
+        }
         json$data$hits$acl <- NULL
         json$data$hits$project <- proj
         if("analysis" %in% colnames(json$data$hits)){
