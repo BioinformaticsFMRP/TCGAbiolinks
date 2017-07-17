@@ -51,6 +51,9 @@ bioc_packages:
   - clusterProfiler
   - BiocCheck
   - fgsea
+  - GO.db
+  - DO.db
+  - org.Hs.eg.db
 
 r_github_packages:
   - eddelbuettel/digest
