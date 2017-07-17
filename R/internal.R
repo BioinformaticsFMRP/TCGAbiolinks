@@ -179,7 +179,7 @@ getGDCprojects <- function(){
 move <- function(from, to) {
     if(file.exists(from)){
         todir <- dirname(to)
-        if (!isTRUE(file.info(todir)$isdir)) dir.create(todir, recursive=TRUE,showWarnings = FALSE)
+        dir.create(todir, recursive=TRUE,showWarnings = FALSE)
         tryCatch(file.copy(from = from,  to = to), warning = function(w) print(w),error = function(e) print(e))
         if(dirname(from) != ".") {
             unlink(dirname(from),recursive=TRUE,force = TRUE)
