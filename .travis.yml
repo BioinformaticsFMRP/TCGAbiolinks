@@ -64,7 +64,7 @@ r_github_packages:
   - edwindj/whisker
   - jimhester/withr
   - jimhester/covr
-
+  - hfang-bristol/dnet
 
 after_script:
   - ls -lah
