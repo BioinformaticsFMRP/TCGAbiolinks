@@ -211,7 +211,6 @@ TCGAanalyze_survival <- function(data,
             xlim = xlim,               # present narrower X axis, but not affect survival estimates.
             main = main,               # Title
             xlab = xlab,               # customize X axis label.
-            ggtheme = theme_light(),   # customize plot and risk table with a theme.
             legend.title = legend,     # Legend title
             legend.labs = labels,      # change legend labels.
             palette =  color,          # custom color palettes.
