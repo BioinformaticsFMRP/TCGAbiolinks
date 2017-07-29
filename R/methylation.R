@@ -166,6 +166,15 @@ TCGAanalyze_survival <- function(data,
     if (any(notDead == TRUE)) {
         data[notDead,"days_to_death"] <- data[notDead,"days_to_last_follow_up"]
     }
+    if(length(data[which((data[,"days_to_death"] < 0) == T),"sample"]) > 0 & "sample" %in% colnames(data)) {
+        message("Incosistencies in the data were found. The following samples have a negative days_to_death value:")
+        message(paste(data[which((data[,"days_to_death"] < 0) == T),"sample"], collapse = ", "))
+    }
+    if(any(is.na(data[,"days_to_death"])) & "sample" %in% colnames(data)) {
+        message("Incosistencies in the data were found. The following samples have a NA days_to_death value:")
+        message(paste(data[is.na(data[,"days_to_death"]),"sample"], collapse = ", "))
+    }
+
     # create a column to be used with survival package, info need
     # to be TRUE(DEAD)/FALSE (ALIVE)
     data$s <- grepl("dead|deceased",data$vital_status,ignore.case = TRUE)
@@ -178,8 +187,11 @@ TCGAanalyze_survival <- function(data,
     fit <- do.call(survfit, list(formula = f.m, data = data))
 
     label.add.n <- function(x) {
-        paste0(x, " (n = ",
-               nrow(data[data[,"type"] == x,]), ")")
+        na.idx <- is.na(data[,"days_to_death"])
+        negative.idx <- data[,"days_to_death"] < 0
+        idx <- !(na.idx | negative.idx)
+        return(paste0(x, " (n = ",
+               sum(data[idx,"type"] == x), ")"))
     }
 
     if(is.null(labels)){
