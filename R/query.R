@@ -508,9 +508,9 @@ getBarcodeDefinition <- function(type = "TCGA"){
 #' @importFrom R.utils gunzip
 #' @importFrom tools md5sum
 #' @examples
-#' acc.muse.maf <- GDCquery_Maf("ACC", pipelines = "muse")
 #' \dontrun{
-#'   acc.varscan2.maf <- GDCquery_Maf("ACC", pipelines = "varscan2")
+#'    acc.muse.maf <- GDCquery_Maf("ACC", pipelines = "muse")
+#'    acc.varscan2.maf <- GDCquery_Maf("ACC", pipelines = "varscan2")
 #'    acc.somaticsniper.maf <- GDCquery_Maf("ACC", pipelines = "somaticsniper")
 #'    acc.mutect.maf <- GDCquery_Maf("ACC", pipelines = "mutect2")
 #' }
