@@ -19,7 +19,7 @@
 
 }
 
-#' @title Check GDC server status
+#' @title Check GDC server status is OK
 #' @description
 #'   Check GDC server status using the api
 #'   https://gdc-api.nci.nih.gov/status
@@ -30,12 +30,25 @@
 #' @return Return true if status is ok
 isServeOK <- function(){
     tryCatch({
-        status <- fromJSON("https://gdc-api.nci.nih.gov/status",simplifyDataFrame = TRUE)$status
+        status <- getGDCInfo()$status
         if(status != "OK") stop("GDC server down, try to use this package later")
     },error = function(e) stop("GDC server down, try to use this package later"))
     return(TRUE)
 }
 
+#' @title Check GDC server status
+#' @description
+#'   Check GDC server status using the api
+#'   https://gdc-api.nci.nih.gov/status
+#' @export
+#' @importFrom jsonlite fromJSON
+#' @examples
+#' info <- getGDCInfo()
+#' @return Return true all status
+getGDCInfo <- function(){
+    status <- fromJSON("https://gdc-api.nci.nih.gov/status",simplifyDataFrame = TRUE)
+    return(status)
+}
 
 checkProjectInput <- function(project){
     projects <- getGDCprojects()
