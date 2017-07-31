@@ -164,7 +164,10 @@ GDCdownload.by.chunk <- function(server, manifest, name, path, step){
         message(paste0("Downloading chunk ", idx, " of ", ceiling(nrow(manifest)/step - 1) ,
                        " (", nrow(manifest.aux)," files, size = ", size,") ",
                        "as ", name.aux))
-        GDCdownload.aux(server, manifest.aux, name.aux, path)
+        repeat {
+         ret <- GDCdownload.aux(server, manifest.aux, name.aux, path)
+         if(ret == 1) break
+        }
     }
 }
 
@@ -179,8 +182,8 @@ GDCdownload.aux <- function(server, manifest, name, path){
             success <- untar(name)
             unlink(name) # remove tar
             if(success != 0){
-                print(success)
                 stop("There was an error in the download process, please execute it again")
+                return(-1)
             }
         }
         # moving to project/source/data_category/data_type/file_id
