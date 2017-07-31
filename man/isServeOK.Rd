@@ -2,7 +2,7 @@
 % Please edit documentation in R/internal.R
 \name{isServeOK}
 \alias{isServeOK}
-\title{Check GDC server status}
+\title{Check GDC server status is OK}
 \usage{
 isServeOK()
 }
