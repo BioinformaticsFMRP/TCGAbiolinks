@@ -528,8 +528,21 @@ GeneSplitRegulon <- function(Genelist,Sep){
     return(RegSplitted)
 }
 
+#' @title Download GISTIC data from firehose
+#' @description
+#' Download GISTIC data from firehose from
+#' http://gdac.broadinstitute.org/runs/analyses__latest/data/
+#' @param disease TCGA disease. Option available in
+#' http://gdac.broadinstitute.org/runs/analyses__latest/data/
+#' @param type Results type: thresholded or data
+#' @export
 #' @import selectr
-getGistic <- function(disease) {
+getGistic <- function(disease, type = "thresholded") {
+    if(type == "thresholded") {
+        file.type <- "all_thresholded.by_genes.txt"
+    } else {
+        file.type <- "all_data_by_genes.txt"
+    }
     base <- paste0("http://gdac.broadinstitute.org/runs/analyses__latest/data/", disease)
     x <- tryCatch({
         read_html(base)  %>% html_nodes("a") %>% html_attr("href")
@@ -551,16 +564,16 @@ getGistic <- function(disease) {
     # Check if downlaod was not corrupted
     md5 <- readr::read_table(file.path(base,x[2]), col_names = FALSE, progress = FALSE)$X1
     if(tools::md5sum(x[1]) != md5) stop("Error while downloading CNV data")
-    file <- paste0(gsub(".tar.gz","",x[1]),"/all_thresholded.by_genes.txt")
+    file <- paste0(gsub(".tar.gz","",x[1]),"/",file.type)
     if(!file.exists(file)) {
         compressed.files <- untar(x[1], list = TRUE)
-        compressed.files <- compressed.files[grepl("all_thresholded.by_genes.txt", compressed.files)]
+        compressed.files <- compressed.files[grepl(file.type, compressed.files)]
         untar(x[1],files = compressed.files )
     }
     ret <- tryCatch({
         fread(file, data.table = FALSE, colClasses = "character")
     }, error = function(e) {
-        file <- dir(pattern = "all_thresholded.by_genes.txt", recursive = TRUE, full.names = TRUE)
+        file <- dir(pattern = file.type, recursive = TRUE, full.names = TRUE)
         file <- file[grep(disease,file,ignore.case = TRUE)]
         fread(file, data.table = FALSE, colClasses = "character")
     })
