@@ -1,20 +1,32 @@
-citHeader("To cite TCGAbiolinksGUI in publications use:")
+citHeader("To cite TCGAbiolinks in publications use:")
 
 citEntry(entry = "Article",
-         title = "TCGAbiolinksGUI: A Graphical User Interface to analyze cancer molecular and clinical data. Bioinformatics - Submitted for review",
-         author       = personList(as.person("Tiago Chedraoui Silva"),
-                                   as.person("Antonio Colaprico"),
+         title        = " TCGAbiolinks: An R/Bioconductor package for integrative analysis of TCGA data",
+         author       = personList(as.person("Antonio Colaprico"),
+                                   as.person("Tiago Chedraoui Silva"),
                                    as.person("Catharina Olsen"),
-                                   as.person("Gianluca Bontempi"),
+                                   as.person("Luciano Garofano"),
+                                   as.person("Claudia Cava"),
+                                   as.person("Davide Garolini"),
+                                   as.person("Thais Sabedot"),
+                                   as.person("Tathiane M. Malta"),
+                                   as.person("Stefano M. Pagnotta"),
+                                   as.person("Isabella Castiglioni"),
                                    as.person("Michele Ceccarelli"),
-                                   as.person("Ben Berman"),
+                                   as.person("Gianluca Bontempi"),
                                    as.person("Houtan Noushmehr")
          ),
-         journal = "Bioinformatics",
-         year         = "2017",
+         journal = "Nucleic Acids Research",
+         year         = "2015",
+         journal      = "Nucleic Acids Research",
+         doi = "10.1093/nar/gkv1507",
+         url = "http://doi.org/10.1093/nar/gkv1507",
          textVersion  =
-             paste(" Tiago Chedraoui Silva, Antonio Colaprico, Catharina Olsen, Gianluca Bontempi,",
-                   "Michele Ceccarelli, Ben Berman, Houtan Noushmehr.",
-                   "TCGAbiolinksGUI: A Graphical User Interface to analyze cancer molecular and clinical data.",
-                   "Bioinformatics - Submitted for review")
+             paste("Antonio Colaprico, Tiago Chedraoui Silva, Catharina Olsen,",
+                   "Luciano Garofano, Claudia Cava, Davide Garolini,",
+                   "Thais Sabedot, Tathiane Malta, Stefano M. Pagnotta,",
+                   "Isabella Castiglioni,Michele Ceccarelli, Gianluca Bontempi",
+                   "Houtan Noushmehr.",
+                   "TCGAbiolinks: An R/Bioconductor package for integrative analysis of TCGA data",
+                   "Nucleic Acids Research (05 May 2016) 44 (8): e71. (doi:10.1093/nar/gkv1507)")
 )
