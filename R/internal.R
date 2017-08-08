@@ -191,13 +191,19 @@ getGDCprojects <- function(){
 # Source: https://stackoverflow.com/questions/10266963/moving-files-between-folders
 move <- function(from, to) {
     if(file.exists(from)){
-        todir <- dirname(to)
-        dir.create(todir, recursive=TRUE,showWarnings = FALSE)
-        tryCatch(file.copy(from = from,  to = to), warning = function(w) print(w),error = function(e) print(e))
+        if(R.utils::isDirectory(from)) {
+            todir <- dirname(to)
+            dir.create(to, recursive=TRUE,showWarnings = FALSE)
+            tryCatch(file.copy(from = from,  to = todir, recursive = TRUE), warning = function(w) print(w),error = function(e) print(e))
+        } else {
+            todir <- dirname(to)
+            dir.create(todir, recursive=TRUE,showWarnings = FALSE)
+            tryCatch(file.copy(from = from,  to = to), warning = function(w) print(w),error = function(e) print(e))
+        }
         if(dirname(from) != ".") {
             unlink(dirname(from),recursive=TRUE,force = TRUE)
         } else {
-            unlink(from)
+            unlink(from, recursive =  R.utils::isDirectory(from))
         }
     } else {
         stop(paste0("I could not find the file: ", from))
