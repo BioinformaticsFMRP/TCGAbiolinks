@@ -62,7 +62,7 @@ GDCprepare <- function(query,
 
     isServeOK()
     if(missing(query)) stop("Please set query parameter")
-    if(any(duplicated(query$results[[1]]$cases)) & query$data.type != "Clinical data") {
+    if(any(duplicated(query$results[[1]]$cases)) & query$data.type != "Clinical data" & query$data.type !=  "Protein expression quantification") {
         dup <- query$results[[1]]$cases[duplicated(query$results[[1]]$cases)]
         dup <- query$results[[1]][sapply(dup, function(x) grep(x,query$results[[1]]$cases)),c(2,4,9,13,15,18)]
         print(knitr::kable(dup))
@@ -744,14 +744,13 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
 readProteinExpression <- function(files,cases) {
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     for (i in seq_along(files)) {
-        data <- read_tsv(file = files[i], col_names = TRUE)
-        data <- data[-1,]
+        data <- read_tsv(file = files[i], col_names = TRUE,skip = 1, col_types = c("cn"))
+        if(!missing(cases))  colnames(data)[2] <- cases[i]
         if(i == 1) df <- data
-        if(i != 1) df <- merge(df, data,all=TRUE, by="Sample REF")
+        if(i != 1) df <- merge(df, data,all=TRUE, by="Composite Element REF")
         setTxtProgressBar(pb, i)
     }
     close(pb)
-    if(!missing(cases))  colnames(df)[2:length(colnames(df))] <- cases
 
     return(df)
 }
