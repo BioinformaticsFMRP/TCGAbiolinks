@@ -178,6 +178,14 @@ GDCquery <- function(project,
         }
         json$data$hits$acl <- NULL
         json$data$hits$project <- proj
+        if("archive" %in% colnames(json$data$hits)){
+            if(is.data.frame(json$data$hits$archive)){
+                archive <- json$data$hits$archive
+                colnames(archive)[1:ncol(archive)] <- paste0("archive_", colnames(archive)[1:ncol(archive)])
+                json$data$hits$archive <- NULL
+                json$data$hits <- cbind(json$data$hits, archive)
+            }
+        }
         if("analysis" %in% colnames(json$data$hits)){
             if(is.data.frame(json$data$hits$analysis)){
                 analysis <- json$data$hits$analysis
@@ -363,7 +371,7 @@ getGDCquery <- function(project, data.category, data.type, legacy, workflow.type
     baseURL <- ifelse(legacy,"https://gdc-api.nci.nih.gov/legacy/files/?","https://gdc-api.nci.nih.gov/files/?")
     options.pretty <- "pretty=true"
     if(data.category == "Protein expression" & legacy) {
-        options.expand <- "expand=cases.samples.portions,cases.project,center,analysis"
+        options.expand <- "fields=archive.revision,archive.file_name,md5sum,state,data_category,file_id,platform,file_name,file_size,md5sum,submitter_id,data_type&expand=cases.samples.portions,cases.project,center,analysis"
     } else if(data.category %in% c("Clinical","Biospecimen")) {
         options.expand <- "expand=cases,cases.project,center,analysis"
     } else {
