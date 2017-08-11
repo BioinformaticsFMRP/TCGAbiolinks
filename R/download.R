@@ -133,7 +133,7 @@ GDCdownload <- function(query,
                 tryCatch({
                     GDCdownload.aux(server, manifest, name, path)
                 }, error = function(e) {
-                    message("Download failed. We will retry with smaller chuncks")
+                    message("Download failed. We will retry with smaller chunks")
                     # split in groups of 100 MB
                     step <- ceiling(100000000/manifest$size[1])
                     if(step == 0) step <- 1
@@ -145,7 +145,7 @@ GDCdownload <- function(query,
                 tryCatch({
                     GDCdownload.by.chunk(server, manifest, name, path, step)
                 }, error = function(e) {
-                    message("At least one of the chuncks download was not correct. We will retry")
+                    message("At least one of the chunks download was not correct. We will retry")
                     GDCdownload.by.chunk(server, manifest, name, path, step)
                 })
             }
@@ -161,7 +161,7 @@ GDCdownload.by.chunk <- function(server, manifest, name, path, step){
         manifest.aux <- manifest[((idx * step) + 1):end,]
         size <- humanReadableByteCount(sum(as.numeric(manifest.aux$size)))
         name.aux <- gsub(".tar",paste0("_",idx,".tar"),name)
-        message(paste0("Downloading chunk ", idx, " of ", ceiling(nrow(manifest)/step - 1) ,
+        message(paste0("Downloading chunk ", idx + 1, " of ", ceiling(nrow(manifest)/step) ,
                        " (", nrow(manifest.aux)," files, size = ", size,") ",
                        "as ", name.aux))
         repeat {
