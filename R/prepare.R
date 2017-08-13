@@ -48,6 +48,7 @@
 #' }
 #' @return A summarizedExperiment or a data.frame
 #' @importFrom  S4Vectors DataFrame
+#' @importFrom SummarizedExperiment metadata<-
 #' @importFrom data.table setcolorder setnames
 #' @importFrom GenomicRanges GRanges
 #' @importFrom IRanges IRanges
@@ -121,6 +122,11 @@ GDCprepare <- function(query,
             data <- readIsoformExpressionQuantification(files = files, cases = query$results[[1]]$cases)
 
     }
+    # Add data release to object
+    if(summarizedExperiment & !is.data.frame(data)){
+        metadata(data) <- list("data_release" = getGDCInfo()$data_release)
+    }
+
 
     if((!is.null(add.gistic2.mut)) & summarizedExperiment) {
         message("=> Adding GISTIC2 and mutation information....")
