@@ -51,8 +51,6 @@ GDCdownload <- function(query,
 
     if(!(method %in% c("api","client"))) stop("method arguments possible values are: 'api' or 'client'")
 
-    manifest <- query$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
-    colnames(manifest) <- c("id","filename","md5","size","state")
 
     source <- ifelse(query$legacy,"legacy","harmonized")
 
@@ -60,10 +58,15 @@ GDCdownload <- function(query,
     for(proj in unique(unlist(query$project))){
         message("Downloading data for project ", proj)
         query.aux <- query
-        query.aux$results[[1]] <- query.aux$results[[1]][query.aux$results[[1]]$project == proj,]
+        results <- getResults(query.aux)[getResults(query.aux)$project == proj,]
+        query.aux$results[[1]] <- results
+
+        manifest <- query.aux$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
+        colnames(manifest) <- c("id","filename","md5","size","state")
+
         path <- unique(file.path(proj, source,
-                                 gsub(" ","_", query.aux$results[[1]]$data_category),
-                                 gsub(" ","_",query.aux$results[[1]]$data_type)))
+                                 gsub(" ","_", results$data_category),
+                                 gsub(" ","_",results$data_type)))
         path <- file.path(directory, path)
 
         # Check if the files were already downloaded by this package
