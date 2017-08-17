@@ -101,7 +101,7 @@ Input: data with gene expression/methylation expression
 }
 \examples{
 library(SummarizedExperiment)
-met <- getMetPlatInfo(genome = "hg38",platform = "27K")
+met <- TCGAbiolinks:::getMetPlatInfo(genome = "hg38",platform = "27K")
 values(met) <- NULL
 met$probeID <- names(met)
 nrows <- length(met); ncols <- 20
