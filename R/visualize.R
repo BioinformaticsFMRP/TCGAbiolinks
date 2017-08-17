@@ -861,7 +861,7 @@ unlistlabels <- function(lab) {
 #' @importFrom ComplexHeatmap oncoPrint draw HeatmapAnnotation
 #' @importFrom grid gpar grid.rect
 #' @importFrom data.table dcast setDT setDF :=
-#' @example
+#' @examples
 #' \dontrun{
 #' mut <- GDCquery_Maf(tumor = "ACC", pipelines = "mutect")
 #' TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:10], rm.empty.columns = TRUE)
