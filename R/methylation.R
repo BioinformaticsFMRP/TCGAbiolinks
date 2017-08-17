@@ -191,7 +191,7 @@ TCGAanalyze_survival <- function(data,
         negative.idx <- data[,"days_to_death"] < 0
         idx <- !(na.idx | negative.idx)
         return(paste0(x, " (n = ",
-               sum(data[idx,"type"] == x), ")"))
+                      sum(data[idx,"type"] == x), ")"))
     }
 
     if(is.null(labels)){
@@ -1217,54 +1217,64 @@ TCGAanalyze_DMR <- function(data,
 #' @param width Figure width
 #' @param dpi Figure dpi
 #' @import ggplot2
+#' @importFrom GenomicRanges distanceToNearest
 #' @importFrom SummarizedExperiment rowRanges rowRanges<- values<-
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom ggrepel geom_label_repel geom_text_repel
+#' @importFrom S4Vectors subjectHits queryHits
 #' @export
 #' @return Save a starburst plot
 #' @examples
 #' library(SummarizedExperiment)
-#' nrows <- 20000; ncols <- 20
+#' met <- getMetPlatInfo(genome = "hg38",platform = "27K")
+#' values(met) <- NULL
+#' met$probeID <- names(met)
+#' nrows <- length(met); ncols <- 20
 #' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
-#' ranges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(5000, 15000)),
-#'                    IRanges::IRanges(floor(runif(20000, 1e5, 1e6)), width=100),
-#'                     strand=sample(c("+", "-"), 20000, TRUE),
-#'                     probeID=sprintf("ID%03d", 1:20000),
-#'                     Gene_Symbol=sprintf("ID%03d", 1:20000))
-#'colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
+#' colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
 #'                     row.names=LETTERS[1:20],
 #'                     group=rep(c("group1","group2"),c(10,10)))
-#'data <- SummarizedExperiment::SummarizedExperiment(
+#' met <- SummarizedExperiment::SummarizedExperiment(
 #'          assays=S4Vectors::SimpleList(counts=counts),
-#'          rowRanges=ranges,
+#'          rowRanges=met,
 #'          colData=colData)
-#' met <- data
-#' exp <- data.frame(row.names=sprintf("ID%03d", 1:20000),
-#'                   logFC=runif(20000, -5, 5),
-#'                   FDR=runif(20000, 0.01, 1))
-#' rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
+#' rowRanges(met)$diffmean.g1.g2 <- c(runif(nrows, -0.1, 0.1))
 #' rowRanges(met)$diffmean.g2.g1 <- -1*(rowRanges(met)$diffmean.g1.g2)
-#' rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
-#' rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
-#' result <- TCGAvisualize_starburst(met,exp,
-#'                                   exp.p.cut = 0.05, met.p.cut = 0.05,
-#'                                   group1="g1",group2="g2",
-#'                                   diffmean.cut=0.0,
-#'                                   names=TRUE, circle = FALSE)
+#' rowRanges(met)$p.value.g1.g2 <- c(runif(nrows, 0, 1))
+#' rowRanges(met)$p.value.adj.g1.g2 <- c(runif(nrows, 0, 1))
+#' exp <- get.GRCh.bioMart("hg38")
+#' exp$logFC <- runif(nrow(exp), -5, 5)
+#' exp$FDR <- runif(nrow(exp), 0.01, 1)
+#' result <- TCGAvisualize_starburst(met,
+#'                                   exp,
+#'                                   exp.p.cut = 0.05,
+#'                                   met.p.cut = 0.05,
+#'                                   group1 = "g1",
+#'                                   group2 = "g2",
+#'                                   genome = "hg38",
+#'                                   met.platform = "27K",
+#'                                   diffmean.cut = 0.0,
+#'                                   names  = TRUE,
+#'                                   circle = FALSE)
 #' result <- TCGAvisualize_starburst(SummarizedExperiment::values(met),
 #'                                   exp,
-#'                                   exp.p.cut = 0.05, met.p.cut = 0.05,
-#'                                   group1="g1",group2="g2",
-#'                                   diffmean.cut=0.0,
-#'                                   names=TRUE, circle = FALSE)
+#'                                   exp.p.cut = 0.05,
+#'                                   met.p.cut = 0.05,
+#'                                   group1 = "g1",
+#'                                   group2 = "g2",
+#'                                   diffmean.cut = 0.0,
+#'                                   names  = TRUE,
+#'                                   circle = FALSE)
 TCGAvisualize_starburst <- function(met,
                                     exp,
-                                    group1=NULL,
-                                    group2=NULL,
+                                    group1 = NULL,
+                                    group2 = NULL,
                                     exp.p.cut = 0.01,
                                     met.p.cut = 0.01,
                                     diffmean.cut = 0,
                                     logFC.cut = 0,
+                                    met.platform = "450K",
+                                    genome = "hg38",
                                     names = FALSE,
                                     names.fill = TRUE,
                                     circle = TRUE,
@@ -1289,9 +1299,9 @@ TCGAvisualize_starburst <- function(met,
                                               "Up regulated & Hyper methylated",
                                               "Down regulated & Hyper methylated"),
                                     xlim = NULL, ylim = NULL,
-                                    height=10,
-                                    width=20,
-                                    dpi=600
+                                    height = 10,
+                                    width = 20,
+                                    dpi = 600
 )
 {
     .e <- environment()
@@ -1326,42 +1336,55 @@ TCGAvisualize_starburst <- function(met,
     }
 
     # Methylation matrix and expression matrix should have the same name column for merge
-    idx <- grep("Gene_symbol",colnames(met),ignore.case = TRUE)
-    colnames(met)[idx] <- "Gene_symbol"
+    idx <- grep("ENGS",exp[1,])
+    colnames(exp)[idx] <- "ensembl_gene_id"
+
+    if(!"ensembl_gene_id" %in% colnames(exp)) {
+        exp$ensembl_gene_id <- rownames(exp)
+    }
+    if(!"probeID" %in% colnames(met))  met$probeID <- met$Composite.Element.REF
+
 
     # Check if gene symbol columns exists
-    if(!any(grepl("Gene_symbol",colnames(exp),ignore.case = FALSE))) {
-        if("mRNA" %in% colnames(exp)) {
-            if(all(grepl("\\|",exp$mRNA))) {
-                exp$Gene_symbol <- unlist(lapply(strsplit(exp$mRNA,"\\|"),function(x) x[2]))
-            } else {
-                exp$Gene_symbol <- exp$mRNA
-            }
-        } else {
-            aux <- rownames(exp)
-            if(all(grepl("\\|",aux))) {
-                exp$Gene_symbol <- unlist(lapply(strsplit(aux,"\\|"),function(x) x[2]))
-            } else {
-                exp$Gene_symbol <- aux
-            }
-        }
-    } else {
-        # Check if it has the same pattern
-        idx <- grep("Gene_symbol",colnames(exp),ignore.case = TRUE)
-        colnames(exp)[idx] <- "Gene_symbol"
+    if(!any(grepl("ensembl_gene_id",colnames(exp),ignore.case = FALSE))) {
+        stop("Column ensembl_gene_id was not found")
     }
 
+    # Correlate gene expression with DNA methylation levels
+    # Step 1: identify nearest TSS for each probe
+    # Step 2: create a table with probe, gene, transcript, distance.TSS and merge with
+    #         the met (by probe name) and gene expression (by gene name) results
+    message("o Fetching auxiliary information")
+    message("oo Fetching probes genomic information")
+    met.info <- getMetPlatInfo(genome = genome,platform = met.platform)
+    values(met.info) <- NULL
+    message("oo Fetching TSS information")
+    tss <- getTSS(genome = genome)
+    message("o Mapping probes to nearest TSS")
+    dist <- distanceToNearest(tss,met.info)
+    g <- suppressWarnings(as.data.frame(tss[queryHits(dist)]))
+    g$start_position <- NULL
+    g$end_position <- NULL
+    colnames(g)[1:5] <- paste0("gene_",colnames(g)[1:5])
+    m <- suppressWarnings(as.data.frame(met.info[subjectHits(dist)],row.names = NULL))
+    colnames(m) <- paste0("probe_",colnames(m))
+    m$probeID <- names(met.info[subjectHits(dist)])
+    nearest <- cbind(m,g)
+    # END mapping nearest probe to nearest gene
+    message("o Mapping results information")
+    volcano <- plyr::join(nearest, exp, by = "ensembl_gene_id")
+    volcano <- merge(volcano, met, by = "probeID")
 
-    volcano <- merge(met, exp, by = "Gene_symbol")
-    volcano$ID <- paste(volcano$Gene_symbol,
+    volcano$ID <- paste(volcano$Gene_symbol,volcano$ensembl_transcript_id,
                         volcano$probeID, sep = ".")
-
+    volcano <- volcano[!is.na(volcano$FDR),] # Some genes have no values
     # Preparing gene expression
     volcano$geFDR <- log10(volcano$FDR)
     volcano$geFDR2 <- volcano$geFDR
     volcano[volcano$logFC > 0, "geFDR2"] <-
         -1 * volcano[volcano$logFC > 0, "geFDR"]
 
+    # Preparing DNA methylation
     diffcol <- gsub("[[:punct:]]| ", ".",paste("diffmean",group1,group2,sep = "."))
     volcano$meFDR <- log10(volcano[,pcol])
     volcano$meFDR2 <- volcano$meFDR
@@ -1373,72 +1396,73 @@ TCGAvisualize_starburst <- function(met,
 
     # subseting by regulation (geFDR) and methylation level
     # (meFDR) down regulated up regulated lowerthr
-    # |||||||||||||||| upperthr hypomethylated hipermethylated
+    # |||||||||||||||| upperthr hypomethylated hypermethylated
     met.lowerthr <- log10(met.p.cut)
     met.upperthr <- (-met.lowerthr)
 
     exp.lowerthr <- log10(exp.p.cut)
     exp.upperthr <- (-exp.lowerthr)
+    volcano <- suppressWarnings(tibble::as.tibble(volcano))
 
     # Group 2:up regulated and hypomethylated
-    a <- subset(volcano,
-                volcano$geFDR2 > exp.upperthr &
-                    volcano$meFDR2 < met.lowerthr)
-
-    a.sig <- subset(a, abs(a[,diffcol]) > diffmean.cut &
-                        abs(a$logFC) > logFC.cut)
+    a <- dplyr::filter(volcano,
+                       volcano$geFDR2 > exp.upperthr &
+                           volcano$meFDR2 < met.lowerthr &
+                           abs(volcano[,diffcol]) > diffmean.cut &
+                           abs(volcano$logFC) > logFC.cut)
 
     # Group 3: down regulated and hypomethylated
-    b <- subset(volcano,
-                volcano$geFDR2 < exp.lowerthr &
-                    volcano$meFDR2 < met.lowerthr)
-
-    b.sig <- subset(b, abs(b[,diffcol]) > diffmean.cut &
-                        abs(b$logFC) > logFC.cut)
+    b <- dplyr::filter(volcano,
+                       volcano$geFDR2 < exp.lowerthr &
+                           volcano$meFDR2 < met.lowerthr &
+                           abs(volcano[,diffcol]) > diffmean.cut &
+                           abs(volcano$logFC) > logFC.cut)
 
     # Group 4: hypomethylated
-    c <- subset(volcano,
-                volcano$geFDR2 > exp.lowerthr &
-                    volcano$geFDR2 < exp.upperthr &
-                    volcano$meFDR2 < met.lowerthr)
+    c <- dplyr::filter(volcano,
+                       volcano$geFDR2 > exp.lowerthr &
+                           volcano$geFDR2 < exp.upperthr &
+                           volcano$meFDR2 < met.lowerthr &
+                           abs(volcano[,diffcol]) > diffmean.cut)
 
     # Group 5: hypermethylated
-    d <- subset(volcano,
-                volcano$geFDR2 > exp.lowerthr &
-                    volcano$geFDR2 < exp.upperthr &
-                    volcano$meFDR2 > met.upperthr)
+    d <- dplyr::filter(volcano,
+                       volcano$geFDR2 > exp.lowerthr &
+                           volcano$geFDR2 < exp.upperthr &
+                           volcano$meFDR2 > met.upperthr &
+                           abs(volcano[,diffcol]) > diffmean.cut)
 
     # Group 6: upregulated
-    e <- subset(volcano,
-                volcano$geFDR2 > exp.upperthr &
-                    volcano$meFDR2 < met.upperthr &
-                    volcano$meFDR2 > met.lowerthr)
+    e <- dplyr::filter(volcano,
+                       volcano$geFDR2 > exp.upperthr &
+                           volcano$meFDR2 < met.upperthr &
+                           volcano$meFDR2 > met.lowerthr &
+                           abs(volcano$logFC) > logFC.cut)
 
     # Group 7: downregulated
-    f <- subset(volcano,
-                volcano$geFDR2 < exp.lowerthr &
-                    volcano$meFDR2 < met.upperthr &
-                    volcano$meFDR2 > met.lowerthr)
+    f <- dplyr::filter(volcano,
+                       volcano$geFDR2 < exp.lowerthr &
+                           volcano$meFDR2 < met.upperthr &
+                           volcano$meFDR2 > met.lowerthr &
+                           abs(volcano$logFC) > logFC.cut)
 
     # Group 8: upregulated and hypermethylated
-    g <- subset(volcano,
-                volcano$geFDR2 > exp.upperthr &
-                    volcano$meFDR2 > met.upperthr)
-
-    g.sig <- subset(g, abs(g[,diffcol]) > diffmean.cut &
-                        abs(g$logFC) > logFC.cut)
+    g <- dplyr::filter(volcano,
+                       volcano$geFDR2 > exp.upperthr &
+                           volcano$meFDR2 > met.upperthr &
+                           abs(volcano[,diffcol]) > diffmean.cut &
+                           abs(volcano$logFC) > logFC.cut)
 
     # Group 9: downregulated and hypermethylated
-    h <- subset(volcano,
-                volcano$geFDR2 < exp.lowerthr &
-                    volcano$meFDR2 > met.upperthr)
-
-    h.sig <- subset(h, abs(h[,diffcol]) > diffmean.cut &
-                        abs(h$logFC) > logFC.cut)
+    h <- dplyr::filter(volcano,
+                       volcano$geFDR2 < exp.lowerthr &
+                           volcano$meFDR2 > met.upperthr &
+                           abs(volcano[,diffcol]) > diffmean.cut &
+                           abs(volcano$logFC) > logFC.cut)
 
     groups <- as.character(seq(2,9))
 
-    # return methylation < 0, expressao >0
+    # return methylation < 0, expression > 0
     volcano$starburst.status  <-  "Not Significant"
     volcano$shape <- "1"
     volcano$threshold.starburst <- "1"
@@ -1455,32 +1479,27 @@ TCGAvisualize_starburst <- function(met,
 
     s <- list(a, b, c, d, e, f, g, h)
     for (i in seq_along(s)) {
-        idx <- rownames(s[[i]])
+        idx <- s[[i]]$ID
         if (length(idx) > 0) {
-            volcano[idx, "threshold.starburst"] <- groups[i]
-            volcano[idx, "starburst.status"] <-  state[i]
+            volcano[volcano$ID %in% idx, "threshold.starburst"] <- groups[i]
+            volcano[volcano$ID %in% idx, "starburst.status"] <-  state[i]
         }
     }
 
-    size <- rep(2,4)
-    shape <-  as.character(rep(2,4))
-    volcano_normal <- volcano
+    s <- list(a, b,g, h)
     significant <- NULL
-    s <- list(a.sig,b.sig,g.sig,h.sig)
     for (i in seq_along(s)) {
-        idx <- rownames(s[[i]])
+        idx <- s[[i]]$ID
         if (length(idx) > 0) {
-            volcano[idx, "threshold.size"] <- size[i]
-            volcano[idx, "shape"] <-  shape[i]
-            significant <-  rbind(significant,volcano[idx,])
+            significant <-  rbind(significant,volcano[volcano$ID %in% idx,])
         }
     }
-
+    message("o Plotting figure")
     ## starburst plot
-    p <- ggplot(data = volcano_normal, environment = .e,
-                aes(x = volcano_normal$meFDR2,
-                    y = volcano_normal$geFDR2,
-                    colour = volcano_normal$threshold.starburst)) +
+    p <- ggplot(data = volcano, environment = .e,
+                aes(x = volcano$meFDR2,
+                    y = volcano$geFDR2,
+                    colour = volcano$threshold.starburst)) +
         geom_point()
     #p <- p + scale_shape_discrete(
     #    labels = c("Candidate Biologically Significant"),
@@ -1497,22 +1516,28 @@ TCGAvisualize_starburst <- function(met,
     }
 
     if(names == TRUE & !is.null(significant)){
-        message("Adding names to genes")
+        message("oo Adding names to genes")
         if(names.fill){
             p <- p + geom_label_repel(
                 data = significant,
-                aes(x = significant$meFDR2, y =  significant$geFDR2,
-                    label = significant$Gene_symbol, fill = as.factor(significant$starburst.status)),
-                size = 4, show.legend = FALSE,
-                fontface = 'bold', color = 'white',
+                aes(x = significant$meFDR2,
+                    y =  significant$geFDR2,
+                    label = map.ensg(genome,significant$ensembl_gene_id)$external_gene_name,
+                    fill = as.factor(significant$starburst.status)),
+                size = 4,
+                show.legend = FALSE,
+                fontface = 'bold',
+                color = 'white',
                 box.padding = unit(0.35, "lines"),
                 point.padding = unit(0.3, "lines")
             ) + scale_fill_manual(values=names.color)
         }  else {
             p <- p + geom_text_repel(
                 data = significant,
-                aes(x = significant$meFDR2, y =  significant$geFDR2,
-                    label = significant$Gene_symbol, fill = significant$starburst.status),
+                aes(x = significant$meFDR2,
+                    y =  significant$geFDR2,
+                    label = map.ensg(genome,significant$ensembl_gene_id)$external_gene_name,
+                    fill = significant$starburst.status),
                 size = 4, show.legend = FALSE,
                 fontface = 'bold', color = 'black',
                 point.padding = unit(0.3, "lines"),
@@ -1576,19 +1601,125 @@ TCGAvisualize_starburst <- function(met,
     volcano$threshold.starburst <- NULL
     volcano$threshold.size <- NULL
 
-    volcano <- subset(volcano, volcano$geFDR <= exp.lowerthr &
+    volcano <- dplyr::filter(volcano, volcano$geFDR <= exp.lowerthr &
                           volcano$meFDR <= met.lowerthr)
 
     if (diffmean.cut != 0) {
-        volcano <- subset(volcano, abs(volcano[,diffcol]) > diffmean.cut)
+        volcano <- dplyr::filter(volcano, abs(volcano[,diffcol]) > diffmean.cut)
     }
     if (logFC.cut != 0){
-        volcano <- subset(volcano, abs(volcano$logFC) >= logFC.cut)
+        volcano <- dplyr::filter(volcano, abs(volcano$logFC) >= logFC.cut)
     }
+
+    message("o Saving results")
+    message("oo Saving significant results as: starburst_results.csv")
+    message("oo It contains pair with changes both in the expression level of the nearest gene and  in the DNA methylation level")
+    suppressWarnings(write_csv(x = volcano,path = "starburst_results.csv"))
 
     if(return.plot) {
         return(list(plot=p,starburst=volcano))
     }
 
     return(volcano)
+}
+
+
+getMetPlatInfo <- function(genome, platform) {
+    base <- "http://zwdzwd.io/InfiniumAnnotation/current"
+
+    platform <-  switch(platform,
+                        "450K" = "hm450",
+                        "450k" = "hm450",
+                        "27k"  = "hm27",
+                        "27K"  = "hm27",
+                        "EPIC" = "EPIC")
+    path <- file.path(base,platform,paste(platform,"manifest.rda", sep ="."))
+    if (grepl("hg38", genome)) path <- gsub(".rda",".hg38.rda",path)
+    message(path)
+    if(!file.exists(basename(path))) downloader::download(path,basename(path))
+    gr <- get(load(basename(path)))
+    return(gr)
+}
+
+
+#' getTSS to fetch GENCODE gene annotation (transcripts level) from Bioconductor package biomaRt
+#' If upstream and downstream are specified in TSS list, promoter regions of GENCODE gene will be generated.
+#' @description
+#' getTSS to fetch GENCODE gene annotation (transcripts level) from Bioconductor package biomaRt
+#' If upstream and downstream are specified in TSS list, promoter regions of GENCODE gene will be generated.
+#' @param TSS A list. Contains upstream and downstream like TSS=list(upstream, downstream).
+#'  When upstream and downstream is specified, coordinates of promoter regions with gene annotation will be generated.
+#' @param genome Which genome build will be used: hg38 (default) or hg19.
+#' @return GENCODE gene annotation if TSS is not specified. Coordinates of GENCODE gene promoter regions if TSS is specified.
+#' @examples
+#' # get GENCODE gene annotation (transcripts level)
+#' \dontrun{
+#'     getTSS <- getTSS()
+#'     getTSS <- getTSS(genome.build = "hg38", TSS=list(upstream=1000, downstream=1000))
+#' }
+#' @export
+#' @import GenomeInfoDb
+#' @importFrom GenomicFeatures transcripts
+#' @importFrom GenomicRanges makeGRangesFromDataFrame
+#' @importFrom biomaRt useEnsembl
+getTSS <- function(genome = "hg38",
+                   TSS = list(upstream = NULL, downstream = NULL)){
+    if (genome == "hg19"){
+        # for hg19
+        ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
+                           host = "feb2014.archive.ensembl.org",
+                           path = "/biomart/martservice" ,
+                           dataset = "hsapiens_gene_ensembl")
+        attributes <- c("chromosome_name",
+                        "start_position",
+                        "end_position",
+                        "strand",
+                        "transcript_start",
+                        "transcript_end",
+                        "ensembl_transcript_id",
+                        "ensembl_gene_id", "entrezgene",
+                        "external_gene_id")
+    } else {
+        # for hg38
+        ensembl <- tryCatch({
+            useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl",
+                       mirror = "useast")
+        },  error = function(e) {
+            useEnsembl("ensembl",
+                       dataset = "hsapiens_gene_ensembl",
+                       mirror = "uswest")
+        })
+        attributes <- c("chromosome_name",
+                        "start_position",
+                        "end_position", "strand",
+                        "ensembl_gene_id",
+                        "transcription_start_site",
+                        "transcript_start",
+                        "ensembl_transcript_id",
+                        "transcript_end",
+                        "external_gene_name")
+    }
+    chrom <- c(1:22, "X", "Y","M","*")
+    db.datasets <- listDatasets(ensembl)
+    description <- db.datasets[db.datasets$dataset=="hsapiens_gene_ensembl",]$description
+    message(paste0("Downloading transcripts information. Using: ", description))
+
+    filename <-  paste0(gsub("[[:punct:]]| ", "_",description),"_tss.rda")
+    if(!file.exists(filename)) {
+        tss <- getBM(attributes = attributes, filters = c("chromosome_name"), values = list(chrom), mart = ensembl)
+        tss <- tss[!duplicated(tss$ensembl_transcript_id),]
+        save(tss, file = filename)
+    } else {
+        tss <- get(load(filename))
+    }
+    if(genome == "hg19") tss$external_gene_name <- tss$external_gene_id
+    tss$chromosome_name <-  paste0("chr", tss$chromosome_name)
+    tss$strand[tss$strand == 1] <- "+"
+    tss$strand[tss$strand == -1] <- "-"
+    tss <- makeGRangesFromDataFrame(tss,start.field = "transcript_start", end.field = "transcript_end", keep.extra.columns = TRUE)
+
+    if(!is.null(TSS$upstream) & !is.null(TSS$downstream))
+        tss <- promoters(tss, upstream = TSS$upstream, downstream = TSS$downstream)
+
+    return(tss)
 }
