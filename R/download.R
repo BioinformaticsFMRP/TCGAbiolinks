@@ -70,14 +70,7 @@ GDCdownload <- function(query,
         path <- file.path(directory, path)
 
         # Check if the files were already downloaded by this package
-
-        files2Download <- !file.exists(file.path(path,manifest$id,manifest$filename))
-        if(any(files2Download == FALSE)) {
-            message("Of the ", nrow(manifest), " files for download ",
-                    table(files2Download)["FALSE"] , " already exist.")
-            if(any(files2Download == TRUE)) message("We will download only those that are missing ones.")
-        }
-        manifest <- manifest[files2Download,]
+        manifest <- checkAlreadyDownloaded(path,manifest)
 
         # There is a bug in the API, if the files has the same name it will not download correctly
         # so method should be set to client if there are files with duplicated names
@@ -138,6 +131,7 @@ GDCdownload <- function(query,
                 }, error = function(e) {
                     message("Download failed. We will retry with smaller chunks")
                     # split in groups of 100 MB
+                    manifest <- checkAlreadyDownloaded(path,manifest)
                     step <- ceiling(100000000/manifest$size[1])
                     if(step == 0) step <- 1
                     GDCdownload.by.chunk(server, manifest, name, path, step)
@@ -149,6 +143,7 @@ GDCdownload <- function(query,
                     GDCdownload.by.chunk(server, manifest, name, path, step)
                 }, error = function(e) {
                     message("At least one of the chunks download was not correct. We will retry")
+                    manifest <- checkAlreadyDownloaded(path,manifest)
                     GDCdownload.by.chunk(server, manifest, name, path, step)
                 })
             }
@@ -264,3 +259,12 @@ GDCclientInstall <- function(){
     return(GDCclientPath())
 }
 
+checkAlreadyDownloaded <- function(path,manifest){
+    files2Download <- !file.exists(file.path(path,manifest$id,manifest$filename))
+    if(any(files2Download == FALSE)) {
+        message("Of the ", nrow(manifest), " files for download ",
+                table(files2Download)["FALSE"] , " already exist.")
+        if(any(files2Download == TRUE)) message("We will download only those that are missing ones.")
+    }
+    return(manifest[files2Download,])
+}
