@@ -54,12 +54,12 @@ checkProjectInput <- function(project){
     projects <- getGDCprojects()
     if(missing(project)) {
         print(knitr::kable(projects[,c(4:6,8)]))
-        stop("Please set a project argument from the column project_id above")
+        stop("Please set a project argument from the column id above")
     }
     for(proj in project)
         if(!(proj %in% projects$project_id)) {
             print(knitr::kable(projects[,c(4:6,8)]))
-            stop("Please set a valid project argument from the column project_id above. Project ", proj, " was not found.")
+            stop("Please set a valid project argument from the column id above. Project ", proj, " was not found.")
         }
 }
 
