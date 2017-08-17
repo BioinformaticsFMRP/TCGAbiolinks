@@ -58,6 +58,8 @@ Imports:
     RColorBrewer,
     doParallel,
     dplyr,
+    GenomeInfoDb,
+    GenomicFeatures,
     parallel,
     tools,
     xml2,
