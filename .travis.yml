@@ -72,7 +72,7 @@ after_script:
   - Rscript -e "library(BiocCheck); BiocCheck(\"${FILE}\")
 
 after_success:
-  -  Rscript -e 'library(covr);codecov()'
+  -  travis_wait Rscript -e 'library(covr);codecov()'
 
 r_build_args: --no-build-vignettes --no-manual --no-resave-data
 r_check_args: --no-build-vignettes --no-manual
