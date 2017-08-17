@@ -6,11 +6,12 @@
 \usage{
 TCGAvisualize_starburst(met, exp, group1 = NULL, group2 = NULL,
   exp.p.cut = 0.01, met.p.cut = 0.01, diffmean.cut = 0, logFC.cut = 0,
-  names = FALSE, names.fill = TRUE, circle = TRUE,
-  filename = "starburst.pdf", return.plot = FALSE,
-  ylab = expression(atop("Gene Expression", paste(Log[10],
-  " (FDR corrected P values)"))), xlab = expression(atop("DNA Methylation",
-  paste(Log[10], " (FDR corrected P values)"))), title = "Starburst Plot",
+  met.platform = "450K", genome = "hg38", names = FALSE,
+  names.fill = TRUE, circle = TRUE, filename = "starburst.pdf",
+  return.plot = FALSE, ylab = expression(atop("Gene Expression",
+  paste(Log[10], " (FDR corrected P values)"))),
+  xlab = expression(atop("DNA Methylation", paste(Log[10],
+  " (FDR corrected P values)"))), title = "Starburst Plot",
   legend = "DNA Methylation/Expression Relation", color = NULL,
   label = c("Not Significant", "Up regulated & Hypo methylated",
   "Down regulated & Hypo methylated", "hypo methylated", "hyper methylated",
@@ -100,37 +101,43 @@ Input: data with gene expression/methylation expression
 }
 \examples{
 library(SummarizedExperiment)
-nrows <- 20000; ncols <- 20
+met <- getMetPlatInfo(genome = "hg38",platform = "27K")
+values(met) <- NULL
+met$probeID <- names(met)
+nrows <- length(met); ncols <- 20
 counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
-ranges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(5000, 15000)),
-                   IRanges::IRanges(floor(runif(20000, 1e5, 1e6)), width=100),
-                    strand=sample(c("+", "-"), 20000, TRUE),
-                    probeID=sprintf("ID\%03d", 1:20000),
-                    Gene_Symbol=sprintf("ID\%03d", 1:20000))
 colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
                     row.names=LETTERS[1:20],
                     group=rep(c("group1","group2"),c(10,10)))
-data <- SummarizedExperiment::SummarizedExperiment(
+met <- SummarizedExperiment::SummarizedExperiment(
          assays=S4Vectors::SimpleList(counts=counts),
-         rowRanges=ranges,
+         rowRanges=met,
          colData=colData)
-met <- data
-exp <- data.frame(row.names=sprintf("ID\%03d", 1:20000),
-                  logFC=runif(20000, -5, 5),
-                  FDR=runif(20000, 0.01, 1))
-rowRanges(met)$diffmean.g1.g2 <- c(runif(20000, -0.1, 0.1))
+rowRanges(met)$diffmean.g1.g2 <- c(runif(nrows, -0.1, 0.1))
 rowRanges(met)$diffmean.g2.g1 <- -1*(rowRanges(met)$diffmean.g1.g2)
-rowRanges(met)$p.value.g1.g2 <- c(runif(20000, 0, 1))
-rowRanges(met)$p.value.adj.g1.g2 <- c(runif(20000, 0, 1))
-result <- TCGAvisualize_starburst(met,exp,
-                                  exp.p.cut = 0.05, met.p.cut = 0.05,
-                                  group1="g1",group2="g2",
-                                  diffmean.cut=0.0,
-                                  names=TRUE, circle = FALSE)
+rowRanges(met)$p.value.g1.g2 <- c(runif(nrows, 0, 1))
+rowRanges(met)$p.value.adj.g1.g2 <- c(runif(nrows, 0, 1))
+exp <- get.GRCh.bioMart("hg38")
+exp$logFC <- runif(nrow(exp), -5, 5)
+exp$FDR <- runif(nrow(exp), 0.01, 1)
+result <- TCGAvisualize_starburst(met,
+                                  exp,
+                                  exp.p.cut = 0.05,
+                                  met.p.cut = 0.05,
+                                  group1 = "g1",
+                                  group2 = "g2",
+                                  genome = "hg38",
+                                  met.platform = "27K",
+                                  diffmean.cut = 0.0,
+                                  names  = TRUE,
+                                  circle = FALSE)
 result <- TCGAvisualize_starburst(SummarizedExperiment::values(met),
                                   exp,
-                                  exp.p.cut = 0.05, met.p.cut = 0.05,
-                                  group1="g1",group2="g2",
-                                  diffmean.cut=0.0,
-                                  names=TRUE, circle = FALSE)
+                                  exp.p.cut = 0.05,
+                                  met.p.cut = 0.05,
+                                  group1 = "g1",
+                                  group2 = "g2",
+                                  diffmean.cut = 0.0,
+                                  names  = TRUE,
+                                  circle = FALSE)
 }
