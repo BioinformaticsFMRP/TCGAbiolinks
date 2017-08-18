@@ -1365,7 +1365,7 @@ TCGAvisualize_starburst <- function(met,
 
 
     # Check if gene symbol columns exists
-    if(!any(grepl("ensembl_gene_id",colnames(exp),ignore.case = FALSE))) {
+    if(!"ensembl_gene_id" %in% colnames(exp)) {
         stop("Column ensembl_gene_id was not found")
     }
 
@@ -1514,11 +1514,12 @@ TCGAvisualize_starburst <- function(met,
         }
     }
     message("o Plotting figure")
+    volcano.aux <- volcano # we need an auxiliry data if dats is returned
     ## starburst plot
-    p <- ggplot(data = volcano, environment = .e,
-                aes(x = volcano$meFDR2,
-                    y = volcano$geFDR2,
-                    colour = volcano$threshold.starburst)) +
+    p <- ggplot(data = volcano.aux, environment = .e,
+                aes(x = volcano.aux$meFDR2,
+                    y = volcano.aux$geFDR2,
+                    colour = volcano.aux$threshold.starburst)) +
         geom_point()
     #p <- p + scale_shape_discrete(
     #    labels = c("Candidate Biologically Significant"),
