@@ -6,12 +6,11 @@
 \usage{
 TCGAvisualize_starburst(met, exp, group1 = NULL, group2 = NULL,
   exp.p.cut = 0.01, met.p.cut = 0.01, diffmean.cut = 0, logFC.cut = 0,
-  met.platform = "450K", genome = "hg38", names = FALSE,
-  names.fill = TRUE, circle = TRUE, filename = "starburst.pdf",
-  return.plot = FALSE, ylab = expression(atop("Gene Expression",
-  paste(Log[10], " (FDR corrected P values)"))),
-  xlab = expression(atop("DNA Methylation", paste(Log[10],
-  " (FDR corrected P values)"))), title = "Starburst Plot",
+  met.platform, genome, names = FALSE, names.fill = TRUE, circle = TRUE,
+  filename = "starburst.pdf", return.plot = FALSE,
+  ylab = expression(atop("Gene Expression", paste(Log[10],
+  " (FDR corrected P values)"))), xlab = expression(atop("DNA Methylation",
+  paste(Log[10], " (FDR corrected P values)"))), title = "Starburst Plot",
   legend = "DNA Methylation/Expression Relation", color = NULL,
   label = c("Not Significant", "Up regulated & Hypo methylated",
   "Down regulated & Hypo methylated", "hypo methylated", "hyper methylated",
@@ -117,7 +116,7 @@ rowRanges(met)$diffmean.g1.g2 <- c(runif(nrows, -0.1, 0.1))
 rowRanges(met)$diffmean.g2.g1 <- -1*(rowRanges(met)$diffmean.g1.g2)
 rowRanges(met)$p.value.g1.g2 <- c(runif(nrows, 0, 1))
 rowRanges(met)$p.value.adj.g1.g2 <- c(runif(nrows, 0, 1))
-exp <- get.GRCh.bioMart("hg38")
+exp <- TCGAiolinks:::get.GRCh.bioMart("hg38")
 exp$logFC <- runif(nrow(exp), -5, 5)
 exp$FDR <- runif(nrow(exp), 0.01, 1)
 result <- TCGAvisualize_starburst(met,
@@ -131,12 +130,15 @@ result <- TCGAvisualize_starburst(met,
                                   diffmean.cut = 0.0,
                                   names  = TRUE,
                                   circle = FALSE)
+# It can also receive a data frame as input
 result <- TCGAvisualize_starburst(SummarizedExperiment::values(met),
                                   exp,
                                   exp.p.cut = 0.05,
                                   met.p.cut = 0.05,
                                   group1 = "g1",
                                   group2 = "g2",
+                                  genome = "hg38",
+                                  met.platform = "27K",
                                   diffmean.cut = 0.0,
                                   names  = TRUE,
                                   circle = FALSE)
