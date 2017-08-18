@@ -1242,7 +1242,7 @@ TCGAanalyze_DMR <- function(data,
 #' rowRanges(met)$diffmean.g2.g1 <- -1*(rowRanges(met)$diffmean.g1.g2)
 #' rowRanges(met)$p.value.g1.g2 <- c(runif(nrows, 0, 1))
 #' rowRanges(met)$p.value.adj.g1.g2 <- c(runif(nrows, 0, 1))
-#' exp <- TCGAiolinks:::get.GRCh.bioMart("hg38")
+#' exp <- TCGAbiolinks:::get.GRCh.bioMart("hg38")
 #' exp$logFC <- runif(nrow(exp), -5, 5)
 #' exp$FDR <- runif(nrow(exp), 0.01, 1)
 #' result <- TCGAvisualize_starburst(met,
