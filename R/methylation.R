@@ -1351,7 +1351,7 @@ TCGAvisualize_starburst <- function(met,
         } else {
             # We will consider our rownames has the gene symbol
             gene.info <- get.GRCh.bioMart(genome)
-            if(any(sapply(rownames(exp), function(y) any(grepl(y,gene.info$external_gene_name))))) {
+            if(any(sapply(rownames(exp)[1:10], function(y) any(grepl(y,gene.info[,grep("external_gene_", colnames(gene.info))]))))) {
                 idx <- match(rownames(exp),gene.info[,grep("external_gene_", colnames(gene.info))])
                 exp <- exp[!is.na(idx),]
                 idx <- match(rownames(exp),gene.info[,grep("external_gene_", colnames(gene.info))])
