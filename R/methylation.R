@@ -1256,12 +1256,15 @@ TCGAanalyze_DMR <- function(data,
 #'                                   diffmean.cut = 0.0,
 #'                                   names  = TRUE,
 #'                                   circle = FALSE)
+#' # It can also receive a data frame as input
 #' result <- TCGAvisualize_starburst(SummarizedExperiment::values(met),
 #'                                   exp,
 #'                                   exp.p.cut = 0.05,
 #'                                   met.p.cut = 0.05,
 #'                                   group1 = "g1",
 #'                                   group2 = "g2",
+#'                                   genome = "hg38",
+#'                                   met.platform = "27K",
 #'                                   diffmean.cut = 0.0,
 #'                                   names  = TRUE,
 #'                                   circle = FALSE)
@@ -1273,8 +1276,8 @@ TCGAvisualize_starburst <- function(met,
                                     met.p.cut = 0.01,
                                     diffmean.cut = 0,
                                     logFC.cut = 0,
-                                    met.platform = "450K",
-                                    genome = "hg38",
+                                    met.platform,
+                                    genome,
                                     names = FALSE,
                                     names.fill = TRUE,
                                     circle = TRUE,
@@ -1304,6 +1307,9 @@ TCGAvisualize_starburst <- function(met,
                                     dpi = 600
 )
 {
+    if(missing(genome)) stop("Please set genome (hg19 or hg38)")
+    if(missing(met.platform)) stop("Please set met.platform (EPIC, 450K or 27K)")
+
     .e <- environment()
 
     group1.col <- gsub("[[:punct:]]| ", ".",group1)
@@ -1337,11 +1343,24 @@ TCGAvisualize_starburst <- function(met,
 
     # Methylation matrix and expression matrix should have the same name column for merge
     idx <- grep("ENGS",exp[1,])
-    colnames(exp)[idx] <- "ensembl_gene_id"
+    if(length(idx) > 0) {
+        colnames(exp)[idx] <- "ensembl_gene_id"
+    } else { # it is in the row names ?
+        if(grepl("ENSG",rownames(exp)[1])) {
+            exp$ensembl_gene_id <- rownames(exp)
+        } else {
+            # We will consider our rownames has the gene symbol
+            gene.info <- get.GRCh.bioMart(genome)
+            if(any(sapply(rownames(exp), function(y) any(grepl(y,gene.info$external_gene_name))))) {
+                idx <- match(rownames(exp),gene.info[,grep("external_gene_", colnames(gene.info))])
+                exp <- exp[!is.na(idx),]
+                idx <- match(rownames(exp),gene.info[,grep("external_gene_", colnames(gene.info))])
+                exp$ensembl_gene_id <- gene.info[idx,"ensembl_gene_id"]
+            }
+        }
 
-    if(!"ensembl_gene_id" %in% colnames(exp)) {
-        exp$ensembl_gene_id <- rownames(exp)
     }
+
     if(!"probeID" %in% colnames(met))  met$probeID <- met$Composite.Element.REF
 
 
@@ -1602,7 +1621,7 @@ TCGAvisualize_starburst <- function(met,
     volcano$threshold.size <- NULL
 
     volcano <- dplyr::filter(volcano, volcano$geFDR <= exp.lowerthr &
-                          volcano$meFDR <= met.lowerthr)
+                                 volcano$meFDR <= met.lowerthr)
 
     if (diffmean.cut != 0) {
         volcano <- dplyr::filter(volcano, abs(volcano[,diffcol]) > diffmean.cut)
