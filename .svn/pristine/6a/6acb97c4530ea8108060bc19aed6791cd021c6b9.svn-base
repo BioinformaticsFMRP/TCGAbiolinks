@@ -1,0 +1,141 @@
+CHANGES IN VERSION 2.2.0
+-------------------------
+
+NEW FEATURES
+    o Add GISTIC2 information and Mutation information in the summarizedExperiment while preparing GDC data
+
+SIGNIFICANT USER-LEVEL CHANGES
+    o Speed up GDCquery
+
+TCGAbiolinks 2.0
+---------------------------------------------------------------
+* GDC functions added (GDCquery, GDCdownload, GDCprepare,
+GDCquery_Maf, GDCprepare_clinic)
+* Removed TCGAquery_investigate, TCGAprofile_plot
+
+TCGAbiolinks 1.3.6
+---------------------------------------------------------------
+* Starting to move the code to GDC data portal
+
+TCGAbiolinks 1.1.26
+---------------------------------------------------------------
+* Bug fix: TCGAprepare for  IlluminaHiSeq_miRNASeq platform was
+not considering all file types
+
+TCGAbiolinks 1.1.26
+---------------------------------------------------------------
+* Bug fix: TCGAprepare for  IlluminaHiSeq_miRNASeq platform was
+not considering all file types
+
+TCGAbiolinks 1.1.25
+---------------------------------------------------------------
+* Bug fix: TCGAquery_maf had a bug if only one table was found.
+TCGAbiolinks 1.1.24
+---------------------------------------------------------------
+* Bug fix: types argument for Genome_Wide_SNP_6 was not working.
+
+TCGAbiolinks 1.1.23
+---------------------------------------------------------------
+* Bug fix: logFC result from TCGAanalyze_DEA for method "glmLRT" was
+considerent the alphabetical order of groups, which migth induce the user to error
+
+TCGAbiolinks 1.1.22
+---------------------------------------------------------------
+* Bug fix: when  checking the data integrity, manifest was being read
+with argument header = T,but it should be false.
+
+
+TCGAbiolinks 1.1.21
+---------------------------------------------------------------
+* Improvement: TCGADownload checks for data integrity.
+
+TCGAbiolinks 1.1.20
+---------------------------------------------------------------
+* Bug fix: TCGAanalyze_Preprocessing subseting was incorrect in case there
+were outliers.
+
+TCGAbiolinks 1.1.19
+---------------------------------------------------------------
+* Bug fix: preparing the data for "IlluminaGA_DNASeq" platform and
+TCGAquery_maf had a problem for some files.
+
+TCGAbiolinks 1.1.18
+---------------------------------------------------------------
+* Update lgg and gbm subtype information. Source: http://dx.doi.org/10.1016/j.cell.2015.12.028
+
+TCGAbiolinks 1.1.17
+---------------------------------------------------------------
+* Adding batch information to the package. batch.info object is available for user
+and TCGAprepare adds automtically info for the summarizedExperiment object
+* TCGAvisualize_starburst new parameter: circle, to draw or not the circles in the plot
+* Database update
+
+TCGAbiolinks 1.1.16
+---------------------------------------------------------------
+* Bug fix: subsetByOverlaps was removed from SummarizedExperiment package
+TCGAbiolinks should not import it
+* Small fixes in documentation
+* TCGAanalyze_DMR is now saving the results in a cvs file
+
+
+TCGAbiolinks 1.1.15
+---------------------------------------------------------------
+* ggplot2 updat broke the package. Some small fixes were made, but
+the function TCGAvisualize_profilePlot is not working as sjPlot is not updated yet.
+* small fixes in documentation
+
+TCGAbiolinks 1.1.14
+---------------------------------------------------------------
+* Change in TCGAvisualize_Heatmap: coloring the columns by patient might give
+wrong results if patient has more than one sample in the hetamap.
+To solve that we added the possibility to use the sample columns and we added a warning
+if there is more than one sample for the patients and a patient column is being used.
+
+TCGAbiolinks 1.1.11 - 1.1.13
+---------------------------------------------------------------
+* Update in the citation
+
+TCGAbiolinks 1.1.10
+----------------------------------------------------------------
+* TCGAPrepare: bug fix for bt.exon_quantification files from IlluminaHiSeq_RNASeqV2 platform
+* Database update
+
+  TCGAbiolinks 1.1.8
+----------------------------------------------------------------
+* TCGAvisualize_Heatmap Now it is using Heatmap plus package and is calculating z-cores
+* TCGAvisualize_profilePlot  Visualize the distribution of subgroups in the groups distributions
+* Database update
+* From version 1.0: small bugs corrections in some plots and TCGAprepare_elmer, documentation improvement.
+
+  TCGAbiolinks 0.99.2
+----------------------------------------------------------------
+  FIRST VERSION - FEATURES
+
+* TCGAanalyze_DEA	Differentially expression analysis (DEA) using edgeR package.
+* TCGAanalyze_DMR	Differentially methylated regions Analysis
+* TCGAanalyze_EA	Enrichment analysis of a gene-set with GO [BP,MF,CC] and pathways.
+* TCGAanalyze_EAcomplete	Enrichment analysis for Gene Ontology (GO) [BP,MF,CC] and Pathways
+* TCGAanalyze_Filtering	Filtering mRNA transcripts and miRNA selecting a threshold.
+* TCGAanalyze_LevelTab	Adding information related to DEGs genes from DEA as mean values in two conditions.
+* TCGAanalyze_Normalization	normalization mRNA transcripts and miRNA using EDASeq package.
+* TCGAanalyze_Preprocessing	Array Array Intensity correlation (AAIC) and correlation boxplot to define outlier
+* TCGAanalyze_survival	Creates survival analysis
+* TCGAanalyze_SurvivalKM	survival analysis (SA) univariate with Kaplan-Meier (KM) method.
+* TCGAbiolinks	Download data of samples from * TCGA
+* TCGAdownload	Download the data from * TCGA using as reference the output from * TCGAquery
+* TCGAintegrate	Filtering common samples among platforms from * TCGAquery for the same tumor
+* TCGAinvestigate	Find most studied TF in pubmed related to a specific cancer, disease, or tissue
+* TCGAprepare	Read the data from level 3 the experiments and prepare it for downstream analysis into a SummarizedExperiment object.
+* TCGAquery	Searches * TCGA open-access data providing also latest version of the files.
+* TCGAquery_clinic	Get the clinical information
+* TCGAquery_clinicFilt	Filter samples using clinical data
+* TCGAquery_MatchedCoupledSampleTypes	Retrieve multiple tissue types from the same patients.
+* TCGAquery_samplesfilter	Filtering sample output from * TCGAquery
+* TCGAquery_SampleTypes	Retrieve multiple tissue types not from the same patients.
+* TCGAquery_Version	Shows a summary (version, date, number of samples, size of the data) of all versions of data for a given tumor and platform.
+* TCGAsocial	Finds the number of downloads of a package on CRAN or BIOC and find questions in website ("bioconductor.org", "biostars.org", "stackoverflow).
+* TCGAvisualize_EAbarplot	barPlot for a complete Enrichment Analysis
+* TCGAvisualize_meanMethylation	Mean methylation boxplot
+* TCGAvisualize_PCA	Principal components analysis (PCA) plot
+* TCGAvisualize_starburst	Create starburst plot
+* TCGAvisualize_SurvivalCoxNET	Survival analysis with univariate Cox regression package (dnet)
