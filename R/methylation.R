@@ -1188,6 +1188,8 @@ TCGAanalyze_DMR <- function(data,
 #' Execute volcanoPlot function in order to obtain these values for the object.
 #' @param exp Object obtained by DEArnaSEQ function
 #' @param filename The filename of the file (it can be pdf, svg, png, etc)
+#' @param met.platform DNA methylation platform ("27K","450K" or "EPIC")
+#' @param genome Genome of reference ("hg38" or "hg19") used to identify nearest probes TSS
 #' @param legend legend title
 #' @param color vector of colors to be used in graph
 #' @param label vector of labels to be used in graph
