@@ -1341,8 +1341,11 @@ TCGAvisualize_starburst <- function(met,
         stop("Error! p-values adjusted not found. Please, run TCGAanalyze_DMR")
     }
 
+    # Transform factor coluns to characters
+    fctr.cols <- sapply(exp, is.factor)
+    exp[, fctr.cols] <- sapply(exp[, fctr.cols], as.character)
     # Methylation matrix and expression matrix should have the same name column for merge
-    idx <- grep("ENGS",exp[1,])
+    idx <- grep("ENSG",exp[1,])
     if(length(idx) > 0) {
         colnames(exp)[idx] <- "ensembl_gene_id"
     } else { # it is in the row names ?
