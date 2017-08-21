@@ -65,7 +65,39 @@ datatable(clinical, filter = 'top',
 
 # Parse XML clinical data
 
-In this example we will fetch clinical data directly from the clinical XML files.
+The process to get data directly from the XML are:
+1. Use `GDCquery` and `GDCDownload` functions to search/download either biospecimen or clinical XML files
+2. Use `GDCprepare_clinic` function to parse the XML files.
+
+The relation between one patient and other clinical information are 1:n, 
+one patient could have several radiation treatments. For that reason, we only give the option
+to parse individual tables (only drug information, only radiation informtaion,...)
+The selection of the tabel is done by the argument `clinical.info`.
+
+<div class="panel panel-info">
+<div class="panel-heading">clinical.info options to parse information for each data category </div>
+<div class="panel-body">
+| data.category | clinical.info |
+|------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Clinical | drug |
+| Clinical | admin |
+| Clinical | follow_up |
+| Clinical | radiation |
+| Clinical | patient |
+| Clinical | stage_event |
+| Clinical | new_tumor_event |
+| Biospecimen | sample |
+| Biospecimen | bio_patient |
+| Biospecimen | analyte |
+| Biospecimen | aliquot |
+| Biospecimen | protocol |
+| Biospecimen | portion |
+| Biospecimen | slide |
+| Other | msi |
+</div>
+</div>
+
+Below are several examples fetching clinical data directly from the clinical XML files.
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
 query <- GDCquery(project = "TCGA-COAD", 
