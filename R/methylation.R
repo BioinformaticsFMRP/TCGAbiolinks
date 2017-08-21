@@ -1677,7 +1677,6 @@ getMetPlatInfo <- function(genome, platform) {
 #'     getTSS <- getTSS()
 #'     getTSS <- getTSS(genome.build = "hg38", TSS=list(upstream=1000, downstream=1000))
 #' }
-#' @export
 #' @import GenomeInfoDb
 #' @importFrom GenomicFeatures transcripts
 #' @importFrom GenomicRanges makeGRangesFromDataFrame
