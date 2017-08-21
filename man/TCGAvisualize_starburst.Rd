@@ -43,6 +43,10 @@ than methylation cut-off will be
 change higher than methylation cut-off will be
  highlighted in the plot. And the data frame return will be subseted.}
 
+\item{met.platform}{DNA methylation platform ("27K","450K" or "EPIC")}
+
+\item{genome}{Genome of reference ("hg38" or "hg19") used to identify nearest probes TSS}
+
 \item{names}{Add the names of the significant genes? Default: FALSE}
 
 \item{names.fill}{Names should be filled in a color box?  Default: TRUE}
