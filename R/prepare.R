@@ -102,6 +102,7 @@ GDCprepare <- function(query,
             suppressWarnings(data <- readSimpleNucleotideVariationMaf(files))
     }  else if(grepl("Clinical|Biospecimen", query$data.category, ignore.case = TRUE)){
         data <- readClinical(files, query$data.type, query$results[[1]]$cases)
+        summarizedExperiment <- FALSE
     } else if (grepl("Gene expression",query$data.category,ignore.case = TRUE)) {
         if(query$data.type == "Gene expression quantification")
             data <- readGeneExpressionQuantification(files = files,
