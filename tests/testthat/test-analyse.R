@@ -177,9 +177,10 @@ test_that("Results from TCGAanalyze_DEA and DMR in starburst plot are correct", 
     #   -3    0.00001
     exp <- data.frame(logFC = c(2,2,-3,-3),
                       FDR = c(0.00001,0.1,0.00001,0.1),
-                      ensembl_gene_id = c("ENSG00000273768","ENSG00000200975","ENSG00000200591","ENSG00000202444"))
+                      ensembl_gene_id = c("ENSG00000176261","ENSG00000200975","ENSG00000200591","ENSG00000202444"), stringsAsFactors = F)
 
-    result.no.cut <- TCGAvisualize_starburst(met,exp,
+    result.no.cut <- TCGAvisualize_starburst(met,
+                                             exp,
                                              exp.p.cut = 1,
                                              met.p.cut = 1,
                                              group1 = "group1",
@@ -191,8 +192,10 @@ test_that("Results from TCGAanalyze_DEA and DMR in starburst plot are correct", 
                                              names = TRUE, circle = FALSE,
                                              return.plot = TRUE)$starburst
 
-    result.fdr.cut <- TCGAvisualize_starburst(met,exp,
-                                              exp.p.cut = 0.05, met.p.cut = 0.05,
+    result.fdr.cut <- TCGAvisualize_starburst(met,
+                                              exp,
+                                              exp.p.cut = 0.05,
+                                              met.p.cut = 0.05,
                                               group1 = "group1",
                                               group2 = "group2",
                                               diffmean.cut = 0.0,
@@ -235,8 +238,8 @@ test_that("Results from TCGAanalyze_DEA and DMR in starburst plot are correct", 
     # group1 vs groups2 (logFC = log(group2) - log(group1), diffmean = group2 - group1 )
     expect_true(result.met.exp.cut$starburst.status == "Down regulated & Hyper methylated" &
                     result.met.exp.cut$logFC < 0 & result.met.exp.cut$diffmean.group1.group2 > 0)
-    expect_true(result.met.cut[2,]$starburst.status == "Up regulated & Hypo methylated" &
-                    result.met.cut[2,]$logFC > 0 & result.met.cut[2,]$diffmean.group1.group2 < 0)
+    expect_true(result.met.cut[2,]$starburst.status == "Up regulated & Hyper methylated" &
+                    result.met.cut[2,]$logFC > 0 & result.met.cut[2,]$diffmean.group1.group2 > 0)
     expect_true(result.met.cut[1,]$starburst.status == "Down regulated & Hyper methylated" &
                     result.met.cut[1,]$logFC < 0 & result.met.cut[1,]$diffmean.group1.group2 > 0)
 
@@ -259,8 +262,8 @@ test_that("Results from TCGAanalyze_DEA and DMR in starburst plot are correct", 
     # group2 vs groups1 (logFC = log(group1) - log(group2), diffmean = group1 - group2 )
     expect_true(result.met.exp.cut.inv$starburst.status == "Down regulated & Hypo methylated" &
                     result.met.exp.cut.inv$logFC < 0 & result.met.exp.cut.inv$diffmean.group2.group1 < 0)
-    expect_true(result.met.cut.inv[2,]$starburst.status == "Up regulated & Hyper methylated" &
-                    result.met.cut.inv[2,]$logFC > 0 & result.met.cut.inv[2,]$diffmean.group2.group1 > 0)
+    expect_true(result.met.cut.inv[2,]$starburst.status == "Up regulated & Hypo methylated" &
+                    result.met.cut.inv[2,]$logFC > 0 & result.met.cut.inv[2,]$diffmean.group2.group1 < 0)
     expect_true(result.met.cut.inv[1,]$starburst.status == "Down regulated & Hypo methylated" &
                     result.met.cut.inv[1,]$logFC < 0 & result.met.cut.inv[1,]$diffmean.group2.group1 < 0)
     unlink("DMR_results_group_group1_group2_pcut_0.85_meancut_0.2.csv")
