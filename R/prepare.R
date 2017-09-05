@@ -1069,3 +1069,25 @@ TCGAprepare_Affy <- function(ClinData, PathFolder, TabCel){
     return(mat)
 
 }
+
+
+##Function to take raw counts by removing rows filtered after norm and filter process###
+
+#' @title Use raw count from the DataPrep object which genes are removed by normalization and filtering steps.
+#' @description function to keep raw counts after filtering and/or normalizing.
+#' @param DataPrep DataPrep object returned by TCGAanalyze_Preprocessing()
+#' @param Filtered data frame containing samples in columns and genes in rows after normalization and/or filtering steps
+#' @examples
+#' \dontrun{
+#' dataPrep_raw<-UseRaw_afterFilter(dataPrep, dataFilt)
+#' }
+#' @export
+#' @return Filtered return object similar to DataPrep with genes removed after normalization and filtering process.
+UseRaw_afterFilter<-function(DataPrep, DataFilt){
+  rownames(DataPrep)<-lapply(rownames(DataPrep), function(x) gsub("[[:punct:]]\\d*", "", x ))
+  filtered.list <- setdiff(rownames(DataPrep), rownames(DataFilt))
+  Res <- DataPrep[!rownames(DataPrep) %in% filtered.list, ]
+  return(Res)
+}
+
+
