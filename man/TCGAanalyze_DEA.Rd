@@ -2,10 +2,13 @@
 % Please edit documentation in R/analyze.R
 \name{TCGAanalyze_DEA}
 \alias{TCGAanalyze_DEA}
-\title{Differentially expression analysis (DEA) using edgeR package.}
+\title{Differential expression analysis (DEA) using edgeR or limma package.}
 \usage{
-TCGAanalyze_DEA(mat1, mat2, Cond1type, Cond2type, method = "exactTest",
-  fdr.cut = 1, logFC.cut = 0, elementsRatio = 30000)
+TCGAanalyze_DEA(mat1, mat2, Cond1type, Cond2type, pipeline = "edgeR",
+  method = "exactTest", fdr.cut = 1, logFC.cut = 0,
+  elementsRatio = 30000, batch.factors = NULL, ClinicalDF = data.frame(),
+  paired = FALSE, log.trans = FALSE, trend = FALSE, MAT = data.frame(),
+  contrast.formula = "", Condtypes = c())
 }
 \arguments{
 \item{mat1}{numeric matrix, each row represents a gene,
@@ -20,7 +23,9 @@ each column represents a sample with Cond2type}
 \item{Cond2type}{a string containing the class label of the samples in mat2
 (e.g., case group)}
 
-\item{method}{is 'glmLRT' (1) or 'exactTest' (2).
+\item{pipeline}{a string to specify which package to use ("limma" or "edgeR")}
+
+\item{method}{is 'glmLRT' (1) or 'exactTest' (2) used for edgeR
 (1) Fit a negative binomial generalized log-linear model to
 the read counts for each gene
 (2) Compute genewise exact tests for differences in the means between
@@ -31,13 +36,29 @@ two groups of negative-binomially distributed counts.}
 \item{logFC.cut}{is a threshold to filter DEGs according their logFC}
 
 \item{elementsRatio}{is number of elements processed for second for time consumation estimation}
+
+\item{batch.factors}{a vector containing strings to specify options for batch correction. Options are "Plate", "TSS", "Year", "Portion", "Center"}
+
+\item{ClinicalDF}{a dataframe returned by GDCquery_clinic() to be used to extract year data}
+
+\item{paired}{boolean to account for paired or non-paired samples. Set to TRUE for paired case}
+
+\item{log.trans}{boolean to perform log cpm transformation. Set to TRUE for log transformation}
+
+\item{MAT}{matrix containing expression set as all samples in columns and genes as rows. Do not provide if mat1 and mat2 are used}
+
+\item{contrast.formula}{string input to determine coefficients and to design contrasts in a customized way}
+
+\item{Condtypes}{vector of grouping for samples in MAT}
+
+\item{transform}{boolean to perform limma-trend pipeline. Set to FALSE to go through limma-trend}
 }
 \value{
-table with DEGs containing for each gene logFC, logCPM, pValue,and FDR
+table with DEGs containing for each gene logFC, logCPM, pValue,and FDR, also for each contrast
 }
 \description{
 TCGAanalyze_DEA allows user to perform Differentially expression analysis (DEA),
-   using edgeR package to identify differentially expressed genes (DEGs).
+   using edgeR package or limma to identify differentially expressed genes (DEGs).
     It is possible to do a two-class analysis.
 
     TCGAanalyze_DEA performs DEA using following functions from edgeR:
@@ -47,6 +68,14 @@ TCGAanalyze_DEA allows user to perform Differentially expression analysis (DEA),
     \item edgeR::exactTest performs pair-wise tests for differential expression between two groups.
     \item edgeR::topTags takes the output from exactTest(), adjusts the raw p-values using the
     False Discovery Rate (FDR) correction, and returns the top differentially expressed genes.
+    }
+    TCGAanalyze_DEA performs DEA using following functions from limma:
+    \enumerate{
+    \item limma::makeContrasts construct matrix of custom contrasts.
+    \item limma::lmFit Fit linear model for each gene given a series of arrays.
+    \item limma::contrasts.fit Given a linear model fit to microarray data, compute estimated coefficients and standard errors for a given set of contrasts.
+    \item limma::eBayes Given a microarray linear model fit, compute moderated t-statistics, moderated F-statistic, and log-odds of differential expression by empirical Bayes moderation of the standard errors towards a common value.
+    \item limma::toptable Extract a table of the top-ranked genes from a linear model fit.
     }
 }
 \examples{
