@@ -486,3 +486,101 @@ TCGAquery_subtype <- function(tumor){
         stop("For the moment we have only subtype for: acc, brca, coad, gbm, hnsc, kich, kirp, kirc, lgg, luad, lusc, prad, pancan, read, skcm, stad, thca and ucec")
     }
 }
+
+
+
+#' @title Retrieve PAM50 molecular subtypes for given TCGA barcodes
+#' @description
+#'   TCGAPam50 Retrieve PAM50 molecular subtypes from TCGA consortium for a given set of barcodes
+#' @param barcodes is a vector of TCGA barcodes
+#' @export
+#' @examples
+#' Purity.BRCA<-TCGAtumor_purity(barcodes, 0, 0, 0, 0, 0.7)
+#' @return List with $subtypes attribute as a dataframe with barcodes, samples, subtypes, and colors. The $filtered attribute is returned as filtered samples with no subtype info
+TCGAPam50<-function(barcodes){
+
+  Pam50<-TabSubtypesCol_merged
+  Pam50$samples<-as.character(Pam50$samples)
+  barcodes<-as.character(barcodes)
+  
+  patients<-sapply(barcodes, function(x) paste(unlist(stringr::str_split(x, "-"))[1:3], collapse = "-"))
+  filt.p<-c()
+  df.barcodes_patID<- data.frame(barcodes=barcodes, patID=patients, row.names = 1:length(barcodes))
+  #print(df.barcodes_patID)
+  for(p in patients){
+    if(p%in%Pam50$samples==FALSE)
+      filt.p<-c(filt.p, p)
+  }
+  
+  if(length(filt.p)>0){
+    message("the following TCGA barcodes/patients with no subtypes were filtered:")
+    filt<-as.character(df.barcodes_patID[which(df.barcodes_patID$patID%in%filt.p),]$barcodes)
+    print(filt)
+  }
+  else filt<-c()
+  
+  
+  patients.filtered<-unlist(patients[patients%in%filt.p==FALSE])
+  idx.patient<-which(Pam50$samples%in%patients.filtered)
+
+  Subtypes<-Pam50[idx.patient,]
+  Subtypes<-Subtypes[match(patients.filtered, Subtypes$samples),]
+  Subtypes$barcodes<-as.character(df.barcodes_patID[which(df.barcodes_patID$patID%in%Subtypes$samples),]$barcodes)
+  
+  return(list(subtypes=Subtypes, filtered=filt))
+}
+
+#' @title Filters TCGA barcodes according to purity parameters
+#' @description
+#'   TCGAtumor_purity Filters TCGA samples using 5 estimates from 5 methods as thresholds.
+#' @param barcodes is a vector of TCGA barcodes
+#' @param estimate uses gene expression profiles of 141 immune genes and 141 stromal genes
+#' @param absolute which uses somatic copy-number data (estimations were available for only 11 cancer types)
+#' @param lump (leukocytes unmethylation for purity), which averages 44 non-methylated immune-specific CpG sites
+#' @param ihc as estimated by image analysis of haematoxylin and eosin stain slides produced by the Nationwide Childrens Hospital Biospecimen Core Resource
+#' @param cpe CPE is a derived consensus measurement as the median purity level after normalizing levels from all methods to give them equal means and s.ds
+#' @export
+#' @examples
+#' @return List with $pure_barcodes attribute as a vector of pure samples and $filtered attribute as filtered samples with no purity info
+TCGAtumor_purity<-function(barcodes, estimate, absolute, lump, ihc, cpe){
+  Tumor.purity<-Tumor.purity
+  barcodes<=as.character(barcodes)
+  Tumor.purity$Sample.ID<-as.character(Tumor.purity$Sample.ID)
+  Tumor.purity$ESTIMATE<-as.numeric(gsub(",", ".", Tumor.purity$ESTIMATE))
+  Tumor.purity$ABSOLUTE<-as.numeric(gsub(",", ".", Tumor.purity$ABSOLUTE))
+  Tumor.purity$LUMP<-as.numeric(gsub(",", ".", Tumor.purity$LUMP))
+  Tumor.purity$IHC<-as.numeric(gsub(",", ".", Tumor.purity$IHC))
+  Tumor.purity$CPE<-as.numeric(gsub(",", ".", Tumor.purity$CPE))
+
+  
+  
+  samples.id<-sapply(barcodes, function(x) paste(unlist(stringr::str_split(x, "-"))[1:4], collapse = "-"))
+  
+  
+  df.barcodes_sampID<- data.frame(barcodes=barcodes, sampID=samples.id, row.names = 1:length(barcodes))
+  print(df.barcodes_sampID)
+  filt.s<-c()
+  
+  for(s in samples.id){
+    if(s%in%Tumor.purity$Sample.ID==FALSE)
+      filt.s<-c(filt.s, s)
+  }
+  
+  if(length(filt.s)>0){
+    message("the following TCGA barcodes do not have info on tumor purity:")
+    filt<-as.character(df.barcodes_sampID[which(df.barcodes_sampID$sampID%in%filt.s),]$barcodes)
+    print(filt)
+  }
+  else filt<-c()
+
+  samples.filtered<-unlist(samples.id[samples.id%in%filt.s==FALSE])
+  
+  idx.samples<-which(Tumor.purity$Sample.ID%in%samples.filtered & Tumor.purity$ESTIMATE>=estimate & Tumor.purity$ABSOLUTE>=absolute & Tumor.purity$LUMP>=lump & Tumor.purity$CPE>=cpe)
+  df.purity<-Tumor.purity[idx.samples,]
+  #print(df.purity)
+  idx<-which(df.barcodes_sampID$sampID%in%df.purity$Sample.ID)
+  
+  filtered.barcodes<-as.character(df.barcodes_sampID[idx,]$barcodes)
+  
+  return(list(pure_barcodes=filtered.barcodes, filtered=filt))
+}
