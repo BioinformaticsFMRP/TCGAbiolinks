@@ -191,7 +191,7 @@ query <- GDCquery(project = "TCGA-COAD",
 query %>% getResults %>% datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
 # Tissue slide image
 query <- GDCquery(project = "TCGA-COAD", 
                   data.category = "Clinical", 
