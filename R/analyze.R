@@ -174,18 +174,27 @@ TCGAanalyze_Preprocessing <- function(object,
 #' @return table with survival genes pvalues from KM.
 #' @examples
 #'  clinical_patient_Cancer <- GDCquery_clinic("TCGA-BRCA","clinical")
-#'  dataBRCAcomplete <- log2(BRCA_rnaseqv2)
-#'  # Selecting only 100 genes for example
-#'  dataBRCAcomplete <- dataBRCAcomplete[1:100,]
-#'  dataGE <- dataBRCAcomplete
-#'  group1 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
-#'  group2 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
+#'  # Selecting only 20 genes for example
+#'  dataBRCAcomplete <- log2(dataBRCA[1:20,] + 1)
+#'  group1 <- TCGAquery_SampleTypes(colnames(dataBRCAcomplete), typesample = c("NT"))
+#'  group2 <- TCGAquery_SampleTypes(colnames(dataBRCAcomplete), typesample = c("TP"))
 #'
-#'  tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,dataBRCAcomplete,
-#'  Genelist = rownames(dataBRCAcomplete), Survresult = FALSE,ThreshTop=0.67,ThreshDown=0.33)
-TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
-                                 ThreshTop=0.67, ThreshDown=0.33,p.cut=0.05,
-                                 group1, group2){
+#'  tabSurvKM <- TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
+#'                                      dataBRCAcomplete,
+#'                                      Genelist = rownames(dataBRCAcomplete),
+#'                                      Survresult = FALSE,
+#'                                      p.cut = 0.2,
+#'                                      ThreshTop = 0.67,
+#'                                      ThreshDown = 0.33)
+TCGAanalyze_SurvivalKM <- function(clinical_patient,
+                                   dataGE,
+                                   Genelist,
+                                   Survresult,
+                                   ThreshTop = 0.67,
+                                   ThreshDown = 0.33,
+                                   p.cut = 0.05,
+                                   group1,
+                                   group2){
 
     Genelist <- intersect(rownames(dataGE),Genelist)
     dataCancer <- dataGE[Genelist,group2]
@@ -194,8 +203,12 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
     cfu<-clinical_patient[clinical_patient[,"bcr_patient_barcode"] %in% substr(colnames(dataCancer),1,12),]
     if("days_to_last_followup" %in% colnames(cfu)) colnames(cfu)[grep("days_to_last_followup",colnames(cfu))] <- "days_to_last_follow_up"
     cfu <- as.data.frame(subset(cfu, select=c("bcr_patient_barcode","days_to_death","days_to_last_follow_up","vital_status"))  )
-    cfu[which(cfu$vital_status=="Alive"),"days_to_death"]<-"-Inf"
-    cfu[which(cfu$vital_status=="Dead"),"days_to_last_follow_up"]<-"-Inf"
+
+    # Set alive death to inf
+    if(length(grep("alive",cfu$vital_status,ignore.case = TRUE)) > 0) cfu[grep("alive",cfu$vital_status,ignore.case = TRUE),"days_to_death"]<-"-Inf"
+
+    # Set dead follow up to inf
+    if(length(grep("dead",cfu$vital_status,ignore.case = TRUE)) > 0) cfu[grep("dead",cfu$vital_status,ignore.case = TRUE),"days_to_last_follow_up"]<-"-Inf"
 
     cfu <- cfu[ !(is.na(cfu[,"days_to_last_follow_up"])),]
     cfu <- cfu[ !(is.na(cfu[,"days_to_death"])),]
@@ -223,28 +236,28 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
         #print(i)
         cat(paste( (ngenes-i),".",sep=""))
 
-        mRNAselected<-as.matrix(rownames(dataNormal))[i]
-        tabSurv_Matrix[i,"mRNA"]<-mRNAselected
+        mRNAselected <- as.matrix(rownames(dataNormal))[i]
+        tabSurv_Matrix[i,"mRNA"] <- mRNAselected
 
-        mRNAselected_values<-dataCancer[rownames(dataCancer) == mRNAselected,]
-        mRNAselected_values_normal<-dataNormal[rownames(dataNormal) == mRNAselected,]
+        mRNAselected_values <- dataCancer[rownames(dataCancer) == mRNAselected,]
+        mRNAselected_values_normal <- dataNormal[rownames(dataNormal) == mRNAselected,]
 
         mRNAselected_values_ordered<-sort(mRNAselected_values,decreasing=TRUE)
-        mRNAselected_values_ordered_top<-as.numeric(quantile(mRNAselected_values_ordered,ThreshTop)[1])
-        mRNAselected_values_ordered_down<-as.numeric(quantile(mRNAselected_values_ordered,ThreshDown)[1])
+        mRNAselected_values_ordered_top<-as.numeric(quantile(as.numeric(mRNAselected_values_ordered),ThreshTop)[1])
+        mRNAselected_values_ordered_down<-as.numeric(quantile(as.numeric(mRNAselected_values_ordered),ThreshDown)[1])
 
         mRNAselected_values_newvector<-mRNAselected_values
 
 
         if (is.na(mRNAselected_values_ordered_top)!=1){
 
-            numberOfSamples<-nrow(as.matrix(mRNAselected_values_ordered))
-            lastelementTOP<-round(numberOfSamples/3)
+            numberOfSamples <- ncol(as.matrix(mRNAselected_values_ordered))
+            lastelementTOP  <- round(numberOfSamples/3)
 
-            firstelementDOWN<- numberOfSamples  - lastelementTOP
+            firstelementDOWN <- numberOfSamples - lastelementTOP
 
-            samples_top_mRNA_selected<-rownames( as.matrix(mRNAselected_values_ordered[1: (lastelementTOP-1)  ] ))
-            samples_down_mRNA_selected<-rownames( as.matrix(mRNAselected_values_ordered[ (firstelementDOWN+1) : numberOfSamples] ))
+            samples_top_mRNA_selected <-  colnames( as.matrix(mRNAselected_values_ordered[1: (lastelementTOP-1)  ] ))
+            samples_down_mRNA_selected <- colnames( as.matrix(mRNAselected_values_ordered[ (firstelementDOWN+1) : numberOfSamples] ))
 
             samples_UNCHANGED_mRNA_selected<-rownames(as.matrix(which((mRNAselected_values_newvector) > mRNAselected_values_ordered_down & mRNAselected_values_newvector < mRNAselected_values_ordered_top )))
 
@@ -295,7 +308,7 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
             tabSurv_Matrix[i,"Cancer Deaths with Top"] <- deads_top
             tabSurv_Matrix[i,"Cancer Deaths with Down"] <- deads_down
 
-            tabSurv_Matrix[i,"Mean Normal"] <- mean(mRNAselected_values_normal)
+            tabSurv_Matrix[i,"Mean Normal"] <- mean(as.numeric(mRNAselected_values_normal))
 
             dataCancer_onlyTop_sample <- dataCancer[,samples_top_mRNA_selected]
             dataCancer_onlyTop_sample_mRNASelected <- dataCancer_onlyTop_sample[rownames(dataCancer_onlyTop_sample) == mRNAselected,]
@@ -305,8 +318,8 @@ TCGAanalyze_SurvivalKM<-function(clinical_patient,dataGE,Genelist, Survresult,
             dataCancer_onlyDown_sample_mRNASelected <- dataCancer_onlyDown_sample[rownames(dataCancer_onlyDown_sample) == mRNAselected,]
 
 
-            tabSurv_Matrix[i,"Mean Tumor Top"] <- mean(dataCancer_onlyTop_sample_mRNASelected)
-            tabSurv_Matrix[i,"Mean Tumor Down"] <- mean(dataCancer_onlyDown_sample_mRNASelected)
+            tabSurv_Matrix[i,"Mean Tumor Top"] <- mean(as.numeric(dataCancer_onlyTop_sample_mRNASelected))
+            tabSurv_Matrix[i,"Mean Tumor Down"] <- mean(as.numeric(dataCancer_onlyDown_sample_mRNASelected))
 
             ttime[!status] <- as.numeric(cfu[!status, "days_to_last_follow_up"])
             #ttime[!status] <- cfu[!status, "days_to_last_followup"]
