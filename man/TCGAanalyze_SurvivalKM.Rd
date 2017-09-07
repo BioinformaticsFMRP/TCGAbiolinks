@@ -50,15 +50,18 @@ from survival package
 }
 \examples{
  clinical_patient_Cancer <- GDCquery_clinic("TCGA-BRCA","clinical")
- dataBRCAcomplete <- log2(BRCA_rnaseqv2)
- # Selecting only 100 genes for example
- dataBRCAcomplete <- dataBRCAcomplete[1:100,]
- dataGE <- dataBRCAcomplete
- group1 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
- group2 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
+ # Selecting only 20 genes for example
+ dataBRCAcomplete <- log2(dataBRCA[1:20,] + 1)
+ group1 <- TCGAquery_SampleTypes(colnames(dataBRCAcomplete), typesample = c("NT"))
+ group2 <- TCGAquery_SampleTypes(colnames(dataBRCAcomplete), typesample = c("TP"))
 
- tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,dataBRCAcomplete,
- Genelist = rownames(dataBRCAcomplete), Survresult = FALSE,ThreshTop=0.67,ThreshDown=0.33)
+ tabSurvKM <- TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
+                                     dataBRCAcomplete,
+                                     Genelist = rownames(dataBRCAcomplete),
+                                     Survresult = FALSE,
+                                     p.cut = 0.2,
+                                     ThreshTop = 0.67,
+                                     ThreshDown = 0.33)
  group1 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
  group2 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
 }
