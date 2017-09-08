@@ -376,9 +376,6 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
     tabSurvKM <- tabSurvKM[,-1]
     tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing=FALSE),]
 
-    #'  group1 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("NT"))
-    #'  group2 <- TCGAquery_SampleTypes(colnames(dataGE), typesample = c("TP"))
-
     colnames(tabSurvKM) <- gsub("Cancer","Group2",colnames(tabSurvKM))
     colnames(tabSurvKM) <- gsub("Tumor","Group2",colnames(tabSurvKM))
     colnames(tabSurvKM) <- gsub("Normal","Group1",colnames(tabSurvKM))
