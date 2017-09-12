@@ -17,6 +17,10 @@
 #' Four separate variant calling pipelines are implemented for GDC data harmonization.
 #' Options: muse, varscan2, somaticsniper, MuTect2. For more information:
 #' https://gdc-docs.nci.nih.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/
+#' @param mutant_variant_classification List of mutant_variant_classification that will be
+#' consider a sample mutant or not. Default: "Frame_Shift_Del", "Frame_Shift_Ins",
+#' "Missense_Mutation", "Nonsense_Mutation", "Splice_Site", "In_Frame_Del",
+#' "In_Frame_Ins", "Translation_Start_Site", "Nonstop_Mutation"
 #' @export
 #' @examples
 #' query <- GDCquery(project = "TCGA-KIRP",
@@ -59,7 +63,16 @@ GDCprepare <- function(query,
                        summarizedExperiment = TRUE,
                        remove.files.prepared = FALSE,
                        add.gistic2.mut = NULL,
-                       mut.pipeline = "mutect2"){
+                       mut.pipeline = "mutect2",
+                       mutant_variant_classification = c("Frame_Shift_Del",
+                                                         "Frame_Shift_Ins",
+                                                         "Missense_Mutation",
+                                                         "Nonsense_Mutation",
+                                                         "Splice_Site",
+                                                         "In_Frame_Del",
+                                                         "In_Frame_Ins",
+                                                         "Translation_Start_Site",
+                                                         "Nonstop_Mutation")){
 
     isServeOK()
     if(missing(query)) stop("Please set query parameter")
@@ -138,7 +151,11 @@ GDCprepare <- function(query,
         if(length(add.gistic2.mut) > 0){
             info <- colData(data)
             for(i in unlist(query$project)){
-                info <- get.mut.gistc.information(info,i, add.gistic2.mut, mut.pipeline = mut.pipeline)
+                info <- get.mut.gistc.information(info,
+                                                  i,
+                                                  add.gistic2.mut,
+                                                  mut.pipeline = mut.pipeline,
+                                                  mutant_variant_classification = mutant_variant_classification)
             }
             colData(data) <- info
         }
@@ -255,7 +272,11 @@ readSimpleNucleotideVariationMaf <- function(files){
     return(ret)
 }
 
-readGeneExpressionQuantification <- function(files, cases, summarizedExperiment = TRUE, experimental.strategy, platform){
+readGeneExpressionQuantification <- function(files,
+                                             cases,
+                                             summarizedExperiment = TRUE,
+                                             experimental.strategy,
+                                             platform){
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
 
     skip <- unique((ifelse(experimental.strategy == "Gene expression array",1,0)))
@@ -264,7 +285,11 @@ readGeneExpressionQuantification <- function(files, cases, summarizedExperiment 
 
     for (i in seq_along(files)) {
         suppressWarnings({
-            data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE,skip = skip)
+            data <- fread(files[i],
+                          header = TRUE,
+                          sep = "\t",
+                          stringsAsFactors = FALSE,
+                          skip = skip)
         })
         if(!missing(cases)) {
             assay.list <- gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)])
@@ -275,7 +300,7 @@ readGeneExpressionQuantification <- function(files, cases, summarizedExperiment 
         if (i == 1) {
             df <- data
         } else {
-            df <- merge(df, data, by=colnames(data)[1], all = TRUE)
+            df <- merge(df, data, by = colnames(data)[1], all = TRUE)
         }
         setTxtProgressBar(pb, i)
     }
@@ -775,7 +800,7 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
     gene.location <- get.GRCh.bioMart("hg38")
     aux <- strsplit(data$X1,"\\.")
     data$ensembl_gene_id <- as.character(unlist(lapply(aux,function(x) x[1])))
-
+    data <- subset(data, grepl("ENSG", data$ensembl_gene_id))
     found.genes <- table(data$ensembl_gene_id %in% gene.location$ensembl_gene_id)
     if("FALSE" %in% names(found.genes))
         message(paste0("From the ", nrow(data), " genes we couldn't map ", found.genes[["FALSE"]]))
