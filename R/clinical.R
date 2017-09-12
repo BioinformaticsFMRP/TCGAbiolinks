@@ -345,7 +345,7 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
     }
     # Converting factor to numeric and double
     out <- clin %>%
-        mutate_all(
+        dplyr::mutate_all(
             funs(
                 type.convert(as.character(.), as.is = TRUE, numerals = "warn.loss")
             )
