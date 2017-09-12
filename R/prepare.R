@@ -255,7 +255,11 @@ readSimpleNucleotideVariationMaf <- function(files){
     return(ret)
 }
 
-readGeneExpressionQuantification <- function(files, cases, summarizedExperiment = TRUE, experimental.strategy, platform){
+readGeneExpressionQuantification <- function(files,
+                                             cases,
+                                             summarizedExperiment = TRUE,
+                                             experimental.strategy,
+                                             platform){
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
 
     skip <- unique((ifelse(experimental.strategy == "Gene expression array",1,0)))
@@ -264,7 +268,11 @@ readGeneExpressionQuantification <- function(files, cases, summarizedExperiment 
 
     for (i in seq_along(files)) {
         suppressWarnings({
-            data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE,skip = skip)
+            data <- fread(files[i],
+                          header = TRUE,
+                          sep = "\t",
+                          stringsAsFactors = FALSE,
+                          skip = skip)
         })
         if(!missing(cases)) {
             assay.list <- gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)])
@@ -275,7 +283,7 @@ readGeneExpressionQuantification <- function(files, cases, summarizedExperiment 
         if (i == 1) {
             df <- data
         } else {
-            df <- merge(df, data, by=colnames(data)[1], all = TRUE)
+            df <- merge(df, data, by = colnames(data)[1], all = TRUE)
         }
         setTxtProgressBar(pb, i)
     }
@@ -775,7 +783,7 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
     gene.location <- get.GRCh.bioMart("hg38")
     aux <- strsplit(data$X1,"\\.")
     data$ensembl_gene_id <- as.character(unlist(lapply(aux,function(x) x[1])))
-
+    data <- subset(data, grepl("ENSG", data$ensembl_gene_id))
     found.genes <- table(data$ensembl_gene_id %in% gene.location$ensembl_gene_id)
     if("FALSE" %in% names(found.genes))
         message(paste0("From the ", nrow(data), " genes we couldn't map ", found.genes[["FALSE"]]))
