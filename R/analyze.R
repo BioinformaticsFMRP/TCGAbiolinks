@@ -891,7 +891,7 @@ TCGAanalyze_DEA <- function(mat1,
             index <- which( tableDEA[,4] < fdr.cut)
             tableDEA<-tableDEA[index,]
             neg_logFC.cut<- -1*logFC.cut
-            index<-which(abs(as.numeric(tableDEA[,1]))>logFC.cut)
+            index<-which(abs(as.numeric(tableDEA[,1]))>logFC.cut )
 
             tableDEA<-tableDEA[index,]
             #if(all(grepl("ENSG",rownames(tableDEA)))) tableDEA <- cbind(tableDEA,map.ensg(genes = rownames(tableDEA))[,2:3])
