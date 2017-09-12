@@ -2,12 +2,16 @@
 title: "TCGAbiolinks version bump with new functions"
 date: "`r BiocStyle::doc_date()`"
 vignette: >
+  %\VignetteIndexEntry{"5. TCGAbiolinks_Extension"}
+  %\VignetteBuilder: knitr
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}title: "TCGAbiolinks Extension"
-author: "Mohamed Mounir"
+  %\VignetteEncoding{UTF-8}
 output: html_document
+
 ---
 ```{r setup, include=FALSE}
+knitr::opts_chunk$set(dpi = 300)
+knitr::opts_chunk$set(cache=FALSE)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -20,7 +24,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 library(TCGAbiolinks)
 library(SummarizedExperiment)
-library(dplyr)
+#library(dplyr)
 library(DT)
 ```
 
