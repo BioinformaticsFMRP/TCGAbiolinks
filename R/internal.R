@@ -635,7 +635,8 @@ get.mutation <- function(project,
     mut <- NULL
     for(i in genes) {
         if(!i %in% maf$Hugo_Symbol) next
-        aux <-  data.frame(patient = substr(unique(maf[grepl(i,maf$Hugo_Symbol,ignore.case = TRUE),]$Tumor_Sample_Barcode),1,15), mut = TRUE)
+        aux <- data.frame(patient = substr(unique(maf[i == maf$Hugo_Symbol,]$Tumor_Sample_Barcode),1,15),
+                           mut = TRUE)
         colnames(aux)[2] <- paste0("mut_hg38_",i)
         if(is.null(mut)) {
             mut <- aux
