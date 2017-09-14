@@ -541,6 +541,7 @@ TCGAPam50<-function(barcodes){
 #' @param cpe CPE is a derived consensus measurement as the median purity level after normalizing levels from all methods to give them equal means and s.ds
 #' @export
 #' @examples
+#' pam50<-TCGAPam50(colnames(dataFilt.tcga.pam50))$subtypes$subtype
 #' @return List with $pure_barcodes attribute as a vector of pure samples and $filtered attribute as filtered samples with no purity info
 TCGAtumor_purity<-function(barcodes, estimate, absolute, lump, ihc, cpe){
   Tumor.purity<-Tumor.purity
