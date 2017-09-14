@@ -544,22 +544,22 @@ TCGAPam50<-function(barcodes){
 #' pam50<-TCGAPam50(colnames(dataFilt.tcga.pam50))$subtypes$subtype
 #' @return List with $pure_barcodes attribute as a vector of pure samples and $filtered attribute as filtered samples with no purity info
 TCGAtumor_purity<-function(barcodes, estimate, absolute, lump, ihc, cpe){
-  Tumor.purity<-Tumor.purity
-  barcodes<=as.character(barcodes)
-  Tumor.purity$Sample.ID<-as.character(Tumor.purity$Sample.ID)
-  Tumor.purity$ESTIMATE<-as.numeric(gsub(",", ".", Tumor.purity$ESTIMATE))
-  Tumor.purity$ABSOLUTE<-as.numeric(gsub(",", ".", Tumor.purity$ABSOLUTE))
-  Tumor.purity$LUMP<-as.numeric(gsub(",", ".", Tumor.purity$LUMP))
-  Tumor.purity$IHC<-as.numeric(gsub(",", ".", Tumor.purity$IHC))
-  Tumor.purity$CPE<-as.numeric(gsub(",", ".", Tumor.purity$CPE))
-
   
+  Tumor.purity.L<-Tumor.purity
+  barcodes<=as.character(barcodes)
+  Tumor.purity.L$Sample.ID<-as.character(Tumor.purity$Sample.ID)
+  Tumor.purity.L$ESTIMATE<-as.numeric(gsub(",", ".", Tumor.purity$ESTIMATE))
+  Tumor.purity.L$ABSOLUTE<-as.numeric(gsub(",", ".", Tumor.purity$ABSOLUTE))
+  Tumor.purity.L$LUMP<-as.numeric(gsub(",", ".", Tumor.purity$LUMP))
+  Tumor.purity.L$IHC<-as.numeric(gsub(",", ".", Tumor.purity$IHC))
+  Tumor.purity.L$CPE<-as.numeric(gsub(",", ".", Tumor.purity$CPE))
+  
+  #print(head(Tumor.purity.L))
   
   samples.id<-sapply(barcodes, function(x) paste(unlist(stringr::str_split(x, "-"))[1:4], collapse = "-"))
   
   
   df.barcodes_sampID<- data.frame(barcodes=barcodes, sampID=samples.id, row.names = 1:length(barcodes))
-  print(df.barcodes_sampID)
   filt.s<-c()
   
   for(s in samples.id){
@@ -573,12 +573,18 @@ TCGAtumor_purity<-function(barcodes, estimate, absolute, lump, ihc, cpe){
     print(filt)
   }
   else filt<-c()
-
+  
   samples.filtered<-unlist(samples.id[samples.id%in%filt.s==FALSE])
   
-  idx.samples<-which(Tumor.purity$Sample.ID%in%samples.filtered & Tumor.purity$ESTIMATE>=estimate & Tumor.purity$ABSOLUTE>=absolute & Tumor.purity$LUMP>=lump & Tumor.purity$CPE>=cpe)
-  df.purity<-Tumor.purity[idx.samples,]
-  #print(df.purity)
+  idx.samples<-which(Tumor.purity.L$Sample.ID%in%samples.filtered 
+                     & (Tumor.purity.L$ESTIMATE>=estimate | Tumor.purity.L$ESTIMATE=='NaN') 
+                     & (Tumor.purity.L$ABSOLUTE>=absolute| Tumor.purity.L$ABSOLUTE=='NaN')
+                     & (Tumor.purity.L$IHC>=ihc | Tumor.purity.L$IHC=='NaN') 
+                     & (Tumor.purity.L$LUMP>=lump | Tumor.purity.L$LUMP=='NaN') 
+                     & (Tumor.purity.L$CPE>=cpe | Tumor.purity.L$CPE=='NaN') )
+  
+  df.purity<-Tumor.purity.L[idx.samples,]
+  
   idx<-which(df.barcodes_sampID$sampID%in%df.purity$Sample.ID)
   
   filtered.barcodes<-as.character(df.barcodes_sampID[idx,]$barcodes)
