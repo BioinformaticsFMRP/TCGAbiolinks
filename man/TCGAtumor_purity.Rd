@@ -25,3 +25,6 @@ List with $pure_barcodes attribute as a vector of pure samples and $filtered att
 \description{
 TCGAtumor_purity Filters TCGA samples using 5 estimates from 5 methods as thresholds.
 }
+\examples{
+pam50<-TCGAPam50(colnames(dataFilt.tcga.pam50))$subtypes$subtype
+}
