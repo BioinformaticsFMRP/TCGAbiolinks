@@ -762,20 +762,36 @@ TCGAanalyze_DEA <- function(mat1,
     # DGE.mat<-edgeR::DGEList(TOC,group = tumorType)
     
     if(length(batch.factors)== 0 & length(Condtypes)>0){
+            if(pipeline=="edgeR")
+                design <- model.matrix(~tumorType)
+            else
                 design <- model.matrix(~0+tumorType)
             }
-    else if(length(batch.factors)== 0 & length(Condtypes)==0){
-                
-                formula<-paste0("~0+tumorType", "")
-                design <- model.matrix(~0+tumorType)
 
-                }
+    else if(length(batch.factors)== 0 & length(Condtypes)==0){
+            if(pipeline=="edgeR")
+                design <- model.matrix(~tumorType)
+            else
+                design <- model.matrix(~0+tumorType)
+            }
+
     else if(length(batch.factors)> 0 & length(Condtypes)==0){
+
+            if(pipeline=="edgeR")
+                formula<-paste0("~tumorType+", additiveformula)
+            else
                 formula<-paste0("~0+tumorType+", additiveformula)
+            
+                
                 design <- model.matrix(eval(parse(text=formula)))
     }
+
     else if(length(batch.factors)> 0 & length(Condtypes)>0){
+            if(pipeline=="edgeR")
+                formula<-paste0("~tumorType+", additiveformula)
+            else
                 formula<-paste0("~0+tumorType+", additiveformula)
+            
                 design <- model.matrix(eval(parse(text=formula)))        
     }
 
@@ -797,6 +813,7 @@ TCGAanalyze_DEA <- function(mat1,
 
         else if (method == "glmLRT"){
             if(length(unique(tumorType))==2){
+
                 aDGEList <- edgeR::DGEList(counts = TOC, group = tumorType)
                 aDGEList <- edgeR::estimateGLMCommonDisp(aDGEList, design)
                 aDGEList <- edgeR::estimateGLMTagwiseDisp(aDGEList, design)
@@ -887,7 +904,6 @@ TCGAanalyze_DEA <- function(mat1,
             tableDEA<-limma::toptable(fit, coef=1, adjust.method='fdr', number=nrow(TOC))
             
             limma::volcanoplot(fit, highlight=10)
-            print(colnames(tableDEA))
             index <- which( tableDEA[,4] < fdr.cut)
             tableDEA<-tableDEA[index,]
             neg_logFC.cut<- -1*logFC.cut
