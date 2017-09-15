@@ -104,7 +104,7 @@ query <- GDCquery(project = "TCGA-GBM",
                            experimental.strategy = "RNA-Seq",
                            barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"),
                            legacy = TRUE)
-GDCdownload(query, method = "api", chunks.per.download = 10)
+GDCdownload(query, method = "api", files.per.chunk = 10)
 data <- GDCprepare(query)
 ```
 ```{r message=FALSE, warning=FALSE}
