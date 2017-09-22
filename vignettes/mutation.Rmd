@@ -88,7 +88,7 @@ To visualize the data you can use the Bioconductor package [maftools](https://bi
 
 ```{r  results = "hide",echo = TRUE, message = FALSE, warning = FALSE}
 library(maftools)
-maf <- GDCquery_Maf("CHOL", pipelines = "muse") %>% read.maf(removeSilent = TRUE, useAll = FALSE)
+maf <- GDCquery_Maf("CHOL", pipelines = "muse") %>% read.maf
 datatable(getSampleSummary(maf),
           filter = 'top',
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
