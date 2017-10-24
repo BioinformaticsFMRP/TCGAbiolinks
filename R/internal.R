@@ -171,19 +171,10 @@ checkBarcodeDefinition <- function(definition){
 #' projects <- getGDCprojects()
 #' @return A data frame with last GDC projects
 getGDCprojects <- function(){
-
-    projects  <- tryCatch({
-        projects <- read_tsv("https://gdc-api.nci.nih.gov/projects?size=1000&format=tsv", col_types = "cccccccc")
-        projects$tumor <- unlist(lapply(projects$project_id, function(x){unlist(str_split(x,"-"))[2]}))
-        return(projects)
-    }, error = function(e) {
-        Sys.sleep(1)
-        url <- "https://gdc-api.nci.nih.gov/projects?size=1000&format=json"
-        json <- fromJSON(content(GET(url), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
-        projects <- json$data$hits
-        projects$tumor <- unlist(lapply(projects$project_id, function(x){unlist(str_split(x,"-"))[2]}))
-        return(projects)
-    })
+    url <- "https://gdc-api.nci.nih.gov/projects?size=1000&format=json"
+    json <- fromJSON(content(GET(url), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+    projects <- json$data$hits
+    projects$tumor <- unlist(lapply(projects$project_id, function(x){unlist(str_split(x,"-"))[2]}))
     if(nrow(projects) == 0) stop("I couldn't access GDC API. Please, check if it is not down.")
     return(projects)
 }
@@ -636,7 +627,7 @@ get.mutation <- function(project,
     for(i in genes) {
         if(!i %in% maf$Hugo_Symbol) next
         aux <- data.frame(patient = substr(unique(maf[i == maf$Hugo_Symbol,]$Tumor_Sample_Barcode),1,15),
-                           mut = TRUE)
+                          mut = TRUE)
         colnames(aux)[2] <- paste0("mut_hg38_",i)
         if(is.null(mut)) {
             mut <- aux
