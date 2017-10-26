@@ -141,7 +141,6 @@ Reference: [TCGA wiki](https://wiki.nci.nih.gov/display/TCGA/Microsatellite+data
 Level 3 data is included in BCR clinical-based submissions and can be downloaded as follows:
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
-
 query <- GDCquery(project = "TCGA-COAD", 
                   data.category = "Other",
                   legacy = TRUE,access = "open",
