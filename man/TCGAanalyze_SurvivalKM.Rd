@@ -33,7 +33,7 @@ table with survival genes pvalues from KM.
 }
 \description{
 TCGAanalyze_SurvivalKM perform an univariate Kaplan-Meier (KM) survival analysis (SA).
-It performed Kaplan-Meier survival univariate using complte follow up with all days
+It performed Kaplan-Meier survival univariate using complete follow up with all days
 taking one gene a time from Genelist of gene symbols.
 For each gene according its level of mean expression in cancer samples,
 defining two thresholds for quantile
@@ -55,6 +55,17 @@ from survival package
  group1 <- TCGAquery_SampleTypes(colnames(dataBRCAcomplete), typesample = c("NT"))
  group2 <- TCGAquery_SampleTypes(colnames(dataBRCAcomplete), typesample = c("TP"))
 
+ tabSurvKM <- TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
+                                     dataBRCAcomplete,
+                                     Genelist = rownames(dataBRCAcomplete),
+                                     Survresult = FALSE,
+                                     p.cut = 0.4,
+                                     ThreshTop = 0.67,
+                                     ThreshDown = 0.33,
+                                     group1 = group1, # Control group
+                                     group2 = group2) # Disease group
+
+ # If the groups are not specified group1 == group2 and all samples are used
  tabSurvKM <- TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
                                      dataBRCAcomplete,
                                      Genelist = rownames(dataBRCAcomplete),
