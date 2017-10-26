@@ -489,15 +489,15 @@ TCGAquery_subtype <- function(tumor){
 
 
 
-#' @title Retrieve PAM50 molecular subtypes for given TCGA barcodes
+#' @title Retrieve molecular subtypes for given TCGA barcodes
 #' @description
-#'   TCGAPam50 Retrieve PAM50 molecular subtypes from TCGA consortium for a given set of barcodes
+#'   TCGA_MolecularSubtype Retrieve molecular subtypes from TCGA consortium for a given set of barcodes
 #' @param barcodes is a vector of TCGA barcodes
 #' @export
 #' @examples
-#' Purity.BRCA<-TCGAtumor_purity(barcodes, 0, 0, 0, 0, 0.7)
+#' TCGA_MolecularSubtype("TCGA-60-2721-01A-01R-0851-07")
 #' @return List with $subtypes attribute as a dataframe with barcodes, samples, subtypes, and colors. The $filtered attribute is returned as filtered samples with no subtype info
-TCGAPam50<-function(barcodes){
+TCGA_MolecularSubtype<-function(barcodes){
 
   Pam50<-TabSubtypesCol_merged
   Pam50$samples<-as.character(Pam50$samples)
@@ -541,7 +541,7 @@ TCGAPam50<-function(barcodes){
 #' @param cpe CPE is a derived consensus measurement as the median purity level after normalizing levels from all methods to give them equal means and s.ds
 #' @export
 #' @examples
-#' pam50<-TCGAPam50(colnames(dataFilt.tcga.pam50))$subtypes$subtype
+#' pam50<-TCGA_MolecularSubtype(colnames(dataFilt.tcga.pam50))$subtypes$subtype
 #' @return List with $pure_barcodes attribute as a vector of pure samples and $filtered attribute as filtered samples with no purity info
 TCGAtumor_purity<-function(barcodes, estimate, absolute, lump, ihc, cpe){
   

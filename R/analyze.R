@@ -612,14 +612,15 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
 #' @param  fdr.cut is a threshold to filter DEGs according their p-value corrected
 #' @param logFC.cut is a threshold to filter DEGs according their logFC
 #' @param elementsRatio is number of elements processed for second for time consumation estimation
-#' @param batch.factors a vector containing strings to specify options for batch correction. Options are "Plate", "TSS", "Year", "Portion", "Center"
+#' @param batch.factors a vector containing strings to specify options for batch correction. Options are "Plate", "TSS", "Year", "Portion", "Center", and "Patients"
 #' @param ClinicalDF a dataframe returned by GDCquery_clinic() to be used to extract year data
 #' @param paired boolean to account for paired or non-paired samples. Set to TRUE for paired case
 #' @param log.trans boolean to perform log cpm transformation. Set to TRUE for log transformation
-#' @param transform boolean to perform limma-trend pipeline. Set to FALSE to go through limma-trend
+#' @param trend boolean to perform limma-trend pipeline. Set to TRUE to go through limma-trend
 #' @param MAT matrix containing expression set as all samples in columns and genes as rows. Do not provide if mat1 and mat2 are used
 #' @param contrast.formula string input to determine coefficients and to design contrasts in a customized way
 #' @param Condtypes vector of grouping for samples in MAT
+#' @param voom boolean to perform voom transformation for limma-voom pipeline. Set to TRUE for voom transformation
 #' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags estimateGLMCommonDisp
 #' estimateGLMTagwiseDisp glmFit glmLRT
 #' @importFrom limma makeContrasts lmFit contrasts.fit eBayes toptable 
@@ -645,7 +646,8 @@ TCGAanalyze_DEA <- function(mat1,
                             batch.factors=NULL,
                             ClinicalDF=data.frame(),
                             paired=FALSE,
-                            log.trans=FALSE, 
+                            log.trans=FALSE,
+                            voom=FALSE, 
                             trend=FALSE,
                             MAT=data.frame(),
                             contrast.formula="",
@@ -698,12 +700,13 @@ TCGAanalyze_DEA <- function(mat1,
     Plate<-factor(my_IDs$plate)
     Condition<-factor(my_IDs$condition)
     TSS<-factor(my_IDs$tss)
-    
     Portion<-factor(my_IDs$portion)
     Center<-factor(my_IDs$center)
+    Patients<-factor(my_IDs$patient)
 
 
-    options <- c("Plate", "TSS", "Year", "Portion", "Center")
+    ####ADD PATIENT AS OPTION
+    options <- c("Plate", "TSS", "Year", "Portion", "Center", "Patients")
 
     if(length(batch.factors)==0){
         message("Batch correction skipped since no factors provided")
@@ -875,11 +878,16 @@ TCGAanalyze_DEA <- function(mat1,
 
     else if(pipeline=="limma"){
 
+        if(voom==TRUE){
+            message("Voom Transformation...")
+            logCPM<-limma::voom(TOC, design)
+        }
+
         if(length(unique(tumorType))==2){
             #DGE <- edgeR::DGEList(TOC,group = rep(c(Cond1type,Cond2type),
                                                   #c(Cond1num,Cond2num)))
 
-            ###logcpm transformation for limma-trend method using edgeR
+            ###logcpm transformation for limma-trend method using edgeR cpm method
             if(log.trans==TRUE)
                 logCPM<- edgeR::cpm(TOC, log=TRUE, prior.count=3)
             else
@@ -907,7 +915,7 @@ TCGAanalyze_DEA <- function(mat1,
             index <- which( tableDEA[,4] < fdr.cut)
             tableDEA<-tableDEA[index,]
             neg_logFC.cut<- -1*logFC.cut
-            index<-which(abs(as.numeric(tableDEA[,1]))>logFC.cut )
+            index<-which(abs(as.numeric(tableDEA$logFC))>logFC.cut )
 
             tableDEA<-tableDEA[index,]
             #if(all(grepl("ENSG",rownames(tableDEA)))) tableDEA <- cbind(tableDEA,map.ensg(genes = rownames(tableDEA))[,2:3])
@@ -988,7 +996,7 @@ TCGAanalyze_DEA <- function(mat1,
 #' @importFrom limma voom
 #' @importFrom sva ComBat
 #' @export
-#' @return A data frame containing voom corrected values with ComBat batch correction applied
+#' @return A voom object and a data frame with ComBat batch correction applied
 TCGAbatch_Correction <- function(tabDF, batch.factor=NULL, adjustment=NULL, ClinicalDF=data.frame()){
 
     if(length(batch.factor)==0 & length(adjustment)==0)
@@ -1036,7 +1044,7 @@ if(length(batch.factor)>0 || length(adjustment)>0)
 
     if(length(batch.factor)==0){
         message("Batch correction skipped since no factors provided: data is Voom corrected")
-        return(v$E)
+        return(v)
     }
 
     if(length(batch.factor)>1) stop("Combat can only correct for one batch variable. Provide one batch factor")
@@ -1066,23 +1074,24 @@ if(length(batch.factor)>0 || length(adjustment)>0)
 
         batchCombat<-eval(parse(text=batch.factor))
 
+
         #####Accounting for covariates######
         if(length(adjustment)>0){
             adjustment.formula<-paste(adjustment, collapse="+")
             adjustment.formula<-paste0("+", adjustment.formula)
             adjustment.formula<-paste0("~Condition", adjustment.formula)
             print(adjustment.formula)
-            model <- data.frame(batchCombat, row.names=names(tabDF))
-            formula.combat<-paste0(adjustment.formula, ",data=model")
-            design.mod.combat<-model.matrix(eval(parse(text=formula.combat)))
+            model <- data.frame(batchCombat, row.names=colnames(tabDF))
+
+            design.mod.combat<-model.matrix(eval(parse(text=adjustment.formula)), data=model)
         }
 
 
 
          # Batch correction
-        batch_corr <- sva::ComBat(dat=v$E, batch=as.factor(as.integer(as.factor(as.character(batchCombat)))), mod=design.mod.combat, par.prior=TRUE,prior.plots=TRUE)
+        batch_corr <- sva::ComBat(dat=tabDF, batch=batchCombat, mod=design.mod.combat, par.prior=TRUE,prior.plots=TRUE)
 
-        return(batch_corr)
+        return(list(v=v, b=batch_corr))
         }
 
 
