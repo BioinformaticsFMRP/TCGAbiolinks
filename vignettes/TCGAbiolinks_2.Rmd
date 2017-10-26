@@ -1,11 +1,13 @@
----
 title: "TCGAbiolinks version bump with new functions"
 date: "`r BiocStyle::doc_date()`"
 vignette: >
-  %\VignetteIndexEntry{"5. TCGAbiolinks_Extension"}
-  %\VignetteBuilder: knitr
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+%\VignetteIndexEntry{"5. TCGAbiolinks_Extension"}
+%\VignetteBuilder: knitr
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteEncoding{UTF-8}
+%\VignetteEncoding{UTF-8}
+title: "TCGAbiolinks Extension"
+author: "Mohamed Mounir"
 output: html_document
 
 ---
@@ -14,6 +16,8 @@ knitr::opts_chunk$set(dpi = 300)
 knitr::opts_chunk$set(cache=FALSE)
 knitr::opts_chunk$set(echo = TRUE)
 ```
+ 
+
 
 <div class="panel panel-info">
 <div class="panel-heading">New functionalities: TCGAbiolinks version bump</div>
@@ -38,7 +42,7 @@ library(DT)
 
 ##Support of Therapeutically Applicable Research To Generate Effective Treatments (TARGET) data:
 
-TARGET applies a comprehensive genomic approach to determine molecular changes that drive childhood cancers. Investigators form a collaborative network to facilitate discovery of molecular targets and translate those findings into the clinic. TARGET is managed by NCI???s Office of Cancer Genomics and Cancer Therapy Evaluation Program.
+TARGET applies a comprehensive genomic approach to determine molecular changes that drive childhood cancers. Investigators form a collaborative network to facilitate discovery of molecular targets and translate those findings into the clinic. TARGET is managed by NCI's Office of Cancer Genomics and Cancer Therapy Evaluation Program.
 
 ###Querying, doanloading, and preparing TARGET data:
 
@@ -167,7 +171,7 @@ dataPrep_raw<-UseRaw_afterFilter(dataPrep, dataFilt)
 ```
 
 
-##TCGAPam50: Query subtypes for cancer data:
+##TCGA_MolecularSubtype: Query subtypes for cancer data:
 
 This function takes a vector of TCGA barcodes as an input and returns a 2 elements list.
 
@@ -178,7 +182,7 @@ This function takes a vector of TCGA barcodes as an input and returns a 2 elemen
 
 ```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
 ##use previously fetched BRCA data:
-Pam50.subtypes<-TCGAPam50(colnames(dataFilt))
+Pam50.subtypes<-TCGA_MolecularSubtype(colnames(dataFilt))
 ```
 
 
@@ -196,11 +200,11 @@ The function takes the following arguments for the version bump:
 * **method**	is 'glmLRT' (1) or 'exactTest' (2) used for edgeR (1) Fit a negative binomial generalized log-linear model to the read counts for each gene (2) Compute genewise exact tests for differences in the means between two groups of negative-binomially distributed counts.
 * **fdr.cu**t	is a threshold to filter DEGs according their p-value corrected
 * **logFC.cut**	is a threshold to filter DEGs according their logFC elementsRatio	is number of elements processed for second for time consumation estimation
-* **batch.factors**	a vector containing strings to specify options for batch correction. Options are "Plate", "TSS", "Year", "Portion", "Center" and they are accounted for in the design matrix
+* **batch.factors**	a vector containing strings to specify options for batch correction. Options are "Plate", "TSS", "Year", "Portion", "Center", "Patients" and they are accounted for in the design matrix
 * **ClinicalDF**	a dataframe returned by GDCquery_clinic() to be used as input to extract "Year" data for batch correction (blocking)
 * **paired**	boolean to account for paired or non-paired samples. Set to TRUE for paired case
 * **log.trans**	boolean to perform log cpm transformation. Set to TRUE for log transformation
-* **trend**	boolean to perform limma-trend pipeline. Set to FALSE to go through limma-trend
+* **trend**	boolean to perform limma-trend pipeline. Set to TRUE to go through limma-trend
 * **MAT**	matrix containing expression set as all samples in columns and genes as rows. Do not provide if mat1 and mat2 are used
 * **contrast.formula**	string input to determine coefficients and to design contrasts in a customized way
 * **Condtypes**	vector of grouping for samples in MAT
@@ -275,11 +279,11 @@ dataFilt.tcga <- TCGAanalyze_Filtering(tabDF = dataNorm.tcga,
 
 ####Filtering data so all samples have a pam50 subtype for LUSC
 
-diff<-setdiff(colnames(dataFilt.tcga), TCGAPam50(colnames(dataFilt.tcga))$filtered)
-TCGAPam50(diff)$subtypes$barcodes
+diff<-setdiff(colnames(dataFilt.tcga), TCGA_MolecularSubtype(colnames(dataFilt.tcga))$filtered)
+TCGA_MolecularSubtype(diff)$subtypes$barcodes
 
 dataFilt.tcga.pam50<-dataFilt.tcga[,diff]
-pam50test<-TCGAPam50(colnames(dataFilt.tcga.pam50))$subtypes$subtype
+pam50test<-TCGA_MolecularSubtype(colnames(dataFilt.tcga.pam50))$subtypes$subtype
 
 ###Differential expression analysis after correcting for "Plate" factor.
 DEGpam50 <- TCGAanalyze_DEA(MAT=dataFilt.tcga.pam50,
@@ -299,7 +303,7 @@ DEGpam50 <- TCGAanalyze_DEA(MAT=dataFilt.tcga.pam50,
 This function calls **ComBat** from **sva** package to handle batch correction, display some plots for exploratory data analysis purposes. More specifically, it shows a plot with black as a kernel estimate of the empirical batch effect density and red as the parametric.
 * **tabDF** numeric matrix, each row represents a gene each column represents a sample
 * **batch.factor** batch.factor a string containing the batch factor to use for correction Options are "Plate", "TSS", "Year", "Portion", "Center". The function accepts only one batch factor at a time
-* **adjustment**  vector containing strings for covariate factors to adjust for using ComBat. Options are "Plate", "TSS", "Year", "Portion", "Center"
+* **adjustment**  vector containing strings for covariate factors to adjust for using ComBat. Options are "Plate", "TSS", "Year", "Portion", "Center", "Patients"
 * **ClinicalDF**  a dataframe returned by GDCquery_clinic() to be used to extract year data
 
 On top of data exploration through **ComBat** plots, a **voom** transformation is performed by the **limma** package. If no batch facotr is provided, only a voom transformation will be executed. Run the code below to see an example:
