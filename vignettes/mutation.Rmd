@@ -64,7 +64,7 @@ datatable(select(getResults(query.maf.hg19),-contains("cases")),
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 10), 
           rownames = FALSE)
 ```
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval=FALSE}
 query.maf.hg19 <- GDCquery(project = "TCGA-CHOL", 
                            data.category = "Simple nucleotide variation", 
                            data.type = "Simple somatic mutation",
@@ -73,6 +73,10 @@ query.maf.hg19 <- GDCquery(project = "TCGA-CHOL",
                            legacy = TRUE)
 GDCdownload(query.maf.hg19)
 maf <- GDCprepare(query.maf.hg19)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+data <- bcgsc.ca_CHOL.IlluminaHiSeq_DNASeq.1.somatic.maf
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 # Only first 50 to make render faster
