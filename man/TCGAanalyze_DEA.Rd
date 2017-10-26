@@ -37,7 +37,7 @@ two groups of negative-binomially distributed counts.}
 
 \item{elementsRatio}{is number of elements processed for second for time consumation estimation}
 
-\item{batch.factors}{a vector containing strings to specify options for batch correction. Options are "Plate", "TSS", "Year", "Portion", "Center"}
+\item{batch.factors}{a vector containing strings to specify options for batch correction. Options are "Plate", "TSS", "Year", "Portion", "Center", and "Patients"}
 
 \item{ClinicalDF}{a dataframe returned by GDCquery_clinic() to be used to extract year data}
 
