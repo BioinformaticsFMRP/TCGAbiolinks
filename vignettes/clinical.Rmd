@@ -140,7 +140,7 @@ Reference: [TCGA wiki](https://wiki.nci.nih.gov/display/TCGA/Microsatellite+data
 
 Level 3 data is included in BCR clinical-based submissions and can be downloaded as follows:
 
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
 
 query <- GDCquery(project = "TCGA-COAD", 
                   data.category = "Other",
@@ -150,7 +150,7 @@ query <- GDCquery(project = "TCGA-COAD",
 GDCdownload(query)
 msi_results <- GDCprepare_clinic(query, "msi")
 ```
-```{r  echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
 datatable(msi_results, options = list(scrollX = TRUE, keys = TRUE))
 ```
 
@@ -227,7 +227,7 @@ query <- GDCquery(project = "TCGA-COAD",
 ```
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
-query %>% getResults %>% dplyr::select(-matches("cases"))%>% datatable(options = list(scrollX = TRUE, keys = TRUE))
+query %>% getResults %>% select(-matches("cases"))%>% datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
@@ -270,10 +270,10 @@ clinical.patient.followup <- GDCprepare_clinic(clin.query, clinical.info = "foll
 clinical.index <- GDCquery_clinic("TCGA-READ")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
-dplyr::select(clinical.patient,vital_status,days_to_death,days_to_last_followup) %>% datatable
-dplyr::select(clinical.patient.followup, vital_status,days_to_death,days_to_last_followup) %>% datatable
+select(clinical.patient,vital_status,days_to_death,days_to_last_followup) %>% datatable
+select(clinical.patient.followup, vital_status,days_to_death,days_to_last_followup) %>% datatable
 # Vital status should be the same in the follow up table 
-filter(clinical.index,submitter_id == "TCGA-F5-6702") %>% dplyr::select(vital_status,days_to_death,days_to_last_follow_up) %>% datatable
+filter(clinical.index,submitter_id == "TCGA-F5-6702") %>% select(vital_status,days_to_death,days_to_last_follow_up) %>% datatable
 ```
 
 ## Progression or Recurrence and Grande inconsistancie
@@ -284,7 +284,7 @@ recurrent.samples <- GDCquery(project = "TCGA-LIHC",
                              data.category = "Transcriptome Profiling",
                              data.type = "Gene Expression Quantification", 
                              workflow.type = "HTSeq - Counts",
-                             sample.type = 	"Recurrent Solid Tumor")$results[[1]] %>% dplyr::select(cases)
+                             sample.type = 	"Recurrent Solid Tumor")$results[[1]] %>% select(cases)
 recurrent.patients <- unique(substr(recurrent.samples$cases,1,12))
 clin.query <- GDCquery(project = "TCGA-LIHC", data.category = "Clinical", barcode = recurrent.patients)
 GDCdownload(clin.query)
@@ -293,10 +293,10 @@ clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 # Get indexed data
 GDCquery_clinic("TCGA-LIHC") %>% filter(submitter_id %in% recurrent.patients) %>% 
-    dplyr::select(progression_or_recurrence,days_to_recurrence,tumor_grade) %>% datatable
+    select(progression_or_recurrence,days_to_recurrence,tumor_grade) %>% datatable
 
 # XML data
-clinical.patient %>% dplyr::select(bcr_patient_barcode,neoplasm_histologic_grade) %>% datatable
+clinical.patient %>% select(bcr_patient_barcode,neoplasm_histologic_grade) %>% datatable
 
 ```
 
