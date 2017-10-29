@@ -86,3 +86,16 @@ NULL
 #' @format A data frame with 11382 rows and 3 variables
 NULL
 
+#' TCGA CHOL MAF transformed to maftools obejct
+#' @docType data
+#' @keywords internal
+#' @name chol_maf
+#' @format An object of class  MAF
+NULL
+
+#' TCGA CHOL MAF
+#' @docType data
+#' @keywords internal
+#' @name bcgsc.ca_CHOL.IlluminaHiSeq_DNASeq.1.somatic.maf
+#' @format A tibble: 3,555 x 34
+NULL
