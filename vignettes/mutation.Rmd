@@ -99,7 +99,7 @@ maf <- GDCquery_Maf("CHOL", pipelines = "muse") %>% read.maf
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 library(maftools)
 library(dplyr)
-data <- chol_maf
+maf <- chol_maf
 ```
 
 ```{r  results = "hide",echo = TRUE, message = FALSE, warning = FALSE}
