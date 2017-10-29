@@ -7,6 +7,9 @@ Create samples information matrix for GDC samples add subtype information}
 \usage{
 colDataPrepare(barcode)
 }
+\arguments{
+\item{barcode}{TCGA or TARGET barcode}
+}
 \examples{
 \dontrun{
   query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
