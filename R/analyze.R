@@ -249,12 +249,12 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
     # Evaluate each gene
     for(i in 1:nrow(as.matrix(rownames(dataNormal))))  {
         cat(paste( (ngenes-i),".",sep=""))
-
         mRNAselected <- as.matrix(rownames(dataNormal))[i]
-        tabSurv_Matrix[i,"mRNA"] <- mRNAselected
-
         mRNAselected_values <- dataCancer[rownames(dataCancer) == mRNAselected,]
         mRNAselected_values_normal <- dataNormal[rownames(dataNormal) == mRNAselected,]
+        if(all(mRNAselected_values == 0)) next # All genes are 0
+        tabSurv_Matrix[i,"mRNA"] <- mRNAselected
+
 
         # Get Thresh values for cancer expression
         mRNAselected_values_ordered <- sort(mRNAselected_values,decreasing=TRUE)
@@ -280,7 +280,7 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
 
             # Which samples are in the intermediate group (above ThreshLow and below ThreshTop)
             samples_UNCHANGED_mRNA_selected <- colnames(mRNAselected_values_newvector[which((mRNAselected_values_newvector) > mRNAselected_values_ordered_down &
-                                                                          mRNAselected_values_newvector < mRNAselected_values_ordered_top )])
+                                                                                                mRNAselected_values_newvector < mRNAselected_values_ordered_top )])
 
             cfu_onlyTOP<-cfu_complete[cfu_complete[,"bcr_patient_barcode"] %in% samples_top_mRNA_selected,]
             cfu_onlyDOWN<-cfu_complete[cfu_complete[,"bcr_patient_barcode"] %in% samples_down_mRNA_selected,]
@@ -299,8 +299,8 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
             deads_top<- sum(ttime_only_top > 0)
 
             if(dim(cfu_onlyDOWN)[1] >= 1) {
-               ttime_only_down <- cfu_onlyDOWN[, "days_to_death"]
-               deads_down<- sum(ttime_only_down > 0)
+                ttime_only_down <- cfu_onlyDOWN[, "days_to_death"]
+                deads_down<- sum(ttime_only_down > 0)
             } else {
                 deads_down <- 0
             }
