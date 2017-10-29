@@ -609,6 +609,7 @@ colDataPrepareTCGA <- function(barcode){
 
 #' @title Create samples information matrix for GDC samples
 #' Create samples information matrix for GDC samples add subtype information
+#' @param barcode TCGA or TARGET barcode
 #' @examples
 #' \dontrun{
 #'   query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
