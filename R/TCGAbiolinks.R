@@ -106,3 +106,19 @@ NULL
 #' @name msi_results
 #' @format A data frame: 2 rows, 4 columns
 NULL
+
+#' A RangedSummarizedExperiment two samples with gene expression data from vignette
+#' aligned against hg38
+#' @docType data
+#' @keywords internal
+#' @name gbm.exp.harmonized
+#' @format A RangedSummarizedExperiment: 56963 genes, 2 samples
+NULL
+
+#' A RangedSummarizedExperiment two samples with gene expression data from vignette
+#' aligned against hg19
+#' @docType data
+#' @keywords internal
+#' @name gbm.exp.legacy
+#' @format A RangedSummarizedExperiment: 21022 genes, 2 samples
+NULL
