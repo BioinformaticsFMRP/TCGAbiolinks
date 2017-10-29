@@ -2,13 +2,15 @@
 % Please edit documentation in R/prepare.R
 \name{colDataPrepare}
 \alias{colDataPrepare}
-\title{Create samples information matrix for GDC samples
-Create samples information matrix for GDC samples add subtype information}
+\title{Create samples information matrix for GDC samples}
 \usage{
 colDataPrepare(barcode)
 }
 \arguments{
 \item{barcode}{TCGA or TARGET barcode}
+}
+\description{
+Create samples information matrix for GDC samples add subtype information
 }
 \examples{
 \dontrun{
