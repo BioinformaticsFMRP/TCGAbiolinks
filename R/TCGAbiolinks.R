@@ -99,3 +99,10 @@ NULL
 #' @name bcgsc.ca_CHOL.IlluminaHiSeq_DNASeq.1.somatic.maf
 #' @format A tibble: 3,555 x 34
 NULL
+
+#' MSI data for two samples
+#' @docType data
+#' @keywords internal
+#' @name msi_results
+#' @format A data frame: 2 rows, 4 columns
+NULL
