@@ -65,6 +65,7 @@ r_github_packages:
   - jimhester/withr
   - jimhester/covr
   - hfang-bristol/dnet
+  - PoisonAlien/maftools
 
 after_script:
   - ls -lah
