@@ -34,9 +34,13 @@ This exmaple will download MAF (mutation annotation files) for variant calling p
 Pipelines options are: `muse`, `varscan2`, `somaticsniper`, `mutect`. For more information please access
 [GDC docs](https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/).
 
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval=F}
 maf <- GDCquery_Maf("CHOL", pipelines = "muse")
 ```
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval=T,include=F}
+maf <- chol_maf@data
+```
+
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 # Only first 50 to make render faster
 datatable(maf[1:20,],
