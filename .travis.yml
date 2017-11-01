@@ -40,6 +40,7 @@ bioc_packages:
   - IRanges
   - supraHex
   - S4Vectors
+  - maftools
   - ComplexHeatmap
   - SummarizedExperiment
   - BiocGenerics
