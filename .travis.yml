@@ -76,8 +76,8 @@ after_script:
 after_success:
   -  travis_wait Rscript -e 'library(covr);codecov()'
 
-r_build_args: --no-build-vignettes --no-manual --no-resave-data
-r_check_args: --no-build-vignettes --no-manual
+r_build_args: --no-build-vignettes --no-manual --no-resave-data --no-tests
+r_check_args: --no-build-vignettes --no-manual --no-tests
 
 notifications:
   slack: omics-team:mp8k727GslFLZPQrmuvOkCcc
