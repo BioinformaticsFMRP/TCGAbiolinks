@@ -736,7 +736,10 @@ TCGAvisualize_Heatmap <- function(data,
     # Change label reference
     if(is.null(values.label)){
         if(type == "methylation") values.label <- "DNA methylation level"
-        if(type == "expression") values.label <- "Expression"
+        if(type == "expression") {
+            values.label <- "Expression"
+            if(scale != "none") values.label <- paste0(values.label, "(z-score)")
+        }
     }
     if(!missing(sortCol) & heatmap.legend.color.bar == "continuous"){
         heatmap  <- Heatmap(data, name = values.label,
