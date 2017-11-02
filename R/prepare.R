@@ -615,7 +615,8 @@ colDataPrepareTCGA <- function(barcode){
 #'   query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
 #'                         legacy = TRUE,
 #'                         data.category = "DNA methylation",
-#'                         platform = c("Illumina Human Methylation 450", "Illumina Human Methylation 27"))
+#'                         platform = c("Illumina Human Methylation 450",
+#'                                       "Illumina Human Methylation 27"))
 #'   colDataPrepare(getResults(query.met)$cases)
 #' }
 colDataPrepare <- function(barcode){
