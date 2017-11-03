@@ -122,3 +122,12 @@ NULL
 #' @name gbm.exp.legacy
 #' @format A RangedSummarizedExperiment: 21022 genes, 2 samples
 NULL
+
+#' A DNA methylation RangedSummarizedExperiment for 8 samples (only first 20 probes)
+#' aligned against hg19
+#' @docType data
+#' @keywords internal
+#' @name met.gbm.27k
+#' @format A RangedSummarizedExperiment: 20 probes, 8 samples
+NULL
+
