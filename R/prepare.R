@@ -160,6 +160,12 @@ GDCprepare <- function(query,
             colData(data) <- info
         }
     }
+    if(any(duplicated(data$sample))) {
+        message("Replicates found.")
+        if(any(data$is_ffpe)) message("FFPE should be removed. You can do data with the following command:\ndata <- data[,!data$is_ffpe]")
+        print(as.data.frame(colData(data)[data$sample %in% data$sample[duplicated(data$sample)],c("is_ffpe"),drop=F]))
+    }
+
 
     if(save){
         if(missing(save.filename) & !missing(query)) save.filename <- paste0(query$project,gsub(" ","_", query$data.category),gsub(" ","_",date()),".RData")
@@ -1052,87 +1058,6 @@ getBarcodeInfo <- function(barcode) {
     df <- df[!is.na(df$submitter_id),]
     return(df)
 }
-
-
-
-#' @title Prepare the data for ELEMR package
-#' @description Prepare the data for ELEMR package
-#' @return Matrix prepared for fetch.mee function
-#' @param data A data frame or summarized experiment from TCGAPrepare
-#' @param platform platform of the data. Example: "HumanMethylation450", "IlluminaHiSeq_RNASeqV2"
-#' @param met.na.cut Define the percentage of NA that the line should have to
-#'  remove the probes for humanmethylation platforms.
-#' @param save Save object? Default: FALSE.
-#' Names of the files will be: "Exp_elmer.rda" (object Exp) and "Met_elmer.rda" (object Met)
-#' @export
-#' @examples
-#' df <- data.frame(runif(200, 1e5, 1e6),runif(200, 1e5, 1e6))
-#' rownames(df) <- sprintf("?|%03d", 1:200)
-#' df <- TCGAprepare_elmer(df,platform="IlluminaHiSeq_RNASeqV2")
-TCGAprepare_elmer <- function(data,
-                              platform,
-                              met.na.cut = 0.2,
-                              save = FALSE){
-    # parameters veryfication
-
-    if (missing(data))  stop("Please set the data parameter")
-    if (missing(platform))  stop("Please set the platform parameter")
-
-    if (grepl("illuminahiseq_rnaseqv2|illuminahiseq_totalrnaseqv2",
-              platform, ignore.case = TRUE)) {
-        message("============ Pre-pocessing expression data =============")
-        message(paste0("1 - expression = log2(expression + 1): ",
-                       "To linearize \n    relation between ",
-                       "methylation and expression"))
-        if(typeof(data) == typeof(SummarizedExperiment())){
-            row.names(data) <- paste0("ID",values(data)$entrezgene)
-            data <- assay(data)
-        }
-
-        if(all(grepl("\\|",rownames(data)))){
-            message("2 - rownames  (gene|loci) => ('ID'loci) ")
-            aux <- strsplit(rownames(data),"\\|")
-            GeneID <- unlist(lapply(aux,function(x) x[2]))
-            row.names(data) <- paste0("ID",GeneID)
-        }
-        data <- log2(data+1)
-        Exp <- data.matrix(data)
-
-        if (save)  save(Exp,file = "Exp_elmer.rda")
-        return(Exp)
-    }
-
-    if (grepl("humanmethylation", platform, ignore.case = TRUE)) {
-        message("============ Pre-pocessing methylation data =============")
-        if (class(data) == class(data.frame())){
-            msg <- paste0("1 - Removing Columns: \n  * Gene_Symbol  \n",
-                          "  * Chromosome  \n  * Genomic_Coordinate")
-            message(msg)
-            data <- subset(data,select = 4:ncol(data))
-        }
-        if(typeof(data) == typeof(SummarizedExperiment())){
-            data <- assay(data)
-        }
-        msg <- paste0("2 - Removing probes with ",
-                      "NA values in more than 20% samples")
-        message(msg)
-        data <- data[rowMeans(is.na(data)) < met.na.cut,]
-        Met <- data.matrix(data)
-        if (save)  save(Met,file = "Met_elmer.rda")
-        return (Met)
-    }
-}
-
-# Is this
-# @import From gdata read.xls
-#getPurityinfo <- function(){
-#    message("Adding purity information from: doi:10.1038/ncomms9971")
-#    x <- read.xls("http://www.nature.com/article-assets/npg/ncomms/2015/151204/ncomms9971/extref/ncomms9971-s2.xlsx", na.strings=c("NA","#DIV/0!","NaN"), skip = 2)
-#    x <- x[,c(1,3:7)]
-#    colnames(x)[1] <- "sample"
-#    return(x)
-#}
-
 
 #' @title Prepare CEL files into an AffyBatch.
 #' @description Prepare CEL files into an AffyBatch.
