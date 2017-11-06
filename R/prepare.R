@@ -78,7 +78,7 @@ GDCprepare <- function(query,
     if(missing(query)) stop("Please set query parameter")
     if(any(duplicated(query$results[[1]]$cases)) & query$data.type != "Clinical data" & query$data.type !=  "Protein expression quantification") {
         dup <- query$results[[1]]$cases[duplicated(query$results[[1]]$cases)]
-        dup <- query$results[[1]][sapply(dup, function(x) grep(x,query$results[[1]]$cases)),c(2,4,9,13,15,18)]
+        dup <- query$results[[1]][query$results[[1]]$cases %in% dup,c("tags","cases","experimental_strategy")]
         print(knitr::kable(dup))
         stop("There are samples duplicated. We will not be able to preapre it")
     }
