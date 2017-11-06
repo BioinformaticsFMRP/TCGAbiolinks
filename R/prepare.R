@@ -940,6 +940,9 @@ addFFPE <- function(df) {
     return(df)
 }
 
+# getFFPE("TCGA-A6-6650")
+#' @importFrom plyr rbind.fill
+#' @importFrom httr content
 getFFPE <- function(patient){
     baseURL <- "https://gdc-api.nci.nih.gov/cases/?"
     options.pretty <- "pretty=true"
