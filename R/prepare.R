@@ -656,7 +656,8 @@ colDataPrepare <- function(barcode){
         patient.info
     })
     ret <- merge(ret,patient.info, by.x = "patient", by.y = "submitter_id", all.x = TRUE )
-
+    # Add FFPE information to sample
+    ret <- addFFPE(ret)
     if(!"project_id" %in% colnames(ret)) {
         aux <- getGDCprojects()[,5:6]
         aux <- aux[aux$disease_type == unique(ret$disease_type),2]
@@ -901,6 +902,69 @@ readCopyNumberVariation <- function(files, cases){
     return(df)
 }
 
+# getBarcodeInfo(c("TCGA-A6-6650-01B"))
+addFFPE <- function(df) {
+    message("Add FFPE information. More information at: \n=> https://cancergenome.nih.gov/cancersselected/biospeccriteria \n=> http://gdac.broadinstitute.org/runs/sampleReports/latest/FPPP_FFPE_Cases.html")
+    barcode <- df$barcode
+    patient <- df$patient
+
+    ffpe.info <- NULL
+    ffpe.info <- tryCatch({
+        step <- 20 # more than 50 gives a bug =/
+        for(i in 0:(ceiling(length(df$patient)/step) - 1)){
+            start <- 1 + step * i
+            end <- ifelse(((i + 1) * step) > length(df$patient), length(df$patient),((i + 1) * step))
+            if(is.null(ffpe.info)) {
+                ffpe.info <- getFFPE(df$patient[start:end])
+            } else {
+                ffpe.info <- rbind(ffpe.info,getFFPE(df$patient[start:end]))
+            }
+        }
+        ffpe.info
+    }, error = function(e) {
+        step <- 2
+        for(i in 0:(ceiling(length(df$patient)/step) - 1)){
+            start <- 1 + step * i
+            end <- ifelse(((i + 1) * step) > length(df$patient), length(df$patient),((i + 1) * step))
+            if(is.null(ffpe.info)) {
+                ffpe.info <- getFFPE(df$patient[start:end])
+            } else {
+                ffpe.info <- rbind(ffpe.info,getFFPE(df$patient[start:end]))
+            }
+        }
+        ffpe.info
+    })
+
+    df <- merge(df, ffpe.info,by.x = "sample", by.y = "submitter_id")
+    df <- df[match(barcode,df$barcode),]
+    return(df)
+}
+
+getFFPE <- function(patient){
+    baseURL <- "https://gdc-api.nci.nih.gov/cases/?"
+    options.pretty <- "pretty=true"
+    options.expand <- "expand=samples"
+    option.size <- paste0("size=",length(patient))
+    options.filter <- paste0("filters=",
+                             URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.submitter_id","value":['),
+                             paste0('"',paste(patient,collapse = '","')),
+                             URLencode('"]}}]}'))
+    url <- paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&"))
+    json  <- tryCatch(
+        getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
+        error = function(e) {
+            message(paste("Error: ", e, sep = " "))
+            message("We will retry to access GDC again! URL:")
+            message(url)
+            fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+        }
+    )
+
+    results <- json$data$hits
+    results <- rbind.fill(results$samples)[,c("submitter_id","is_ffpe")]
+    return(results)
+}
+# getBarcodeInfo(c("TCGA-A6-6650"))
 getBarcodeInfo <- function(barcode) {
     baseURL <- "https://gdc-api.nci.nih.gov/cases/?"
     options.pretty <- "pretty=true"
