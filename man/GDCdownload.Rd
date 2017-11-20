@@ -39,14 +39,14 @@ GDCdownload(query, method = "api")
 query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical")
 GDCdownload(query, files.per.chunk = 200)
 \dontrun{
-query <- GDCquery(project = "TARGET-AML",
+    query <- GDCquery(project = "TARGET-AML",
                   data.category = "Transcriptome Profiling",
                   data.type = "miRNA Expression Quantification",
                   workflow.type = "BCGSC miRNA Profiling",
                   barcode = c("TARGET-20-PARUDL-03A-01R","TARGET-20-PASRRB-03A-01R"))
-# data will be saved in:
-# example_data_dir/TARGET-AML/harmonized/Transcriptome_Profiling/miRNA_Expression_Quantification
-GDCdownload(query, method = "client", directory = "example_data_dir")
+    # data will be saved in:
+    # example_data_dir/TARGET-AML/harmonized/Transcriptome_Profiling/miRNA_Expression_Quantification
+    GDCdownload(query, method = "client", directory = "example_data_dir")
     acc.gbm <- GDCquery(project =  c("TCGA-ACC","TCGA-GBM"),
                         data.category = "Transcriptome Profiling",
                         data.type = "Gene Expression Quantification",
