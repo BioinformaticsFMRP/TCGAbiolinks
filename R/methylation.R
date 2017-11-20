@@ -1196,8 +1196,6 @@ TCGAanalyze_DMR <- function(data,
 #' @param title main title
 #' @param names Add the names of the significant genes? Default: FALSE
 #' @param names.fill Names should be filled in a color box?  Default: TRUE
-#' @param circle Circle pair gene/probe that respects diffmean.cut and logFC.cut
-#' Default: TRUE
 #' @param ylab y axis text
 #' @param xlab x axis text
 #' @param xlim x limits to cut image
@@ -1247,29 +1245,30 @@ TCGAanalyze_DMR <- function(data,
 #' exp <- TCGAbiolinks:::get.GRCh.bioMart("hg38")
 #' exp$logFC <- runif(nrow(exp), -5, 5)
 #' exp$FDR <- runif(nrow(exp), 0.01, 1)
+#'
 #' result <- TCGAvisualize_starburst(met,
 #'                                   exp,
 #'                                   exp.p.cut = 0.05,
 #'                                   met.p.cut = 0.05,
+#'                                   logFC.cut = 2,
 #'                                   group1 = "g1",
 #'                                   group2 = "g2",
 #'                                   genome = "hg38",
 #'                                   met.platform = "27K",
 #'                                   diffmean.cut = 0.0,
-#'                                   names  = TRUE,
-#'                                   circle = FALSE)
+#'                                   names  = TRUE)
 #' # It can also receive a data frame as input
 #' result <- TCGAvisualize_starburst(SummarizedExperiment::values(met),
 #'                                   exp,
 #'                                   exp.p.cut = 0.05,
 #'                                   met.p.cut = 0.05,
+#'                                   logFC.cut = 2,
 #'                                   group1 = "g1",
 #'                                   group2 = "g2",
 #'                                   genome = "hg38",
 #'                                   met.platform = "27K",
 #'                                   diffmean.cut = 0.0,
-#'                                   names  = TRUE,
-#'                                   circle = FALSE)
+#'                                   names  = TRUE)
 TCGAvisualize_starburst <- function(met,
                                     exp,
                                     group1 = NULL,
@@ -1282,7 +1281,6 @@ TCGAvisualize_starburst <- function(met,
                                     genome,
                                     names = FALSE,
                                     names.fill = TRUE,
-                                    circle = TRUE,
                                     filename = "starburst.pdf",
                                     return.plot = FALSE,
                                     ylab = expression(atop("Gene Expression",
@@ -1316,6 +1314,26 @@ TCGAvisualize_starburst <- function(met,
 
     group1.col <- gsub("[[:punct:]]| ", ".",group1)
     group2.col <- gsub("[[:punct:]]| ", ".",group2)
+
+    if(title == "Starburst Plot") {
+        if(diffmean.cut != 0 & logFC.cut == 0) {
+            title <- bquote(atop("Starburst Plot",scriptstyle((list(
+                Delta ~ bar(beta) >= .(diffmean.cut),
+                FDR[expression]  <=  .(exp.p.cut),
+                FDR[DNAmethylation]  <=  .(met.p.cut))))))
+        } else if(logFC.cut != 0 & diffmean.cut == 0) {
+            title <- bquote(atop("Starburst Plot",scriptstyle((list(
+                  group("|",logFC,"|")  >=  .(logFC.cut),
+                  FDR[expression]  <=  .(exp.p.cut),
+                  FDR[DNAmethylation]  <=  .(met.p.cut))))))
+        } else if (logFC.cut != 0 & diffmean.cut != 0) {
+            title <- bquote(atop("Starburst Plot",scriptstyle((list(
+                Delta,bar(beta)  >=  .(diffmean.cut),
+                group("|",logFC,"|")  >=  .(logFC.cut),
+                FDR[expression]  <=  .(exp.p.cut),
+                FDR[DNAmethylation]  <=  .(met.p.cut))))))
+        }
+    }
 
     if(is.null(color)) color <- c("#000000", "#E69F00","#56B4E9", "#009E73",
                                   "red", "#0072B2","#D55E00", "#CC79A7",
@@ -1384,6 +1402,7 @@ TCGAvisualize_starburst <- function(met,
     values(met.info) <- NULL
     message("oo Fetching TSS information")
     tss <- getTSS(genome = genome)
+    tss <- promoters(tss,upstream = 0,downstream = 0)
     message("o Mapping probes to nearest TSS")
     dist <- distanceToNearest(tss,met.info)
     g <- suppressWarnings(as.data.frame(tss[queryHits(dist)]))
@@ -1394,13 +1413,19 @@ TCGAvisualize_starburst <- function(met,
     colnames(m) <- paste0("probe_",colnames(m))
     m$probeID <- names(met.info[subjectHits(dist)])
     nearest <- cbind(m,g)
+    nearest$distance_TSS <- values(dist)$distance
+    # Keep only one entry
+    nearest$id <- paste0(nearest$probeID,nearest$ensembl_gene_id)
+    nearest <- nearest[order(nearest$id, -abs(nearest$distance_TSS) ), ]
+    nearest <- nearest[ !duplicated(nearest$id), ]
+    nearest$id <- NULL
+    nearest <- nearest[,c("distance_TSS","probeID","ensembl_gene_id")]
     # END mapping nearest probe to nearest gene
     message("o Mapping results information")
     volcano <- plyr::join(nearest, exp, by = "ensembl_gene_id")
     volcano <- merge(volcano, met, by = "probeID")
 
-    volcano$ID <- paste(volcano$Gene_symbol,volcano$ensembl_transcript_id,
-                        volcano$probeID, sep = ".")
+    volcano$ID <- paste(volcano$ensembl_gene_id, volcano$probeID, sep = ".")
     volcano <- volcano[!is.na(volcano$FDR),] # Some genes have no values
     # Preparing gene expression
     volcano$geFDR <- log10(volcano$FDR)
@@ -1526,19 +1551,6 @@ TCGAvisualize_starburst <- function(met,
                     y = volcano.aux$geFDR2,
                     colour = volcano.aux$threshold.starburst)) +
         geom_point()
-    #p <- p + scale_shape_discrete(
-    #    labels = c("Candidate Biologically Significant"),
-    #    name = "Biological importance")
-
-    if(!is.null(significant) & circle){
-        p <- p + geom_point( data = significant,
-                             aes(x = significant$meFDR2,
-                                 y = significant$geFDR2),
-                             color = "black",
-                             shape=1,
-                             size = 8,
-                             show.legend = FALSE)
-    }
 
     if(names == TRUE & !is.null(significant)){
         message("oo Adding names to genes")
@@ -1552,7 +1564,7 @@ TCGAvisualize_starburst <- function(met,
                 size = 4,
                 show.legend = FALSE,
                 fontface = 'bold',
-                color = 'white',
+                color = 'black',
                 box.padding = unit(0.35, "lines"),
                 point.padding = unit(0.3, "lines")
             ) + scale_fill_manual(values=names.color)
@@ -1608,20 +1620,7 @@ TCGAvisualize_starburst <- function(met,
               axis.title.y = element_text(face = "bold",
                                           size = 14),
               axis.text.y = element_text(size = 14))
-    #p <- p + geom_point( data = significant,
-    #                     aes(x = meFDR2,
-    #                         y = geFDR2), shape=1, size = 10,show_guide = FALSE)
-    #    p <- p + scale_shape_discrete(
-    #        labels = c("Candidate Biologically Significant"),
-    #        name = "Biological importance")
     if(!return.plot) ggsave(filename = filename, width = width, height = height, dpi = dpi)
-
-    #statuscol <- paste("status", group1, group2, sep = ".")
-
-    #volcano <- subset(volcano,select = c("Gene_Symbol",
-    #                                     "probeID",statuscol,
-    #                                     "starburst.status")
-    #)
     volcano$shape <- NULL
     volcano$threshold.starburst <- NULL
     volcano$threshold.size <- NULL
