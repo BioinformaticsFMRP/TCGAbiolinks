@@ -193,14 +193,14 @@ TCGAanalyze_Preprocessing <- function(object,
 #'  tabSurvKM <- TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
 #'                                      dataBRCAcomplete,
 #'                                      Genelist = rownames(dataBRCAcomplete),
-#'                                      Survresult = FALSE,
+#'                                      Survresult = TRUE,
 #'                                      p.cut = 0.2,
 #'                                      ThreshTop = 0.67,
 #'                                      ThreshDown = 0.33)
 TCGAanalyze_SurvivalKM <- function(clinical_patient,
                                    dataGE,
                                    Genelist,
-                                   Survresult,
+                                   Survresult = FALSE,
                                    ThreshTop = 0.67,
                                    ThreshDown = 0.33,
                                    p.cut = 0.05,
@@ -228,7 +228,7 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
     cfu <- cfu[ !(is.na(cfu[,"days_to_last_follow_up"])),]
     cfu <- cfu[ !(is.na(cfu[,"days_to_death"])),]
 
-    followUpLevel <- Survresult <- FALSE
+    followUpLevel <- FALSE
 
     #FC_FDR_table_mRNA
     tabSurv_Matrix<-matrix(0,nrow(as.matrix(rownames(dataNormal))),8)
