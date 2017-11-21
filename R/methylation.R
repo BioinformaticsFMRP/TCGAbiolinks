@@ -1683,7 +1683,7 @@ getMetPlatInfo <- function(genome, platform) {
 #' }
 #' @import GenomeInfoDb
 #' @importFrom GenomicFeatures transcripts
-#' @importFrom GenomicRanges makeGRangesFromDataFrame
+#' @importFrom GenomicRanges makeGRangesFromDataFrame promoters
 #' @importFrom biomaRt useEnsembl
 getTSS <- function(genome = "hg38",
                    TSS = list(upstream = NULL, downstream = NULL)){
