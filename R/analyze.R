@@ -275,11 +275,11 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
             # Low group (below ThreshDown)
             firstelementDOWN <- min(which(mRNAselected_values_ordered<=mRNAselected_values_ordered_down))
 
-            samples_top_mRNA_selected <- colnames( as.matrix(mRNAselected_values_ordered[1:lastelementTOP] ))
-            samples_down_mRNA_selected <- colnames(as.matrix(mRNAselected_values_ordered[firstelementDOWN:numberOfSamples]))
+            samples_top_mRNA_selected <- names(mRNAselected_values_ordered[1:lastelementTOP])
+            samples_down_mRNA_selected <- names(mRNAselected_values_ordered[firstelementDOWN:numberOfSamples])
 
             # Which samples are in the intermediate group (above ThreshLow and below ThreshTop)
-            samples_UNCHANGED_mRNA_selected <- colnames(mRNAselected_values_newvector[which((mRNAselected_values_newvector) > mRNAselected_values_ordered_down &
+            samples_UNCHANGED_mRNA_selected <- names(mRNAselected_values_newvector[which((mRNAselected_values_newvector) > mRNAselected_values_ordered_down &
                                                                                                 mRNAselected_values_newvector < mRNAselected_values_ordered_top )])
 
             cfu_onlyTOP<-cfu_complete[cfu_complete[,"bcr_patient_barcode"] %in% samples_top_mRNA_selected,]
