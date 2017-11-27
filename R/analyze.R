@@ -352,10 +352,10 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
 
     tabSurv_Matrix[tabSurv_Matrix=="-Inf"]<-0
 
-
     tabSurvKM <- tabSurv_Matrix
 
     # Filtering by selected pvalue < 0.01
+    tabSurvKM <- tabSurvKM[tabSurvKM$mRNA != 0,]
     tabSurvKM <- tabSurvKM[tabSurvKM$pvalue < p.cut,]
     tabSurvKM <- tabSurvKM[!duplicated(tabSurvKM$mRNA),]
     rownames(tabSurvKM) <-tabSurvKM$mRNA
