@@ -211,8 +211,8 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
     Genelist <- intersect(rownames(dataGE),Genelist)
 
     # Split gene expression matrix btw the groups
-    dataCancer <- dataGE[Genelist,group2]
-    dataNormal <- dataGE[Genelist,group1]
+    dataCancer <- dataGE[Genelist,group2, drop = FALSE]
+    dataNormal <- dataGE[Genelist,group1, drop = FALSE]
     colnames(dataCancer)  <- substr(colnames(dataCancer),1,12)
 
     cfu <- clinical_patient[clinical_patient[,"bcr_patient_barcode"] %in% substr(colnames(dataCancer),1,12),]
@@ -232,7 +232,14 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
 
     #FC_FDR_table_mRNA
     tabSurv_Matrix<-matrix(0,nrow(as.matrix(rownames(dataNormal))),8)
-    colnames(tabSurv_Matrix)<-c("mRNA","pvalue","Cancer Deaths","Cancer Deaths with Top","Cancer Deaths with Down","Mean Tumor Top","Mean Tumor Down","Mean Normal")
+    colnames(tabSurv_Matrix)<-c("mRNA",
+                                "pvalue",
+                                "Cancer Deaths",
+                                "Cancer Deaths with Top",
+                                "Cancer Deaths with Down",
+                                "Mean Tumor Top",
+                                "Mean Tumor Down",
+                                "Mean Normal")
 
     tabSurv_Matrix<-as.data.frame(tabSurv_Matrix)
 
@@ -248,7 +255,7 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
 
     # Evaluate each gene
     for(i in 1:nrow(as.matrix(rownames(dataNormal))))  {
-        cat(paste( (ngenes-i),".",sep=""))
+        cat(paste0( (ngenes-i),"."))
         mRNAselected <- as.matrix(rownames(dataNormal))[i]
         mRNAselected_values <- dataCancer[rownames(dataCancer) == mRNAselected,]
         mRNAselected_values_normal <- dataNormal[rownames(dataNormal) == mRNAselected,]
@@ -266,8 +273,8 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
 
         if (!is.na(mRNAselected_values_ordered_top)){
 
-            # How many samples do we have in cancer matrix
-            numberOfSamples <- ncol(as.matrix(mRNAselected_values_ordered))
+            # How many samples do we have
+            numberOfSamples <- length(mRNAselected_values_ordered)
 
             # High group (above ThreshTop)
             lastelementTOP <- max(which(mRNAselected_values_ordered>mRNAselected_values_ordered_top))
@@ -280,7 +287,7 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
 
             # Which samples are in the intermediate group (above ThreshLow and below ThreshTop)
             samples_UNCHANGED_mRNA_selected <- names(mRNAselected_values_newvector[which((mRNAselected_values_newvector) > mRNAselected_values_ordered_down &
-                                                                                                mRNAselected_values_newvector < mRNAselected_values_ordered_top )])
+                                                                                             mRNAselected_values_newvector < mRNAselected_values_ordered_top )])
 
             cfu_onlyTOP<-cfu_complete[cfu_complete[,"bcr_patient_barcode"] %in% samples_top_mRNA_selected,]
             cfu_onlyDOWN<-cfu_complete[cfu_complete[,"bcr_patient_barcode"] %in% samples_down_mRNA_selected,]
@@ -321,17 +328,17 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
 
             ttime <- Surv(ttime, status)
             rownames(ttime) <- rownames(cfu)
-            length(ttime)
             legendHigh <- paste(mRNAselected,"High")
             legendLow  <- paste(mRNAselected,"Low")
 
-            tabSurv<-survdiff(ttime  ~ c(rep("top", nrow(cfu_onlyTOP)), rep("down", nrow(cfu_onlyDOWN)) ))
-            tabSurv_chis<-unlist(tabSurv)$chisq
-
-            tabSurv_pvalue <- as.numeric(1 - pchisq(abs(tabSurv$chisq), df = 1))
-
-            tabSurv_Matrix[i,"pvalue"]<-tabSurv_pvalue
-
+            tabSurv_pvalue <- tryCatch({
+                tabSurv <- survdiff(ttime  ~ c(rep("top", nrow(cfu_onlyTOP)), rep("down", nrow(cfu_onlyDOWN)) ))
+                tabSurv_chis<-unlist(tabSurv)$chisq
+                tabSurv_pvalue <- as.numeric(1 - pchisq(abs(tabSurv$chisq), df = 1))
+            }, error = function(e){
+                return(Inf)
+            })
+            tabSurv_Matrix[i,"pvalue"] <- tabSurv_pvalue
 
             if (Survresult ==TRUE) {
                 titlePlot<- paste("Kaplan-Meier Survival analysis, pvalue=",tabSurv_pvalue )
