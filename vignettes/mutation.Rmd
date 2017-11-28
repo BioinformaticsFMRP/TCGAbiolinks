@@ -34,9 +34,13 @@ This exmaple will download MAF (mutation annotation files) for variant calling p
 Pipelines options are: `muse`, `varscan2`, `somaticsniper`, `mutect`. For more information please access
 [GDC docs](https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/).
 
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval=F}
 maf <- GDCquery_Maf("CHOL", pipelines = "muse")
 ```
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval=T,include=F}
+maf <- chol_maf@data
+```
+
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 # Only first 50 to make render faster
 datatable(maf[1:20,],
@@ -64,7 +68,7 @@ datatable(dplyr::select(getResults(query.maf.hg19),-contains("cases")),
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 10), 
           rownames = FALSE)
 ```
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval=FALSE}
 query.maf.hg19 <- GDCquery(project = "TCGA-CHOL", 
                            data.category = "Simple nucleotide variation", 
                            data.type = "Simple somatic mutation",
@@ -73,6 +77,10 @@ query.maf.hg19 <- GDCquery(project = "TCGA-CHOL",
                            legacy = TRUE)
 GDCdownload(query.maf.hg19)
 maf <- GDCprepare(query.maf.hg19)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+data <- bcgsc.ca_CHOL.IlluminaHiSeq_DNASeq.1.somatic.maf
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 # Only first 50 to make render faster
@@ -86,9 +94,19 @@ datatable(maf[1:20,],
 To visualize the data you can use the Bioconductor package [maftools](https://bioconductor.org/packages/release/bioc/html/maftools.html). For more information, please check its [vignette](https://bioconductor.org/packages/release/bioc/vignettes/maftools/inst/doc/maftools.html#rainfall-plots).
 
 
-```{r  results = "hide",echo = TRUE, message = FALSE, warning = FALSE}
+```{r  results = "hide",echo = TRUE, message = FALSE, warning = FALSE, eval=FALSE}
 library(maftools)
-maf <- GDCquery_Maf("CHOL", pipelines = "muse") %>% read.maf(removeSilent = TRUE, useAll = FALSE)
+library(dplyr)
+maf <- GDCquery_Maf("CHOL", pipelines = "muse") %>% read.maf
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(maftools)
+library(dplyr)
+maf <- chol_maf
+```
+
+```{r  results = "hide",echo = TRUE, message = FALSE, warning = FALSE}
 datatable(getSampleSummary(maf),
           filter = 'top',
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
