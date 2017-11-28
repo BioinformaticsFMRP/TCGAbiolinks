@@ -8,8 +8,8 @@
 #' @param method Uses the API (POST method) or gdc client tool. Options "api", "client".
 #' API is faster, but the data might get corrupted in the download, and it might need to be executed again
 #' @param directory Directory/Folder where the data was downloaded. Default: GDCdata
-#' @param chunks.per.download This will make the API method only download n (chunks.per.download) files at a time.
-#' This may reduce the download problems when the data size is too large. Expected a integer number (example chunks.per.download = 6)
+#' @param files.per.chunk This will make the API method only download n (files.per.chunk) files at a time.
+#' This may reduce the download problems when the data size is too large. Expected a integer number (example files.per.chunk = 6)
 #' @importFrom tools md5sum
 #' @importFrom utils untar
 #' @import httr
@@ -24,28 +24,28 @@
 #' # data will be saved in  GDCdata/TCGA-ACC/legacy/Copy_number_variation/Copy_number_segmentation
 #' GDCdownload(query, method = "api")
 #' query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical")
-#' GDCdownload(query, chunks.per.download = 200)
+#' GDCdownload(query, files.per.chunk = 200)
 #' \dontrun{
-#' query <- GDCquery(project = "TARGET-AML",
+#'     query <- GDCquery(project = "TARGET-AML",
 #'                   data.category = "Transcriptome Profiling",
 #'                   data.type = "miRNA Expression Quantification",
 #'                   workflow.type = "BCGSC miRNA Profiling",
 #'                   barcode = c("TARGET-20-PARUDL-03A-01R","TARGET-20-PASRRB-03A-01R"))
-#' # data will be saved in:
-#' # example_data_dir/TARGET-AML/harmonized/Transcriptome_Profiling/miRNA_Expression_Quantification
-#' GDCdownload(query, method = "client", directory = "example_data_dir")
+#'     # data will be saved in:
+#'     # example_data_dir/TARGET-AML/harmonized/Transcriptome_Profiling/miRNA_Expression_Quantification
+#'     GDCdownload(query, method = "client", directory = "example_data_dir")
 #'     acc.gbm <- GDCquery(project =  c("TCGA-ACC","TCGA-GBM"),
 #'                         data.category = "Transcriptome Profiling",
 #'                         data.type = "Gene Expression Quantification",
 #'                         workflow.type = "HTSeq - Counts")
-#'     GDCdownload(acc.gbm, method = "api", directory = "example", chunks.per.download = 50)
+#'     GDCdownload(acc.gbm, method = "api", directory = "example", files.per.chunk = 50)
 #' }
 #' @return Shows the output from the GDC transfer tools
 GDCdownload <- function(query,
                         token.file,
                         method = "api",
                         directory = "GDCdata",
-                        chunks.per.download = NULL) {
+                        files.per.chunk = NULL) {
     isServeOK()
     if(missing(query)) stop("Please set query argument")
 
@@ -61,8 +61,7 @@ GDCdownload <- function(query,
         results <- getResults(query.aux)[getResults(query.aux)$project == proj,]
         query.aux$results[[1]] <- results
 
-        manifest <- query.aux$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
-        colnames(manifest) <- c("id","filename","md5","size","state")
+        manifest <- generateManifest(query.aux)
 
         path <- unique(file.path(proj, source,
                                  gsub(" ","_", results$data_category),
@@ -119,12 +118,12 @@ GDCdownload <- function(query,
 
             server <- ifelse(query$legacy,"https://gdc-api.nci.nih.gov/legacy/data/", "https://gdc-api.nci.nih.gov/data/")
 
-            if(is.null(chunks.per.download) & sum(as.numeric(manifest$size)) > 10^9) {
+            if(is.null(files.per.chunk) & sum(as.numeric(manifest$size)) > 10^9) {
                 message("The total size of files is big. We will download files in chunks")
-                chunks.per.download <- floor(10^9/mean(as.numeric(manifest$size)))
+                files.per.chunk <- floor(10^9/mean(as.numeric(manifest$size)))
             }
 
-            if(is.null(chunks.per.download)) {
+            if(is.null(files.per.chunk)) {
                 message(paste0("Downloading as: ", name))
                 tryCatch({
                     GDCdownload.aux(server, manifest, name, path)
@@ -137,7 +136,7 @@ GDCdownload <- function(query,
                     GDCdownload.by.chunk(server, manifest, name, path, step)
                 })
             } else {
-                step <- chunks.per.download
+                step <- files.per.chunk
                 # If error we will try another time.
                 tryCatch({
                     GDCdownload.by.chunk(server, manifest, name, path, step)
@@ -151,6 +150,12 @@ GDCdownload <- function(query,
             message("All samples have been already downloaded")
         }
     }
+}
+
+generateManifest <- function(query) {
+    manifest <- query$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
+    colnames(manifest) <- c("id","filename","md5","size","state")
+    return(manifest)
 }
 
 GDCdownload.by.chunk <- function(server, manifest, name, path, step){
@@ -211,7 +216,7 @@ GDCdownload.aux <- function(server, manifest, name, path){
     })
     if(result == -1) stop(paste0("There was an error in the download process (we might had a connection problem with GDC server).",
                                  "\nPlease run this function it again.",
-                                 "\nTry using method = `client` or setting chunks.per.download to a small number."))
+                                 "\nTry using method = `client` or setting files.per.chunk to a small number."))
     message("Download completed")
 }
 
