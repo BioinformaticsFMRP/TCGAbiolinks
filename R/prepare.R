@@ -17,6 +17,10 @@
 #' Four separate variant calling pipelines are implemented for GDC data harmonization.
 #' Options: muse, varscan2, somaticsniper, MuTect2. For more information:
 #' https://gdc-docs.nci.nih.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/
+#' @param mutant_variant_classification List of mutant_variant_classification that will be
+#' consider a sample mutant or not. Default: "Frame_Shift_Del", "Frame_Shift_Ins",
+#' "Missense_Mutation", "Nonsense_Mutation", "Splice_Site", "In_Frame_Del",
+#' "In_Frame_Ins", "Translation_Start_Site", "Nonstop_Mutation"
 #' @export
 #' @examples
 #' query <- GDCquery(project = "TCGA-KIRP",
@@ -59,13 +63,23 @@ GDCprepare <- function(query,
                        summarizedExperiment = TRUE,
                        remove.files.prepared = FALSE,
                        add.gistic2.mut = NULL,
-                       mut.pipeline = "mutect2"){
+                       mut.pipeline = "mutect2",
+                       mutant_variant_classification = c("Frame_Shift_Del",
+                                                         "Frame_Shift_Ins",
+                                                         "Missense_Mutation",
+                                                         "Nonsense_Mutation",
+                                                         "Splice_Site",
+                                                         "In_Frame_Del",
+                                                         "In_Frame_Ins",
+                                                         "Translation_Start_Site",
+                                                         "Nonstop_Mutation")){
 
     isServeOK()
     if(missing(query)) stop("Please set query parameter")
     if(any(duplicated(query$results[[1]]$cases)) & query$data.type != "Clinical data" & query$data.type !=  "Protein expression quantification") {
         dup <- query$results[[1]]$cases[duplicated(query$results[[1]]$cases)]
-        dup <- query$results[[1]][sapply(dup, function(x) grep(x,query$results[[1]]$cases)),c(2,4,9,13,15,18)]
+        dup <- query$results[[1]][query$results[[1]]$cases %in% dup,c("tags","cases","experimental_strategy")]
+        dup <- dup[order(dup$cases),]
         print(knitr::kable(dup))
         stop("There are samples duplicated. We will not be able to preapre it")
     }
@@ -138,11 +152,21 @@ GDCprepare <- function(query,
         if(length(add.gistic2.mut) > 0){
             info <- colData(data)
             for(i in unlist(query$project)){
-                info <- get.mut.gistc.information(info,i, add.gistic2.mut, mut.pipeline = mut.pipeline)
+                info <- get.mut.gistc.information(info,
+                                                  i,
+                                                  add.gistic2.mut,
+                                                  mut.pipeline = mut.pipeline,
+                                                  mutant_variant_classification = mutant_variant_classification)
             }
             colData(data) <- info
         }
     }
+    if(any(duplicated(data$sample))) {
+        message("Replicates found.")
+        if(any(data$is_ffpe)) message("FFPE should be removed. You can do data with the following command:\ndata <- data[,!data$is_ffpe]")
+        print(as.data.frame(colData(data)[data$sample %in% data$sample[duplicated(data$sample)],c("is_ffpe"),drop=F]))
+    }
+
 
     if(save){
         if(missing(save.filename) & !missing(query)) save.filename <- paste0(query$project,gsub(" ","_", query$data.category),gsub(" ","_",date()),".RData")
@@ -255,7 +279,11 @@ readSimpleNucleotideVariationMaf <- function(files){
     return(ret)
 }
 
-readGeneExpressionQuantification <- function(files, cases, summarizedExperiment = TRUE, experimental.strategy, platform){
+readGeneExpressionQuantification <- function(files,
+                                             cases,
+                                             summarizedExperiment = TRUE,
+                                             experimental.strategy,
+                                             platform){
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
 
     skip <- unique((ifelse(experimental.strategy == "Gene expression array",1,0)))
@@ -264,7 +292,11 @@ readGeneExpressionQuantification <- function(files, cases, summarizedExperiment 
 
     for (i in seq_along(files)) {
         suppressWarnings({
-            data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE,skip = skip)
+            data <- fread(files[i],
+                          header = TRUE,
+                          sep = "\t",
+                          stringsAsFactors = FALSE,
+                          skip = skip)
         })
         if(!missing(cases)) {
             assay.list <- gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)])
@@ -275,7 +307,7 @@ readGeneExpressionQuantification <- function(files, cases, summarizedExperiment 
         if (i == 1) {
             df <- data
         } else {
-            df <- merge(df, data, by=colnames(data)[1], all = TRUE)
+            df <- merge(df, data, by = colnames(data)[1], all = TRUE)
         }
         setTxtProgressBar(pb, i)
     }
@@ -583,13 +615,15 @@ colDataPrepareTCGA <- function(barcode){
 }
 
 #' @title Create samples information matrix for GDC samples
-#' Create samples information matrix for GDC samples add subtype information
+#' @description Create samples information matrix for GDC samples add subtype information
+#' @param barcode TCGA or TARGET barcode
 #' @examples
 #' \dontrun{
 #'   query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
 #'                         legacy = TRUE,
 #'                         data.category = "DNA methylation",
-#'                         platform = c("Illumina Human Methylation 450", "Illumina Human Methylation 27"))
+#'                         platform = c("Illumina Human Methylation 450",
+#'                                       "Illumina Human Methylation 27"))
 #'   colDataPrepare(getResults(query.met)$cases)
 #' }
 colDataPrepare <- function(barcode){
@@ -629,7 +663,8 @@ colDataPrepare <- function(barcode){
         patient.info
     })
     ret <- merge(ret,patient.info, by.x = "patient", by.y = "submitter_id", all.x = TRUE )
-
+    # Add FFPE information to sample
+    ret <- addFFPE(ret)
     if(!"project_id" %in% colnames(ret)) {
         aux <- getGDCprojects()[,5:6]
         aux <- aux[aux$disease_type == unique(ret$disease_type),2]
@@ -650,7 +685,7 @@ colDataPrepare <- function(barcode){
         if(grepl("TCGA",proj,ignore.case = TRUE)) {
             message(" => Adding subtype information to samples")
             tumor <- gsub("TCGA-","",proj)
-            if (grepl("acc|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|pcpg|kirp|kirc|all",
+            if (grepl("acc|esca|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|pcpg|kirp|kirc|all",
                       tumor,ignore.case = TRUE)) {
                 subtype <- TCGAquery_subtype(tumor)
                 colnames(subtype) <- paste0("subtype_", colnames(subtype))
@@ -775,7 +810,7 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
     gene.location <- get.GRCh.bioMart("hg38")
     aux <- strsplit(data$X1,"\\.")
     data$ensembl_gene_id <- as.character(unlist(lapply(aux,function(x) x[1])))
-
+    data <- subset(data, grepl("ENSG", data$ensembl_gene_id))
     found.genes <- table(data$ensembl_gene_id %in% gene.location$ensembl_gene_id)
     if("FALSE" %in% names(found.genes))
         message(paste0("From the ", nrow(data), " genes we couldn't map ", found.genes[["FALSE"]]))
@@ -874,6 +909,72 @@ readCopyNumberVariation <- function(files, cases){
     return(df)
 }
 
+# getBarcodeInfo(c("TCGA-A6-6650-01B"))
+addFFPE <- function(df) {
+    message("Add FFPE information. More information at: \n=> https://cancergenome.nih.gov/cancersselected/biospeccriteria \n=> http://gdac.broadinstitute.org/runs/sampleReports/latest/FPPP_FFPE_Cases.html")
+    barcode <- df$barcode
+    patient <- df$patient
+
+    ffpe.info <- NULL
+    ffpe.info <- tryCatch({
+        step <- 20 # more than 50 gives a bug =/
+        for(i in 0:(ceiling(length(df$patient)/step) - 1)){
+            start <- 1 + step * i
+            end <- ifelse(((i + 1) * step) > length(df$patient), length(df$patient),((i + 1) * step))
+            if(is.null(ffpe.info)) {
+                ffpe.info <- getFFPE(df$patient[start:end])
+            } else {
+                ffpe.info <- rbind(ffpe.info,getFFPE(df$patient[start:end]))
+            }
+        }
+        ffpe.info
+    }, error = function(e) {
+        step <- 2
+        for(i in 0:(ceiling(length(df$patient)/step) - 1)){
+            start <- 1 + step * i
+            end <- ifelse(((i + 1) * step) > length(df$patient), length(df$patient),((i + 1) * step))
+            if(is.null(ffpe.info)) {
+                ffpe.info <- getFFPE(df$patient[start:end])
+            } else {
+                ffpe.info <- rbind(ffpe.info,getFFPE(df$patient[start:end]))
+            }
+        }
+        ffpe.info
+    })
+
+    df <- merge(df, ffpe.info,by.x = "sample", by.y = "submitter_id")
+    df <- df[match(barcode,df$barcode),]
+    return(df)
+}
+
+# getFFPE("TCGA-A6-6650")
+#' @importFrom plyr rbind.fill
+#' @importFrom httr content
+getFFPE <- function(patient){
+    baseURL <- "https://gdc-api.nci.nih.gov/cases/?"
+    options.pretty <- "pretty=true"
+    options.expand <- "expand=samples"
+    option.size <- paste0("size=",length(patient))
+    options.filter <- paste0("filters=",
+                             URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.submitter_id","value":['),
+                             paste0('"',paste(patient,collapse = '","')),
+                             URLencode('"]}}]}'))
+    url <- paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&"))
+    json  <- tryCatch(
+        getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
+        error = function(e) {
+            message(paste("Error: ", e, sep = " "))
+            message("We will retry to access GDC again! URL:")
+            message(url)
+            fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+        }
+    )
+
+    results <- json$data$hits
+    results <- rbind.fill(results$samples)[,c("submitter_id","is_ffpe")]
+    return(results)
+}
+# getBarcodeInfo(c("TCGA-A6-6650"))
 getBarcodeInfo <- function(barcode) {
     baseURL <- "https://gdc-api.nci.nih.gov/cases/?"
     options.pretty <- "pretty=true"
@@ -958,87 +1059,6 @@ getBarcodeInfo <- function(barcode) {
     df <- df[!is.na(df$submitter_id),]
     return(df)
 }
-
-
-
-#' @title Prepare the data for ELEMR package
-#' @description Prepare the data for ELEMR package
-#' @return Matrix prepared for fetch.mee function
-#' @param data A data frame or summarized experiment from TCGAPrepare
-#' @param platform platform of the data. Example: "HumanMethylation450", "IlluminaHiSeq_RNASeqV2"
-#' @param met.na.cut Define the percentage of NA that the line should have to
-#'  remove the probes for humanmethylation platforms.
-#' @param save Save object? Default: FALSE.
-#' Names of the files will be: "Exp_elmer.rda" (object Exp) and "Met_elmer.rda" (object Met)
-#' @export
-#' @examples
-#' df <- data.frame(runif(200, 1e5, 1e6),runif(200, 1e5, 1e6))
-#' rownames(df) <- sprintf("?|%03d", 1:200)
-#' df <- TCGAprepare_elmer(df,platform="IlluminaHiSeq_RNASeqV2")
-TCGAprepare_elmer <- function(data,
-                              platform,
-                              met.na.cut = 0.2,
-                              save = FALSE){
-    # parameters veryfication
-
-    if (missing(data))  stop("Please set the data parameter")
-    if (missing(platform))  stop("Please set the platform parameter")
-
-    if (grepl("illuminahiseq_rnaseqv2|illuminahiseq_totalrnaseqv2",
-              platform, ignore.case = TRUE)) {
-        message("============ Pre-pocessing expression data =============")
-        message(paste0("1 - expression = log2(expression + 1): ",
-                       "To linearize \n    relation between ",
-                       "methylation and expression"))
-        if(typeof(data) == typeof(SummarizedExperiment())){
-            row.names(data) <- paste0("ID",values(data)$entrezgene)
-            data <- assay(data)
-        }
-
-        if(all(grepl("\\|",rownames(data)))){
-            message("2 - rownames  (gene|loci) => ('ID'loci) ")
-            aux <- strsplit(rownames(data),"\\|")
-            GeneID <- unlist(lapply(aux,function(x) x[2]))
-            row.names(data) <- paste0("ID",GeneID)
-        }
-        data <- log2(data+1)
-        Exp <- data.matrix(data)
-
-        if (save)  save(Exp,file = "Exp_elmer.rda")
-        return(Exp)
-    }
-
-    if (grepl("humanmethylation", platform, ignore.case = TRUE)) {
-        message("============ Pre-pocessing methylation data =============")
-        if (class(data) == class(data.frame())){
-            msg <- paste0("1 - Removing Columns: \n  * Gene_Symbol  \n",
-                          "  * Chromosome  \n  * Genomic_Coordinate")
-            message(msg)
-            data <- subset(data,select = 4:ncol(data))
-        }
-        if(typeof(data) == typeof(SummarizedExperiment())){
-            data <- assay(data)
-        }
-        msg <- paste0("2 - Removing probes with ",
-                      "NA values in more than 20% samples")
-        message(msg)
-        data <- data[rowMeans(is.na(data)) < met.na.cut,]
-        Met <- data.matrix(data)
-        if (save)  save(Met,file = "Met_elmer.rda")
-        return (Met)
-    }
-}
-
-# Is this
-# @import From gdata read.xls
-#getPurityinfo <- function(){
-#    message("Adding purity information from: doi:10.1038/ncomms9971")
-#    x <- read.xls("http://www.nature.com/article-assets/npg/ncomms/2015/151204/ncomms9971/extref/ncomms9971-s2.xlsx", na.strings=c("NA","#DIV/0!","NaN"), skip = 2)
-#    x <- x[,c(1,3:7)]
-#    colnames(x)[1] <- "sample"
-#    return(x)
-#}
-
 
 #' @title Prepare CEL files into an AffyBatch.
 #' @description Prepare CEL files into an AffyBatch.
