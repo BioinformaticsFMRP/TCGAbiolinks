@@ -140,13 +140,13 @@ Reference: [TCGA wiki](https://wiki.nci.nih.gov/display/TCGA/Microsatellite+data
 
 Level 3 data is included in BCR clinical-based submissions and can be downloaded as follows:
 
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
-
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval = F}
 query <- GDCquery(project = "TCGA-COAD", 
                   data.category = "Other",
-                  legacy = TRUE,access = "open",
+                  legacy = TRUE,
+                  access = "open",
                   data.type = "Auxiliary test",
-                   barcode = c("TCGA-AD-A5EJ","TCGA-DM-A0X9"))  
+                  barcode = c("TCGA-AD-A5EJ","TCGA-DM-A0X9"))  
 GDCdownload(query)
 msi_results <- GDCprepare_clinic(query, "msi")
 ```

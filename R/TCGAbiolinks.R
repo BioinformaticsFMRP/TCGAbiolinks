@@ -86,3 +86,48 @@ NULL
 #' @format A data frame with 11382 rows and 3 variables
 NULL
 
+#' TCGA CHOL MAF transformed to maftools obejct
+#' @docType data
+#' @keywords internal
+#' @name chol_maf
+#' @format An object of class  MAF
+NULL
+
+#' TCGA CHOL MAF
+#' @docType data
+#' @keywords internal
+#' @name bcgsc.ca_CHOL.IlluminaHiSeq_DNASeq.1.somatic.maf
+#' @format A tibble: 3,555 x 34
+NULL
+
+#' MSI data for two samples
+#' @docType data
+#' @keywords internal
+#' @name msi_results
+#' @format A data frame: 2 rows, 4 columns
+NULL
+
+#' A RangedSummarizedExperiment two samples with gene expression data from vignette
+#' aligned against hg38
+#' @docType data
+#' @keywords internal
+#' @name gbm.exp.harmonized
+#' @format A RangedSummarizedExperiment: 56963 genes, 2 samples
+NULL
+
+#' A RangedSummarizedExperiment two samples with gene expression data from vignette
+#' aligned against hg19
+#' @docType data
+#' @keywords internal
+#' @name gbm.exp.legacy
+#' @format A RangedSummarizedExperiment: 21022 genes, 2 samples
+NULL
+
+#' A DNA methylation RangedSummarizedExperiment for 8 samples (only first 20 probes)
+#' aligned against hg19
+#' @docType data
+#' @keywords internal
+#' @name met.gbm.27k
+#' @format A RangedSummarizedExperiment: 20 probes, 8 samples
+NULL
+

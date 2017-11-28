@@ -263,21 +263,21 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
     xpath <- NULL
 
     disease <- tolower(gsub("TCGA-","",query$project))
-    if(tolower(clinical.info) == "drug")      xpath <- "//rx:drug"
-    else if(tolower(clinical.info) == "admin")     xpath <- "//admin:admin"
+    if(tolower(clinical.info) == "drug") xpath <- "//rx:drug"
+    else if(tolower(clinical.info) == "admin") xpath <- "//admin:admin"
     else if(tolower(clinical.info) == "radiation") xpath <- "//rad:radiation"
-    else if(tolower(clinical.info) == "patient")   xpath <- paste0("//",disease,":patient")
-    else if(tolower(clinical.info) == "stage_event")     xpath <- "//shared_stage:stage_event"
+    else if(tolower(clinical.info) == "patient") xpath <- paste0("//",disease,":patient")
+    else if(tolower(clinical.info) == "stage_event") xpath <- "//shared_stage:stage_event"
     else if(tolower(clinical.info) == "new_tumor_event") xpath <- paste0("//",disease,"_nte:new_tumor_event")
     # biospecimen xpaths
-    else if(tolower(clinical.info) == "sample")      xpath <- "//bio:sample"
-    else if(tolower(clinical.info) == "bio_patient")      xpath <- "//bio:patient"
-    else if(tolower(clinical.info) == "analyte")      xpath <- "//bio:analyte"
-    else if(tolower(clinical.info) == "aliquot")      xpath <- "//bio:aliquot"
-    else if(tolower(clinical.info) == "protocol")      xpath <- "//bio:protocol"
-    else if(tolower(clinical.info) == "portion")      xpath <- "//bio:portion"
-    else if(tolower(clinical.info) == "slide")  xpath <- "//bio:slide"
-    else if(tolower(clinical.info)  == "msi")  xpath <- "//auxiliary:microsatellite_instability_test_result"
+    else if(tolower(clinical.info) == "sample") xpath <- "//bio:sample"
+    else if(tolower(clinical.info) == "bio_patient")  xpath <- "//bio:patient"
+    else if(tolower(clinical.info) == "analyte") xpath <- "//bio:analyte"
+    else if(tolower(clinical.info) == "aliquot") xpath <- "//bio:aliquot"
+    else if(tolower(clinical.info) == "protocol") xpath <- "//bio:protocol"
+    else if(tolower(clinical.info) == "portion") xpath <- "//bio:portion"
+    else if(tolower(clinical.info) == "slide") xpath <- "//bio:slide"
+    else if(tolower(clinical.info)  == "msi") xpath <- "//auxiliary:microsatellite_instability_test_result"
 
     if(tolower(clinical.info) == "follow_up") {
         follow_up_version <- sort(unique(unlist(sapply(files,function(x) {
@@ -330,7 +330,14 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
         }
 
     }
-    if(tolower(clinical.info) == "samples") clin$samples <- NULL
+    if(tolower(clinical.info) == "sample") {
+        clin$portions <- NULL
+        clin$samples <- NULL
+    }
+    if(tolower(clinical.info) == "bio_patient") {
+        clin$samples <- NULL
+    }
+
     if(tolower(clinical.info) == "portion") {
         for(i in c("slides","analytes")){
             clin[,i] <- as.character(clin[,i])
@@ -415,7 +422,7 @@ parseXML <- function(files, xpath, clinical.info ){
 #' dataSubt <- TCGAquery_subtype(tumor = "lgg")
 #' @return a data.frame with barcode and molecular subtypes
 TCGAquery_subtype <- function(tumor){
-    if (grepl("acc|lgg|gbm|luad|stad|brca|coad|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|pcpg|kirp|kirc|all",
+    if (grepl("acc|lgg|gbm|luad|stad|brca|coad|esca|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|pcpg|kirp|kirc|all",
               tumor,ignore.case = TRUE)) {
 
         doi <- c("acc"="doi:10.1016/j.ccell.2016.04.002",
@@ -423,6 +430,7 @@ TCGAquery_subtype <- function(tumor){
                  "blca"="doi:10.1038/nature12965",
                  "brca"="doi:10.1038/nature11412",
                  "coad"="doi:10.1038/nature11252",
+                 "esca"="doi:10.1038/nature20805",
                  "gbm"="doi:10.1016/j.cell.2015.12.028",
                  "lgg"="doi:10.1016/j.cell.2015.12.028",
                  "hnsc"="doi:10.1038/nature14129",
@@ -445,7 +453,7 @@ TCGAquery_subtype <- function(tumor){
 
         if(tolower(tumor) != "all") message(paste0("Subtype information from:", doi[tolower(tumor)]))
         if(tolower(tumor) == "all") {
-            all.tumor <- c("acc","lgg", "gbm", "luad", "stad", "brca", "coad",
+            all.tumor <- c("acc","lgg", "esca","gbm", "luad", "stad", "brca", "coad",
                            "skcm", "hnsc", 'kich', "lusc", "ucec", "pancan", "thca",
                            "prad","kirp","kirc")
             all <- NULL
@@ -483,7 +491,7 @@ TCGAquery_subtype <- function(tumor){
         }
         return(get(paste0(tolower(tumor),".subtype")))
     } else {
-        stop("For the moment we have only subtype for: acc, brca, coad, gbm, hnsc, kich, kirp, kirc, lgg, luad, lusc, prad, pancan, read, skcm, stad, thca and ucec")
+        stop("For the moment we have only subtype for: acc, brca, coad, esca, gbm, hnsc, kich, kirp, kirc, lgg, luad, lusc, prad, pancan, read, skcm, stad, thca and ucec")
     }
 }
 
