@@ -5,7 +5,7 @@
 \title{Download GDC data}
 \usage{
 GDCdownload(query, token.file, method = "api", directory = "GDCdata",
-  chunks.per.download = NULL)
+  files.per.chunk = NULL)
 }
 \arguments{
 \item{query}{A query for GDCquery function}
@@ -17,8 +17,8 @@ API is faster, but the data might get corrupted in the download, and it might ne
 
 \item{directory}{Directory/Folder where the data was downloaded. Default: GDCdata}
 
-\item{chunks.per.download}{This will make the API method only download n (chunks.per.download) files at a time.
-This may reduce the download problems when the data size is too large. Expected a integer number (example chunks.per.download = 6)}
+\item{files.per.chunk}{This will make the API method only download n (files.per.chunk) files at a time.
+This may reduce the download problems when the data size is too large. Expected a integer number (example files.per.chunk = 6)}
 }
 \value{
 Shows the output from the GDC transfer tools
@@ -37,20 +37,20 @@ query <- GDCquery(project = "TCGA-ACC",
 # data will be saved in  GDCdata/TCGA-ACC/legacy/Copy_number_variation/Copy_number_segmentation
 GDCdownload(query, method = "api")
 query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical")
-GDCdownload(query, chunks.per.download = 200)
+GDCdownload(query, files.per.chunk = 200)
 \dontrun{
-query <- GDCquery(project = "TARGET-AML",
+    query <- GDCquery(project = "TARGET-AML",
                   data.category = "Transcriptome Profiling",
                   data.type = "miRNA Expression Quantification",
                   workflow.type = "BCGSC miRNA Profiling",
                   barcode = c("TARGET-20-PARUDL-03A-01R","TARGET-20-PASRRB-03A-01R"))
-# data will be saved in:
-# example_data_dir/TARGET-AML/harmonized/Transcriptome_Profiling/miRNA_Expression_Quantification
-GDCdownload(query, method = "client", directory = "example_data_dir")
+    # data will be saved in:
+    # example_data_dir/TARGET-AML/harmonized/Transcriptome_Profiling/miRNA_Expression_Quantification
+    GDCdownload(query, method = "client", directory = "example_data_dir")
     acc.gbm <- GDCquery(project =  c("TCGA-ACC","TCGA-GBM"),
                         data.category = "Transcriptome Profiling",
                         data.type = "Gene Expression Quantification",
                         workflow.type = "HTSeq - Counts")
-    GDCdownload(acc.gbm, method = "api", directory = "example", chunks.per.download = 50)
+    GDCdownload(acc.gbm, method = "api", directory = "example", files.per.chunk = 50)
 }
 }

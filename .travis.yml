@@ -40,6 +40,7 @@ bioc_packages:
   - IRanges
   - supraHex
   - S4Vectors
+  - maftools
   - ComplexHeatmap
   - SummarizedExperiment
   - BiocGenerics
@@ -65,6 +66,7 @@ r_github_packages:
   - jimhester/withr
   - jimhester/covr
   - hfang-bristol/dnet
+  - PoisonAlien/maftools
 
 after_script:
   - ls -lah
@@ -74,8 +76,8 @@ after_script:
 after_success:
   -  travis_wait Rscript -e 'library(covr);codecov()'
 
-r_build_args: --no-build-vignettes --no-manual --no-resave-data
-r_check_args: --no-build-vignettes --no-manual
+r_build_args: --no-build-vignettes --no-manual --no-resave-data --no-tests
+r_check_args: --no-build-vignettes --no-manual --no-tests
 
 notifications:
   slack: omics-team:mp8k727GslFLZPQrmuvOkCcc
