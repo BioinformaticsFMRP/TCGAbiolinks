@@ -171,19 +171,10 @@ checkBarcodeDefinition <- function(definition){
 #' projects <- getGDCprojects()
 #' @return A data frame with last GDC projects
 getGDCprojects <- function(){
-
-    projects  <- tryCatch({
-        projects <- read_tsv("https://gdc-api.nci.nih.gov/projects?size=1000&format=tsv", col_types = "cccccccc")
-        projects$tumor <- unlist(lapply(projects$project_id, function(x){unlist(str_split(x,"-"))[2]}))
-        return(projects)
-    }, error = function(e) {
-        Sys.sleep(1)
-        url <- "https://gdc-api.nci.nih.gov/projects?size=1000&format=json"
-        json <- fromJSON(content(GET(url), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
-        projects <- json$data$hits
-        projects$tumor <- unlist(lapply(projects$project_id, function(x){unlist(str_split(x,"-"))[2]}))
-        return(projects)
-    })
+    url <- "https://gdc-api.nci.nih.gov/projects?size=1000&format=json"
+    json <- fromJSON(content(GET(url), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+    projects <- json$data$hits
+    projects$tumor <- unlist(lapply(projects$project_id, function(x){unlist(str_split(x,"-"))[2]}))
     if(nrow(projects) == 0) stop("I couldn't access GDC API. Please, check if it is not down.")
     return(projects)
 }
@@ -567,8 +558,11 @@ getGistic <- function(disease, type = "thresholded") {
         if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
         downloader::download(file.path(base,x[1]),x[1], mode = mode)
     }
-    # Check if downlaod was not corrupted
-    md5 <- readr::read_table(file.path(base,x[2]), col_names = FALSE, progress = FALSE)$X1
+    # Check if download was not corrupted
+    md5 <- readr::read_table(file.path(base,x[2]),
+                             col_names = FALSE,
+                             progress = FALSE,
+                             col_types = "cc")$X1
     if(tools::md5sum(x[1]) != md5) stop("Error while downloading CNV data")
     file <- paste0(gsub(".tar.gz","",x[1]),"/",file.type)
     if(!file.exists(file)) {
@@ -597,16 +591,43 @@ get.cnv <- function(project, genes){
     return(cnv.annotation)
 }
 
-get.mutation <- function(project, genes, pipeline = pipeline){
+get.mutation <- function(project,
+                         genes,
+                         pipeline = pipeline,
+                         mutant_variant_classification = c("Frame_Shift_Del",
+                                                           "Frame_Shift_Ins",
+                                                           "Missense_Mutation",
+                                                           "Nonsense_Mutation",
+                                                           "Splice_Site",
+                                                           "In_Frame_Del",
+                                                           "In_Frame_Ins",
+                                                           "Translation_Start_Site",
+                                                           "Nonstop_Mutation")){
     if(missing(project)) stop("Argument project is missing")
     if(missing(genes)) stop("Argument genes is missing")
 
     # Get mutation annotation file
     maf <- GDCquery_Maf(gsub("TCGA-","",project),pipelines = pipeline)
+
+    message(paste0("Consindering only the mutant_variant_classification mutations: \n o ",
+                   paste(mutant_variant_classification, collapse = "\n o ")))
+    # We will select only genes with mutation in the exon
+    idx <- unique(
+        unlist(
+            sapply(
+                mutant_variant_classification,
+                function(x) grep(x,maf$Variant_Classification,
+                                 ignore.case = TRUE)
+            )
+        )
+    )
+    maf <- maf[idx,]
+
     mut <- NULL
     for(i in genes) {
         if(!i %in% maf$Hugo_Symbol) next
-        aux <-  data.frame(patient = substr(unique(maf[grepl(i,maf$Hugo_Symbol,ignore.case = TRUE),]$Tumor_Sample_Barcode),1,15), mut = TRUE)
+        aux <- data.frame(patient = substr(unique(maf[i == maf$Hugo_Symbol,]$Tumor_Sample_Barcode),1,15),
+                          mut = TRUE)
         colnames(aux)[2] <- paste0("mut_hg38_",i)
         if(is.null(mut)) {
             mut <- aux
@@ -625,10 +646,17 @@ get.mutation <- function(project, genes, pipeline = pipeline){
 
     return(mut)
 }
-get.mut.gistc <- function(project, genes,mut.pipeline) {
+get.mut.gistc <- function(project,
+                          genes,
+                          mut.pipeline,
+                          mutant_variant_classification) {
+
     if(missing(project)) stop("Argument project is missing")
     if(missing(genes)) stop("Argument genes is missing")
-    mut <- get.mutation(project, genes, pipeline = mut.pipeline )
+    mut <- get.mutation(project,
+                        genes,
+                        pipeline = mut.pipeline,
+                        mutant_variant_classification =  mutant_variant_classification )
     cnv <- get.cnv(project, genes)
     if(!is.null(mut) & !is.null(cnv)) {
         annotation <- merge(mut, cnv, by = 0 , sort = FALSE,all=TRUE)
@@ -644,17 +672,37 @@ get.mut.gistc <- function(project, genes,mut.pipeline) {
     }
     return(NULL)
 }
-get.mut.gistc.information <- function(df, project, genes, mut.pipeline = "mutect2") {
+get.mut.gistc.information <- function(df,
+                                      project,
+                                      genes,
+                                      mut.pipeline = "mutect2",
+                                      mutant_variant_classification = c("Frame_Shift_Del",
+                                                                        "Frame_Shift_Ins",
+                                                                        "Missense_Mutation",
+                                                                        "Nonsense_Mutation",
+                                                                        "Splice_Site",
+                                                                        "In_Frame_Del",
+                                                                        "In_Frame_Ins",
+                                                                        "Translation_Start_Site",
+                                                                        "Nonstop_Mutation")) {
     order <- rownames(df)
     for(i in genes) if(!tolower(i) %in% tolower(EAGenes$Gene)) message(paste("Gene not found:", i))
-    info <- as.data.frame(get.mut.gistc(project, genes, mut.pipeline = mut.pipeline))
+    info <- as.data.frame(get.mut.gistc(project,
+                                        genes,
+                                        mut.pipeline = mut.pipeline,
+                                        mutant_variant_classification = mutant_variant_classification))
     if(is.null(info)) return(df)
     info$aux <- rownames(info)
     df$aux <- substr(df$barcode,1,15)
     df <- merge(df,info,by = "aux", all.x = TRUE, sort = FALSE)
     df$aux <- NULL
     mut.idx <- grep("mut_hg38_",colnames(df))
-    if(length(mut.idx) > 0) df[,mut.idx] <- !is.na(df[,mut.idx]) & df[,mut.idx] != FALSE
+    # NA should be set to FALSE as the sample has no information found
+    if(length(mut.idx) > 0) {
+        for(idx in mut.idx) {
+            df[,idx] <-  !is.na(df[,idx]) & df[,idx] != FALSE
+        }
+    }
     for(i in paste0("mut_hg38_",genes)){
         if(!i %in% colnames(df)) {
             df$aux <- FALSE
