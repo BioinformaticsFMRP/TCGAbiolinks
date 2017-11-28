@@ -523,7 +523,10 @@ getBarcodeDefinition <- function(type = "TCGA"){
 #'    acc.mutect.maf <- GDCquery_Maf("ACC", pipelines = "mutect2")
 #' }
 #' @return A data frame with the maf file information
-GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata", pipelines = NULL){
+GDCquery_Maf <- function(tumor,
+                         save.csv = FALSE,
+                         directory = "GDCdata",
+                         pipelines = NULL){
 
     if(is.null(pipelines)) stop("Please select the pipeline argument (muse, varscan2, somaticsniper, mutect2)")
     if(grepl("varscan",pipelines, ignore.case = TRUE)) {
@@ -553,13 +556,20 @@ GDCquery_Maf <- function(tumor, save.csv= FALSE, directory = "GDCdata", pipeline
                       access = "open")
 
     if(nrow(query$results[[1]]) == 0) stop("No MAF file found for this type of workflow")
-    tryCatch({
-        GDCdownload(query, directory = directory, method = "api")
+    maf <- tryCatch({
+        tryCatch({
+            GDCdownload(query, directory = directory, method = "api")
+        }, error = function(e) {
+            GDCdownload(query, directory = directory, method = "client")
+        })
+        maf <- GDCprepare(query, directory = directory)
+        maf
     }, error = function(e) {
-        GDCdownload(query, directory = directory, method = "client")
+        manifest <- generateManifest(query)
+        GDCdownload.aux( "https://gdc-api.nci.nih.gov/data/", manifest, manifest$filename, ".")
+        maf <- readSimpleNucleotideVariationMaf(file.path(manifest$id,manifest$filename))
+        maf
     })
-
-    maf <- GDCprepare(query, directory = directory)
 
     if(save.csv) {
         fout <- file.path(directory,gsub("\\.gz", "\\.csv",getResults(query)$file_name))
