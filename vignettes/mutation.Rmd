@@ -63,7 +63,7 @@ query.maf.hg19 <- GDCquery(project = "TCGA-CHOL",
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 # Check maf availables
-datatable(select(getResults(query.maf.hg19),-contains("cases")),
+datatable(dplyr::select(getResults(query.maf.hg19),-contains("cases")),
           filter = 'top',
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 10), 
           rownames = FALSE)
