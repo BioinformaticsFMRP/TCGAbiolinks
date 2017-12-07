@@ -11,9 +11,6 @@
   \item{color}{color, character string}
   ...
 }}
-\source{
-\url{}
-}
 \usage{
 TabSubtypesCol_merged
 }
