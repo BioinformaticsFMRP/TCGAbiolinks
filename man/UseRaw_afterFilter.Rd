@@ -9,7 +9,7 @@ UseRaw_afterFilter(DataPrep, DataFilt)
 \arguments{
 \item{DataPrep}{DataPrep object returned by TCGAanalyze_Preprocessing()}
 
-\item{Filtered}{data frame containing samples in columns and genes in rows after normalization and/or filtering steps}
+\item{DataFilt}{Filtered data frame containing samples in columns and genes in rows after normalization and/or filtering steps}
 }
 \value{
 Filtered return object similar to DataPrep with genes removed after normalization and filtering process.
