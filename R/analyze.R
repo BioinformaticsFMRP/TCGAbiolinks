@@ -1116,7 +1116,7 @@ get_IDs <- function(data) {
 #' @param DataFilt Filtered data frame containing samples in columns and genes in rows after normalization and/or filtering steps
 #' @examples
 #' \dontrun{
-#' dataPrep_raw<-UseRaw_afterFilter(dataPrep, dataFilt)
+#'   dataPrep_raw <- UseRaw_afterFilter(dataPrep, dataFilt)
 #' }
 #' @export
 #' @return Filtered return object similar to DataPrep with genes removed after normalization and filtering process.
