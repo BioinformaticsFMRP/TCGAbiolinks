@@ -19,6 +19,6 @@ function to keep raw counts after filtering and/or normalizing.
 }
 \examples{
 \dontrun{
-dataPrep_raw<-UseRaw_afterFilter(dataPrep, dataFilt)
+  dataPrep_raw <- UseRaw_afterFilter(dataPrep, dataFilt)
 }
 }
