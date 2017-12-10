@@ -230,7 +230,7 @@ query <- GDCquery(project = "TCGA-COAD",
 query %>% getResults %>% select(-matches("cases"))%>% datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE, eval = FALSE}
 GDCdownload(query)
 clinical.biotab <- GDCprepare(query)
 ```
