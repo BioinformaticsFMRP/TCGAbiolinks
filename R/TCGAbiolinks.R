@@ -131,3 +131,9 @@ NULL
 #' @format A RangedSummarizedExperiment: 20 probes, 8 samples
 NULL
 
+#' A list of data frames with clinical data parsed from XML (code in vignettes)
+#' @docType data
+#' @keywords internal
+#' @name clinical.biotab
+#' @format A list with 7 elements
+NULL
