@@ -1705,8 +1705,7 @@ getTSS <- function(genome = "hg38",
     } else {
         # for hg38
         ensembl <- tryCatch({
-            useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl",
-                       mirror = "useast")
+            useEnsembl("ensembl",dataset = "hsapiens_gene_ensembl")
         },  error = function(e) {
             useEnsembl("ensembl",
                        dataset = "hsapiens_gene_ensembl",
