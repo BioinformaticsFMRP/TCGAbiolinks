@@ -61,7 +61,7 @@ GDCdownload <- function(query,
         results <- getResults(query.aux)[getResults(query.aux)$project == proj,]
         query.aux$results[[1]] <- results
 
-        manifest <- generateManifest(query.aux)
+        manifest <- getManifest(query.aux)
 
         path <- unique(file.path(proj, source,
                                  gsub(" ","_", results$data_category),
@@ -152,9 +152,28 @@ GDCdownload <- function(query,
     }
 }
 
-generateManifest <- function(query) {
+#' @title Get a Manifest from GDCquery output that can be used with GDC-client
+#' @description
+#' Get a Manifest from GDCquery output that can be used with GDC-client
+#' @param query A query for GDCquery function
+#' @param save Write Manifest to a txt file (tab separated)
+#' @examples
+#' query <- GDCquery(project = "TARGET-AML",
+#'                   data.category = "Transcriptome Profiling",
+#'                   data.type = "Gene Expression Quantification",
+#'                   workflow.type = "HTSeq - Counts",
+#'                   barcode = c("TARGET-20-PADZCG-04A-01R","TARGET-20-PARJCR-09A-01R"))
+#' getManifest(query)
+#' @export
+getManifest <- function(query, save = F) {
     manifest <- query$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
     colnames(manifest) <- c("id","filename","md5","size","state")
+    if(save)  {
+        fname <- "gdc_manifest.txt"
+        write_delim(manifest,fname,delim = "\t")
+        file <- file.path(getwd(),fname)
+        message("Manifest saved as: ", file)
+    }
     return(manifest)
 }
 
