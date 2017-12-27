@@ -249,12 +249,12 @@ GDCclientInstall <- function(){
     links = tryCatch({
         read_html("https://gdc.nci.nih.gov/access-data/gdc-data-transfer-tool")  %>% html_nodes("a") %>% html_attr("href")
     }, error = function(e) {
-        c("https://gdc.nci.nih.gov/files/public/file/gdc-client_v1.2.0_Windows_x64.zip.zip",
-          "https://gdc.nci.nih.gov/files/public/file/gdc-client_v1.2.0_Ubuntu14.04_x64.zip",
-          "https://gdc.nci.nih.gov/files/public/file/gdc-client_v1.2.0_OSX_x64.zip")
+        c("https://gdc.nci.nih.gov/files/public/file/gdc-client_v1.3.0_Windows_x64.zip.zip",
+          "https://gdc.nci.nih.gov/files/public/file/gdc-client_v1.3.0_Ubuntu14.04_x64.zip",
+          "https://gdc.nci.nih.gov/files/public/file/gdc-client_v1.3.0_OSX_x64.zip")
     })
     bin <- links[grep("zip",links)]
-    if(is.windows()) bin <- bin[grep("windows", bin,ignore.case = TRUE)]
+    if(is.windows()) bin <- bin[grep("client*.*windows", bin,ignore.case = TRUE)]
     if(is.mac()) bin <- bin[grep("OSX", bin)]
     if(is.linux()) bin <- bin[grep("Ubuntu", bin)]
     if(is.windows()) mode <- "wb" else  mode <- "w"
