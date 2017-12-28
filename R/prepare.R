@@ -161,10 +161,12 @@ GDCprepare <- function(query,
             colData(data) <- info
         }
     }
-    if(any(duplicated(data$sample))) {
-        message("Replicates found.")
-        if(any(data$is_ffpe)) message("FFPE should be removed. You can do data with the following command:\ndata <- data[,!data$is_ffpe]")
-        print(as.data.frame(colData(data)[data$sample %in% data$sample[duplicated(data$sample)],c("is_ffpe"),drop=F]))
+    if("samples" %in% colnames(data)){
+        if(any(duplicated(data$sample))) {
+            message("Replicates found.")
+            if(any(data$is_ffpe)) message("FFPE should be removed. You can do data with the following command:\ndata <- data[,!data$is_ffpe]")
+            print(as.data.frame(colData(data)[data$sample %in% data$sample[duplicated(data$sample)],c("is_ffpe"),drop=F]))
+        }
     }
 
 
