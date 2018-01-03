@@ -211,8 +211,8 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
     Genelist <- intersect(rownames(dataGE),Genelist)
 
     # Split gene expression matrix btw the groups
-    dataCancer <- dataGE[Genelist,group2]
-    dataNormal <- dataGE[Genelist,group1]
+    dataCancer <- dataGE[Genelist,group2, drop = FALSE]
+    dataNormal <- dataGE[Genelist,group1, drop = FALSE]
     colnames(dataCancer)  <- substr(colnames(dataCancer),1,12)
 
     cfu <- clinical_patient[clinical_patient[,"bcr_patient_barcode"] %in% substr(colnames(dataCancer),1,12),]
@@ -232,7 +232,14 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
 
     #FC_FDR_table_mRNA
     tabSurv_Matrix<-matrix(0,nrow(as.matrix(rownames(dataNormal))),8)
-    colnames(tabSurv_Matrix)<-c("mRNA","pvalue","Cancer Deaths","Cancer Deaths with Top","Cancer Deaths with Down","Mean Tumor Top","Mean Tumor Down","Mean Normal")
+    colnames(tabSurv_Matrix)<-c("mRNA",
+                                "pvalue",
+                                "Cancer Deaths",
+                                "Cancer Deaths with Top",
+                                "Cancer Deaths with Down",
+                                "Mean Tumor Top",
+                                "Mean Tumor Down",
+                                "Mean Normal")
 
     tabSurv_Matrix<-as.data.frame(tabSurv_Matrix)
 
@@ -248,7 +255,7 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
 
     # Evaluate each gene
     for(i in 1:nrow(as.matrix(rownames(dataNormal))))  {
-        cat(paste( (ngenes-i),".",sep=""))
+        cat(paste0( (ngenes-i),"."))
         mRNAselected <- as.matrix(rownames(dataNormal))[i]
         mRNAselected_values <- dataCancer[rownames(dataCancer) == mRNAselected,]
         mRNAselected_values_normal <- dataNormal[rownames(dataNormal) == mRNAselected,]
@@ -266,8 +273,8 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
 
         if (!is.na(mRNAselected_values_ordered_top)){
 
-            # How many samples do we have in cancer matrix
-            numberOfSamples <- ncol(as.matrix(mRNAselected_values_ordered))
+            # How many samples do we have
+            numberOfSamples <- length(mRNAselected_values_ordered)
 
             # High group (above ThreshTop)
             lastelementTOP <- max(which(mRNAselected_values_ordered>mRNAselected_values_ordered_top))
@@ -275,12 +282,12 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
             # Low group (below ThreshDown)
             firstelementDOWN <- min(which(mRNAselected_values_ordered<=mRNAselected_values_ordered_down))
 
-            samples_top_mRNA_selected <- colnames( as.matrix(mRNAselected_values_ordered[1:lastelementTOP] ))
-            samples_down_mRNA_selected <- colnames(as.matrix(mRNAselected_values_ordered[firstelementDOWN:numberOfSamples]))
+            samples_top_mRNA_selected <- names(mRNAselected_values_ordered[1:lastelementTOP])
+            samples_down_mRNA_selected <- names(mRNAselected_values_ordered[firstelementDOWN:numberOfSamples])
 
             # Which samples are in the intermediate group (above ThreshLow and below ThreshTop)
-            samples_UNCHANGED_mRNA_selected <- colnames(mRNAselected_values_newvector[which((mRNAselected_values_newvector) > mRNAselected_values_ordered_down &
-                                                                                                mRNAselected_values_newvector < mRNAselected_values_ordered_top )])
+            samples_UNCHANGED_mRNA_selected <- names(mRNAselected_values_newvector[which((mRNAselected_values_newvector) > mRNAselected_values_ordered_down &
+                                                                                             mRNAselected_values_newvector < mRNAselected_values_ordered_top )])
 
             cfu_onlyTOP<-cfu_complete[cfu_complete[,"bcr_patient_barcode"] %in% samples_top_mRNA_selected,]
             cfu_onlyDOWN<-cfu_complete[cfu_complete[,"bcr_patient_barcode"] %in% samples_down_mRNA_selected,]
@@ -321,17 +328,17 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
 
             ttime <- Surv(ttime, status)
             rownames(ttime) <- rownames(cfu)
-            length(ttime)
             legendHigh <- paste(mRNAselected,"High")
             legendLow  <- paste(mRNAselected,"Low")
 
-            tabSurv<-survdiff(ttime  ~ c(rep("top", nrow(cfu_onlyTOP)), rep("down", nrow(cfu_onlyDOWN)) ))
-            tabSurv_chis<-unlist(tabSurv)$chisq
-
-            tabSurv_pvalue <- as.numeric(1 - pchisq(abs(tabSurv$chisq), df = 1))
-
-            tabSurv_Matrix[i,"pvalue"]<-tabSurv_pvalue
-
+            tabSurv_pvalue <- tryCatch({
+                tabSurv <- survdiff(ttime  ~ c(rep("top", nrow(cfu_onlyTOP)), rep("down", nrow(cfu_onlyDOWN)) ))
+                tabSurv_chis<-unlist(tabSurv)$chisq
+                tabSurv_pvalue <- as.numeric(1 - pchisq(abs(tabSurv$chisq), df = 1))
+            }, error = function(e){
+                return(Inf)
+            })
+            tabSurv_Matrix[i,"pvalue"] <- tabSurv_pvalue
 
             if (Survresult ==TRUE) {
                 titlePlot<- paste("Kaplan-Meier Survival analysis, pvalue=",tabSurv_pvalue )
@@ -345,10 +352,10 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
 
     tabSurv_Matrix[tabSurv_Matrix=="-Inf"]<-0
 
-
     tabSurvKM <- tabSurv_Matrix
 
     # Filtering by selected pvalue < 0.01
+    tabSurvKM <- tabSurvKM[tabSurvKM$mRNA != 0,]
     tabSurvKM <- tabSurvKM[tabSurvKM$pvalue < p.cut,]
     tabSurvKM <- tabSurvKM[!duplicated(tabSurvKM$mRNA),]
     rownames(tabSurvKM) <-tabSurvKM$mRNA
@@ -567,7 +574,7 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
 #'    TCGAanalyze_DEA allows user to perform Differentially expression analysis (DEA),
 #'    using edgeR package or limma to identify differentially expressed genes (DEGs).
 #'     It is possible to do a two-class analysis.
-#' 
+#'
 #'     TCGAanalyze_DEA performs DEA using following functions from edgeR:
 #'     \enumerate{
 #'     \item edgeR::DGEList converts the count matrix into an edgeR object.
@@ -612,7 +619,7 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
 #' @param voom boolean to perform voom transformation for limma-voom pipeline. Set to TRUE for voom transformation
 #' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags estimateGLMCommonDisp
 #' estimateGLMTagwiseDisp glmFit glmLRT
-#' @importFrom limma makeContrasts lmFit contrasts.fit eBayes toptable 
+#' @importFrom limma makeContrasts lmFit contrasts.fit eBayes toptable
 #' @export
 #' @examples
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
@@ -636,7 +643,7 @@ TCGAanalyze_DEA <- function(mat1,
                             ClinicalDF=data.frame(),
                             paired=FALSE,
                             log.trans=FALSE,
-                            voom=FALSE, 
+                            voom=FALSE,
                             trend=FALSE,
                             MAT=data.frame(),
                             contrast.formula="",
@@ -654,7 +661,7 @@ TCGAanalyze_DEA <- function(mat1,
         Cond1num <- ncol(mat1)
         Cond2num <- ncol(mat2)
         #print(map.ensg(genes = rownames(TOC))[,2:3])
-        
+
     }
     else {
         TOC<-MAT
@@ -683,7 +690,7 @@ TCGAanalyze_DEA <- function(mat1,
         my_IDs<-merge(my_IDs, ClinicalDF, by="patient")
         Year<-as.factor(my_IDs$diag_year)
     }
-    
+
 
 #####
     Plate<-factor(my_IDs$plate)
@@ -701,7 +708,7 @@ TCGAanalyze_DEA <- function(mat1,
         message("Batch correction skipped since no factors provided")
     }
 
-    else   
+    else
       for(o in batch.factors){
             if(o %in%  options == FALSE)
                 stop(paste0(o, " is not a valid batch correction factor"))
@@ -711,7 +718,7 @@ TCGAanalyze_DEA <- function(mat1,
 
             }
 
-        ###Additive Formula#######    
+        ###Additive Formula#######
         additiveformula <-paste(batch.factors, collapse="+")
         ###########################
 
@@ -731,13 +738,13 @@ TCGAanalyze_DEA <- function(mat1,
                                    "features as miRNA or genes "))
 
      }
-    
+
     timeEstimated <- format(ncol(TOC)*nrow(TOC)/elementsRatio,digits = 2)
     message(messageEstimation <- paste("I Need about ", timeEstimated,
                                        "seconds for this DEA. [Processing 30k elements /s]  "))
 
     # Reading in the data and creating a DGEList object
-    
+
     colnames(TOC) <- paste0('s',1:ncol(TOC))
     #DGE <- DGEList(TOC,group=rep(c("Normal","Tumor"),c(NormalSample,
     #TumorSample)))
@@ -752,7 +759,7 @@ TCGAanalyze_DEA <- function(mat1,
                 }
 
     # DGE.mat<-edgeR::DGEList(TOC,group = tumorType)
-    
+
     if(length(batch.factors)== 0 & length(Condtypes)>0){
             if(pipeline=="edgeR")
                 design <- model.matrix(~tumorType)
@@ -773,8 +780,8 @@ TCGAanalyze_DEA <- function(mat1,
                 formula<-paste0("~tumorType+", additiveformula)
             else
                 formula<-paste0("~0+tumorType+", additiveformula)
-            
-                
+
+
                 design <- model.matrix(eval(parse(text=formula)))
     }
 
@@ -783,8 +790,8 @@ TCGAanalyze_DEA <- function(mat1,
                 formula<-paste0("~tumorType+", additiveformula)
             else
                 formula<-paste0("~0+tumorType+", additiveformula)
-            
-                design <- model.matrix(eval(parse(text=formula)))        
+
+                design <- model.matrix(eval(parse(text=formula)))
     }
 
 
@@ -892,14 +899,14 @@ TCGAanalyze_DEA <- function(mat1,
             if(trend==TRUE){
                 fit <- limma::eBayes(fit, trend=TRUE)
             }
-                
+
             else{
                 fit <- limma::eBayes(fit, trend=FALSE)
             }
-                
+
 
             tableDEA<-limma::toptable(fit, coef=1, adjust.method='fdr', number=nrow(TOC))
-            
+
             limma::volcanoplot(fit, highlight=10)
             index <- which( tableDEA[,4] < fdr.cut)
             tableDEA<-tableDEA[index,]
@@ -931,7 +938,7 @@ TCGAanalyze_DEA <- function(mat1,
             cont.matrix<-eval(parse(text=commandstr))
             fit <- limma::lmFit(logCPM$counts, design)
             fit<-limma::contrasts.fit(fit, cont.matrix)
- 
+
             if(trend==TRUE) ##limma-trend option
                 fit <- limma::eBayes(fit, trend=TRUE)
             else
@@ -953,7 +960,7 @@ TCGAanalyze_DEA <- function(mat1,
 
             }
 
-            
+
     }
 
     else stop(paste0(pipeline, " is not a valid pipeline option. Choose 'edgeR' or 'limma'"))
@@ -990,12 +997,12 @@ TCGAbatch_Correction <- function(tabDF, batch.factor=NULL, adjustment=NULL, Clin
 
     if(length(batch.factor)==0 & length(adjustment)==0)
             message("batch correction will be skipped")
-    
+
     else if(batch.factor %in% adjustment){
-        
+
          stop(paste0("Cannot adjust and correct for the same factor"))
     }
-        
+
 
     my_IDs <- get_IDs(tabDF)
 
@@ -1012,13 +1019,13 @@ if(length(batch.factor)>0 || length(adjustment)>0)
     else if(nrow(ClinicalDF)==0 & batch.factor=="Year") {
         stop("Cannot extract Year data. Clinical data was not provided")
     }
-    
+
     Plate<-as.factor(my_IDs$plate)
     Condition<-as.factor(my_IDs$condition)
     TSS<-as.factor(my_IDs$tss)
     Portion<-as.factor(my_IDs$portion)
     Sequencing.Center<-as.factor(my_IDs$center)
-   
+
 
     design.matrix<- model.matrix(~Condition)
 
@@ -1056,7 +1063,7 @@ if(length(batch.factor)>0 || length(adjustment)>0)
                 a<-Sequencing.Center
             adjustment.data<-cbind(eval(parse(text=a)), adjustment.data)
         }
-        
+
         if(batch.factor=="Sequencing Center")
             batch.factor<-Sequencing.Center
 
@@ -1096,7 +1103,7 @@ get_IDs <- function(data) {
   condition <- gsub("11+[[:alpha:]]", "normal", as.character(IDs$sample))
   condition  <- gsub("01+[[:alpha:]]", "cancer", condition)
   IDs$condition <- condition
-  IDs$myorder  <- 1:nrow(IDs)              
+  IDs$myorder  <- 1:nrow(IDs)
   return(IDs)
 }
 
@@ -1106,10 +1113,10 @@ get_IDs <- function(data) {
 #' @title Use raw count from the DataPrep object which genes are removed by normalization and filtering steps.
 #' @description function to keep raw counts after filtering and/or normalizing.
 #' @param DataPrep DataPrep object returned by TCGAanalyze_Preprocessing()
-#' @param Filtered data frame containing samples in columns and genes in rows after normalization and/or filtering steps
+#' @param DataFilt Filtered data frame containing samples in columns and genes in rows after normalization and/or filtering steps
 #' @examples
 #' \dontrun{
-#' dataPrep_raw<-UseRaw_afterFilter(dataPrep, dataFilt)
+#'   dataPrep_raw <- UseRaw_afterFilter(dataPrep, dataFilt)
 #' }
 #' @export
 #' @return Filtered return object similar to DataPrep with genes removed after normalization and filtering process.

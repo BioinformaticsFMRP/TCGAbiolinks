@@ -26,5 +26,10 @@ List with $pure_barcodes attribute as a vector of pure samples and $filtered att
 TCGAtumor_purity Filters TCGA samples using 5 estimates from 5 methods as thresholds.
 }
 \examples{
-pam50<-TCGA_MolecularSubtype(colnames(dataFilt.tcga.pam50))$subtypes$subtype
+pam50 <- TCGAtumor_purity("TCGA-60-2721-01A-01R-0851-07",
+                          estimate = 0.6,
+                          absolute = 0.6,
+                          ihc = 0.8,
+                          lump = 0.8,
+                          cpe = 0.7)
 }
