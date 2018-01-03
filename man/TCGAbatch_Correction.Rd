@@ -18,7 +18,7 @@ each column represents a sample}
 \item{ClinicalDF}{a dataframe returned by GDCquery_clinic() to be used to extract year data}
 }
 \value{
-A data frame containing voom corrected values with ComBat batch correction applied
+A voom object and a data frame with ComBat batch correction applied
 }
 \description{
 TCGAbatch_correction allows user to perform a Voom correction on gene expression data and have it ready for DEA.
