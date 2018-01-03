@@ -242,3 +242,13 @@ datatable(getResults(query.exp.hg19),
               options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
               rownames = FALSE)
 ```
+
+# Get Manifest file
+
+If you want to get the manifest file from the query object you can use the function *getManifest*. If you 
+set save to TRUEm a txt file that can be used with GDC-client Data transfer tool (DTT) or with its GUI version [ddt-ui](https://github.com/NCI-GDC/dtt-ui) will be created.
+
+```{r message=FALSE, warning=FALSE}
+getManifest(query.exp.hg19,save = FALSE) 
+```
+

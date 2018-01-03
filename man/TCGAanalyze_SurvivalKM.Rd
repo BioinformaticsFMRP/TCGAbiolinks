@@ -4,7 +4,7 @@
 \alias{TCGAanalyze_SurvivalKM}
 \title{survival analysis (SA) univariate with Kaplan-Meier (KM) method.}
 \usage{
-TCGAanalyze_SurvivalKM(clinical_patient, dataGE, Genelist, Survresult,
+TCGAanalyze_SurvivalKM(clinical_patient, dataGE, Genelist, Survresult = FALSE,
   ThreshTop = 0.67, ThreshDown = 0.33, p.cut = 0.05, group1, group2)
 }
 \arguments{
@@ -69,7 +69,7 @@ from survival package
  tabSurvKM <- TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
                                      dataBRCAcomplete,
                                      Genelist = rownames(dataBRCAcomplete),
-                                     Survresult = FALSE,
+                                     Survresult = TRUE,
                                      p.cut = 0.2,
                                      ThreshTop = 0.67,
                                      ThreshDown = 0.33)
