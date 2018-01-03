@@ -10,7 +10,8 @@ TCGA_MolecularSubtype(barcodes)
 \item{barcodes}{is a vector of TCGA barcodes}
 }
 \value{
-List with $subtypes attribute as a dataframe with barcodes, samples, subtypes, and colors. The $filtered attribute is returned as filtered samples with no subtype info
+List with $subtypes attribute as a dataframe with barcodes,
+samples, subtypes, and colors. The $filtered attribute is returned as filtered samples with no subtype info
 }
 \description{
 TCGA_MolecularSubtype Retrieve molecular subtypes from TCGA consortium for a given set of barcodes

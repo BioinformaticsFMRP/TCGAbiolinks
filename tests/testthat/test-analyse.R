@@ -157,8 +157,7 @@ test_that("Results from TCGAanalyze_DEA and DMR in starburst plot are correct", 
     rowRanges <- GenomicRanges::GRanges((rep("chr1",nrows)),
                                         IRanges::IRanges(rep(2000,nrows), width=100),
                                         strand=rep("+",nrows),
-                                        probeID=c("cg19020103","cg11977919","cg11229946","cg09065413"),
-                                        ensembl_gene_id = c("ENSG00000273768","ENSG00000200975","ENSG00000200591","ENSG00000202444"))
+                                        probeID=c("cg19020103","cg11977919","cg11229946","cg09065413"))
     colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
                                     row.names=LETTERS[1:20],
                                     group=rep(c("group1","group2"),c(10,10)))
@@ -204,27 +203,39 @@ test_that("Results from TCGAanalyze_DEA and DMR in starburst plot are correct", 
                                               names = TRUE,
 
                                               return.plot = TRUE)$starburst
-    result.fc.cut <- TCGAvisualize_starburst(met,exp,
-                                             exp.p.cut = 1, met.p.cut = 1,
+    result.fc.cut <- TCGAvisualize_starburst(met,
+                                             exp,
+                                             exp.p.cut = 1,
+                                             met.p.cut = 1,
                                              met.platform = "450K",
                                              genome = "hg19",
-                                             group1="group1",group2="group2",
+                                             group1="group1",
+                                             group2="group2",
                                              diffmean.cut=0.0,logFC.cut = 2.5,
                                              names=TRUE, return.plot = TRUE)$starburst
 
-    result.met.cut <- TCGAvisualize_starburst(met,exp,
-                                              exp.p.cut = 1, met.p.cut = 1,
+    result.met.cut <- TCGAvisualize_starburst(met,
+                                              exp,
+                                              exp.p.cut = 1,
+                                              met.p.cut = 1,
                                               met.platform = "450K",
                                               genome = "hg19",
-                                              group1="group1",group2="group2",
-                                              diffmean.cut=0.5,logFC.cut = 0,
+                                              group1 = "group1",
+                                              group2 = "group2",
+                                              diffmean.cut = 0.5,
+                                              logFC.cut = 0,
                                               names=TRUE, return.plot = TRUE)$starburst
-    result.met.exp.cut <- TCGAvisualize_starburst(met,exp,
-                                                  exp.p.cut = 1, met.p.cut = 1,
+
+    result.met.exp.cut <- TCGAvisualize_starburst(met,
+                                                  exp,
+                                                  exp.p.cut = 1,
+                                                  met.p.cut = 1,
                                                   met.platform = "450K",
                                                   genome = "hg19",
-                                                  group1="group1",group2="group2",
-                                                  diffmean.cut=0.5,logFC.cut = 2.5,
+                                                  group1 = "group1",
+                                                  group2 = "group2",
+                                                  diffmean.cut=0.5,
+                                                  logFC.cut = 2.5,
                                                   names=TRUE, return.plot = TRUE)$starburst
 
 

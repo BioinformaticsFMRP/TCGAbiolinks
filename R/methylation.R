@@ -1465,7 +1465,7 @@ TCGAvisualize_starburst <- function(met,
                        volcano$geFDR2 < exp.lowerthr &
                            volcano$meFDR2 < met.lowerthr &
                            abs(volcano[,diffcol]) > diffmean.cut &
-                           abs(volcano$logFC) > logFC.cut)
+                           volcano$logFC < logFC.cut)
 
     # Group 4: hypomethylated
     c <- dplyr::filter(volcano,
@@ -1486,7 +1486,7 @@ TCGAvisualize_starburst <- function(met,
                        volcano$geFDR2 > exp.upperthr &
                            volcano$meFDR2 < met.upperthr &
                            volcano$meFDR2 > met.lowerthr &
-                           abs(volcano$logFC) > logFC.cut)
+                           volcano$logFC > logFC.cut)
 
     # Group 7: downregulated
     f <- dplyr::filter(volcano,
@@ -1500,14 +1500,14 @@ TCGAvisualize_starburst <- function(met,
                        volcano$geFDR2 > exp.upperthr &
                            volcano$meFDR2 > met.upperthr &
                            abs(volcano[,diffcol]) > diffmean.cut &
-                           abs(volcano$logFC) > logFC.cut)
+                           volcano$logFC > logFC.cut)
 
     # Group 9: downregulated and hypermethylated
     h <- dplyr::filter(volcano,
                        volcano$geFDR2 < exp.lowerthr &
                            volcano$meFDR2 > met.upperthr &
                            abs(volcano[,diffcol]) > diffmean.cut &
-                           abs(volcano$logFC) > logFC.cut)
+                           volcano$logFC < logFC.cut)
 
     groups <- as.character(seq(2,9))
 
@@ -1517,14 +1517,14 @@ TCGAvisualize_starburst <- function(met,
     volcano$threshold.starburst <- "1"
     volcano$threshold.size <- "1"
 
-    state <- c("Up regulated & Hypo methylated",
-               "Down regulated & Hypo methylated",
-               "hypo methylated",
-               "hyper methylated",
-               "Up regulated",
-               "Down regulated",
-               "Up regulated & Hyper methylated",
-               "Down regulated & Hyper methylated")
+    state <- c("Up regulated & Hypo methylated",    # a
+               "Down regulated & Hypo methylated",  # b
+               "hypo methylated",                   # c
+               "hyper methylated",                  # d
+               "Up regulated",                      # e
+               "Down regulated",                    # f
+               "Up regulated & Hyper methylated",   # g
+               "Down regulated & Hyper methylated") # h
 
     s <- list(a, b, c, d, e, f, g, h)
     for (i in seq_along(s)) {
@@ -1705,8 +1705,7 @@ getTSS <- function(genome = "hg38",
     } else {
         # for hg38
         ensembl <- tryCatch({
-            useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl",
-                       mirror = "useast")
+            useEnsembl("ensembl",dataset = "hsapiens_gene_ensembl")
         },  error = function(e) {
             useEnsembl("ensembl",
                        dataset = "hsapiens_gene_ensembl",
