@@ -2,11 +2,6 @@
 % Please edit documentation in R/prepare.R
 \name{colDataPrepare}
 \alias{colDataPrepare}
-\title{Create samples information matrix for GDC samples
-Create samples information matrix for GDC samples add subtype information}
-\usage{
-colDataPrepare(barcode)
-}
 \title{Create samples information matrix for GDC samples}
 \usage{
 colDataPrepare(barcode)
@@ -22,7 +17,6 @@ Create samples information matrix for GDC samples add subtype information
   query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
                         legacy = TRUE,
                         data.category = "DNA methylation",
-                        platform = c("Illumina Human Methylation 450", "Illumina Human Methylation 27"))
                         platform = c("Illumina Human Methylation 450",
                                       "Illumina Human Methylation 27"))
   colDataPrepare(getResults(query.met)$cases)
