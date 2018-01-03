@@ -599,21 +599,17 @@ TCGAquery_recount2<-function(project, tissue=c()){
              "uterus", "vagina")
   tissue<-paste(unlist(strsplit(tissue, " ")), collapse="_")
   Res<-list()
-
+  
   if(tolower(project)=="gtex"){
     for(t_i in tissue){
       if(tissue%in%tissues){
         con<-"http://duffel.rail.bio/recount/SRP012682/rse_gene_"
         con<-paste0(con,tissue,".Rdata")
-        con<-url(con)
-        message(paste0("downloading Range Summarized Experiment for: ", tissue))
-        load(con)
-        Res[[paste0(project,"_", t_i)]]<-rse_gene
-        ###Convert to matrix[genes, samples]#####
-        #ES<- exprs(as(rse_gene, "ExpressionSet"))
         
-        ###Remove version from ENSG ids (what's after the ".")####
-        #rownames(ES)<-gsub("\\..*","",rownames(ES))
+        message(paste0("downloading Range Summarized Experiment for: ", tissue))
+        load(url(con))
+        Res[[paste0(project,"_", t_i)]]<-rse_gene
+
       }
       else stop(paste0(tissue, " is not an available tissue on Recount2")) 
     }
@@ -625,7 +621,7 @@ TCGAquery_recount2<-function(project, tissue=c()){
         con<-"http://duffel.rail.bio/recount/TCGA/rse_gene_"
         con<-paste0(con,tissue,".Rdata")
         message(paste0("downloading Range Summarized Experiment for: ", tissue))
-        load(con)
+        load(url(con))
         Res[[paste0(project,"_", t_i)]]<-rse_gene
         
       }
@@ -636,4 +632,3 @@ TCGAquery_recount2<-function(project, tissue=c()){
   else stop(paste0(project, " is not a valid project"))
   
 }
-
