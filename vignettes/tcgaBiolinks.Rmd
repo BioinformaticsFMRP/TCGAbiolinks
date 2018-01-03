@@ -2115,13 +2115,6 @@ query.exp <- GDCquery(project = "TCGA-LGG",
                       sample.type = "Primary solid Tumor")
 GDCdownload(query.exp)
 lgg.exp <- GDCprepare(query = query.exp, save = TRUE, save.filename = "lggExp.rda")
-
-# get subtype information
-dataSubt <- TCGAquery_subtype(tumor = "LGG")
-
-# get indexed clinical data
-dataClin <- GDCquery_clinic(project = "TCGA-LGG", "Clinical")
-
 ```
 
 First, we searched for possible outliers using the `TCGAanalyze_Preprocessing` 
@@ -2151,61 +2144,37 @@ Then we applied two Hierarchical cluster analysis on 1187 mRNAs after the three
 filters described above, the first cluster using as method ward.D2, and the 
 second with ConsensusClusterPlus.
 
-After the two clustering analysis, with cut.tree =4 we obtained n=4 espression clusters (EC).
+After the two clustering analysis, with cut.tree = 4 we obtained n= 4 espression clusters (EC).
 
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+library(dplyr)
 
-# expression data with molecular subtypes
-lgg.exp <- subset(lgg.exp, select = colData(lgg.exp)$patient %in% dataSubt$patient)
-
-dataPrep <- TCGAanalyze_Preprocessing(object = lgg.exp,cor.cut = 0.6)
+dataPrep <- TCGAanalyze_Preprocessing(object = lgg.exp, cor.cut = 0.6)
 dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
                                       geneInfo = geneInfo,
                                       method = "gcContent")
 
-datFilt1 <- TCGAanalyze_Filtering(tabDF = dataNorm,method = "varFilter")
-datFilt2 <- TCGAanalyze_Filtering(tabDF = datFilt1,method = "filter1")
-datFilt <- TCGAanalyze_Filtering(tabDF = datFilt2,method = "filter2")
+datFilt <- dataNorm %>% TCGAanalyze_Filtering(method = "varFilter") %>%
+  TCGAanalyze_Filtering(method = "filter1") %>%  TCGAanalyze_Filtering(method = "filter2",foldChange = 0.2)
 
-data_Hc1 <- TCGAanalyze_Clustering(tabDF = datFilt,
-                                   method = "hclust",
-                                   methodHC = "ward.D2")
 data_Hc2 <- TCGAanalyze_Clustering(tabDF = datFilt,
                                    method = "consensus",
                                    methodHC = "ward.D2") 
-```
-
-For the next steps, we will merge the clinical data with with the
-the cluster information and we will add the subtype information. 
-
-```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-
-#------  Add cluster information
-cluster <- data.frame("groupsHC" = data_Hc2[[4]]$consensusClass)
-cluster$groupsHC <- paste0("EC",cluster$groupsHC)
-cluster$patient <-  substr(colData(lgg.exp)$patient,1,12)
-
-# Add information about gropus from consensus Cluster in clinical data
-dataClin <- merge(dataClin,cluster, by.x="bcr_patient_barcode", by.y="patient")
-
-# Merge subtype and clinical data
-clin_subt <- merge(dataClin,dataSubt, by.x="bcr_patient_barcode", by.y="patient")
-clin_subt_all <- merge(dataClin,dataSubt, 
-                       by.x="bcr_patient_barcode", by.y="patient", all.x = TRUE)
+# Add  cluster information to Summarized Experiment
+colData(lgg.exp)$groupsHC <- paste0("EC",data_Hc2[[4]]$consensusClass)
 
 ```
 
 The next steps will be to visualize the data. First, we created the survival plot.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-#----------- VISUALIZE --------------------
-# plotting survival for groups EC1, EC2, EC3, EC4
-TCGAanalyze_survival(data = clin_subt_all,
+TCGAanalyze_survival(data = colData(lgg.exp),
                      clusterCol = "groupsHC",
                      main = "TCGA kaplan meier survival plot from consensus cluster",
-                     legend = "RNA Group",
+                     legend = "RNA Group",height = 10,
+                     risk.table = T,conf.int = F,
                      color = c("black","red","blue","green3"),
-                     filename = "case2_surv.png")
+                     filename = "survival_lgg_expression_subtypes.png")
 ```
 
 
@@ -2221,27 +2190,26 @@ grid.raster(img)
 We will also, create a heatmap of the expression.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 TCGAvisualize_Heatmap(t(datFilt),
-                      col.metadata =  clin_subt[,c("bcr_patient_barcode",
-                                                   "groupsHC",
-                                                   "Histology",
-                                                   "IDH.codel.subtype")],
+                      col.metadata =  colData(lgg.exp)[,c("barcode",
+                                                       "groupsHC",
+                                                       "subtype_Histology",
+                                                       "subtype_IDH.codel.subtype")],
                       col.colors =  list(
-                          groupsHC = c("EC1"="black",
-                                       "EC2"="red",
-                                       "EC3"="blue",
-                                       "EC4"="green3"),
-                          Histology=c("astrocytoma"="navy",
-                                      "oligoastrocytoma"="green3",
-                                      "oligodendroglioma"="red"),
-                          IDH.codel.subtype = c("IDHmut-codel"="tomato",
-                                                "IDHmut-non-codel"="navy",
-                                                "IDHwt"="gold","NA"="white")),
+                        groupsHC = c("EC1"="black",
+                                     "EC2"="red",
+                                     "EC3"="blue",
+                                     "EC4"="green3")),
                       sortCol = "groupsHC",
                       type = "expression", # sets default color
-                      scale = "row", # use z-scores for better visualization
+                      scale = "row", # use z-scores for better visualization. Center gene expression level around 0.
                       title = "Heatmap from concensus cluster", 
-                      filename = "case2_Heatmap.pdf",
-                      cluster_rows = TRUE)
+                      filename = "case2_Heatmap.png",
+                      cluster_rows = TRUE,
+                      color.levels = colorRampPalette(c("green", "black", "red"))(n = 11),
+                      extrems =seq(-5,5,1),
+                      cluster_columns = FALSE,
+                      width = 1000,
+                      height = 1000)
 ```
 
 The result is shown below:
