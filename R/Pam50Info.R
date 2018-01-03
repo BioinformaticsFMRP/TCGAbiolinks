@@ -9,6 +9,5 @@
 #'   \item{color}{color, character string}
 #'   ...
 #' }
-#' @source \url{}
 
 "TabSubtypesCol_merged"

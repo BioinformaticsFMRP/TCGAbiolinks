@@ -565,7 +565,7 @@ GDCquery_Maf <- function(tumor,
         maf <- GDCprepare(query, directory = directory)
         maf
     }, error = function(e) {
-        manifest <- generateManifest(query)
+        manifest <- getManifest(query)
         GDCdownload.aux( "https://gdc-api.nci.nih.gov/data/", manifest, manifest$filename, ".")
         maf <- readSimpleNucleotideVariationMaf(file.path(manifest$id,manifest$filename))
         maf
@@ -609,9 +609,8 @@ TCGAquery_recount2<-function(project, tissue=c()){
         message(paste0("downloading Range Summarized Experiment for: ", tissue))
         load(url(con))
         Res[[paste0(project,"_", t_i)]]<-rse_gene
-
       }
-      else stop(paste0(tissue, " is not an available tissue on Recount2")) 
+      else stop(paste0(tissue, " is not an available tissue on Recount2"))
     }
     return(Res)
   }
@@ -623,12 +622,12 @@ TCGAquery_recount2<-function(project, tissue=c()){
         message(paste0("downloading Range Summarized Experiment for: ", tissue))
         load(url(con))
         Res[[paste0(project,"_", t_i)]]<-rse_gene
-        
+
       }
-      else stop(paste0(tissue, " is not an available tissue on Recount2")) 
+      else stop(paste0(tissue, " is not an available tissue on Recount2"))
     }
     return(Res)
   }
   else stop(paste0(project, " is not a valid project"))
-  
+
 }
