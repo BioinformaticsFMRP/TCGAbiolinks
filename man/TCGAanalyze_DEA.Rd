@@ -7,8 +7,8 @@
 TCGAanalyze_DEA(mat1, mat2, Cond1type, Cond2type, pipeline = "edgeR",
   method = "exactTest", fdr.cut = 1, logFC.cut = 0,
   elementsRatio = 30000, batch.factors = NULL, ClinicalDF = data.frame(),
-  paired = FALSE, log.trans = FALSE, trend = FALSE, MAT = data.frame(),
-  contrast.formula = "", Condtypes = c())
+  paired = FALSE, log.trans = FALSE, voom = FALSE, trend = FALSE,
+  MAT = data.frame(), contrast.formula = "", Condtypes = c())
 }
 \arguments{
 \item{mat1}{numeric matrix, each row represents a gene,
@@ -45,13 +45,15 @@ two groups of negative-binomially distributed counts.}
 
 \item{log.trans}{boolean to perform log cpm transformation. Set to TRUE for log transformation}
 
+\item{voom}{boolean to perform voom transformation for limma-voom pipeline. Set to TRUE for voom transformation}
+
+\item{trend}{boolean to perform limma-trend pipeline. Set to TRUE to go through limma-trend}
+
 \item{MAT}{matrix containing expression set as all samples in columns and genes as rows. Do not provide if mat1 and mat2 are used}
 
 \item{contrast.formula}{string input to determine coefficients and to design contrasts in a customized way}
 
 \item{Condtypes}{vector of grouping for samples in MAT}
-
-\item{transform}{boolean to perform limma-trend pipeline. Set to FALSE to go through limma-trend}
 }
 \value{
 table with DEGs containing for each gene logFC, logCPM, pValue,and FDR, also for each contrast
