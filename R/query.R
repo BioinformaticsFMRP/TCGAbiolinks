@@ -310,7 +310,7 @@ GDCquery <- function(project,
     # Filter by barcode
     if(!any(is.na(barcode))) {
         message("ooo By barcode")
-        idx <- unlist(sapply(barcode, function(x) grep(x, results$cases,ignore.case = TRUE)))
+        idx <- unique(unlist(sapply(barcode, function(x) grep(x, results$cases,ignore.case = TRUE))))
         if(length(idx) == 0)  {
             print(knitr::kable(results$cases,col.names = "Available barcodes"))
             stop("None of the barcodes were matched. Available barcodes are above")
