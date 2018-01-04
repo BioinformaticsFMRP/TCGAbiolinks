@@ -20,7 +20,8 @@ to search, download and prepare relevant data for analysis in R.
 # Installation
 
 ## R
-You can install the stable version from [Bioconductor](http://bioconductor.org/packages/release/bioc/html/TCGAbiolinks.html), or the development version using:
+You can install the stable version from [Bioconductor](http://bioconductor.org/packages/release/bioc/html/TCGAbiolinks.html).
+If you are having issues with the stable version, try using the development version.
 
 * Stable version:
 ```{r message=FALSE, warning=FALSE, eval=FALSE}
@@ -35,8 +36,7 @@ devtools::install_github('BioinformaticsFMRP/TCGAbiolinks')
 
 ## Docker image
 
-If you prefer to use docker, TCGAbiolinks and TCGAbiolinksGUI are available as Docker image (self-contained environments that contain everything needed to run the software), 
-which can be easily run on Mac OS, Windows and Linux systems. 
+If you prefer to use docker, TCGAbiolinks and TCGAbiolinksGUI are available as Docker image (self-contained environments that contain everything needed to run the software), which can be easily run on Mac OS, Windows and Linux systems. 
 
 This [PDF](https://drive.google.com/open?id=0B0-8N2fjttG-QXp5LVlPQnVQejg) show how to install and execute the image.
 
