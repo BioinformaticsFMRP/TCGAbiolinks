@@ -6,7 +6,7 @@ html_document:
   mathjax: null
   toc: true
   toc_float: true
-  toc_depth: 2
+  toc_depth: 3
   css: include/site.css
   includes:
     lib_dir: libs
