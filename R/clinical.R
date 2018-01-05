@@ -408,6 +408,16 @@ parseXML <- function(files, xpath, clinical.info ){
     return(clin)
 }
 
+#' @title Retrieve table with TCGA molecular subtypes
+#' @description
+#'   PanCan2018_subtypes is a curated table with molecular subtypes for 24 TCGA cancer types
+#' @export
+#' @examples
+#' molecular.subtypes <- PanCan2018_subtypes()
+#' @return a data.frame with barcode and molecular subtypes for 24 cancer types
+PanCan2018_subtypes <- function(){
+    return(pancan2018)
+}
 
 #' @title Retrieve molecular subtypes for a given tumor
 #' @description
@@ -422,7 +432,7 @@ parseXML <- function(files, xpath, clinical.info ){
 #' dataSubt <- TCGAquery_subtype(tumor = "lgg")
 #' @return a data.frame with barcode and molecular subtypes
 TCGAquery_subtype <- function(tumor){
-    if (grepl("acc|lgg|gbm|luad|stad|brca|coad|esca|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|pcpg|kirp|kirc|all",
+    if (grepl("acc|blca|lgg|gbm|luad|stad|brca|coad|esca|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|pcpg|kirp|kirc|all",
               tumor,ignore.case = TRUE)) {
 
         doi <- c("acc"="doi:10.1016/j.ccell.2016.04.002",
@@ -453,7 +463,7 @@ TCGAquery_subtype <- function(tumor){
 
         if(tolower(tumor) != "all") message(paste0("Subtype information from:", doi[tolower(tumor)]))
         if(tolower(tumor) == "all") {
-            all.tumor <- c("acc","lgg", "esca","gbm", "luad", "stad", "brca", "coad",
+            all.tumor <- c("acc","blca","lgg", "esca","gbm", "luad", "stad", "brca", "coad",
                            "skcm", "hnsc", 'kich', "lusc", "ucec", "pancan", "thca",
                            "prad","kirp","kirc")
             all <- NULL
@@ -491,7 +501,7 @@ TCGAquery_subtype <- function(tumor){
         }
         return(get(paste0(tolower(tumor),".subtype")))
     } else {
-        stop("For the moment we have only subtype for: acc, brca, coad, esca, gbm, hnsc, kich, kirp, kirc, lgg, luad, lusc, prad, pancan, read, skcm, stad, thca and ucec")
+        stop("For the moment we have only subtype for: acc, blca, brca, coad, esca, gbm, hnsc, kich, kirp, kirc, lgg, luad, lusc, prad, pancan, read, skcm, stad, thca and ucec")
     }
 }
 
