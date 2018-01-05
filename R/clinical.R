@@ -410,12 +410,12 @@ parseXML <- function(files, xpath, clinical.info ){
 
 #' @title Retrieve table with TCGA molecular subtypes
 #' @description
-#'   PanCan33_subtypes is a curated table with molecular subtypes for 24 TCGA cancer types
+#'   PanCancerAtlas_subtypes is a curated table with molecular subtypes for 24 TCGA cancer types
 #' @export
 #' @examples
-#' molecular.subtypes <- PanCan33_subtypes()
+#' molecular.subtypes <- PanCancerAtlas_subtypes()
 #' @return a data.frame with barcode and molecular subtypes for 24 cancer types
-PanCan33_subtypes <- function(){
+PanCancerAtlas_subtypes <- function(){
     return(pancan2018)
 }
 
