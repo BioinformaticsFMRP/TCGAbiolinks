@@ -23,19 +23,19 @@ library(DT)
   
 
 TCGAbiolinks retrieved molecular subtypes information from TCGA samples.
-The functions `PanCan33_subtypesLink` and `TCGAquery_subtype` can be used to get the information tables.
+The functions `PanCancerAtlas_subtypes` and `TCGAquery_subtype` can be used to get the information tables.
 
-While the `PanCan33_subtypesLink` function gives access to a curated table retrieved from synapse (probably with the most updated  molecular subtypes)
+While the `PanCancerAtlas_subtypes` function gives access to a curated table retrieved from synapse (probably with the most updated  molecular subtypes)
 the `TCGAquery_subtype` function has the complete table also with sample information retrieved from the TCGA marker papers.
 
-# `PanCan33_subtypesLink`: Curated molecular subtypes.
+# `PanCancerAtlas_subtypes`: Curated molecular subtypes.
 
 Data and description retrieved from synapse (https://www.synapse.org/#!Synapse:syn8402849) 
 
-Synapse has published a single file with all available molecular subtypes that have been described by TCGA (all tumor types and all molecular platforms), which can be accessed using the `PanCan33_subtypesLink` function as below:
+Synapse has published a single file with all available molecular subtypes that have been described by TCGA (all tumor types and all molecular platforms), which can be accessed using the `PanCancerAtlas_subtypes` function as below:
 
 ```{r message=FALSE, warning=FALSE}
-subtypes <- PanCan33_subtypesLink()
+subtypes <- PanCancerAtlas_subtypes()
 DT::datatable(subtypes, 
              filter = 'top',
              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
