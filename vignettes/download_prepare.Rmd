@@ -90,6 +90,30 @@ Related discussions: [issue 91](https://github.com/BioinformaticsFMRP/TCGAbiolin
 </div>
 </div>
 
+## Arguments 
+
+### `GDCdownload`
+
+| Argument 	| Description	|
+|-----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| query           | A query for GDCquery function        |
+| token.file      | Token file to download controled data (only for method = "client")           |
+| method          | Uses the API (POST method) or gdc client tool. Options "api", "client". API is faster, but the data might get corrupted in the download, and it might need to be executed again     |
+| directory       | Directory/Folder where the data was downloaded. Default: GDCdata         |
+| files.per.chunk | This will make the API method only download n (files.per.chunk) files at a time. This may reduce the download problems when the data size is too large. Expected a integer number (example files.per.chunk = 6) |
+
+### `GDCprepare`
+| Argument 	| Description	|
+|-------------------------------	|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| query 	| A query for GDCquery function 	|
+| save 	| Save result as RData object? 	|
+| save.filename 	| Name of the file to be save if empty an automatic will be created 	|
+| directory 	| Directory/Folder where the data was downloaded. Default: GDCdata 	|
+| summarizedExperiment 	| Create a summarizedExperiment? Default TRUE (if possible) 	|
+| remove.files.prepared 	| Remove the files read? Default: FALSE This argument will be considered only if save argument is set to true 	|
+| add.gistic2.mut 	| If a list of genes (gene symbol) is given, columns with gistic2 results from GDAC firehose (hg19) and a column indicating if there is or not mutation in that gene (hg38) (TRUE or FALSE - use the MAF file for more information) will be added to the sample matrix in the summarized Experiment object. 	|
+| mut.pipeline 	| If add.gistic2.mut is not NULL this field will be taken in consideration. Four separate variant calling pipelines are implemented for GDC data harmonization. Options: muse, varscan2, somaticsniper, MuTect2. For more information: https://gdc-docs.nci.nih.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/ 	|
+| mutant_variant_classification 	| List of mutant_variant_classification that will be consider a sample mutant or not. Default: "Frame_Shift_Del", "Frame_Shift_Ins", "Missense_Mutation", "Nonsense_Mutation", "Splice_Site", "In_Frame_Del", "In_Frame_Ins", "Translation_Start_Site", "Nonstop_Mutation" 	|
 
 ## Search and download data from legacy database using GDC api method
 
@@ -155,4 +179,183 @@ datatable(assay(data)[1:100,],
               rownames = TRUE)
 
 rowRanges(data)
+```
+
+
+# `GDCprepare`: Outputs
+
+This function is still under development, it is not working for all cases. See the tables below with the status.
+Examples of query, download, prepare can be found in this [gist](https://gist.github.com/tiagochst/a701bad3fa3800ade7063760755e0aad).
+
+## Harmonized data
+
+| Data.category               | Data.type                         | Workflow Type   | Status                                                                      |
+|-----------------------------|-----------------------------------|-----------------|-----------------------------------------------------------------------------|
+| Transcriptome Profiling     | Gene Expression Quantification    | HTSeq - Counts  | Data frame or SE (losing 5% of information when mapping to genomic regions) |
+|                             |                                   | HTSeq - FPKM-UQ | Returning only a (losing 5% of information when mapping to genomic regions) |
+|                             |                                   | HTSeq - FPKM    | Returning only a (losing 5% of information when mapping to genomic regions) |
+|                             | Isoform Expression Quantification | Not needed      |                                                                             |
+|                             | miRNA Expression Quantification   | Not needed      | Returning only a dataframe for  the moment                                  |
+| Copy number variation       | Copy Number Segment               |                 | Returning only a dataframe for  the moment                                  |
+|                             | Masked Copy Number Segment        |                 | Returning only a dataframe for  the moment                                  |
+| Simple Nucleotide Variation |                                   |                 |                                                                             |
+| Raw Sequencing Data         |                                   |                 |                                                                             |
+| Biospecimen                 |                                   |                 |                                                                             |
+| Clinical                    |                                   |                 |                                                                             |
+
+## Legacy data
+| Data.category               | Data.type                         | Platform                            | file.type          | Status          |
+|-----------------------------|-----------------------------------|-------------------------------------|--------------------|-----------------|
+| Transcriptome Profiling     |                                   |                                     |                    |                 |
+| Copy number variation       | -                                 | Affymetrix SNP Array 6.0            | nocnv_hg18.seg     | Working         |
+|                             | -                                 | Affymetrix SNP Array 6.0            | hg18.seg           | Working         |
+|                             | -                                 | Affymetrix SNP Array 6.0            | nocnv_hg19.seg     | Working         |
+|                             | -                                 | Affymetrix SNP Array 6.0            | hg19.seg           | Working         |
+|                             | -                                 | Illumina HiSeq                      | Several            | Working         |
+| Simple Nucleotide Variation | Simple somatic mutation           |                                     |                    |                 |
+| Raw Sequencing Data         |                                   |                                     |                    |                 |
+| Biospecimen                 |                                   |                                     |                    |                 |
+| Clinical                    |                                   |                                     |                    |                 |
+| Protein expression          |                                   | MDA RPPA Core                       | -                  | Working         |
+| Gene expression             | Gene expression quantification    | Illumina HiSeq                      | normalized_results | Working         |
+|                             |                                   | Illumina HiSeq                      | results            | Working         |
+|                             |                                   | HT_HG-U133A                         | -                  | Working         |
+|                             |                                   | AgilentG4502A_07_2                  | -                  | Data frame only |
+|                             |                                   | AgilentG4502A_07_1                  | -                  | Data frame only |
+|                             |                                   | HuEx-1_0-st-v2                      | FIRMA.txt          | Not Preparing   |
+|                             |                                   |                                     | gene.txt           | Not Preparing   |
+|                             | Isoform expression quantification |                                     |                    |                 |
+|                             | miRNA gene quantification         |                                     |                    |                 |
+|                             | Exon junction quantification      |                                     |                    |                 |
+|                             | Exon quantification               |                                     |                    |                 |
+|                             | miRNA isoform quantification      |                                     |                    |                 |
+|                             |                                   |                                     |                    |                 |
+| DNA methylation             |                                   | Illumina Human Methylation 450      | Not used           | Working         |
+|                             |                                   | Illumina Human Methylation 27       | Not used           | Working         |
+|                             |                                   | Illumina DNA Methylation OMA003 CPI | Not used           | Working         |
+|                             |                                   | Illumina DNA Methylation OMA002 CPI | Not used           | Working         |
+|                             |                                   | Illumina Hi Seq                     |                    | Not  working    |
+| Raw Microarray Data         |                                   |                                     |                    |                 |
+| Structural Rearrangement    |                                   |                                     |                    |                 |
+| Other                       |                                   |                                     |                    |                 |
+
+
+
+# Examples
+
+## Legacy archive
+### DNA methylation: Get all TCGA IDAT files
+
+```{r message=FALSE, warning=FALSE}
+#-------------------------------------------------------
+# Example to idat files from TCGA projects
+#-------------------------------------------------------
+projects <- TCGAbiolinks:::getGDCprojects()$project_id
+projects <- projects[grepl('^TCGA',projects,perl=T)]
+match.file.cases.all <- NULL
+for(proj in projects){
+    print(proj)
+    query <- GDCquery(project = proj,
+                      data.category = "Raw microarray data",
+                      data.type = "Raw intensities", 
+                      experimental.strategy = "Methylation array", 
+                      legacy = TRUE,
+                      file.type = ".idat",
+                      platform = "Illumina Human Methylation 450")
+    match.file.cases <- getResults(query,cols=c("cases","file_name"))
+    match.file.cases$project <- proj
+    match.file.cases.all <- rbind(match.file.cases.all,match.file.cases)
+    tryCatch(GDCdownload(query, method = "api",chunks.per.download = 20),
+             error = function(e) GDCdownload(query, method = "client"))
+}
+# This will create a map between idat file name, cases (barcode) and project
+readr::write_tsv(match.file.cases.all, path =  "idat_filename_case.txt")
+# code to move all files to local folder
+for(file in dir(".",pattern = ".idat", recursive = T)){
+    TCGAbiolinks::move(file,basename(file))
+}
+```
+
+
+### DNA methylation: aligned against hg19
+
+```{r, eval = FALSE}
+query_meth.hg19 <- GDCquery(project= "TCGA-LGG", 
+                            data.category = "DNA methylation", 
+                            platform = "Illumina Human Methylation 450", 
+                            barcode = c("TCGA-HT-8111-01A-11D-2399-05","TCGA-HT-A5R5-01A-11D-A28N-05"), 
+                            legacy = TRUE)
+GDCdownload(query_meth.hg19)
+data.hg19 <- GDCprepare(query_meth.hg19)
+```
+
+
+### Protein expression
+```{r, eval = FALSE}
+query <- GDCquery(project = "TCGA-GBM",
+                  data.category = "Protein expression",
+                  legacy = TRUE, 
+                  barcode = c("TCGA-OX-A56R-01A-21-A44T-20","TCGA-08-0357-01A-21-1898-20"))
+GDCdownload(query)
+data <- GDCprepare(query, save = TRUE, 
+                   save.filename = "gbmProteinExpression.rda",
+                   remove.files.prepared = TRUE)
+```
+
+
+### Gene expression: aligned against hg19
+```{r, eval = FALSE}
+# Aligned against Hg19
+query.exp.hg19 <- GDCquery(project = "TCGA-GBM",
+                  data.category = "Gene expression",
+                  data.type = "Gene expression quantification",
+                  platform = "Illumina HiSeq", 
+                  file.type  = "normalized_results",
+                  experimental.strategy = "RNA-Seq",
+                  barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"),
+                  legacy = TRUE)
+GDCdownload(query.exp.hg19)
+data <- GDCprepare(query.exp.hg19)
+```
+
+## Harmonized database
+
+### Copy Number
+
+```{r, eval = FALSE}
+query <- GDCquery(project = "TCGA-ACC", 
+                  data.category = "Copy Number Variation",
+                  data.type = "Copy Number Segment",
+                  barcode = c( "TCGA-OR-A5KU-01A-11D-A29H-01", "TCGA-OR-A5JK-01A-11D-A29H-01"))
+GDCdownload(query)
+data <- GDCprepare(query)
+```
+
+### Gene expression: aligned against hg38
+```{r, eval = FALSE}
+# mRNA pipeline: https://gdc-docs.nci.nih.gov/Data/Bioinformatics_Pipelines/Expression_mRNA_Pipeline/
+query.exp.hg38 <- GDCquery(project = "TCGA-GBM", 
+                  data.category = "Transcriptome Profiling", 
+                  data.type = "Gene Expression Quantification", 
+                  workflow.type = "HTSeq - FPKM-UQ",
+                  barcode =  c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"))
+GDCdownload(query.exp.hg38)
+expdat <- GDCprepare(query = query.exp.hg38,
+                     save = TRUE, 
+                     save.filename = "exp.rda")
+```
+
+
+### DNA methylation: aligned against hg38
+```{r, eval = FALSE}
+#-------------------------------------- 
+# DNA methylation data
+#-------------------------------------- 
+# DNA methylation aligned to hg38
+query_met.hg38 <- GDCquery(project= "TCGA-LGG", 
+                           data.category = "DNA Methylation", 
+                           platform = "Illumina Human Methylation 450", 
+                           barcode = c("TCGA-HT-8111-01A-11D-2399-05","TCGA-HT-A5R5-01A-11D-A28N-05"))
+GDCdownload(query_met.hg38)
+data.hg38 <- GDCprepare(query_met.hg38)
 ```
