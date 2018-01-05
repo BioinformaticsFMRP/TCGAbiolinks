@@ -20,13 +20,13 @@ navbar:
         - text: "---------"
         - text: "Other data"        
         - text: "Clinical data"
-          icon: fa-user-circle
+          icon: fa-user
           href: clinical.html
         - text: "Mutation data"
-          icon: fa-chain-broken
+          icon: fa-random
           href: mutation.html
         - text: "Molecular subtypes"
-          icon: fa-info
+          icon: fa-table
           href: subtypes.html
     - text: "Case Study"
       href: casestudy.html
@@ -76,3 +76,5 @@ navbar:
         - text: "Fundings"
         - text: "FAPESP (16/10436-9)"
           href: http://www.bv.fapesp.br/en/pesquisa/?sort=-data_inicio&q2=%28instituicao%3A%22Cedars-Sinai+Medical+Center%22%29+AND+%28%28bolsa_en_exact%3A%22Scholarships+abroad%22+AND+situacao_en_exact%3A%22Ongoing%22%29%29
+        - text: "FAPESP (16/01389-7)"
+          href: http://bv.fapesp.br/en/pesquisa/?sort=-data_inicio&q2=%28id_pesquisador_exact%3A679917%29+AND+%28%28bolsa_en_exact%3A%22Scholarships+in+Brazil%22+AND+situacao_en_exact%3A%22Ongoing%22%29%29
