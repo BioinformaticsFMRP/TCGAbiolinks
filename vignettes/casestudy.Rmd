@@ -26,10 +26,10 @@ library(DT)
 This vignette shows a complete workflow of the TCGAbiolinks package. 
 The code is divided in 4 case study:
   
-* 1. Expression pipeline (BRCA)
-* 2. Expression pipeline (GBM)
-* 3. Integration of DNA methylation and RNA expression pipeline (COAD)
-* 4. ELMER pipeline (KIRC)
+1. Expression pipeline (BRCA)
+2. Expression pipeline (GBM)
+3. Integration of DNA methylation and RNA expression pipeline (COAD)
+4. ELMER pipeline (KIRC)
   
 # Case study n. 1: Pan Cancer downstream analysis BRCA
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
@@ -408,7 +408,8 @@ dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,idx],
                             Cond2type = "CIMP-low",
                             method = "glmLRT")
 
-TCGAVisualize_volcano(dataDEGs$logFC,dataDEGs$FDR,
+TCGAVisualize_volcano(x = dataDEGs$logFC,
+                      y = dataDEGs$FDR,
                       filename = "Case3_volcanoexp.png",
                       x.cut = 3,
                       y.cut = 10^-5,
@@ -444,8 +445,13 @@ We used only the samples that had a classification in the examples.
 # expression and DNA methylation and respects all the thresholds)
 # will be shown
 # these genes are returned by the function see starburst object after the function is executed
-starburst <- TCGAvisualize_starburst(acc.met, dataDEGs,"CIMP-high","CIMP-low",
+starburst <- TCGAvisualize_starburst(met = acc.met, 
+                                     exp = dataDEGs,
+                                     genome = "hg19"
+                                     group1 = "CIMP-high",
+                                     group2 = "CIMP-low",
                                      filename = "starburst.png",
+                                     met.platform = "450K",
                                      met.p.cut = 10^-5,
                                      exp.p.cut = 10^-5,
                                      diffmean.cut = 0.25,
@@ -476,6 +482,7 @@ infer upstream regulators. This package can be easily applied to TCGA public
 available cancer data sets and custom DNA methylation and gene expression data sets.
 
 ELMER analyses have the following steps: 
+
 1. Organize data as a *MultiAssayExperiment* object
 2. Identify distal probes with significantly different DNA methylation level when comparing two sample groups.
 3. Identify putative target genes for differentially methylated distal probes, using methylation vs. expression correlation
@@ -485,15 +492,19 @@ ELMER analyses have the following steps:
 We will present this the study KIRC by TCGAbiolinks and 
 ELMER integration. 
 
-<div class="panel panel-danger">
+<div class="panel panel-info">
 <div class="panel-heading">ELMER package</div>
 <div class="panel-body">
 
-For more information, please consult the ELMER package (http://bioconductor.org/packages/ELMER/) and articles:
+For more information, please consult the ELMER package:
 
-- (http://www.biorxiv.org/content/early/2017/06/11/148726.full.pdf)
-- (https://www.ncbi.nlm.nih.gov/pubmed/26446758)
-- (https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0668-3).
+- http://bioconductor.org/packages/ELMER/ 
+
+And the following articles:
+
+- http://www.biorxiv.org/content/early/2017/06/11/148726.full.pdf
+- https://www.ncbi.nlm.nih.gov/pubmed/26446758
+- https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0668-3
 
 
 </div>
@@ -539,6 +550,7 @@ GDCdownload(query.exp)
 kirc.exp <- GDCprepare(query = query.exp, 
                        save = TRUE, 
                        save.filename = "kircExp.rda")
+kirc.exp <- kirc.exp
 ```
 
 A MultiAssayExperiment object from the r BiocStyle::Biocpkg("MultiAssayExperiment") package is the input for multiple main functions of r BiocStyle::Biocpkg("ELMER").
@@ -562,6 +574,8 @@ mae <- createMAE(exp = kirc.exp,
                  met.platform = "450K",
                  genome = "hg38",
                  TCGA = TRUE)
+# Remove FFPE samples
+mae <- mae[,!mae$is_ffpe]
 ```
 
 We will execute ELMER to identify probes that are hypomethylated in tumor samples
@@ -641,7 +655,12 @@ gene expression vs DNA methylation at this probe. The result of this is
 show by the ELMER scatter plot.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-scatter.plot(mee,byProbe=list(probe=c("cg00328720"),geneNum=20), category="TN", lm_line = TRUE)
+scatter.plot(data = mae,
+             byProbe = list(probe = sig.diff$probe[1], numFlankingGenes = 20), 
+             category = "definition", 
+             dir.out = "plots",
+             lm = TRUE, # Draw linear regression curve
+             save = TRUE) 
 ```
 
 The result is shown below:
@@ -654,9 +673,13 @@ grid.raster(img)
 
 Each scatter plot showing the average DNA methylation level of sites with the UA6 motif in all KIRC samples plotted against the expression of the transcription factor ZNF677 and PEG3 respectively.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-scatter.plot(mee,byTF = list(TF = c("ZNF677","PEG3"),
-                             probe = enriched.motif[["UA6"]]), category = "TN",
-             save = TRUE, lm_line = TRUE, dir.out = "kirc")
+scatter.plot(data = mae,
+             byTF = list(TF = c("RUNX1","RUNX2","RUNX3"),
+                         probe = enriched.motif[[names(enriched.motif)[10]]]), 
+             category = "definition",
+             dir.out = "plots",
+             save = TRUE, 
+             lm_line = TRUE)
 ```
 
 The result is shown below:
@@ -667,13 +690,16 @@ img <- readPNG("elmer1.png")
 grid.raster(img)
 ```
 
-The schematic plot shows probe colored in blue and the location of nearby 20 genes. 
-The genes significantly linked to the probe were shown in red.
+You cen see the anticorrelated pairs of gene and probes by drawing a heatmap.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-pair <- fetch.pair(pair="./kirc/getPair.hypo.pairs.significant.csv",
-                   probeInfo = mee@probeInfo, geneInfo = mee@geneInfo)
-schematic.plot(pair=pair, byProbe="cg15862394",save=FALSE)
+heatmapPairs(data = mae, 
+             group.col = "definition",
+             group1 = "Primary solid Tumor", 
+             annotation.col = c("gender"),
+             group2 = "Solid Tissue Normal",
+             pairs = pair,
+             filename =  "heatmap.pdf")
 ```
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
@@ -683,7 +709,7 @@ img <- readPNG("elmer2.png")
 grid.raster(img)
 ```
 
-The plot shows the odds ratio (x axis) for the selected motifs with OR above 1.3 and lower boundary of OR above 1.3. 
+The plot shows the odds ratio (x axis) for the selected motifs with lower boundary of OR above 1.8. 
 The range shows the 95% confidence interval for each Odds Ratio.
 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
