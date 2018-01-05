@@ -10,7 +10,7 @@ navbar:
       icon: fa-database
       menu:
         - text: "---------"
-        - text: "Molecular data"        
+        - text: "Molecular data"
         - text: "Query"
           icon: fa-search
           href: query.html
@@ -18,7 +18,7 @@ navbar:
           icon: fa-database
           href: download_prepare.html
         - text: "---------"
-        - text: "Other data"        
+        - text: "Other data"
         - text: "Clinical data"
           icon: fa-user
           href: clinical.html
@@ -28,11 +28,14 @@ navbar:
         - text: "Molecular subtypes"
           icon: fa-table
           href: subtypes.html
+    - text: "Analysis"
+      href: analysis.html
+      icon: fa-flask
     - text: "Case Study"
       href: casestudy.html
-    - text: "All functions"
+    - text: "Other functions"
       icon: fa-book
-      href: tcgaBiolinks.html
+      href: extension.html
     - text: "GUI"
       icon: fa-hand-pointer-o
       href: gui.html
