@@ -9,32 +9,30 @@ navbar:
     - text: "Data"
       icon: fa-database
       menu:
-      - text: "---------"
-      - text: "Molecular data"        
-      - text: "Query"
-        icon: fa-search
-        href: query.html
-      - text: "Download & Prepare"
-        icon: fa-database
-        href: download_prepare.html
-      - text: "---------"
-      - text: "Other data"        
-      - text: "Clinical data"
-        icon: fa-user-circle
-        href: clinical.html
-      - text: "Mutation data"
-        icon: fa-chain-broken
-        href: mutation.html
-      - text: "Molecular subtypes"
-        icon: fa-info
-        href: subtypes.html
+        - text: "---------"
+        - text: "Molecular data"        
+        - text: "Query"
+          icon: fa-search
+          href: query.html
+        - text: "Download & Prepare"
+          icon: fa-database
+          href: download_prepare.html
+        - text: "---------"
+        - text: "Other data"        
+        - text: "Clinical data"
+          icon: fa-user-circle
+          href: clinical.html
+        - text: "Mutation data"
+          icon: fa-chain-broken
+          href: mutation.html
+        - text: "Molecular subtypes"
+          icon: fa-info
+          href: subtypes.html
     - text: "Case Study"
       href: casestudy.html
     - text: "All functions"
       icon: fa-book
       href: tcgaBiolinks.html
-#   - text: "Extension"
-#     href: extension.html
     - text: "GUI"
       icon: fa-hand-pointer-o
       href: gui.html
