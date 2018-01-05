@@ -1657,11 +1657,11 @@ getMetPlatInfo <- function(genome, platform) {
                         "27k"  = "hm27",
                         "27K"  = "hm27",
                         "EPIC" = "EPIC")
-    path <- file.path(base,platform,paste(platform,"manifest.rda", sep ="."))
-    if (grepl("hg38", genome)) path <- gsub(".rda",".hg38.rda",path)
+    path <- file.path(base,platform,paste(platform,"hg19.manifest.rds", sep ="."))
+    if (grepl("hg38", genome)) path <- gsub("hg19","hg38",path)
     message(path)
     if(!file.exists(basename(path))) downloader::download(path,basename(path))
-    gr <- get(load(basename(path)))
+    gr <- readRDS(basename(path))
     return(gr)
 }
 
