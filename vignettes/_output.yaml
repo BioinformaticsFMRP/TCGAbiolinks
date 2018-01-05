@@ -11,5 +11,4 @@ html_document:
   includes:
     lib_dir: libs
     in_header: include/header.html
-    before_body: include/before_body.html
     after_body: include/after_body.html
