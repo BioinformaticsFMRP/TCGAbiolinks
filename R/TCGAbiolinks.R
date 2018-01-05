@@ -137,3 +137,10 @@ NULL
 #' @name clinical.biotab
 #' @format A list with 7 elements
 NULL
+
+#' A data frame with all TCGA molecular subtypes
+#' @docType data
+#' @keywords internal
+#' @name pancan2018
+#' @format A data frame with 7,734 lines and 10 columns
+NULL
