@@ -1,0 +1,121 @@
+---
+title: "Compilation of TCGA molecular subtypes"
+bibliography: bibliography.bib    
+vignette: >
+    %\VignetteIndexEntry{Compilation of TCGA molecular subtypes}
+    %\VignetteEngine{knitr::rmarkdown}
+    \usepackage[utf8]{inputenc}
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dpi = 300)
+knitr::opts_chunk$set(cache=FALSE)
+```
+  
+```{r, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
+devtools::load_all(".")
+```
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(SummarizedExperiment)
+library(dplyr)
+library(DT)
+```
+  
+
+TCGAbiolinks retrieved molecular subtypes information from TCGA samples.
+The functions `PanCan2018_subtypes` and `TCGAquery_subtype` can be used to get the information tables.
+
+While the `PanCan2018_subtypes` function gives access to a curated table retrieved from synapse (probably with the most updated  molecular subtypes)
+the `TCGAquery_subtype` function has the complete table also with sample information retrieved from the TCGA marker papers.
+
+# `PanCan2018_subtypes`: Curated molecular subtypes.
+
+Data and description retrieved from synapse (https://www.synapse.org/#!Synapse:syn8402849) 
+
+Synapse has published a single file with all available molecular subtypes that have been described by TCGA (all tumor types and all molecular platforms), which can be accessed using the `PanCan2018_subtypes` function as below:
+
+```{r message=FALSE, warning=FALSE}
+subtypes <- PanCan2018_subtypes()
+DT::datatable(subtypes, 
+             filter = 'top',
+             options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+             rownames = FALSE)
+```
+
+The columns "Subtype_Selected" was selected as most prominent subtype classification (from the other columns)
+
+|                                          | All available molecular data based-subtype                    | Selected subtype                                         | Number of samples | Link to file                                                                                                                                           | Reference        | link to paper                                                               |
+|------------------------------------------|---------------------------------------------------------------|----------------------------------------------------------|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|-----------------------------------------------------------------------------|
+| ACC                                      | mRNA, DNAmeth, protein, miRNA, CNA, COC, C1A.C1B              | DNAmeth                                                  | 91                | [Link](http://www.cell.com/cms/attachment/2062093088/2063584534/mmc3.xlsx)                                                                                     | Cancer Cell 2016 | [Link](http://www.cell.com/cancer-cell/fulltext/S1535-6108(16)30160-X)              |
+| AML                                      | mRNA and miRNA                                                | mRNA                                                     | 187               | [Link](https://tcga-data.nci.nih.gov/docs/publications/laml_2012/TCGA.LAML.cNMF-clustering.20140820.xlsx)                                                      | NEJM 2013        | [Link](http://www.nejm.org/doi/full/10.1056/NEJMoa1301689)                          |
+| BLCA                                     | mRNA subtypes                                                 | mRNA                                                     | 129               | [Link](https://tcga-data.nci.nih.gov/docs/publications/blca_2013/BLCA_cluster-assign-k4.tsv)                                                                   | Nature 2014      | [Link](http://www.nature.com/nature/journal/v507/n7492/full/nature12965.html)       |
+| BRCA                                     | PAM50 (mRNA)                                                  | PAM50                                                    | 1218              | [Link](https://www.synapse.org/#!Synapse:syn3853594)                                                                                                           | Nature 2012      | [Link](http://www.nature.com/nature/journal/v490/n7418/full/nature11412.html#close) |
+| GBM/LGG*                                 | mRNA, DNAmeth, protein, Supervised_DNAmeth                    | Supervised_DNAmeth                                       | 1122              | [Link](http://www.cell.com/cms/attachment/2045372863/2056783242/mmc2.xlsx)                                                                                     | Cell 2016        | [Link](http://www.cell.com/cell/abstract/S0092-8674(15)01692-X)                     |
+| Pan-GI (preliminary) ESCA/STAD/COAD/READ |                                                               |                                                          | 1011              | Provided by Pan-GI group                                                                                                                               | not published    |                                                                             |
+| HNSC                                     | mRNA, DNAmeth, RPPA, miRNA, CNA, Paradigm                     | mRNA                                                     | 279               | [Link](http://www.nature.com/nature/journal/v517/n7536/extref/nature14129-s2.zip) (TabS7.2)                                                                    | Nature 2015      | [Link](http://www.nature.com/nature/journal/v517/n7536/full/nature14129.html)       |
+| KICH                                     | Eosinophilic                                                  | Eosinophilic                                             | 66                | [Link](https://www.synapse.org/#!Synapse:syn4463858)                                                                                                           | Cancer Cell 2014 | [Link](http://www.cell.com/cancer-cell/abstract/S1535-6108(14)00304-3)              |
+| KIRC                                     | mRNA, miRNA                                                   | mRNA                                                     | 442               | [Link](http://www.nature.com/nature/journal/v499/n7456/extref/nature12222-s2.zip)                                                                              | Nature 2013      | [Link](http://www.nature.com/nature/journal/v499/n7456/full/nature12222.html)       |
+| KIRP                                     | mRNA, DNAmeth, protein, miRNA, CNA, COC                       | COC                                                      | 161               | [Link](http://www.nejm.org/doi/suppl/10.1056/NEJMoa1505917/suppl_file/nejmoa1505917_appendix_3.xlsx)                                                           | NEJM 2015        | [Link](http://www.nejm.org/doi/full/10.1056/NEJMoa1505917#t=article)                |
+| LIHC (preliminary)                       | mRNA, DNAmeth, protein, miRNA, CNA, Paradigma, iCluster       | iCluster                                                 | 196               | [Link](https://wiki.nci.nih.gov/download/attachments/139067884/Supplementary%20Tables-1-2016.xlsx?version=1&modificationDate=1452270515000&api=v2) (Table S1A) | not published    |                                                                             |
+| LUAD                                     | DNAmeth, iCluster                                             | iCluster                                                 | 230               | [Link](http://www.nature.com/nature/journal/v511/n7511/extref/nature13385-s2.xlsx) (Table S7)                                                                  | Nature 2014      | [Link](http://www.nature.com/nature/journal/v511/n7511/full/nature13385.html)       |
+| LUSC                                     | mRNA                                                          | mRNA                                                     | 178               | [Link](http://www.nature.com/nature/journal/v489/n7417/extref/nature11404-s2.zip) (Data file S7.5)                                                             | Nature 2012      | [Link](http://www.nature.com/nature/journal/v489/n7417/full/nature11404.html)       |
+| OVCA                                     | mRNA                                                          | mRNA                                                     | 489               | [Link](https://www.synapse.org/#!Synapse:syn4213428)                                                                                                           | Nature 2011      | [Link](http://www.nature.com/nature/journal/v474/n7353/full/nature10166.html)       |
+| PCPG                                     | mRNA, DNAmeth, protein, miRNA, CNA                            | mRNA                                                     | 178               | tableS2                                                                                                                                                | Cancer Cell 2017 | [Link](http://www.cell.com/cancer-cell/fulltext/S1535-6108(17)30001-6)              |
+| PRAD                                     | mRNA, DNAmeth, protein, miRNA, CNA, icluster, mutation/fusion | mutation/fusion                                          | 333               | [Link](http://www.cell.com/cms/attachment/2062406705/2064289081/mmc2.xls)                                                                                      | Cell 2015        | [Link](http://www.cell.com/cell/abstract/S0092-8674(15)01339-2)                     |
+| SKCM                                     | mRNA, DNAmeth, protein, miRNA, mutation                       | mutation                                                 | 331               | [Link](http://www.cell.com/cms/attachment/2048142118/2058244319/mmc2.xlsx) (Table S1D)                                                                         | Cell 2015        | [Link](http://www.cell.com/cell/abstract/S0092-8674(15)00634-0)                     |
+| THCA                                     | mRNA, DNAmeth, protein, miRNA, CNA, histology                 | mRNA                                                     | 496               | [Link](http://www.cell.com/cms/attachment/2019646612/2039684990/mmc3.xlsx) (Table S2 - Tab1)                                                                   | Cell 2014        | [Link](http://www.cell.com/cell/fulltext/S0092-8674(14)01238-0#)                    |
+| UCEC                                     | iCluster, MSI, CNA, mRNA                                      | iCluster - updated according to Pan-Gyne/Pathways groups | 538               | [Link](http://www.nature.com/nature/journal/v497/n7447/extref/nature12113-s2.zip) (datafile S1.1)                                                              | Nature 2013      | [Link](http://www.nature.com/nature/journal/v497/n7447/full/nature12113.html)       |
+|                                          |                                                               |                                                          |                   | [Link](https://docs.google.com/spreadsheets/d/1Z1H3mXdO_sk9nc0v8df7VNS_XzXiu6vKGJRbK1qYoh4/edit#gid=2047911448)                                                |                  |                                                                             |
+| UCS (preliminary)                        | mRNA                                                          | mRNA                                                     | 57                | [Link](https://www.synapse.org/#!Synapse:syn4214438)                                                                                                           | not published    |                                                                             |
+
+# `TCGAquery_subtype`: Working with molecular subtypes data.
+
+The Cancer Genome Atlas (TCGA) Research Network has reported integrated genome-wide 
+studies of various diseases. We have added some of the subtypes defined by these
+report in our package:
+
+| TCGA dataset | Link                                                                 | Paper                                                                                                   | Journal          |
+|--------------|----------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|------------------|
+| ACC          | doi:10.1016/j.ccell.2016.04.002                                      | Comprehensive Pan-Genomic Characterization of Adrenocortical Carcinoma.                                 | Cancer cell 2016 |
+| BRCA         | https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3465532/                | Comprehensive molecular portraits of human breast tumors                                                |                  |
+| COAD         | http://www.nature.com/nature/journal/v487/n7407/abs/nature11252.html | Comprehensive molecular characterization of human colon and rectal cancer                               | Nature 2012      |
+| GBM          | http://dx.doi.org/10.1016/j.cell.2015.12.028                         | Molecular Profiling Reveals Biologically Discrete Subsets and Pathways of Progression in Diffuse Glioma | Cell 2016        |
+| HNSC         | http://www.nature.com/nature/journal/v517/n7536/abs/nature14129.html | Comprehensive genomic characterization of head and neck squamous cell carcinomas                        | Nature 2015      |
+| KICH         | http://www.sciencedirect.com/science/article/pii/S1535610814003043   | The Somatic Genomic Landscape of Chromophobe Renal Cell Carcinoma                                       | Cancer cell 2014 |
+| KIRC         | http://www.nature.com/nature/journal/v499/n7456/abs/nature12222.html | Comprehensive molecular characterization of clear cell renal cell carcinoma                             | Nature 2013      |
+| KIRP         | http://www.nejm.org/doi/full/10.1056/NEJMoa1505917                   | Comprehensive Molecular Characterization of Papillary Renal-Cell Carcinoma                              | NEJM 2016        |
+| LGG          | http://dx.doi.org/10.1016/j.cell.2015.12.028                         | Molecular Profiling Reveals Biologically Discrete Subsets and Pathways of Progression in Diffuse Glioma | Cell 2016        |
+| LUAD         | http://www.nature.com/nature/journal/v511/n7511/abs/nature13385.html | Comprehensive molecular profiling of lung adenocarcinoma                                                | Nature 2014      |
+| LUSC         | http://www.nature.com/nature/journal/v489/n7417/abs/nature11404.html | Comprehensive genomic characterization of squamous cell lung cancers                                    | Nature 2012      |
+| PCPG         | http://dx.doi.org/10.1016/j.ccell.2017.01.001                        | Comprehensive Molecular Characterization of Pheochromocytoma and Paraganglioma                          | Cancer cell 2017 |
+| PRAD         | http://www.sciencedirect.com/science/article/pii/S0092867415013392   | The Molecular Taxonomy of Primary Prostate Cancer                                                       | Cell 2015        |
+| READ         | http://www.nature.com/nature/journal/v487/n7407/abs/nature11252.html | Comprehensive molecular characterization of human colon and rectal cancer                               | Nature 2012      |
+| SKCM         | http://www.sciencedirect.com/science/article/pii/S0092867415006340   | Genomic Classification of Cutaneous Melanoma                                                            | Cell 2015        |
+| STAD         | http://www.nature.com/nature/journal/v511/n7511/abs/nature13385.html | Comprehensive molecular characterization of gastric adenocarcinoma                                      | Nature 2013      |
+| THCA         | http://www.sciencedirect.com/science/article/pii/S0092867414012380   | Integrated Genomic Characterization of Papillary Thyroid Carcinoma                                      | Cell 2014        |
+| UCEC         | http://www.nature.com/nature/journal/v497/n7447/abs/nature12113.html | Integrated genomic characterization of endometrial carcinoma                                            | Nature 2013      |
+
+These subtypes will be automatically added in the summarizedExperiment
+object through GDCprepare. But you can also use the `TCGAquery_subtype` function
+to retrive this information.
+
+```{r, eval = FALSE}
+lgg.gbm.subtype <- TCGAquery_subtype(tumor = "lgg")
+```
+
+A subset of the LGG subytpe is shown below:
+```{r, eval = TRUE, echo = FALSE}
+datatable(lgg.gbm.subtype[1:10,],
+          caption = "Table with LGG molecular subtypes from TCGAquery_subtype",
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
+```
+
+
+# Session Information
+******
+```{r sessionInfo}
+sessionInfo()
+```
+
