@@ -77,10 +77,9 @@ report in our package:
 | TCGA dataset | Link                                                                 | Paper                                                                                                   | Journal          |
 |--------------|----------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|------------------|
 | ACC          | doi:10.1016/j.ccell.2016.04.002                                      | Comprehensive Pan-Genomic Characterization of Adrenocortical Carcinoma.                                 | Cancer cell 2016 |
-| BRCA         | https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3465532/                | Comprehensive molecular portraits of human breast tumors                                                |        Nature 2013          |
-| BLCA         | https://www.ncbi.nlm.nih.gov/pubmed/24476821              | Comprehensive molecular characterization of urothelial bladder carcinoma.
-                                               |        Nature 2014          |
-| COAD         | http://www.nature.com/nature/journal/v487/n7407/abs/nature11252.html | Comprehensive molecular characterization of human colon and rectal cancer                               | Nature 2012      |
+| BRCA | https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3465532/  | Comprehensive molecular portraits of human breast tumors | Nature 2013 |
+| BLCA  | https://www.ncbi.nlm.nih.gov/pubmed/24476821  | Comprehensive molecular characterization of urothelial bladder carcinoma |  Nature 2014    |
+| COAD  | http://www.nature.com/nature/journal/v487/n7407/abs/nature11252.html | Comprehensive molecular characterization of human colon and rectal cancer  | Nature 2012      |
 | GBM          | http://dx.doi.org/10.1016/j.cell.2015.12.028                         | Molecular Profiling Reveals Biologically Discrete Subsets and Pathways of Progression in Diffuse Glioma | Cell 2016        |
 | HNSC         | http://www.nature.com/nature/journal/v517/n7536/abs/nature14129.html | Comprehensive genomic characterization of head and neck squamous cell carcinomas                        | Nature 2015      |
 | KICH         | http://www.sciencedirect.com/science/article/pii/S1535610814003043   | The Somatic Genomic Landscape of Chromophobe Renal Cell Carcinoma                                       | Cancer cell 2014 |
