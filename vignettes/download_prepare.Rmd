@@ -246,7 +246,7 @@ Examples of query, download, prepare can be found in this [gist](https://gist.gi
 ## Legacy archive
 ### DNA methylation: Get all TCGA IDAT files
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, eval =FALSE}
 #-------------------------------------------------------
 # Example to idat files from TCGA projects
 #-------------------------------------------------------
