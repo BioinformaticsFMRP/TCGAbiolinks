@@ -889,7 +889,7 @@ report in our package:
 - [UCEC](http://www.nature.com/nature/journal/v497/n7447/abs/nature12113.html) [@ref17]
 
 These subtypes will be automatically added in the summarizedExperiment
-object through TCGAprepare. But you can also use the `TCGAquery_subtype` function
+object through GDCprepare. But you can also use the `TCGAquery_subtype` function
 to retrive this information.
 
 ```{r, eval = FALSE}
