@@ -1,0 +1,808 @@
+---
+title: "Analyzing and visualizing TCGA data"
+bibliography: bibliography.bib    
+vignette: >
+    %\VignetteIndexEntry{Analyzing and visualizing TCGA data}
+    %\VignetteEngine{knitr::rmarkdown}
+    \usepackage[utf8]{inputenc}
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dpi = 300)
+knitr::opts_chunk$set(cache=FALSE)
+```
+  
+```{r, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
+devtools::load_all(".")
+```
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(SummarizedExperiment)
+library(dplyr)
+library(DT)
+```
+  
+
+# `TCGAanalyze`: Analyze data from TCGA. 
+You can easily analyze data using following functions:
+
+## `TCGAanalyze_Preprocessing`: Preprocessing of Gene Expression data (IlluminaHiSeq_RNASeqV2)
+
+You can easily search TCGA samples, download and prepare a matrix of gene expression.
+```{r, eval = FALSE}
+# You can define a list of samples to query and download providing relative TCGA barcodes.
+listSamples <- c("TCGA-E9-A1NG-11A-52R-A14M-07","TCGA-BH-A1FC-11A-32R-A13Q-07",
+                 "TCGA-A7-A13G-11A-51R-A13Q-07","TCGA-BH-A0DK-11A-13R-A089-07",
+                 "TCGA-E9-A1RH-11A-34R-A169-07","TCGA-BH-A0AU-01A-11R-A12P-07",
+                 "TCGA-C8-A1HJ-01A-11R-A13Q-07","TCGA-A7-A13D-01A-13R-A12P-07",
+                 "TCGA-A2-A0CV-01A-31R-A115-07","TCGA-AQ-A0Y5-01A-11R-A14M-07")
+
+# Query platform Illumina HiSeq with a list of barcode 
+query <- GDCquery(project = "TCGA-BRCA", 
+                  data.category = "Gene expression",
+                  data.type = "Gene expression quantification",
+                  experimental.strategy = "RNA-Seq",
+                  platform = "Illumina HiSeq",
+                  file.type = "results",
+                  barcode = listSamples, 
+                  legacy = TRUE)
+
+# Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
+GDCdownload(query)
+
+# Prepare expression matrix with geneID in the rows and samples (barcode) in the columns
+# rsem.genes.results as values
+BRCARnaseqSE <- GDCprepare(query)
+
+BRCAMatrix <- assay(BRCARnaseqSE,"raw_count") # or BRCAMatrix <- assay(BRCARnaseqSE,"raw_count")
+
+# For gene expression if you need to see a boxplot correlation and AAIC plot to define outliers you can run
+BRCARnaseq_CorOutliers <- TCGAanalyze_Preprocessing(BRCARnaseqSE)
+```
+
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE,size = 8}
+library(TCGAbiolinks)
+dataGE <- dataBRCA[sample(rownames(dataBRCA),10),sample(colnames(dataBRCA),7)]
+
+knitr::kable(dataGE[1:10,2:3], digits = 2, 
+             caption = "Example of a matrix of gene expression (10 genes in rows and 2 samples in columns)",
+             row.names = TRUE)
+```
+
+The result from TCGAanalyze_Preprocessing is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("PreprocessingOutput.png")
+grid.raster(img)
+```
+
+## `TCGAanalyze_DEA` `&` `TCGAanalyze_LevelTab`: Differential expression analysis (DEA)
+
+Perform DEA (Differential expression analysis) to identify differentially expressed genes (DEGs) using the `TCGAanalyze_DEA` function. 
+
+`TCGAanalyze_DEA` performs DEA using following functions from R \Biocpkg{edgeR}:
+
+1. edgeR::DGEList converts the count matrix into an edgeR object.
+2. edgeR::estimateCommonDisp each gene gets assigned the same dispersion estimate.
+3. edgeR::exactTest performs pair-wise tests for differential expression between two groups.
+4. edgeR::topTags takes the output from exactTest(), adjusts the raw p-values using the False Discovery Rate (FDR) correction, and returns the top differentially expressed genes.
+
+This function receives as arguments:
+
+* **mat1** The matrix of the first group (in the example, group 1 is the normal samples), 
+* **mat2** The matrix of the  second group (in the example, group 2 is tumor samples)
+* **Cond1type** Label for group 1
+* **Cond1type** Label for group 2
+
+Next, we filter the output of dataDEGs by abs(LogFC) >=1, and uses the
+`TCGAanalyze_LevelTab` function to create a table with DEGs (differentially expressed genes), log Fold Change (FC), false discovery rate (FDR), the gene expression level for samples in Cond1type, and Cond2type, and Delta value (the difference of gene expression between the two conditions multiplied logFC).
+
+```{r, eval = FALSE}
+# Downstream analysis using gene expression data  
+# TCGA samples from IlluminaHiSeq_RNASeqV2 with type rsem.genes.results
+# save(dataBRCA, geneInfo , file = "dataGeneExpression.rda")
+library(TCGAbiolinks)
+
+# normalization of genes
+dataNorm <- TCGAanalyze_Normalization(tabDF = dataBRCA, geneInfo =  geneInfo)
+
+# quantile filter of genes
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
+                                  method = "quantile", 
+                                  qnt.cut =  0.25)
+
+# selection of normal samples "NT"
+samplesNT <- TCGAquery_SampleTypes(barcode = colnames(dataFilt),
+                                   typesample = c("NT"))
+
+# selection of tumor samples "TP"
+samplesTP <- TCGAquery_SampleTypes(barcode = colnames(dataFilt), 
+                                   typesample = c("TP"))
+
+# Diff.expr.analysis (DEA)
+dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,samplesNT],
+                            mat2 = dataFilt[,samplesTP],
+                            Cond1type = "Normal",
+                            Cond2type = "Tumor",
+                            fdr.cut = 0.01 ,
+                            logFC.cut = 1,
+                            method = "glmLRT")
+
+# DEGs table with expression values in normal and tumor samples
+dataDEGsFiltLevel <- TCGAanalyze_LevelTab(dataDEGs,"Tumor","Normal",
+                                          dataFilt[,samplesTP],dataFilt[,samplesNT])
+
+```
+The result is shown below:
+
+```{r, eval = TRUE, echo = FALSE}
+library(TCGAbiolinks)
+dataDEGsFiltLevel$FDR <- format(dataDEGsFiltLevel$FDR, scientific = TRUE)
+knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2,
+             caption = "Table of DEGs after DEA", row.names = FALSE)
+```
+
+
+Other examples are in the next sections.
+
+
+### HTSeq data: Downstream analysis BRCA
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+
+CancerProject <- "TCGA-BRCA"
+DataDirectory <- paste0("../GDC/",gsub("-","_",CancerProject))
+FileNameData <- paste0(DataDirectory, "_","HTSeq_Counts",".rda")
+
+query <- GDCquery(project = CancerProject,
+                  data.category = "Transcriptome Profiling",
+                  data.type = "Gene Expression Quantification", 
+                  workflow.type = "HTSeq - Counts")
+
+samplesDown <- getResults(query,cols=c("cases"))
+
+dataSmTP <- TCGAquery_SampleTypes(barcode = samplesDown,
+                                  typesample = "TP")
+
+dataSmNT <- TCGAquery_SampleTypes(barcode = samplesDown,
+                                  typesample = "NT")
+dataSmTP_short <- dataSmTP[1:10]
+dataSmNT_short <- dataSmNT[1:10]
+
+queryDown <- GDCquery(project = CancerProject, 
+                      data.category = "Transcriptome Profiling",
+                      data.type = "Gene Expression Quantification", 
+                      workflow.type = "HTSeq - Counts", 
+                      barcode = c(dataSmTP_short, dataSmNT_short))
+                    
+GDCdownload(query = queryDown,
+            directory = DataDirectory)
+
+dataPrep <- GDCprepare(query = queryDown, 
+                       save = TRUE, 
+                       directory =  DataDirectory,
+                       save.filename = FileNameData)
+
+dataPrep <- TCGAanalyze_Preprocessing(object = dataPrep, 
+                                      cor.cut = 0.6,
+                                      datatype = "HTSeq - Counts")                      
+
+dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
+                                      geneInfo = geneInfoHT,
+                                      method = "gcContent") 
+
+boxplot(dataPrep, outline = FALSE)
+
+boxplot(dataNorm, outline = FALSE)
+
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
+                                  method = "quantile", 
+                                  qnt.cut =  0.25)   
+
+dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmTP_short],
+                            mat2 = dataFilt[,dataSmNT_short],
+                            Cond1type = "Normal",
+                            Cond2type = "Tumor",
+                            fdr.cut = 0.01 ,
+                            logFC.cut = 1,
+                            method = "glmLRT")  
+
+```
+
+
+### miRNA expression data: Downstream analysis BRCA
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+require(TCGAbiolinks)
+
+CancerProject <- "TCGA-BRCA"
+DataDirectory <- paste0("../GDC/",gsub("-","_",CancerProject))
+FileNameData <- paste0(DataDirectory, "_","miRNA_gene_quantification",".rda")
+
+query.miR <- GDCquery(project = CancerProject, 
+                  data.category = "Gene expression",
+                  data.type = "miRNA gene quantification",
+                  file.type = "hg19.mirna",
+                  legacy = TRUE)
+
+samplesDown.miR <- getResults(query.miR,cols=c("cases"))
+
+dataSmTP.miR <- TCGAquery_SampleTypes(barcode = samplesDown.miR,
+                                  typesample = "TP")
+
+dataSmNT.miR <- TCGAquery_SampleTypes(barcode = samplesDown.miR,
+                                  typesample = "NT")
+dataSmTP_short.miR <- dataSmTP.miR[1:10]
+dataSmNT_short.miR <- dataSmNT.miR[1:10]
+
+queryDown.miR <- GDCquery(project = CancerProject, 
+                      data.category = "Gene expression",
+                      data.type = "miRNA gene quantification",
+                      file.type = "hg19.mirna",
+                      legacy = TRUE,
+                      barcode = c(dataSmTP_short.miR, dataSmNT_short.miR))
+
+GDCdownload(query = queryDown.miR,
+            directory = DataDirectory)
+
+dataAssy.miR <- GDCprepare(query = queryDown.miR, 
+                           save = TRUE, 
+                           save.filename = FileNameData, 
+                           summarizedExperiment = TRUE,
+                           directory =DataDirectory )
+rownames(dataAssy.miR) <- dataAssy.miR$miRNA_ID
+
+# using read_count's data 
+read_countData <-  colnames(dataAssy.miR)[grep("count", colnames(dataAssy.miR))]
+dataAssy.miR <- dataAssy.miR[,read_countData]
+colnames(dataAssy.miR) <- gsub("read_count_","", colnames(dataAssy.miR))
+
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataAssy.miR,
+                                  method = "quantile", 
+                                  qnt.cut =  0.25)   
+
+dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmNT_short.miR],
+                            mat2 = dataFilt[,dataSmTP_short.miR],
+                            Cond1type = "Normal",
+                            Cond2type = "Tumor",
+                            fdr.cut = 0.01 ,
+                            logFC.cut = 1,
+                            method = "glmLRT")  
+
+```
+## `TCGAanalyze_EAcomplete & TCGAvisualize_EAbarplot`: Enrichment Analysis
+
+Researchers, in order to better understand the underlying biological processes, 
+often want to retrieve a functional profile of a set of genes that might 
+have an important role. This can be done by performing an enrichment analysis. 
+
+We will perform an enrichment analysis on gene sets using the `TCGAanalyze_EAcomplete` 
+function. 
+Given a set of genes that are up-regulated under certain conditions, 
+an enrichment analysis will identify classes of genes or proteins that 
+are over-represented using annotations for that gene set.
+
+
+To view the results you can use the `TCGAvisualize_EAbarplot` function as shown below.
+
+```{r, eval = FALSE}
+library(TCGAbiolinks)
+# Enrichment Analysis EA
+# Gene Ontology (GO) and Pathway enrichment by DEGs list
+Genelist <- rownames(dataDEGsFiltLevel)
+
+system.time(ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
+
+# Enrichment Analysis EA (TCGAVisualize)
+# Gene Ontology (GO) and Pathway enrichment barPlot
+
+TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP), 
+                        GOBPTab = ansEA$ResBP,
+                        GOCCTab = ansEA$ResCC,
+                        GOMFTab = ansEA$ResMF,
+                        PathTab = ansEA$ResPat,
+                        nRGTab = Genelist, 
+                        nBar = 10)
+
+```
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("EAplot.png")
+grid.raster(img)
+```
+
+
+The figure shows canonical pathways significantly overrepresented (enriched) by the DEGs 
+(differentially expressed genes).
+The most statistically significant canonical pathways identified 
+in DEGs list are listed according to their p value corrected FDR (-Log) (colored bars) 
+and the ratio of list genes found in each pathway over the total number of 
+genes in that pathway (Ratio, red line).
+
+## `TCGAanalyze_survival`: Survival Analysis
+
+When analyzing survival, different problems come up than the ones discussed so far. 
+One question is how do we deal with subjects dropping out of a
+study. For example, assuming that we test a new cancer drug. While some subjects
+die, others may believe that the new drug is not effective, and decide to drop out
+of the study before the study is finished. A similar problem would be faced when
+we investigate how long a machine lasts before it breaks down.
+
+Using the clinical data, it is possible to create a survival plot with the 
+function `TCGAanalyze_survival` as follows:
+
+```{r, eval = FALSE}
+clin.gbm <- GDCquery_clinic("TCGA-GBM", "clinical")
+TCGAanalyze_survival(clin.gbm,
+                     "gender",
+                     main = "TCGA Set\n GBM",height = 10, width=10)
+```
+
+The arguments of `TCGAanalyze_survival` are:
+
+*  **clinical_patient** TCGA Clinical patient with the information days_to_death
+*  **clusterCol** Column with groups to plot. This is a mandatory field, 
+the caption will be based in this column
+*  **legend** Legend title of the figure
+*  **xlim** xlim x axis limits e.g. xlim = c(0, 1000). Present narrower X axis, but not affect survival estimates. 
+*  **main**	 main title of the plot
+*  **ylab**	y-axis text of the plot
+*  **xlab** x-axis text of the plot
+*  **filename**	 The name of the pdf file
+*  **color** Define the colors of the lines.
+*  **pvalue** Show pvalue in the plot. 
+*  **risk.table** 	Show or not the risk table
+*  **conf.int** 	Show confidence intervals for point estimaes of survival curves.
+
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("case2_surv.png")
+grid.raster(img)
+```
+
+## `TCGAanalyze_SurvivalKM`: Correlating gene expression and Survival Analysis
+
+```{r, eval = FALSE}
+library(TCGAbiolinks)
+# Survival Analysis SA
+
+clinical_patient_Cancer <- GDCquery_clinic("TCGA-BRCA","clinical")
+dataBRCAcomplete <- log2(BRCA_rnaseqv2)
+
+tokenStop<- 1
+
+tabSurvKMcomplete <- NULL
+
+for( i in 1: round(nrow(dataBRCAcomplete)/100)){
+    message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
+    tokenStart <- tokenStop
+    tokenStop <-100*i
+    tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
+                                      dataBRCAcomplete,
+                                      Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
+                                      Survresult = F,
+                                      ThreshTop=0.67,
+                                      ThreshDown=0.33)
+    
+    tabSurvKMcomplete <- rbind(tabSurvKMcomplete,tabSurvKM)
+}
+
+tabSurvKMcomplete <- tabSurvKMcomplete[tabSurvKMcomplete$pvalue < 0.01,]
+tabSurvKMcomplete <- tabSurvKMcomplete[order(tabSurvKMcomplete$pvalue, decreasing=F),]
+
+tabSurvKMcompleteDEGs <- tabSurvKMcomplete[
+    rownames(tabSurvKMcomplete) %in% dataDEGsFiltLevel$mRNA,
+    ]
+```
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+tabSurvKMcompleteDEGs$pvalue <- format(tabSurvKMcompleteDEGs$pvalue, scientific = TRUE)
+knitr::kable(tabSurvKMcompleteDEGs[1:5,1:4], 
+             digits = 2,
+             caption = "Table KM-survival genes after SA",
+             row.names = TRUE)
+knitr::kable(tabSurvKMcompleteDEGs[1:5,5:7], 
+             digits = 2,
+             row.names = TRUE)
+```
+
+## `TCGAanalyze_DMR`: Differentially methylated regions Analysis
+
+We will search for differentially methylated CpG sites using the `TCGAanalyze_DMR`
+function. In order to find these regions we use the beta-values 
+(methylation values ranging from 0.0 to 1.0) to compare two groups. 
+
+First, it calculates the difference between the mean DNA methylation of each group
+for each probe. 
+
+Second, it test for differential expression between two groups using the wilcoxon test 
+adjusting by the Benjamini-Hochberg method. The default arguments was set to
+require a minimum absolute beta-values difference of 0.2 and an adjusted p-value
+of < 0.01. 
+
+After these tests, we save a volcano plot (x-axis:diff mean methylation,
+y-axis: statistical significance) that will help the user identify the differentially
+methylated CpG sites, then the results are saved in a csv file (DMR_results.groupCol.group1.group2.csv) and finally the object is returned with the calculus in the rowRanges.
+
+The arguments of TCGAanalyze_DMR are:
+
+| Argument 	| Description 	|
+|--------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| data 	| SummarizedExperiment obtained from the TCGAPrepare 	|
+| groupCol 	| Columns with the groups inside the SummarizedExperiment object. (This will be obtained by the function colData(data)) 	|
+| group1 	| In case our object has more than 2 groups, you should set the name of the group 	|
+| group2 	| In case our object has more than 2 groups, you should set the name of the group 	|
+| calculate.pvalues.probes 	| In order to get the probes faster the user can select to calculate the pvalues only for the probes with a difference in DNA methylation. The default is to calculate to all probes. Possible values: "all", "differential". Default "all" 	|
+| plot.filename 	| Filename. Default: volcano.pdf, volcano.svg, volcano.png. If set to FALSE, there will be no plot. 	|
+| ylab 	| y axis text 	|
+| xlab 	| x axis text 	|
+| title 	| main title. If not specified it will be "Volcano plot (group1 vs group2) 	|
+| legend 	| Legend title 	|
+| color 	| vector of colors to be used in graph 	|
+| label 	| vector of labels to be used in the figure. Example: c("Not Significant","Hypermethylated in group1", "Hypomethylated in group1")) 	|
+| xlim 	| x limits to cut image 	|
+| ylim 	| y limits to cut image 	|
+| p.cut 	| p values threshold. Default: 0.01 	|
+| probe.names 	| is probe.names 	|
+| diffmean.cut 	| diffmean threshold. Default: 0.2 	|
+| paired 	| Wilcoxon paired parameter. Default: FALSE 	|
+| adj.method 	| Adjusted method for the p-value calculation 	|
+| overwrite 	| Overwrite the pvalues and diffmean values if already in the object for both groups? Default: FALSE 	|
+| cores 	| Number of cores to be used in the non-parametric test Default = groupCol.group1.group2.rda 	|
+| save 	| Save object with results? Default: TRUE 	|
+
+
+```{r, eval = FALSE}
+data <- TCGAanalyze_DMR(data, groupCol = "methylation_subtype",
+                        group1 = "CIMP.H",
+                        group2="CIMP.L",
+                        p.cut = 10^-5,
+                        diffmean.cut = 0.25,
+                        legend = "State",
+                        plot.filename = "coad_CIMPHvsCIMPL_metvolcano.png")
+```
+
+The output will be a plot such as the figure below. The green dots are the 
+probes that are hypomethylated in group 2 compared to group 1, 
+while the red dots are the hypermethylated probes in group 2 compared to group 1
+
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("figure5met.png")
+grid.raster(img)
+```
+
+
+Also, the `TCGAanalyze_DMR` 
+function will save the plot as pdf and return the same SummarizedExperiment
+that was given as input with the values of p-value,
+p-value adjusted, diffmean and the group it belongs in the graph 
+(non significant, hypomethylated, hypermethylated) in the rowRanges. 
+The collumns will be (where group1 and group2 are the names of the groups): 
+
+* diffmean.group1.group2 (mean.group2 - mean.group1) 
+* diffmean.group2.group1 (mean.group1 - mean.group2)
+* p.value.group1.group2
+* p.value.adj.group1.group2
+* status.group1.group2 (Status of probes in group2 in relation to group1) 
+* status.group2.group1 (Status of probes in group1 in relation to group2) 
+
+This values can be view/acessed using the `rowRanges` 
+acessesor (`rowRanges(data)`).
+
+**Observation:** Calling the same function again, with the same arguments 
+will only plot the results,  as it was already calculated. 
+If you want to have them recalculated, please set
+`overwrite` to `TRUE` or remove the calculated collumns.
+
+# `TCGAvisualize`: Visualize results from analysis functions with TCGA's data. 
+You can easily visualize results from some following functions:
+
+## `TCGAvisualize_Heatmap`: Create heatmaps with cluster bars
+
+In order to have a better view of clusters, we normally use heatmaps.
+`TCGAvisualize_Heatmap` will plot a heatmap and add to each sample bars representing
+different features. This function is a wrapper to the package 
+[ComplexHeatmap](http://bioconductor.org/packages/ComplexHeatmap/)  package,
+
+The arguments of this function are:
+
+
+* **data**	The object with the heatmap data (expression, methylation)
+* **col.metadata** Metadata for the columns (patients). It should have the column bcr_patient_barcode or patient or ID with the patients barcodes.
+* **row.metadata** Metadata for the rows genes (expression) or probes (methylation)
+* **col.colors ** A list of names colors
+* **row.colors ** A list of named colors
+* **show_column_names **	Show column names names? Dafault: FALSE
+* **show_row_names ** Show row names? Dafault: FALSE
+* **cluster_rows ** Cluster rows ? Dafault: FALSE
+* **cluster_columns** Cluster columns ? Dafault: FALSE
+* **sortCol** Name of the column to be used to sort the columns
+* **title** Title of the plot
+* **type** Select the colors of the heatmap values. Possible values are "expression" (default), "methylation"
+* **scale**	Use z-score to make the heamat? If we want to show differences between genes, it is good to make Z-score by samples (force each sample to have zero mean and standard deviation=1). If we want to show differences between samples, it is good to make Z-score by genes (force each gene to have zero mean and standard deviation=1). Possibilities: "row", "col. Default "none"
+
+
+For more information please take a look on case study #2.
+
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("case2_Heatmap.png")
+grid.raster(img)
+```
+
+## `TCGAvisualize_Volcano`: Create volcano plot 
+
+Creates a volcano plot for DNA methylation or expression
+
+The arguments of this function are:
+
+| Argument 	| Description 	|
+|-----------------	|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| x 	| x-axis data 	|
+| y 	| y-axis data 	|
+| filename 	| Filename. Default: volcano.pdf, volcano.svg, volcano.png 	|
+| ylab 	| y axis text 	|
+| xlab 	| x axis text 	|
+| title 	| main title. If not specified it will be "Volcano plot (group1 vs group2) 	|
+| legend 	| Legend title 	|
+| label 	| vector of labels to be used in the figure. Example: c("Not Significant","Hypermethylated in group1", "Hypomethylated in group1"))#' 	|
+| xlim 	| x limits to cut image 	|
+| ylim 	| y limits to cut image 	|
+| color 	| vector of colors to be used in graph 	|
+| names 	| Names to be ploted if significant. Should be the same size of x and y 	|
+| names.fill 	| Names should be filled in a color box? Default: TRUE 	|
+| show.names 	| What names will be showd? Possibilities: "both", "significant", "highlighted" 	|
+| x.cut 	| x-axis threshold. Default: 0.0 If you give only one number (e.g. 0.2) the cut-offs will be -0.2 and 0.2. Or you can give diffenrent cutt-ofs as a vector (e.g. c(-0.3,0.4)) 	|
+| y.cut 	| p-values threshold. 	|
+| height 	| Figure height 	|
+| width 	| Figure width 	|
+| highlight 	| List of genes/probes to be highlighted. It should be in the names argument. 	|
+| highlight.color 	| Color of the points highlighted 	|
+| names.size 	| Size of the names text 	|
+| dpi 	| Figure dpi 	|
+|  	|  	|
+|  	|  	|
+|  	|  	|
+|  	|  	|
+For more information please take a look on case study #3.
+
+## `TCGAvisualize_PCA`: Principal Component Analysis plot for differentially expressed genes
+
+In order to better understand our genes, we can perform a PCA to reduce the
+number of dimensions of our gene set. The function `TCGAvisualize_PCA` will plot
+the PCA for different groups.
+
+The arguments of this function are:
+
+* **dataFilt** The expression matrix after normalization and quantile filter
+* **dataDEGsFiltLevel** The TCGAanalyze_LevelTab output
+* **ntopgenes** number of DEGs genes to plot in PCA
+* ** group1 a string containing the barcode list of the samples in control group
+* ** group2 a string containing the barcode list of the samples in disease group
+
+
+```{r, eval = FALSE}
+# normalization of genes
+dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
+
+# quantile filter of genes
+dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
+                                  method = "quantile", 
+                                  qnt.cut =  0.25)
+
+# selection of normal samples "NT" 
+group1 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
+# selection of normal samples "TP" 
+group2 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
+
+# Principal Component Analysis plot for ntop selected DEGs
+ pca <- TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200, group1, group2)
+```
+
+The result is shown below:
+```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
+library(png)
+library(grid)
+img <- readPNG("PCAtop200DEGs.png")
+grid.raster(img)
+```
+
+## `TCGAvisualize_meanMethylation`: Mean DNA Methylation Analysis
+Using the data and calculating the mean DNA methylation per group, it is possible 
+to create a mean DNA methylation boxplot with the function 
+`TCGAvisualize_meanMethylation` as follows:
+
+```{r,include=FALSE,echo=FALSE, fig.height=5, message=FALSE, warning=FALSE}
+data <- tryCatch({
+    query <- GDCquery(project = "TCGA-GBM",
+                  data.category = "DNA methylation",
+                  platform = "Illumina Human Methylation 27",
+                  legacy = TRUE, 
+                  barcode = c("TCGA-02-0058-01A-01D-0186-05", "TCGA-12-1597-01B-01D-0915-05",
+                              "TCGA-12-0829-01A-01D-0392-05", "TCGA-06-0155-01B-01D-0521-05",
+                              "TCGA-02-0099-01A-01D-0199-05", "TCGA-19-4068-01A-01D-1228-05",
+                              "TCGA-19-1788-01A-01D-0595-05", "TCGA-16-0848-01A-01D-0392-05"))
+            GDCdownload(query, method = "api", chunks.per.download = 2)
+            GDCdownload(query, method = "api")
+            data <- GDCprepare(query)
+            data
+    }, error = function(e) {
+         nrows <- 200; ncols <- 21
+         counts <- matrix(runif(nrows * ncols, 0, 1), nrows)
+         rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
+                            IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
+                            strand=sample(c("+", "-"), 200, TRUE),
+                            feature_id=sprintf("ID%03d", 1:200))
+        colData <- S4Vectors::DataFrame(shortLetterCode=rep(c("NT", "TP","TR"), 7),
+                         row.names=LETTERS[1:21],
+                         subtype_Pan.Glioma.DNA.Methylation.Cluster=rep(c("group1","group2","group3"),c(7,7,7)),
+                         vital_status=rep(c("DEAD","ALIVE","DEAD"),7))
+        data <- SummarizedExperiment::SummarizedExperiment(
+                    assays=S4Vectors::SimpleList(counts=counts),
+                    rowRanges=rowRanges,
+                    colData=colData)
+        data
+
+        }
+    )
+```
+
+```{r, eval=FALSE, echo=TRUE, fig.height=5, message=FALSE, warning=FALSE}
+query <- GDCquery(project = "TCGA-GBM",
+                  data.category = "DNA methylation",
+                  platform = "Illumina Human Methylation 27",
+                  legacy = TRUE, 
+                  barcode = c("TCGA-02-0058-01A-01D-0186-05", "TCGA-12-1597-01B-01D-0915-05",
+                              "TCGA-12-0829-01A-01D-0392-05", "TCGA-06-0155-01B-01D-0521-05",
+                              "TCGA-02-0099-01A-01D-0199-05", "TCGA-19-4068-01A-01D-1228-05",
+                              "TCGA-19-1788-01A-01D-0595-05", "TCGA-16-0848-01A-01D-0392-05"))
+GDCdownload(query, method = "api")
+data <- GDCprepare(query)
+```
+
+```{r, echo=TRUE, fig.height=4, fig.width=3, out.width = 3, out.heigh=5, message=FALSE, warning=FALSE}
+# "shortLetterCode" is a column in the SummarizedExperiment::colData(data) matrix
+TCGAvisualize_meanMethylation(data, groupCol = "shortLetterCode",filename = NULL)
+```
+The arguments of `TCGAvisualize_meanMethylation` are:
+
+| Argument      | Description |   
+|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| data                  | SummarizedExperiment object obtained from GDCPrepare                                                                              |
+| groupCol              | Columns in colData(data) that defines the groups. If no columns defined a columns called "Patients" will be used                  |
+| subgroupCol           | Columns in colData(data) that defines the subgroups.                                                                              |
+| shapes                | Shape vector of the subgroups. It must have the size of the levels of the subgroups. Example: shapes = c(21,23) if for two levels |
+| print.pvalue          | Print p-value for two groups                                                                                                      |
+| plot.jitter           | Plot jitter? Default TRUE                                                                                                         |
+| jitter.size           | Plot jitter size? Default 3                                                                                                       |
+| filename              | The name of the pdf that will be saved                                                                                            |
+| ylab                  | y axis text in the plot                                                                                                           |
+| xlab                  | x axis text in the plot                                                                                                           |
+| title                 | main title in the plot                                                                                                            |
+| labels                | Labels of the groups                                                                                                              |
+| group.legend          | Name of the group legend. DEFAULT: groupCol                                                                                       |
+| subgroup.legend       | Name of the subgroup legend. DEFAULT: subgroupCol                                                                                 |
+| color                 | vector of colors to be used in graph                                                                                              |
+| y.limits              | Change lower/upper y-axis limit                                                                                                   |
+| sort                  | Sort boxplot by mean or median. Possible values: mean.asc, mean.desc, median.asc, meadian.desc                                    |
+| order                 | Order of the boxplots                                                                                                             |
+| legend.position       | Legend position ("top", "right","left","bottom")                                                                                  |
+| legend.title.position | Legend title position ("top", "right","left","bottom")                                                                            |
+| legend.ncols          | Number of columns of the legend                                                                                                   |
+| add.axis.x.text       | Add text to x-axis? Default: FALSE                                                                                                |
+| width                 | Plot width default:10                                                                                                             |
+| height                | Plot height default:10                                                                                                            |
+| dpi                   | Pdf dpi default:600                                                                                                               |
+| axis.text.x.angle     | Angle of text in the x axis                                                                                                       |
+
+Other examples using the parameters:
+```{r, echo=TRUE, fig.height=4, fig.width=7, out.width = 7, out.heigh=5, message=FALSE, warning=FALSE}
+# setting y limits: lower 0, upper 1
+TCGAvisualize_meanMethylation(data,groupCol = "shortLetterCode", 
+                              filename = NULL, y.limits = c(0,1))
+# setting y limits: lower 0
+TCGAvisualize_meanMethylation(data,groupCol = "shortLetterCode", 
+                              filename = NULL, y.limits = 0)
+
+# Changing shapes of jitters to show subgroups
+TCGAvisualize_meanMethylation(data,
+                              groupCol = "subtype_Pan.Glioma.DNA.Methylation.Cluster", 
+                              subgroupCol ="vital_status", filename = NULL)
+
+# Sorting bars by descending mean methylation
+TCGAvisualize_meanMethylation(data,
+                              groupCol = "subtype_Pan.Glioma.DNA.Methylation.Cluster",
+                              sort="mean.desc",
+                              filename=NULL)
+# Sorting bars by asc mean methylation
+TCGAvisualize_meanMethylation(data,
+                              groupCol = "subtype_Pan.Glioma.DNA.Methylation.Cluster",
+                              sort = "mean.asc",
+                              filename=NULL)
+
+TCGAvisualize_meanMethylation(data,
+                              groupCol = "vital_status",
+                              sort = "mean.asc",
+                              filename=NULL)
+```
+
+
+## `TCGAvisualize_starburst`: Integration of gene expression and DNA methylation data 
+
+The starburst plot is proposed to combine information from two volcano plots, 
+and is applied for a study of DNA methylation and gene expression. It first introduced in 2010 [@noushmehr2010identification]. In order to
+reproduce this plot, we will use the `TCGAvisualize_starburst` function.
+
+The function creates Starburst plot for comparison of DNA methylation
+and gene expression. The log10 (FDR-corrected P value) for DNA methylation is plotted in the x axis, and for gene expression in the y axis, for each gene. 
+The black dashed line shows the FDR-adjusted P value of 0.01.
+
+The arguments of this function are:
+| Argument      | Description |   
+|--------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| exp | Object obtained by DEArnaSEQ function |
+| group1 | The name of the group 1 Obs: Column p.value.adj.group1.group2 should exist |
+| group2 | The name of the group 2. Obs: Column p.value.adj.group1.group2 should exist |
+| exp.p.cut | expression p value cut-off |
+| met.p.cut | methylation p value cut-off |
+| diffmean.cut | If set, the probes with diffmean higher than methylation cut-off will be highlighted in the plot. And the data frame return will be subseted. |
+| logFC.cut | If set, the probes with expression fold change higher than methylation cut-off will be highlighted in the plot. And the data frame return will be subseted. |
+| met.platform | DNA methylation platform ("27K","450K" or "EPIC") |
+| genome | Genome of reference ("hg38" or "hg19") used to identify nearest probes TSS |
+| names | Add the names of the significant genes? Default: FALSE |
+| names.fill | Names should be filled in a color box? Default: TRUE |
+| filename | The filename of the file (it can be pdf, svg, png, etc) |
+| return.plot | If true only plot object will be returned (pdf will not be created) |
+| ylab | y axis text |
+| xlab | x axis text |
+| title | main title |
+| legend | legend title |
+| color | vector of colors to be used in graph |
+| label | vector of labels to be used in graph |
+| xlim | x limits to cut image |
+| ylim | y limits to cut image |
+| height | Figure height |
+| width | Figure width |
+| dpi | Figure dpi |
+
+```{r, eval = FALSE}
+starburst <- TCGAvisualize_starburst(coad.SummarizeExperiment, 
+                                     different.experssion.analysis.data,
+                                     group1 = "CIMP.H",
+                                     group2 = "CIMP.L",
+                                     met.platform = "450K",
+                                     genome = "hg19",
+                                     met.p.cut = 10^-5, 
+                                     exp.p.cut = 10^-5,
+                                     names = TRUE)
+```
+
+As a result, the function will a plot the figure below and return a matrix with 
+the Gene_symbol and it status in relation to expression (up regulated/down regulated) and to methylation (Hyper/Hypo methylated). The case study 3, shows the complete pipeline
+for creating this figure.
+
+
+```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
+library(png)
+library(grid)
+img <- readPNG("figure5star.png")
+grid.raster(img)
+```
+
+
+
+# Session Information
+******
+```{r sessionInfo}
+sessionInfo()
+```
+
