@@ -3,7 +3,7 @@ title: "Graphical User Interface (GUI)"
 date: "`r BiocStyle::doc_date()`"
 bibliography: bibliography.bib
 vignette: >
-  %\VignetteIndexEntry{"6. Graphical User Interface (GUI)"}
+  %\VignetteIndexEntry{"9. Graphical User Interface (GUI)"}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
