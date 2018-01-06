@@ -2,7 +2,7 @@
 title: "Case Studies"
 bibliography: bibliography.bib    
 vignette: >
-    %\VignetteIndexEntry{Case Studies}
+    %\VignetteIndexEntry{8. Case Studies}
     %\VignetteEngine{knitr::rmarkdown}
     \usepackage[utf8]{inputenc}
 ---
