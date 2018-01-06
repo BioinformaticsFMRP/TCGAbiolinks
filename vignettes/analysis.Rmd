@@ -2,7 +2,7 @@
 title: "Analyzing and visualizing TCGA data"
 bibliography: bibliography.bib    
 vignette: >
-    %\VignetteIndexEntry{Analyzing and visualizing TCGA data}
+    %\VignetteIndexEntry{7. Analyzing and visualizing TCGA data}
     %\VignetteEngine{knitr::rmarkdown}
     \usepackage[utf8]{inputenc}
 ---
