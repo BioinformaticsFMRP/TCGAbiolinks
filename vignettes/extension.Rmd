@@ -3,7 +3,7 @@ title: "TCGAbiolinks Extension"
 author: "Mohamed Mounir"
 date: "`r BiocStyle::doc_date()`"
 vignette: >
-    %\VignetteIndexEntry{"5. TCGAbiolinks_Extension"}
+    %\VignetteIndexEntry{"10. TCGAbiolinks_Extension"}
     %\VignetteBuilder: knitr
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}
