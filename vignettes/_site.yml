@@ -25,9 +25,9 @@ navbar:
         - text: "Mutation data"
           icon: fa-random
           href: mutation.html
-#        - text: "Molecular subtypes"
-#          icon: fa-table
-#          href: subtypes.html
+        - text: "Molecular subtypes"
+          icon: fa-table
+          href: subtypes.html
     - text: "Analysis"
       href: analysis.html
       icon: fa-flask
