@@ -432,7 +432,7 @@ PanCancerAtlas_subtypes <- function(){
 #' dataSubt <- TCGAquery_subtype(tumor = "lgg")
 #' @return a data.frame with barcode and molecular subtypes
 TCGAquery_subtype <- function(tumor){
-    if (grepl("acc|blca|usc|chol|sarc|cesc|lgg|gbm|luad|stad|brca|coad|esca|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|pcpg|kirp|kirc|all",
+    if (grepl("acc|blca|ucs|chol|sarc|cesc|lgg|gbm|luad|stad|brca|coad|esca|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|pcpg|kirp|kirc|all",
               tumor,ignore.case = TRUE)) {
 
         doi <- c("acc"  = "doi:10.1016/j.ccell.2016.04.002",
