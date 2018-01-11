@@ -4,7 +4,6 @@ bibliography: bibliography.bib
 vignette: >
     %\VignetteIndexEntry{8. Case Studies}
     %\VignetteEngine{knitr::rmarkdown}
-    \usepackage[utf8]{inputenc}
 ---
   
 ```{r setup, include=FALSE}
