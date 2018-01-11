@@ -512,6 +512,7 @@ colDataPrepareTARGET <- function(barcode){
     samples <- str_match(barcode,regex)[,1]
 
     ret <- DataFrame(barcode = barcode,
+                     sample = substr(barcode, 1, 20),
                      patient = substr(barcode, 1, 16),
                      tumor.code = substr(barcode, 8, 9),
                      case.unique.id = substr(barcode, 11, 16),
