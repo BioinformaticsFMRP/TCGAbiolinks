@@ -4,7 +4,6 @@ bibliography: bibliography.bib
 vignette: >
     %\VignetteIndexEntry{7. Analyzing and visualizing TCGA data}
     %\VignetteEngine{knitr::rmarkdown}
-    \usepackage[utf8]{inputenc}
 ---
   
 ```{r setup, include=FALSE}
