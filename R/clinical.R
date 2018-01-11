@@ -478,7 +478,7 @@ TCGAquery_subtype <- function(tumor){
                  "lihc" = "doi:10.1016/j.cell.2017.05.046",
                  "luad" = "doi:10.1038/nature13385",
                  "lusc" = "doi:10.1038/nature11404",
-                 "paad"  = "doi:10.1016/j.ccell.2017.07.007"
+                 "paad"  = "doi:10.1016/j.ccell.2017.07.007",
                  "ovca" = "doi:10.1038/nature10166",
                  "pancan"="doi:10.1016/j.cell.2014.06.049",
                  "pcpg" = "doi:10.1016/j.ccell.2017.01.001",
