@@ -432,12 +432,38 @@ PanCancerAtlas_subtypes <- function(){
 #' dataSubt <- TCGAquery_subtype(tumor = "lgg")
 #' @return a data.frame with barcode and molecular subtypes
 TCGAquery_subtype <- function(tumor){
-    if (grepl("acc|blca|ucs|chol|sarc|cesc|lgg|gbm|luad|stad|brca|coad|esca|read|skcm|hnsc|kich|lusc|ucec|pancan|thca|prad|pcpg|kirp|kirc|all",
+    available <- c("ACC",
+                   "BRCA",
+                   "BLCA",
+                   "CESC",
+                   "CHOL",
+                   "COAD",
+                   "ESCA",
+                   "GBM",
+                   "HNSC",
+                   "KICH",
+                   "KIRC",
+                   "KIRP",
+                   "LGG",
+                   "LUAD",
+                   "LUSC",
+                   "PAAD",
+                   "PCPG",
+                   "PRAD",
+                   "READ",
+                   "SKCM",
+                   "SARC",
+                   "STAD",
+                   "THCA",
+                   "UCEC",
+                   "UCS",
+                   "UVM")
+    if (grepl(paste(available,collapse = "|"),
               tumor,ignore.case = TRUE)) {
 
         doi <- c("acc"  = "doi:10.1016/j.ccell.2016.04.002",
                  "aml"  = "doi:10.1056/NEJMoa1301689",
-                 "blca" = "10.1016/j.cell.2017.09.007",
+                 "blca" = "doi:10.1016/j.cell.2017.09.007",
                  "brca" = "doi:10.1038/nature11412",
                  "cesc" = "doi:10.1038/nature21386",
                  "chol" = "doi:10.1016/j.celrep.2017.02.033",
@@ -449,26 +475,46 @@ TCGAquery_subtype <- function(tumor){
                  "kich" = "doi:10.1016/j.ccr.2014.07.014",
                  "kirc" = "doi:10.1038/nature12222",
                  "kirp" = "doi:10.1056/NEJMoa1505917",
-                 "lihc" = "",
+                 "lihc" = "doi:10.1016/j.cell.2017.05.046",
                  "luad" = "doi:10.1038/nature13385",
                  "lusc" = "doi:10.1038/nature11404",
+                 "paad"  = "doi:10.1016/j.ccell.2017.07.007"
                  "ovca" = "doi:10.1038/nature10166",
                  "pancan"="doi:10.1016/j.cell.2014.06.049",
-                 "pcpg" = "http://dx.doi.org/10.1016/j.ccell.2017.01.001",
+                 "pcpg" = "doi:10.1016/j.ccell.2017.01.001",
                  "prad" = "doi:10.1016/j.cell.2015.10.025",
                  "read" = "doi:10.1038/nature11252",
-                 "sarc" = "10.1016/j.cell.2017.10.014",
+                 "sarc" = "doi:10.1016/j.cell.2017.10.014",
                  "skcm" = "doi:10.1016/j.cell.2015.05.044",
                  "stad" = "doi:10.1038/nature13480",
                  "thca" = "doi:10.1016/j.cell.2014.09.050",
                  "ucec" = "doi:10.1038/nature12113",
-                 "ucs"  = "10.1016/j.ccell.2017.02.010")
+                 "ucs"  = "doi:10.1016/j.ccell.2017.02.010",
+                 "uvm"  = "doi:10.1016/j.ccell.2017.07.003")
 
         if(tolower(tumor) != "all") message(paste0("Subtype information from:", doi[tolower(tumor)]))
         if(tolower(tumor) == "all") {
-            all.tumor <- c("acc","blca","lgg", "esca","gbm", "luad", "stad", "brca", "coad",
-                           "skcm", "hnsc", 'kich', "lusc", "ucec", "pancan", "thca",
-                           "prad","kirp","kirc")
+            all.tumor <- c("acc",
+                           "blca",
+                           "lgg",
+                           "esca",
+                           "lhc",
+                           "gbm",
+                           "luad",
+                           "stad",
+                           "brca",
+                           "coad",
+                           "skcm",
+                           "hnsc",
+                           'kich',
+                           "lusc",
+                           "pancan",
+                           "thca",
+                           "prad",
+                           "kirp",
+                           "kirc",
+                           "ucec"
+            )
             all <- NULL
             for(i in all.tumor){
                 try({
@@ -504,7 +550,7 @@ TCGAquery_subtype <- function(tumor){
         }
         return(get(paste0(tolower(tumor),".subtype")))
     } else {
-        stop("For the moment we have only subtype for: acc, blca, brca, coad, esca, gbm, hnsc, kich, kirp, kirc, lgg, luad, lusc, prad, pancan, read, skcm, stad, thca and ucec")
+        stop("For the moment we have only subtype for:\no ", paste(available,collapse = "\no "))
     }
 }
 
@@ -521,35 +567,35 @@ TCGAquery_subtype <- function(tumor){
 #' samples, subtypes, and colors. The $filtered attribute is returned as filtered samples with no subtype info
 TCGA_MolecularSubtype <- function(barcodes){
 
-  Pam50 <- TabSubtypesCol_merged
-  Pam50$samples <- as.character(Pam50$samples)
-  barcodes <- as.character(barcodes)
+    Pam50 <- TabSubtypesCol_merged
+    Pam50$samples <- as.character(Pam50$samples)
+    barcodes <- as.character(barcodes)
 
-  patients <- sapply(barcodes, function(x) paste(unlist(stringr::str_split(x, "-"))[1:3], collapse = "-"))
-  filt.p <- c()
-  df.barcodes_patID <- data.frame(barcodes=barcodes, patID=patients, row.names = 1:length(barcodes))
-  #print(df.barcodes_patID)
-  for(p in patients){
-    if(p %in% Pam50$samples == FALSE)
-      filt.p <- c(filt.p, p)
-  }
+    patients <- sapply(barcodes, function(x) paste(unlist(stringr::str_split(x, "-"))[1:3], collapse = "-"))
+    filt.p <- c()
+    df.barcodes_patID <- data.frame(barcodes=barcodes, patID=patients, row.names = 1:length(barcodes))
+    #print(df.barcodes_patID)
+    for(p in patients){
+        if(p %in% Pam50$samples == FALSE)
+            filt.p <- c(filt.p, p)
+    }
 
-  if(length(filt.p)>0){
-    message("the following TCGA barcodes/patients with no subtypes were filtered:")
-    filt<-as.character(df.barcodes_patID[which(df.barcodes_patID$patID%in%filt.p),]$barcodes)
-    print(filt)
-  }
-  else filt<-c()
+    if(length(filt.p)>0){
+        message("the following TCGA barcodes/patients with no subtypes were filtered:")
+        filt<-as.character(df.barcodes_patID[which(df.barcodes_patID$patID%in%filt.p),]$barcodes)
+        print(filt)
+    }
+    else filt<-c()
 
 
-  patients.filtered<-unlist(patients[patients%in%filt.p==FALSE])
-  idx.patient<-which(Pam50$samples%in%patients.filtered)
+    patients.filtered<-unlist(patients[patients%in%filt.p==FALSE])
+    idx.patient<-which(Pam50$samples%in%patients.filtered)
 
-  Subtypes<-Pam50[idx.patient,]
-  Subtypes<-Subtypes[match(patients.filtered, Subtypes$samples),]
-  Subtypes$barcodes<-as.character(df.barcodes_patID[which(df.barcodes_patID$patID%in%Subtypes$samples),]$barcodes)
+    Subtypes<-Pam50[idx.patient,]
+    Subtypes<-Subtypes[match(patients.filtered, Subtypes$samples),]
+    Subtypes$barcodes<-as.character(df.barcodes_patID[which(df.barcodes_patID$patID%in%Subtypes$samples),]$barcodes)
 
-  return(list(subtypes=Subtypes, filtered=filt))
+    return(list(subtypes=Subtypes, filtered=filt))
 }
 
 #' @title Filters TCGA barcodes according to purity parameters
@@ -572,49 +618,49 @@ TCGA_MolecularSubtype <- function(barcodes){
 #' @return List with $pure_barcodes attribute as a vector of pure samples and $filtered attribute as filtered samples with no purity info
 TCGAtumor_purity <- function(barcodes, estimate, absolute, lump, ihc, cpe){
 
-  Tumor.purity.L <- Tumor.purity
-  barcodes <= as.character(barcodes)
-  Tumor.purity.L$Sample.ID <- as.character(Tumor.purity$Sample.ID)
-  Tumor.purity.L$ESTIMATE <- as.numeric(gsub(",", ".", Tumor.purity$ESTIMATE))
-  Tumor.purity.L$ABSOLUTE <- as.numeric(gsub(",", ".", Tumor.purity$ABSOLUTE))
-  Tumor.purity.L$LUMP <- as.numeric(gsub(",", ".", Tumor.purity$LUMP))
-  Tumor.purity.L$IHC <- as.numeric(gsub(",", ".", Tumor.purity$IHC))
-  Tumor.purity.L$CPE <- as.numeric(gsub(",", ".", Tumor.purity$CPE))
+    Tumor.purity.L <- Tumor.purity
+    barcodes <= as.character(barcodes)
+    Tumor.purity.L$Sample.ID <- as.character(Tumor.purity$Sample.ID)
+    Tumor.purity.L$ESTIMATE <- as.numeric(gsub(",", ".", Tumor.purity$ESTIMATE))
+    Tumor.purity.L$ABSOLUTE <- as.numeric(gsub(",", ".", Tumor.purity$ABSOLUTE))
+    Tumor.purity.L$LUMP <- as.numeric(gsub(",", ".", Tumor.purity$LUMP))
+    Tumor.purity.L$IHC <- as.numeric(gsub(",", ".", Tumor.purity$IHC))
+    Tumor.purity.L$CPE <- as.numeric(gsub(",", ".", Tumor.purity$CPE))
 
-  #print(head(Tumor.purity.L))
+    #print(head(Tumor.purity.L))
 
-  samples.id<-sapply(barcodes, function(x) paste(unlist(stringr::str_split(x, "-"))[1:4], collapse = "-"))
+    samples.id<-sapply(barcodes, function(x) paste(unlist(stringr::str_split(x, "-"))[1:4], collapse = "-"))
 
 
-  df.barcodes_sampID <- data.frame(barcodes=barcodes, sampID=samples.id, row.names = 1:length(barcodes))
-  filt.s <- c()
+    df.barcodes_sampID <- data.frame(barcodes=barcodes, sampID=samples.id, row.names = 1:length(barcodes))
+    filt.s <- c()
 
-  for(s in samples.id){
-    if(s %in% Tumor.purity$Sample.ID==FALSE)
-      filt.s <- c(filt.s, s)
-  }
+    for(s in samples.id){
+        if(s %in% Tumor.purity$Sample.ID==FALSE)
+            filt.s <- c(filt.s, s)
+    }
 
-  if(length(filt.s)>0){
-    message("the following TCGA barcodes do not have info on tumor purity:")
-    filt <- as.character(df.barcodes_sampID[which(df.barcodes_sampID$sampID %in% filt.s),]$barcodes)
-    print(filt)
-  }
-  else filt<-c()
+    if(length(filt.s)>0){
+        message("the following TCGA barcodes do not have info on tumor purity:")
+        filt <- as.character(df.barcodes_sampID[which(df.barcodes_sampID$sampID %in% filt.s),]$barcodes)
+        print(filt)
+    }
+    else filt<-c()
 
-  samples.filtered<-unlist(samples.id[samples.id %in% filt.s == FALSE])
+    samples.filtered<-unlist(samples.id[samples.id %in% filt.s == FALSE])
 
-  idx.samples <- which(Tumor.purity.L$Sample.ID %in% samples.filtered
-                       & (Tumor.purity.L$ESTIMATE >= estimate | Tumor.purity.L$ESTIMATE == 'NaN')
-                       & (Tumor.purity.L$ABSOLUTE >= absolute| Tumor.purity.L$ABSOLUTE == 'NaN')
-                       & (Tumor.purity.L$IHC >= ihc | Tumor.purity.L$IHC == 'NaN')
-                       & (Tumor.purity.L$LUMP >= lump | Tumor.purity.L$LUMP == 'NaN')
-                       & (Tumor.purity.L$CPE >= cpe | Tumor.purity.L$CPE == 'NaN') )
+    idx.samples <- which(Tumor.purity.L$Sample.ID %in% samples.filtered
+                         & (Tumor.purity.L$ESTIMATE >= estimate | Tumor.purity.L$ESTIMATE == 'NaN')
+                         & (Tumor.purity.L$ABSOLUTE >= absolute| Tumor.purity.L$ABSOLUTE == 'NaN')
+                         & (Tumor.purity.L$IHC >= ihc | Tumor.purity.L$IHC == 'NaN')
+                         & (Tumor.purity.L$LUMP >= lump | Tumor.purity.L$LUMP == 'NaN')
+                         & (Tumor.purity.L$CPE >= cpe | Tumor.purity.L$CPE == 'NaN') )
 
-  df.purity <- Tumor.purity.L[idx.samples,]
+    df.purity <- Tumor.purity.L[idx.samples,]
 
-  idx <- which(df.barcodes_sampID$sampID%in%df.purity$Sample.ID)
+    idx <- which(df.barcodes_sampID$sampID%in%df.purity$Sample.ID)
 
-  filtered.barcodes <- as.character(df.barcodes_sampID[idx,]$barcodes)
+    filtered.barcodes <- as.character(df.barcodes_sampID[idx,]$barcodes)
 
-  return(list(pure_barcodes=filtered.barcodes, filtered=filt))
+    return(list(pure_barcodes=filtered.barcodes, filtered=filt))
 }
