@@ -87,9 +87,11 @@ report in our package:
 | KICH         | http://www.sciencedirect.com/science/article/pii/S1535610814003043   | The Somatic Genomic Landscape of Chromophobe Renal Cell Carcinoma                                       | Cancer cell 2014 |
 | KIRC         | http://www.nature.com/nature/journal/v499/n7456/abs/nature12222.html | Comprehensive molecular characterization of clear cell renal cell carcinoma                             | Nature 2013      |
 | KIRP         | http://www.nejm.org/doi/full/10.1056/NEJMoa1505917                   | Comprehensive Molecular Characterization of Papillary Renal-Cell Carcinoma                              | NEJM 2016        |
+| LIHC	| http://linkinghub.elsevier.com/retrieve/pii/S0092-8674(17)30639-6	| Comprehensive and Integrative Genomic Characterization of Hepatocellular Carcinoma |	Cell 2017 | 
 | LGG          | http://dx.doi.org/10.1016/j.cell.2015.12.028                         | Molecular Profiling Reveals Biologically Discrete Subsets and Pathways of Progression in Diffuse Glioma | Cell 2016        |
 | LUAD         | http://www.nature.com/nature/journal/v511/n7511/abs/nature13385.html | Comprehensive molecular profiling of lung adenocarcinoma                                                | Nature 2014      |
 | LUSC         | http://www.nature.com/nature/journal/v489/n7417/abs/nature11404.html | Comprehensive genomic characterization of squamous cell lung cancers                                    | Nature 2012      |
+| PAAD	 | http://www.cell.com/cancer-cell/fulltext/S1535-6108(17)30299-4 |	Integrated Genomic Characterization of Pancreatic Ductal Adenocarcinoma |	Cancer Cell 2017 |
 | PCPG         | http://dx.doi.org/10.1016/j.ccell.2017.01.001                        | Comprehensive Molecular Characterization of Pheochromocytoma and Paraganglioma                          | Cancer cell 2017 |
 | PRAD         | http://www.sciencedirect.com/science/article/pii/S0092867415013392   | The Molecular Taxonomy of Primary Prostate Cancer                                                       | Cell 2015        |
 | READ         | http://www.nature.com/nature/journal/v487/n7407/abs/nature11252.html | Comprehensive molecular characterization of human colon and rectal cancer                               | Nature 2012      |
@@ -99,7 +101,7 @@ report in our package:
 | THCA         | http://www.sciencedirect.com/science/article/pii/S0092867414012380   | Integrated Genomic Characterization of Papillary Thyroid Carcinoma                                      | Cell 2014        |
 | UCEC         | http://www.nature.com/nature/journal/v497/n7447/abs/nature12113.html | Integrated genomic characterization of endometrial carcinoma                                            | Nature 2013      |
 | UCS	| http://www.cell.com/cancer-cell/fulltext/S1535-6108(17)30053-3 | 	Integrated Molecular Characterization of Uterine Carcinosarcoma	Cancer |  Cell 2017 | 
-
+| UVM	| http://www.cell.com/cancer-cell/fulltext/S1535-6108(17)30295-7 |	Integrative Analysis Identifies Four Molecular and Clinical Subsets in Uveal Melanoma	| Cancer Cell 2017 |	
 
 These subtypes will be automatically added in the summarizedExperiment
 object through GDCprepare. But you can also use the `TCGAquery_subtype` function
