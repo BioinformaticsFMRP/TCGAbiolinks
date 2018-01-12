@@ -458,7 +458,7 @@ TCGAquery_subtype <- function(tumor){
                    "UCEC",
                    "UCS",
                    "UVM")
-    if (grepl(paste(available,collapse = "|"),
+    if (grepl(paste(c(available,"all"),collapse = "|"),
               tumor,ignore.case = TRUE)) {
 
         doi <- c("acc"  = "doi:10.1016/j.ccell.2016.04.002",
@@ -492,31 +492,10 @@ TCGAquery_subtype <- function(tumor){
                  "ucs"  = "doi:10.1016/j.ccell.2017.02.010",
                  "uvm"  = "doi:10.1016/j.ccell.2017.07.003")
 
-        if(tolower(tumor) != "all") message(paste0("Subtype information from:", doi[tolower(tumor)]))
+        if(tolower(tumor) != "all") message(paste0(tolower(tumor)," subtype information from:", doi[tolower(tumor)]))
         if(tolower(tumor) == "all") {
-            all.tumor <- c("acc",
-                           "blca",
-                           "lgg",
-                           "esca",
-                           "lhc",
-                           "gbm",
-                           "luad",
-                           "stad",
-                           "brca",
-                           "coad",
-                           "skcm",
-                           "hnsc",
-                           'kich',
-                           "lusc",
-                           "pancan",
-                           "thca",
-                           "prad",
-                           "kirp",
-                           "kirc",
-                           "ucec"
-            )
             all <- NULL
-            for(i in all.tumor){
+            for(i in available){
                 try({
                     aux <- TCGAquery_subtype(i)
                     aux$Disease <- toupper(i)
