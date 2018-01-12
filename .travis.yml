@@ -21,30 +21,35 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update ; fi
   - if [[ "$TRAVIS_R_VERSION_STRING" = 'bioc-devel' ]]; then mkdir ~/.R && echo 'CXX1X=g++ -std=c++0x -g -O2 -fPIC' > ~/.R/Makevars; fi
 
-r-packages:
-  - testthat
+r_binary_packages:
+  - withr
   - knitr
+  - crayon
+  - genomicranges
+  - biobase
+  - s4vectors
+  - iranges
+  - biocgenerics
+  - genomicfeatures
+  - testthat
+  - rex
+  - affy
+  - survminer
+  - r6
+
+r-packages:
   - markdown
   - DBI
   - RSQLite
-  - R6
 
 bioc_packages:
   - BiocStyle
-  - GenomicRanges
-  - Biobase
-  - affy
   - EDASeq
   - edgeR
   - biomaRt
-  - IRanges
   - supraHex
-  - S4Vectors
-  - maftools
   - ComplexHeatmap
   - SummarizedExperiment
-  - BiocGenerics
-  - GenomicFeatures
   - TxDb.Hsapiens.UCSC.hg19.knownGene
   - limma
   - genefilter
@@ -59,11 +64,8 @@ bioc_packages:
 
 r_github_packages:
   - eddelbuettel/digest
-  - kevinushey/rex
   - kevinushey/later
-  - jimhester/crayon
   - edwindj/whisker
-  - jimhester/withr
   - jimhester/covr
   - hfang-bristol/dnet
   - PoisonAlien/maftools
