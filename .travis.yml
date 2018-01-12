@@ -39,6 +39,8 @@ r_binary_packages:
   - rsqlite
   - base64enc
   - fastmatch
+  - xml
+  - igraph
 
 bioc_packages:
   - BiocStyle
