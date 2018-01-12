@@ -1660,7 +1660,8 @@ getMetPlatInfo <- function(genome, platform) {
     path <- file.path(base,platform,paste(platform,"hg19.manifest.rds", sep ="."))
     if (grepl("hg38", genome)) path <- gsub("hg19","hg38",path)
     message(path)
-    if(!file.exists(basename(path))) downloader::download(path,basename(path))
+    if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
+    if(!file.exists(basename(path))) downloader::download(path,basename(path), mode = mode)
     gr <- readRDS(basename(path))
     return(gr)
 }
