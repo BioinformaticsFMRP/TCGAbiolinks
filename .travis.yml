@@ -33,7 +33,12 @@ r_binary_packages:
   - rcurl
   - bitops
   - dbi
+  - getopt
+  - rjson
+  - snow
   - rsqlite
+  - base64enc
+  - fastmatch
 
 bioc_packages:
   - BiocStyle
