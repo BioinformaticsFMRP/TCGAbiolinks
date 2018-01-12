@@ -27,11 +27,13 @@ r_binary_packages:
   - rex
   - survminer
   - r6
-
-r-packages:
-  - markdown
-  - DBI
-  - RSQLite
+  - whisker
+  - jsonlite
+  - httr
+  - rcurl
+  - bitops
+  - dbi
+  - rsqlite
 
 bioc_packages:
   - BiocStyle
@@ -62,9 +64,7 @@ bioc_packages:
 
 
 r_github_packages:
-  - eddelbuettel/digest
   - kevinushey/later
-  - edwindj/whisker
   - jimhester/covr
   - hfang-bristol/dnet
   - PoisonAlien/maftools
