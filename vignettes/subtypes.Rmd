@@ -2,7 +2,7 @@
 title: "Compilation of TCGA molecular subtypes"
 bibliography: bibliography.bib    
 vignette: >
-    %\VignetteIndexEntry{Compilation of TCGA molecular subtypes}
+    %\VignetteIndexEntry{6. Compilation of TCGA molecular subtypes}
     %\VignetteEngine{knitr::rmarkdown}
     \usepackage[utf8]{inputenc}
 ---
