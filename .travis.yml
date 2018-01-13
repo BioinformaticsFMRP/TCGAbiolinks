@@ -12,12 +12,6 @@ os:
   - osx
 osx_image: xcode9
 
-before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update -q ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install libc6 libc6-dev ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update ; fi
-  - if [[ "$TRAVIS_R_VERSION_STRING" = 'bioc-devel' ]]; then mkdir ~/.R && echo 'CXX1X=g++ -std=c++0x -g -O2 -fPIC' > ~/.R/Makevars; fi
-
 r_binary_packages:
   - withr
   - knitr
@@ -26,20 +20,20 @@ r_binary_packages:
   - testthat
   - rex
   - survminer
-  - r6
+  - R6
   - whisker
   - jsonlite
   - httr
-  - rcurl
+  - RCurl
   - bitops
-  - dbi
+  - DBI
   - getopt
   - rjson
   - snow
-  - rsqlite
+  - RSQLite
   - base64enc
   - fastmatch
-  - xml
+  - XML
   - igraph
 
 bioc_packages:
