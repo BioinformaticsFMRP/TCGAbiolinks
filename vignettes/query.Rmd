@@ -4,7 +4,7 @@ date: "`r BiocStyle::doc_date()`"
 vignette: >
   %\VignetteIndexEntry{"2. Searching GDC database"}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  \usepackage[utf8]{inputenc}
 ---
 
 ```{r setup, include=FALSE}
@@ -70,7 +70,7 @@ You can easily search GDC data using the `GDCquery` function.
 Using a summary of filters as used in the TCGA portal, the function works
 with the following arguments:
 
-| ÿproject 	| A list of valid project (see table below)] 	|  	|
+| ?project 	| A list of valid project (see table below)] 	|  	|
 |-----------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|-------------------------------------	|
 | data.category 	| A valid project (see list with TCGAbiolinks:::getProjectSummary(project)) 	|  	|
 | data.type 	| A data type to filter the files to download 	|  	|
