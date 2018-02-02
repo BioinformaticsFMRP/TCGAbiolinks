@@ -50,7 +50,7 @@ GDCdownload <- function(query,
     if(missing(query)) stop("Please set query argument")
 
     if(!(method %in% c("api","client"))) stop("method arguments possible values are: 'api' or 'client'")
-
+    if(length(unique(getResults(query)$data_type)) > 1) stop("We can only download one data type. Please use data.type argument in GDCquery to filter results.")
 
     source <- ifelse(query$legacy,"legacy","harmonized")
 
