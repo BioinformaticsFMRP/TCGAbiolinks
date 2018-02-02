@@ -270,12 +270,19 @@ GDCclientInstall <- function(){
     }, error = function(e) {
         c("https://gdc.nci.nih.gov/files/public/file/gdc-client_v1.3.0_Windows_x64.zip.zip",
           "https://gdc.nci.nih.gov/files/public/file/gdc-client_v1.3.0_Ubuntu14.04_x64.zip",
-          "https://gdc.nci.nih.gov/files/public/file/gdc-client_v1.3.0_OSX_x64.zip")
+          "https://gdc.nci.nih.gov/files/public/file/gdc-client_v1.3.0_OSX_x64.zip",
+          "https://gdc.cancer.gov/system/files/authenticated%20user/0/gdc-client_v1.3.0_CentOS7_x64_Beta.zip")
     })
     bin <- links[grep("zip",links)]
     if(is.windows()) bin <- bin[grep("client*.*windows", bin,ignore.case = TRUE)]
     if(is.mac()) bin <- bin[grep("client*.*OSX", bin)]
-    if(is.linux()) bin <- bin[grep("client*.*Ubuntu", bin)]
+    if(is.linux()) {
+        if(grepl("ubuntu",Sys.info()["version"],ignore.case = T)){
+            bin <- bin[grep("client*.*Ubuntu", bin)]
+        } else {
+            bin <- bin[grep("client*.*Cent", bin)]
+        }
+    }
     if(is.windows()) mode <- "wb" else  mode <- "w"
     download(bin, basename(bin), mode = mode)
     unzip(basename(bin))
