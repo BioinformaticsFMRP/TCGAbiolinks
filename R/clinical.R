@@ -309,8 +309,8 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
 
         for(i in composed.cols){
             clin[,i] <- as.character(clin[,i])
-            clin[which(clin[,i] != ""),i] <- "YES"
-            clin[which(clin[,i] == ""),i] <- "NO"
+            clin[!clin[,i] %in%  c("","NO"),i] <- "YES"
+            clin[clin[,i] %in% c("","NO"),i] <- "NO"
             colnames(clin)[which(colnames(clin) == i)] <- paste0("has_",i,"_information")
         }
         if("stage_event" %in% colnames(clin)) {
