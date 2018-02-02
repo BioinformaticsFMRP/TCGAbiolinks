@@ -299,7 +299,7 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
             if(i == "new_tumor_events") {
                 followup <- parseFollowup(files,xpath,clinical.info)
                 barcode <- followup$bcr_patient_barcode[!followup$new_tumor_events %in% c("","NO")]
-                clin[patient$bcr_patient_barcode %in% barcode,i] <- "YES"
+                clin[clin$bcr_patient_barcode %in% barcode,i] <- "YES"
             }
             colnames(clin)[which(colnames(clin) == i)] <- paste0("has_",i,"_information")
         }
