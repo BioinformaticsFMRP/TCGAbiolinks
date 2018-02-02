@@ -280,23 +280,7 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
     else if(tolower(clinical.info)  == "msi") xpath <- "//auxiliary:microsatellite_instability_test_result"
 
     if(tolower(clinical.info) == "follow_up") {
-        follow_up_version <- sort(unique(unlist(sapply(files,function(x) {
-            n <- names(xml_ns(read_xml(x)))
-            n[grepl("follow_up",n)]
-        }))))
-        if(length(follow_up_version) > 1) {
-            message("We found more than one follow up version!")
-            message("We will parse all and add a collumn (follow_up_version) to identify each version")
-        }
-        clin <- plyr::adply(follow_up_version, 1,function(x){
-            message("Parsing follow up version: ", x)
-            xpath <- paste0("//", x, ":follow_up")
-            clin <- parseXML(files,xpath,clinical.info)
-            clin$follow_up_version <- x
-            return(clin)
-        }, .id = "follow_up_version")
-        col_idx <- grep("follow_up_version", names(clin))
-        clin <- clin[, c(col_idx, (1:ncol(clin))[-col_idx])]
+        clin <- parseFollowup(files,xpath,clinical.info)
     } else {
         clin <- parseXML(files,xpath,clinical.info)
     }
@@ -311,6 +295,12 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
             clin[,i] <- as.character(clin[,i])
             clin[!clin[,i] %in%  c("","NO"),i] <- "YES"
             clin[clin[,i] %in% c("","NO"),i] <- "NO"
+
+            if(i == "new_tumor_events") {
+                followup <- parseFollowup(files,xpath,clinical.info)
+                barcode <- followup$bcr_patient_barcode[!followup$new_tumor_events %in% c("","NO")]
+                clin[patient$bcr_patient_barcode %in% barcode,i] <- "YES"
+            }
             colnames(clin)[which(colnames(clin) == i)] <- paste0("has_",i,"_information")
         }
         if("stage_event" %in% colnames(clin)) {
@@ -366,6 +356,25 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
     return(out)
 }
 
+parseFollowup <- function(files, xpath, clinical.info){
+    follow_up_version <- sort(unique(unlist(sapply(files,function(x) {
+        n <- names(xml_ns(read_xml(x)))
+        n[grepl("follow_up",n)]
+    }))))
+    if(length(follow_up_version) > 1) {
+        message("We found more than one follow up version!")
+        message("We will parse all and add a collumn (follow_up_version) to identify each version")
+    }
+    clin <- plyr::adply(follow_up_version, 1,function(x){
+        message("Parsing follow up version: ", x)
+        xpath <- paste0("//", x, ":follow_up")
+        clin <- parseXML(files,xpath,clinical.info)
+        clin$follow_up_version <- x
+        return(clin)
+    }, .id = "follow_up_version")
+    col_idx <- grep("follow_up_version", names(clin))
+    clin <- clin[, c(col_idx, (1:ncol(clin))[-col_idx])]
+}
 
 parseXML <- function(files, xpath, clinical.info ){
     clin <- NULL
