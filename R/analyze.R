@@ -648,28 +648,24 @@ TCGAanalyze_DEA <- function(mat1,
                             MAT=data.frame(),
                             contrast.formula="",
                             Condtypes=c()
-                            ) {
-
+) {
 
     table.code <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
-                           "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
-                           "CELL","XP","XCL")
-    names(table.code)<- c('01','02','03','04','05','06','07','08','09','10',
-                    '11','12','13','14','20','40','50','60','61')
+                    "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
+                    "CELL","XP","XCL")
+    names(table.code) <- c('01','02','03','04','05','06','07','08','09','10',
+                          '11','12','13','14','20','40','50','60','61')
     if(nrow(MAT)==0){
         TOC <- cbind(mat1,mat2)
         Cond1num <- ncol(mat1)
         Cond2num <- ncol(mat2)
         #print(map.ensg(genes = rownames(TOC))[,2:3])
-
-    }
-    else {
+    } else {
         TOC<-MAT
+    }
 
-        }
 
-
-    my_IDs <- get_IDs(TOC)
+    my_IDs <- get_IDs(colnames(TOC))
 
 
     if(paired==TRUE){
@@ -692,7 +688,7 @@ TCGAanalyze_DEA <- function(mat1,
     }
 
 
-#####
+    #####
     Plate<-factor(my_IDs$plate)
     Condition<-factor(my_IDs$condition)
     TSS<-factor(my_IDs$tss)
@@ -709,18 +705,18 @@ TCGAanalyze_DEA <- function(mat1,
     }
 
     else
-      for(o in batch.factors){
+        for(o in batch.factors){
             if(o %in%  options == FALSE)
                 stop(paste0(o, " is not a valid batch correction factor"))
 
             if(o == "Year" & nrow(ClinicalDF)==0)
                 stop("batch correction using diagnosis year needs clinical info. Provide Clinical Data in arguments")
 
-            }
+        }
 
-        ###Additive Formula#######
-        additiveformula <-paste(batch.factors, collapse="+")
-        ###########################
+    ###Additive Formula#######
+    additiveformula <-paste(batch.factors, collapse="+")
+    ###########################
 
     message("----------------------- DEA -------------------------------")
 
@@ -731,13 +727,13 @@ TCGAanalyze_DEA <- function(mat1,
                                    Cond2num, "samples"))
         message(message3 <- paste( "there are ", nrow(TOC) ,
                                    "features as miRNA or genes "))
-        }
+    }
     else{
 
         message(message3 <- paste( "there are ", nrow(TOC) ,
                                    "features as miRNA or genes "))
 
-     }
+    }
 
     timeEstimated <- format(ncol(TOC)*nrow(TOC)/elementsRatio,digits = 2)
     message(messageEstimation <- paste("I Need about ", timeEstimated,
@@ -750,48 +746,48 @@ TCGAanalyze_DEA <- function(mat1,
     #TumorSample)))
 
     if(length(Condtypes)>0){
-                tumorType <- factor(x=Condtypes, levels=unique(Condtypes))
-            }
+        tumorType <- factor(x=Condtypes, levels=unique(Condtypes))
+    }
     else {
-                tumorType <- factor(x =  rep(c(Cond1type,Cond2type),
-                                         c(Cond1num,Cond2num)),
-                                levels = c(Cond1type,Cond2type))
-                }
+        tumorType <- factor(x =  rep(c(Cond1type,Cond2type),
+                                     c(Cond1num,Cond2num)),
+                            levels = c(Cond1type,Cond2type))
+    }
 
     # DGE.mat<-edgeR::DGEList(TOC,group = tumorType)
 
     if(length(batch.factors)== 0 & length(Condtypes)>0){
-            if(pipeline=="edgeR")
-                design <- model.matrix(~tumorType)
-            else
-                design <- model.matrix(~0+tumorType)
-            }
+        if(pipeline=="edgeR")
+            design <- model.matrix(~tumorType)
+        else
+            design <- model.matrix(~0+tumorType)
+    }
 
     else if(length(batch.factors)== 0 & length(Condtypes)==0){
-            if(pipeline=="edgeR")
-                design <- model.matrix(~tumorType)
-            else
-                design <- model.matrix(~0+tumorType)
-            }
+        if(pipeline=="edgeR")
+            design <- model.matrix(~tumorType)
+        else
+            design <- model.matrix(~0+tumorType)
+    }
 
     else if(length(batch.factors)> 0 & length(Condtypes)==0){
 
-            if(pipeline=="edgeR")
-                formula<-paste0("~tumorType+", additiveformula)
-            else
-                formula<-paste0("~0+tumorType+", additiveformula)
+        if(pipeline=="edgeR")
+            formula<-paste0("~tumorType+", additiveformula)
+        else
+            formula<-paste0("~0+tumorType+", additiveformula)
 
 
-                design <- model.matrix(eval(parse(text=formula)))
+        design <- model.matrix(eval(parse(text=formula)))
     }
 
     else if(length(batch.factors)> 0 & length(Condtypes)>0){
-            if(pipeline=="edgeR")
-                formula<-paste0("~tumorType+", additiveformula)
-            else
-                formula<-paste0("~0+tumorType+", additiveformula)
+        if(pipeline=="edgeR")
+            formula<-paste0("~tumorType+", additiveformula)
+        else
+            formula<-paste0("~0+tumorType+", additiveformula)
 
-                design <- model.matrix(eval(parse(text=formula)))
+        design <- model.matrix(eval(parse(text=formula)))
     }
 
 
@@ -825,7 +821,7 @@ TCGAanalyze_DEA <- function(mat1,
                 tableDEA <- tableDEA[abs(tableDEA$logFC) > logFC.cut,]
                 if(all(grepl("ENSG",rownames(tableDEA)))) tableDEA <- cbind(tableDEA,map.ensg(genes = rownames(tableDEA))[,2:3])
 
-                }
+            }
             else if(length(unique(tumorType))>2) {
                 aDGEList <- edgeR::DGEList(counts = TOC, group = tumorType)
 
@@ -881,7 +877,7 @@ TCGAanalyze_DEA <- function(mat1,
 
         if(length(unique(tumorType))==2){
             #DGE <- edgeR::DGEList(TOC,group = rep(c(Cond1type,Cond2type),
-                                                  #c(Cond1num,Cond2num)))
+            #c(Cond1num,Cond2num)))
 
             ###logcpm transformation for limma-trend method using edgeR cpm method
             if(log.trans==TRUE)
@@ -915,7 +911,7 @@ TCGAanalyze_DEA <- function(mat1,
 
             tableDEA<-tableDEA[index,]
             #if(all(grepl("ENSG",rownames(tableDEA)))) tableDEA <- cbind(tableDEA,map.ensg(genes = rownames(tableDEA))[,2:3])
-                }
+        }
 
         else if(length(unique(tumorType))>2){
             DGE <- edgeR::DGEList(TOC,group = tumorType)
@@ -956,9 +952,9 @@ TCGAanalyze_DEA <- function(mat1,
                 #i<-i+1
 
             }
-                #sapply(colnames(dataFilt), FUN= function(x) subtypedata[which(subtypedata$samples==substr(x,1,12)),]$subtype)
+            #sapply(colnames(dataFilt), FUN= function(x) subtypedata[which(subtypedata$samples==substr(x,1,12)),]$subtype)
 
-            }
+        }
 
 
     }
@@ -996,26 +992,26 @@ TCGAanalyze_DEA <- function(mat1,
 TCGAbatch_Correction <- function(tabDF, batch.factor=NULL, adjustment=NULL, ClinicalDF=data.frame()){
 
     if(length(batch.factor)==0 & length(adjustment)==0)
-            message("batch correction will be skipped")
+        message("batch correction will be skipped")
 
     else if(batch.factor %in% adjustment){
 
-         stop(paste0("Cannot adjust and correct for the same factor"))
+        stop(paste0("Cannot adjust and correct for the same factor"))
     }
 
 
-    my_IDs <- get_IDs(tabDF)
+    my_IDs <- get_IDs(colnames(tabDF))
 
-if(length(batch.factor)>0 || length(adjustment)>0)
-    if( (nrow(ClinicalDF)>0 & batch.factor=="Year") || ("Year" %in% adjustment==TRUE & nrow(ClinicalDF)>0)){
-        names(ClinicalDF)[names(ClinicalDF)=="bcr_patient_barcode"] <- "patient"
-        ClinicalDF$age_at_diag_year <- floor(ClinicalDF$age_at_diagnosis/365)
-        ClinicalDF$diag_year<-ClinicalDF$age_at_diag_year+ClinicalDF$year_of_birth
-        diag_yearDF<-ClinicalDF[,c("patient", "diag_year")]
-        Year<-merge(my_IDs, diag_yearDF, by="patient")
-        Year<-Year$diag_year
-        Year<-as.factor(Year)
-    }
+    if(length(batch.factor)>0 || length(adjustment)>0)
+        if( (nrow(ClinicalDF)>0 & batch.factor=="Year") || ("Year" %in% adjustment==TRUE & nrow(ClinicalDF)>0)){
+            names(ClinicalDF)[names(ClinicalDF)=="bcr_patient_barcode"] <- "patient"
+            ClinicalDF$age_at_diag_year <- floor(ClinicalDF$age_at_diagnosis/365)
+            ClinicalDF$diag_year<-ClinicalDF$age_at_diag_year+ClinicalDF$year_of_birth
+            diag_yearDF<-ClinicalDF[,c("patient", "diag_year")]
+            Year<-merge(my_IDs, diag_yearDF, by="patient")
+            Year<-Year$diag_year
+            Year<-as.factor(Year)
+        }
     else if(nrow(ClinicalDF)==0 & batch.factor=="Year") {
         stop("Cannot extract Year data. Clinical data was not provided")
     }
@@ -1054,59 +1050,60 @@ if(length(batch.factor)>0 || length(adjustment)>0)
         if(o %in%  options == FALSE)
             stop(paste0(o, " is not a valid adjustment factor"))
 
-        }
+    }
 
 
     adjustment.data<-c()
-        for(a in adjustment){
-            if(a=="Sequencing Center")
-                a<-Sequencing.Center
-            adjustment.data<-cbind(eval(parse(text=a)), adjustment.data)
-        }
+    for(a in adjustment){
+        if(a=="Sequencing Center")
+            a<-Sequencing.Center
+        adjustment.data<-cbind(eval(parse(text=a)), adjustment.data)
+    }
 
-        if(batch.factor=="Sequencing Center")
-            batch.factor<-Sequencing.Center
-
-
-        batchCombat<-eval(parse(text=batch.factor))
+    if(batch.factor=="Sequencing Center")
+        batch.factor<-Sequencing.Center
 
 
-        #####Accounting for covariates######
-        if(length(adjustment)>0){
-            adjustment.formula<-paste(adjustment, collapse="+")
-            adjustment.formula<-paste0("+", adjustment.formula)
-            adjustment.formula<-paste0("~Condition", adjustment.formula)
-            print(adjustment.formula)
-            model <- data.frame(batchCombat, row.names=colnames(tabDF))
-
-            design.mod.combat<-model.matrix(eval(parse(text=adjustment.formula)), data=model)
-        }
+    batchCombat<-eval(parse(text=batch.factor))
 
 
+    #####Accounting for covariates######
+    if(length(adjustment)>0){
+        adjustment.formula<-paste(adjustment, collapse="+")
+        adjustment.formula<-paste0("+", adjustment.formula)
+        adjustment.formula<-paste0("~Condition", adjustment.formula)
+        print(adjustment.formula)
+        model <- data.frame(batchCombat, row.names=colnames(tabDF))
 
-         # Batch correction
-        batch_corr <- sva::ComBat(dat=tabDF, batch=batchCombat, mod=design.mod.combat, par.prior=TRUE,prior.plots=TRUE)
+        design.mod.combat<-model.matrix(eval(parse(text=adjustment.formula)), data=model)
+    }
 
-        return(list(v=v, b=batch_corr))
-        }
+
+
+    # Batch correction
+    batch_corr <- sva::ComBat(dat=tabDF, batch=batchCombat, mod=design.mod.combat, par.prior=TRUE,prior.plots=TRUE)
+
+    return(list(v=v, b=batch_corr))
+}
 
 
 ###Thilde's Code#####
-get_IDs <- function(data) {
-  IDs <- strsplit(c(colnames(data)), "-")
-  IDs <- plyr::ldply(IDs, rbind)
-  colnames(IDs) <- c('project', 'tss','participant', 'sample', "portion", "plate", "center")
-  cols <- c("project", "tss", "participant")
-  IDs$patient <- apply(IDs[,cols],1,paste,collapse = "-" )
-  barcode <- colnames(data)
-  IDs <- cbind(IDs, barcode)
-  condition <- gsub("11+[[:alpha:]]", "normal", as.character(IDs$sample))
-  condition  <- gsub("01+[[:alpha:]]", "cancer", condition)
-  IDs$condition <- condition
-  IDs$myorder  <- 1:nrow(IDs)
-  return(IDs)
+get_IDs <- function(barcode) {
+    IDs <- strsplit(barcode, "-")
+    IDs <- plyr::ldply(IDs, rbind)
+    colnames(IDs) <- c('project', 'tss','participant', 'sample',"portion", "plate", "center")
+    vial <- substr(as.character(IDs$sample),3,3)
+    IDs$vial <- vial
+    IDs$sample <- substr(as.character(IDs$sample),1,2)
+    cols <- c("project", "tss", "participant")
+    IDs$patient <- apply(IDs[,cols],1,paste,collapse = "-" )
+    IDs <- cbind(IDs, barcode)
+    condition <- gsub("11+[[:alpha:]]", "normal", as.character(IDs$sample))
+    condition  <- gsub("01+[[:alpha:]]", "cancer", condition)
+    IDs$condition <- condition
+    IDs$myorder  <- 1:nrow(IDs)
+    return(IDs)
 }
-
 
 ##Function to take raw counts by removing rows filtered after norm and filter process###
 
@@ -1121,10 +1118,10 @@ get_IDs <- function(data) {
 #' @export
 #' @return Filtered return object similar to DataPrep with genes removed after normalization and filtering process.
 UseRaw_afterFilter<-function(DataPrep, DataFilt){
-  rownames(DataPrep)<-lapply(rownames(DataPrep), function(x) gsub("[[:punct:]]\\d*", "", x ))
-  filtered.list <- setdiff(rownames(DataPrep), rownames(DataFilt))
-  Res <- DataPrep[!rownames(DataPrep) %in% filtered.list, ]
-  return(Res)
+    rownames(DataPrep)<-lapply(rownames(DataPrep), function(x) gsub("[[:punct:]]\\d*", "", x ))
+    filtered.list <- setdiff(rownames(DataPrep), rownames(DataFilt))
+    Res <- DataPrep[!rownames(DataPrep) %in% filtered.list, ]
+    return(Res)
 }
 
 
