@@ -876,7 +876,7 @@ TCGAanalyze_DEA <- function(mat1,
 
         if(voom==TRUE){
             message("Voom Transformation...")
-            logCPM<-limma::voom(TOC, design)
+            TOC<-limma::voom(TOC, design)
         }
 
         if(length(unique(tumorType))==2){
