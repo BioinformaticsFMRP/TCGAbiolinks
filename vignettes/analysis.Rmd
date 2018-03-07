@@ -746,6 +746,7 @@ and gene expression. The log10 (FDR-corrected P value) for DNA methylation is pl
 The black dashed line shows the FDR-adjusted P value of 0.01.
 
 The arguments of this function are:
+
 | Argument      | Description |   
 |--------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | exp | Object obtained by DEArnaSEQ function |
