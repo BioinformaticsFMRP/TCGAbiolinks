@@ -872,22 +872,24 @@ TCGAanalyze_DEA <- function(mat1,
 
     }
 
+ 
+
     else if(pipeline=="limma"){
+
+    ###logcpm transformation for limma-trend method using edgeR cpm method
+        if(log.trans==TRUE)
+            logCPM<- edgeR::cpm(TOC, log=TRUE, prior.count=3)
+        else
+            logCPM<-TOC
 
         if(voom==TRUE){
             message("Voom Transformation...")
-            TOC<-limma::voom(TOC, design)
+            logCPM<-limma::voom(logCPM, design)
         }
 
         if(length(unique(tumorType))==2){
             #DGE <- edgeR::DGEList(TOC,group = rep(c(Cond1type,Cond2type),
                                                   #c(Cond1num,Cond2num)))
-
-            ###logcpm transformation for limma-trend method using edgeR cpm method
-            if(log.trans==TRUE)
-                logCPM<- edgeR::cpm(TOC, log=TRUE, prior.count=3)
-            else
-                logCPM<-TOC
 
 
             colnames(design)[1:2]<-c(Cond1type,Cond2type)
@@ -920,11 +922,6 @@ TCGAanalyze_DEA <- function(mat1,
         else if(length(unique(tumorType))>2){
             DGE <- edgeR::DGEList(TOC,group = tumorType)
 
-            ###logcpm transformation for limma-trend method using edgeR
-            if(log.trans==TRUE)
-                logCPM<- edgeR::cpm(DGE, log=TRUE, prior.count=3)
-            else
-                logCPM<-DGE
 
             #colnames(design)[1:2]<-c(Cond1type,Cond2type)
 
