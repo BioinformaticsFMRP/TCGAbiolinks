@@ -277,6 +277,7 @@ TCGAvisualize_Heatmap(t(datFilt),
 ```
 
 The result is shown below:
+
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
 library(png)
 library(grid)
@@ -284,8 +285,9 @@ img <- readPNG("case2_Heatmap.png")
 grid.raster(img)
 ```
 
-Finally, we will take a look in the mutation genes. We will first download the maf file
-with `TCGAquery_maf`. In this example we will investigate the gene "ATRX".
+Finally, we will take a look in the mutation genes. We will first download the MAF file
+with `GDCquery_Maf`. In this example we will investigate the gene "ATRX".
+
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 LGGmut <- GDCquery_Maf(tumor = "LGG", pipelines = "muse")
 # Selecting gene
