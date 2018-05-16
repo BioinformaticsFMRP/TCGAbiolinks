@@ -265,7 +265,7 @@ for(proj in projects){
     match.file.cases <- getResults(query,cols=c("cases","file_name"))
     match.file.cases$project <- proj
     match.file.cases.all <- rbind(match.file.cases.all,match.file.cases)
-    tryCatch(GDCdownload(query, method = "api",chunks.per.download = 20),
+    tryCatch(GDCdownload(query, method = "api", files.per.chunk = 20),
              error = function(e) GDCdownload(query, method = "client"))
 }
 # This will create a map between idat file name, cases (barcode) and project
