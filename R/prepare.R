@@ -894,7 +894,7 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,su
             close(pb)
             if(summarizedExperiment) df <- makeSEfromTranscriptomeProfiling(df,cases,workflow.type)
         }
-    } else if(grepl("miRNA", workflow.type, ignore.case = TRUE) & grepl("miRNA", data.type, ignore.case)) {
+    } else if(grepl("miRNA", workflow.type, ignore.case = TRUE) & grepl("miRNA", data.type, ignore.case = TRUE)) {
         pb <- txtProgressBar(min = 0, max = length(files), style = 3)
         for (i in seq_along(files)) {
             data <- read_tsv(file = files[i], col_names = TRUE,col_types = "cidc")
