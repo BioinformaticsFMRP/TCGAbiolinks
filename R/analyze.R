@@ -993,7 +993,7 @@ TCGAanalyze_DEA <- function(mat1,
 TCGAbatch_Correction <- function(tabDF, batch.factor=NULL, adjustment=NULL, ClinicalDF=data.frame()){
 
     if(length(batch.factor)==0 & length(adjustment)==0)
-            message("batch correction will be skipped")
+            stop(paste0 ("No batch factor provided. Check documentation for options)")
 
     else if(batch.factor %in% adjustment){
 
@@ -1035,10 +1035,6 @@ if(length(batch.factor)>0 || length(adjustment)>0)
 
     options <- c("Plate", "TSS", "Year", "Portion", "Sequencing Center")
 
-    if(length(batch.factor)==0){
-        message("Batch correction skipped since no factors provided: data is Voom corrected")
-        return(v)
-    }
 
     if(length(batch.factor)>1) stop("Combat can only correct for one batch variable. Provide one batch factor")
 
@@ -1084,7 +1080,7 @@ if(length(batch.factor)>0 || length(adjustment)>0)
          # Batch correction
         batch_corr <- sva::ComBat(dat=tabDF, batch=batchCombat, mod=design.mod.combat, par.prior=TRUE,prior.plots=TRUE)
 
-        return(list(v=v, b=batch_corr))
+        return(batch_corr)
         }
 
 
