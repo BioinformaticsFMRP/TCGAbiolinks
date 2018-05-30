@@ -293,14 +293,14 @@ GDCquery <- function(project,
     }
     if(!all(unique(results$data_type) == "Auxiliary test")) {
         barcodes <- unlist(lapply(results$cases,function(x) {
-            str <- str_extract_all(x,pat) %>% unlist %>% paste(collapse = ",")
+            str <- str_extract_all(unlist(x),pat) %>% unlist %>% na.omit %>%  paste(collapse = ",")
             ifelse(all(is.na(str)), NA,str[!is.na(str)])
         }))
     } else { # auxiliary fies case
         pat <- paste("TCGA-[:alnum:]{2}-[:alnum:]{4}",
                      "TARGET-[:alnum:]{2}-[:alnum:]{6}",sep = "|")
         barcodes <- unlist(lapply(results$file_name,function(x) {
-            str <- str_extract_all(x,pat) %>% unlist %>% paste(collapse = ",")
+            str <- str_extract_all(unlist(x),pat) %>% unlist  %>% na.omit %>% paste(collapse = ",")
             ifelse(all(is.na(str)), NA,str[!is.na(str)])
         }))
     }
@@ -599,13 +599,13 @@ TCGAquery_recount2<-function(project, tissue=c()){
              "uterus", "vagina")
   tissue<-paste(unlist(strsplit(tissue, " ")), collapse="_")
   Res<-list()
-  
+
   if(tolower(project)=="gtex"){
     for(t_i in tissue){
       if(tissue%in%tissues){
         con<-"http://duffel.rail.bio/recount/SRP012682/rse_gene_"
         con<-paste0(con,tissue,".Rdata")
-        
+
         message(paste0("downloading Range Summarized Experiment for: ", tissue))
         load(url(con))
         Res[[paste0(project,"_", t_i)]]<-rse_gene
