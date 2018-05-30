@@ -187,17 +187,27 @@ GDCdownload.by.chunk <- function(server, manifest, name, path, step){
                        " (", nrow(manifest.aux)," files, size = ", size,") ",
                        "as ", name.aux))
         repeat {
-         ret <- GDCdownload.aux(server, manifest.aux, name.aux, path)
-         if(ret == 1) break
+            ret <- GDCdownload.aux(server, manifest.aux, name.aux, path)
+            if(ret == 1) break
         }
     }
 }
 
 GDCdownload.aux <- function(server, manifest, name, path){
     result = tryCatch({
-        bin <- POST(server,
-                    body =  list(ids=list(manifest$id)),
-                    encode = "json", progress())
+        bin <- getURL(server,
+                      POST,
+                      body =  list(ids=list(manifest$id)),
+                      encode = "json",
+                      progress())
+        if(bin[[2]] == "405"){
+            message("ERROR accessing GDC. Trying again...")
+            bin <- getURL("https://gdc-api.nci.nih.gov/data/",
+                          POST,
+                          body =  list(ids=list(manifest$id)),
+                          encode = "json",
+                          progress())
+        }
         writeBin(getURL(bin,content, as= "raw",encoding = "UTF-8"), name)
 
         if(nrow(manifest) > 1) {
