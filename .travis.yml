@@ -19,6 +19,8 @@ r_binary_packages:
   - roxygen2
   - testthat
   - rex
+  - survmisc
+  - survival
   - survminer
   - R6
   - whisker
