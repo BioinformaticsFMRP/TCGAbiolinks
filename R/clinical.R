@@ -120,7 +120,7 @@ TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
 GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
     checkProjectInput(project)
     if(!grepl("clinical|Biospecimen",type,ignore.case = TRUE)) stop("Type must be clinical or biospecemen")
-    baseURL <- "https://gdc-api.nci.nih.gov/cases/?"
+    baseURL <- "https://api.gdc.cancer.gov/cases/?"
     options.pretty <- "pretty=true"
     if(grepl("clinical",type,ignore.case = TRUE)) {
         options.expand <- "expand=diagnoses,diagnoses.treatments,annotations,family_histories,demographic,exposures"
@@ -141,15 +141,9 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
     json  <- tryCatch(
         getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
         error = function(e) {
-            file <- paste0(gsub(" |:","_",date()),".json")
-            downloader::download(url,file)
-            aux <- fromJSON(file)
-            unlink(file)
-            aux
+            fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
         }
     )
-
-
 
 
     #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
