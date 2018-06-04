@@ -116,7 +116,7 @@ GDCdownload <- function(query,
                                humanReadableByteCount(sum(as.numeric(manifest$size)))))
             }
 
-            server <- ifelse(query$legacy,"https://gdc-api.nci.nih.gov/legacy/data/", "https://gdc-api.nci.nih.gov/data/")
+            server <- ifelse(query$legacy,"https://api.gdc.cancer.gov/legacy/data/", "https://api.gdc.cancer.gov/data/")
 
             if(is.null(files.per.chunk) & sum(as.numeric(manifest$size)) > 10^9) {
                 message("The total size of files is big. We will download files in chunks")
@@ -202,7 +202,7 @@ GDCdownload.aux <- function(server, manifest, name, path){
                       progress())
         if(bin[[2]] == "405"){
             message("ERROR accessing GDC. Trying again...")
-            bin <- getURL("https://gdc-api.nci.nih.gov/data/",
+            bin <- getURL("https://api.gdc.cancer.gov/data/",
                           POST,
                           body =  list(ids=list(manifest$id)),
                           encode = "json",
