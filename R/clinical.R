@@ -141,9 +141,16 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
     json  <- tryCatch(
         getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
         error = function(e) {
-            fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+            file <- paste0(gsub(" |:","_",date()),".json")
+            downloader::download(url,file)
+            aux <- fromJSON(file)
+            unlink(file)
+            aux
         }
     )
+
+
+
 
     #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
     results <- json$data$hits
