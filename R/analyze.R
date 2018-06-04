@@ -1763,7 +1763,7 @@ matchedMetExp <- function(project, legacy = FALSE, n = NULL){
 #' @examples
 #' summary <- getDataCategorySummary("TCGA-ACC", legacy = TRUE)
 getDataCategorySummary <- function(project, legacy = FALSE){
-    baseURL <- ifelse(legacy,"https://gdc-api.nci.nih.gov/legacy/files/?","https://gdc-api.nci.nih.gov/files/?")
+    baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/files/?","https://api.gdc.cancer.gov/files/?")
     url <- paste0(baseURL,"&expand=cases&size=100000&fields=cases.submitter_id,data_category&filters=",
                   URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
                   URLencode(project),
