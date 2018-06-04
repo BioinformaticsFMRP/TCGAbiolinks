@@ -232,6 +232,7 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 #' clinical.admin <- GDCprepare_clinic(query,"admin")
 #' query <- GDCquery(project = "TCGA-COAD",
 #'                   data.category = "Biospecimen",
+#'                   data.type = "Biospecimen Supplement",
 #'                   barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))
 #' GDCdownload(query)
 #' clinical <- GDCprepare_clinic(query,"admin")

@@ -200,7 +200,8 @@ Examples of query, download, prepare can be found in this [gist](https://gist.gi
 |                             | Masked Copy Number Segment        |                 | Returning only a dataframe for  the moment                                  |
 | Simple Nucleotide Variation |                                   |                 |                                                                             |
 | Raw Sequencing Data         |                                   |                 |                                                                             |
-| Biospecimen                 |                                   |                 |                                                                             |
+| Biospecimen                 | Slide Image                       |                 |                                                                             |
+| Biospecimen                 | Biospecimen Supplement            |                 |                                                                             |
 | Clinical                    |                                   |                 |                                                                             |
 
 ## Legacy data
