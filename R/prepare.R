@@ -978,7 +978,7 @@ addFFPE <- function(df) {
 #' @importFrom plyr rbind.fill
 #' @importFrom httr content
 getFFPE <- function(patient){
-    baseURL <- "https://gdc-api.nci.nih.gov/cases/?"
+    baseURL <- "https://api.gdc.cancer.gov/cases/?"
     options.pretty <- "pretty=true"
     options.expand <- "expand=samples"
     option.size <- paste0("size=",length(patient))
@@ -1003,7 +1003,7 @@ getFFPE <- function(patient){
 }
 # getBarcodeInfo(c("TCGA-A6-6650"))
 getBarcodeInfo <- function(barcode) {
-    baseURL <- "https://gdc-api.nci.nih.gov/cases/?"
+    baseURL <- "https://api.gdc.cancer.gov/cases/?"
     options.pretty <- "pretty=true"
     options.expand <- "expand=project,diagnoses,diagnoses.treatments,annotations,family_histories,demographic,exposures"
     option.size <- paste0("size=",length(barcode))
