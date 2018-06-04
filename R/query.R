@@ -368,7 +368,7 @@ GDCquery <- function(project,
 
 getGDCquery <- function(project, data.category, data.type, legacy, workflow.type,platform){
     # Get manifest using the API
-    baseURL <- ifelse(legacy,"https://gdc-api.nci.nih.gov/legacy/files/?","https://gdc-api.nci.nih.gov/files/?")
+    baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/files/?","https://api.gdc.cancer.gov/files/?")
     options.pretty <- "pretty=true"
     if(data.category == "Protein expression" & legacy) {
         options.expand <- "fields=archive.revision,archive.file_name,md5sum,state,data_category,file_id,platform,file_name,file_size,md5sum,submitter_id,data_type&expand=cases.samples.portions,cases.project,center,analysis"
@@ -566,7 +566,7 @@ GDCquery_Maf <- function(tumor,
         maf
     }, error = function(e) {
         manifest <- getManifest(query)
-        GDCdownload.aux( "https://gdc-api.nci.nih.gov/data/", manifest, manifest$filename, ".")
+        GDCdownload.aux( "https://api.gdc.cancer.gov/data/", manifest, manifest$filename, ".")
         maf <- readSimpleNucleotideVariationMaf(file.path(manifest$id,manifest$filename))
         maf
     })
