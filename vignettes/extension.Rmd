@@ -1,5 +1,5 @@
 ---
-title: "TCGAbiolinks Extension"
+title: "TCGAbiolinks Extensioni - version bump with new functions"
 author: "Mohamed Mounir"
 date: "`r BiocStyle::doc_date()`"
 vignette: >
@@ -42,7 +42,7 @@ library(DT)
 
 TARGET applies a comprehensive genomic approach to determine molecular changes that drive childhood cancers. Investigators form a collaborative network to facilitate discovery of molecular targets and translate those findings into the clinic. TARGET is managed by NCI's Office of Cancer Genomics and Cancer Therapy Evaluation Program.
 
-###Querying, doanloading, and preparing TARGET data:
+###Querying, downloading, and preparing TARGET data:
 
 Below is an example to run to query, download, and prepare data from the TARGET initiative through **tcgabiolinks** package:
 
@@ -202,6 +202,7 @@ The function takes the following arguments for the version bump:
 * **ClinicalDF**	a dataframe returned by GDCquery_clinic() to be used as input to extract "Year" data for batch correction (blocking)
 * **paired**	boolean to account for paired or non-paired samples. Set to TRUE for paired case
 * **log.trans**	boolean to perform log cpm transformation. Set to TRUE for log transformation
+* **voom** boolean to voom transform data. Set to true to apply transformation
 * **trend**	boolean to perform limma-trend pipeline. Set to TRUE to go through limma-trend
 * **MAT**	matrix containing expression set as all samples in columns and genes as rows. Do not provide if mat1 and mat2 are used
 * **contrast.formula**	string input to determine coefficients and to design contrasts in a customized way
@@ -259,7 +260,7 @@ GDCdownload(query = queryDown.lung)
 
 dataPrep1.tcga <- GDCprepare(query = queryDown.lung, 
                              save = TRUE, 
-                             save.filename = "TCGA_BRCA_HTSeq_Countds.rda")
+                             save.filename = "TCGA_LUSC_HTSeq_Countds.rda")
 dataPrep.tcga <- TCGAanalyze_Preprocessing(object = dataPrep1.tcga, 
                                            cor.cut = 0.6,
                                            datatype = "HTSeq - Counts")
@@ -280,11 +281,11 @@ dataFilt.tcga <- TCGAanalyze_Filtering(tabDF = dataNorm.tcga,
 diff<-setdiff(colnames(dataFilt.tcga), TCGA_MolecularSubtype(colnames(dataFilt.tcga))$filtered)
 TCGA_MolecularSubtype(diff)$subtypes$barcodes
 
-dataFilt.tcga.pam50<-dataFilt.tcga[,diff]
-pam50test<-TCGA_MolecularSubtype(colnames(dataFilt.tcga.pam50))$subtypes$subtype
+dataFilt.tcga.lusc<-dataFilt.tcga[,diff]
+LUSC.subtypes<-TCGA_MolecularSubtype(colnames(dataFilt.tcga.lusc))$subtypes$subtype
 
 ###Differential expression analysis after correcting for "Plate" factor.
-DEGpam50 <- TCGAanalyze_DEA(MAT=dataFilt.tcga.pam50,
+DEG.lusc <- TCGAanalyze_DEA(MAT=dataFilt.tcga.lusc,
                             pipeline="limma",
                             batch.factors = c("Plate"),
                             Cond1type = "Normal",
@@ -292,7 +293,7 @@ DEGpam50 <- TCGAanalyze_DEA(MAT=dataFilt.tcga.pam50,
                             fdr.cut = 0.01 ,
                             logFC.cut = 1,
                             method = "glmLRT", ClinicalDF = data.frame(),
-                            Condtypes = pam50test,
+                            Condtypes = LUSC.subtypes,
                             contrast.formula = "LUSC.basalvsLUSC.classical=LUSC.basal - LUSC.classical")
 ```
 
@@ -305,13 +306,13 @@ This function calls **ComBat** from **sva** package to handle batch correction, 
 * **adjustment**  vector containing strings for covariate factors to adjust for using ComBat. Options are "Plate", "TSS", "Year", "Portion", "Center", "Patients"
 * **ClinicalDF**  a dataframe returned by GDCquery_clinic() to be used to extract year data
 
-On top of data exploration through **ComBat** plots, a **voom** transformation is performed by the **limma** package. If no batch facotr is provided, only a voom transformation will be executed. Run the code below to see an example:
+On top of data exploration through **ComBat** plots, if no batch factor is provided nothing will be performed. Run the code below to see an example:
 
 ```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
 
-voom.data <- TCGAbatch_Correction(tabDF = dataFilt.tcga, batch.factor = "Plate")
+batch.corrected <- TCGAbatch_Correction(tabDF = dataFilt.tcga, batch.factor = "Plate")
 
-voom.data.adjusted <- TCGAbatch_Correction(tabDF = dataFilt.tcga, batch.factor = "Plate", adjustment=c("TSS"))
+batch.corrected.adjusted <- TCGAbatch_Correction(tabDF = dataFilt.tcga, batch.factor = "Plate", adjustment=c("TSS"))
 ```
 
 
