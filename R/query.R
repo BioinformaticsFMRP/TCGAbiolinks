@@ -202,7 +202,8 @@ GDCquery <- function(project,
                 json$data$hits <- cbind(json$data$hits, center)
             }
         }
-        results <- rbind(results,json$data$hits,make.row.names = FALSE)
+        results <-  plyr::rbind.fill(as.data.frame(results),as.data.frame(json$data$hits))
+
     }
     if(is.null(dim(results))) {
         message("Sorry! There is no result for your query. Please check in GDC the data available")
