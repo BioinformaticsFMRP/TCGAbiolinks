@@ -34,74 +34,68 @@ library(DT)
 </div>
 
 
-<div class="panel panel-info">
-<div class="panel-heading">Documentation with examples</div>
-<div class="panel-body">
-
-##Support of Therapeutically Applicable Research To Generate Effective Treatments (TARGET) data:
+## Support of Therapeutically Applicable Research To Generate Effective Treatments (TARGET) data:
 
 TARGET applies a comprehensive genomic approach to determine molecular changes that drive childhood cancers. Investigators form a collaborative network to facilitate discovery of molecular targets and translate those findings into the clinic. TARGET is managed by NCI's Office of Cancer Genomics and Cancer Therapy Evaluation Program.
 
-###Querying, downloading, and preparing TARGET data:
+###  Querying, downloading, and preparing TARGET data:
 
 Below is an example to run to query, download, and prepare data from the TARGET initiative through **tcgabiolinks** package:
 
-Available TARGET projects: "TARGET-AML"  "TARGET-NBL"  "TARGET-WT"   "TARGET-RT"   "TARGET-OS"   "TARGET-CCSK".
--TARGET cases available can be printed with this R chunk:
-
-```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=TRUE}
-projects<-getGDCprojects()$project_id
-projects[grep("TARGET", projects)]
+Available TARGET projects: 
+```{r, echo=TRUE, warning=FALSE, eval=TRUE}
+projects <- getGDCprojects()$project_id
+as.data.frame(grep("TARGET", projects,value = TRUE))
 ```
 
 
 ```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
 #Downloading and prepare TARGET CASE
 query_Target <- GDCquery(project = "TARGET-AML", 
-                  data.category = "Transcriptome Profiling", 
-                  data.type = "Gene Expression Quantification", 
-                  workflow.type = "HTSeq - Counts")
+                         data.category = "Transcriptome Profiling", 
+                         data.type = "Gene Expression Quantification", 
+                         workflow.type = "HTSeq - Counts")
 
-samplesDown_Target <- getResults(query_Target,cols=c("cases"))
+samplesDown_Target <- getResults(query_Target, cols = c("cases"))
 
 dataSmTB_Target <- TCGAquery_SampleTypes(barcode = samplesDown_Target,
-                                  typesample = "TB")
+                                         typesample = "TB")
 
 dataSmNB_Target <- TCGAquery_SampleTypes(barcode = samplesDown_Target,
-                                  typesample = "TBM")
+                                         typesample = "TBM")
 dataSmTB_short_Target <- dataSmTB_Target[1:10]
 dataSmNB_short_Target <- dataSmNB_Target[1:10]
 
 queryDown_Target <- GDCquery(project = "TARGET-AML", 
-                      data.category = "Transcriptome Profiling",
-                      data.type = "Gene Expression Quantification", 
-                      workflow.type = "HTSeq - Counts", 
-                      barcode = c(dataSmTB_short_Target, dataSmNB_short_Target))
+                             data.category = "Transcriptome Profiling",
+                             data.type = "Gene Expression Quantification", 
+                             workflow.type = "HTSeq - Counts", 
+                             barcode = c(dataSmTB_short_Target, dataSmNB_short_Target))
 
 GDCdownload(queryDown_Target)
 
-###SummarizedExperiment = TRUE
+### SummarizedExperiment = TRUE
 data <- GDCprepare(queryDown_Target)
 
 dataPrep_Target <- TCGAanalyze_Preprocessing(object = data, 
-                                      cor.cut = 0.6,
-                                      datatype = "HTSeq - Counts")                      
+                                             cor.cut = 0.6,
+                                             datatype = "HTSeq - Counts")                      
 
 dataNorm_Target <- TCGAanalyze_Normalization(tabDF = dataPrep_Target,
-                                      geneInfo = geneInfoHT,
-                                      method = "gcContent") 
+                                             geneInfo = geneInfoHT,
+                                             method = "gcContent") 
 
 boxplot(dataPrep_Target, outline = FALSE)
 
 boxplot(dataNorm_Target, outline = FALSE)
 
 dataFilt_Target <- TCGAanalyze_Filtering(tabDF = dataNorm_Target,
-                                  method = "quantile", 
-                                  qnt.cut =  0.25)   
+                                         method = "quantile", 
+                                         qnt.cut =  0.25)   
 ```
 
 
-##Preparing BRCA data for downstream analysis: Differential Expression Analysis
+## Preparing BRCA data for downstream analysis: Differential Expression Analysis
 
 ```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
 CancerProject <- "TCGA-BRCA"
@@ -113,7 +107,7 @@ query <- GDCquery(project = CancerProject,
                   data.type = "Gene Expression Quantification", 
                   workflow.type = "HTSeq - Counts")
 
-samplesDown <- getResults(query,cols=c("cases"))
+samplesDown <- getResults(query,cols = c("cases"))
 
 dataSmTP <- TCGAquery_SampleTypes(barcode = samplesDown,
                                   typesample = "TP")
@@ -163,13 +157,12 @@ After applying filtering and normalization steps, this function reassigns raw co
 
 
 ```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
-###dataframe will have genes from dataFilt but raw counts from dataPrep
-dataPrep_raw<-UseRaw_afterFilter(dataPrep, dataFilt)
-
+### dataframe will have genes from dataFilt but raw counts from dataPrep
+dataPrep_raw <- UseRaw_afterFilter(dataPrep, dataFilt)
 ```
 
 
-##TCGA_MolecularSubtype: Query subtypes for cancer data:
+## TCGA_MolecularSubtype: Query subtypes for cancer data:
 
 This function takes a vector of TCGA barcodes as an input and returns a 2 elements list.
 
@@ -208,7 +201,7 @@ The function takes the following arguments for the version bump:
 * **contrast.formula**	string input to determine coefficients and to design contrasts in a customized way
 * **Condtypes**	vector of grouping for samples in MAT
 
-### Limma pipeline
+###  Limma pipeline
 
 This example will perform differential expression analysis between control and case groups matrices downloaded through tcgabiolinks from GDC portal. Other pipeline option could be **edgeR**.
 
@@ -223,7 +216,7 @@ dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmTP_short],
                             method = "glmLRT", ClinicalDF = data.frame())
 ```
 
-### Customization of contrast using ---contrast.formula--- argument:
+###  Customization of contrast using ---contrast.formula--- argument:
 
 *contrast.formula* argument is a string formula formatted in a way to be used as an input for DEA using limma pipeline. Elements of contrast in the formula should be one of the unique elements in *CondTypes* vector. The example below shows the syntax *contrast.formula* argument should have. We are contrasting here between Pam50 molecular subtypes of some lung cancer samples.
 **N.B**: Syntax for the contrast formula should be under this form
@@ -232,7 +225,7 @@ dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmTP_short],
 *CondTypes* vector should preferably have no space character in its elements.
 
 ```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
-#####download and prepare lung data through GDC#####
+### ##download and prepare lung data through GDC### ##
 query.lung <- GDCquery(project = "TCGA-LUSC",
                        data.category = "Transcriptome Profiling",
                        data.type = "Gene Expression Quantification", 
@@ -273,10 +266,10 @@ dataNorm.tcga <- TCGAanalyze_Normalization(tabDF = dataNorm.tcga,
                                            geneInfo = geneInfoHT,
                                            method = "geneLength")
 dataFilt.tcga <- TCGAanalyze_Filtering(tabDF = dataNorm.tcga,
-                                      method = "quantile", 
-                                      qnt.cut =  0.25)
+                                       method = "quantile", 
+                                       qnt.cut =  0.25)
 
-####Filtering data so all samples have a pam50 subtype for LUSC
+### #Filtering data so all samples have a pam50 subtype for LUSC
 
 diff<-setdiff(colnames(dataFilt.tcga), TCGA_MolecularSubtype(colnames(dataFilt.tcga))$filtered)
 TCGA_MolecularSubtype(diff)$subtypes$barcodes
@@ -284,7 +277,7 @@ TCGA_MolecularSubtype(diff)$subtypes$barcodes
 dataFilt.tcga.lusc<-dataFilt.tcga[,diff]
 LUSC.subtypes<-TCGA_MolecularSubtype(colnames(dataFilt.tcga.lusc))$subtypes$subtype
 
-###Differential expression analysis after correcting for "Plate" factor.
+### Differential expression analysis after correcting for "Plate" factor.
 DEG.lusc <- TCGAanalyze_DEA(MAT=dataFilt.tcga.lusc,
                             pipeline="limma",
                             batch.factors = c("Plate"),
@@ -312,7 +305,9 @@ On top of data exploration through **ComBat** plots, if no batch factor is provi
 
 batch.corrected <- TCGAbatch_Correction(tabDF = dataFilt.tcga, batch.factor = "Plate")
 
-batch.corrected.adjusted <- TCGAbatch_Correction(tabDF = dataFilt.tcga, batch.factor = "Plate", adjustment=c("TSS"))
+batch.corrected.adjusted <- TCGAbatch_Correction(tabDF = dataFilt.tcga, 
+                                                 batch.factor = "Plate", 
+                                                 adjustment=c("TSS"))
 ```
 
 
