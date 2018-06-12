@@ -933,7 +933,7 @@ TCGAanalyze_DEA <- function(mat1,
             commandstr=paste0("limma::", commandstr)
 
             cont.matrix<-eval(parse(text=commandstr))
-            fit <- limma::lmFit(logCPM$counts, design)
+            fit <- limma::lmFit(logCPM, design)
             fit<-limma::contrasts.fit(fit, cont.matrix)
 
             if(trend==TRUE) ##limma-trend option
@@ -989,11 +989,11 @@ TCGAanalyze_DEA <- function(mat1,
 #' @importFrom limma voom
 #' @importFrom sva ComBat
 #' @export
-#' @return A voom object and a data frame with ComBat batch correction applied
+#' @return data frame with ComBat batch correction applied
 TCGAbatch_Correction <- function(tabDF, batch.factor=NULL, adjustment=NULL, ClinicalDF=data.frame()){
 
     if(length(batch.factor)==0 & length(adjustment)==0)
-            stop(paste0 ("No batch factor provided. Check documentation for options)")
+            stop(paste0 ("No batch factor provided. Check documentation for options")
 
     else if(batch.factor %in% adjustment){
 
@@ -1022,21 +1022,23 @@ if(length(batch.factor)>0 || length(adjustment)>0)
     TSS<-as.factor(my_IDs$tss)
     Portion<-as.factor(my_IDs$portion)
     Sequencing.Center<-as.factor(my_IDs$center)
+    Patients<-factor(my_IDs$patient)
+
 
 
     design.matrix<- model.matrix(~Condition)
 
     #Voom Correction:
-
-    v <- limma::voom(tabDF, design.matrix, plot=TRUE)
+    #v <- limma::voom(tabDF, design.matrix, plot=TRUE)
 
     design.mod.combat<-model.matrix(~Condition)
 
 
-    options <- c("Plate", "TSS", "Year", "Portion", "Sequencing Center")
+    options <- c("Plate", "TSS", "Year", "Portion", "Sequencing Center", "Patients")
 
 
     if(length(batch.factor)>1) stop("Combat can only correct for one batch variable. Provide one batch factor")
+
 
 
     if(batch.factor %in%  options == FALSE)
