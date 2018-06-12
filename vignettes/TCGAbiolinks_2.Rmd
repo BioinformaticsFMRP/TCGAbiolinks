@@ -1,7 +1,7 @@
 ---
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 title: "TCGAbiolinks version bump with new functions"
 date: "`r BiocStyle::doc_date()`"
@@ -34,7 +34,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(TCGAbiolinks)
 library(SummarizedExperiment)
 #library(dplyr)
-library(DT)
+#library(DT)
 ```
 
 </div>
@@ -308,7 +308,7 @@ DEG.lusc <- TCGAanalyze_DEA(MAT=dataFilt.tcga.lusc,
 
 This function calls **ComBat** from **sva** package to handle batch correction, display some plots for exploratory data analysis purposes. More specifically, it shows a plot with black as a kernel estimate of the empirical batch effect density and red as the parametric.
 * **tabDF** numeric matrix, each row represents a gene each column represents a sample
-* **batch.factor** batch.factor a string containing the batch factor to use for correction Options are "Plate", "TSS", "Year", "Portion", "Center". The function accepts only one batch factor at a time
+* **batch.factor** batch.factor a string containing the batch factor to use for correction Options are "Plate", "TSS", "Year", "Portion", "Center", "Patients". The function accepts only one batch factor at a time
 * **adjustment**  vector containing strings for covariate factors to adjust for using ComBat. Options are "Plate", "TSS", "Year", "Portion", "Center", "Patients"
 * **ClinicalDF**  a dataframe returned by GDCquery_clinic() to be used to extract year data
 
