@@ -990,116 +990,72 @@ TCGAanalyze_DEA <- function(mat1,
 #' @importFrom sva ComBat
 #' @export
 #' @return data frame with ComBat batch correction applied
-TCGAbatch_Correction <- function(tabDF, batch.factor=NULL, adjustment=NULL, ClinicalDF=data.frame()){
-
-    if(length(batch.factor)==0 & length(adjustment)==0) message("batch correction will be skipped")
-    if(batch.factor %in% adjustment) stop(paste0("Cannot adjust and correct for the same factor"))
-
-    my_IDs <- get_IDs(colnames(tabDF))
-
-    if(length(batch.factor)>0 || length(adjustment)>0)
-        if( (nrow(ClinicalDF)>0 & batch.factor=="Year") || ("Year" %in% adjustment==TRUE & nrow(ClinicalDF)>0)){
-            names(ClinicalDF)[names(ClinicalDF)=="bcr_patient_barcode"] <- "patient"
-            ClinicalDF$age_at_diag_year <- floor(ClinicalDF$age_at_diagnosis/365)
-            ClinicalDF$diag_year<-ClinicalDF$age_at_diag_year+ClinicalDF$year_of_birth
-            diag_yearDF<-ClinicalDF[,c("patient", "diag_year")]
-            Year<-merge(my_IDs, diag_yearDF, by="patient")
-            Year<-Year$diag_year
-            Year<-as.factor(Year)
-        }
-    else if(nrow(ClinicalDF)==0 & batch.factor=="Year") {
-        stop("Cannot extract Year data. Clinical data was not provided")
+TCGAbatch_Correction2<-function (tabDF, batch.factor = NULL, adjustment = NULL, ClinicalDF = data.frame())
+  
+{
+  if (length(batch.factor) == 0 & length(adjustment) == 0)
+    message("batch correction will be skipped")
+  else if (batch.factor %in% adjustment) {
+    stop(paste0("Cannot adjust and correct for the same factor|"))
+  }
+  my_IDs <- get_IDs(tabDF)
+  if (length(batch.factor) > 0 || length(adjustment) > 0)
+    if ((nrow(ClinicalDF) > 0 & batch.factor == "Year") ||
+        ("Year" %in% adjustment == TRUE & nrow(ClinicalDF) >
+         0)) {
+      names(ClinicalDF)[names(ClinicalDF) == "bcr_patient_barcode"] <- "patient"
+      ClinicalDF$age_at_diag_year <- floor(ClinicalDF$age_at_diagnosis/365)
+      ClinicalDF$diag_year <- ClinicalDF$age_at_diag_year +
+        ClinicalDF$year_of_birth
+      diag_yearDF <- ClinicalDF[, c("patient", "diag_year")]
+      Year <- merge(my_IDs, diag_yearDF, by = "patient")
+      Year <- Year$diag_year
+      Year <- as.factor(Year)
     }
-
-    Plate<-as.factor(my_IDs$plate)
-    Condition<-as.factor(my_IDs$condition)
-    TSS<-as.factor(my_IDs$tss)
-    Portion<-as.factor(my_IDs$portion)
-    Sequencing.Center<-as.factor(my_IDs$center)
-    Patients<-factor(my_IDs$patient)
-
-
-
-    design.matrix<- model.matrix(~Condition)
-
-    #Voom Correction:
-    #v <- limma::voom(tabDF, design.matrix, plot=TRUE)
-
-    design.mod.combat<-model.matrix(~Condition)
-
-
-    options <- c("Plate", "TSS", "Year", "Portion", "Sequencing Center", "Patients")
-
-    if(length(batch.factor)==0){
-        message("Batch correction skipped since no factors provided: data is Voom corrected")
-        return(v)
-    }
-
-    if(length(batch.factor)>1) stop("Combat can only correct for one batch variable. Provide one batch factor")
-
-
-
-    if(batch.factor %in%  options == FALSE)
-        stop(paste0(o, " is not a valid batch correction factor"))
-
-
-    for(o in adjustment){
-        if(o %in%  options == FALSE)
-            stop(paste0(o, " is not a valid adjustment factor"))
-
-    }
-
-
-    adjustment.data<-c()
-    for(a in adjustment){
-        if(a=="Sequencing Center")
-            a<-Sequencing.Center
-        adjustment.data<-cbind(eval(parse(text=a)), adjustment.data)
-    }
-
-    if(batch.factor=="Sequencing Center")
-        batch.factor<-Sequencing.Center
-
-
-    batchCombat<-eval(parse(text=batch.factor))
-
-
-    #####Accounting for covariates######
-    if(length(adjustment)>0){
-        adjustment.formula<-paste(adjustment, collapse="+")
-        adjustment.formula<-paste0("+", adjustment.formula)
-        adjustment.formula<-paste0("~Condition", adjustment.formula)
-        print(adjustment.formula)
-        model <- data.frame(batchCombat, row.names=colnames(tabDF))
-
-        design.mod.combat<-model.matrix(eval(parse(text=adjustment.formula)), data=model)
-    }
-
-
-
-    # Batch correction
-    batch_corr <- sva::ComBat(dat=tabDF, batch=batchCombat, mod=design.mod.combat, par.prior=TRUE,prior.plots=TRUE)
-
-    return(list(v=v, b=batch_corr))
-}
-
-
-###Thilde's Code#####
-get_IDs <- function(barcode) {
-    IDs <- strsplit(barcode, "-")
-    IDs <- plyr::ldply(IDs, rbind)
-    colnames(IDs) <- c('project', 'tss','participant', 'sample',"portion", "plate", "center")
-    vial <- substr(as.character(IDs$sample),3,3)
-    IDs$vial <- vial
-    IDs$sample <- substr(as.character(IDs$sample),1,2)
-    cols <- c("project", "tss", "participant")
-    IDs$patient <- apply(IDs[,cols],1,paste,collapse = "-" )
-    IDs <- cbind(IDs, barcode)
-    condition <- gsub("11+[[:alpha:]]", "normal", as.character(IDs$sample))
-    condition  <- gsub("01+[[:alpha:]]", "cancer", condition)
-    IDs$condition <- condition
-    IDs$myorder  <- 1:nrow(IDs)
-    return(IDs)
+  else if (nrow(ClinicalDF) == 0 & batch.factor == "Year") {
+    stop("Cannot extract Year data. Clinical data was not provided")
+  }
+  Plate <- as.factor(my_IDs$plate)
+  Condition <- as.factor(my_IDs$condition)
+  TSS <- as.factor(my_IDs$tss)
+  Portion <- as.factor(my_IDs$portion)
+  Sequencing.Center <- as.factor(my_IDs$center)
+  design.matrix <- model.matrix(~Condition)
+  design.mod.combat <- model.matrix(~Condition)
+  options <- c("Plate", "TSS", "Year", "Portion", "Sequencing Center")
+  
+  if (length(batch.factor) > 1)
+    stop("Combat can only correct for one batch variable. Provide one batch factor")
+  if (batch.factor %in% options == FALSE)
+    stop(paste0(o, " is not a valid batch correction factor"))
+  
+  for (o in adjustment) {
+    if (o %in% options == FALSE)
+      stop(paste0(o, " is not a valid adjustment factor"))
+    
+  }
+  adjustment.data <- c()
+  for (a in adjustment) {
+    if (a == "Sequencing Center")
+      a <- Sequencing.Center
+    adjustment.data <- cbind(eval(parse(text = a)), adjustment.data)
+  }
+  if (batch.factor == "Sequencing Center")
+    batch.factor <- Sequencing.Center
+  batchCombat <- eval(parse(text = batch.factor))
+  if (length(adjustment) > 0) {
+    adjustment.formula <- paste(adjustment, collapse = "+")
+    adjustment.formula <- paste0("+", adjustment.formula)
+    adjustment.formula <- paste0("~Condition", adjustment.formula)
+    print(adjustment.formula)
+    model <- data.frame(batchCombat, row.names = colnames(tabDF))
+    design.mod.combat <- model.matrix(eval(parse(text = adjustment.formula)),
+                                      data = model)
+  }
+  print(unique(batchCombat))
+  batch_corr <- sva::ComBat(dat = tabDF, batch = batchCombat,
+                            mod = design.mod.combat, par.prior = TRUE, prior.plots = TRUE)
+  return(batch_corr)
 }
 
 ##Function to take raw counts by removing rows filtered after norm and filter process###
