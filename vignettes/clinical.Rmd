@@ -385,7 +385,7 @@ getclinical <- function(proj){
     message(proj)
     while(1){
         result = tryCatch({
-            query <- GDCquery(project = proj, data.category = "Clinical")
+            query <- GDCquery(project = proj, data.category = "Clinical",file.type = "xml")
             GDCdownload(query)
             clinical <- GDCprepare_clinic(query, clinical.info = "patient")
             for(i in c("admin","radiation","follow_up","drug","new_tumor_event")){
