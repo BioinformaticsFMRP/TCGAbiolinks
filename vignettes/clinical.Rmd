@@ -102,6 +102,7 @@ Below are several examples fetching clinical data directly from the clinical XML
 ```{r results = 'hide',echo=TRUE, message=FALSE, warning=FALSE}
 query <- GDCquery(project = "TCGA-COAD", 
                   data.category = "Clinical", 
+                  file.type = "xml", 
                   barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))
 GDCdownload(query)
 clinical <- GDCprepare_clinic(query, clinical.info = "patient")
