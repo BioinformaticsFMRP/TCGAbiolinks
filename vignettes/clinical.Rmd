@@ -262,7 +262,7 @@ investigated by the GDC team. These inconsistencies are:
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
 # Get XML files and parse them
-clin.query <- GDCquery(project = "TCGA-READ", data.category = "Clinical", barcode = "TCGA-F5-6702")
+clin.query <- GDCquery(project = "TCGA-READ", data.category = "Clinical", file.type = "xml", barcode = "TCGA-F5-6702")
 GDCdownload(clin.query)
 clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
 clinical.patient.followup <- GDCprepare_clinic(clin.query, clinical.info = "follow_up")
@@ -287,7 +287,7 @@ recurrent.samples <- GDCquery(project = "TCGA-LIHC",
                              workflow.type = "HTSeq - Counts",
                              sample.type = 	"Recurrent Solid Tumor")$results[[1]] %>% select(cases)
 recurrent.patients <- unique(substr(recurrent.samples$cases,1,12))
-clin.query <- GDCquery(project = "TCGA-LIHC", data.category = "Clinical", barcode = recurrent.patients)
+clin.query <- GDCquery(project = "TCGA-LIHC", data.category = "Clinical", file.type = "xml", barcode = recurrent.patients)
 GDCdownload(clin.query)
 clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient") 
 ```
