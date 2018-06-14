@@ -764,3 +764,25 @@ getURL <- function(URL, FUN, ..., N.TRIES=3L) {
 
     result
 }
+
+#' @title Extract information from TCGA barcodes.
+#' @description
+#'    get_IDs allows user to extract metadata from barcodes. The dataframe returned has columnns for
+#'  'project', 'tss','participant', 'sample', "portion", "plate", and "center"
+#' @param data numeric matrix, each row represents a gene, each column represents a sample
+#' @export
+#' @return data frame with columns 'project', 'tss','participant', 'sample', "portion", "plate", "center", "condition"
+get_IDs <- function(data) {
+  IDs <- strsplit(c(colnames(data)), "-")
+  IDs <- plyr::ldply(IDs, rbind)
+  colnames(IDs) <- c('project', 'tss','participant', 'sample', "portion", "plate", "center")
+  cols <- c("project", "tss", "participant")
+  IDs$patient <- apply(IDs[,cols],1,paste,collapse = "-" )
+  barcode <- colnames(data)
+  IDs <- cbind(IDs, barcode)
+  condition <- gsub("11+[[:alpha:]]", "normal", as.character(IDs$sample))
+  condition  <- gsub("01+[[:alpha:]]", "cancer", condition)
+  IDs$condition <- condition
+  IDs$myorder  <- 1:nrow(IDs)
+  return(IDs)
+}
