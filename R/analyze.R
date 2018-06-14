@@ -990,7 +990,7 @@ TCGAanalyze_DEA <- function(mat1,
 #' @importFrom sva ComBat
 #' @export
 #' @return data frame with ComBat batch correction applied
-TCGAbatch_Correction2<-function (tabDF, batch.factor = NULL, adjustment = NULL, ClinicalDF = data.frame())
+TCGAbatch_Correction<-function (tabDF, batch.factor = NULL, adjustment = NULL, ClinicalDF = data.frame())
   
 {
   if (length(batch.factor) == 0 & length(adjustment) == 0)
