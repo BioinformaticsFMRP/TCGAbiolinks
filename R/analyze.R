@@ -669,7 +669,7 @@ TCGAanalyze_DEA <- function(mat1,
   }
   
   
-  my_IDs <- get_IDs2(TOC)
+  my_IDs <- get_IDs(TOC)
   
   
   if(paired==TRUE){
