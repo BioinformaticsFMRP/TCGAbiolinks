@@ -224,6 +224,7 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 #' @examples
 #' query <- GDCquery(project = "TCGA-COAD",
 #'                   data.category = "Clinical",
+#'                   file.type = "xml",
 #'                   barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))
 #' GDCdownload(query)
 #' clinical <- GDCprepare_clinic(query,"patient")
