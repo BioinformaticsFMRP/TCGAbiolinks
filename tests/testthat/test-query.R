@@ -58,11 +58,12 @@ test_that("GDCquery can filter by barcode", {
     barcode <- c("TCGA-OR-A5KU", "TCGA-OR-A5JK")
     query <- GDCquery(project = "TCGA-ACC",
                       data.category = "Clinical",
+                      file.type = "xml",
                       barcode = barcode)
     expect_true(all(sort(barcode) == sort(unique(query$results[[1]]$cases))))
 
     # Will work if barcode was not found
-    query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",
+    query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",file.type = "xml",
                            barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"))
     expect_true(!all(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q") %in% query$results[[1]]$cases))
 })
