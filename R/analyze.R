@@ -631,7 +631,8 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
 #'
 #' @return table with DEGs containing for each gene logFC, logCPM, pValue,and FDR, also for each contrast
 TCGAanalyze_DEA <- function(mat1,
-                            mat2,
+                             mat2,
+                             metadata=TRUE,
                              Cond1type,
                              Cond2type,
                              pipeline="edgeR",
@@ -668,8 +669,17 @@ TCGAanalyze_DEA <- function(mat1,
     
   }
   
+  if(metadata==TRUE){
+    #####
+    my_IDs <- get_IDs(TOC)
+    Plate<-factor(my_IDs$plate)
+    Condition<-factor(my_IDs$condition)
+    TSS<-factor(my_IDs$tss)
+    Portion<-factor(my_IDs$portion)
+    Center<-factor(my_IDs$center)
+    Patients<-factor(my_IDs$patient)
+  }
   
-  my_IDs <- get_IDs(TOC)
   
   
   if(paired==TRUE){
@@ -691,14 +701,6 @@ TCGAanalyze_DEA <- function(mat1,
     Year<-as.factor(my_IDs$diag_year)
   }
   
-  
-  #####
-  Plate<-factor(my_IDs$plate)
-  Condition<-factor(my_IDs$condition)
-  TSS<-factor(my_IDs$tss)
-  Portion<-factor(my_IDs$portion)
-  Center<-factor(my_IDs$center)
-  Patients<-factor(my_IDs$patient)
   
   
   ####ADD PATIENT AS OPTION
@@ -823,7 +825,7 @@ TCGAanalyze_DEA <- function(mat1,
         tableDEA <- cbind(aGlmLRT$table, FDR = p.adjust(aGlmLRT$table$PValue, "fdr"))
         tableDEA <- tableDEA[tableDEA$FDR < fdr.cut,]
         tableDEA <- tableDEA[abs(tableDEA$logFC) > logFC.cut,]
-        if(all(grepl("ENSG",rownames(tableDEA)))) tableDEA <- cbind(tableDEA,map.ensg2(genes = rownames(tableDEA))[,2:3])
+        if(all(grepl("ENSG",rownames(tableDEA)))) tableDEA <- cbind(tableDEA,map.ensg(genes = rownames(tableDEA))[,2:3])
         
       }
       else if(length(unique(tumorType))>2) {
@@ -860,7 +862,7 @@ TCGAanalyze_DEA <- function(mat1,
           tableDEA[[as.character(mycoef)]]<-tt
           #print(rownames(tableDEA[[as.character(mycoef)]]))
           
-          if(all(grepl("ENSG",rownames(tableDEA[[as.character(mycoef)]])))) tableDEA[[as.character(mycoef)]] <- cbind(tableDEA[[as.character(mycoef)]],map.ensg2(genes = rownames(tableDEA[[as.character(mycoef)]]))[,2:3])
+          if(all(grepl("ENSG",rownames(tableDEA[[as.character(mycoef)]])))) tableDEA[[as.character(mycoef)]] <- cbind(tableDEA[[as.character(mycoef)]],map.ensg(genes = rownames(tableDEA[[as.character(mycoef)]]))[,2:3])
         }
         #sapply(colnames(dataFilt), FUN= function(x) subtypedata[which(subtypedata$samples==substr(x,1,12)),]$subtype)
         
@@ -907,7 +909,7 @@ TCGAanalyze_DEA <- function(mat1,
       }
       
       
-      tableDEA<-limma::toptable(fit, coef=1, adjust.method='fdr', number=nrow(TOC))
+      tableDEA<-limma::topTable(fit, coef=1, adjust.method='fdr', number=nrow(TOC))
       
       limma::volcanoplot(fit, highlight=10)
       index <- which( tableDEA[,4] < fdr.cut)
@@ -944,12 +946,12 @@ TCGAanalyze_DEA <- function(mat1,
       tableDEA<-list()
       
       for(mycoef in colnames(cont.matrix)){
-        tableDEA[[as.character(mycoef)]]<-limma::toptable(fit, coef=mycoef, adjust.method="fdr", number=nrow(MAT))
+        tableDEA[[as.character(mycoef)]]<-limma::topTable(fit, coef=mycoef, adjust.method="fdr", number=nrow(MAT))
         message(paste0("DEA for", " :", mycoef))
         tempDEA<-tableDEA[[as.character(mycoef)]]
         index.up <- which(tempDEA$adj.P.Val < fdr.cut & abs(as.numeric(tempDEA$logFC))>logFC.cut)
         tableDEA[[as.character(mycoef)]]<-tempDEA[index.up,]
-        if(all(grepl("ENSG",rownames(tableDEA[[as.character(mycoef)]])))) tableDEA[[as.character(mycoef)]] <- cbind(tableDEA[[as.character(mycoef)]],map.ensg2(genes = rownames(tableDEA[[as.character(mycoef)]]))[,2:3])
+        if(all(grepl("ENSG",rownames(tableDEA[[as.character(mycoef)]])))) tableDEA[[as.character(mycoef)]] <- cbind(tableDEA[[as.character(mycoef)]],map.ensg(genes = rownames(tableDEA[[as.character(mycoef)]]))[,2:3])
         #i<-i+1
         
       }
