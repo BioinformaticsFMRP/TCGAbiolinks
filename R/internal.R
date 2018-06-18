@@ -46,7 +46,7 @@ isServeOK <- function(){
 #' info <- getGDCInfo()
 #' @return Return true all status
 getGDCInfo <- function(){
-    status <- fromJSON("https://gdc-api.nci.nih.gov/status",simplifyDataFrame = TRUE)
+    status <- fromJSON("https://api.gdc.cancer.gov/status",simplifyDataFrame = TRUE)
     return(status)
 }
 
@@ -171,7 +171,7 @@ checkBarcodeDefinition <- function(definition){
 #' projects <- getGDCprojects()
 #' @return A data frame with last GDC projects
 getGDCprojects <- function(){
-    url <- "https://gdc-api.nci.nih.gov/projects?size=1000&format=json"
+    url <- "https://api.gdc.cancer.gov/projects?size=1000&format=json"
     json <- fromJSON(content(GET(url), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
     projects <- json$data$hits
     projects$tumor <- unlist(lapply(projects$project_id, function(x){unlist(str_split(x,"-"))[2]}))
@@ -202,7 +202,7 @@ move <- function(from, to) {
 }
 
 getProjectSummary <- function(project, legacy = FALSE){
-    baseURL <- ifelse(legacy,"https://gdc-api.nci.nih.gov/legacy/projects/","https://gdc-api.nci.nih.gov/projects/")
+    baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/projects/","https://api.gdc.cancer.gov/projects/")
     url <- paste0(baseURL, project,"?expand=summary,summary.data_categories&pretty=true")
     return(fromJSON(url,simplifyDataFrame = TRUE)$data$summary)
 }
