@@ -17,6 +17,8 @@ each column represents a sample with Cond1type}
 \item{mat2}{numeric matrix, each row represents a gene,
 each column represents a sample with Cond2type}
 
+\item{metadata}{Add metadata}
+
 \item{Cond1type}{a string containing the class label of the samples in mat1
 (e.g., control group)}
 
