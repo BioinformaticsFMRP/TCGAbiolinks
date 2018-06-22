@@ -595,6 +595,7 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
 #' each column represents a sample with Cond1type
 #' @param mat2 numeric matrix, each row represents a gene,
 #' each column represents a sample with Cond2type
+#' @param metadata Add metadata
 #' @param Cond1type a string containing the class label of the samples in mat1
 #'  (e.g., control group)
 #' @param Cond2type a string containing the class label of the samples in mat2
@@ -605,7 +606,7 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
 #' the read counts for each gene
 #' (2) Compute genewise exact tests for differences in the means between
 #' two groups of negative-binomially distributed counts.
-#' @param  fdr.cut is a threshold to filter DEGs according their p-value corrected
+#' @param fdr.cut is a threshold to filter DEGs according their p-value corrected
 #' @param logFC.cut is a threshold to filter DEGs according their logFC
 #' @param elementsRatio is number of elements processed for second for time consumation estimation
 #' @param batch.factors a vector containing strings to specify options for batch correction. Options are "Plate", "TSS", "Year", "Portion", "Center", and "Patients"
