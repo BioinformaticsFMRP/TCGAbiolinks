@@ -4,8 +4,8 @@
 \alias{TCGAanalyze_DEA}
 \title{Differential expression analysis (DEA) using edgeR or limma package.}
 \usage{
-TCGAanalyze_DEA(mat1, mat2, Cond1type, Cond2type, pipeline = "edgeR",
-  method = "exactTest", fdr.cut = 1, logFC.cut = 0,
+TCGAanalyze_DEA(mat1, mat2, metadata = TRUE, Cond1type, Cond2type,
+  pipeline = "edgeR", method = "exactTest", fdr.cut = 1, logFC.cut = 0,
   elementsRatio = 30000, batch.factors = NULL, ClinicalDF = data.frame(),
   paired = FALSE, log.trans = FALSE, voom = FALSE, trend = FALSE,
   MAT = data.frame(), contrast.formula = "", Condtypes = c())
@@ -85,7 +85,9 @@ dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 dataFilt <- TCGAanalyze_Filtering(tabDF = dataBRCA, method = "quantile", qnt.cut =  0.25)
 samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
 samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
-dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT],
-                      dataFilt[,samplesTP],"Normal", "Tumor")
+dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,samplesNT],
+                            mat2 = dataFilt[,samplesTP],
+                            Cond1type = "Normal",
+                            Cond2type = "Tumor")
 
 }
