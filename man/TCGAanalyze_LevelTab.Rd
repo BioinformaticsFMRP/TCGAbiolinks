@@ -40,8 +40,10 @@ dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 dataFilt <- TCGAanalyze_Filtering(tabDF = dataBRCA, method = "quantile", qnt.cut =  0.25)
 samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
 samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
-dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT], dataFilt[,samplesTP],
-"Normal", "Tumor")
+dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT],
+                            dataFilt[,samplesTP],
+                            Cond1type = "Normal",
+                            Cond2type = "Tumor")
 dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
 dataTP <- dataFilt[,samplesTP]
 dataTN <- dataFilt[,samplesNT]
