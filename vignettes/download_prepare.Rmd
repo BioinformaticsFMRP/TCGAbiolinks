@@ -37,7 +37,7 @@ There are two methods to download GDC data using TCGAbiolinks:
 
 - client: this method creates a MANIFEST file and download the data using [GDC Data Transfer Tool](https://gdc.cancer.gov/access-data/gdc-data-transfer-tool)
     this method is more reliable but it might be slower compared to the api method.
-- api: this methods used the [GDC Application Programming Interface (API)](https://gdc.cancer.gov/developers/gdc-application-programming-interface-api) to downlaod the data.
+- api: this methods used the [GDC Application Programming Interface (API)](https://gdc.cancer.gov/developers/gdc-application-programming-interface-api) to download the data.
     This will create a MANIFEST file and the data downloaded will be compressed into a tar.gz file. If the size and the number of the files are too big this tar.gz will be too big
     whicih might have a high probability of download failure. To solve that we created the `files.per.chunk` argument which will split the files
     into small chunks, for example, if chunks.per.download is equal to 10 we will download only 10 files inside each tar.gz.
