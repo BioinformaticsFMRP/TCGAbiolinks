@@ -161,7 +161,10 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
             }
             if("demographic" %in% colnames(results)){
                 results$demographic$submitter_id <- gsub("_demographic","", results$demographic$submitter_id)
-                df <- merge(df,as.data.table(results$demographic)[,-c("updated_datetime","state","created_datetime")], by="submitter_id", all = TRUE)
+                demographic <- results$demographic[!is.na(results$demographic$submitter_id),]
+                df <- merge(df,
+                            as.data.table(demographic)[,-c("updated_datetime","state","created_datetime")],
+                            by="submitter_id", all = TRUE)
             }
             if("treatments" %in% colnames(df)){
                 treatments <- rbindlist(df$treatments,fill = TRUE)
