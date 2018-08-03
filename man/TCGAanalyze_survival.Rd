@@ -7,9 +7,10 @@
 TCGAanalyze_survival(data, clusterCol = NULL, legend = "Legend",
   labels = NULL, risk.table = TRUE, xlim = NULL,
   main = "Kaplan-Meier Overall Survival Curves",
-  ylab = "Probability of survival", xlab = "Time since diagnosis (days)",
-  filename = "survival.pdf", color = NULL, height = 8, width = 12,
-  dpi = 300, pvalue = TRUE, conf.int = TRUE, ...)
+  ylab = "Probability of survival",
+  xlab = "Time since diagnosis (days)", filename = "survival.pdf",
+  color = NULL, height = 8, width = 12, dpi = 300, pvalue = TRUE,
+  conf.int = TRUE, ...)
 }
 \arguments{
 \item{data}{TCGA Clinical patient with the information days_to_death}
@@ -56,7 +57,14 @@ using survival library. It uses the fields days_to_death and vital, plus a
 columns for groups.
 }
 \examples{
-clin <- GDCquery_clinic("TCGA-LGG", type = "clinical", save.csv = FALSE)
+ # clin <- GDCquery_clinic("TCGA-BRCA","clinical")
+ clin <- data.frame(
+      vital_status = c("alive","alive","alive","dead","alive",
+                       "alive","dead","alive","dead","alive"),
+      days_to_death = c(NA,NA,NA,172,NA,NA,3472,NA,786,NA),
+      days_to_last_follow_up = c(3011,965,718,NA,1914,423,NA,5,656,1417),
+      gender = c(rep("male",5),rep("female",5))
+ )
 TCGAanalyze_survival(clin, clusterCol="gender")
 TCGAanalyze_survival(clin, clusterCol="gender", xlim = 1000)
 TCGAanalyze_survival(clin,
