@@ -6,9 +6,10 @@
 \usage{
 ggbiplot(pcobj, choices = 1:2, scale = 1, pc.biplot = TRUE,
   obs.scale = 1 - scale, var.scale = scale, groups = NULL,
-  ellipse = FALSE, ellipse.prob = 0.68, labels = NULL, labels.size = 3,
-  alpha = 1, var.axes = TRUE, circle = FALSE, circle.prob = 0.69,
-  varname.size = 3, varname.adjust = 1.5, varname.abbrev = FALSE)
+  ellipse = FALSE, ellipse.prob = 0.68, labels = NULL,
+  labels.size = 3, alpha = 1, var.axes = TRUE, circle = FALSE,
+  circle.prob = 0.69, varname.size = 3, varname.adjust = 1.5,
+  varname.abbrev = FALSE)
 }
 \arguments{
 \item{pcobj}{an object returned by prcomp() or princomp()}

@@ -18,5 +18,7 @@ List with $subtypes attribute as a dataframe with barcodes, samples, subtypes, a
 TCGArecount2_query queries and downloads data produced by the Recount2 project. User can specify which project and which tissue to query
 }
 \examples{
-brain.rec<-TCGAquery_recount2(project = "gtex", tissue = "brain")
+\dontrun{
+ brain.rec<-TCGAquery_recount2(project = "gtex", tissue = "brain")
+}
 }
