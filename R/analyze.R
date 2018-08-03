@@ -173,9 +173,17 @@ TCGAanalyze_Preprocessing <- function(object,
 #' @export
 #' @return table with survival genes pvalues from KM.
 #' @examples
-#'  clinical_patient_Cancer <- GDCquery_clinic("TCGA-BRCA","clinical")
 #'  # Selecting only 20 genes for example
 #'  dataBRCAcomplete <- log2(dataBRCA[1:20,] + 1)
+#'
+#'  # clinical_patient_Cancer <- GDCquery_clinic("TCGA-BRCA","clinical")
+#'  clinical_patient_Cancer <- data.frame(
+#'       bcr_patient_barcode = substr(colnames(dataBRCAcomplete),1,12),
+#'       vital_status = c("alive","alive","alive","dead","alive","alive","dead","alive","dead","alive"),
+#'       days_to_death = c(NA,NA,NA,172,NA,NA,3472,NA,786,NA),
+#'       days_to_last_follow_up = c(3011,965,718,NA,1914,423,NA,5,656,1417)
+#'  )
+#'
 #'  group1 <- TCGAquery_SampleTypes(colnames(dataBRCAcomplete), typesample = c("NT"))
 #'  group2 <- TCGAquery_SampleTypes(colnames(dataBRCAcomplete), typesample = c("TP"))
 #'
@@ -190,6 +198,7 @@ TCGAanalyze_Preprocessing <- function(object,
 #'                                      group2 = group2) # Disease group
 #'
 #'  # If the groups are not specified group1 == group2 and all samples are used
+#'  \dontrun{
 #'  tabSurvKM <- TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
 #'                                      dataBRCAcomplete,
 #'                                      Genelist = rownames(dataBRCAcomplete),
@@ -197,6 +206,7 @@ TCGAanalyze_Preprocessing <- function(object,
 #'                                      p.cut = 0.2,
 #'                                      ThreshTop = 0.67,
 #'                                      ThreshDown = 0.33)
+#' }
 TCGAanalyze_SurvivalKM <- function(clinical_patient,
                                    dataGE,
                                    Genelist,

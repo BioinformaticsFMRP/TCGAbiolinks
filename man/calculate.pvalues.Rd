@@ -4,9 +4,9 @@
 \alias{calculate.pvalues}
 \title{Calculate pvalues}
 \usage{
-calculate.pvalues(data, groupCol = NULL, group1 = NULL, group2 = NULL,
-  paired = FALSE, method = "BH", exact = TRUE, cores = 1,
-  save = FALSE)
+calculate.pvalues(data, groupCol = NULL, group1 = NULL,
+  group2 = NULL, paired = FALSE, method = "BH", exact = TRUE,
+  cores = 1, save = FALSE)
 }
 \arguments{
 \item{data}{SummarizedExperiment obtained from the TCGAPrepare}
