@@ -5,18 +5,19 @@
 \title{Create starburst plot}
 \usage{
 TCGAvisualize_starburst(met, exp, group1 = NULL, group2 = NULL,
-  exp.p.cut = 0.01, met.p.cut = 0.01, diffmean.cut = 0, logFC.cut = 0,
-  met.platform, genome, names = FALSE, names.fill = TRUE,
-  filename = "starburst.pdf", return.plot = FALSE,
+  exp.p.cut = 0.01, met.p.cut = 0.01, diffmean.cut = 0,
+  logFC.cut = 0, met.platform, genome, names = FALSE,
+  names.fill = TRUE, filename = "starburst.pdf", return.plot = FALSE,
   ylab = expression(atop("Gene Expression", paste(Log[10],
-  " (FDR corrected P values)"))), xlab = expression(atop("DNA Methylation",
-  paste(Log[10], " (FDR corrected P values)"))), title = "Starburst Plot",
+  " (FDR corrected P values)"))),
+  xlab = expression(atop("DNA Methylation", paste(Log[10],
+  " (FDR corrected P values)"))), title = "Starburst Plot",
   legend = "DNA Methylation/Expression Relation", color = NULL,
   label = c("Not Significant", "Up regulated & Hypo methylated",
-  "Down regulated & Hypo methylated", "hypo methylated", "hyper methylated",
-  "Up regulated", "Down regulated", "Up regulated & Hyper methylated",
-  "Down regulated & Hyper methylated"), xlim = NULL, ylim = NULL,
-  height = 10, width = 20, dpi = 600)
+  "Down regulated & Hypo methylated", "hypo methylated",
+  "hyper methylated", "Up regulated", "Down regulated",
+  "Up regulated & Hyper methylated", "Down regulated & Hyper methylated"),
+  xlim = NULL, ylim = NULL, height = 10, width = 20, dpi = 600)
 }
 \arguments{
 \item{met}{A SummarizedExperiment with methylation data obtained from the
@@ -100,6 +101,7 @@ Input: data with gene expression/methylation expression
    Output: starburst plot
 }
 \examples{
+\dontrun{
 library(SummarizedExperiment)
 met <- TCGAbiolinks:::getMetPlatInfo(genome = "hg38",platform = "27K")
 values(met) <- NULL
@@ -144,4 +146,5 @@ result <- TCGAvisualize_starburst(SummarizedExperiment::values(met),
                                   met.platform = "27K",
                                   diffmean.cut = 0.0,
                                   names  = TRUE)
+}
 }

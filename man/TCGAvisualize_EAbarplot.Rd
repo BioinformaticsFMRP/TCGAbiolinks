@@ -4,10 +4,10 @@
 \alias{TCGAvisualize_EAbarplot}
 \title{barPlot for a complete Enrichment Analysis}
 \usage{
-TCGAvisualize_EAbarplot(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab,
-  filename = "TCGAvisualize_EAbarplot_Output.pdf", text.size = 1,
-  mfrow = c(2, 2), xlim = NULL, color = c("orange", "cyan", "green",
-  "yellow"))
+TCGAvisualize_EAbarplot(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar,
+  nRGTab, filename = "TCGAvisualize_EAbarplot_Output.pdf",
+  text.size = 1, mfrow = c(2, 2), xlim = NULL, color = c("orange",
+  "cyan", "green", "yellow"))
 }
 \arguments{
 \item{tf}{is a list of gene symbols}
