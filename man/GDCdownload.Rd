@@ -36,9 +36,10 @@ query <- GDCquery(project = "TCGA-ACC",
                  barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01", "TCGA-OR-A5LJ-10A-01D-A29K-01"))
 # data will be saved in  GDCdata/TCGA-ACC/legacy/Copy_number_variation/Copy_number_segmentation
 GDCdownload(query, method = "api")
-query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical")
-GDCdownload(query, files.per.chunk = 200)
 \dontrun{
+    # Download clinical data from XML
+    query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical")
+    GDCdownload(query, files.per.chunk = 200)
     query <- GDCquery(project = "TARGET-AML",
                   data.category = "Transcriptome Profiling",
                   data.type = "miRNA Expression Quantification",
