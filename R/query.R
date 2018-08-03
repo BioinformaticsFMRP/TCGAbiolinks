@@ -595,13 +595,41 @@ GDCquery_Maf <- function(tumor,
 #' }
 #' @return List with $subtypes attribute as a dataframe with barcodes, samples, subtypes, and colors. The $filtered attribute is returned as filtered samples with no subtype info
 TCGAquery_recount2<-function(project, tissue=c()){
-  tissues<-c("adipose tissue", "adrenal", "gland", "bladder",
-             "blood", "blood vessel", "bone marrow", "brain", "breast",
-             "cervix uteri", "colon", "esophagus", "fallopian tube",
-             "heart", "kidney", "liver", "lung", "muscle", "nerve", "ovary",
-             "pancreas", "pituitary", "prostate", "salivary", "gland", "skin",
-             "small intestine", "spleen", "stomach", "testis", "thyroid",
-             "uterus", "vagina")
+    tissues <- c(
+        "adipose tissue",
+        "adrenal",
+        "gland",
+        "bladder",
+        "blood",
+        "blood vessel",
+        "bone marrow",
+        "brain",
+        "breast",
+        "cervix uteri",
+        "colon",
+        "esophagus",
+        "fallopian tube",
+        "heart",
+        "kidney",
+        "liver",
+        "lung",
+        "muscle",
+        "nerve",
+        "ovary",
+        "pancreas",
+        "pituitary",
+        "prostate",
+        "salivary",
+        "gland",
+        "skin",
+        "small intestine",
+        "spleen",
+        "stomach",
+        "testis",
+        "thyroid",
+        "uterus",
+        "vagina"
+    )
   tissue<-paste(unlist(strsplit(tissue, " ")), collapse="_")
   Res<-list()
 
