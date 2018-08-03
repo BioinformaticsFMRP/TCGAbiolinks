@@ -1,7 +1,12 @@
 context("Analyse")
 
 test_that("TCGAanalyze_survival creates pdf", {
-    clin <- GDCquery_clinic("TCGA-ACC", type = "clinical", save.csv = FALSE)
+    clin <- data.frame(
+           vital_status = c("alive","alive","alive","dead","alive","alive","dead","alive","dead","alive"),
+           days_to_death = c(NA,NA,NA,172,NA,NA,3472,NA,786,NA),
+           days_to_last_follow_up = c(3011,965,718,NA,1914,423,NA,5,656,1417),
+           gender = c(rep("male",5),rep("female",5))
+    )
     TCGAanalyze_survival(clin,clusterCol="gender",filename = "test.pdf")
     expect_true(file.exists("test.pdf"))
     unlink("test.pdf")
@@ -143,144 +148,4 @@ test_that("Results from TCGAanalyze_DMR are correct", {
     expect_equal(result$diffmean.group2.group1 , 0.8)
     expect_equal(result$status.group2.group1 , "Hypermethylated")
 
-})
-
-
-test_that("Results from TCGAanalyze_DEA and DMR in starburst plot are correct", {
-    nrows <- 4; ncols <- 20
-    counts <- matrix(nrow = nrows,ncol = ncols)
-    counts[1,] <-c(rep(0.9,ncols/2),rep(0.1,ncols/2))
-    counts[2,] <-c(rep(0.3,ncols/2),rep(0.1,ncols/2))
-    counts[3,] <-c(rep(0.1,ncols/2),rep(0.9,ncols/2))
-    counts[4,] <-c(rep(0.1,ncols/2),rep(0.3,ncols/2))
-
-    rowRanges <- GenomicRanges::GRanges((rep("chr1",nrows)),
-                                        IRanges::IRanges(rep(2000,nrows), width=100),
-                                        strand=rep("+",nrows),
-                                        probeID=c("cg00008800","cg00008493","cg00008452","cg00064347"))
-    colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
-                                    row.names=LETTERS[1:20],
-                                    group=rep(c("group1","group2"),c(10,10)))
-    data <- SummarizedExperiment::SummarizedExperiment(
-        assays=S4Vectors::SimpleList(counts=counts),
-        rowRanges=rowRanges,
-        colData=colData)
-    SummarizedExperiment::colData(data)$group <- c(rep("group1",10),  rep("group2",10))
-    met <- TCGAanalyze_DMR(data, p.cut = 0.85,"group","group1","group2")
-
-    # Expression results
-    #  logFC     FDR
-    #    2     0.00001
-    #    2       0.1
-    #   -3       0.1
-    #   -3    0.00001
-    exp <- data.frame(logFC = c(2,2,-3,-3),
-                      FDR = c(0.00001,0.1,0.00001,0.1),
-                      ensembl_gene_id = c("ENSG00000213553","ENSG00000187581","ENSG00000120868","ENSG00000122068"), stringsAsFactors = F)
-
-    result.no.cut <- TCGAvisualize_starburst(met,
-                                             exp,
-                                             exp.p.cut = 1,
-                                             met.p.cut = 1,
-                                             group1 = "group1",
-                                             group2 = "group2",
-                                             diffmean.cut = 0.0,
-                                             logFC.cut = 0,
-                                             met.platform = "450K",
-                                             genome = "hg38",
-                                             names = TRUE,
-                                             return.plot = TRUE)$starburst
-
-    result.fdr.cut <- TCGAvisualize_starburst(met,
-                                              exp,
-                                              exp.p.cut = 0.05,
-                                              met.p.cut = 0.05,
-                                              group1 = "group1",
-                                              group2 = "group2",
-                                              diffmean.cut = 0.0,
-                                              met.platform = "450K",
-                                              genome = "hg19",
-                                              names = TRUE,
-                                              return.plot = TRUE)$starburst
-    result.fc.cut <- TCGAvisualize_starburst(met,
-                                             exp,
-                                             exp.p.cut = 1,
-                                             met.p.cut = 1,
-                                             met.platform = "450K",
-                                             genome = "hg19",
-                                             group1="group1",
-                                             group2="group2",
-                                             diffmean.cut=0.0,
-                                             logFC.cut = 2.5,
-                                             names=TRUE, return.plot = TRUE)$starburst
-
-    result.met.cut <- TCGAvisualize_starburst(met,
-                                              exp,
-                                              exp.p.cut = 1,
-                                              met.p.cut = 1,
-                                              met.platform = "450K",
-                                              genome = "hg19",
-                                              group1 = "group1",
-                                              group2 = "group2",
-                                              diffmean.cut = 0.5,
-                                              logFC.cut = 0,
-                                              names=TRUE, return.plot = TRUE)$starburst
-
-    result.met.exp.cut <- TCGAvisualize_starburst(met,
-                                                  exp,
-                                                  exp.p.cut = 1,
-                                                  met.p.cut = 1,
-                                                  met.platform = "450K",
-                                                  genome = "hg19",
-                                                  group1 = "group1",
-                                                  group2 = "group2",
-                                                  diffmean.cut=0.5,
-                                                  logFC.cut = 2.5,
-                                                  names=TRUE, return.plot = TRUE)$starburst
-
-
-    # Threshold are respected
-    expect_equal(nrow(result.fdr.cut), 2)
-    expect_equal(nrow(result.no.cut), 4)
-    expect_equal(nrow(result.fc.cut), 2)
-    expect_equal(nrow(result.met.cut), 2)
-    expect_equal(nrow(result.met.exp.cut), 1)
-
-    # group1 vs groups2 (logFC = log(group2) - log(group1), diffmean = group2 - group1 )
-    expect_true(result.met.exp.cut$starburst.status == "Down regulated & Hyper methylated" &
-                    result.met.exp.cut$logFC < 0 & result.met.exp.cut$diffmean.group1.group2 > 0)
-    expect_true(result.met.cut[2,]$starburst.status == "Up regulated & Hypo methylated" &
-                    result.met.cut[2,]$logFC > 0 & result.met.cut[2,]$diffmean.group1.group2 < 0)
-    expect_true(result.met.cut[1,]$starburst.status == "Down regulated & Hyper methylated" &
-                    result.met.cut[1,]$logFC < 0 & result.met.cut[1,]$diffmean.group1.group2 > 0)
-
-    # --- Changing groups order
-    result.met.cut.inv <- TCGAvisualize_starburst(met,exp,
-                                                  exp.p.cut = 1, met.p.cut = 1,
-                                                  group1="group2",group2="group1",
-                                                  met.platform = "450K",
-                                                  genome = "hg19",
-                                                  diffmean.cut=0.5,logFC.cut = 0,
-                                                  names=TRUE, return.plot = TRUE)$starburst
-    result.met.exp.cut.inv <- TCGAvisualize_starburst(met,exp,
-                                                      exp.p.cut = 1, met.p.cut = 1,
-                                                      group1="group2",group2="group1",
-                                                      met.platform = "450K",
-                                                      genome = "hg19",
-                                                      diffmean.cut=0.5,logFC.cut = 2.5,
-                                                      names=TRUE, return.plot = TRUE)$starburst
-
-    # group2 vs groups1 (logFC = log(group1) - log(group2), diffmean = group1 - group2 )
-    expect_true(result.met.exp.cut.inv$starburst.status == "Down regulated & Hypo methylated" &
-                    result.met.exp.cut.inv$logFC < 0 & result.met.exp.cut.inv$diffmean.group2.group1 < 0)
-    expect_true(result.met.cut.inv[2,]$starburst.status == "Up regulated & Hyper methylated" &
-                    result.met.cut.inv[2,]$logFC > 0 & result.met.cut.inv[2,]$diffmean.group2.group1 > 0)
-    expect_true(result.met.cut.inv[1,]$starburst.status == "Down regulated & Hypo methylated" &
-                    result.met.cut.inv[1,]$logFC < 0 & result.met.cut.inv[1,]$diffmean.group2.group1 < 0)
-    unlink("DMR_results_group_group1_group2_pcut_0.85_meancut_0.2.csv")
-    unlink("group_group1_group2_pcut_0.85_meancut_0.2.rda")
-    unlink("histogram_diffmean.group1group2.png")
-    unlink("histogram_pvalues.png")
-    unlink("histogram_pvalues_adj.png")
-    unlink("methylation_volcano.pdf")
 })

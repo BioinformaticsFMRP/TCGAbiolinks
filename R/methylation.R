@@ -113,7 +113,14 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save =
 #' @export
 #' @return Survival plot
 #' @examples
-#' clin <- GDCquery_clinic("TCGA-LGG", type = "clinical", save.csv = FALSE)
+#'  # clin <- GDCquery_clinic("TCGA-BRCA","clinical")
+#'  clin <- data.frame(
+#'       vital_status = c("alive","alive","alive","dead","alive",
+#'                        "alive","dead","alive","dead","alive"),
+#'       days_to_death = c(NA,NA,NA,172,NA,NA,3472,NA,786,NA),
+#'       days_to_last_follow_up = c(3011,965,718,NA,1914,423,NA,5,656,1417),
+#'       gender = c(rep("male",5),rep("female",5))
+#'  )
 #' TCGAanalyze_survival(clin, clusterCol="gender")
 #' TCGAanalyze_survival(clin, clusterCol="gender", xlim = 1000)
 #' TCGAanalyze_survival(clin,
@@ -1225,6 +1232,7 @@ TCGAanalyze_DMR <- function(data,
 #' @export
 #' @return Save a starburst plot
 #' @examples
+#' \dontrun{
 #' library(SummarizedExperiment)
 #' met <- TCGAbiolinks:::getMetPlatInfo(genome = "hg38",platform = "27K")
 #' values(met) <- NULL
@@ -1269,6 +1277,7 @@ TCGAanalyze_DMR <- function(data,
 #'                                   met.platform = "27K",
 #'                                   diffmean.cut = 0.0,
 #'                                   names  = TRUE)
+#' }
 TCGAvisualize_starburst <- function(met,
                                     exp,
                                     group1 = NULL,
