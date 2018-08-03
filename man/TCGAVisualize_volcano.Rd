@@ -9,8 +9,9 @@ TCGAVisualize_volcano(x, y, filename = "volcano.pdf",
   xlab = NULL, title = "Volcano plot", legend = NULL, label = NULL,
   xlim = NULL, ylim = NULL, color = c("black", "red", "green"),
   names = NULL, names.fill = TRUE, show.names = "significant",
-  x.cut = 0, y.cut = 0.01, height = 5, width = 10, highlight = NULL,
-  highlight.color = "orange", names.size = 4, dpi = 300)
+  x.cut = 0, y.cut = 0.01, height = 5, width = 10,
+  highlight = NULL, highlight.color = "orange", names.size = 4,
+  dpi = 300)
 }
 \arguments{
 \item{x}{x-axis data}

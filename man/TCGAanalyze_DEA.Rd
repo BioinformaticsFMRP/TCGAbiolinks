@@ -5,10 +5,11 @@
 \title{Differential expression analysis (DEA) using edgeR or limma package.}
 \usage{
 TCGAanalyze_DEA(mat1, mat2, metadata = TRUE, Cond1type, Cond2type,
-  pipeline = "edgeR", method = "exactTest", fdr.cut = 1, logFC.cut = 0,
-  elementsRatio = 30000, batch.factors = NULL, ClinicalDF = data.frame(),
-  paired = FALSE, log.trans = FALSE, voom = FALSE, trend = FALSE,
-  MAT = data.frame(), contrast.formula = "", Condtypes = c())
+  pipeline = "edgeR", method = "exactTest", fdr.cut = 1,
+  logFC.cut = 0, elementsRatio = 30000, batch.factors = NULL,
+  ClinicalDF = data.frame(), paired = FALSE, log.trans = FALSE,
+  voom = FALSE, trend = FALSE, MAT = data.frame(),
+  contrast.formula = "", Condtypes = c())
 }
 \arguments{
 \item{mat1}{numeric matrix, each row represents a gene,
