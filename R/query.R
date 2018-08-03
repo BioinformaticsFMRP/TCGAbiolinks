@@ -51,29 +51,31 @@
 #' query <- GDCquery(project = "TCGA-ACC",
 #'                   data.category = "Copy Number Variation",
 #'                   data.type = "Copy Number Segment")
-#' query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
-#'                       legacy = TRUE,
-#'                       data.category = "DNA methylation",
-#'                       platform = "Illumina Human Methylation 450")
+#' \dontrun{
 #' query <- GDCquery(project = "TARGET-AML",
 #'                   data.category = "Transcriptome Profiling",
 #'                   data.type = "miRNA Expression Quantification",
 #'                   workflow.type = "BCGSC miRNA Profiling",
 #'                   barcode = c("TARGET-20-PARUDL-03A-01R","TARGET-20-PASRRB-03A-01R"))
-#' query <- GDCquery(project = "TCGA-ACC",
-#'                   data.category =  "Copy Number Variation",
-#'                   data.type = "Masked Copy Number Segment",
-#'                   sample.type = c("Primary solid Tumor"))
 #' query <- GDCquery(project = "TARGET-AML",
 #'                   data.category = "Transcriptome Profiling",
 #'                   data.type = "Gene Expression Quantification",
 #'                   workflow.type = "HTSeq - Counts",
 #'                   barcode = c("TARGET-20-PADZCG-04A-01R","TARGET-20-PARJCR-09A-01R"))
 #' query <- GDCquery(project = "TCGA-ACC",
+#'                   data.category =  "Copy Number Variation",
+#'                   data.type = "Masked Copy Number Segment",
+#'                   sample.type = c("Primary solid Tumor"))
+#' query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
+#'                       legacy = TRUE,
+#'                       data.category = "DNA methylation",
+#'                       platform = "Illumina Human Methylation 450")
+#' query <- GDCquery(project = "TCGA-ACC",
 #'                   data.category =  "Copy number variation",
 #'                   legacy = TRUE,
 #'                   file.type = "hg19.seg",
 #'                   barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
+#' }
 #' @return A data frame with the results and the parameters used
 #' @importFrom  jsonlite fromJSON
 #' @importFrom knitr kable
@@ -588,7 +590,9 @@ GDCquery_Maf <- function(tumor,
 #' @param tissue a vector of tissue(s) to download. Options are "adipose tissue", "adrenal", "gland", "bladder","blood", "blood vessel", "bone marrow", "brain", "breast","cervix uteri", "colon", "esophagus", "fallopian tube","heart", "kidney", "liver", "lung", "muscle", "nerve", "ovary","pancreas", "pituitary", "prostate", "salivary", "gland", "skin", "small intestine", "spleen", "stomach", "testis", "thyroid", "uterus", "vagina"
 #' @export
 #' @examples
-#' brain.rec<-TCGAquery_recount2(project = "gtex", tissue = "brain")
+#' \dontrun{
+#'  brain.rec<-TCGAquery_recount2(project = "gtex", tissue = "brain")
+#' }
 #' @return List with $subtypes attribute as a dataframe with barcodes, samples, subtypes, and colors. The $filtered attribute is returned as filtered samples with no subtype info
 TCGAquery_recount2<-function(project, tissue=c()){
   tissues<-c("adipose tissue", "adrenal", "gland", "bladder",

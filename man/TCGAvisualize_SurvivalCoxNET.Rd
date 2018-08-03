@@ -4,8 +4,9 @@
 \alias{TCGAvisualize_SurvivalCoxNET}
 \title{Survival analysis with univariate Cox regression package (dnet)}
 \usage{
-TCGAvisualize_SurvivalCoxNET(clinical_patient, dataGE, Genelist, org.Hs.string,
-  scoreConfidence = 700, titlePlot = "TCGAvisualize_SurvivalCoxNET Example")
+TCGAvisualize_SurvivalCoxNET(clinical_patient, dataGE, Genelist,
+  org.Hs.string, scoreConfidence = 700,
+  titlePlot = "TCGAvisualize_SurvivalCoxNET Example")
 }
 \arguments{
 \item{clinical_patient}{is a data.frame using function 'clinic' with information
