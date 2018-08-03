@@ -79,6 +79,7 @@ Creates a volcano plot from the expression and methylation analysis.
 x <- runif(200, -1, 1)
 y <- runif(200, 0.01, 1)
 TCGAVisualize_volcano(x,y)
+\dontrun{
 TCGAVisualize_volcano(x,y,filename = NULL,y.cut = 10000000,x.cut=0.8,
                       names = rep("AAAA",length(x)), legend = "Status",
                       names.fill = FALSE)
@@ -88,5 +89,6 @@ TCGAVisualize_volcano(x,y,filename = NULL,y.cut = 10000000,x.cut=0.8,
 TCGAVisualize_volcano(x,y,filename = NULL,y.cut = 10000000,x.cut=c(-0.3,0.8),
                       names = as.character(1:length(x)), legend = "Status",
                       names.fill = TRUE, highlight = c("1","2"),show="both")
+}
 while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 }
