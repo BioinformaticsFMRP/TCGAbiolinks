@@ -77,7 +77,7 @@ report in our package:
 | TCGA dataset | Link                                                                 | Paper                                                                                                   | Journal          |
 |--------------|----------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|------------------|
 | ACC          | doi:10.1016/j.ccell.2016.04.002                                      | Comprehensive Pan-Genomic Characterization of Adrenocortical Carcinoma.                                 | Cancer cell 2016 |
-| BRCA | https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3465532/  | Comprehensive molecular portraits of human breast tumors | Nature 2013 |
+| BRCA | https://www.cell.com/cancer-cell/fulltext/S1535-6108(18)30119-3  | A Comprehensive Pan-Cancer Molecular Study of Gynecologic and Breast Cancers | Cancer cell 2018 |
 | BLCA	| http://www.cell.com/cell/fulltext/S0092-8674(17)31056-5	| Comprehensive Molecular Characterization of Muscle-Invasive Bladder Cancer	Cell 2017 | 
 | CHOL	| http://www.sciencedirect.com/science/article/pii/S2211124717302140?via%3Dihub	| Integrative Genomic Analysis of Cholangiocarcinoma Identifies Distinct IDH-Mutant Molecular Profiles |	Cell Reports 2017|
 | COAD  | http://www.nature.com/nature/journal/v487/n7407/abs/nature11252.html | Comprehensive molecular characterization of human colon and rectal cancer  | Nature 2012      |
