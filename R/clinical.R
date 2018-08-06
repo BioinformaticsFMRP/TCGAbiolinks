@@ -481,7 +481,7 @@ TCGAquery_subtype <- function(tumor){
         doi <- c("acc"  = "doi:10.1016/j.ccell.2016.04.002",
                  "aml"  = "doi:10.1056/NEJMoa1301689",
                  "blca" = "doi:10.1016/j.cell.2017.09.007",
-                 "brca" = "doi:10.1038/nature11412",
+                 "brca" = "doi.org/10.1016/j.ccell.2018.03.014",
                  "cesc" = "doi:10.1038/nature21386",
                  "chol" = "doi:10.1016/j.celrep.2017.02.033",
                  "coad" = "doi:10.1038/nature11252",
