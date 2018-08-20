@@ -259,7 +259,7 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
 
     # Get all the clincal xml files
     source <- ifelse(query$legacy,"legacy","harmonized")
-    files <- file.path(query$project, source,
+    files <- file.path(query$results[[1]]$project, source,
                        gsub(" ","_",query$results[[1]]$data_category),
                        gsub(" ","_",query$results[[1]]$data_type),
                        gsub(" ","_",query$results[[1]]$file_id),
