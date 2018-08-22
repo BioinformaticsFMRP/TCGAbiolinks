@@ -121,12 +121,14 @@ GDCprepare <- function(query,
             data <- readGeneExpressionQuantification(files = files,
                                                      cases = query$results[[1]]$cases,
                                                      summarizedExperiment = summarizedExperiment,
+                                                     genome = ifelse(query$legacy,"hg19","hg38"),
                                                      experimental.strategy = unique(query$results[[1]]$experimental_strategy))
 
         if(query$data.type == "miRNA gene quantification")
             data <- readGeneExpressionQuantification(files = files,
                                                      cases = query$results[[1]]$cases,
                                                      summarizedExperiment = FALSE,
+                                                     genome = ifelse(query$legacy,"hg19","hg38"),
                                                      experimental.strategy = unique(query$results[[1]]$experimental_strategy))
         if(query$data.type == "miRNA isoform quantification")
             data <- readmiRNAIsoformQuantification(files = files,
@@ -134,6 +136,11 @@ GDCprepare <- function(query,
 
         if(query$data.type == "Isoform expression quantification")
             data <- readIsoformExpressionQuantification(files = files, cases = query$results[[1]]$cases)
+
+        if(query$data.type == "Exon quantification")
+            data <- readExonQuantification(files = files,
+                                           cases = query$results[[1]]$cases,
+                                           summarizedExperiment = summarizedExperiment)
 
     }
     # Add data release to object
@@ -201,6 +208,56 @@ readClinical <- function(files, data.type, cases){
     return(ret)
 }
 
+
+readExonQuantification <- function (files, cases, summarizedExperiment = TRUE){
+    pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+
+    for (i in seq_along(files)) {
+        data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+
+
+        if(!missing(cases)) {
+            assay.list <- gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)])
+            # We will use this because there might be more than one col for each samples
+            setnames(data,colnames(data)[2:ncol(data)],
+                     paste0(gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)]),"_",cases[i]))
+        }
+        if (i == 1) {
+            df <- data
+        } else {
+            df <- merge(df, data, by=colnames(data)[1], all = TRUE)
+        }
+        setTxtProgressBar(pb, i)
+    }
+    setDF(df)
+    rownames(df) <- df[,1]
+    df <- df %>% tidyr::separate(exon,into = c("seqnames","coordinates","strand"),sep = ":") %>%
+        tidyr::separate(coordinates,into = c("start","end"),sep = "-")
+    if(summarizedExperiment) {
+        suppressWarnings({
+            assays <- lapply(assay.list, function (x) {
+                return(data.matrix(subset(df, select = grep(x,colnames(df),ignore.case = TRUE))))
+            })
+        })
+        names(assays) <- assay.list
+        regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
+                        "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
+        samples <- na.omit(unique(str_match(colnames(df),regex)[,1]))
+        colData <-  colDataPrepare(samples)
+        assays <- lapply(assays, function(x){
+            colnames(x) <- NULL
+            rownames(x) <- NULL
+            return(x)
+        })
+        rowRanges <- makeGRangesFromDataFrame(df)
+        rse <- SummarizedExperiment(assays=assays,
+                                    rowRanges=rowRanges,
+                                    colData=colData)
+        return(rse)
+    }
+    return(df)
+
+}
 readIsoformExpressionQuantification <- function (files, cases){
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
 
@@ -282,6 +339,7 @@ readSimpleNucleotideVariationMaf <- function(files){
 
 readGeneExpressionQuantification <- function(files,
                                              cases,
+                                             genome = "hg19",
                                              summarizedExperiment = TRUE,
                                              experimental.strategy,
                                              platform){
@@ -315,7 +373,7 @@ readGeneExpressionQuantification <- function(files,
     setDF(df)
 
     if (summarizedExperiment) {
-        df <- makeSEfromGeneExpressionQuantification(df,assay.list)
+        df <- makeSEfromGeneExpressionQuantification(df,assay.list, genome = genome)
     } else {
         rownames(df) <- df$gene_id
         df$gene_id <- NULL
