@@ -269,7 +269,7 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
                                              "Please check directory parameter right"))
     xpath <- NULL
 
-    disease <- tolower(gsub("TCGA-","",query$project))
+    disease <- tolower(gsub("TCGA-","",unlist(query$project)))
     if(tolower(clinical.info) == "drug") xpath <- "//rx:drug"
     else if(tolower(clinical.info) == "admin") xpath <- "//admin:admin"
     else if(tolower(clinical.info) == "radiation") xpath <- "//rad:radiation"
@@ -290,6 +290,7 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
         clin <- parseFollowup(files,xpath,clinical.info)
     } else {
         clin <- parseXML(files,xpath,clinical.info)
+        clin <- merge(clin,getResults(query)[,c("project","cases")],by.x = c("bcr_patient_barcode"), by.y = "cases",all.x = TRUE)
     }
 
     if(tolower(clinical.info) == "patient") {
@@ -313,7 +314,7 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
         if("stage_event" %in% colnames(clin)) {
             message("Adding stage event information")
             aux <- parseXML(files,"//shared_stage:stage_event","stage_event")
-            colnames(aux)[1:(length(colnames(aux)) - 1)] <- paste0("stage_event_",colnames(aux)[1:(length(colnames(aux)) - 1)])
+            colnames(aux)[grep("bcr_patient_barcode",colnames(aux),invert = TRUE)] <- paste0("stage_event_",grep("bcr_patient_barcode",colnames(aux),invert = TRUE,value = TRUE))
             clin <- merge(clin, aux, by = "bcr_patient_barcode" , sort = FALSE, all.x = TRUE)
             clin$stage_event <- NULL
         }
@@ -321,7 +322,7 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
             message("Adding primary pathology information")
             aux <- parseXML(files,paste0("//",disease,":primary_pathology"),"primary_pathology")
             # Last column is the idx to merge
-            colnames(aux)[1:(length(colnames(aux)) - 1)] <- paste0("primary_pathology_",colnames(aux)[1:(length(colnames(aux)) - 1)])
+            colnames(aux)[grep("bcr_patient_barcode",colnames(aux),invert = TRUE)] <- paste0("primary_pathology_",grep("bcr_patient_barcode",colnames(aux),invert = TRUE,value = TRUE))
             clin <- merge(clin, aux, by = "bcr_patient_barcode" , sort = FALSE, all.x = TRUE)
             clin$primary_pathology <- NULL
         }
@@ -395,29 +396,31 @@ parseXML <- function(files, xpath, clinical.info ){
 
         patient <- str_extract(xmlfile,"[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}")
         # Test if this xpath exists before parsing it
-        if(gsub("\\/\\/","", unlist(stringr::str_split(xpath,":"))[1]) %in% names(xml_ns(xml))){
-            nodes <- getNodeSet(doc,xpath)
-            if(length(nodes) == 0) next;
-            df <- NULL
-            for(j in 1:length(nodes)) {
-                df.aux <- xmlToDataFrame(nodes = nodes[j])
-                if(NA %in% colnames(df.aux)) df.aux <- df.aux[,!is.na(colnames(df.aux))]
-                if(nrow(df.aux) == 0) next
+        for(xpath.it in xpath){
+            if(gsub("\\/\\/","", unlist(stringr::str_split(xpath.it,":"))[1]) %in% names(xml_ns(xml))){
+                nodes <- getNodeSet(doc,xpath.it)
+                if(length(nodes) == 0) next;
+                df <- NULL
+                for(j in 1:length(nodes)) {
+                    df.aux <- xmlToDataFrame(nodes = nodes[j])
+                    if(NA %in% colnames(df.aux)) df.aux <- df.aux[,!is.na(colnames(df.aux))]
+                    if(nrow(df.aux) == 0) next
 
-                if(j == 1) {
-                    df <- df.aux
-                } else {
-                    df <- rbind.fill(df,df.aux)
+                    if(j == 1) {
+                        df <- df.aux
+                    } else {
+                        df <- rbind.fill(df,df.aux)
+                    }
                 }
-            }
 
-            df$bcr_patient_barcode <- patient
-            if(i == 1) {
-                clin <- df
-            } else {
-                clin <- rbind.fill(clin,df)
+                df$bcr_patient_barcode <- patient
+                if(i == 1) {
+                    clin <- df
+                } else {
+                    clin <- rbind.fill(clin,df)
+                }
+                setTxtProgressBar(pb, i)
             }
-            setTxtProgressBar(pb, i)
         }
     }
     close(pb)
