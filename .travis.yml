@@ -12,6 +12,22 @@ os:
   - osx
 osx_image: xcode9
 
+addons:
+  apt:
+    packages:
+      - libgdal-dev
+      - libgdal1-dev
+      - libproj-dev
+      - libudunits2-dev
+  brew_packages:
+      - udunits
+
+before_install:
+  - if [ ${TRAVIS_OS_NAME} == linux ]; then sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable --yes; fi
+  - if [ ${TRAVIS_OS_NAME} == linux ]; then sudo apt-get --yes --force-yes update -qq; fi
+  - if [ ${TRAVIS_OS_NAME} == linux ]; then sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev; fi
+
+
 r_binary_packages:
   - withr
   - knitr
