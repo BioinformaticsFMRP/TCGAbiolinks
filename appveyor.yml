@@ -13,8 +13,31 @@ install:
 # Adapt as necessary starting from here
 
 build_script:
+  - travis-tool.sh install_github eddelbuettel/digest
   - travis-tool.sh install_bioc_deps
-  - travis-tool.sh install_bioc digest BiocStyle GenomeInfoDbData GenomicRanges Biobase maftools affy EDASeq edgeR biomaRt IRanges supraHex S4Vectors ComplexHeatmap SummarizedExperiment DO.db BiocGenerics GenomicFeatures TxDb.Hsapiens.UCSC.hg19.knownGene limma genefilter ConsensusClusterPlus pathview clusterProfiler
+  - travis-tool.sh install_bioc BiocStyle
+  - travis-tool.sh install_bioc GenomeInfoDbData
+  - travis-tool.sh install_bioc GenomicRanges
+  - travis-tool.sh install_bioc Biobase
+  - travis-tool.sh install_bioc maftools affy
+  - travis-tool.sh install_bioc affy
+  - travis-tool.sh install_bioc EDASeq
+  - travis-tool.sh install_bioc edgeR
+  - travis-tool.sh install_bioc biomaRt
+  - travis-tool.sh install_bioc IRanges
+  - travis-tool.sh install_bioc supraHex
+  - travis-tool.sh install_bioc S4Vectors
+  - travis-tool.sh install_bioc ComplexHeatmap
+  - travis-tool.sh install_bioc SummarizedExperiment
+  - travis-tool.sh install_bioc DO.db BiocGenerics
+  - travis-tool.sh install_bioc GenomicFeatures
+  - travis-tool.sh install_bioc TxDb.Hsapiens.UCSC.hg19.knownGene
+  - travis-tool.sh install_bioc limma
+  - travis-tool.sh install_bioc genefilter
+  - travis-tool.sh install_bioc ConsensusClusterPlus
+  - travis-tool.sh install_bioc pathview
+  - travis-tool.sh install_bioc clusterProfiler
+
   - travis-tool.sh install_deps
 
 test_script:
