@@ -45,13 +45,10 @@ on_failure:
   - appveyor PushArtifact failure.zip
 
 environment:
-    global:
-      _R_CHECK_FORCE_SUGGESTS_: false
-      R_ARCH: x64
-      USE_RTOOLS: true
   matrix:
     - R_VERSION: release
       R_ARCH: x64
+      USE_RTOOLS: true
 
 artifacts:
   - path: '*.Rcheck\**\*.log'
