@@ -13,16 +13,13 @@ os:
 osx_image: xcode9
 
 r_binary_packages:
-  - recommended
   - withr
   - knitr
   - crayon
   - roxygen2
   - testthat
   - rex
-  - survMisc
   - survival
-  - survminer
   - R6
   - whisker
   - jsonlite
