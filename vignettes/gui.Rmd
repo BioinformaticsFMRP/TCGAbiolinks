@@ -52,14 +52,16 @@ To install the package from the [Bioconductor repository](http://bioconductor.or
 code. 
 
 ```{r, eval = FALSE}
-source("https://bioconductor.org/biocLite.R")
-biocLite("TCGAbiolinksGUI", dependencies = TRUE)
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("TCGAbiolinksGUI", dependencies = TRUE)
 ```
 
 To install the development version of the package via GitHub:
 
 ```{r, eval = FALSE}
-source("https://bioconductor.org/biocLite.R")
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
 devtools::install_github("BioinformaticsFMRP/TCGAbiolinksGUI.data",ref = "R_3.4")
 devtools::install_github("BioinformaticsFMRP/TCGAbiolinksGUI")
 ```
