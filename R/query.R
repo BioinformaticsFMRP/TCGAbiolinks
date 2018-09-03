@@ -153,7 +153,8 @@ GDCquery <- function(project,
                            legacy = legacy,
                            workflow.type = workflow.type,
                            platform = platform,
-                           file.type = file.type)
+                           file.type = file.type,
+                           files.access = access)
         message("ooo Project: ", proj)
         json  <- tryCatch(
             getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
@@ -170,7 +171,8 @@ GDCquery <- function(project,
                                legacy = legacy,
                                workflow.type = NA,
                                platform = NA,
-                               file.type = file.type)
+                               file.type = file.type,
+                               files.access = access)
             json  <- tryCatch(
                 getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
                 error = function(e) {
@@ -371,7 +373,7 @@ GDCquery <- function(project,
     return(ret)
 }
 
-getGDCquery <- function(project, data.category, data.type, legacy, workflow.type,platform,file.type){
+getGDCquery <- function(project, data.category, data.type, legacy, workflow.type,platform,file.type,files.access){
     # Get manifest using the API
     baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/files/?","https://api.gdc.cancer.gov/files/?")
     options.pretty <- "pretty=true"
@@ -398,8 +400,13 @@ getGDCquery <- function(project, data.category, data.type, legacy, workflow.type
     if(!any(is.na(file.type))) {
         if(file.type == "results" & legacy) options.filter <- paste0(options.filter,addFilter("files.tags", "unnormalized"))
         if(file.type == "normalized_results" & legacy) options.filter <- paste0(options.filter,addFilter("files.tags", "normalized"))
+        if(file.type == "nocnv_hg19.seg" & legacy) options.filter <- paste0(options.filter,addFilter("files.tags", "nocnv"))
     }
-    # Close json request
+    if(!any(is.na(files.access))) {
+        options.filter <- paste0(options.filter,addFilter("files.access", files.access))
+    }
+
+        # Close json request
     options.filter <- paste0(options.filter, URLencode(']}'))
     url <- paste0(baseURL,paste(options.pretty,
                                 options.expand,
