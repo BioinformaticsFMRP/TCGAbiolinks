@@ -25,8 +25,9 @@ If you are having issues with the stable version, try using the development vers
 
 * Stable version:
 ```{r message=FALSE, warning=FALSE, eval=FALSE}
-source("https://bioconductor.org/biocLite.R")
-biocLite("TCGAbiolinks")
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("TCGAbiolinks")
 ```
 
 * Development version:
