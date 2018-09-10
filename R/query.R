@@ -213,8 +213,8 @@ GDCquery <- function(project,
         results <-  plyr::rbind.fill(as.data.frame(results),as.data.frame(json$data$hits))
 
     }
-    if(is.null(dim(results))) {
-        message("Sorry! There is no result for your query. Please check in GDC the data available")
+    if(ncol(results) == 1) {
+        message("Sorry! There is no result for your query. Please check in GDC the data available or if there is no error in your query.")
         return (NULL)
     }
     print.header("Filtering results","subsection")
