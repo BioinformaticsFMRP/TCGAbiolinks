@@ -409,6 +409,7 @@ getGDCquery <- function(project, data.category, data.type, legacy, workflow.type
     }
     if(!any(is.na(sample.type))) {
         if("Primary solid Tumor" %in% sample.type) sample.type[sample.type == "Primary solid Tumor"] <- "Primary Tumor"
+        if("Recurrent Solid Tumor" %in% sample.type) sample.type[sample.type == "Primary solid Tumor"] <- "Recurrent Tumor"
         options.filter <- paste0(options.filter,addFilter("cases.samples.sample_type", sample.type))
     }
 
