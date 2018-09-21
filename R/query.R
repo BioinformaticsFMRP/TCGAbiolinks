@@ -403,6 +403,7 @@ getGDCquery <- function(project, data.category, data.type, legacy, workflow.type
         if(file.type == "results" & legacy) options.filter <- paste0(options.filter,addFilter("files.tags", "unnormalized"))
         if(file.type == "normalized_results" & legacy) options.filter <- paste0(options.filter,addFilter("files.tags", "normalized"))
         if(file.type == "nocnv_hg19.seg" & legacy) options.filter <- paste0(options.filter,addFilter("files.tags", "nocnv"))
+        if(file.type == "hg19.isoform" & legacy) options.filter <- paste0(options.filter,addFilter("files.tags", "hg19"))
     }
     if(!any(is.na(files.access))) {
         options.filter <- paste0(options.filter,addFilter("files.access", files.access))
