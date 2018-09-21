@@ -290,6 +290,7 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
         clin <- parseFollowup(files,xpath,clinical.info)
     } else {
         clin <- parseXML(files,xpath,clinical.info)
+        if(is.null(clin)) return(NULL)
         clin <- merge(clin,getResults(query)[,c("project","cases")],by.x = c("bcr_patient_barcode"), by.y = "cases",all.x = TRUE)
     }
 
