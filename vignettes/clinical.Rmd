@@ -371,13 +371,14 @@ SSS <- TCGAquery_MatchedCoupledSampleTypes(bar,c("NT","TP"))
 To get all the information for TGCA samples you can use the script below:
 ```{r, eval = FALSE}
 # This code will get all clinical indexed data from TCGA
-library(TCGAbiolinks)
 library(data.table)
+library(dplyr)
+library(regexPipes)
 clinical <- TCGAbiolinks:::getGDCprojects()$project_id %>% 
-            regexPipes::grep("TCGA",value=T) %>% 
-            sort %>% 
-            plyr::alply(1,GDCquery_clinic, .progress = "text") %>% 
-            rbindlist
+    regexPipes::grep("TCGA",value=T) %>% 
+    sort %>% 
+    plyr::alply(1,GDCquery_clinic, .progress = "text") %>% 
+    rbindlist
 readr::write_csv(clinical,path = paste0("all_clin_indexed.csv"))
 
 # This code will get all clinical XML data from TCGA
@@ -391,7 +392,7 @@ getclinical <- function(proj){
             for(i in c("admin","radiation","follow_up","drug","new_tumor_event")){
                 message(i)
                 aux <- GDCprepare_clinic(query, clinical.info = i)
-                if(is.null(aux)) next
+                if(is.null(aux) || nrow(aux) == 0) next
                 # add suffix manually if it already exists
                 replicated <- which(grep("bcr_patient_barcode",colnames(aux), value = T,invert = T) %in% colnames(clinical))
                 colnames(aux)[replicated] <- paste0(colnames(aux)[replicated],".",i)
@@ -408,6 +409,7 @@ clinical <- TCGAbiolinks:::getGDCprojects()$project_id %>%
     regexPipes::grep("TCGA",value=T) %>% sort %>% 
     plyr::alply(1,getclinical, .progress = "text") %>% 
     rbindlist(fill = TRUE) %>% setDF %>% subset(!duplicated(clinical))
+
 readr::write_csv(clinical,path = "all_clin_XML.csv")
 # result: https://drive.google.com/open?id=0B0-8N2fjttG-WWxSVE5MSGpva1U
 # Obs: this table has multiple lines for each patient, as the patient might have several followups, drug treatments,
