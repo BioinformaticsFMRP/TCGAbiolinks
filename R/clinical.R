@@ -568,8 +568,21 @@ TCGAquery_subtype <- function(tumor){
 #' samples, subtypes, and colors. The $filtered attribute is returned as filtered samples with no subtype info
 TCGA_MolecularSubtype <- function(barcodes){
 
-    Pam50 <- TabSubtypesCol_merged
-    Pam50$samples <- as.character(Pam50$samples)
+    tabPanCancer <- as.data.frame(PanCancerAtlas_subtypes())
+    tabSubtypeMergedNew <- subset(tabPanCancer, select = c("pan.samplesID", "Subtype_Selected"))
+    colnames(tabSubtypeMergedNew) <- c("samples", "subtype")
+    rownames(tabSubtypeMergedNew) <- tabSubtypeMergedNew$samples
+    tabSubtypeMergedNew <- cbind(tabSubtypeMergedNew, color = rep(0,nrow(tabSubtypeMergedNew)))
+
+    TabSubtypesCol_merged<- TabSubtypesCol_merged[!duplicated(TabSubtypesCol_merged$samples),]
+    commonSamples <- intersect(tabSubtypeMergedNew$samples, TabSubtypesCol_merged$samples)
+    rownames(TabSubtypesCol_merged) <- TabSubtypesCol_merged$samples
+
+    tabSubtypeMergedNew[commonSamples, "color"] <- TabSubtypesCol_merged[commonSamples, "color"]
+
+    dataTableSubt <-  tabSubtypeMergedNew
+
+    dataTableSubt$samples <- as.character(dataTableSubt$samples)
     barcodes <- as.character(barcodes)
 
     patients <- sapply(barcodes, function(x) paste(unlist(stringr::str_split(x, "-"))[1:3], collapse = "-"))
@@ -577,7 +590,7 @@ TCGA_MolecularSubtype <- function(barcodes){
     df.barcodes_patID <- data.frame(barcodes=barcodes, patID=patients, row.names = 1:length(barcodes))
     #print(df.barcodes_patID)
     for(p in patients){
-        if(p %in% Pam50$samples == FALSE)
+        if(p %in% dataTableSubt$samples == FALSE)
             filt.p <- c(filt.p, p)
     }
 
@@ -590,9 +603,9 @@ TCGA_MolecularSubtype <- function(barcodes){
 
 
     patients.filtered<-unlist(patients[patients%in%filt.p==FALSE])
-    idx.patient<-which(Pam50$samples%in%patients.filtered)
+    idx.patient<-which(dataTableSubt$samples%in%patients.filtered)
 
-    Subtypes<-Pam50[idx.patient,]
+    Subtypes<-dataTableSubt[idx.patient,]
     Subtypes<-Subtypes[match(patients.filtered, Subtypes$samples),]
     Subtypes$barcodes<-as.character(df.barcodes_patID[which(df.barcodes_patID$patID%in%Subtypes$samples),]$barcodes)
 
@@ -610,7 +623,7 @@ TCGA_MolecularSubtype <- function(barcodes){
 #' @param cpe CPE is a derived consensus measurement as the median purity level after normalizing levels from all methods to give them equal means and s.ds
 #' @export
 #' @examples
-#' pam50 <- TCGAtumor_purity("TCGA-60-2721-01A-01R-0851-07",
+#' dataTableSubt <- TCGAtumor_purity("TCGA-60-2721-01A-01R-0851-07",
 #'                           estimate = 0.6,
 #'                           absolute = 0.6,
 #'                           ihc = 0.8,
