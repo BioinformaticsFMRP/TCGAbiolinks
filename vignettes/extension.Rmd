@@ -310,6 +310,63 @@ batch.corrected.adjusted <- TCGAbatch_Correction(tabDF = dataFilt.tcga,
                                                  adjustment=c("TSS"))
 ```
 
+## TCGAbatch_correction: working with unpublished datasets
+
+This function calls **ComBat** from **sva** package to handle batch correction, display some plots for exploratory data analysis purposes. More specifically, it shows a plot with black as a kernel estimate of the empirical batch effect density and red as the parametric.
+
+* **tabDF** numeric matrix, each row represents a gene each column represents a sample
+* **UnpublishedData**  if TRUE perform a batch correction after adding new data
+* **AnnotationDF**  a dataframe with column Batch indicating different batches of the samples in the tabDF
+
+On top of data exploration through **ComBat** plots, if no batch factor is provided nothing will be performed. Run the code below to see an example:
+
+The following example shows how to consider two cancer type LUAD and LUSC and normal and tumor samples.
+The end-user can replace LUSC with unpublished data for example.
+
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+
+#dataFilt is a gene expression matrix from pancancer33 RNASeq data that can be generated following our previous described workflow
+
+sampleTP <- TCGAquery_SampleTypes(barcode = colnames(dataFilt), typesample = "TP")
+sampleNT <- TCGAquery_SampleTypes(barcode = colnames(dataFilt), typesample = "NT")
+dataFiltTP <- dataFilt[,sampleTP]
+dataFiltNT <- dataFilt[,sampleNT]
+    
+dataSubt_LUAD <-TCGAquery_subtype(tumor = "LUAD")
+sampleStageI_LUAD <- dataSubt_LUAD[dataSubt_LUAD$Tumor.stage %in% c("Stage I","Stage IA","Stage IB"),]
+dataFilt.LUAD.stageI.TP <- dataFiltTP[,substr(colnames(dataFiltTP),1,12) %in% sampleStageI_LUAD$patient]
+dataFilt.LUAD.stageI.NT <- dataFiltNT[,substr(colnames(dataFiltNT),1,12) %in% sampleStageI_LUAD$patient]
+
+# here for example the end-user can replace LUSC with unpublished data in a dataframe containing counts.
+# and adding the information for LUSC.stageI.TP or LUSC.stageI.NT with unpublished data
+
+dataSubt_LUSC <-TCGAquery_subtype(tumor = "LUSC")
+sampleStageI_LUSC <- dataSubt_LUSC[dataSubt_LUSC$T.stage %in% c("T1","T1a","T1b"),]
+dataFilt.LUSC.stageI.TP <- dataFiltTP[,substr(colnames(dataFiltTP),1,12) %in% sampleStageI_LUSC$patient]
+dataFilt.LUSC.stageI.NT <- dataFiltNT[,substr(colnames(dataFiltNT),1,12) %in% sampleStageI_LUSC$patient]
+
+countsTable <-cbind(dataFilt.LUAD.stageI.TP,dataFilt.LUAD.stageI.NT,
+                    dataFilt.LUSC.stageI.TP, dataFilt.LUSC.stageI.NT)
+
+AnnotationCounts <- matrix(0,ncol(countsTable),2)
+colnames(AnnotationCounts) <- c("Samples","Batch")
+rownames(AnnotationCounts) <- colnames(countsTable)
+
+AnnotationCounts <- as.data.frame(AnnotationCounts)
+AnnotationCounts$Samples <- colnames(countsTable)
+
+AnnotationCounts[colnames(dataFilt.LUAD.stageI.TP),"Batch"] <- "LUAD.stageI.TP"
+AnnotationCounts[colnames(dataFilt.LUAD.stageI.NT),"Batch"] <- "LUAD.stageI.NT"
+AnnotationCounts[colnames(dataFilt.LUSC.stageI.TP),"Batch"] <- "LUSC.stageI.TP"
+AnnotationCounts[colnames(dataFilt.LUSC.stageI.NT),"Batch"] <- "LUSC.stageI.NT"
+
+countsCorrected <- TCGAbatch_Correction(tabDF =countsTable,
+                                        UnpublishedData = TRUE, 
+                                        AnnotationDF = AnnotationCounts)
+```
+
+
+
 
 ## TCGAtumor_purity: Filter TCGA samples according to tumor purity
 
