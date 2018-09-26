@@ -1000,15 +1000,24 @@ TCGAanalyze_DEA <- function(mat1,
 #' each column represents a sample
 #' @param batch.factor a string containing the batch factor to use for correction. Options are "Plate", "TSS", "Year", "Portion", "Center"
 #' @param adjustment vector containing strings for factors to adjust for using ComBat. Options are "Plate", "TSS", "Year", "Portion", "Center"
+#' @param UnpublishedData if TRUE perform a batch correction after adding new data
 #' @param ClinicalDF a dataframe returned by GDCquery_clinic() to be used to extract year data
+#' @param AnnotationDF a dataframe with column Batch indicating different batches of the samples in the tabDF
 #' @importFrom limma voom
 #' @importFrom sva ComBat
 #' @export
 #' @return data frame with ComBat batch correction applied
-TCGAbatch_Correction<-function (tabDF, batch.factor = NULL, adjustment = NULL, ClinicalDF = data.frame())
+TCGAbatch_Correction<-function (tabDF, batch.factor = NULL, adjustment = NULL, ClinicalDF = data.frame(),  UnpublishedData = FALSE, AnnotationDF = data.frame())
 
 {
-    if (length(batch.factor) == 0 & length(adjustment) == 0)
+    if( UnpublishedData == TRUE) {
+        batch.factor <- as.factor(AnnotationDF$Batch)
+        batch_corr <- sva::ComBat(dat = tabDF, batch = batch.factor, par.prior = TRUE, prior.plots = TRUE)
+    }
+
+    if( UnpublishedData == FALSE) {
+
+     if (length(batch.factor) == 0 & length(adjustment) == 0)
         message("batch correction will be skipped")
     else if (batch.factor %in% adjustment) {
         stop(paste0("Cannot adjust and correct for the same factor|"))
@@ -1070,6 +1079,8 @@ TCGAbatch_Correction<-function (tabDF, batch.factor = NULL, adjustment = NULL, C
     print(unique(batchCombat))
     batch_corr <- sva::ComBat(dat = tabDF, batch = batchCombat,
                               mod = design.mod.combat, par.prior = TRUE, prior.plots = TRUE)
+    }
+
     return(batch_corr)
 }
 
