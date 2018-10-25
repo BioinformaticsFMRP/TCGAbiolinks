@@ -422,6 +422,7 @@ getGDCquery <- function(project, data.category, data.type, legacy, workflow.type
                                 options.filter,
                                 option.format,
                                 sep = "&"))
+    print(url)
     return(url)
 }
 
