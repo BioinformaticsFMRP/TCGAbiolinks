@@ -5,7 +5,8 @@
 \title{Batch correction using ComBat and Voom transformation using limma package.}
 \usage{
 TCGAbatch_Correction(tabDF, batch.factor = NULL, adjustment = NULL,
-  ClinicalDF = data.frame())
+  ClinicalDF = data.frame(), UnpublishedData = FALSE,
+  AnnotationDF = data.frame())
 }
 \arguments{
 \item{tabDF}{numeric matrix, each row represents a gene,
@@ -16,6 +17,10 @@ each column represents a sample}
 \item{adjustment}{vector containing strings for factors to adjust for using ComBat. Options are "Plate", "TSS", "Year", "Portion", "Center"}
 
 \item{ClinicalDF}{a dataframe returned by GDCquery_clinic() to be used to extract year data}
+
+\item{UnpublishedData}{if TRUE perform a batch correction after adding new data}
+
+\item{AnnotationDF}{a dataframe with column Batch indicating different batches of the samples in the tabDF}
 }
 \value{
 data frame with ComBat batch correction applied
