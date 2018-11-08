@@ -271,10 +271,10 @@ clinical.patient.followup <- GDCprepare_clinic(clin.query, clinical.info = "foll
 clinical.index <- GDCquery_clinic("TCGA-READ")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
-select(clinical.patient,vital_status,days_to_death,days_to_last_followup) %>% datatable
-select(clinical.patient.followup, vital_status,days_to_death,days_to_last_followup) %>% datatable
+dplyr::select(clinical.patient,vital_status,days_to_death,days_to_last_followup) %>% datatable
+dplyr::select(clinical.patient.followup, vital_status,days_to_death,days_to_last_followup) %>% datatable
 # Vital status should be the same in the follow up table 
-filter(clinical.index,submitter_id == "TCGA-F5-6702") %>% select(vital_status,days_to_death,days_to_last_follow_up) %>% datatable
+dplyr::filter(clinical.index,submitter_id == "TCGA-F5-6702") %>% dplyr::select(vital_status,days_to_death,days_to_last_follow_up) %>% datatable
 ```
 
 ## Progression or Recurrence and Grande inconsistancie
@@ -293,11 +293,11 @@ clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 # Get indexed data
-GDCquery_clinic("TCGA-LIHC") %>% filter(submitter_id %in% recurrent.patients) %>% 
-    select(progression_or_recurrence,days_to_recurrence,tumor_grade) %>% datatable
+GDCquery_clinic("TCGA-LIHC") %>% dplyr::filter(submitter_id %in% recurrent.patients) %>% 
+    dplyr::select(progression_or_recurrence,days_to_recurrence,tumor_grade) %>% datatable
 
 # XML data
-clinical.patient %>% select(bcr_patient_barcode,neoplasm_histologic_grade) %>% datatable
+clinical.patient %>% dplyr::select(bcr_patient_barcode,neoplasm_histologic_grade) %>% datatable
 
 ```
 
