@@ -767,31 +767,18 @@ TCGAanalyze_DEA <- function (mat1, mat2, metadata = TRUE, Cond1type, Cond2type,
         else if (method == "glmLRT") {
             if (length(unique(tumorType)) == 2) {
                 aDGEList <- edgeR::DGEList(counts = TOC, group = tumorType)
-                aDGEList <- edgeR::estimateGLMCommonDisp(aDGEList,
-                                                         design)
-                aDGEList <- edgeR::estimateGLMTagwiseDisp(aDGEList,
-                                                          design)
+                aDGEList <- edgeR::estimateGLMCommonDisp(aDGEList, design)
+                aDGEList <- edgeR::estimateGLMTagwiseDisp(aDGEList, design)
                 aGlmFit <- edgeR::glmFit(aDGEList, design, dispersion = aDGEList$tagwise.dispersion,
                                          prior.count.total = 0)
 
-                prestr = "makeContrasts("
-                poststr = ",levels=colnames(design))"
-                commandstr = paste(prestr, contrast.formula,
-                                   poststr, sep = "")
-                commandstr = paste0("limma::", commandstr)
-                colnames(design)[1:length(levels(tumorType))] <- levels(tumorType)
-                cont.matrix <- eval(parse(text = commandstr))
 
                 aGlmLRT <- edgeR::glmLRT(aGlmFit, coef=2)
-                tableDEA <- cbind(aGlmLRT$table, FDR = p.adjust(aGlmLRT$table$PValue,
-                                                                "fdr"))
-                tableDEA <- tableDEA[tableDEA$FDR < fdr.cut,
-                                     ]
-                tableDEA <- tableDEA[abs(tableDEA$logFC) > logFC.cut,
-                                     ]
+                tableDEA <- cbind(aGlmLRT$table, FDR = p.adjust(aGlmLRT$table$PValue,"fdr"))
+                tableDEA <- tableDEA[tableDEA$FDR < fdr.cut,]
+                tableDEA <- tableDEA[abs(tableDEA$logFC) > logFC.cut,]
                 if (all(grepl("ENSG", rownames(tableDEA))))
-                    tableDEA <- cbind(tableDEA, map.ensg(genes = rownames(tableDEA))[,
-                                                                                     2:3])
+                    tableDEA <- cbind(tableDEA, map.ensg(genes = rownames(tableDEA))[,2:3])
             }
             else if (length(unique(tumorType)) > 2) {
                 aDGEList <- edgeR::DGEList(counts = TOC, group = tumorType)
