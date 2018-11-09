@@ -108,7 +108,8 @@ test_that("Results of TCGAanalyze_DEA inverting groups changes signal and order 
         dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,samplesNT],
                                     mat2 = dataFilt[,samplesTP],
                                     Cond1type = "Normal",
-                                    Cond2type =  "Tumor", method = "glmLRT")
+                                    Cond2type =  "Tumor",
+                                    method = "glmLRT")
     })
     expect_equal(dataDEGs["CLDN6|9074",]$logFC > 0,(log2FC > 0)[[1]])
 
