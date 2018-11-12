@@ -164,9 +164,9 @@ query <- GDCquery(project = c("TCGA-GBM", "TCGA-LGG"),
                   sample.type = "Recurrent Solid Tumor"
 )
 datatable(getResults(query), 
-              filter = 'top',
-              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-              rownames = FALSE)
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
 ```
 
 ## Samples with DNA methylation and gene expression data
@@ -178,13 +178,13 @@ for Colon Adenocarcinoma tumor (TCGA-COAD).
 
 ```{r message=FALSE, warning=FALSE}
 query.met <- GDCquery(project = "TCGA-COAD",
-                  data.category = "DNA Methylation",
-                  legacy = FALSE,
-                  platform = c("Illumina Human Methylation 450"))
+                      data.category = "DNA Methylation",
+                      legacy = FALSE,
+                      platform = c("Illumina Human Methylation 450"))
 query.exp <- GDCquery(project = "TCGA-COAD",
-                  data.category = "Transcriptome Profiling",
-                  data.type = "Gene Expression Quantification", 
-                  workflow.type = "HTSeq - FPKM-UQ")
+                      data.category = "Transcriptome Profiling",
+                      data.type = "Gene Expression Quantification", 
+                      workflow.type = "HTSeq - FPKM-UQ")
 
 # Get all patients that have DNA methylation and gene expression.
 common.patients <- intersect(substr(getResults(query.met, cols = "cases"), 1, 12),
@@ -192,23 +192,23 @@ common.patients <- intersect(substr(getResults(query.met, cols = "cases"), 1, 12
 
 # Only seelct the first 5 patients
 query.met <- GDCquery(project = "TCGA-COAD",
-                  data.category = "DNA Methylation",
-                  legacy = FALSE,
-                  platform = c("Illumina Human Methylation 450"),
-                  barcode = common.patients[1:5])
+                      data.category = "DNA Methylation",
+                      legacy = FALSE,
+                      platform = c("Illumina Human Methylation 450"),
+                      barcode = common.patients[1:5])
 query.exp <- GDCquery(project = "TCGA-COAD",
-                  data.category = "Transcriptome Profiling",
-                  data.type = "Gene Expression Quantification", 
-                  workflow.type = "HTSeq - FPKM-UQ",
-                  barcode = common.patients[1:5])
+                      data.category = "Transcriptome Profiling",
+                      data.type = "Gene Expression Quantification", 
+                      workflow.type = "HTSeq - FPKM-UQ",
+                      barcode = common.patients[1:5])
 datatable(getResults(query.met, cols = c("data_type","cases")),
-              filter = 'top',
-              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-              rownames = FALSE)
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
 datatable(getResults(query.exp, cols = c("data_type","cases")), 
-              filter = 'top',
-              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-              rownames = FALSE)
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
 
 
 ```
@@ -224,9 +224,9 @@ query <- GDCquery(project = c("TCGA-BRCA"),
                   sample.type = "Primary solid Tumor")
 # Only first 100 to make render faster
 datatable(getResults(query, rows = 1:100,cols = c("file_name","cases")), 
-              filter = 'top',
-              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-              rownames = FALSE)
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
 ```
 
 
@@ -234,20 +234,47 @@ datatable(getResults(query, rows = 1:100,cols = c("file_name","cases")),
 
 ## DNA methylation
 
-This exmaple shows how the user can search for  glioblastoma multiform (GBM) 
+### Array-based assays
+
+This example shows how the user can search for  glioblastoma multiform (GBM) 
 and low grade gliomas (LGG) DNA methylation data 
 for platform Illumina Human Methylation 450 and Illumina Human Methylation 27.
 
 ```{r message=FALSE, warning=FALSE}
 query <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
-                      legacy = TRUE,
-                      data.category = "DNA methylation",
-                      platform = c("Illumina Human Methylation 450", "Illumina Human Methylation 27"))
+                  legacy = TRUE,
+                  data.category = "DNA methylation",
+                  platform = c("Illumina Human Methylation 450", "Illumina Human Methylation 27"))
 datatable(getResults(query, rows = 1:100), 
-              filter = 'top',
-              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-              rownames = FALSE)
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
 ```
+
+### whole-genome bisulfite sequencing (WGBS) 
+
+```{r message = FALSE, warning = FALSE, eval = FALSE}
+
+query <- GDCquery(project = c("TCGA-LUAD"),
+                  legacy = TRUE,
+                  data.type = "Methylation percentage",
+                  experimental.strategy = "Bisulfite-Seq")
+
+# VCF - controlled data
+query <- GDCquery(project = c("TCGA-LUAD"),
+                  legacy = TRUE,
+                  data.type = "Bisulfite sequence alignment",
+                  experimental.strategy = "Bisulfite-Seq")
+
+
+# WGBS BAM files - controlled data
+query <- GDCquery(project = c("TCGA-LUAD"),
+                  legacy = TRUE,
+                  data.type = "Aligned reads",
+                  data.category = "Raw sequencing data",
+                  experimental.strategy = "Bisulfite-Seq")
+```
+
 
 ## Gene expression
 
@@ -257,17 +284,17 @@ For more information check [rnaseqV2 TCGA wiki](https://wiki.nci.nih.gov/display
 ```{r message=FALSE, warning=FALSE}
 # Gene expression aligned against hg19.
 query.exp.hg19 <- GDCquery(project = "TCGA-GBM",
-                  data.category = "Gene expression",
-                  data.type = "Gene expression quantification",
-                  platform = "Illumina HiSeq", 
-                  file.type  = "normalized_results",
-                  experimental.strategy = "RNA-Seq",
-                  barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"),
-                  legacy = TRUE)
+                           data.category = "Gene expression",
+                           data.type = "Gene expression quantification",
+                           platform = "Illumina HiSeq", 
+                           file.type  = "normalized_results",
+                           experimental.strategy = "RNA-Seq",
+                           barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"),
+                           legacy = TRUE)
 datatable(getResults(query.exp.hg19), 
-              filter = 'top',
-              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-              rownames = FALSE)
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
 ```
 
 # Get Manifest file
