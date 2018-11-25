@@ -414,7 +414,7 @@ getGDCquery <- function(project, data.category, data.type, legacy, workflow.type
         options.filter <- paste0(options.filter,addFilter("cases.samples.sample_type", sample.type))
     }
 
-        # Close json request
+    # Close json request
     options.filter <- paste0(options.filter, URLencode(']}'))
     url <- paste0(baseURL,paste(options.pretty,
                                 options.expand,
@@ -650,37 +650,77 @@ TCGAquery_recount2<-function(project, tissue=c()){
         "uterus",
         "vagina"
     )
-  tissue<-paste(unlist(strsplit(tissue, " ")), collapse="_")
-  Res<-list()
+    tissue<-paste(unlist(strsplit(tissue, " ")), collapse="_")
+    Res<-list()
 
-  if(tolower(project)=="gtex"){
-    for(t_i in tissue){
-      if(tissue%in%tissues){
-        con<-"http://duffel.rail.bio/recount/SRP012682/rse_gene_"
-        con<-paste0(con,tissue,".Rdata")
+    if(tolower(project)=="gtex"){
+        for(t_i in tissue){
+            if(tissue%in%tissues){
+                con<-"http://duffel.rail.bio/recount/SRP012682/rse_gene_"
+                con<-paste0(con,tissue,".Rdata")
 
-        message(paste0("downloading Range Summarized Experiment for: ", tissue))
-        load(url(con))
-        Res[[paste0(project,"_", t_i)]]<-rse_gene
-      }
-      else stop(paste0(tissue, " is not an available tissue on Recount2"))
+                message(paste0("downloading Range Summarized Experiment for: ", tissue))
+                load(url(con))
+                Res[[paste0(project,"_", t_i)]]<-rse_gene
+            }
+            else stop(paste0(tissue, " is not an available tissue on Recount2"))
+        }
+        return(Res)
     }
-    return(Res)
-  }
-  else if(tolower(project)=="tcga"){
-    for(t_i in tissue){
-      if(tissue%in%tissues){
-        con<-"http://duffel.rail.bio/recount/TCGA/rse_gene_"
-        con<-paste0(con,tissue,".Rdata")
-        message(paste0("downloading Range Summarized Experiment for: ", tissue))
-        load(url(con))
-        Res[[paste0(project,"_", t_i)]]<-rse_gene
+    else if(tolower(project)=="tcga"){
+        for(t_i in tissue){
+            if(tissue%in%tissues){
+                con<-"http://duffel.rail.bio/recount/TCGA/rse_gene_"
+                con<-paste0(con,tissue,".Rdata")
+                message(paste0("downloading Range Summarized Experiment for: ", tissue))
+                load(url(con))
+                Res[[paste0(project,"_", t_i)]]<-rse_gene
 
-      }
-      else stop(paste0(tissue, " is not an available tissue on Recount2"))
+            }
+            else stop(paste0(tissue, " is not an available tissue on Recount2"))
+        }
+        return(Res)
     }
-    return(Res)
-  }
-  else stop(paste0(project, " is not a valid project"))
+    else stop(paste0(project, " is not a valid project"))
 
 }
+
+#' @title Retrieve open access ATAC-seq files from GDC server
+#' @description
+#'   Retrieve open access ATAC-seq files from GDC server
+#'  https://gdc.cancer.gov/about-data/publications/ATACseq-AWG
+#'  Manifest available at: https://gdc.cancer.gov/files/public/file/ATACseq-AWG_Open_GDC-Manifest.txt
+#' @param tumor a valid tumor
+#' @param file.type Write maf file into a csv document
+#' @export
+#' @examples
+#' \dontrun{
+#'    query <- GDCquery_ATAC_seq(file.type = "txt")
+#'    GDCdownload(query)
+#'    query <- GDCquery_ATAC_seq(file.type = "bigWigs")
+#'    GDCdownload(query)
+#' }
+#' @return A data frame with the maf file information
+GDCquery_ATAC_seq <- function(tumor = NULL,
+                              file.type = NULL) {
+    isServeOK()
+    results <- readr::read_tsv("https://gdc.cancer.gov/files/public/file/ATACseq-AWG_Open_GDC-Manifest.txt")
+
+    if(!is.null(tumor)) results <- results[grep(tumor,results$filename,ignore.case = T),]
+    if(!is.null(file.type))  results <- results[grep(file.type,results$filename,ignore.case = T),]
+
+    colnames(results) <- c("file_id", "file_name", "md5sum", "file_size")
+    results$state <- "released"
+    results$data_type <- "ATAC-seq"
+    results$data_category <- "ATAC-seq"
+    results$project <- "ATAC-seq"
+    ret <- data.frame(results=I(list(results)),
+                      tumor = I(list(tumor)),
+                      project = I(list("ATAC-seq")),
+                      data.type = I(list("ATAC-seq")),
+                      data.category = I(list("ATAC-seq")),
+                      legacy = I(list(FALSE)))
+
+    return(ret)
+}
+
