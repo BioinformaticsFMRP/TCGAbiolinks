@@ -113,7 +113,7 @@ datatable(getSampleSummary(maf),
           rownames = FALSE)
 plotmafSummary(maf = maf, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE)
 ```
-```{r  echo = TRUE, message = FALSE, warning = FALSE}
+```{r  echo = TRUE, message = FALSE,eval = FALSE, warning = FALSE}
 oncoplot(maf = maf, top = 10, removeNonMutated = TRUE)
 titv = titv(maf = maf, plot = FALSE, useSyn = TRUE)
 #plot titv summary
