@@ -724,3 +724,61 @@ GDCquery_ATAC_seq <- function(tumor = NULL,
     return(ret)
 }
 
+
+
+#' @title Retrieve summary of files per sample in a project
+#' @description
+#'  Retrieve the numner of files under each
+#'   data_category + data_type + experimental_strategy + platform
+#'   Almost like https://portal.gdc.cancer.gov/exploration
+#' @param project A GDC project
+#' @export
+#' @examples
+#'    summary <- getSampleFilesSummary("TCGA-LUAD")
+#' \dontrun{
+#'    summary <- getSampleFilesSummary(c("TCGA-OV","TCGA_ACC"))
+#' }
+#' @return A data frame with the maf file information
+getSampleFilesSummary <- function(project) {
+    out <- NULL
+    for(proj in project){
+        message("Accessing information for project: ", proj)
+        url <- getSampleSummaryUrl(proj)
+        x <- getURL(url,fromJSON,simplifyDataFrame = TRUE)
+        y <- x$data$hits$files
+        names(y) <- x$data$hits$submitter_id
+        df <- ldply (y, data.frame)
+        df <- df %>%  dcast(.id ~ data_category  + data_type + experimental_strategy + platform)
+        colnames(df) <- gsub("_NA","",colnames(df))
+        df$project <- proj
+        out <- rbind.fill(out,df)
+    }
+    return(out)
+}
+
+getSampleSummaryUrl <- function(project){
+    # Get manifest using the API
+    baseURL <- "https://api.gdc.cancer.gov/cases?"
+    options.pretty <- "pretty=true"
+    options.expand <- "expand=summary,summary.data_categories,files"
+    #option.size <- paste0("size=",getNbFiles(project,data.category,legacy))
+    option.size <- paste0("size=",1000)
+    option.format <- paste0("format=JSON")
+
+    options.filter <- paste0("filters=",
+                             URLencode('{"op":"and","content":['),  # Start json request
+                             URLencode('{"op":"in","content":{"field":"cases.project.project_id","value":["'),
+                             project,
+                             URLencode('"]}}'))
+
+    # Close json request
+    options.filter <- paste0(options.filter, URLencode(']}'))
+    url <- paste0(baseURL,paste(options.pretty,
+                                options.expand,
+                                option.size,
+                                options.filter,
+                                option.format,
+                                sep = "&"))
+    return(url)
+}
+
