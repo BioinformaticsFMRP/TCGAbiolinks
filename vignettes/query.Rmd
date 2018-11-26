@@ -2,11 +2,11 @@
 title: "TCGAbiolinks: Searching GDC database"
 date: "`r BiocStyle::doc_date()`"
 vignette: >
-  %\VignetteIndexEntry{"2. Searching GDC database"}
-  %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
+    %\VignetteIndexEntry{"2. Searching GDC database"}
+    %\VignetteEngine{knitr::rmarkdown}
+    \usepackage[utf8]{inputenc}
 ---
-
+  
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(progress = FALSE)
@@ -37,11 +37,11 @@ library(DT)
 There are two available sources to download GDC data using TCGAbiolinks:
 
 - GDC Legacy Archive : provides access to an unmodified copy of data that was previously stored in
-  [CGHub](https://cghub.ucsc.edu/) and in the TCGA Data Portal hosted by the TCGA Data Coordinating Center (DCC), in which uses
-  as references GRCh37 (hg19) and GRCh36 (hg18).
+[CGHub](https://cghub.ucsc.edu/) and in the TCGA Data Portal hosted by the TCGA Data Coordinating Center (DCC), in which uses
+as references GRCh37 (hg19) and GRCh36 (hg18).
 - GDC harmonized database: data available was harmonized against GRCh38 (hg38) using GDC Bioinformatics Pipelines
-  which provides methods to the standardization of biospecimen and
-  clinical data.
+which provides methods to the standardization of biospecimen and
+clinical data.
 
 </div>
 </div>
@@ -306,3 +306,38 @@ set save to TRUEm a txt file that can be used with GDC-client Data transfer tool
 getManifest(query.exp.hg19,save = FALSE) 
 ```
 
+# ATAC-seq data
+
+For the moment, ATAC-seq data is available at the [GDC publication page](https://gdc.cancer.gov/about-data/publications/ATACseq-AWG).
+
+The list of file available is below:
+```{r message=FALSE, warning=FALSE}
+
+datatable(getResults(TCGAbiolinks:::GDCquery_ATAC_seq())[,c("file_name","file_size")], 
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
+```
+
+You can use the function `GDCquery_ATAC_seq` filter the manifest table and use `GDCdownload` to save the data locally.
+```{r message=FALSE, warning=FALSE,eval = FALSE}
+query <- TCGAbiolinks:::GDCquery_ATAC_seq(file.type = "rds") 
+GDCdownload(query,method = "client")
+
+query <- TCGAbiolinks:::GDCquery_ATAC_seq(file.type = "bigWigs") 
+GDCdownload(query,method = "client")
+
+```
+
+# Summary of available files per patient
+
+Retrieve the numner of files under each data_category + data_type + experimental_strategy + platform.
+Almost like https://portal.gdc.cancer.gov/exploration
+
+```{r message=FALSE, warning=FALSE,eval = FALSE}
+tab <-  getSampleFilesSummary("TCGA-ACC")
+datatable(tab,
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
+```
