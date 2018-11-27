@@ -22,7 +22,7 @@
 #' @title Check GDC server status is OK
 #' @description
 #'   Check GDC server status using the api
-#'   https://gdc-api.nci.nih.gov/status
+#'   https://api.gdc.cancer.gov/status
 #' @export
 #' @importFrom jsonlite fromJSON
 #' @examples
@@ -39,7 +39,7 @@ isServeOK <- function(){
 #' @title Check GDC server status
 #' @description
 #'   Check GDC server status using the api
-#'   https://gdc-api.nci.nih.gov/status
+#'   https://api.gdc.cancer.gov/status
 #' @export
 #' @importFrom jsonlite fromJSON
 #' @examples
@@ -164,7 +164,7 @@ checkBarcodeDefinition <- function(definition){
 #' @title Retrieve all GDC projects
 #' @description
 #'   getGDCprojects uses the following api to get projects
-#'   https://gdc-api.nci.nih.gov/projects
+#'   https://api.gdc.cancer.gov/projects
 #' @export
 #' @import readr stringr
 #' @examples
