@@ -64,6 +64,7 @@ Imports:
     tools,
     sva,
     limma,
+    reshape2,
     xml2,
     httr (>= 1.2.1),
     matlab,
