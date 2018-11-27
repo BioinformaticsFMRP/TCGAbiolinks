@@ -4,10 +4,12 @@
 \alias{getSampleFilesSummary}
 \title{Retrieve summary of files per sample in a project}
 \usage{
-getSampleFilesSummary(project)
+getSampleFilesSummary(project, legacy = FALSE)
 }
 \arguments{
 \item{project}{A GDC project}
+
+\item{legacy}{Access legacy database ? Deafult: FALSE}
 }
 \value{
 A data frame with the maf file information
