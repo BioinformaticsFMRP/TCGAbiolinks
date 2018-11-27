@@ -732,6 +732,7 @@ GDCquery_ATAC_seq <- function(tumor = NULL,
 #'   data_category + data_type + experimental_strategy + platform
 #'   Almost like https://portal.gdc.cancer.gov/exploration
 #' @param project A GDC project
+#' @param legacy Access legacy database ? Deafult: FALSE
 #' @export
 #' @examples
 #'    summary <- getSampleFilesSummary("TCGA-LUAD")
@@ -739,18 +740,18 @@ GDCquery_ATAC_seq <- function(tumor = NULL,
 #'    summary <- getSampleFilesSummary(c("TCGA-OV","TCGA_ACC"))
 #' }
 #' @return A data frame with the maf file information
-#' @importFrom reshape2 dcast
+#' @importFrom data.table dcast
 #' @importFrom plyr ldply
-getSampleFilesSummary <- function(project) {
+getSampleFilesSummary <- function(project, legacy = FALSE) {
     out <- NULL
     for(proj in project){
         message("Accessing information for project: ", proj)
-        url <- getSampleSummaryUrl(proj)
+        url <- getSampleSummaryUrl(proj,legacy)
         x <- getURL(url,fromJSON,simplifyDataFrame = TRUE)
         y <- x$data$hits$files
         names(y) <- x$data$hits$submitter_id
         df <- ldply (y, data.frame)
-        df <- df %>%  dcast(.id ~ data_category  + data_type + experimental_strategy + platform)
+        df <- df %>%  data.table::dcast(.id ~ data_category  + data_type + experimental_strategy + platform)
         colnames(df) <- gsub("_NA","",colnames(df))
         df$project <- proj
         out <- rbind.fill(out,df)
@@ -758,9 +759,10 @@ getSampleFilesSummary <- function(project) {
     return(out)
 }
 
-getSampleSummaryUrl <- function(project){
+getSampleSummaryUrl <- function(project,legacy = FALSE){
     # Get manifest using the API
-    baseURL <- "https://api.gdc.cancer.gov/cases?"
+    baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/cases/?","https://api.gdc.cancer.gov/cases/?")
+
     options.pretty <- "pretty=true"
     options.expand <- "expand=summary,summary.data_categories,files"
     #option.size <- paste0("size=",getNbFiles(project,data.category,legacy))
