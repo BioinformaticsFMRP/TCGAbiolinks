@@ -11,7 +11,7 @@ A data frame with last GDC projects
 }
 \description{
 getGDCprojects uses the following api to get projects
-  https://gdc-api.nci.nih.gov/projects
+  https://api.gdc.cancer.gov/projects
 }
 \examples{
 projects <- getGDCprojects()
