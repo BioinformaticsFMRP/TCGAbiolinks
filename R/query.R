@@ -733,6 +733,8 @@ GDCquery_ATAC_seq <- function(tumor = NULL,
 #'   Almost like https://portal.gdc.cancer.gov/exploration
 #' @param project A GDC project
 #' @param legacy Access legacy database ? Deafult: FALSE
+#' @param files.access Filter by file access ("open" or "controlled").
+#' Default: no filter
 #' @export
 #' @examples
 #'    summary <- getSampleFilesSummary("TCGA-LUAD")
@@ -742,7 +744,7 @@ GDCquery_ATAC_seq <- function(tumor = NULL,
 #' @return A data frame with the maf file information
 #' @importFrom data.table dcast
 #' @importFrom plyr ldply
-getSampleFilesSummary <- function(project, legacy = FALSE) {
+getSampleFilesSummary <- function(project, legacy = FALSE, files.access = NA) {
     out <- NULL
     for(proj in project){
         message("Accessing information for project: ", proj)
@@ -759,7 +761,7 @@ getSampleFilesSummary <- function(project, legacy = FALSE) {
     return(out)
 }
 
-getSampleSummaryUrl <- function(project,legacy = FALSE){
+getSampleSummaryUrl <- function(project,legacy = FALSE, files.access = NA){
     # Get manifest using the API
     baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/cases/?","https://api.gdc.cancer.gov/cases/?")
 
@@ -775,6 +777,9 @@ getSampleSummaryUrl <- function(project,legacy = FALSE){
                              project,
                              URLencode('"]}}'))
 
+    if(!any(is.na(files.access))) {
+        options.filter <- paste0(options.filter,addFilter("files.access", files.access))
+    }
     # Close json request
     options.filter <- paste0(options.filter, URLencode(']}'))
     url <- paste0(baseURL,paste(options.pretty,
