@@ -11,7 +11,7 @@ Return true all status
 }
 \description{
 Check GDC server status using the api
-  https://gdc-api.nci.nih.gov/status
+  https://api.gdc.cancer.gov/status
 }
 \examples{
 info <- getGDCInfo()
