@@ -739,6 +739,8 @@ GDCquery_ATAC_seq <- function(tumor = NULL,
 #'    summary <- getSampleFilesSummary(c("TCGA-OV","TCGA_ACC"))
 #' }
 #' @return A data frame with the maf file information
+#' @importFrom reshape2 dcast
+#' @importFrom plyr ldply
 getSampleFilesSummary <- function(project) {
     out <- NULL
     for(proj in project){
