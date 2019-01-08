@@ -129,6 +129,7 @@ checkDataTypeInput <- function(legacy, data.type){
                                   "Isoform Expression Quantification",
                                   "miRNA Expression Quantification",
                                   "Biospecimen Supplement",
+                                  "Gene Level Copy Number Scores",
                                   "Clinical Supplement",
                                   "Masked Somatic Mutation")
         if(!data.type %in% harmonized.data.type) {
