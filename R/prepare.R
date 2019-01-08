@@ -31,23 +31,13 @@
 #' maf <- GDCprepare(query, directory = "maf")
 #'
 #' \dontrun{
-#' query <- GDCquery(project = "TCGA-ACC",
-#'                    data.category =  "Copy number variation",
-#'                    legacy = TRUE,
-#'                    file.type = "hg19.seg",
-#'                    barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01", "TCGA-OR-A5LJ-10A-01D-A29K-01"))
-#' # data will be saved in  GDCdata/TCGA-ACC/legacy/Copy_number_variation/Copy_number_segmentation
-#' GDCdownload(query, method = "api")
-#' acc.cnv <- GDCprepare(query)
-#'  query <- GDCquery(project = "TCGA-GBM",
-#'                    legacy = TRUE,
-#'                    data.category = "Gene expression",
-#'                    data.type = "Gene expression quantification",
-#'                    platform = "Illumina HiSeq",
-#'                    file.type = "normalized_results",
-#'                    experimental.strategy = "RNA-Seq")
-#'  GDCdownload(query, method = "api")
-#'  data <- GDCprepare(query,add.gistic2.mut = c("PTEN","FOXJ1"))
+#' # Get GISTIC values
+#' gistic.query <- GDCquery(project = "TCGA-ACC",
+#' data.category = "Copy Number Variation",
+#' data.type = "Gene Level Copy Number Scores",
+#' access="open")
+#' GDCdownload(gistic.query)
+#' gistic <- GDCprepare(gistic.query)
 #' }
 #' @return A summarizedExperiment or a data.frame
 #' @importFrom  S4Vectors DataFrame
@@ -105,7 +95,11 @@ GDCprepare <- function(query,
                                            cases = query$results[[1]]$cases,
                                            summarizedExperiment)
     } else if(grepl("Copy Number Variation",query$data.category,ignore.case = TRUE)) {
-        data <- readCopyNumberVariation(files, query$results[[1]]$cases)
+        if(query$data.type == "Gene Level Copy Number Scores") {
+            data <- readGISTIC(files, query$results[[1]]$cases)
+        } else {
+            data <- readCopyNumberVariation(files, query$results[[1]]$cases)
+        }
     }  else if(grepl("DNA methylation",query$data.category, ignore.case = TRUE)) {
         data <- readDNAmethylation(files, query$results[[1]]$cases, summarizedExperiment, unique(query$platform))
     }  else if(grepl("Protein expression",query$data.category,ignore.case = TRUE)) {
@@ -978,6 +972,44 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,su
     return(df)
 }
 
+readGISTIC <- function(files, cases){
+    message("Reading GISTIC file")
+    data <- read_tsv(file = files, col_names = TRUE, progress = TRUE)
+
+    patient <- substr(unlist(str_split(res$results[[1]]$cases,",")),1,12)
+    info <- NULL
+    info <- tryCatch({
+        step <- 20 # more than 50 gives a bug =/
+        for(i in 0:(ceiling(length(patient)/step) - 1)){
+            start <- 1 + step * i
+            end <- ifelse(((i + 1) * step) > length(patient), length(patient),((i + 1) * step))
+            if(is.null(info)) {
+                info <- getAliquot_ids(patient[start:end])
+            } else {
+                info <- rbind(info, getAliquot_ids(patient[start:end]))
+            }
+        }
+        info
+    }, error = function(e) {
+        step <- 2
+        for(i in 0:(ceiling(length(patient)/step) - 1)){
+            start <- 1 + step * i
+            end <- ifelse(((i + 1) * step) > length(patient), length(patient),((i + 1) * step))
+            if(is.null(info)) {
+                info <- getAliquot_ids(patient[start:end])
+            } else {
+                info <- rbind(info, getAliquot_ids(patient[start:end]))
+            }
+        }
+        info
+    })
+
+    barcode <- info$barcode[match(colnames(data),info$aliquot_id)]
+    idx <- which(!is.na(barcode))
+    colnames(data)[idx] <- barcode[idx]
+    return(data)
+}
+
 # Reads Copy Number Variation files to a data frame, basically it will rbind it
 readCopyNumberVariation <- function(files, cases){
     message("Reading copy number variation files")
@@ -1057,6 +1089,38 @@ getFFPE <- function(patient){
     results <- json$data$hits
     results <- rbind.fill(results$samples)[,c("submitter_id","is_ffpe")]
     return(results)
+}
+
+getAliquot_ids <- function(barcode){
+    baseURL <- "https://api.gdc.cancer.gov/cases/?"
+    options.pretty <- "pretty=true"
+    option.size <- paste0("size=",length(barcode))
+    #message(paste(barcode,collapse = '","'))
+    #message(paste0('"',paste(barcode,collapse = '","')))
+    options.filter <- paste0("filters=",
+                             URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.submitter_id","value":['),
+                             paste0('"',paste(barcode,collapse = '","')),
+                             URLencode('"]}}]}'))
+    #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
+    url <- paste0(baseURL,paste(options.pretty, option.size, options.filter, sep = "&"))
+    json  <- tryCatch(
+        getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
+        error = function(e) {
+            message(paste("Error: ", e, sep = " "))
+            message("We will retry to access GDC again! URL:")
+            message(url)
+            fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+        }
+    )
+
+    results <- json$data$hits
+    submitter_id <- results$submitter_id
+    l <- results$aliquot_ids
+    names(l) <- submitter_id
+    df <- do.call(rbind,lapply(l,data.frame))
+    df$barcode <- gsub("\\.[0-9]*","",rownames(df))
+    colnames(df) <- c("aliquot_id","barcode")
+    return(df)
 }
 # getBarcodeInfo(c("TCGA-A6-6650"))
 getBarcodeInfo <- function(barcode) {
