@@ -55,22 +55,12 @@ GDCdownload(query, method = "api", directory = "maf")
 maf <- GDCprepare(query, directory = "maf")
 
 \dontrun{
-query <- GDCquery(project = "TCGA-ACC",
-                   data.category =  "Copy number variation",
-                   legacy = TRUE,
-                   file.type = "hg19.seg",
-                   barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01", "TCGA-OR-A5LJ-10A-01D-A29K-01"))
-# data will be saved in  GDCdata/TCGA-ACC/legacy/Copy_number_variation/Copy_number_segmentation
-GDCdownload(query, method = "api")
-acc.cnv <- GDCprepare(query)
- query <- GDCquery(project = "TCGA-GBM",
-                   legacy = TRUE,
-                   data.category = "Gene expression",
-                   data.type = "Gene expression quantification",
-                   platform = "Illumina HiSeq",
-                   file.type = "normalized_results",
-                   experimental.strategy = "RNA-Seq")
- GDCdownload(query, method = "api")
- data <- GDCprepare(query,add.gistic2.mut = c("PTEN","FOXJ1"))
+# Get GISTIC values
+gistic.query <- GDCquery(project = "TCGA-ACC",
+data.category = "Copy Number Variation",
+data.type = "Gene Level Copy Number Scores",
+access="open")
+GDCdownload(gistic.query)
+gistic <- GDCprepare(gistic.query)
 }
 }
