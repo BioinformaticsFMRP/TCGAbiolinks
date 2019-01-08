@@ -3,7 +3,7 @@ context("Query")
 
 test_that("GDCquery can filter by data.category", {
     query <- GDCquery(project = "TCGA-ACC",data.category = "Copy Number Variation")
-    expect_equal(length(unique(query$results[[1]]$data_type)),2)
+    expect_equal(length(unique(query$results[[1]]$data_type)),3)
     query <- GDCquery(project = "TCGA-ACC",data.category = "Copy Number Variation", data.type = "Copy Number Segment")
     expect_equal(unique(query$results[[1]]$data_type),"Copy Number Segment")
 })
