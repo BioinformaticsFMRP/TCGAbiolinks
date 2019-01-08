@@ -1,3 +1,7 @@
+CHANGES IN VERSION 2.11.2
+-------------------------
+* Add GISTIC2 case to GDC prepare and manuals
+
 CHANGES IN VERSION 2.7.13
 -------------------------
 * Adding new function: PanCancerAtlas_subtypes
