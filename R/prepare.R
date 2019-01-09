@@ -680,6 +680,7 @@ colDataPrepareTCGA <- function(barcode){
 #'                                       "Illumina Human Methylation 27"))
 #'   colDataPrepare(getResults(query.met)$cases)
 #' }
+#' @export
 colDataPrepare <- function(barcode){
     # For the moment this will work only for TCGA Data
     # We should search what TARGET data means
@@ -794,6 +795,7 @@ colDataPrepare <- function(barcode){
 }
 
 #' @importFrom biomaRt getBM useMart listDatasets useEnsembl
+#' @export
 get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
     tries <- 0L
     msg <- character()
