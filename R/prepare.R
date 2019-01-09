@@ -203,6 +203,7 @@ readClinical <- function(files, data.type, cases){
 }
 
 
+#' @importFrom tidyr separate
 readExonQuantification <- function (files, cases, summarizedExperiment = TRUE){
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
 
@@ -225,8 +226,8 @@ readExonQuantification <- function (files, cases, summarizedExperiment = TRUE){
     }
     setDF(df)
     rownames(df) <- df[,1]
-    df <- df %>% tidyr::separate(exon,into = c("seqnames","coordinates","strand"),sep = ":") %>%
-        tidyr::separate(coordinates,into = c("start","end"),sep = "-")
+    df <- df %>% separate(exon,into = c("seqnames","coordinates","strand"),sep = ":") %>%
+        separate(coordinates,into = c("start","end"),sep = "-")
     if(summarizedExperiment) {
         suppressWarnings({
             assays <- lapply(assay.list, function (x) {
