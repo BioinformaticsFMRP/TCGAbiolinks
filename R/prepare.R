@@ -795,6 +795,10 @@ colDataPrepare <- function(barcode){
     return(ret)
 }
 
+#' @title Get hg19 or hg38 information from biomaRt
+#' @description Get hg19 or hg38 information from biomaRt
+#' @param genome hg38 or hg19
+#' @param as.granges Output as GRanges or data.frame
 #' @importFrom biomaRt getBM useMart listDatasets useEnsembl
 #' @export
 get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
