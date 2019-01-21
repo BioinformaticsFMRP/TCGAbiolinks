@@ -155,6 +155,7 @@ GDCquery <- function(project,
                            platform = platform,
                            file.type = file.type,
                            files.access = access,
+                           experimental.strategy = experimental.strategy,
                            sample.type = sample.type)
         message("ooo Project: ", proj)
         json  <- tryCatch(
@@ -375,7 +376,7 @@ GDCquery <- function(project,
     return(ret)
 }
 
-getGDCquery <- function(project, data.category, data.type, legacy, workflow.type,platform,file.type,files.access,sample.type){
+getGDCquery <- function(project, data.category, data.type, legacy, workflow.type,platform,file.type,files.access,sample.type,experimental.strategy){
     # Get manifest using the API
     baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/files/?","https://api.gdc.cancer.gov/files/?")
     options.pretty <- "pretty=true"
@@ -395,6 +396,7 @@ getGDCquery <- function(project, data.category, data.type, legacy, workflow.type
                              project,
                              URLencode('"]}}'))
 
+    if(!is.na(experimental.strategy))  options.filter <- paste0(options.filter,addFilter("files.experimental_strategy", experimental.strategy))
     if(!is.na(data.category))  options.filter <- paste0(options.filter,addFilter("files.data_category", data.category))
     if(!is.na(data.type))  options.filter <- paste0(options.filter,addFilter("files.data_type", data.type))
     if(!is.na(workflow.type))  options.filter <- paste0(options.filter,addFilter("files.analysis.workflow_type", workflow.type))
