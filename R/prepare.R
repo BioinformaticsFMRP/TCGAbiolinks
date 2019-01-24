@@ -983,7 +983,7 @@ readGISTIC <- function(files, cases){
     message("Reading GISTIC file")
     data <- read_tsv(file = files, col_names = TRUE, progress = TRUE)
 
-    patient <- substr(unlist(str_split(res$results[[1]]$cases,",")),1,12)
+    patient <- substr(unlist(str_split(cases,",")),1,12)
     info <- NULL
     info <- tryCatch({
         step <- 20 # more than 50 gives a bug =/
