@@ -383,8 +383,8 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
         df$entrezgene <- as.numeric(GeneID)
         df <- merge(df, gene.location, by="entrezgene")
     } else {
-        df$external_gene_id <- as.character(df[,1])
-        df <- merge(df, gene.location, by="external_gene_id")
+        df$external_gene_name <- as.character(df[,1])
+        df <- merge(df, gene.location, by="external_gene_name")
     }
 
 
@@ -393,7 +393,7 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
                              ranges = IRanges(start = df$start_position,
                                               end = df$end_position),
                              strand = df$strand,
-                             gene_id = df$external_gene_id,
+                             gene_id = df$external_gene_name,
                              entrezgene = df$entrezgene,
                              ensembl_gene_id = df$ensembl_gene_id,
                              transcript_id = subset(df, select = 5))
@@ -404,10 +404,10 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
                              ranges = IRanges(start = df$start_position,
                                               end = df$end_position),
                              strand = df$strand,
-                             gene_id = df$external_gene_id,
+                             gene_id = df$external_gene_name,
                              entrezgene = df$entrezgene,
                              ensembl_gene_id = df$ensembl_gene_id)
-        names(rowRanges) <- as.character(df$external_gene_id)
+        names(rowRanges) <- as.character(df$external_gene_name)
     }
     suppressWarnings({
         assays <- lapply(assay.list, function (x) {
@@ -437,7 +437,7 @@ makeSEfromDNAmethylation <- function(df, probeInfo=NULL){
                            ranges = IRanges(start = gene.location$start_position,
                                             end = gene.location$end_position),
                            strand = gene.location$strand,
-                           symbol = gene.location$external_gene_id,
+                           symbol = gene.location$external_gene_name,
                            EntrezID = gene.location$entrezgene)
 
         rowRanges <- GRanges(seqnames = paste0("chr", df$Chromosome),
@@ -806,33 +806,21 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
     msg <- character()
     while (tries < 3L) {
         gene.location <- tryCatch({
-            if (genome == "hg19"){
-                # for hg19
-                ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
-                                   host = "feb2014.archive.ensembl.org",
-                                   path = "/biomart/martservice" ,
-                                   dataset = "hsapiens_gene_ensembl")
-                attributes <- c("chromosome_name",
-                                "start_position",
-                                "end_position", "strand",
-                                "ensembl_gene_id", "entrezgene",
-                                "external_gene_id")
-            } else {
-                # for hg38
-                ensembl <- tryCatch({
-                    useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl")
-                },  error = function(e) {
-                    useEnsembl("ensembl",
-                               dataset = "hsapiens_gene_ensembl",
-                               mirror = "uswest")
-                })
-
-                attributes <- c("chromosome_name",
-                                "start_position",
-                                "end_position", "strand",
-                                "ensembl_gene_id",
-                                "external_gene_name")
-            }
+            host <- ifelse(genome == "hg19",  "grch37.ensembl.org","www.ensembl.org")
+            ensembl <- tryCatch({
+                useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host =  host)
+            },  error = function(e) {
+                useEnsembl("ensembl",
+                           dataset = "hsapiens_gene_ensembl",
+                           mirror = "uswest",
+                           host =  host)
+            })
+            attributes <- c("chromosome_name",
+                            "start_position",
+                            "end_position", "strand",
+                            "ensembl_gene_id",
+                            "entrezgene",
+                            "external_gene_name")
             db.datasets <- listDatasets(ensembl)
             description <- db.datasets[db.datasets$dataset=="hsapiens_gene_ensembl",]$description
             message(paste0("Downloading genome information (try:", tries,") Using: ", description))
