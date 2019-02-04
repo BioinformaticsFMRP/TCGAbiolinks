@@ -37,7 +37,7 @@ TCGAanalyze_Clustering <- function(tabDF, method,  methodHC = "ward.D2"){
 
 #' @title Array Array Intensity correlation (AAIC) and correlation boxplot to define outlier
 #' @description TCGAanalyze_Preprocessing perform Array Array Intensity correlation (AAIC).
-#' It defines a square symmetric matrix of pearson correlation among samples.
+#' It defines a square symmetric matrix of spearman correlation among samples.
 #' According this matrix and boxplot of correlation samples by samples it is possible
 #' to find samples with low correlation that can be identified as possible outliers.
 #' @param object of gene expression of class RangedSummarizedExperiment from TCGAprepare
