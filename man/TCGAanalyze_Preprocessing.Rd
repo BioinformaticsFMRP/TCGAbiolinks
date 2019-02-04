@@ -26,7 +26,7 @@ Plot with array array intensity correlation and boxplot of correlation samples b
 }
 \description{
 TCGAanalyze_Preprocessing perform Array Array Intensity correlation (AAIC).
-It defines a square symmetric matrix of pearson correlation among samples.
+It defines a square symmetric matrix of spearman correlation among samples.
 According this matrix and boxplot of correlation samples by samples it is possible
 to find samples with low correlation that can be identified as possible outliers.
 }
