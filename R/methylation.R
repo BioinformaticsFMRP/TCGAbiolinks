@@ -1334,9 +1334,9 @@ TCGAvisualize_starburst <- function(met,
                 FDR[DNAmethylation]  <=  .(met.p.cut))))))
         } else if(logFC.cut != 0 & diffmean.cut == 0) {
             title <- bquote(atop("Starburst Plot",scriptstyle((list(
-                  group("|",logFC,"|")  >=  .(logFC.cut),
-                  FDR[expression]  <=  .(exp.p.cut),
-                  FDR[DNAmethylation]  <=  .(met.p.cut))))))
+                group("|",logFC,"|")  >=  .(logFC.cut),
+                FDR[expression]  <=  .(exp.p.cut),
+                FDR[DNAmethylation]  <=  .(met.p.cut))))))
         } else if (logFC.cut != 0 & diffmean.cut != 0) {
             title <- bquote(atop("Starburst Plot",scriptstyle((list(
                 Delta,bar(beta)  >=  .(diffmean.cut),
@@ -1697,42 +1697,29 @@ getMetPlatInfo <- function(genome, platform) {
 #' @importFrom GenomicFeatures transcripts
 #' @importFrom GenomicRanges makeGRangesFromDataFrame promoters
 #' @importFrom biomaRt useEnsembl
-getTSS <- function(genome = "hg38",
-                   TSS = list(upstream = NULL, downstream = NULL)){
-    if (genome == "hg19"){
-        # for hg19
-        ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
-                           host = "feb2014.archive.ensembl.org",
-                           path = "/biomart/martservice" ,
-                           dataset = "hsapiens_gene_ensembl")
-        attributes <- c("chromosome_name",
-                        "start_position",
-                        "end_position",
-                        "strand",
-                        "transcript_start",
-                        "transcript_end",
-                        "ensembl_transcript_id",
-                        "ensembl_gene_id", "entrezgene",
-                        "external_gene_id")
-    } else {
-        # for hg38
-        ensembl <- tryCatch({
-            useEnsembl("ensembl",dataset = "hsapiens_gene_ensembl")
-        },  error = function(e) {
-            useEnsembl("ensembl",
-                       dataset = "hsapiens_gene_ensembl",
-                       mirror = "uswest")
-        })
-        attributes <- c("chromosome_name",
-                        "start_position",
-                        "end_position", "strand",
-                        "ensembl_gene_id",
-                        "transcription_start_site",
-                        "transcript_start",
-                        "ensembl_transcript_id",
-                        "transcript_end",
-                        "external_gene_name")
-    }
+getTSS <- function(genome = "hg38", TSS = list(upstream = NULL, downstream = NULL)){
+
+    host <- ifelse(genome == "hg19",  "grch37.ensembl.org","www.ensembl.org")
+    ensembl <- tryCatch({
+        useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host =  host)
+    },  error = function(e) {
+        useEnsembl("ensembl",
+                   dataset = "hsapiens_gene_ensembl",
+                   mirror = "uswest",
+                   host =  host)
+    })
+    attributes <- c("chromosome_name",
+                    "start_position",
+                    "end_position",
+                    "strand",
+                    "transcript_start",
+                    "transcription_start_site",
+                    "transcript_end",
+                    "ensembl_transcript_id",
+                    "ensembl_gene_id",
+                    "entrezgene",
+                    "external_gene_name")
+
     chrom <- c(1:22, "X", "Y","M","*")
     db.datasets <- listDatasets(ensembl)
     description <- db.datasets[db.datasets$dataset=="hsapiens_gene_ensembl",]$description
