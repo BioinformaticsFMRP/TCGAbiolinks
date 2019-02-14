@@ -181,7 +181,7 @@ getGDCprojects <- function(){
 }
 
 # Source: https://stackoverflow.com/questions/10266963/moving-files-between-folders
-move <- function(from, to) {
+move <- function(from, to, keep.copy = FALSE) {
     if(file.exists(from)){
         if(R.utils::isDirectory(from)) {
             todir <- dirname(to)
@@ -192,10 +192,12 @@ move <- function(from, to) {
             dir.create(todir, recursive=TRUE,showWarnings = FALSE)
             tryCatch(file.copy(from = from,  to = to), warning = function(w) print(w),error = function(e) print(e))
         }
-        if(dirname(from) != ".") {
-            unlink(dirname(from),recursive=TRUE,force = TRUE)
-        } else {
-            unlink(from, recursive =  R.utils::isDirectory(from))
+        if(!keep.copy){
+            if(dirname(from) != ".") {
+                unlink(dirname(from),recursive=TRUE,force = TRUE)
+            } else {
+                unlink(from, recursive =  R.utils::isDirectory(from))
+            }
         }
     } else {
         stop(paste0("I could not find the file: ", from))
@@ -774,16 +776,16 @@ getURL <- function(URL, FUN, ..., N.TRIES=3L) {
 #' @export
 #' @return data frame with columns 'project', 'tss','participant', 'sample', "portion", "plate", "center", "condition"
 get_IDs <- function(data) {
-  IDs <- strsplit(c(colnames(data)), "-")
-  IDs <- plyr::ldply(IDs, rbind)
-  colnames(IDs) <- c('project', 'tss','participant', 'sample', "portion", "plate", "center")
-  cols <- c("project", "tss", "participant")
-  IDs$patient <- apply(IDs[,cols],1,paste,collapse = "-" )
-  barcode <- colnames(data)
-  IDs <- cbind(IDs, barcode)
-  condition <- gsub("11+[[:alpha:]]", "normal", as.character(IDs$sample))
-  condition  <- gsub("01+[[:alpha:]]", "cancer", condition)
-  IDs$condition <- condition
-  IDs$myorder  <- 1:nrow(IDs)
-  return(IDs)
+    IDs <- strsplit(c(colnames(data)), "-")
+    IDs <- plyr::ldply(IDs, rbind)
+    colnames(IDs) <- c('project', 'tss','participant', 'sample', "portion", "plate", "center")
+    cols <- c("project", "tss", "participant")
+    IDs$patient <- apply(IDs[,cols],1,paste,collapse = "-" )
+    barcode <- colnames(data)
+    IDs <- cbind(IDs, barcode)
+    condition <- gsub("11+[[:alpha:]]", "normal", as.character(IDs$sample))
+    condition  <- gsub("01+[[:alpha:]]", "cancer", condition)
+    IDs$condition <- condition
+    IDs$myorder  <- 1:nrow(IDs)
+    return(IDs)
 }
