@@ -65,7 +65,9 @@ GDCprepare <- function(query,
 
     isServeOK()
     if(missing(query)) stop("Please set query parameter")
-    if(any(duplicated(query$results[[1]]$cases)) & query$data.type != "Clinical data" & query$data.type !=  "Protein expression quantification") {
+    if(any(duplicated(query$results[[1]]$cases)) & query$data.type != "Clinical data" &
+       query$data.type !=  "Protein expression quantification" &
+       query$data.type != "Raw intensities") {
         dup <- query$results[[1]]$cases[duplicated(query$results[[1]]$cases)]
         dup <- query$results[[1]][query$results[[1]]$cases %in% dup,c("tags","cases","experimental_strategy")]
         dup <- dup[order(dup$cases),]
@@ -102,6 +104,9 @@ GDCprepare <- function(query,
         }
     }  else if(grepl("DNA methylation",query$data.category, ignore.case = TRUE)) {
         data <- readDNAmethylation(files, query$results[[1]]$cases, summarizedExperiment, unique(query$platform))
+    }  else if(grepl("Raw intensities",query$data.type, ignore.case = TRUE)) {
+        # preparing IDAT files
+        data <- readIDATDNAmethylation(files, query$results[[1]]$cases, summarizedExperiment, unique(query$platform), query$legacy)
     }  else if(grepl("Protein expression",query$data.category,ignore.case = TRUE)) {
         data <- readProteinExpression(files, query$results[[1]]$cases)
     }  else if(grepl("Simple Nucleotide Variation",query$data.category,ignore.case = TRUE)) {
@@ -430,6 +435,52 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
     return(rse)
 }
 
+
+#' @importFrom downloader download
+#' @importFrom S4Vectors DataFrame
+makeSEFromDNAMethylationMatrix <- function(betas, genome = "hg38", met.platform = "450K") {
+    message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
+    message("Creating a SummarizedExperiment from DNA methylation input")
+
+    # Instead of looking on the size, it is better to set it as a argument as the annotation is different
+    annotation <-   getInfiniumAnnotation(met.platform, genome)
+
+    rowRanges <- annotation[names(annotation) %in% rownames(betas),,drop=FALSE]
+
+    # Remove masked probes, besed on the annotation
+    rowRanges <- rowRanges[!rowRanges$MASK_general]
+
+    colData <-  DataFrame(samples = colnames(betas))
+    betas <- betas[rownames(betas) %in% names(rowRanges),,drop = FALSE]
+    betas <- betas[names(rowRanges),,drop = FALSE]
+    assay <- data.matrix(betas)
+    betas <- SummarizedExperiment(assays=assay,
+                                  rowRanges=rowRanges,
+                                  colData=colData)
+    return(betas)
+}
+
+
+getInfiniumAnnotation <- function(platform, genome){
+    base <- "http://zwdzwd.io/InfiniumAnnotation/current/"
+
+    if (grepl("hg38", genome)) path <- gsub("hg19","hg38",path)
+    if(platform == "EPIC") {
+        annotation <- paste0(base,"EPIC/EPIC.hg19.manifest.rds")
+    } else if(platform == "450K") {
+        annotation <- paste0(base,"hm450/hm450.hg19.manifest.rds")
+    } else {
+        annotation <- paste0(base,"hm27/hm27.hg19.manifest.rds")
+    }
+    if(grepl("hg38", genome)) annotation <- gsub("hg19","hg38",annotation)
+    if(!file.exists(basename(annotation))) {
+        if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
+        downloader::download(annotation, basename(annotation), mode = mode)
+    }
+    readRDS(basename(annotation))
+}
+
+
 makeSEfromDNAmethylation <- function(df, probeInfo=NULL){
     if(is.null(probeInfo)) {
         gene.location <- get.GRCh.bioMart()
@@ -457,6 +508,38 @@ makeSEfromDNAmethylation <- function(df, probeInfo=NULL){
     colnames(assay) <- rownames(colData)
     rownames(assay) <- as.character(df$Composite.Element.REF)
     rse <- SummarizedExperiment(assays = assay, rowRanges = rowRanges, colData = colData)
+}
+
+#' @importFrom sesame openSesame
+readIDATDNAmethylation <- function(files,
+                                   barcode,
+                                   summarizedExperiment,
+                                   platform,
+                                   legacy){
+
+    moved.files <- file.path(dirname(dirname(files)), basename(files))
+
+    # for eah file move it to upper parent folder
+    plyr::a_ply(files, 1,function(x){
+        tryCatch(TCGAbiolinks:::move(x,file.path(dirname(dirname(x)), basename(x)),keep.copy = TRUE),error = function(e){})
+    })
+
+    samples <- unique(gsub("_Grn.idat|_Red.idat","",moved.files))
+    message("Processing  IDATs with Sesame - http://bioconductor.org/packages/sesame/")
+    message("Running opensesame with deafult parameters - applying  quality masking and nondetection masking (threshold P-value 0.05)")
+    message("Please cite: doi: 10.1093/nar/gky691 and 10.1093/nar/gkt090")
+    betas <- openSesame(samples)
+    barcode <- unique(data.frame("file" = gsub("_Grn.idat|_Red.idat","",basename(moved.files)), "barcode" = barcode))
+    colnames(betas) <- barcode$barcode[match(basename(samples),barcode$file)]
+
+    if(summarizedExperiment){
+        met.platform <- "EPIC"
+        if(grepl("450",platform)) met.platform <- "450K"
+        if(grepl("27",platform)) met.platform <- "27K"
+        betas <- makeSEFromDNAMethylationMatrix(betas,genome = ifelse(legacy,"hg19","hg38"),met.platform = met.platform)
+        colData(betas) <- DataFrame(colDataPrepare(colnames(betas)))
+    }
+
 }
 
 # We will try to make this function easier to use this function in its own data
