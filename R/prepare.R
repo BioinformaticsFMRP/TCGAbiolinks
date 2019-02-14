@@ -447,9 +447,6 @@ makeSEFromDNAMethylationMatrix <- function(betas, genome = "hg38", met.platform 
 
     rowRanges <- annotation[names(annotation) %in% rownames(betas),,drop=FALSE]
 
-    # Remove masked probes, besed on the annotation
-    rowRanges <- rowRanges[!rowRanges$MASK_general]
-
     colData <-  DataFrame(samples = colnames(betas))
     betas <- betas[rownames(betas) %in% names(rowRanges),,drop = FALSE]
     betas <- betas[names(rowRanges),,drop = FALSE]
