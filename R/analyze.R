@@ -179,7 +179,7 @@ TCGAanalyze_Preprocessing <- function(object,
 #'  # clinical_patient_Cancer <- GDCquery_clinic("TCGA-BRCA","clinical")
 #'  clinical_patient_Cancer <- data.frame(
 #'       bcr_patient_barcode = substr(colnames(dataBRCAcomplete),1,12),
-#'       vital_status = c("alive","alive","alive","dead","alive","alive","dead","alive","dead","alive"),
+#'       vital_status = c(rep("alive",3),"dead",rep("alive",2),rep(c("dead","alive"),2)),
 #'       days_to_death = c(NA,NA,NA,172,NA,NA,3472,NA,786,NA),
 #'       days_to_last_follow_up = c(3011,965,718,NA,1914,423,NA,5,656,1417)
 #'  )
