@@ -372,3 +372,23 @@ query_met.hg38 <- GDCquery(project= "TCGA-LGG",
 GDCdownload(query_met.hg38)
 data.hg38 <- GDCprepare(query_met.hg38)
 ```
+
+### DNA methylation IDAT
+```{r, eval = FALSE}
+# Using sesame 	http://bioconductor.org/packages/sesame/
+# Please cite 10.1093/nar/gky691 and doi: 10.1093/nar/gkt090.
+library(TCGAbiolinks)
+proj <- "TCGA-ACC"
+query <- GDCquery(project = proj,
+                  data.category = "Raw microarray data",
+                  data.type = "Raw intensities", 
+                  experimental.strategy = "Methylation array", 
+                  legacy = TRUE,
+                  barcode = c("TCGA-OR-A5JT","CGA-OR-A5LG","TCGA-OR-A5JX"),
+                  file.type = ".idat",
+                  platform = "Illumina Human Methylation 450")
+tryCatch(GDCdownload(query, method = "api", files.per.chunk = 20),
+         error = function(e) GDCdownload(query, method = "client"))
+betas <- GDCprepare(query)
+```
+
