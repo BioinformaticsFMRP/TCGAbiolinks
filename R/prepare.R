@@ -463,7 +463,7 @@ makeSEFromDNAMethylationMatrix <- function(betas, genome = "hg38", met.platform 
 
 getInfiniumAnnotation <- function(platform, genome){
     base <- "http://zwdzwd.io/InfiniumAnnotation/current/"
-
+    path <- file.path(base,platform,paste(platform,"hg19.manifest.rds", sep ="."))
     if (grepl("hg38", genome)) path <- gsub("hg19","hg38",path)
     if(platform == "EPIC") {
         annotation <- paste0(base,"EPIC/EPIC.hg19.manifest.rds")
