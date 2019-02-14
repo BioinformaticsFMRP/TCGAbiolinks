@@ -12,6 +12,7 @@ install:
 # Adapt as necessary starting from here
 
 build_script:
+  - travis-tool.sh install_bioc stringi
   - travis-tool.sh install_deps
   - travis-tool.sh install_bioc_deps
   - travis-tool.sh install_bioc BiocStyle
