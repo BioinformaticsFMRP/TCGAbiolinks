@@ -62,6 +62,7 @@ Imports:
     GenomicFeatures,
     parallel,
     tools,
+    sesame,
     tidyr,
     sva,
     limma,
