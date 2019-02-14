@@ -19,8 +19,8 @@ build_script:
   - travis-tool.sh install_bioc GenomeInfoDbData
   - travis-tool.sh install_bioc GenomicRanges
   - travis-tool.sh install_bioc Biobase
-  - travis-tool.sh install_bioc sesame
-  - travis-tool.sh install_bioc sesameData
+  - travis-tool.sh install_github zwdzwd/sesame
+  - travis-tool.sh install_github zwdzwd/sesameData
   - travis-tool.sh install_bioc maftools affy
   - travis-tool.sh install_bioc affy
   - travis-tool.sh install_bioc EDASeq
