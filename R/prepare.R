@@ -539,6 +539,7 @@ readIDATDNAmethylation <- function(files,
         betas <- makeSEFromDNAMethylationMatrix(betas,genome = ifelse(legacy,"hg19","hg38"),met.platform = met.platform)
         colData(betas) <- DataFrame(colDataPrepare(colnames(betas)))
     }
+    return(betas)
 
 }
 
