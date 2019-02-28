@@ -358,6 +358,31 @@ expdat <- GDCprepare(query = query.exp.hg38,
                      save.filename = "exp.rda")
 ```
 
+### miRNA
+```{r, eval = FALSE}
+library(TCGAbiolinks)
+query.mirna <- GDCquery(project = "TARGET-AML", 
+                        experimental.strategy = "miRNA-Seq",
+                        data.category = "Transcriptome Profiling", 
+                        barcode = c("TARGET-20-PATDNN","TARGET-20-PAPUNR"),
+                        data.type = "miRNA Expression Quantification")
+GDCdownload(query.mirna)
+mirna <- GDCprepare(query = query.mirna,
+                     save = TRUE, 
+                     save.filename = "mirna.rda")
+
+
+query.isoform <- GDCquery(project = "TARGET-AML", 
+                          experimental.strategy = "miRNA-Seq",
+                          data.category = "Transcriptome Profiling", 
+                          barcode = c("TARGET-20-PATDNN","TARGET-20-PAPUNR"),
+                          data.type = "Isoform Expression Quantification")
+GDCdownload(query.isoform)
+
+isoform <- GDCprepare(query = query.isoform,
+                    save = TRUE, 
+                    save.filename = "mirna-isoform.rda")
+```
 
 ### DNA methylation: aligned against hg38
 ```{r, eval = FALSE}
