@@ -97,7 +97,7 @@ GDCprepare <- function(query,
                                            cases = query$results[[1]]$cases,
                                            summarizedExperiment)
     } else if(grepl("Copy Number Variation",query$data.category,ignore.case = TRUE)) {
-        if(query$data.type == "Gene Level Copy Number Scores") {
+        if(unique(query$results[[1]]$data_type) == "Gene Level Copy Number Scores") {
             data <- readGISTIC(files, query$results[[1]]$cases)
         } else {
             data <- readCopyNumberVariation(files, query$results[[1]]$cases)
