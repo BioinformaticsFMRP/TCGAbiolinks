@@ -174,6 +174,7 @@ GDCquery <- function(project,
                                workflow.type = NA,
                                platform = NA,
                                file.type = file.type,
+                               experimental.strategy = experimental.strategy,
                                files.access = access,
                                sample.type = sample.type)
             json  <- tryCatch(
