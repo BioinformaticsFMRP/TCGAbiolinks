@@ -128,7 +128,7 @@ datatable(TCGAbiolinks:::getBarcodeDefinition(),
 ```
 
 The other fields (data.category, data.type, workflow.type, platform, file.type) can be found below. 
-Please, not that these tables are still incomplete.
+Please, note that these tables are still incomplete.
 
 ## Harmonized data options (`legacy = FALSE`)
 
