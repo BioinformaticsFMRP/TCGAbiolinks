@@ -69,9 +69,9 @@ GDCprepare <- function(query,
        query$data.type !=  "Protein expression quantification" &
        query$data.type != "Raw intensities") {
         dup <- query$results[[1]]$cases[duplicated(query$results[[1]]$cases)]
-        cols <- c("tags","cases","experimental_strategy")
+        cols <- c("tags","cases","experimental_strategy","analysis_workflow_type")
         cols <- cols[cols %in% colnames(query$results[[1]])]
-        query$results[[1]]$casesdup <- query$results[[1]][query$results[[1]]$cases %in% dup,cols]
+        dup <- query$results[[1]][query$results[[1]]$cases %in% dup,cols]
         dup <- dup[order(dup$cases),]
         print(knitr::kable(dup))
         stop("There are samples duplicated. We will not be able to prepare it")
