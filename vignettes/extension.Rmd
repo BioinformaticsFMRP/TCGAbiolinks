@@ -390,7 +390,7 @@ Purity.BRCA <- TCGAtumor_purity(colnames(dataPrep.tcga), 0, 0, 0, 0, 0.7)
 
 ## Download GTEx data available through the Recount2 project:
 
-**Recount2** project has made gene count data available for the scientific community to download. Recount2 is an online resource consisting of RNA-seq gene and exon counts as well as coverage bigWig files for 2041 different studies. It is the second generation of the ReCount project. The raw sequencing data were processed with Rail-RNA as described in the recount2 paper. The purpose of this function is to get data processed under one signle pipeline to avoid any technical variabilities affecting any downstream integrative analysis. The returned object will be a list with elements named "project_tissue" and as a SummarizedExperiment (SE) of gene counts per sample. This is particularly useful to study batch-free data or to increase the pool of healthy/normal samples.
+**Recount2** project has made gene count data available for the scientific community to download. Recount2 is an online resource consisting of RNA-seq gene and exon counts as well as coverage bigWig files for 2041 different studies. It is the second generation of the ReCount project. The raw sequencing data were processed with Rail-RNA as described in the recount2 paper. The purpose of this function is to get data processed under one single pipeline to avoid any technical variabilities affecting any downstream integrative analysis. The returned object will be a list with elements named "project_tissue" and as a SummarizedExperiment (SE) of gene counts per sample. This is particularly useful to study batch-free data or to increase the pool of healthy/normal samples.
 
 Arguments are:
 
