@@ -1082,7 +1082,7 @@ readGISTIC <- function(files, cases){
         info
     })
 
-    barcode <- info$barcode[match(colnames(data),info$aliquot_id)]
+    barcode <- as.character(info$barcode)[match(colnames(data),as.character(info$aliquot_id))]
     idx <- which(!is.na(barcode))
     colnames(data)[idx] <- barcode[idx]
     return(data)
@@ -1192,11 +1192,7 @@ getAliquot_ids <- function(barcode){
     )
 
     results <- json$data$hits
-    submitter_id <- results$submitter_id
-    l <- results$aliquot_ids
-    names(l) <- submitter_id
-    df <- do.call(rbind,lapply(l,data.frame))
-    df$barcode <- gsub("\\.[0-9]*","",rownames(df))
+    df <- data.frame(unlist(results$aliquot_ids),unlist(results$submitter_aliquot_ids))
     colnames(df) <- c("aliquot_id","barcode")
     return(df)
 }
