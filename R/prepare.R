@@ -890,7 +890,7 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
     while (tries < 3L) {
         gene.location <- tryCatch({
             host <- ifelse(genome == "hg19",  "grch37.ensembl.org","www.ensembl.org")
-            message("Accessing ", host, " to get TSS information")
+            message("Accessing ", host, " to get gene information")
 
             ensembl <- tryCatch({
                 useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host =  host)
