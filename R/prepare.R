@@ -890,14 +890,29 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
     while (tries < 3L) {
         gene.location <- tryCatch({
             host <- ifelse(genome == "hg19",  "grch37.ensembl.org","www.ensembl.org")
+            message("Accessing ", host, " to get TSS information")
+
             ensembl <- tryCatch({
                 useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host =  host)
             },  error = function(e) {
-                useEnsembl("ensembl",
-                           dataset = "hsapiens_gene_ensembl",
-                           mirror = "uswest",
-                           host =  host)
+                message(e)
+                for(mirror in c("asia","useast","uswest")){
+                    x <- useEnsembl("ensembl",
+                                    dataset = "hsapiens_gene_ensembl",
+                                    mirror = mirror,
+                                    host =  host)
+                    if(class(x) == "Mart") {
+                        return(x)
+                    }
+                }
+                return(NULL)
             })
+
+            if(is.null(host)) {
+                message("Problems accessing ensembl database")
+                return(NULL)
+            }
+
             attributes <- c("chromosome_name",
                             "start_position",
                             "end_position", "strand",
