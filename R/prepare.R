@@ -1065,6 +1065,7 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,su
     return(df)
 }
 
+#' @importFrom purrr reduce
 readGISTIC <- function(files, cases){
     message("Reading GISTIC file")
     gistic.df <- NULL
