@@ -1194,6 +1194,7 @@ getFFPE <- function(patient){
 
 getAliquot_ids <- function(barcode){
     baseURL <- "https://api.gdc.cancer.gov/cases/?"
+    options.fields <- "fields=samples.portions.analytes.aliquots.aliquot_id,samples.portions.analytes.aliquots.submitter_id"
     options.pretty <- "pretty=true"
     option.size <- paste0("size=",length(barcode))
     #message(paste(barcode,collapse = '","'))
@@ -1203,7 +1204,7 @@ getAliquot_ids <- function(barcode){
                              paste0('"',paste(barcode,collapse = '","')),
                              URLencode('"]}}]}'))
     #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
-    url <- paste0(baseURL,paste(options.pretty, option.size, options.filter, sep = "&"))
+    url <- paste0(baseURL,paste(options.pretty,options.fields, option.size, options.filter, sep = "&"))
     json  <- tryCatch(
         getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
         error = function(e) {
@@ -1213,9 +1214,11 @@ getAliquot_ids <- function(barcode){
             fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
         }
     )
+    results <- unlist(json$data$hits$samples)
+    results.barcode <- grep("TCGA",results,value = TRUE)
+    results.aliquot <- grep("TCGA",results,value = TRUE,invert = TRUE)
 
-    results <- json$data$hits
-    df <- data.frame(unlist(results$aliquot_ids),unlist(results$submitter_aliquot_ids))
+    df <- data.frame(results.aliquot,results.barcode)
     colnames(df) <- c("aliquot_id","barcode")
     return(df)
 }
