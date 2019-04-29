@@ -41,7 +41,7 @@ Please cite both TCGAbiolinks package:
 
 * Colaprico A, Silva TC, Olsen C, Garofano L, Cava C, Garolini D, Sabedot T, Malta TM, Pagnotta SM, Castiglioni I, Ceccarelli M, Bontempi G and Noushmehr H. "TCGAbiolinks: an R/Bioconductor package for integrative analysis of TCGA data." Nucleic acids research (2015): gkv1507.
 
-[![doi](https://img.shields.io/badge/doi-10.1093/nar/gkv1507-green.svg?style=flat)](http://dx.doi.org/10.1093/nar/gkv1507) [![citation](https://img.shields.io/badge/cited%20by-18-green.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=6029790855238928406) [![Altmetric](https://img.shields.io/badge/Altmetric-27-green.svg?style=flat)](https://www.altmetric.com/details/4919535)
+[![doi](https://img.shields.io/badge/doi-10.1093/nar/gkv1507-green.svg?style=flat)](http://dx.doi.org/10.1093/nar/gkv1507) [![citation](https://img.shields.io/badge/cited%20by-191-green.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=6029790855238928406) [![Altmetric](https://img.shields.io/badge/Altmetric-25-green.svg?style=flat)](https://www.altmetric.com/details/4919535)
 
 Also, if you have used ELMER analysis please cite:
 
