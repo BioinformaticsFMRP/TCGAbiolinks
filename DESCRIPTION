@@ -16,7 +16,7 @@ Author: Antonio Colaprico,
     Michele Ceccarelli,
     Gianluca Bontempi,
     Houtan Noushmehr
-Maintainer: Antonio Colaprico <antonio.colaprico@ulb.ac.be>,
+Maintainer: Antonio Colaprico <axc1833@med.miami.edu>,
     Tiago Chedraoui Silva <tiagochst@usp.br>
 Depends:
     R (>= 3.2)
