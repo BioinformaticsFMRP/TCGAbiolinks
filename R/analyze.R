@@ -1666,3 +1666,54 @@ getDataCategorySummary <- function(project, legacy = FALSE){
     ret <- as.data.frame.matrix(xtabs(~ submitter_id + data_category , json))
     return(ret)
 }
+
+#' @title Generate Stemness Score based on RNASeq (mRNAsi stemness index) Malta et al., Cell, 2018
+#' @description TCGAanalyze_Stemness generate the mRNAsi score
+#' @param stemSig is a vector of the stemness Signature generated using gelnet package
+#' @param dataGE is a matrix of Gene expression (genes in rows, samples in cols) from TCGAprepare
+#' @export
+#' @return table with samples and stemness score
+#' @examples
+#'  # Selecting TCGA breast cancer (10 samples) for example stored in dataBRCA
+#'  dataNorm <- TCGAanalyze_Normalization(tabDF = dataBRCA, geneInfo =  geneInfo)
+#'  quantile filter of genes
+#'  dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
+#'                                   method = "quantile",
+#'                                   qnt.cut =  0.25)
+#'  dataBRCA_stemness <- TCGAanalyze_Stemness(stemSig = PCBC_stemSig, dataGE = dataFilt)
+TCGAanalyze_Stemness <- function(stemSig,
+                                 dataGE){
+
+    reads <- dataGE
+    X <- reads
+    commonStemsigGenes <- intersect(names(w),rownames(X))
+
+    X <- X[commonStemsigGenes,]
+    w <- w[ rownames(X) ]
+
+    # Score the Matrix X using Spearman correlation.
+
+    s <- apply( X, 2, function(z) {cor( z, w, method = "sp", use = "complete.obs" )} )
+
+    ## Scale the scores to be between 0 and 1
+    s <- s - min(s)
+    s <- s / max(s)
+
+    dataSce_stemness <- cbind(s)
+
+    dataAnnotationSC <- matrix(0,ncol(reads),2)
+    colnames(dataAnnotationSC) <- c("Sample","Annotation")
+
+
+    dataAnnotationSC <- as.data.frame(dataAnnotationSC)
+    dataAnnotationSC$Sample <- colnames(reads)
+    rownames(dataAnnotationSC) <- colnames(reads)
+
+    dataAnnotationSC <- cbind(dataAnnotationSC, StemnessScore = rep(0, nrow(dataAnnotationSC)))
+    dataAnnotationSC[rownames(dataSce_stemness),"StemnessScore"] <- as.numeric(dataSce_stemness)
+
+    colnames(dataAnnotationSC)[1] <- "Sample"
+
+    return(dataAnnotationSC)
+}
+
