@@ -509,12 +509,16 @@ makeSEfromDNAmethylation <- function(df, probeInfo=NULL){
     rse <- SummarizedExperiment(assays = assay, rowRanges = rowRanges, colData = colData)
 }
 
-#' @importFrom sesame openSesame
 readIDATDNAmethylation <- function(files,
                                    barcode,
                                    summarizedExperiment,
                                    platform,
                                    legacy){
+
+    if (!requireNamespace("sesame", quietly = TRUE)) {
+        stop("sesame package is needed for this function to work. Please install it.",
+             call. = FALSE)
+    }
 
     moved.files <- file.path(dirname(dirname(files)), basename(files))
 
