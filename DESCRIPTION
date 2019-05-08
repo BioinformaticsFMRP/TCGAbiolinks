@@ -2,7 +2,7 @@ Package: TCGAbiolinks
 Type: Package
 Title: TCGAbiolinks: An R/Bioconductor package for integrative analysis with GDC data
 Version: 2.13.0
-Date: 2017-06-7
+Date: 2019-05-06
 Author: Antonio Colaprico,
     Tiago Chedraoui Silva,
     Catharina Olsen,
@@ -16,7 +16,7 @@ Author: Antonio Colaprico,
     Michele Ceccarelli,
     Gianluca Bontempi,
     Houtan Noushmehr
-Maintainer: Antonio Colaprico <antonio.colaprico@ulb.ac.be>,
+Maintainer: Antonio Colaprico <axc1833@med.miami.edu>,
     Tiago Chedraoui Silva <tiagochst@usp.br>
 Depends:
     R (>= 3.2)
