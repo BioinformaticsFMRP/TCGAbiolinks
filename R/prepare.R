@@ -1304,9 +1304,11 @@ getBarcodeInfo <- function(barcode) {
         df <- merge(df,treatments, by="submitter_id", all = TRUE,sort = FALSE)
     }
     df$bcr_patient_barcode <- df$submitter_id
+    projects.info <- results$project
+    projects.info <- results$project[,grep("state",colnames(projects.info),invert = TRUE)]
     df <- merge(df,
-                cbind("submitter_id" = submitter_id, results$project),
-                sort = FALSE)
+                cbind("submitter_id" = submitter_id, projects.info),
+                sort = FALSE, by = "submitter_id")
 
     # Adding in the same order
     df <- df[match(barcode,df$submitter_id),]
