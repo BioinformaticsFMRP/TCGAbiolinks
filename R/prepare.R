@@ -1257,11 +1257,18 @@ getBarcodeInfo <- function(barcode) {
         }  else {
             diagnoses$submitter_id <- submitter_id
         }
-        df <- diagnoses
+        # this is required since the sample might not have a diagnosis
+        df <- merge(data.frame("submitter_id" = submitter_id),
+                    diagnoses,
+                    by = "submitter_id",
+                    all.x = T,
+                    sort = FALSE)
     } else {
         df <- as.data.frame(submitter_id)
 
     }
+
+
 
     if(!is.null(results$exposures) > 0) {
         exposures <- rbindlist(results$exposures, fill = TRUE)
@@ -1270,7 +1277,7 @@ getBarcodeInfo <- function(barcode) {
         }  else {
             exposures$submitter_id <- submitter_id
         }
-        df <- merge(df,exposures, by="submitter_id", all = TRUE,sort = FALSE)
+        df <- merge(df,exposures, by = "submitter_id", all = TRUE,sort = FALSE)
     }
 
 
@@ -1281,14 +1288,15 @@ getBarcodeInfo <- function(barcode) {
         } else {
             demographic$submitter_id <-submitter_id
         }
+        demographic <- demographic[!is.na(demographic$submitter_id),]
         df <- merge(df,demographic, by="submitter_id", all = TRUE,sort = FALSE)
     }
 
     treatments <- rbindlist(results$treatments,fill = TRUE)
-    if(nrow(treatments) > 0) {
+    if (nrow(treatments) > 0) {
         df[,treatments:=NULL]
 
-        if(any(grepl("submitter_id", colnames(treatments)))) {
+        if (any(grepl("submitter_id", colnames(treatments)))) {
             treatments$submitter_id <- gsub("_treatment","", treatments$submitter_id)
         } else {
             treatments$submitter_id <-submitter_id
@@ -1296,10 +1304,12 @@ getBarcodeInfo <- function(barcode) {
         df <- merge(df,treatments, by="submitter_id", all = TRUE,sort = FALSE)
     }
     df$bcr_patient_barcode <- df$submitter_id
-    df <- cbind(df,results$project)
+    df <- merge(df,
+                cbind("submitter_id" = submitter_id, results$project),
+                sort = FALSE)
 
     # Adding in the same order
-    df <- df[match(barcode,df$submitter_id)]
+    df <- df[match(barcode,df$submitter_id),]
     # This line should not exists, but some patients does not have clinical data
     # case: TCGA-R8-A6YH"
     # this has been reported to GDC, waiting answers
