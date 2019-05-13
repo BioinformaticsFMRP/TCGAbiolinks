@@ -1676,7 +1676,7 @@ getDataCategorySummary <- function(project, legacy = FALSE){
 #' @examples
 #'  # Selecting TCGA breast cancer (10 samples) for example stored in dataBRCA
 #'  dataNorm <- TCGAanalyze_Normalization(tabDF = dataBRCA, geneInfo =  geneInfo)
-#'  quantile filter of genes
+#'  # quantile filter of genes
 #'  dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
 #'                                   method = "quantile",
 #'                                   qnt.cut =  0.25)
@@ -1686,6 +1686,7 @@ TCGAanalyze_Stemness <- function(stemSig,
 
     reads <- dataGE
     X <- reads
+    w <- stemSig
     commonStemsigGenes <- intersect(names(w),rownames(X))
 
     X <- X[commonStemsigGenes,]
