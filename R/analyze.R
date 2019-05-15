@@ -1671,6 +1671,9 @@ getDataCategorySummary <- function(project, legacy = FALSE){
 #' @description TCGAanalyze_Stemness generate the mRNAsi score
 #' @param stemSig is a vector of the stemness Signature generated using gelnet package
 #' @param dataGE is a matrix of Gene expression (genes in rows, samples in cols) from TCGAprepare
+#' @param annotation as default is FALSE.
+#' If annotation == subtype it returns the molecular subtype of a sample.
+#' If annotation == sampleType it returns the type of a sample (normal or tumor)
 #' @export
 #' @return table with samples and stemness score
 #' @examples
@@ -1680,9 +1683,11 @@ getDataCategorySummary <- function(project, legacy = FALSE){
 #'  dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
 #'                                   method = "quantile",
 #'                                   qnt.cut =  0.25)
-#'  dataBRCA_stemness <- TCGAanalyze_Stemness(stemSig = PCBC_stemSig, dataGE = dataFilt)
+#'  dataBRCA_stemness <- TCGAanalyze_Stemness(stemSig = PCBC_stemSig,
+#'  dataGE = dataFilt, annotation = "sampleType")
 TCGAanalyze_Stemness <- function(stemSig,
-                                 dataGE){
+                                 dataGE,
+                                 annotation = FALSE){
 
     reads <- dataGE
     X <- reads
@@ -1714,6 +1719,28 @@ TCGAanalyze_Stemness <- function(stemSig,
     dataAnnotationSC[rownames(dataSce_stemness),"StemnessScore"] <- as.numeric(dataSce_stemness)
 
     colnames(dataAnnotationSC)[1] <- "Sample"
+    if( annotation == "sampleType"){
+
+        sampleTP <- TCGAquery_SampleTypes(barcode =dataAnnotationSC$Sample,typesample = "TP" )
+        sampleNT <- TCGAquery_SampleTypes(barcode =dataAnnotationSC$Sample,typesample = "NT" )
+
+        dataAnnotationSC[sampleTP,"Annotation"] <- "TP"
+        dataAnnotationSC[sampleNT,"Annotation"] <- "NT"
+        }
+
+
+
+    if( annotation == "subtype"){
+        dataSubt <- TCGAquery_subtype(tumor = "BRCA")
+
+         for( i in 1: nrow(dataAnnotationSC)){
+            curSample <- dataAnnotationSC$Sample[i]
+            dataAnnotationSC$Annotation <- dataSubt[dataSubt$patient %in% substr(curSample,1,12),"BRCA_Subtype_PAM50"]
+        }
+
+
+    }
+
 
     return(dataAnnotationSC)
 }
