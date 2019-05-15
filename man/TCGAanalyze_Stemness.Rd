@@ -4,12 +4,16 @@
 \alias{TCGAanalyze_Stemness}
 \title{Generate Stemness Score based on RNASeq (mRNAsi stemness index) Malta et al., Cell, 2018}
 \usage{
-TCGAanalyze_Stemness(stemSig, dataGE)
+TCGAanalyze_Stemness(stemSig, dataGE, annotation = FALSE)
 }
 \arguments{
 \item{stemSig}{is a vector of the stemness Signature generated using gelnet package}
 
 \item{dataGE}{is a matrix of Gene expression (genes in rows, samples in cols) from TCGAprepare}
+
+\item{annotation}{as default is FALSE.
+If annotation == subtype it returns the molecular subtype of a sample.
+If annotation == sampleType it returns the type of a sample (normal or tumor)}
 }
 \value{
 table with samples and stemness score
@@ -24,5 +28,6 @@ TCGAanalyze_Stemness generate the mRNAsi score
  dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
                                   method = "quantile",
                                   qnt.cut =  0.25)
- dataBRCA_stemness <- TCGAanalyze_Stemness(stemSig = PCBC_stemSig, dataGE = dataFilt)
+ dataBRCA_stemness <- TCGAanalyze_Stemness(stemSig = PCBC_stemSig,
+ dataGE = dataFilt, annotation = "sampleType")
 }
