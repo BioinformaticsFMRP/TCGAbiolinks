@@ -23,6 +23,7 @@
 #' "In_Frame_Ins", "Translation_Start_Site", "Nonstop_Mutation"
 #' @export
 #' @examples
+#' \dontrun{
 #' query <- GDCquery(project = "TCGA-KIRP",
 #'                   data.category = "Simple Nucleotide Variation",
 #'                   data.type = "Masked Somatic Mutation",
@@ -30,12 +31,11 @@
 #' GDCdownload(query, method = "api", directory = "maf")
 #' maf <- GDCprepare(query, directory = "maf")
 #'
-#' \dontrun{
 #' # Get GISTIC values
 #' gistic.query <- GDCquery(project = "TCGA-ACC",
-#' data.category = "Copy Number Variation",
-#' data.type = "Gene Level Copy Number Scores",
-#' access="open")
+#'                          data.category = "Copy Number Variation",
+#'                          data.type = "Gene Level Copy Number Scores",
+#'                          access = "open")
 #' GDCdownload(gistic.query)
 #' gistic <- GDCprepare(gistic.query)
 #' }
