@@ -47,6 +47,7 @@ A summarizedExperiment or a data.frame
 Reads the data downloaded and prepare it into an R object
 }
 \examples{
+\dontrun{
 query <- GDCquery(project = "TCGA-KIRP",
                   data.category = "Simple Nucleotide Variation",
                   data.type = "Masked Somatic Mutation",
@@ -54,12 +55,11 @@ query <- GDCquery(project = "TCGA-KIRP",
 GDCdownload(query, method = "api", directory = "maf")
 maf <- GDCprepare(query, directory = "maf")
 
-\dontrun{
 # Get GISTIC values
 gistic.query <- GDCquery(project = "TCGA-ACC",
-data.category = "Copy Number Variation",
-data.type = "Gene Level Copy Number Scores",
-access="open")
+                         data.category = "Copy Number Variation",
+                         data.type = "Gene Level Copy Number Scores",
+                         access = "open")
 GDCdownload(gistic.query)
 gistic <- GDCprepare(gistic.query)
 }
