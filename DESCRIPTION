@@ -91,6 +91,7 @@ biocViews: DNAMethylation,
     Sequencing,
     Survival
 Suggests:
+    jpeg,
     png,
     BiocStyle,
     rmarkdown,
