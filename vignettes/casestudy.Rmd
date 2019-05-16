@@ -279,9 +279,9 @@ TCGAvisualize_Heatmap(t(datFilt),
 The result is shown below:
 
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
+library(jpeg)
 library(grid)
-img <- readPNG("case2_Heatmap.png")
+img <- readJPEG("case2_Heatmap.jpg")
 grid.raster(img)
 ```
 
