@@ -144,3 +144,10 @@ NULL
 #' @name pancan2018
 #' @format A data frame with 7,734 lines and 10 columns
 NULL
+
+#' A numeric vector with Stemness signature trained on PCBC's dataset
+#' @docType data
+#' @keywords internal
+#' @name PCBC_stemSig
+#' @format A numeric vector with 12955 genes
+NULL
