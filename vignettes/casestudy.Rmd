@@ -685,9 +685,9 @@ scatter.plot(data = mae,
 
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(jpeg)
+library(png)
 library(grid)
-img <- readJPEG("elmer2.jpg")
+img <- readPNG("elmer1.png")
 grid.raster(img)
 
 ```
@@ -705,9 +705,9 @@ heatmapPairs(data = mae,
 ```
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
-library(png)
+library(jpeg)
 library(grid)
-img <- readPNG("elmer2.png")
+img <- readJPEG("elmer2.jpg")
 grid.raster(img)
 ```
 
