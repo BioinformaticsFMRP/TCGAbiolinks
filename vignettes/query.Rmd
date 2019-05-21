@@ -59,7 +59,7 @@ Example:
 - Participant: TCGA-G4-6317
 - Sample: TCGA-G4-6317-02
 
-For more information check [TCGA wiki](https://wiki.nci.nih.gov/display/TCGA/TCGA+barcode)
+For more information check [GDC TCGA barcodes](https://docs.gdc.cancer.gov/Encyclopedia/pages/TCGA_Barcode/)
 </div>
 </div>
 
@@ -280,7 +280,7 @@ query <- GDCquery(project = c("TCGA-LUAD"),
 
 This exmaple shows how the user can search for  glioblastoma multiform (GBM) 
 gene expression data with the normalized results for expression of a gene. 
-For more information check [rnaseqV2 TCGA wiki](https://wiki.nci.nih.gov/display/tcga/rnaseq+version+2)
+For more information about file.types check [GDC TCGA file types](https://gdc.cancer.gov/resources-tcga-users/legacy-archive-tcga-tag-descriptions)
 ```{r message=FALSE, warning=FALSE}
 # Gene expression aligned against hg19.
 query.exp.hg19 <- GDCquery(project = "TCGA-GBM",
