@@ -1289,7 +1289,10 @@ TCGAanalyze_EA <- function (GeneName, RegulonList, TableEnrichment, EAGenes, GOt
     else {
         topPathways_tab <- NA
     }
-    return(topPathways_tab)
+
+    if( GeneSymbolsTable == FALSE) {
+        return(topPathways_tab)
+    }
 
     if( GeneSymbolsTable == TRUE) {
         return(table_pathway_enriched_filt)
