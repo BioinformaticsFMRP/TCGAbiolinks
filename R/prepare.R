@@ -482,14 +482,6 @@ getInfiniumAnnotation <- function(platform, genome){
 
 makeSEfromDNAmethylation <- function(df, probeInfo=NULL){
     if(is.null(probeInfo)) {
-        gene.location <- get.GRCh.bioMart()
-        gene.GR <- GRanges(seqnames = paste0("chr", gene.location$chromosome_name),
-                           ranges = IRanges(start = gene.location$start_position,
-                                            end = gene.location$end_position),
-                           strand = gene.location$strand,
-                           symbol = gene.location$external_gene_name,
-                           EntrezID = gene.location$entrezgene)
-
         rowRanges <- GRanges(seqnames = paste0("chr", df$Chromosome),
                              ranges = IRanges(start = df$Genomic_Coordinate,
                                               end = df$Genomic_Coordinate),
@@ -982,9 +974,11 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
     # Prepare Patient table
     colData <-  colDataPrepare(cases)
 
+    # one ensemblID can be mapped to multiple entrezgene ID
     gene.location <- get.GRCh.bioMart("hg38")
-    aux <- strsplit(data$X1,"\\.")
-    data$ensembl_gene_id <- as.character(unlist(lapply(aux,function(x) x[1])))
+    gene.location <- gene.location[!duplicated(gene.location$ensembl_gene_id),] 
+        
+    data$ensembl_gene_id <- as.character(gsub("\\.[0-9]*","",data$X1))
     data <- subset(data, grepl("ENSG", data$ensembl_gene_id))
     found.genes <- table(data$ensembl_gene_id %in% gene.location$ensembl_gene_id)
     if("FALSE" %in% names(found.genes))
@@ -1018,6 +1012,10 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
     return(rse)
 }
 
+
+#' @importFrom purrr reduce
+#' @importFrom dplyr left_join
+#' @importFrom plyr alplydev
 readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,summarizedExperiment) {
     if(grepl("Gene Expression Quantification", data.type, ignore.case = TRUE)){
 
@@ -1026,20 +1024,16 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,su
         #  - FPKM
         #  - FPKM-UQ
         if(grepl("HTSeq",workflow.type)){
-            pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-            for (i in seq_along(files)) {
-                data <- read_tsv(file = files[i],
-                                 col_names = FALSE,
-                                 col_types = cols(
-                                     X1 = col_character(),
-                                     X2 = col_double()
-                                 ))
-                if(!missing(cases))  colnames(data)[2] <- cases[i]
-                if(i == 1) df <- data
-                if(i != 1) df <- merge(df, data, by=colnames(df)[1],all = TRUE)
-                setTxtProgressBar(pb, i)
-            }
-            close(pb)
+            
+            x <- plyr::alply(files,1, function(f) {
+                readr::read_tsv(file = files[i],
+                                col_names = FALSE,
+                                progress = FALSE,
+                                col_types = c("cd"))
+                
+            }, .progress = "time")
+            df <- x %>% purrr::reduce(left_join, by = "X1")
+            if(!missing(cases))  colnames(df)[-1] <- cases
             if(summarizedExperiment) df <- makeSEfromTranscriptomeProfiling(df,cases,workflow.type)
         }
     } else if(grepl("miRNA", workflow.type, ignore.case = TRUE) & grepl("miRNA", data.type, ignore.case = TRUE)) {
