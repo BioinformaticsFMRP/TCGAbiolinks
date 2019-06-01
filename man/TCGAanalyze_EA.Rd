@@ -5,7 +5,7 @@
 \title{Enrichment analysis of a gene-set with GO [BP,MF,CC]  and pathways.}
 \usage{
 TCGAanalyze_EA(GeneName, RegulonList, TableEnrichment, EAGenes, GOtype,
-  FDRThresh = 0.01)
+  FDRThresh = 0.01, GeneSymbolsTable = FALSE)
 }
 \arguments{
 \item{GeneName}{is the name of gene signatures list}
@@ -23,6 +23,8 @@ Cellular componet (CC)}
 
 \item{FDRThresh}{pvalue corrected (FDR) as threshold to selected significant
 BP, MF,CC, or pathways. (default FDR < 0.01)}
+
+\item{GeneSymbolsTable}{if it is TRUE will return a table with GeneSymbols in common GO or pathways.}
 }
 \value{
 Table with enriched GO or pathways by selected gene signature.
