@@ -482,14 +482,6 @@ getInfiniumAnnotation <- function(platform, genome){
 
 makeSEfromDNAmethylation <- function(df, probeInfo=NULL){
     if(is.null(probeInfo)) {
-        gene.location <- get.GRCh.bioMart()
-        gene.GR <- GRanges(seqnames = paste0("chr", gene.location$chromosome_name),
-                           ranges = IRanges(start = gene.location$start_position,
-                                            end = gene.location$end_position),
-                           strand = gene.location$strand,
-                           symbol = gene.location$external_gene_name,
-                           EntrezID = gene.location$entrezgene)
-
         rowRanges <- GRanges(seqnames = paste0("chr", df$Chromosome),
                              ranges = IRanges(start = df$Genomic_Coordinate,
                                               end = df$Genomic_Coordinate),
