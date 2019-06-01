@@ -3,3 +3,5 @@
 ^\.git$
 ^\.travis\.yml$
 ^appveyor\.yml$
+^doc$
+^Meta$

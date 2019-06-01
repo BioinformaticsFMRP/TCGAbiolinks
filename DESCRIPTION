@@ -19,7 +19,7 @@ Author: Antonio Colaprico,
 Maintainer: Antonio Colaprico <axc1833@med.miami.edu>,
     Tiago Chedraoui Silva <tiagochst@usp.br>
 Depends:
-    R (>= 3.2)
+    R (>= 3.5)
 Imports:
     downloader (>= 0.4),
     survminer,
