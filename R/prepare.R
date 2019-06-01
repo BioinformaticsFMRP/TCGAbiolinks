@@ -982,9 +982,11 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
     # Prepare Patient table
     colData <-  colDataPrepare(cases)
 
+    # one ensemblID can be mapped to multiple entrezgene ID
     gene.location <- get.GRCh.bioMart("hg38")
-    aux <- strsplit(data$X1,"\\.")
-    data$ensembl_gene_id <- as.character(unlist(lapply(aux,function(x) x[1])))
+    gene.location <- gene.location[!duplicated(gene.location$ensembl_gene_id),] 
+        
+    data$ensembl_gene_id <- as.character(gsub("\\.[0-9]*","",data$X1))
     data <- subset(data, grepl("ENSG", data$ensembl_gene_id))
     found.genes <- table(data$ensembl_gene_id %in% gene.location$ensembl_gene_id)
     if("FALSE" %in% names(found.genes))
@@ -1021,7 +1023,7 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
 
 #' @importFrom purrr reduce
 #' @importFrom dplyr left_join
-#' @importFrom plyr alply
+#' @importFrom plyr alplydev
 readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,summarizedExperiment) {
     if(grepl("Gene Expression Quantification", data.type, ignore.case = TRUE)){
 
@@ -1034,6 +1036,7 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,su
             x <- plyr::alply(files,1, function(f) {
                 readr::read_tsv(file = files[i],
                                 col_names = FALSE,
+                                progress = FALSE,
                                 col_types = c("cd"))
                 
             }, .progress = "time")
