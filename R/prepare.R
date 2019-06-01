@@ -1041,7 +1041,7 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,su
                 
             }, .progress = "time")
             df <- x %>% purrr::reduce(left_join, by = "X1")
-            if(!missing(cases))  colnames(df)[-1] <- cases[i]
+            if(!missing(cases))  colnames(df)[-1] <- cases
             if(summarizedExperiment) df <- makeSEfromTranscriptomeProfiling(df,cases,workflow.type)
         }
     } else if(grepl("miRNA", workflow.type, ignore.case = TRUE) & grepl("miRNA", data.type, ignore.case = TRUE)) {
