@@ -1018,6 +1018,10 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
     return(rse)
 }
 
+
+#' @importFrom purrr reduce
+#' @importFrom dplyr left_join
+#' @importFrom plyr alply
 readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,summarizedExperiment) {
     if(grepl("Gene Expression Quantification", data.type, ignore.case = TRUE)){
 
@@ -1026,20 +1030,15 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,su
         #  - FPKM
         #  - FPKM-UQ
         if(grepl("HTSeq",workflow.type)){
-            pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-            for (i in seq_along(files)) {
-                data <- read_tsv(file = files[i],
-                                 col_names = FALSE,
-                                 col_types = cols(
-                                     X1 = col_character(),
-                                     X2 = col_double()
-                                 ))
-                if(!missing(cases))  colnames(data)[2] <- cases[i]
-                if(i == 1) df <- data
-                if(i != 1) df <- merge(df, data, by=colnames(df)[1],all = TRUE)
-                setTxtProgressBar(pb, i)
-            }
-            close(pb)
+            
+            x <- plyr::alply(files,1, function(f) {
+                readr::read_tsv(file = files[i],
+                                col_names = FALSE,
+                                col_types = c("cd"))
+                
+            }, .progress = "time")
+            df <- x %>% purrr::reduce(left_join, by = "X1")
+            if(!missing(cases))  colnames(df)[-1] <- cases[i]
             if(summarizedExperiment) df <- makeSEfromTranscriptomeProfiling(df,cases,workflow.type)
         }
     } else if(grepl("miRNA", workflow.type, ignore.case = TRUE) & grepl("miRNA", data.type, ignore.case = TRUE)) {
