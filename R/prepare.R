@@ -546,6 +546,7 @@ readIDATDNAmethylation <- function(files,
 #' @importFrom GenomicRanges makeGRangesFromDataFrame
 #' @importFrom tibble as_data_frame
 readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platform){
+  if(missing(cases)) cases <- NULL
   if (grepl("OMA00",platform)){
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     for (i in seq_along(files)) {
@@ -555,7 +556,7 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
                     colClasses=c("character", # Composite Element REF
                                  "numeric"))   # beta value
       setnames(data,gsub(" ", "\\.", colnames(data)))
-      if(!missing(cases)) setnames(data,2,cases[i])
+      if(!is.null(cases)) setnames(data,2,cases[i])
       if (i == 1) {
         df <- data
       } else {
@@ -580,7 +581,7 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
       data <- fread(f, header = TRUE, sep = "\t",
                     stringsAsFactors = FALSE,skip = skip, colClasses = colClasses)
       setnames(data,gsub(" ", "\\.", colnames(data)))
-      if(!missing(cases)) setnames(data,2,cases[which(f == files)])
+      if(!is.null(cases)) setnames(data,2,cases[which(f == files)])
         setcolorder(data,c(1, 3:ncol(data), 2))
     }, .progress = "time")
     
