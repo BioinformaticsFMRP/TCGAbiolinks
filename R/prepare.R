@@ -546,63 +546,59 @@ readIDATDNAmethylation <- function(files,
 #' @importFrom GenomicRanges makeGRangesFromDataFrame
 #' @importFrom tibble as_data_frame
 readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platform){
-    if (grepl("OMA00",platform)){
-        pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-        for (i in seq_along(files)) {
-            data <- fread(files[i], header = TRUE, sep = "\t",
-                          stringsAsFactors = FALSE,skip = 1,
-                          na.strings="N/A",
-                          colClasses=c("character", # Composite Element REF
-                                       "numeric"))   # beta value
-            setnames(data,gsub(" ", "\\.", colnames(data)))
-            if(!missing(cases)) setnames(data,2,cases[i])
-            if (i == 1) {
-                df <- data
-            } else {
-                df <- merge(df, data, by = "Composite.Element.REF")
-            }
-            setTxtProgressBar(pb, i)
-        }
-        setDF(df)
-        rownames(df) <- df$Composite.Element.REF
-        df$Composite.Element.REF <- NULL
-    } else {
-        pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-        skip <- ifelse(all(grepl("hg38",files)), 0,1)
-        colClasses <- NULL
-        if(!all(grepl("hg38",files))) colClasses <- c("character", # Composite Element REF
-                                                      "numeric",   # beta value
-                                                      "character", # Gene symbol
-                                                      "character", # Chromosome
-                                                      "integer")
-
-        for (i in seq_along(files)) {
-            data <- fread(files[i], header = TRUE, sep = "\t",
-                          stringsAsFactors = FALSE,skip = skip, colClasses = colClasses)
-            setnames(data,gsub(" ", "\\.", colnames(data)))
-            if(!missing(cases)) setnames(data,2,cases[i])
-            if (i == 1) {
-                setcolorder(data,c(1, 3:ncol(data), 2))
-                df <- data
-            } else {
-                data <- subset(data,select = c(1,2))
-                df <- merge(df, data, by = "Composite.Element.REF")
-            }
-            setTxtProgressBar(pb, i)
-        }
-        if (summarizedExperiment) {
-            if(skip == 0) {
-                df <- makeSEfromDNAmethylation(df, probeInfo = as_data_frame(df)[,grep("TCGA",colnames(df),invert = TRUE)])
-            } else {
-                df <- makeSEfromDNAmethylation(df)
-            }
-        } else {
-            setDF(df)
-            rownames(df) <- df$Composite.Element.REF
-            df$Composite.Element.REF <- NULL
-        }
+  if (grepl("OMA00",platform)){
+    pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+    for (i in seq_along(files)) {
+      data <- fread(files[i], header = TRUE, sep = "\t",
+                    stringsAsFactors = FALSE,skip = 1,
+                    na.strings="N/A",
+                    colClasses=c("character", # Composite Element REF
+                                 "numeric"))   # beta value
+      setnames(data,gsub(" ", "\\.", colnames(data)))
+      if(!missing(cases)) setnames(data,2,cases[i])
+      if (i == 1) {
+        df <- data
+      } else {
+        df <- merge(df, data, by = "Composite.Element.REF")
+      }
+      setTxtProgressBar(pb, i)
     }
-    return(df)
+    setDF(df)
+    rownames(df) <- df$Composite.Element.REF
+    df$Composite.Element.REF <- NULL
+  } else {
+    skip <- ifelse(all(grepl("hg38",files)), 0,1)
+    colClasses <- NULL
+    if(!all(grepl("hg38",files))) colClasses <- c("character", # Composite Element REF
+                                                  "numeric",   # beta value
+                                                  "character", # Gene symbol
+                                                  "character", # Chromosome
+                                                  "integer")
+    
+    
+    x <- plyr::alply(files,1, function(f) {
+      data <- fread(f, header = TRUE, sep = "\t",
+                    stringsAsFactors = FALSE,skip = skip, colClasses = colClasses)
+      setnames(data,gsub(" ", "\\.", colnames(data)))
+      if(!missing(cases)) setnames(data,2,cases[which(f == files)])
+        setcolorder(data,c(1, 3:ncol(data), 2))
+    }, .progress = "time")
+    
+    df <- x %>% purrr::reduce(left_join)
+    
+    if (summarizedExperiment) {
+      if(skip == 0) {
+        df <- makeSEfromDNAmethylation(df, probeInfo = as_data_frame(df)[,grep("TCGA",colnames(df),invert = TRUE)])
+      } else {
+        df <- makeSEfromDNAmethylation(df)
+      }
+    } else {
+      setDF(df)
+      rownames(df) <- df$Composite.Element.REF
+      df$Composite.Element.REF <- NULL
+    }
+  }
+  return(df)
 }
 
 colDataPrepareTARGET <- function(barcode){
