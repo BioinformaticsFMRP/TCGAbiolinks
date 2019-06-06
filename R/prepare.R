@@ -1013,7 +1013,7 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
 
 #' @importFrom purrr reduce
 #' @importFrom dplyr left_join
-#' @importFrom plyr alplydev
+#' @importFrom plyr alply
 readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,summarizedExperiment) {
     if(grepl("Gene Expression Quantification", data.type, ignore.case = TRUE)){
 
