@@ -748,6 +748,7 @@ colDataPrepareTCGA <- function(barcode){
 #' @title Create samples information matrix for GDC samples
 #' @description Create samples information matrix for GDC samples add subtype information
 #' @param barcode TCGA or TARGET barcode
+#' @importFrom plyr rbind.fill
 #' @examples
 #' \dontrun{
 #'   query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
@@ -777,7 +778,7 @@ colDataPrepare <- function(barcode){
             if(is.null(patient.info)) {
                 patient.info <- getBarcodeInfo(ret$patient[start:end])
             } else {
-                patient.info <- rbind(patient.info,getBarcodeInfo(ret$patient[start:end]))
+                patient.info <- rbind.fill(patient.info,getBarcodeInfo(ret$patient[start:end]))
             }
         }
         patient.info
@@ -789,7 +790,7 @@ colDataPrepare <- function(barcode){
             if(is.null(patient.info)) {
                 patient.info <- getBarcodeInfo(ret$patient[start:end])
             } else {
-                patient.info <- rbind(patient.info,getBarcodeInfo(ret$patient[start:end]))
+                patient.info <- rbind.fill(patient.info,getBarcodeInfo(ret$patient[start:end]))
             }
         }
         patient.info
@@ -1023,11 +1024,10 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,su
         if(grepl("HTSeq",workflow.type)){
             
             x <- plyr::alply(files,1, function(f) {
-                readr::read_tsv(file = files[i],
+                readr::read_tsv(file = f,
                                 col_names = FALSE,
                                 progress = FALSE,
                                 col_types = c("cd"))
-                
             }, .progress = "time")
             df <- x %>% purrr::reduce(left_join, by = "X1")
             if(!missing(cases))  colnames(df)[-1] <- cases
@@ -1223,14 +1223,12 @@ getBarcodeInfo <- function(barcode) {
     options.pretty <- "pretty=true"
     options.expand <- "expand=project,diagnoses,diagnoses.treatments,annotations,family_histories,demographic,exposures"
     option.size <- paste0("size=",length(barcode))
-    #message(paste(barcode,collapse = '","'))
-    #message(paste0('"',paste(barcode,collapse = '","')))
     options.filter <- paste0("filters=",
                              URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.submitter_id","value":['),
                              paste0('"',paste(barcode,collapse = '","')),
                              URLencode('"]}}]}'))
-    #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
     url <- paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&"))
+    #message(url)
     json  <- tryCatch(
         getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
         error = function(e) {
