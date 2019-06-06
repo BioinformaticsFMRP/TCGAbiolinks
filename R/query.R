@@ -618,7 +618,7 @@ GDCquery_Maf <- function(tumor,
 #' }
 #' @return List with $subtypes attribute as a dataframe with barcodes, samples, subtypes, and colors. The $filtered attribute is returned as filtered samples with no subtype info
 TCGAquery_recount2<-function(project, tissue=c()){
-    tissues <- c(
+    tissuesGTEx <- c(
         "adipose tissue",
         "adrenal",
         "gland",
@@ -653,12 +653,42 @@ TCGAquery_recount2<-function(project, tissue=c()){
         "uterus",
         "vagina"
     )
+
+    tissuesTCGA <- c(
+        "adrenal_gland",
+        "bile_duct",
+        "bladder",
+        "bone_marrow",
+        "brain",
+        "breast",
+        "cervix",
+        "colorectal",
+        "esophagus",
+        "eye",
+        "head_and_neck",
+        "kidney",
+        "liver",
+        "lung",
+        "lymph_nodes",
+        "ovary",
+        "pancreas",
+        "pleura",
+        "prostate",
+        "skin",
+        "soft_tissue",
+        "stomach",
+        "testis",
+        "thymus",
+        "thyroid",
+        "uterus")
+
+
     tissue<-paste(unlist(strsplit(tissue, " ")), collapse="_")
     Res<-list()
 
     if(tolower(project)=="gtex"){
         for(t_i in tissue){
-            if(tissue%in%tissues){
+            if(tissue%in%tissuesGTEx){
                 con<-"http://duffel.rail.bio/recount/SRP012682/rse_gene_"
                 con<-paste0(con,tissue,".Rdata")
 
@@ -672,8 +702,8 @@ TCGAquery_recount2<-function(project, tissue=c()){
     }
     else if(tolower(project)=="tcga"){
         for(t_i in tissue){
-            if(tissue%in%tissues){
-                con<-"http://duffel.rail.bio/recount/TCGA/rse_gene_"
+            if(tissue%in%tissuesTCGA){
+                con<-"http://duffel.rail.bio/recount/v2/TCGA/rse_gene_"
                 con<-paste0(con,tissue,".Rdata")
                 message(paste0("downloading Range Summarized Experiment for: ", tissue))
                 load(url(con))
