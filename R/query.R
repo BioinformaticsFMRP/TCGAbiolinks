@@ -619,19 +619,19 @@ GDCquery_Maf <- function(tumor,
 #' @return List with $subtypes attribute as a dataframe with barcodes, samples, subtypes, and colors. The $filtered attribute is returned as filtered samples with no subtype info
 TCGAquery_recount2<-function(project, tissue=c()){
     tissuesGTEx <- c(
-        "adipose tissue",
+        "adipose_tissue",
         "adrenal",
         "gland",
         "bladder",
         "blood",
-        "blood vessel",
-        "bone marrow",
+        "blood_vessel",
+        "bone_marrow",
         "brain",
         "breast",
-        "cervix uteri",
+        "cervix_uteri",
         "colon",
         "esophagus",
-        "fallopian tube",
+        "fallopian_tube",
         "heart",
         "kidney",
         "liver",
@@ -645,7 +645,7 @@ TCGAquery_recount2<-function(project, tissue=c()){
         "salivary",
         "gland",
         "skin",
-        "small intestine",
+        "small_intestine",
         "spleen",
         "stomach",
         "testis",
@@ -689,7 +689,7 @@ TCGAquery_recount2<-function(project, tissue=c()){
     if(tolower(project)=="gtex"){
         for(t_i in tissue){
             if(tissue%in%tissuesGTEx){
-                con<-"http://duffel.rail.bio/recount/SRP012682/rse_gene_"
+                con<-"http://duffel.rail.bio/recount/v2/SRP012682/rse_gene_"
                 con<-paste0(con,tissue,".Rdata")
 
                 message(paste0("downloading Range Summarized Experiment for: ", tissue))
