@@ -899,9 +899,6 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
         if (class(ensembl) == "Mart") break
       }
       
-      print(ensembl)
-      print(ensembl)
-      print(ensembl)
       if(is.null(ensembl)) {
         message("Problems accessing ensembl database")
         return(NULL)
