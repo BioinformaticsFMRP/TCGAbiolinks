@@ -169,8 +169,21 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
             if("treatments" %in% colnames(df)){
                 treatments <- rbindlist(df$treatments,fill = TRUE)
                 df[,treatments:=NULL]
-                treatments$submitter_id <- gsub("_treatment","", treatments$submitter_id)
-                df <- merge(df,as.data.table(treatments)[,-c("updated_datetime","state","created_datetime")], by="submitter_id", all = TRUE)
+                treatments$submitter_id <- gsub("_treatment(_[0-9])?","", treatments$submitter_id)
+                treatments <- treatments[,-c("updated_datetime", "state", "created_datetime")]
+                
+                # we have now two types of treatment
+                treatments.pharmaceutical <- treatments[grep("Pharmaceutical",treatments$treatment_type,ignore.case = TRUE),]
+                treatments.radiation <- treatments[grep("radiation",treatments$treatment_type,ignore.case = TRUE),]
+                
+                # Adding a prefix
+                colnames(treatments.pharmaceutical) <- paste0("treatments_pharmaceutical_",colnames(treatments.pharmaceutical))
+                colnames(treatments.radiation) <- paste0("treatments_radiation_",colnames(treatments.radiation))
+                colnames(treatments.radiation)[grep("submitter",colnames(treatments.radiation))] <- "submitter_id"
+                colnames(treatments.pharmaceutical)[grep("submitter",colnames(treatments.pharmaceutical))] <- "submitter_id"
+                
+                df <- merge(df, as.data.table(treatments.pharmaceutical), by = "submitter_id",  all = TRUE)
+                df <- merge(df, as.data.table(treatments.radiation), by = "submitter_id",  all = TRUE)
             }
             df$bcr_patient_barcode <- df$submitter_id
             df$disease <- gsub("TCGA-|TARGET-", "", project)
