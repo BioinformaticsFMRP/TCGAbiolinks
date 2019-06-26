@@ -877,6 +877,7 @@ colDataPrepare <- function(barcode){
 #' @param genome hg38 or hg19
 #' @param as.granges Output as GRanges or data.frame
 #' @importFrom biomaRt getBM useMart listDatasets useEnsembl
+#' @importFrom R.utils withTimeout                                
 #' @export
 get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
     tries <- 0L
@@ -887,20 +888,23 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
             message("Accessing ", host, " to get gene information")
 
             ensembl <- tryCatch({
-                useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host =  host)
-            },  error = function(e) {
-                message(e)
-                for(mirror in c("asia","useast","uswest")){
-                    x <- useEnsembl("ensembl",
-                                    dataset = "hsapiens_gene_ensembl",
-                                    mirror = mirror,
-                                    host =  host)
-                    if(class(x) == "Mart") {
-                        return(x)
-                    }
+            withTimeout({
+                message("Trying to access ", host, " (limit time for response: 10 seconds)")
+                useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", 
+                           host = host)
+            }, timeout = 10, onTimeout = "error")
+        }, error = function(e) {
+            message(e)
+            for (mirror in c("asia", "useast", "uswest")) {
+                message("\nTrying mirror: ", mirror)
+                x <- useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", 
+                                mirror = mirror, host = host)
+                if (class(x) == "Mart") {
+                    return(x)
                 }
-                return(NULL)
-            })
+            }
+            return(NULL)
+        })
 
             if(is.null(host)) {
                 message("Problems accessing ensembl database")
