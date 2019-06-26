@@ -890,7 +890,7 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
         ensembl <- tryCatch({
           message(ifelse(is.null(mirror),
                          paste0("Accessing ", host, " to get gene information"),
-                         paste0("Accessing ", host,"(mirror ", mirror,")")))
+                         paste0("Accessing ", host," (mirror ", mirror,")")))
           useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host = host, mirror = mirror)
         }, error = function(e) {
           message(e)
