@@ -886,11 +886,11 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
       host <- ifelse(genome == "hg19", "grch37.ensembl.org", 
                      "www.ensembl.org")
 
-      for (mirror in list(NULL,"useast", "uswest", "asia")){
+      for (mirror in list("useast", "uswest", "asia", NULL)){
         ensembl <- tryCatch({
           message(ifelse(is.null(mirror),
                          paste0("Accessing ", host, " to get gene information"),
-                         paste0("Trying mirror ", mirror)))
+                         paste0("Accessing ", host,"(mirror ", mirror,")")))
           useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host = host, mirror = mirror)
         }, error = function(e) {
           message(e)
@@ -899,6 +899,9 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
         if (class(ensembl) == "Mart") break
       }
       
+      print(ensembl)
+      print(ensembl)
+      print(ensembl)
       if(is.null(ensembl)) {
         message("Problems accessing ensembl database")
         return(NULL)
