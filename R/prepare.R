@@ -62,7 +62,7 @@ GDCprepare <- function(query,
                                                          "In_Frame_Ins",
                                                          "Translation_Start_Site",
                                                          "Nonstop_Mutation")){
-  
+
   isServeOK()
   if(missing(query)) stop("Please set query parameter")
   if(any(duplicated(query$results[[1]]$cases)) & query$data.type != "Clinical data" &
@@ -86,12 +86,12 @@ GDCprepare <- function(query,
                      gsub(" ","_",query$results[[1]]$data_type),
                      gsub(" ","_",query$results[[1]]$file_id),
                      gsub(" ","_",query$results[[1]]$file_name))
-  
+
   files <- file.path(directory, files)
-  
+
   if(!all(file.exists(files))) stop(paste0("I couldn't find all the files from the query. ",
                                            "Please check if the directory parameter is right or `GDCdownload` downloaded the samples."))
-  
+
   if(grepl("Transcriptome Profiling", query$data.category, ignore.case = TRUE)){
     data <- readTranscriptomeProfiling(files = files,
                                        data.type = ifelse(!is.na(query$data.type),  as.character(query$data.type),  unique(query$results[[1]]$data_type)),
@@ -124,7 +124,7 @@ GDCprepare <- function(query,
                                                summarizedExperiment = summarizedExperiment,
                                                genome = ifelse(query$legacy,"hg19","hg38"),
                                                experimental.strategy = unique(query$results[[1]]$experimental_strategy))
-    
+
     if(query$data.type == "miRNA gene quantification")
       data <- readGeneExpressionQuantification(files = files,
                                                cases = query$results[[1]]$cases,
@@ -134,22 +134,22 @@ GDCprepare <- function(query,
     if(query$data.type == "miRNA isoform quantification")
       data <- readmiRNAIsoformQuantification(files = files,
                                              cases = query$results[[1]]$cases)
-    
+
     if(query$data.type == "Isoform expression quantification")
       data <- readIsoformExpressionQuantification(files = files, cases = query$results[[1]]$cases)
-    
+
     if(query$data.type == "Exon quantification")
       data <- readExonQuantification(files = files,
                                      cases = query$results[[1]]$cases,
                                      summarizedExperiment = summarizedExperiment)
-    
+
   }
   # Add data release to object
   if(summarizedExperiment & !is.data.frame(data)){
     metadata(data) <- list("data_release" = getGDCInfo()$data_release)
   }
-  
-  
+
+
   if((!is.null(add.gistic2.mut)) & summarizedExperiment) {
     message("=> Adding GISTIC2 and mutation information....")
     genes <- tolower(levels(EAGenes$Gene))
@@ -175,21 +175,21 @@ GDCprepare <- function(query,
       print(as.data.frame(colData(data)[data$sample %in% data$sample[duplicated(data$sample)],c("is_ffpe"),drop=F]))
     }
   }
-  
-  
+
+
   if(save){
     if(missing(save.filename) & !missing(query)) save.filename <- paste0(query$project,gsub(" ","_", query$data.category),gsub(" ","_",date()),".RData")
     message(paste0("Saving file:",save.filename))
     save(data, file = save.filename)
     message("File saved")
-    
+
     # save is true, due to the check in the beggining of the code
     if(remove.files.prepared){
       # removes files and empty directories
       remove.files.recursively(files)
     }
   }
-  
+
   return(data)
 }
 
@@ -213,11 +213,11 @@ readClinical <- function(files, data.type, cases){
 #' @importFrom tidyr separate
 readExonQuantification <- function (files, cases, summarizedExperiment = TRUE){
   pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-  
+
   for (i in seq_along(files)) {
     data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE)
-    
-    
+
+
     if(!missing(cases)) {
       assay.list <- gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)])
       # We will use this because there might be more than one col for each samples
@@ -258,14 +258,14 @@ readExonQuantification <- function (files, cases, summarizedExperiment = TRUE){
     return(rse)
   }
   return(df)
-  
+
 }
 readIsoformExpressionQuantification <- function (files, cases){
   pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-  
+
   for (i in seq_along(files)) {
     data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE)
-    
+
     if(!missing(cases)) {
       assay.list <- gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)])
       # We will use this because there might be more than one col for each samples
@@ -283,11 +283,11 @@ readIsoformExpressionQuantification <- function (files, cases){
   rownames(df) <- df[,1]
   df[,1] <- NULL
   return(df)
-  
+
 }
 readmiRNAIsoformQuantification <- function (files, cases){
   pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-  
+
   for (i in seq_along(files)) {
     data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE)
     data$barcode <- cases[i]
@@ -299,7 +299,7 @@ readmiRNAIsoformQuantification <- function (files, cases){
     setTxtProgressBar(pb, i)
   }
   setDF(df)
-  
+
 }
 readSimpleNucleotideVariationMaf <- function(files){
   ret <- read_tsv(files,
@@ -346,11 +346,11 @@ readGeneExpressionQuantification <- function(files,
                                              experimental.strategy,
                                              platform){
   pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-  
+
   skip <- unique((ifelse(experimental.strategy == "Gene expression array",1,0)))
-  
+
   if(length(skip) > 1) stop("It is not possible to handle those different platforms together")
-  
+
   for (i in seq_along(files)) {
     suppressWarnings({
       data <- fread(files[i],
@@ -373,7 +373,7 @@ readGeneExpressionQuantification <- function(files,
     setTxtProgressBar(pb, i)
   }
   setDF(df)
-  
+
   if (summarizedExperiment) {
     df <- makeSEfromGeneExpressionQuantification(df,assay.list, genome = genome)
   } else {
@@ -393,8 +393,8 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
     df$external_gene_name <- as.character(df[,1])
     df <- merge(df, gene.location, by="external_gene_name")
   }
-  
-  
+
+
   if("transcript_id" %in% assay.list){
     rowRanges <- GRanges(seqnames = paste0("chr", df$chromosome_name),
                          ranges = IRanges(start = df$start_position,
@@ -443,12 +443,12 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
 makeSEFromDNAMethylationMatrix <- function(betas, genome = "hg38", met.platform = "450K") {
   message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
   message("Creating a SummarizedExperiment from DNA methylation input")
-  
+
   # Instead of looking on the size, it is better to set it as a argument as the annotation is different
   annotation <-   getInfiniumAnnotation(met.platform, genome)
-  
+
   rowRanges <- annotation[names(annotation) %in% rownames(betas),,drop=FALSE]
-  
+
   colData <-  DataFrame(samples = colnames(betas))
   betas <- betas[rownames(betas) %in% names(rowRanges),,drop = FALSE]
   betas <- betas[names(rowRanges),,drop = FALSE]
@@ -487,7 +487,7 @@ makeSEfromDNAmethylation <- function(df, probeInfo=NULL){
                                           end = df$Genomic_Coordinate),
                          probeID = df$Composite.Element.REF,
                          Gene_Symbol = df$Gene_Symbol)
-    
+
     names(rowRanges) <- as.character(df$Composite.Element.REF)
     colData <-  colDataPrepare(colnames(df)[5:ncol(df)])
     assay <- data.matrix(subset(df,select = c(5:ncol(df))))
@@ -506,19 +506,19 @@ readIDATDNAmethylation <- function(files,
                                    summarizedExperiment,
                                    platform,
                                    legacy){
-  
+
   if (!requireNamespace("sesame", quietly = TRUE)) {
     stop("sesame package is needed for this function to work. Please install it.",
          call. = FALSE)
   }
-  
+
   moved.files <- file.path(dirname(dirname(files)), basename(files))
-  
+
   # for eah file move it to upper parent folder
   plyr::a_ply(files, 1,function(x){
     tryCatch(TCGAbiolinks:::move(x,file.path(dirname(dirname(x)), basename(x)),keep.copy = TRUE),error = function(e){})
   })
-  
+
   samples <- unique(gsub("_Grn.idat|_Red.idat","",moved.files))
   message("Processing  IDATs with Sesame - http://bioconductor.org/packages/sesame/")
   message("Running opensesame - applying quality masking and nondetection masking (threshold P-value 0.05)")
@@ -526,7 +526,7 @@ readIDATDNAmethylation <- function(files,
   betas <- openSesame(samples)
   barcode <- unique(data.frame("file" = gsub("_Grn.idat|_Red.idat","",basename(moved.files)), "barcode" = barcode))
   colnames(betas) <- barcode$barcode[match(basename(samples),barcode$file)]
-  
+
   if(summarizedExperiment){
     met.platform <- "EPIC"
     if(grepl("450",platform)) met.platform <- "450K"
@@ -535,7 +535,7 @@ readIDATDNAmethylation <- function(files,
     colData(betas) <- DataFrame(colDataPrepare(colnames(betas)))
   }
   return(betas)
-  
+
 }
 
 # We will try to make this function easier to use this function in its own data
@@ -575,8 +575,8 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
                                                   "character", # Gene symbol
                                                   "character", # Chromosome
                                                   "integer")
-    
-    
+
+
     x <- plyr::alply(files,1, function(f) {
       data <- fread(f, header = TRUE, sep = "\t",
                     stringsAsFactors = FALSE,skip = skip, colClasses = colClasses)
@@ -584,9 +584,9 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
       if(!is.null(cases)) setnames(data,2,cases[which(f == files)])
       setcolorder(data,c(1, 3:ncol(data), 2))
     }, .progress = "time")
-    
+
     df <- x %>% purrr::reduce(left_join)
-    
+
     if (summarizedExperiment) {
       if(skip == 0) {
         df <- makeSEfromDNAmethylation(df, probeInfo = as_data_frame(df)[,grep("TCGA",colnames(df),invert = TRUE)])
@@ -606,7 +606,7 @@ colDataPrepareTARGET <- function(barcode){
   message("Adding description to TARGET samples")
   tissue.code <- c('01','02','03','04','05','06','07','08','09','10','11',
                    '12','13','14','15','16','17','20','40','41','42','50','60','61','99')
-  
+
   definition <- c("Primary solid Tumor", # 01
                   "Recurrent Solid Tumor", # 02
                   "Primary Blood Derived Cancer - Peripheral Blood", # 03
@@ -633,12 +633,12 @@ colDataPrepareTARGET <- function(barcode){
                   "Xenograft grown in mice from established cell lines", #61
                   "Granulocytes after a Ficoll separation") # 99
   aux <- DataFrame(tissue.code = tissue.code,definition)
-  
+
   # in case multiple equal barcode
   regex <- paste0("[:alnum:]{5}-[:alnum:]{2}-[:alnum:]{6}",
                   "-[:alnum:]{3}-[:alnum:]{3}")
   samples <- str_match(barcode,regex)[,1]
-  
+
   ret <- DataFrame(barcode = barcode,
                    sample = substr(barcode, 1, 20),
                    patient = substr(barcode, 1, 16),
@@ -646,12 +646,12 @@ colDataPrepareTARGET <- function(barcode){
                    case.unique.id = substr(barcode, 11, 16),
                    tissue.code = substr(barcode, 18, 19),
                    nucleic.acid.code = substr(barcode, 24, 24))
-  
+
   ret <- merge(ret,aux, by = "tissue.code", sort = FALSE)
-  
+
   tumor.code <- c('00','01','02','03','04','10','15','20','21','30','40',
                   '41','50','51','52','60','61','62','63','64','65','70','71','80','81')
-  
+
   tumor.definition <- c("Non-cancerous tissue", # 00
                         "Diffuse Large B-Cell Lymphoma (DLBCL)", # 01
                         "Lung Cancer (all types)", # 02
@@ -679,7 +679,7 @@ colDataPrepareTARGET <- function(barcode){
                         "Soft tissue sarcoma, non-rhabdomyosarcoma") # 81
   aux <- DataFrame(tumor.code = tumor.code,tumor.definition)
   ret <- merge(ret,aux, by = "tumor.code", sort = FALSE)
-  
+
   nucleic.acid.code <- c('D','E','W','X','Y','R','S')
   nucleic.acid.description <-  c("DNA, unamplified, from the first isolation of a tissue",
                                  "DNA, unamplified, from the first isolation of a tissue embedded in FFPE",
@@ -690,8 +690,8 @@ colDataPrepareTARGET <- function(barcode){
                                  "RNA, from the first isolation of a tissue embedded in FFPE")
   aux <- DataFrame(nucleic.acid.code = nucleic.acid.code,nucleic.acid.description)
   ret <- merge(ret,aux, by = "nucleic.acid.code", sort = FALSE)
-  
-  
+
+
   ret <- ret[match(barcode,ret$barcode),]
   rownames(ret) <- gsub("\\.","-",make.names(ret$barcode,unique=TRUE))
   ret$code <- NULL
@@ -701,13 +701,13 @@ colDataPrepareTARGET <- function(barcode){
 colDataPrepareTCGA <- function(barcode){
   # For the moment this will work only for TCGA Data
   # We should search what TARGET data means
-  
+
   code <- c('01','02','03','04','05','06','07','08','09','10','11',
             '12','13','14','20','40','50','60','61')
   shortLetterCode <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
                        "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
                        "CELL","XP","XCL")
-  
+
   definition <- c("Primary solid Tumor", # 01
                   "Recurrent Solid Tumor", # 02
                   "Primary Blood Derived Cancer - Peripheral Blood", # 03
@@ -728,12 +728,12 @@ colDataPrepareTCGA <- function(barcode){
                   "Primary Xenograft Tissue", # 60
                   "Cell Line Derived Xenograft Tissue") # 61
   aux <- DataFrame(code = code,shortLetterCode,definition)
-  
+
   # in case multiple equal barcode
   regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                   "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
   samples <- str_match(barcode,regex)[,1]
-  
+
   ret <- DataFrame(barcode = barcode,
                    patient = substr(barcode, 1, 12),
                    sample = substr(barcode, 1, 16),
@@ -763,13 +763,13 @@ colDataPrepare <- function(barcode){
   # For the moment this will work only for TCGA Data
   # We should search what TARGET data means
   message("Starting to add information to samples")
-  
+
   if(all(grepl("TARGET",barcode))) ret <- colDataPrepareTARGET(barcode)
   if(all(grepl("TCGA",barcode))) ret <- colDataPrepareTCGA(barcode)
   message(" => Add clinical information to samples")
   # There is a limitation on the size of the string, so this step will be splited in cases of 100
   patient.info <- NULL
-  
+
   patient.info <- tryCatch({
     step <- 20 # more than 50 gives a bug =/
     for(i in 0:(ceiling(length(ret$patient)/step) - 1)){
@@ -847,7 +847,7 @@ colDataPrepare <- function(barcode){
       if (grepl(paste(c(available,"all"),collapse = "|"),tumor,ignore.case = TRUE)) {
         subtype <- TCGAquery_subtype(tumor)
         colnames(subtype) <- paste0("subtype_", colnames(subtype))
-        
+
         if(all(str_length(subtype$subtype_patient) == 12)){
           # Subtype information were to primary tumor in priority
           subtype$sample.aux <- paste0(subtype$subtype_patient,"-01")
@@ -865,7 +865,7 @@ colDataPrepare <- function(barcode){
   # Add purity information from http://www.nature.com/articles/ncomms9971
   # purity  <- getPurityinfo()
   # ret <- merge(ret, purity, by = "sample", all.x = TRUE, sort = FALSE)
-  
+
   # Put data in the right order
   ret <- ret[match(barcode,ret$barcode),]
   rownames(ret) <- ret$barcode
@@ -883,10 +883,10 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
   msg <- character()
   while (tries < 3L) {
     gene.location <- tryCatch({
-      host <- ifelse(genome == "hg19", "grch37.ensembl.org", 
+      host <- ifelse(genome == "hg19", "grch37.ensembl.org",
                      "www.ensembl.org")
 
-      for (mirror in list("useast", "uswest", "asia", NULL)){
+      for (mirror in list(NULL, "useast", "uswest", "asia")){
         ensembl <- tryCatch({
           message(ifelse(is.null(mirror),
                          paste0("Accessing ", host, " to get gene information"),
@@ -898,12 +898,12 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
         })
         if (class(ensembl) == "Mart") break
       }
-      
+
       if(is.null(ensembl)) {
         message("Problems accessing ensembl database")
         return(NULL)
       }
-      
+
       attributes <- c("chromosome_name",
                       "start_position",
                       "end_position", "strand",
@@ -913,7 +913,7 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
       db.datasets <- listDatasets(ensembl)
       description <- db.datasets[db.datasets$dataset=="hsapiens_gene_ensembl",]$description
       message(paste0("Downloading genome information (try:", tries,") Using: ", description))
-      
+
       filename <-  paste0(gsub("[[:punct:]]| ", "_",description),".rda")
       if(!file.exists(filename)) {
         chrom <- c(1:22, "X", "Y")
@@ -933,7 +933,7 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
     if(!is.null(gene.location)) break
   }
   if (tries == 3L) stop("failed to get URL after 3 tries:", "\n  error: ", msg)
-  
+
   if(as.granges) {
     gene.location$strand[gene.location$strand == 1] <- "+"
     gene.location$strand[gene.location$strand == -1] <- "-"
@@ -957,7 +957,7 @@ readProteinExpression <- function(files,cases) {
     setTxtProgressBar(pb, i)
   }
   close(pb)
-  
+
   return(df)
 }
 
@@ -965,22 +965,22 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
   # How many cases do we have?
   # We wil consider col 1 is the ensemble gene id, other ones are data
   size <- ncol(data)
-  
+
   # Prepare Patient table
   colData <-  colDataPrepare(cases)
-  
+
   # one ensemblID can be mapped to multiple entrezgene ID
   gene.location <- get.GRCh.bioMart("hg38")
-  gene.location <- gene.location[!duplicated(gene.location$ensembl_gene_id),] 
-  
+  gene.location <- gene.location[!duplicated(gene.location$ensembl_gene_id),]
+
   data$ensembl_gene_id <- as.character(gsub("\\.[0-9]*","",data$X1))
   data <- subset(data, grepl("ENSG", data$ensembl_gene_id))
   found.genes <- table(data$ensembl_gene_id %in% gene.location$ensembl_gene_id)
   if("FALSE" %in% names(found.genes))
     message(paste0("From the ", nrow(data), " genes we couldn't map ", found.genes[["FALSE"]]))
-  
+
   data <- merge(data, gene.location, by="ensembl_gene_id")
-  
+
   # Prepare data table
   # Remove the version from the ensembl gene id
   assays <- list(data.matrix(data[,2:size+1]))
@@ -990,7 +990,7 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
     rownames(x) <- NULL
     return(x)
   })
-  
+
   # Prepare rowRanges
   rowRanges <- GRanges(seqnames = paste0("chr", data$chromosome_name),
                        ranges = IRanges(start = data$start_position,
@@ -1003,7 +1003,7 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
   rse <- SummarizedExperiment(assays=assays,
                               rowRanges=rowRanges,
                               colData=colData)
-  
+
   return(rse)
 }
 
@@ -1013,13 +1013,13 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
 #' @importFrom plyr alply
 readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,summarizedExperiment) {
   if(grepl("Gene Expression Quantification", data.type, ignore.case = TRUE)){
-    
+
     # Status working for:
     #  - htseq
     #  - FPKM
     #  - FPKM-UQ
     if(grepl("HTSeq",workflow.type)){
-      
+
       x <- plyr::alply(files,1, function(f) {
         readr::read_tsv(file = f,
                         col_names = FALSE,
@@ -1036,13 +1036,13 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,su
       data <- read_tsv(file = files[i], col_names = TRUE,col_types = "cidc")
       if(!missing(cases))
         colnames(data)[2:ncol(data)] <- paste0(colnames(data)[2:ncol(data)],"_",cases[i])
-      
+
       if(i == 1) df <- data
       if(i != 1) df <- merge(df, data, by=colnames(df)[1],all = TRUE)
       setTxtProgressBar(pb, i)
     }
     close(pb)
-    
+
   } else if(grepl("Isoform Expression Quantification", data.type, ignore.case = TRUE)){
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     for (i in seq_along(files)) {
@@ -1064,7 +1064,7 @@ readGISTIC <- function(files, cases){
   gistic.list <- plyr::alply(files,1,.fun = function(file) {
     message("Reading file: ", file)
     data <- read_tsv(file = file, col_names = TRUE, progress = TRUE,col_types = readr::cols())
-    
+
     patient <- substr(unlist(str_split(cases,",")),1,12)
     info <- NULL
     info <- tryCatch({
@@ -1092,14 +1092,14 @@ readGISTIC <- function(files, cases){
       }
       info
     })
-    
+
     barcode <- as.character(info$barcode)[match(colnames(data),as.character(info$aliquot_id))]
     idx <- which(!is.na(barcode))
     colnames(data)[idx] <- barcode[idx]
     return(data)
   })
   gistic.df <- gistic.list %>% purrr::reduce(dplyr::full_join, by = c("Gene Symbol","Gene ID","Cytoband"))
-  
+
   return(gistic.df)
 }
 
@@ -1123,7 +1123,7 @@ addFFPE <- function(df) {
   message("Add FFPE information. More information at: \n=> https://cancergenome.nih.gov/cancersselected/biospeccriteria \n=> http://gdac.broadinstitute.org/runs/sampleReports/latest/FPPP_FFPE_Cases.html")
   barcode <- df$barcode
   patient <- df$patient
-  
+
   ffpe.info <- NULL
   ffpe.info <- tryCatch({
     step <- 20 # more than 50 gives a bug =/
@@ -1150,7 +1150,7 @@ addFFPE <- function(df) {
     }
     ffpe.info
   })
-  
+
   df <- merge(df, ffpe.info,by.x = "sample", by.y = "submitter_id")
   df <- df[match(barcode,df$barcode),]
   return(df)
@@ -1178,7 +1178,7 @@ getFFPE <- function(patient){
       fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
     }
   )
-  
+
   results <- json$data$hits
   results <- rbind.fill(results$samples)[,c("submitter_id","is_ffpe")]
   return(results)
@@ -1209,7 +1209,7 @@ getAliquot_ids <- function(barcode){
   results <- unlist(json$data$hits$samples)
   results.barcode <- grep("TCGA",results,value = TRUE)
   results.aliquot <- grep("TCGA",results,value = TRUE,invert = TRUE)
-  
+
   df <- data.frame(results.aliquot,results.barcode)
   colnames(df) <- c("aliquot_id","barcode")
   return(df)
@@ -1235,10 +1235,10 @@ getBarcodeInfo <- function(barcode) {
       fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
     }
   )
-  
+
   results <- json$data$hits
   submitter_id <- results$submitter_id
-  
+
   # We dont have the same cols for TCGA and TARGET so we need to check them
   if(!is.null(results$diagnoses)) {
     diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
@@ -1255,11 +1255,11 @@ getBarcodeInfo <- function(barcode) {
                 sort = FALSE)
   } else {
     df <- as.data.frame(submitter_id)
-    
+
   }
-  
-  
-  
+
+
+
   if(!is.null(results$exposures) > 0) {
     exposures <- rbindlist(results$exposures, fill = TRUE)
     if(any(grepl("submitter_id", colnames(exposures)))) {
@@ -1269,8 +1269,8 @@ getBarcodeInfo <- function(barcode) {
     }
     df <- merge(df,exposures, by = "submitter_id", all = TRUE,sort = FALSE)
   }
-  
-  
+
+
   if(!is.null(results$demographic)) {
     demographic <- results$demographic
     if(any(grepl("submitter_id", colnames(demographic)))) {
@@ -1281,11 +1281,11 @@ getBarcodeInfo <- function(barcode) {
     demographic <- demographic[!is.na(demographic$submitter_id),]
     df <- merge(df,demographic, by="submitter_id", all = TRUE,sort = FALSE)
   }
-  
+
   treatments <- rbindlist(results$treatments,fill = TRUE)
   if (nrow(treatments) > 0) {
     df[,treatments:=NULL]
-    
+
     if (any(grepl("submitter_id", colnames(treatments)))) {
       treatments$submitter_id <- gsub("_treatment","", treatments$submitter_id)
     } else {
@@ -1299,7 +1299,7 @@ getBarcodeInfo <- function(barcode) {
   df <- merge(df,
               cbind("submitter_id" = submitter_id, projects.info),
               sort = FALSE, by = "submitter_id")
-  
+
   # Adding in the same order
   df <- df[match(barcode,df$submitter_id),]
   # This line should not exists, but some patients does not have clinical data
@@ -1331,11 +1331,11 @@ TCGAprepare_Affy <- function(ClinData, PathFolder, TabCel){
          call. = FALSE)
   }
   affy_batch <- affy::ReadAffy(filenames=as.character(paste(TabCel$samples, ".CEL", sep="")))
-  
+
   eset <- affy::rma(affy_batch)
-  
+
   mat <- Biobase::exprs(eset)
-  
+
   return(mat)
-  
+
 }
