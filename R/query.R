@@ -300,7 +300,8 @@ GDCquery <- function(project,
                      "TARGET-[:alnum:]{2}-[:alnum:]{6}",sep = "|")
     } else {
         pat <- paste("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}-[:alnum:]{3}-[:alnum:]{2,3}-[:alnum:]{4}-[:alnum:]{2}",
-                     "[:alnum:]{6}-[:alnum:]{2}-[:alnum:]{6}-[:alnum:]{3}-[:alnum:]{3}",sep = "|")
+                     "[:alnum:]{6}-[:alnum:]{2}-[:alnum:]{6}-[:alnum:]{3}-[:alnum:]{3}",
+                     "[:alnum:]{3}-[:alnum:]{5}-[:alnum:]{2}", sep = "|")
     }
     if(!all(unique(results$data_type) == "Auxiliary test")) {
         barcodes <- unlist(lapply(results$cases,function(x) {
