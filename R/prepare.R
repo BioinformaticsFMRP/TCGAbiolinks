@@ -885,33 +885,27 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
     gene.location <- tryCatch({
       host <- ifelse(genome == "hg19", "grch37.ensembl.org",
                      "www.ensembl.org")
+      mirror <- list(NULL, "useast", "uswest", "asia")[[tries + 1]]
 
-      for (mirror in list(NULL, "useast", "uswest", "asia")){
-        ensembl <- tryCatch({
-          message(ifelse(is.null(mirror),
-                         paste0("Accessing ", host, " to get gene information"),
-                         paste0("Accessing ", host," (mirror ", mirror,")")))
-          useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host = host, mirror = mirror)
-        }, error = function(e) {
-          message(e)
-          return(NULL)
-        })
-        if (class(ensembl) == "Mart") break
-      }
-
-      if(is.null(ensembl)) {
-        message("Problems accessing ensembl database")
+      ensembl <- tryCatch({
+        message(ifelse(is.null(mirror),
+                       paste0("Accessing ", host, " to get gene information"),
+                       paste0("Accessing ", host," (mirror ", mirror,")")))
+        useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host = host, mirror = mirror)
+      }, error = function(e) {
+        message(e)
         return(NULL)
-      }
+      })
 
       attributes <- c("chromosome_name",
                       "start_position",
                       "end_position", "strand",
                       "ensembl_gene_id",
-                      "entrezgene",
+                      "entrezgene_id",
                       "external_gene_name")
+
       db.datasets <- listDatasets(ensembl)
-      description <- db.datasets[db.datasets$dataset=="hsapiens_gene_ensembl",]$description
+      description <- db.datasets[db.datasets$dataset == "hsapiens_gene_ensembl",]$description
       message(paste0("Downloading genome information (try:", tries,") Using: ", description))
 
       filename <-  paste0(gsub("[[:punct:]]| ", "_",description),".rda")
@@ -929,6 +923,7 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
     }, error = function(e) {
       msg <<- conditionMessage(e)
       tries <<- tries + 1L
+      NULL
     })
     if(!is.null(gene.location)) break
   }
