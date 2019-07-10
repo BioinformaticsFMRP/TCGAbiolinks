@@ -387,11 +387,11 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
   if(all(grepl("\\|",df[,1]))){
     aux <- strsplit(df$gene_id,"\\|")
     GeneID <- unlist(lapply(aux,function(x) x[2]))
-    df$entrezgene <- as.numeric(GeneID)
-    df <- merge(df, gene.location, by="entrezgene")
+    df$entrezgene_id <- as.numeric(GeneID)
+    df <- merge(df, gene.location, by = "entrezgene_id")
   } else {
     df$external_gene_name <- as.character(df[,1])
-    df <- merge(df, gene.location, by="external_gene_name")
+    df <- merge(df, gene.location, by = "external_gene_name")
   }
 
 
@@ -401,7 +401,7 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
                                           end = df$end_position),
                          strand = df$strand,
                          gene_id = df$external_gene_name,
-                         entrezgene = df$entrezgene,
+                         entrezgene = df$entrezgene_id,
                          ensembl_gene_id = df$ensembl_gene_id,
                          transcript_id = subset(df, select = 5))
     names(rowRanges) <- as.character(df$gene_id)
@@ -412,7 +412,7 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
                                           end = df$end_position),
                          strand = df$strand,
                          gene_id = df$external_gene_name,
-                         entrezgene = df$entrezgene,
+                         entrezgene = df$entrezgene_id,
                          ensembl_gene_id = df$ensembl_gene_id)
     names(rowRanges) <- as.character(df$external_gene_name)
   }
