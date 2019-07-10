@@ -257,13 +257,15 @@ datatable(getResults(query, rows = 1:100),
 
 query <- GDCquery(project = c("TCGA-LUAD"),
                   legacy = TRUE,
+		  data.category = "DNA methylation",
                   data.type = "Methylation percentage",
                   experimental.strategy = "Bisulfite-Seq")
 
 # VCF - controlled data
 query <- GDCquery(project = c("TCGA-LUAD"),
                   legacy = TRUE,
-                  data.type = "Bisulfite sequence alignment",
+                  data.category = "DNA methylation",
+		  data.type = "Bisulfite sequence alignment",
                   experimental.strategy = "Bisulfite-Seq")
 
 
