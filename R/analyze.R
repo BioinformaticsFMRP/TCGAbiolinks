@@ -1008,22 +1008,7 @@ UseRaw_afterFilter<-function(DataPrep, DataFilt){
 
 #' @importFrom biomaRt getBM useMart listDatasets
 map.ensg <- function(genome = "hg38", genes) {
-    if (genome == "hg19"){
-        # for hg19
-        ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
-                           host = "feb2014.archive.ensembl.org",
-                           path = "/biomart/martservice" ,
-                           dataset = "hsapiens_gene_ensembl")
-        attributes <- c("ensembl_gene_id", "entrezgene","external_gene_id")
-    } else {
-        # for hg38
-        ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
-        attributes <- c("ensembl_gene_id", "entrezgene","external_gene_name")
-    }
-    gene.location <- getBM(attributes = attributes,
-                           filters = c("ensembl_gene_id"),
-                           values = list(genes), mart = ensembl)
-    colnames(gene.location) <-  c("ensembl_gene_id", "entrezgene","external_gene_name")
+    gene.location <- get.GRCh.bioMart(genome)
     gene.location <- gene.location[match(genes,gene.location$ensembl_gene_id),]
     return(gene.location)
 }
