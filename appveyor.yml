@@ -51,7 +51,11 @@ environment:
   matrix:
     - R_VERSION: release
       R_ARCH: x64
+      GCC_PATH: mingw_64
       USE_RTOOLS: true
+      WARNINGS_ARE_ERRORS: 0
+      DOWNLOAD_FILE_METHOD: wininet
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: TRUE
 
 artifacts:
   - path: '*.Rcheck\**\*.log'
