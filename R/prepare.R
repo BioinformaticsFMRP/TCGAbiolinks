@@ -388,6 +388,7 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"
     aux <- strsplit(df$gene_id,"\\|")
     GeneID <- unlist(lapply(aux,function(x) x[2]))
     df$entrezgene_id <- as.numeric(GeneID)
+    gene.location <- gene.location[!duplicated(gene.location$entrezgene_id),]
     df <- merge(df, gene.location, by = "entrezgene_id")
   } else {
     df$external_gene_name <- as.character(df[,1])
