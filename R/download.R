@@ -279,10 +279,9 @@ GDCclientInstall <- function(){
     links = tryCatch({
         read_html("https://gdc.cancer.gov/access-data/gdc-data-transfer-tool")  %>% html_nodes("a") %>% html_attr("href")
     }, error = function(e) {
-        c("https://gdc.cancer.gov/system/files/authenticated%20user/0/gdc-client_v1.3.0_Windows_x64.zip",
-          "https://gdc.cancer.gov/system/files/authenticated%20user/0/gdc-client_v1.3.0_Ubuntu14.04_x64.zip",
-          "https://gdc.cancer.gov/system/files/authenticated%20user/0/gdc-client_v1.3.0_OSX_x64.zip",
-          "https://gdc.cancer.gov/system/files/authenticated%20user/0/gdc-client_v1.3.0_CentOS7_x64_Beta.zip")
+        c("https://gdc.cancer.gov/system/files/authenticated%20user/0/gdc-client_v1.4.0_Windows_x64.zip",
+          "https://gdc.cancer.gov/system/files/authenticated%20user/0/gdc-client_v1.4.0_Ubuntu_x64.zip",
+          "https://gdc.cancer.gov/system/files/authenticated%20user/0/gdc-client_v1.4.0_OSX_x64_10.12.6.zip")
     })
     bin <- links[grep("zip",links)]
     if(is.windows()) bin <- bin[grep("client*.*windows", bin,ignore.case = TRUE)]

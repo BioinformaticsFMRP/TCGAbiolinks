@@ -382,7 +382,7 @@ readGeneExpressionQuantification <- function(files,
   }
   return(df)
 }
-makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome="hg19"){
+makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome = "hg19"){
   gene.location <- get.GRCh.bioMart(genome)
   if(all(grepl("\\|",df[,1]))){
     aux <- strsplit(df$gene_id,"\\|")
@@ -909,17 +909,10 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
       description <- db.datasets[db.datasets$dataset == "hsapiens_gene_ensembl",]$description
       message(paste0("Downloading genome information (try:", tries,") Using: ", description))
 
-      filename <-  paste0(gsub("[[:punct:]]| ", "_",description),".rda")
-      if(!file.exists(filename)) {
         chrom <- c(1:22, "X", "Y")
         gene.location <- getBM(attributes = attributes,
                                filters = c("chromosome_name"),
                                values = list(chrom), mart = ensembl)
-        save(gene.location, file = filename)
-      } else {
-        message("Loading from disk")
-        gene.location <- get(load(filename))
-      }
       gene.location
     }, error = function(e) {
       msg <<- conditionMessage(e)
