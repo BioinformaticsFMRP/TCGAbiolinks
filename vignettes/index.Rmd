@@ -16,6 +16,18 @@ TCGAbiolinks is able to access The National Cancer Institute (NCI) Genomic Data 
 [GDC Application Programming Interface (API)](https://gdc.cancer.gov/developers/gdc-application-programming-interface-api) 
 to search, download and prepare relevant data for analysis in R. 
 
+# Citation
+
+If you use TCGAbiolinks, please cite:
+
+* Colaprico, Antonio, et al. "TCGAbiolinks: an R/Bioconductor package for integrative analysis of TCGA data." Nucleic acids research 44.8 (2015): e71-e71.
+* Silva, Tiago C., et al. "TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages." F1000Research 5 (2016). (https://f1000research.com/articles/5-1542/v2)
+
+# Other useful links
+
+* Gao, Galen F., et al. "Before and After: Comparison of Legacy and Harmonized TCGA Genomic Data Commons’ Data." Cell systems 9.1 (2019): 24-34. (https://doi.org/10.1016/j.cels.2019.06.006)
+
+* TCGA Workflow Analyze cancer genomics and epigenomics data using Bioconductor packages: http://bioconductor.org/packages/TCGAWorkflow/
 
 # Installation
 
