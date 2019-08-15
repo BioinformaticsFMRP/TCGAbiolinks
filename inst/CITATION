@@ -30,3 +30,31 @@ citEntry(entry = "Article",
                    "TCGAbiolinks: An R/Bioconductor package for integrative analysis of TCGA data",
                    "Nucleic Acids Research (05 May 2016) 44 (8): e71. (doi:10.1093/nar/gkv1507)")
 )
+
+citHeader("Please, also consider citing:")
+
+citEntry(
+  entry = "Article",
+  title= "TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages",
+  author="Silva, Tiago C and Colaprico, Antonio and Olsen, Catharina and D'Angelo, Fulvio and Bontempi, Gianluca and Ceccarelli, Michele and Noushmehr, Houtan",
+  journal= "F1000Research",
+  volume = "5",
+  year= 2016,
+  publisher="Faculty of 1000 Ltd",
+  textVersion = paste('Silva, Tiago C., et al. "TCGA Workflow: Analyze cancer genomics',
+  ' and epigenomics data using Bioconductor packages." F1000Research 5 (2016).')
+
+)
+
+citEntry(
+  entry = "Article",
+  title = "New functionalities in the TCGAbiolinks package for the study and integration of cancer data from GDC and GTEx",
+  author ="Mounir, Mohamed and Lucchetta, Marta and Silva, Tiago C and Olsen, Catharina and Bontempi, Gianluca and Chen, Xi and Noushmehr, Houtan and Colaprico, Antonio and Papaleo, Elena",
+  journal ="PLoS computational biology",
+  volume = 15,
+  number = 3,
+  pages = "e1006701",
+  year = 2019,
+  publisher="Public Library of Science",
+textVersion = paste('Mounir, Mohamed, et al. "New functionalities in the TCGAbiolinks package for the study and integration of cancer data from GDC and GTEx." PLoS computational biology 15.3 (2019): e1006701.')
+)
