@@ -42,6 +42,13 @@ navbar:
   right:
     - icon: fa-book fa-lg
       menu:
+        - text: "ELMER workshop"
+        - text: "Workshop for multi-omics analysis with ELMER"
+          href: http://rpubs.com/tiagochst/ELMER_workshop
+        - text: "ATAC-Seq workshop"
+        - text: "Workshop for ATAC-Seq analysis"
+          href: http://rpubs.com/tiagochst/atac_seq_workshop
+        - text: "---------"
         - text: "Bioc2017 workshop"
         - text: "Github ELMER/TCGAbiolinks"
           href: https://github.com/BioinformaticsFMRP/Bioc2017.TCGAbiolinks.ELMER
