@@ -28,6 +28,9 @@ navbar:
         - text: "Molecular subtypes"
           icon: fa-table
           href: subtypes.html
+        - text: "ATAC-seq"
+          icon: fa-flask
+          href: http://rpubs.com/tiagochst/atac_seq_workshop
     - text: "Analysis"
       href: analysis.html
       icon: fa-flask
