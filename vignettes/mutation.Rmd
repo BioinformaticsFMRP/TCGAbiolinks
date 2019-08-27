@@ -30,7 +30,7 @@ There are two options to download the data:
 
 ## Mutation data (hg38)
 
-This exmaple will download MAF (mutation annotation files) for variant calling pipeline muse.
+This example will download MAF (mutation annotation files) for variant calling pipeline muse.
 Pipelines options are: `muse`, `varscan2`, `somaticsniper`, `mutect`. For more information please access
 [GDC docs](https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/).
 
