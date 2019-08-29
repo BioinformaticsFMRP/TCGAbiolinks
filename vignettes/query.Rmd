@@ -133,7 +133,7 @@ Please, note that these tables are still incomplete.
 ## Harmonized data options (`legacy = FALSE`)
 
 ```{r}
-datatable(readr::read_csv("https://docs.google.com/spreadsheets/d/1f98kFdj9mxVDc1dv4xTZdx8iWgUiDYO-qiFJINvmTZs/export?format=csv&gid=2046985454"),
+datatable(readr::read_csv("https://docs.google.com/spreadsheets/d/1f98kFdj9mxVDc1dv4xTZdx8iWgUiDYO-qiFJINvmTZs/export?format=csv&gid=2046985454",col_types = readr::cols()),
           filter = 'top',
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 40), 
           rownames = FALSE)
@@ -141,7 +141,7 @@ datatable(readr::read_csv("https://docs.google.com/spreadsheets/d/1f98kFdj9mxVDc
 
 ## Legacy archive data  options (`legacy = TRUE`)
 ```{r}
-datatable(readr::read_csv("https://docs.google.com/spreadsheets/d/1f98kFdj9mxVDc1dv4xTZdx8iWgUiDYO-qiFJINvmTZs/export?format=csv&gid=1817673686"),
+datatable(readr::read_csv("https://docs.google.com/spreadsheets/d/1f98kFdj9mxVDc1dv4xTZdx8iWgUiDYO-qiFJINvmTZs/export?format=csv&gid=1817673686",col_types = readr::cols()),
           filter = 'top',
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 40), 
           rownames = FALSE)
