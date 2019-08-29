@@ -311,6 +311,7 @@ getManifest(query.exp.hg19,save = FALSE)
 # ATAC-seq data
 
 For the moment, ATAC-seq data is available at the [GDC publication page](https://gdc.cancer.gov/about-data/publications/ATACseq-AWG).
+Also, for more details, you can check an ATAC-seq workhop at http://rpubs.com/tiagochst/atac_seq_workshop
 
 The list of file available is below:
 ```{r message=FALSE, warning=FALSE}
@@ -336,9 +337,9 @@ GDCdownload(query,method = "client")
 Retrieve the numner of files under each data_category + data_type + experimental_strategy + platform.
 Almost like https://portal.gdc.cancer.gov/exploration
 
-```{r message=FALSE, warning=FALSE,eval = FALSE}
-tab <-  getSampleFilesSummary("TCGA-ACC")
-datatable(tab,
+```{r message=FALSE, warning=FALSE,eval = TRUE}
+tab <-  getSampleFilesSummary(project = "TCGA-ACC")
+datatable(head(tab),
           filter = 'top',
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = FALSE)
