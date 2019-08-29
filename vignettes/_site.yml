@@ -43,11 +43,17 @@ navbar:
       icon: fa-hand-pointer-o
       href: gui.html
   right:
-    - icon: fa-book fa-lg
+    - text: "Workshops"
+      icon: fa-book fa-lg
       menu:
+        - text: "TCGA workshop"
+        - text: "Workshop - TCGA data analysis"
+          href: http://rpubs.com/tiagochst/TCGAworkshop
+        - text: "---------"
         - text: "ELMER workshop"
         - text: "Workshop for multi-omics analysis with ELMER"
           href: http://rpubs.com/tiagochst/ELMER_workshop
+        - text: "---------"
         - text: "ATAC-Seq workshop"
         - text: "Workshop for ATAC-Seq analysis"
           href: http://rpubs.com/tiagochst/atac_seq_workshop
@@ -55,7 +61,8 @@ navbar:
         - text: "Bioc2017 workshop"
         - text: "Github ELMER/TCGAbiolinks"
           href: https://github.com/BioinformaticsFMRP/Bioc2017.TCGAbiolinks.ELMER
-        - text: "---------"
+    - icon: fa-code fa-lg
+      menu:
         - text: "TCGAbiolinks package"
         - text: "Github"
           href: https://github.com/BioinformaticsFMRP/TCGAbiolinks
