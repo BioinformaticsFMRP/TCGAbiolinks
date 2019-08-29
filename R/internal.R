@@ -123,15 +123,24 @@ checkDataTypeInput <- function(legacy, data.type){
             stop("Please set a data.type argument from the column legacy.data.type above")
         }
     } else {
-        harmonized.data.type <- c("Gene Expression Quantification",
-                                  "Copy Number Segment",
-                                  "Masked Copy Number Segment",
-                                  "Isoform Expression Quantification",
-                                  "miRNA Expression Quantification",
-                                  "Biospecimen Supplement",
-                                  "Gene Level Copy Number Scores",
-                                  "Clinical Supplement",
-                                  "Masked Somatic Mutation")
+        harmonized.data.type <- c(
+            "Aggregated Somatic Mutation",
+            "Gene Expression Quantification",
+            "Raw CGI Variant",
+            "Methylation Beta Value",
+            "Splice Junction Quantification",
+            "Annotated Somatic Mutation",
+            "Raw Simple Somatic Mutation",
+            "Masked Somatic Mutation",
+            "Copy Number Segment",
+            "Masked Copy Number Segment",
+            "Isoform Expression Quantification",
+            "miRNA Expression Quantification",
+            "Biospecimen Supplement",
+            "Gene Level Copy Number Scores",
+            "Clinical Supplement",
+            "Masked Somatic Mutation",
+            "Slide Image")
         if(!data.type %in% harmonized.data.type) {
             print(knitr::kable(as.data.frame(sort(harmonized.data.type))))
             stop("Please set a data.type argument from the column harmonized.data.type above")
