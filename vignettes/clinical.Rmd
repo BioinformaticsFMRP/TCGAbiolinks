@@ -97,7 +97,8 @@ clinical <- GDCquery_clinic(project = "TCGA-LUAD", type = "clinical")
 ```
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
-datatable(clinical, filter = 'top', 
+clinical %>%
+  datatable(filter = 'top', 
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
           rownames = FALSE)
 ```
@@ -148,25 +149,38 @@ GDCdownload(query)
 clinical <- GDCprepare_clinic(query, clinical.info = "patient")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
-datatable(clinical, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+clinical %>% 
+datatable(filter = 'top', 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+          rownames = FALSE)
 ```
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
 clinical.drug <- GDCprepare_clinic(query, clinical.info = "drug")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
-datatable(clinical.drug, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+clinical.drug %>% 
+datatable(filter = 'top', 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+          rownames = FALSE)
 ```
+
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
 clinical.radiation <- GDCprepare_clinic(query, clinical.info = "radiation")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
-datatable(clinical.radiation, options = list(scrollX = TRUE,  keys = TRUE), rownames = FALSE)
+clinical.radiation %>% 
+datatable(filter = 'top', 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+          rownames = FALSE)
 ```
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
 clinical.admin <- GDCprepare_clinic(query, clinical.info = "admin")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
-datatable(clinical.admin, options = list(scrollX = TRUE, keys = TRUE), rownames = FALSE)
+clinical.admin %>% 
+datatable(filter = 'top', 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+          rownames = FALSE)
 ```
 
 
@@ -192,7 +206,7 @@ GDCdownload(query)
 msi_results <- GDCprepare_clinic(query, "msi")
 ```
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
-datatable(msi_results, options = list(scrollX = TRUE, keys = TRUE))
+msi_results %>% datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 
