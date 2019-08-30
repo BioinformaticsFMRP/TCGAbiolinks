@@ -6,12 +6,15 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
+  
+<style> body {text-align: justify} </style>
+  
+  
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(progress = FALSE)
 ```
-
+  
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 library(TCGAbiolinks)
 library(SummarizedExperiment)
@@ -22,7 +25,7 @@ library(DT)
 
 **TCGAbiolinks** has provided a few functions to search, download and parse clinical data.
 This section starts by explaining the different sources for clinical information in GDC, followed by the necessary
-function to access these sources and it finishes by showing the insconsistencies between those sources.
+function to access these sources.
 
 
 ---
@@ -33,29 +36,66 @@ function to access these sources and it finishes by showing the insconsistencies
 <div class="panel-heading">Different sources</div>
 <div class="panel-body">
 
-In GDC database the clinical data can be retrieved from two sources:
+In GDC database the clinical data can be retrieved from different sources:
 
 - indexed clinical: a refined clinical data that is created using the XML files.
-- XML files
+- XML files: original source of the data
+- BCR Biotab: tsv files parsed from XML files
 
-There are two main differences:
+
+There are two main differences between the indexed clinical and XML files:
 
 - XML has more information: radiation, drugs information, follow-ups, biospecimen, etc. So the indexed one is only a subset of the XML files
 - The indexed data contains the updated data with the follow up information. 
-  For example: if the patient is alive in the first time clinical data was collect and the in the next follow-up he is dead, 
-  the indexed data will show dead. The XML will have two fields, one for the first time saying he is alive (in the clinical part) and the follow-up saying he is dead. You can see this case here: 
+For example: if the patient is alive in the first time clinical data was collect and the in the next follow-up he is dead, 
+the indexed data will show dead. The XML will have two fields, one for the first time saying he is alive (in the clinical part) and the follow-up saying he is dead. You can see this case here: 
 
 </div>
 </div>
 
+Other useful clinical information available are:
 
-# Get clinical indexed data
+* Tissue slide image 
+* Pathology report - Slide image
 
-In this example we will fetch clinical indexed data.
+
+# BCR Biotab
+
+In this example we will fetch clinical data from  BCR Biotab files.
+
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
+query <- GDCquery(project = "TCGA-ACC", 
+                  data.category = "Clinical",
+                  data.type = "Clinical Supplement", 
+                  data.format = "BCR Biotab",
+                  file.type = "radiation")
+GDCdownload(query)
+clinical.BCRtab.all <- GDCprepare(query)
+
+query <- GDCquery(project = "TCGA-ACC", 
+                  data.category = "Clinical",
+                  data.type = "Clinical Supplement", 
+                  data.format = "BCR Biotab")
+GDCdownload(query)
+clinical.BCRtab.radiation <- GDCprepare(query)
+names(clinical.BCRtab.radiation)
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+clinical.BCRtab.all$clinical_drug_acc  %>% 
+  head  %>% 
+  datatable(options = list(scrollX = TRUE, keys = TRUE))
+```
+
+
+# Clinical indexed data
+
+In this example we will fetch clinical indexed data (same as showed in the data portal).
 
 ```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
 clinical <- GDCquery_clinic(project = "TCGA-LUAD", type = "clinical")
 ```
+
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 datatable(clinical, filter = 'top', 
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
@@ -63,7 +103,7 @@ datatable(clinical, filter = 'top',
 ```
 
 
-# Parse XML clinical data
+# XML clinical data
 
 The process to get data directly from the XML are:
 1. Use `GDCquery` and `GDCDownload` functions to search/download either biospecimen or clinical XML files
@@ -130,7 +170,7 @@ datatable(clinical.admin, options = list(scrollX = TRUE, keys = TRUE), rownames 
 ```
 
 
-## Microsatellite data
+# Microsatellite data
 
 
 MSI-Mono-Dinucleotide Assay is performed to test a panel of four mononucleotide repeat loci (polyadenine tracts BAT25, BAT26, BAT40, and transforming growth factor receptor type II) and three dinucleotide repeat loci (CA repeats in D2S123, D5S346, and D17S250). Two additional pentanucleotide loci (Penta D and Penta E) are included in this assay to evaluate sample identity. Multiplex fluorescent-labeled PCR and capillary electrophoresis were used to identify MSI if a variation in the number of microsatellite repeats was detected between tumor and matched non-neoplastic tissue or mononuclear blood cells. Equivocal or failed markers were re-evaluated by singleplex PCR.
@@ -156,8 +196,54 @@ datatable(msi_results, options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 
-# Get legacy clinical data
+# Tissue slide image (SVS format)
 
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+# Tissue slide image files from legacy database
+query.legacy <- GDCquery(project = "TCGA-COAD", 
+                         data.category = "Clinical", 
+                         data.type = "Tissue slide image",
+                         legacy = TRUE,
+                         barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")) 
+
+# Tissue slide image files from harmonized database
+query.harmonized <- GDCquery(project = "TCGA-OV",
+                             data.category = "Biospecimen",
+                             data.type = 'Slide Image')
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+query.legacy %>% 
+  getResults %>% 
+  datatable(options = list(scrollX = TRUE, keys = TRUE))
+
+query.harmonized  %>% 
+  getResults %>% 
+  head  %>% 
+  datatable(options = list(scrollX = TRUE, keys = TRUE))
+```
+
+# Diagnostic Slide (SVS format)
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+# Pathology report from harmonized portal 
+query.harmonized <- GDCquery(project = "TCGA-COAD", 
+                             data.category = "Biospecimen", 
+                             data.type = "Slide Image",,
+                             experimental.strategy = "Diagnostic Slide",
+                             barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))  
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+query.harmonized  %>% 
+  getResults %>% 
+  head  %>% 
+  datatable(options = list(scrollX = TRUE, keys = TRUE))
+```
+
+
+
+# Legacy archive files
 The clincal data types available in legacy database are:
 
 * Biospecimen data (Biotab format)
@@ -166,31 +252,23 @@ The clincal data types available in legacy database are:
 * Pathology report (PDF)
 * Clinical data (Biotab format)
 
+## Pathology report (PDF)
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
-# Tissue slide image files
-query <- GDCquery(project = "TCGA-COAD", 
-                  data.category = "Clinical", 
-                  data.type = "Tissue slide image",
-                  legacy = TRUE,
-                  barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")) 
+# Pathology report from legacy portal 
+query.legacy <- GDCquery(project = "TCGA-COAD", 
+                         data.category = "Clinical", 
+                         data.type = "Pathology report",
+                         legacy = TRUE,
+                         barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))  
 ```
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
-query %>% getResults %>% datatable(options = list(scrollX = TRUE, keys = TRUE))
+query.legacy %>% 
+  getResults %>% 
+  datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
-# Pathology report
-query <- GDCquery(project = "TCGA-COAD", 
-                  data.category = "Clinical", 
-                  data.type = "Pathology report",
-                  legacy = TRUE,
-                  barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))  
-```
-
-```{r  echo=TRUE, message=FALSE, warning=FALSE}
-query %>% getResults %>% datatable(options = list(scrollX = TRUE, keys = TRUE))
-```
+## Tissue slide image (SVS format)
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
 # Tissue slide image
@@ -201,11 +279,15 @@ query <- GDCquery(project = "TCGA-COAD",
                   barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")) 
 ```
 
-```{r  echo=TRUE, message=FALSE, warning=FALSE}
-query %>% getResults %>% datatable(options = list(scrollX = TRUE, keys = TRUE))
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+query %>% 
+  getResults %>% 
+  datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+## Clinical Supplement (XML format)
+
+```{r results = 'hide', echo = TRUE, message = FALSE, warning = FALSE}
 # Clinical Supplement
 query <- GDCquery(project = "TCGA-COAD", 
                   data.category = "Clinical", 
@@ -215,9 +297,13 @@ query <- GDCquery(project = "TCGA-COAD",
 ```
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
-query %>% getResults %>% datatable(options = list(scrollX = TRUE, keys = TRUE))
+query %>% 
+  getResults %>% 
+  datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
+
+## Clinical data (Biotab format)
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
 # Clinical data
 query <- GDCquery(project = "TCGA-COAD", 
@@ -228,7 +314,10 @@ query <- GDCquery(project = "TCGA-COAD",
 ```
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
-query %>% getResults %>% select(-matches("cases"))%>% datatable(options = list(scrollX = TRUE, keys = TRUE))
+query %>% 
+  getResults %>% 
+  select(-matches("cases"))%>% 
+  datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE, eval = FALSE}
@@ -239,66 +328,6 @@ clinical.biotab <- GDCprepare(query)
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 names(clinical.biotab)
 datatable(clinical.biotab$clinical_radiation_coad, options = list(scrollX = TRUE, keys = TRUE))
-```
-
-
-# Clinical data inconsistencies
-
-<div class="panel panel-danger">
-<div class="panel-heading">Clinical data inconsistencies</div>
-<div class="panel-body">
-
-Some inconsisentecies have been found in the indexed clinical data and are being
-investigated by the GDC team. These inconsistencies are:
-
-- ***Vital status*** field is not correctly updated 
-- ***Tumor Grade*** field is not being filled
-- ***Progression or Recurrence*** field is not being filled
-
-</div>
-</div>
-
-## Vital status inconsistancie
-
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
-# Get XML files and parse them
-clin.query <- GDCquery(project = "TCGA-READ", data.category = "Clinical", file.type = "xml", barcode = "TCGA-F5-6702")
-GDCdownload(clin.query)
-clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient")
-clinical.patient.followup <- GDCprepare_clinic(clin.query, clinical.info = "follow_up")
-
-# Get indexed data
-clinical.index <- GDCquery_clinic("TCGA-READ")
-```
-```{r  echo = TRUE, message = FALSE, warning = FALSE}
-dplyr::select(clinical.patient,vital_status,days_to_death,days_to_last_followup) %>% datatable
-dplyr::select(clinical.patient.followup, vital_status,days_to_death,days_to_last_followup) %>% datatable
-# Vital status should be the same in the follow up table 
-dplyr::filter(clinical.index,submitter_id == "TCGA-F5-6702") %>% dplyr::select(vital_status,days_to_death,days_to_last_follow_up) %>% datatable
-```
-
-## Progression or Recurrence and Grande inconsistancie
-
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
-# Get XML files and parse them
-recurrent.samples <- GDCquery(project = "TCGA-LIHC",
-                             data.category = "Transcriptome Profiling",
-                             data.type = "Gene Expression Quantification", 
-                             workflow.type = "HTSeq - Counts",
-                             sample.type = 	"Recurrent Solid Tumor")$results[[1]] %>% select(cases)
-recurrent.patients <- unique(substr(recurrent.samples$cases,1,12))
-clin.query <- GDCquery(project = "TCGA-LIHC", data.category = "Clinical", file.type = "xml", barcode = recurrent.patients)
-GDCdownload(clin.query)
-clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient") 
-```
-```{r  echo = TRUE, message = FALSE, warning = FALSE}
-# Get indexed data
-GDCquery_clinic("TCGA-LIHC") %>% dplyr::filter(submitter_id %in% recurrent.patients) %>% 
-    dplyr::select(progression_or_recurrence,days_to_recurrence,tumor_grade) %>% datatable
-
-# XML data
-clinical.patient %>% dplyr::select(bcr_patient_barcode,neoplasm_histologic_grade) %>% datatable
-
 ```
 
 # Filter functions 
@@ -375,40 +404,40 @@ library(data.table)
 library(dplyr)
 library(regexPipes)
 clinical <- TCGAbiolinks:::getGDCprojects()$project_id %>% 
-    regexPipes::grep("TCGA",value=T) %>% 
-    sort %>% 
-    plyr::alply(1,GDCquery_clinic, .progress = "text") %>% 
-    rbindlist
+  regexPipes::grep("TCGA",value=T) %>% 
+  sort %>% 
+  plyr::alply(1,GDCquery_clinic, .progress = "text") %>% 
+  rbindlist
 readr::write_csv(clinical,path = paste0("all_clin_indexed.csv"))
 
 # This code will get all clinical XML data from TCGA
 getclinical <- function(proj){
-    message(proj)
-    while(1){
-        result = tryCatch({
-            query <- GDCquery(project = proj, data.category = "Clinical",file.type = "xml")
-            GDCdownload(query)
-            clinical <- GDCprepare_clinic(query, clinical.info = "patient")
-            for(i in c("admin","radiation","follow_up","drug","new_tumor_event")){
-                message(i)
-                aux <- GDCprepare_clinic(query, clinical.info = i)
-                if(is.null(aux) || nrow(aux) == 0) next
-                # add suffix manually if it already exists
-                replicated <- which(grep("bcr_patient_barcode",colnames(aux), value = T,invert = T) %in% colnames(clinical))
-                colnames(aux)[replicated] <- paste0(colnames(aux)[replicated],".",i)
-                if(!is.null(aux)) clinical <- merge(clinical,aux,by = "bcr_patient_barcode", all = TRUE)
-            }
-            readr::write_csv(clinical,path = paste0(proj,"_clinical_from_XML.csv")) # Save the clinical data into a csv file
-            return(clinical)
-        }, error = function(e) {
-            message(paste0("Error clinical: ", proj))
-        })
-    }
+  message(proj)
+  while(1){
+    result = tryCatch({
+      query <- GDCquery(project = proj, data.category = "Clinical",file.type = "xml")
+      GDCdownload(query)
+      clinical <- GDCprepare_clinic(query, clinical.info = "patient")
+      for(i in c("admin","radiation","follow_up","drug","new_tumor_event")){
+        message(i)
+        aux <- GDCprepare_clinic(query, clinical.info = i)
+        if(is.null(aux) || nrow(aux) == 0) next
+        # add suffix manually if it already exists
+        replicated <- which(grep("bcr_patient_barcode",colnames(aux), value = T,invert = T) %in% colnames(clinical))
+        colnames(aux)[replicated] <- paste0(colnames(aux)[replicated],".",i)
+        if(!is.null(aux)) clinical <- merge(clinical,aux,by = "bcr_patient_barcode", all = TRUE)
+      }
+      readr::write_csv(clinical,path = paste0(proj,"_clinical_from_XML.csv")) # Save the clinical data into a csv file
+      return(clinical)
+    }, error = function(e) {
+      message(paste0("Error clinical: ", proj))
+    })
+  }
 }
 clinical <- TCGAbiolinks:::getGDCprojects()$project_id %>% 
-    regexPipes::grep("TCGA",value=T) %>% sort %>% 
-    plyr::alply(1,getclinical, .progress = "text") %>% 
-    rbindlist(fill = TRUE) %>% setDF %>% subset(!duplicated(clinical))
+  regexPipes::grep("TCGA",value=T) %>% sort %>% 
+  plyr::alply(1,getclinical, .progress = "text") %>% 
+  rbindlist(fill = TRUE) %>% setDF %>% subset(!duplicated(clinical))
 
 readr::write_csv(clinical,path = "all_clin_XML.csv")
 # result: https://drive.google.com/open?id=0B0-8N2fjttG-WWxSVE5MSGpva1U

@@ -65,9 +65,14 @@ GDCprepare <- function(query,
 
   isServeOK()
   if(missing(query)) stop("Please set query parameter")
-  if(any(duplicated(query$results[[1]]$cases)) & query$data.type != "Clinical data" &
-     query$data.type !=  "Protein expression quantification" &
-     query$data.type != "Raw intensities") {
+
+  test.duplicated.cases <- (any(duplicated(query$results[[1]]$cases)) &
+                              query$data.type != "Clinical data" &
+                              query$data.type !=  "Protein expression quantification" &
+                              query$data.type != "Raw intensities" &
+                              query$data.type != "Clinical Supplement")
+
+  if(test.duplicated.cases) {
     dup <- query$results[[1]]$cases[duplicated(query$results[[1]]$cases)]
     cols <- c("tags","cases","experimental_strategy","analysis_workflow_type")
     cols <- cols[cols %in% colnames(query$results[[1]])]
@@ -204,6 +209,11 @@ readClinical <- function(files, data.type, cases){
     suppressMessages({
       ret <- plyr::alply(files,.margins = 1,readr::read_tsv, .progress = "text")
     })
+    names(ret) <- gsub("nationwidechildrens.org_","",gsub(".txt","",basename(files)))
+  } else if(data.type == "Clinical Supplement"){
+    ret <- plyr::alply(files,.margins = 1,function(f) {
+      readr::read_tsv(f,col_types = readr::cols())
+    }, .progress = "text")
     names(ret) <- gsub("nationwidechildrens.org_","",gsub(".txt","",basename(files)))
   }
   return(ret)
@@ -909,10 +919,10 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
       description <- db.datasets[db.datasets$dataset == "hsapiens_gene_ensembl",]$description
       message(paste0("Downloading genome information (try:", tries,") Using: ", description))
 
-        chrom <- c(1:22, "X", "Y")
-        gene.location <- getBM(attributes = attributes,
-                               filters = c("chromosome_name"),
-                               values = list(chrom), mart = ensembl)
+      chrom <- c(1:22, "X", "Y")
+      gene.location <- getBM(attributes = attributes,
+                             filters = c("chromosome_name"),
+                             values = list(chrom), mart = ensembl)
       gene.location
     }, error = function(e) {
       msg <<- conditionMessage(e)

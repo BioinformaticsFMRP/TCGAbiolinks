@@ -171,17 +171,17 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
                 df[,treatments:=NULL]
                 treatments$submitter_id <- gsub("_treatment(_[0-9])?","", treatments$submitter_id)
                 treatments <- treatments[,-c("updated_datetime", "state", "created_datetime")]
-                
+
                 # we have now two types of treatment
                 treatments.pharmaceutical <- treatments[grep("Pharmaceutical",treatments$treatment_type,ignore.case = TRUE),]
                 treatments.radiation <- treatments[grep("radiation",treatments$treatment_type,ignore.case = TRUE),]
-                
+
                 # Adding a prefix
                 colnames(treatments.pharmaceutical) <- paste0("treatments_pharmaceutical_",colnames(treatments.pharmaceutical))
                 colnames(treatments.radiation) <- paste0("treatments_radiation_",colnames(treatments.radiation))
                 colnames(treatments.radiation)[grep("submitter",colnames(treatments.radiation))] <- "submitter_id"
                 colnames(treatments.pharmaceutical)[grep("submitter",colnames(treatments.pharmaceutical))] <- "submitter_id"
-                
+
                 df <- merge(df, as.data.table(treatments.pharmaceutical), by = "submitter_id",  all = TRUE)
                 df <- merge(df, as.data.table(treatments.radiation), by = "submitter_id",  all = TRUE)
             }
@@ -297,7 +297,7 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
     else if(tolower(clinical.info) == "protocol") xpath <- "//bio:protocol"
     else if(tolower(clinical.info) == "portion") xpath <- "//bio:portion"
     else if(tolower(clinical.info) == "slide") xpath <- "//bio:slide"
-    else if(tolower(clinical.info)  == "msi") xpath <- "//auxiliary:microsatellite_instability_test_result"
+    else if(tolower(clinical.info) == "msi") xpath <- "//auxiliary:microsatellite_instability_test_result"
 
     if(tolower(clinical.info) == "follow_up") {
         clin <- parseFollowup(files,xpath,clinical.info)
