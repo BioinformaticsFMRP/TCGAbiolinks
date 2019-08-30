@@ -7,6 +7,7 @@ html_document:
   toc: true
   toc_float: true
   toc_depth: 3
+  df_print: paged
   css: include/site.css
   includes:
     in_header: include/header.html
