@@ -67,18 +67,19 @@ In this example we will fetch clinical data from  BCR Biotab files.
 query <- GDCquery(project = "TCGA-ACC", 
                   data.category = "Clinical",
                   data.type = "Clinical Supplement", 
-                  data.format = "BCR Biotab",
-                  file.type = "radiation")
+                  data.format = "BCR Biotab")
 GDCdownload(query)
 clinical.BCRtab.all <- GDCprepare(query)
+names(clinical.BCRtab.all)
 
 query <- GDCquery(project = "TCGA-ACC", 
                   data.category = "Clinical",
                   data.type = "Clinical Supplement", 
-                  data.format = "BCR Biotab")
+                  data.format = "BCR Biotab",
+                   file.type = "radiation")
 GDCdownload(query)
 clinical.BCRtab.radiation <- GDCprepare(query)
-names(clinical.BCRtab.radiation)
+
 ```
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
