@@ -5,7 +5,7 @@
 \title{Query GDC data}
 \usage{
 GDCquery(project, data.category, data.type, workflow.type,
-  legacy = FALSE, access, platform, file.type, barcode,
+  legacy = FALSE, access, platform, file.type, barcode, data.format,
   experimental.strategy, sample.type)
 }
 \arguments{
@@ -52,6 +52,9 @@ IlluminaHiSeq_RNASeqV2            \tab Mixed_DNASeq_Cont
 to define which file types to be used.}
 
 \item{barcode}{A list of barcodes to filter the files to download}
+
+\item{data.format}{Data format filter ("VCF", "TXT", "BAM","SVS","BCR XML","BCR SSF XML",
+"TSV", "BCR Auxiliary XML", "BCR OMF XML", "BCR Biotab", "MAF", "BCR PPS XML", "XLSX")}
 
 \item{experimental.strategy}{Filter to experimental stratey. Harmonized: WXS, RNA-Seq, miRNA-Seq, Genotyping Array.
 Legacy:  WXS, RNA-Seq, miRNA-Seq, Genotyping Array,

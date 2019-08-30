@@ -11,6 +11,8 @@
 #' @param sample.type A sample type to filter the files to download
 #' @param barcode A list of barcodes to filter the files to download
 #' @param legacy Search in the legacy repository
+#' @param data.format Data format filter ("VCF", "TXT", "BAM","SVS","BCR XML","BCR SSF XML",
+#' "TSV", "BCR Auxiliary XML", "BCR OMF XML", "BCR Biotab", "MAF", "BCR PPS XML", "XLSX")
 #' @param file.type To be used in the legacy database for some platforms,
 #' to define which file types to be used.
 #' @param workflow.type GDC workflow type
@@ -89,6 +91,7 @@ GDCquery <- function(project,
                      platform,
                      file.type,
                      barcode,
+                     data.format,
                      experimental.strategy,
                      sample.type){
 
@@ -134,6 +137,11 @@ GDCquery <- function(project,
             access <- NA
         } else if(access == FALSE) {
             access <- NA
+        }
+        if(missing(data.format)) {
+            data.format <- NA
+        } else if(data.format == FALSE) {
+            data.format <- NA
         }
     })
     print.header("GDCquery: Searching in GDC database","section")
@@ -241,6 +249,16 @@ GDCquery <- function(project,
         } else {
             message(paste0("The argument experimental_strategy does not match any of the results.\nPossible values:",
                            paste(unique(results$experimental_strategy),collapse = "\n=>")))
+        }
+    }
+
+    if(!is.na(data.format)) {
+        if(all(tolower(data.format) %in%  tolower(results$data_format))) {
+            message("ooo By data.format")
+            results <- results[tolower(results$data_format) %in% tolower(data.format),]
+        } else {
+            message(paste0("The argument experimental_strategy does not match any of the results.\nPossible values:",
+                           paste(unique(results$data_format),collapse = "\n=>")))
         }
     }
 
