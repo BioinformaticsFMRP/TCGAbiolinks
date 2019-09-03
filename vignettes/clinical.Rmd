@@ -48,8 +48,7 @@ There are two main differences between the indexed clinical and XML files:
 - XML has more information: radiation, drugs information, follow-ups, biospecimen, etc. So the indexed one is only a subset of the XML files
 - The indexed data contains the updated data with the follow up information. 
 For example: if the patient is alive in the first time clinical data was collect and the in the next follow-up he is dead, 
-the indexed data will show dead. The XML will have two fields, one for the first time saying he is alive (in the clinical part) and the follow-up saying he is dead. You can see this case here: 
-
+the indexed data will show dead. The XML will have two fields, one for the first time saying he is alive (in the clinical part) and the follow-up saying he is dead. 
 </div>
 </div>
 
