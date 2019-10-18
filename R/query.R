@@ -312,31 +312,58 @@ GDCquery <- function(project,
     }
 
     # get barcode of the samples
+    # 1) Normally for each sample we will have only single information
+    # however the mutation call uses both normal and tumor which are both
+    # reported by the API
+    if(!data.category %in% c("Clinical","Biospecimen","Other","Simple Nucleotide Variation", "Simple nucleotide variation")){
+        aux <- plyr::laply(results$cases,
+                           function(x) {
+                               unlist(x$samples[[1]],recursive = T)[c("portions.analytes.aliquots.submitter_id","sample_type","is_ffpe")]
+                           }) %>% as.data.frame
 
-    if(data.category %in% c("Clinical","Biospecimen")) {
-        pat <- paste("TCGA-[:alnum:]{2}-[:alnum:]{4}",
-                     "TARGET-[:alnum:]{2}-[:alnum:]{6}",sep = "|")
-    } else {
-        pat <- paste("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}-[:alnum:]{3}-[:alnum:]{2,3}-[:alnum:]{4}-[:alnum:]{2}",
-                     "[:alnum:]{6}-[:alnum:]{2}-[:alnum:]{6}-[:alnum:]{3}-[:alnum:]{3}",
-                     "[:alnum:]{3}-[:alnum:]{5}-[:alnum:]{2}", sep = "|")
-    }
-    if(!all(unique(results$data_type) == "Auxiliary test")) {
-        barcodes <- unlist(lapply(results$cases,function(x) {
-            str <- str_extract_all(unlist(x),pat) %>% unlist %>% na.omit %>%  paste(collapse = ",")
-            ifelse(all(is.na(str)), NA,str[!is.na(str)])
-        }))
-    } else { # auxiliary fies case
-        pat <- paste("TCGA-[:alnum:]{2}-[:alnum:]{4}",
-                     "TARGET-[:alnum:]{2}-[:alnum:]{6}",sep = "|")
-        barcodes <- unlist(lapply(results$file_name,function(x) {
-            str <- str_extract_all(unlist(x),pat) %>% unlist  %>% na.omit %>% paste(collapse = ",")
-            ifelse(all(is.na(str)), NA,str[!is.na(str)])
-        }))
-    }
-    results$cases <- barcodes
-    results$tissue.definition <- expandBarcodeInfo(barcodes)$tissue.definition
+        results$sample_type <- aux$sample_type %>% as.character()
+        results$is_ffpe <- aux$is_ffpe %>% as.logical
+        results$cases <- aux$portions.analytes.aliquots.submitter_id  %>% as.character()
+    } else  if(data.category %in% c("Clinical", "Biospecimen")){
+        # Clinical has another structure
+        aux <- plyr::laply(results$cases,
+                           function(x) {
+                               unlist(x,recursive = T)[c("submitter_id")]
+                           }) %>% as.data.frame
+        results$cases <- aux  %>% dplyr::pull(1) %>% as.character()
+    }  else  if(data.category == "Other"){
+        # Auxiliary test files does not have information linked toit.
+        # get frm file names
+        results$cases <- str_extract_all(results$file_name,"TCGA-[:alnum:]{2}-[:alnum:]{4}") %>% unlist
+    } else if(data.category == "Simple nucleotide variation"){
+        aux <- plyr::laply(results$cases,
+                           function(x) {
+                               lapply(x$samples,FUN = function(y)   unlist(y,recursive = T)[c("portions.analytes.aliquots.submitter_id")]) %>% unlist %>% paste(collapse = ",")
+                           }) %>% as.data.frame %>% pull(1)
+        results$cases <- aux
+    } else if(data.category == "Simple Nucleotide Variation"){
 
+        if(data.type %in% "Masked Somatic Mutation"){
+            # MAF files are one single file for all samples
+            aux <- plyr::laply(results$cases[[1]]$samples,
+                               function(x) {
+                                   unlist(x,recursive = T)[c("portions.analytes.aliquots.submitter_id","sample_type1","sample_type2","is_ffpe1","is_ffpe2")]
+                               }) %>% as.data.frame
+            results$cases <- aux$portions.analytes.aliquots.submitter_id  %>% as.character() %>% paste(collapse = ",")
+            if(!is.na(sample.type)) sample.type <- NA # ensure no filtering will be applied
+        } else {
+            aux <- plyr::laply(results$cases,
+                               function(x) {
+                                   unlist(x$samples[[1]],recursive = T)[c("portions.analytes.aliquots.submitter_id","sample_type1","sample_type2","is_ffpe1","is_ffpe2")]
+                               }) %>% as.data.frame
+            results$sample_type1 <- aux$sample_type1 %>% as.character()
+            results$sample_type2 <- aux$sample_type2 %>% as.character()
+            results$is_ffpe1 <- aux$is_ffpe1 %>% as.logical
+            results$is_ffpe2 <- aux$is_ffpe2 %>% as.logical
+            results$cases <- aux$portions.analytes.aliquots.submitter_id  %>% as.character()
+            if(!is.na(sample.type)) sample.type <- NA # ensure no filtering will be applied
+        }
+    }
     # Filter by barcode
     if(!any(is.na(barcode))) {
         message("ooo By barcode")
@@ -348,16 +375,17 @@ GDCquery <- function(project,
 
         results <- results[idx,]
     }
+
     # Filter by sample.type
     if(!any(is.na(sample.type))) {
-        if(!any(tolower(results$tissue.definition) %in% tolower(sample.type))) {
-            aux <- as.data.frame(table(results$tissue.definition))
-            aux <- aux[aux$Freq>0,]
-            print(kable(aux,row.names=FALSE,col.names = c("sample.type","Number of samples")))
+        if(!any(tolower(results$sample_type) %in% tolower(sample.type))) {
+            aux <- as.data.frame(table(results$sample_type))
+            aux <- aux[aux$Freq > 0,]
+            print(kable(aux,row.names = FALSE,col.names = c("sample.type","Number of samples")))
             stop("Please set a valid sample.type argument from the list above.")
         }
         message("ooo By sample.type")
-        results <- results[tolower(results$tissue.definition) %in% tolower(sample.type),]
+        results <- results[tolower(results$sample_type) %in% tolower(sample.type),]
     }
     # some how there are duplicated files in GDC we should remove them
     # Example of problematic query
@@ -381,7 +409,7 @@ GDCquery <- function(project,
     if(nrow(results) == 0) stop("Sorry, no results were found for this query")
 
     print.header("Preparing output","section")
-    ret <- data.frame(results=I(list(results)),
+    ret <- data.frame(results = I(list(results)),
                       project = I(list(project)),
                       data.category = data.category,
                       data.type = data.type,
@@ -488,8 +516,8 @@ getBarcodeDefinition <- function(type = "TCGA"){
                              "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
                              "CELL","XP","XCL")
 
-        tissue.definition <- c("Primary solid Tumor",
-                               "Recurrent Solid Tumor",
+        tissue.definition <- c("Primary Tumor",
+                               "Recurrent Tumor",
                                "Primary Blood Derived Cancer - Peripheral Blood",
                                "Recurrent Blood Derived Cancer - Bone Marrow",
                                "Additional - New Primary",
@@ -774,70 +802,4 @@ GDCquery_ATAC_seq <- function(tumor = NULL,
     return(ret)
 }
 
-
-
-#' @title Retrieve summary of files per sample in a project
-#' @description
-#'  Retrieve the numner of files under each
-#'   data_category + data_type + experimental_strategy + platform
-#'   Almost like https://portal.gdc.cancer.gov/exploration
-#' @param project A GDC project
-#' @param legacy Access legacy database ? Deafult: FALSE
-#' @param files.access Filter by file access ("open" or "controlled").
-#' Default: no filter
-#' @export
-#' @examples
-#'    summary <- getSampleFilesSummary("TCGA-LUAD")
-#' \dontrun{
-#'    summary <- getSampleFilesSummary(c("TCGA-OV","TCGA_ACC"))
-#' }
-#' @return A data frame with the maf file information
-#' @importFrom data.table dcast
-#' @importFrom plyr ldply
-getSampleFilesSummary <- function(project, legacy = FALSE, files.access = NA) {
-    out <- NULL
-    for(proj in project){
-        message("Accessing information for project: ", proj)
-        url <- getSampleSummaryUrl(proj,legacy)
-        x <- getURL(url,fromJSON,simplifyDataFrame = TRUE)
-        y <- x$data$hits$files
-        names(y) <- x$data$hits$submitter_id
-        df <- ldply (y, data.frame)
-        df <- df %>%  data.table::dcast(.id ~ data_category  + data_type + experimental_strategy + platform)
-        colnames(df) <- gsub("_NA","",colnames(df))
-        df$project <- proj
-        out <- rbind.fill(out,df)
-    }
-    return(out)
-}
-
-getSampleSummaryUrl <- function(project,legacy = FALSE, files.access = NA){
-    # Get manifest using the API
-    baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/cases/?","https://api.gdc.cancer.gov/cases/?")
-
-    options.pretty <- "pretty=true"
-    options.expand <- "expand=summary,summary.data_categories,files"
-    #option.size <- paste0("size=",getNbFiles(project,data.category,legacy))
-    option.size <- paste0("size=",1000)
-    option.format <- paste0("format=JSON")
-
-    options.filter <- paste0("filters=",
-                             URLencode('{"op":"and","content":['),  # Start json request
-                             URLencode('{"op":"in","content":{"field":"cases.project.project_id","value":["'),
-                             project,
-                             URLencode('"]}}'))
-
-    if(!any(is.na(files.access))) {
-        options.filter <- paste0(options.filter,addFilter("files.access", files.access))
-    }
-    # Close json request
-    options.filter <- paste0(options.filter, URLencode(']}'))
-    url <- paste0(baseURL,paste(options.pretty,
-                                options.expand,
-                                option.size,
-                                options.filter,
-                                option.format,
-                                sep = "&"))
-    return(url)
-}
 
