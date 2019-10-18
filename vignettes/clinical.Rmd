@@ -243,7 +243,7 @@ query.harmonized  %>%
 # Pathology report from harmonized portal 
 query.harmonized <- GDCquery(project = "TCGA-COAD", 
                              data.category = "Biospecimen", 
-                             data.type = "Slide Image",,
+                             data.type = "Slide Image",
                              experimental.strategy = "Diagnostic Slide",
                              barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))  
 ```
@@ -356,8 +356,8 @@ type the argument typesample.
 |------------	|--------------------------------------------------------------	|-----------------------------------------------	|
 | barcode 	| is a list of samples as TCGA barcodes 	|  	|
 | typesample 	| a character vector indicating tissue type to query. Example: 	|  	|
-|  	| TP 	| PRIMARY SOLID TUMOR 	|
-|  	| TR 	| RECURRENT SOLID TUMOR 	|
+|  	| TP 	| PRIMARY TUMOR 	|
+|  	| TR 	| RECURRENT TUMOR 	|
 |  	| TB 	| Primary Blood Derived Cancer-Peripheral Blood 	|
 |  	| TRBM 	| Recurrent Blood Derived Cancer-Bone Marrow 	|
 |  	| TAP 	| Additional-New Primary 	|

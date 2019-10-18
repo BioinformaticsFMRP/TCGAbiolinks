@@ -165,7 +165,7 @@ query <- GDCquery(project = c("TCGA-GBM", "TCGA-LGG"),
                   data.category = "DNA Methylation",
                   legacy = FALSE,
                   platform = c("Illumina Human Methylation 450"),
-                  sample.type = "Recurrent Solid Tumor"
+                  sample.type = "Recurrent Tumor"
 )
 datatable(getResults(query), 
           filter = 'top',
@@ -225,7 +225,7 @@ and verify the name of the files and the barcodes associated with it.
 ```{r message=FALSE, warning=FALSE}
 query <- GDCquery(project = c("TCGA-BRCA"),
                   data.category = "Sequencing Reads",  
-                  sample.type = "Primary solid Tumor")
+                  sample.type = "Primary Tumor")
 # Only first 100 to make render faster
 datatable(getResults(query, rows = 1:100,cols = c("file_name","cases")), 
           filter = 'top',
