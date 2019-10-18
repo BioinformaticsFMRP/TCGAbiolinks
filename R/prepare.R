@@ -613,6 +613,14 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
   return(df)
 }
 
+# Barcode example MMRF_1358_1_BM_CD138pos_T1_TSMRU_L02337
+colDataPrepareMMRF <- function(barcode){
+  ret <- DataFrame(barcode = barcode,
+                   sample = barcode,
+                   patient = substr(barcode,1,9)
+                   )
+}
+
 colDataPrepareTARGET <- function(barcode){
   message("Adding description to TARGET samples")
   tissue.code <- c('01','02','03','04','05','06','07','08','09','10','11',
@@ -774,43 +782,48 @@ colDataPrepare <- function(barcode){
   # For the moment this will work only for TCGA Data
   # We should search what TARGET data means
   message("Starting to add information to samples")
+  ret <- NULL
 
   if(all(grepl("TARGET",barcode))) ret <- colDataPrepareTARGET(barcode)
   if(all(grepl("TCGA",barcode))) ret <- colDataPrepareTCGA(barcode)
+  if(all(grepl("MMRF",barcode))) ret <- colDataPrepareMMRF(barcode)
+
   message(" => Add clinical information to samples")
   # There is a limitation on the size of the string, so this step will be splited in cases of 100
   patient.info <- NULL
+  if(all(grepl("TARGET|TCGA|MMRF",barcode))) {
 
-  patient.info <- tryCatch({
-    step <- 20 # more than 50 gives a bug =/
-    for(i in 0:(ceiling(length(ret$patient)/step) - 1)){
-      start <- 1 + step * i
-      end <- ifelse(((i + 1) * step) > length(ret$patient), length(ret$patient),((i + 1) * step))
-      if(is.null(patient.info)) {
-        patient.info <- getBarcodeInfo(ret$patient[start:end])
-      } else {
-        patient.info <- rbind.fill(patient.info,getBarcodeInfo(ret$patient[start:end]))
+    patient.info <- tryCatch({
+      step <- 20 # more than 50 gives a bug =/
+      for(i in 0:(ceiling(length(ret$patient)/step) - 1)){
+        start <- 1 + step * i
+        end <- ifelse(((i + 1) * step) > length(ret$patient), length(ret$patient),((i + 1) * step))
+        if(is.null(patient.info)) {
+          patient.info <- getBarcodeInfo(ret$patient[start:end])
+        } else {
+          patient.info <- rbind.fill(patient.info,getBarcodeInfo(ret$patient[start:end]))
+        }
       }
-    }
-    patient.info
-  }, error = function(e) {
-    step <- 2 # more than 50 gives a bug =/
-    for(i in 0:(ceiling(length(ret$patient)/step) - 1)){
-      start <- 1 + step * i
-      end <- ifelse(((i + 1) * step) > length(ret$patient), length(ret$patient),((i + 1) * step))
-      if(is.null(patient.info)) {
-        patient.info <- getBarcodeInfo(ret$patient[start:end])
-      } else {
-        patient.info <- rbind.fill(patient.info,getBarcodeInfo(ret$patient[start:end]))
+      patient.info
+    }, error = function(e) {
+      step <- 2 # more than 50 gives a bug =/
+      for(i in 0:(ceiling(length(ret$patient)/step) - 1)){
+        start <- 1 + step * i
+        end <- ifelse(((i + 1) * step) > length(ret$patient), length(ret$patient),((i + 1) * step))
+        if(is.null(patient.info)) {
+          patient.info <- getBarcodeInfo(ret$patient[start:end])
+        } else {
+          patient.info <- rbind.fill(patient.info,getBarcodeInfo(ret$patient[start:end]))
+        }
       }
-    }
-    patient.info
-  })
-  ret <- merge(ret,patient.info, by.x = "patient", by.y = "submitter_id", all.x = TRUE )
-  # Add FFPE information to sample
-  ret <- addFFPE(ret)
+      patient.info
+    })
+    ret <- merge(ret,patient.info, by.x = "patient", by.y = "submitter_id", all.x = TRUE )
+    if(all(grepl("TARGET|TCGA",barcode))) ret <- addFFPE(ret)
+  }
+
   if(!"project_id" %in% colnames(ret)) {
-    aux <- getGDCprojects()[,5:6]
+    aux <- getGDCprojects()[,c(5,7)]
     aux <- aux[aux$disease_type == unique(ret$disease_type),2]
     ret$project_id <- as.character(aux)
   }
@@ -1173,7 +1186,7 @@ getFFPE <- function(patient){
     error = function(e) {
       message(paste("Error: ", e, sep = " "))
       message("We will retry to access GDC again! URL:")
-      message(url)
+      #message(url)
       fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
     }
   )
@@ -1201,7 +1214,7 @@ getAliquot_ids <- function(barcode){
     error = function(e) {
       message(paste("Error: ", e, sep = " "))
       message("We will retry to access GDC again! URL:")
-      message(url)
+      #message(url)
       fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
     }
   )
@@ -1230,7 +1243,7 @@ getBarcodeInfo <- function(barcode) {
     error = function(e) {
       message(paste("Error: ", e, sep = " "))
       message("We will retry to access GDC again! URL:")
-      message(url)
+      #message(url)
       fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
     }
   )
@@ -1242,7 +1255,7 @@ getBarcodeInfo <- function(barcode) {
   if(!is.null(results$diagnoses)) {
     diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
     if(any(grepl("submitter_id", colnames(diagnoses)))) {
-      diagnoses$submitter_id <- gsub("_diagnosis","", diagnoses$submitter_id)
+      diagnoses$submitter_id <- gsub("_diagnosis.*","", diagnoses$submitter_id)
     }  else {
       diagnoses$submitter_id <- submitter_id
     }
@@ -1262,7 +1275,7 @@ getBarcodeInfo <- function(barcode) {
   if(!is.null(results$exposures) > 0) {
     exposures <- rbindlist(results$exposures, fill = TRUE)
     if(any(grepl("submitter_id", colnames(exposures)))) {
-      exposures$submitter_id <- gsub("_exposure","", exposures$submitter_id)
+      exposures$submitter_id <- gsub("_exposure.*","", exposures$submitter_id)
     }  else {
       exposures$submitter_id <- submitter_id
     }
@@ -1273,12 +1286,12 @@ getBarcodeInfo <- function(barcode) {
   if(!is.null(results$demographic)) {
     demographic <- results$demographic
     if(any(grepl("submitter_id", colnames(demographic)))) {
-      demographic$submitter_id <- gsub("_demographic","", results$demographic$submitter_id)
+      demographic$submitter_id <- gsub("_demographic.*","", results$demographic$submitter_id)
     } else {
       demographic$submitter_id <-submitter_id
     }
     demographic <- demographic[!is.na(demographic$submitter_id),]
-    df <- merge(df,demographic, by="submitter_id", all = TRUE,sort = FALSE)
+    df <- merge(df,demographic, by = "submitter_id", all = TRUE, sort = FALSE)
   }
 
   treatments <- rbindlist(results$treatments,fill = TRUE)
@@ -1286,13 +1299,13 @@ getBarcodeInfo <- function(barcode) {
     df[,treatments:=NULL]
 
     if (any(grepl("submitter_id", colnames(treatments)))) {
-      treatments$submitter_id <- gsub("_treatment","", treatments$submitter_id)
+      treatments$submitter_id <- gsub("_treatment.*","", treatments$submitter_id)
     } else {
       treatments$submitter_id <-submitter_id
     }
     df <- merge(df,treatments, by="submitter_id", all = TRUE,sort = FALSE)
   }
-  df$bcr_patient_barcode <- df$submitter_id
+  df$bcr_patient_barcode <- df$submitter_id %>% as.character()
   projects.info <- results$project
   projects.info <- results$project[,grep("state",colnames(projects.info),invert = TRUE)]
   df <- merge(df,
