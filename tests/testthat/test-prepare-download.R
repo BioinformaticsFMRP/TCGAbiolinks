@@ -24,9 +24,9 @@ test_that("getBarcodeInfo works", {
 })
 
 test_that("GDCprepare accepts more than one project", {
-    cases <-  c("TCGA-OR-A5JX-01A-11D-A29H-01", "TCGA-OR-A5J3-01A-11D-A29H-01",
-                "TCGA-02-0010-10A-01D-0182-01","TCGA-14-0871-01A-01D-0384-01")
-    acc.gbm<- GDCquery(project =  c("TCGA-ACC","TCGA-GBM"),
+    cases <-  c("TCGA-OR-A5JX-01A", "TCGA-OR-A5J3-01A",
+                "TCGA-06-0680-11A","TCGA-14-0871-01A")
+    acc.gbm <- GDCquery(project =  c("TCGA-ACC","TCGA-GBM"),
                         data.category = "Transcriptome Profiling",
                         data.type = "Gene Expression Quantification",
                         workflow.type = "HTSeq - FPKM-UQ",
