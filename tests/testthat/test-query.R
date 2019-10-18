@@ -19,26 +19,26 @@ test_that("GDCquery accepts more than one project", {
 })
 
 test_that("GDCquery can filter by sample.type", {
-    sample.type <- "Primary solid Tumor"
+    sample.type <- "Primary Tumor"
     query <- GDCquery(project = "TCGA-ACC",
                       data.category =  "Copy Number Variation",
                       data.type = "Masked Copy Number Segment",
                       sample.type = sample.type)
-    expect_equal(as.character(unique(query$results[[1]]$tissue.definition)),sample.type)
+    expect_equal(as.character(unique(query$results[[1]]$sample_type)),sample.type)
 
     sample.type <- "Solid Tissue Normal"
     query <- GDCquery(project = "TCGA-ACC",
                       data.category =  "Copy Number Variation",
                       data.type = "Masked Copy Number Segment",
                       sample.type = sample.type)
-    expect_equal(as.character(unique(query$results[[1]]$tissue.definition)),sample.type)
+    expect_equal(as.character(unique(query$results[[1]]$sample_type)),sample.type)
 
-    sample.type <- c("Solid Tissue Normal", "Primary solid Tumor")
+    sample.type <- c("Solid Tissue Normal", "Primary Tumor")
     query <- GDCquery(project = "TCGA-ACC",
                       data.category =  "Copy Number Variation",
                       data.type = "Masked Copy Number Segment",
                       sample.type = sample.type)
-    expect_true(all(sample.type %in% unique(query$results[[1]]$tissue.definition)))
+    expect_true(all(sample.type %in% unique(query$results[[1]]$sample_type)))
 })
 
 test_that("GDCquery can filter by barcode", {
