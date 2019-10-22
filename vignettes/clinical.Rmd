@@ -58,8 +58,10 @@ Other useful clinical information available are:
 * Pathology report - Slide image
 
 
-# BCR Biotab
+#  BCR Biotab
 
+
+## Clinical
 In this example we will fetch clinical data from  BCR Biotab files.
 
 ```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
@@ -83,6 +85,62 @@ clinical.BCRtab.radiation <- GDCprepare(query)
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 clinical.BCRtab.all$clinical_drug_acc  %>% 
+  head  %>% 
+  datatable(options = list(scrollX = TRUE, keys = TRUE))
+```
+
+
+In this example we will fetch all BRCA BCR Biotab files, and look for the ER status.
+
+```{r, results = "hide",cache=TRUE, message=FALSE}
+library(TCGAbiolinks)
+query <- GDCquery(project = "TCGA-BRCA", 
+                  data.category = "Clinical",
+                  data.type = "Clinical Supplement", 
+                  data.format = "BCR Biotab")
+GDCdownload(query)
+clinical.BCRtab.all <- GDCprepare(query)
+```
+
+```{R}
+# All available tables
+names(clinical.BCRtab.all)
+
+# colnames from clinical_patient_brca
+tibble::tibble(sort(colnames(clinical.BCRtab.all$clinical_patient_brca)))
+
+# ER status count
+plyr::count(clinical.BCRtab.all$clinical_patient_brca$er_status_by_ihc)
+
+# ER content 
+er.cols <- grep("^er",colnames(clinical.BCRtab.all$clinical_patient_brca))
+clinical.BCRtab.all$clinical_patient_brca[,c(2,er.cols)] %>% 
+DT::datatable(options = list(scrollX = TRUE))
+
+# All columns content first rows
+clinical.BCRtab.all$clinical_patient_brca %>% 
+  head  %>% 
+  datatable(options = list(scrollX = TRUE, keys = TRUE))
+```
+
+## Biospecimen
+
+
+```{r, results = "hide",cache=TRUE, message=FALSE,warning=FALSE}
+# Biospecimen BCR Biotab
+query.biospecimen <- GDCquery(project = "TCGA-BRCA", 
+                  data.category = "Biospecimen",
+                  data.type = "Biospecimen Supplement", 
+                  data.format = "BCR Biotab")
+GDCdownload(query.biospecimen)
+biospecimen.BCRtab.all <- GDCprepare(query.biospecimen)
+```
+
+```{R}
+# All available tables
+names(biospecimen.BCRtab.all)
+
+biospecimen.BCRtab.all$ssf_normal_controls_ov  %>% 
   head  %>% 
   datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
