@@ -527,7 +527,7 @@ readIDATDNAmethylation <- function(files,
 
   # for eah file move it to upper parent folder
   plyr::a_ply(files, 1,function(x){
-    tryCatch(TCGAbiolinks:::move(x,file.path(dirname(dirname(x)), basename(x)),keep.copy = TRUE),error = function(e){})
+    tryCatch(TCGAbiolinks:::move(x,file.path(dirname(dirname(x)), basename(x)),keep.copy = FALSE),error = function(e){})
   })
 
   samples <- unique(gsub("_Grn.idat|_Red.idat","",moved.files))
