@@ -67,10 +67,11 @@ GDCprepare <- function(query,
   if(missing(query)) stop("Please set query parameter")
 
   test.duplicated.cases <- (any(duplicated(query$results[[1]]$cases)) &
-                              query$data.type != "Clinical data" &
-                              query$data.type !=  "Protein expression quantification" &
-                              query$data.type != "Raw intensities" &
-                              query$data.type != "Clinical Supplement")
+                              !(query$data.type %in% c("Clinical data",
+                                                       "Protein expression quantification",
+                                                       "Raw intensities",
+                                                       "Clinical Supplement",
+                                                       "Biospecimen Supplement")))
 
   if(test.duplicated.cases) {
     dup <- query$results[[1]]$cases[duplicated(query$results[[1]]$cases)]
@@ -204,13 +205,15 @@ remove.files.recursively <- function(files){
   files2rm <- dirname(files2rm) # data category
   if(length(list.files(files2rm)) == 0) remove.files.recursively(files2rm)
 }
+
+
 readClinical <- function(files, data.type, cases){
   if(data.type == "Clinical data"){
     suppressMessages({
       ret <- plyr::alply(files,.margins = 1,readr::read_tsv, .progress = "text")
     })
     names(ret) <- gsub("nationwidechildrens.org_","",gsub(".txt","",basename(files)))
-  } else if(data.type == "Clinical Supplement"){
+  } else if(data.type %in% c("Clinical Supplement","Biospecimen Supplement")){
     ret <- plyr::alply(files,.margins = 1,function(f) {
       readr::read_tsv(f,col_types = readr::cols())
     }, .progress = "text")

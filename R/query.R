@@ -324,13 +324,21 @@ GDCquery <- function(project,
         results$sample_type <- aux$sample_type %>% as.character()
         results$is_ffpe <- aux$is_ffpe %>% as.logical
         results$cases <- aux$portions.analytes.aliquots.submitter_id  %>% as.character()
-    } else  if(data.category %in% c("Clinical", "Biospecimen")){
+    } else  if(data.category %in% c("Clinical")){
         # Clinical has another structure
         aux <- plyr::laply(results$cases,
                            function(x) {
                                unlist(x,recursive = T)[c("submitter_id")]
                            }) %>% as.data.frame
         results$cases <- aux  %>% dplyr::pull(1) %>% as.character()
+
+    } else  if(data.category %in% c("Biospecimen")){
+        # Clinical has another structure
+        aux <- plyr::laply(results$cases,
+                           function(x) {
+                               paste(x$submitter_id,collapse = ",")
+                           })
+        results$cases <- aux
     }  else  if(data.category == "Other"){
         # Auxiliary test files does not have information linked toit.
         # get frm file names
