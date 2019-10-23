@@ -123,3 +123,40 @@ getSubmitterID <- function(project,legacy = FALSE, files.access = NA){
 
 
 }
+
+# getBarcodefromAliquot(c("4e06e279-5f0d-4bf5-8659-67b8069050b8","bb6e1801-b08a-49b1-bc4b-205fdefb035b"))
+getBarcodefromAliquot <- function(aliquot){
+    baseURL <- "https://api.gdc.cancer.gov/cases/?"
+    options.fields <- "fields=samples.portions.analytes.aliquots.aliquot_id,samples.portions.analytes.aliquots.submitter_id"
+    options.pretty <- "pretty=true"
+    option.size <- paste0("size=",length(aliquot))
+    #message(paste(barcode,collapse = '","'))
+    #message(paste0('"',paste(barcode,collapse = '","')))
+    options.filter <- paste0("filters=",
+                             URLencode('{"op":"and","content":[{"op":"in","content":{"field":"samples.portions.analytes.aliquots.aliquot_id","value":['),
+                             paste0('"',paste(aliquot,collapse = '","')),
+                             URLencode('"]}}]}'))
+    #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
+    url <- paste0(baseURL,paste(options.pretty,options.fields, option.size, options.filter, sep = "&"))
+    json  <- tryCatch(
+        getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
+        error = function(e) {
+            message(paste("Error: ", e, sep = " "))
+            message("We will retry to access GDC again! URL:")
+            #message(url)
+            fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+        }
+    )
+    results <- json$data$hits
+
+
+    results <- plyr::ldply(results$samples,.fun = function(x){
+        x$portions[[1]]$analytes[[1]]$aliquots %>% bind_rows()
+    })
+
+    results <- results$submitter_id[match(aliquot,results$aliquot_id)]
+
+    return(results)
+}
+
+
