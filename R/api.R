@@ -148,7 +148,10 @@ getBarcodefromAliquot <- function(aliquot){
         }
     )
     results <- json$data$hits
-
+    if(length(results) == 0){
+        message("aliquot_id not found")
+        return(NULL)
+    }
 
     results <- plyr::ldply(results$samples,.fun = function(x){
         x$portions[[1]]$analytes[[1]]$aliquots %>% bind_rows()
