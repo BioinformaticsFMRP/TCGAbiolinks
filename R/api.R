@@ -125,6 +125,7 @@ getSubmitterID <- function(project,legacy = FALSE, files.access = NA){
 }
 
 # getBarcodefromAliquot(c("4e06e279-5f0d-4bf5-8659-67b8069050b8","bb6e1801-b08a-49b1-bc4b-205fdefb035b"))
+#' @importFrom dplyr bind_rows
 getBarcodefromAliquot <- function(aliquot){
     baseURL <- "https://api.gdc.cancer.gov/cases/?"
     options.fields <- "fields=samples.portions.analytes.aliquots.aliquot_id,samples.portions.analytes.aliquots.submitter_id"
@@ -157,7 +158,11 @@ getBarcodefromAliquot <- function(aliquot){
         x$portions[[1]]$analytes[[1]]$aliquots %>% bind_rows()
     })
 
-    results <- results$submitter_id[match(aliquot,results$aliquot_id)]
+    idx <- is.na(match(aliquot,results$aliquot_id))
+    if(any(idx)){
+        message("Some aliquot IDs were not found:",aliquot[idx])
+    }
+    results <- results[match(aliquot,results$aliquot_id),] %>% na.omit()
 
     return(results)
 }
