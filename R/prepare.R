@@ -820,9 +820,10 @@ colDataPrepare <- function(barcode){
     ret <- merge(ret,
                  patient.info,
                  by.x = "sample",
-                 by.y = "sample_submitter_id",
+                 by.y = "bcr_patient_barcode",
                  all.x = TRUE,
                  sort = FALSE)
+    ret$bcr_patient_barcode <- ret$sample
   }
 
   if(!"project_id" %in% colnames(ret)) {
@@ -1277,9 +1278,8 @@ getBarcodeInfo <- function(barcode) {
   if(!is.null(results$samples)) {
     samples <- rbindlist(results$samples, fill = TRUE)
     samples <- samples[match(barcode,samples$submitter_id),]
-    samples$sample_submitter_id <- barcode
     samples$submitter_id <- str_extract_all(samples$submitter_id,paste(barcode,collapse = "|")) %>% unlist
-    df <- samples
+    df <- samples[!is.na(samples$submitter_id),]
   }
 
 
@@ -1288,18 +1288,22 @@ getBarcodeInfo <- function(barcode) {
     diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
     diagnoses[,c("updated_datetime","created_datetime","state")] <- NULL
     if(any(grepl("submitter_id", colnames(diagnoses)))) {
-      diagnoses$submitter_id <- gsub("_diagnosis.*|-DIAG","", diagnoses$submitter_id)
+      diagnoses$submitter_id <- gsub("_diagnosis.*|-DIAG|diag-","", diagnoses$submitter_id)
     }  else {
       diagnoses$submitter_id <- submitter_id
     }
     # this is required since the sample might not have a diagnosis
-    df <- merge(df,
-                diagnoses,
-                by = "submitter_id",
-                all.x = T,
-                sort = FALSE)
+    if(!any(df$submitter_id %in% diagnoses$submitter_id)){
+      diagnoses$submitter_id <- NULL
+      df <- dplyr::bind_cols(df,diagnoses)
+    } else {
+      df <- merge(df,
+                  diagnoses,
+                  by = "submitter_id",
+                  all.x = T,
+                  sort = FALSE)
+    }
   }
-
   if(!is.null(results$exposures)) {
     exposures <- rbindlist(results$exposures, fill = TRUE)
     exposures[,c("updated_datetime","created_datetime","state")] <- NULL
@@ -1308,7 +1312,12 @@ getBarcodeInfo <- function(barcode) {
     }  else {
       exposures$submitter_id <- submitter_id
     }
-    df <- merge(df,exposures, by = "submitter_id", all = TRUE,sort = FALSE)
+    if(!any(df$submitter_id %in% exposures$submitter_id)){
+      exposures$submitter_id <- NULL
+      df <- dplyr::bind_cols(df,exposures)
+    } else {
+      df <- merge(df,exposures, by = "submitter_id", all = TRUE,sort = FALSE)
+    }
   }
 
 
@@ -1316,12 +1325,18 @@ getBarcodeInfo <- function(barcode) {
     demographic <- results$demographic
     demographic[,c("updated_datetime","created_datetime","state")] <- NULL
     if(any(grepl("submitter_id", colnames(demographic)))) {
-      demographic$submitter_id <- gsub("_demographic.*|-DEMO","", results$demographic$submitter_id)
+      demographic$submitter_id <- gsub("_demographic.*|-DEMO|demo-","", results$demographic$submitter_id)
     } else {
-      demographic$submitter_id <-submitter_id
+      demographic$submitter_id <- submitter_id
     }
     demographic <- demographic[!is.na(demographic$submitter_id),]
-    df <- merge(df,demographic, by = "submitter_id", all = TRUE, sort = FALSE)
+
+    if(!any(df$submitter_id %in% demographic$submitter_id)){
+      demographic$submitter_id <- NULL
+      df <- dplyr::bind_cols(df,demographic)
+    } else {
+      df <- merge(df,demographic, by = "submitter_id", all = TRUE, sort = FALSE)
+    }
   }
 
   treatments <- rbindlist(df$treatments,fill = TRUE)
@@ -1349,11 +1364,16 @@ getBarcodeInfo <- function(barcode) {
   df$bcr_patient_barcode <- df$submitter_id %>% as.character()
   projects.info <- results$project
   projects.info <- results$project[,grep("state",colnames(projects.info),invert = TRUE)]
-  df <- merge(df,
-              cbind("submitter_id" = submitter_id, projects.info),
-              sort = FALSE,
-              all.x = TRUE,
-              by = "submitter_id")
+
+  if(any(submitter_id %in% df$submitter_id)){
+    df <- merge(df,
+                cbind("submitter_id" = submitter_id, projects.info),
+                sort = FALSE,
+                all.x = TRUE,
+                by = "submitter_id")
+  } else {
+    df <- dplyr::bind_cols(df,projects.info)
+  }
 
   # Adding in the same order
   if(any(substr(barcode,1,str_length(df$submitter_id)) %in% df$submitter_id)){
@@ -1369,8 +1389,8 @@ getBarcodeInfo <- function(barcode) {
     })
     df <- df[idx,]
   }
- # remove empty columns
- df <- df[,colSums(is.na(df) < nrow(df))]
+  # remove empty columns
+  df <- df %>% as.data.frame() %>% dplyr::select(which(colSums(is.na(df)) < nrow(df)))
   return(df)
 }
 
