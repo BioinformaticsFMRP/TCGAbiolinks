@@ -823,8 +823,8 @@ colDataPrepare <- function(barcode){
                  by.y = "bcr_patient_barcode",
                  all.x = TRUE,
                  sort = FALSE)
-    ret$bcr_patient_barcode <- ret$sample
   }
+  ret$bcr_patient_barcode <- ret$sample
 
   if(!"project_id" %in% colnames(ret)) {
     if("disease_type" %in% colnames(ret)){
@@ -1285,7 +1285,7 @@ getBarcodeInfo <- function(barcode) {
 
   # We dont have the same cols for TCGA and TARGET so we need to check them
   if(!is.null(results$diagnoses)) {
-    diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
+    diagnoses <- rbindlist(lapply(results$diagnoses, function(x) if(is.null(x)) data.frame(NA) else x),fill = T)
     diagnoses[,c("updated_datetime","created_datetime","state")] <- NULL
     if(any(grepl("submitter_id", colnames(diagnoses)))) {
       diagnoses$submitter_id <- gsub("_diagnosis.*|-DIAG|diag-","", diagnoses$submitter_id)
@@ -1305,7 +1305,7 @@ getBarcodeInfo <- function(barcode) {
     }
   }
   if(!is.null(results$exposures)) {
-    exposures <- rbindlist(results$exposures, fill = TRUE)
+    exposures <- rbindlist(lapply(results$exposures, function(x) if(is.null(x)) data.frame(NA) else x),fill = T)
     exposures[,c("updated_datetime","created_datetime","state")] <- NULL
     if(any(grepl("submitter_id", colnames(exposures)))) {
       exposures$submitter_id <- gsub("_exposure.*|-EXP","", exposures$submitter_id)
@@ -1329,7 +1329,6 @@ getBarcodeInfo <- function(barcode) {
     } else {
       demographic$submitter_id <- submitter_id
     }
-    demographic <- demographic[!is.na(demographic$submitter_id),]
 
     if(!any(df$submitter_id %in% demographic$submitter_id)){
       demographic$submitter_id <- NULL
@@ -1339,7 +1338,16 @@ getBarcodeInfo <- function(barcode) {
     }
   }
 
-  treatments <- rbindlist(df$treatments,fill = TRUE)
+  treatments <- rbindlist(lapply(df$treatments,
+                                 function(x) {
+                                   if(is.null(x)) {
+                                     rbind(data.frame(treatment_type= "Pharmaceutical Therapy, NOS"),
+                                           data.frame(treatment_type = "Radiation Therapy, NOS"))
+                                   } else {
+                                     x
+                                   }
+                                 }),fill = TRUE)
+
   if (nrow(treatments) > 0) {
     df[,treatments:=NULL]
 
@@ -1356,8 +1364,8 @@ getBarcodeInfo <- function(barcode) {
     colnames(treatments.radiation)[grep("submitter",colnames(treatments.radiation))] <- "submitter_id"
     colnames(treatments.pharmaceutical)[grep("submitter",colnames(treatments.pharmaceutical))] <- "submitter_id"
 
-    df <- merge(df, as.data.table(treatments.pharmaceutical), by = "submitter_id",  all = TRUE)
-    df <- merge(df, as.data.table(treatments.radiation), by = "submitter_id",  all = TRUE)
+    df <- dplyr::bind_cols(df,treatments.pharmaceutical)
+    df <- dplyr::bind_cols(df,treatments.radiation)
   }
 
 

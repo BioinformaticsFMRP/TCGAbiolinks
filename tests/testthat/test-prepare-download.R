@@ -14,11 +14,11 @@ test_that("GDCdownload API method for one files is working ", {
 
 test_that("getBarcodeInfo works", {
     cols <- c("gender","project_id","days_to_last_follow_up","alcohol_history","cigarettes_per_day")
-    x <- getBarcodeInfo(c("TCGA-OR-A5LR", "TCGA-OR-A5LJ"))
+    x <- getBarcodeInfo(c("TCGA-OR-A5LR-01A", "TCGA-OR-A5LJ-01A"))
     expect_true(all(cols %in% colnames(x)))
 
     cols <- c("gender","project_id")
-    x <- getBarcodeInfo(c("TARGET-20-PARUDL"))
+    x <- getBarcodeInfo(c("TARGET-20-PARUDL-03A"))
     expect_true(all(cols %in% colnames(x)))
 
 })
