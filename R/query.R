@@ -316,14 +316,40 @@ GDCquery <- function(project,
     # however the mutation call uses both normal and tumor which are both
     # reported by the API
     if(!data.category %in% c("Clinical","Biospecimen","Other","Simple Nucleotide Variation", "Simple nucleotide variation")){
-        aux <- plyr::laply(results$cases,
-                           function(x) {
-                               unlist(x$samples[[1]],recursive = T)[c("portions.analytes.aliquots.submitter_id","sample_type","is_ffpe")]
-                           }) %>% as.data.frame
 
+        # we also need to deal with pooled samples (mixed from different patients)
+        # example CPT0000870008
+
+        if("portions" %in% (results$cases[[1]]$samples[[1]] %>% names)) {
+            aux <- plyr::laply(results$cases,
+                               function(x) {
+                                   summarize(x$samples[[1]],
+                                             submitter_id = paste(submitter_id,collapse = ";"),
+                                             is_ffpe = any(is_ffpe),
+                                             sample_type =  paste(sample_type,collapse = ";"),
+                                             aliquot.submiter.id = x$samples[[1]]$portions[[1]]$analytes[[1]]$aliquots[[1]]$submitter_id)
+                               }) %>% as.data.frame
+        } else {
+            aux <- plyr::laply(results$cases,
+                               function(x) {
+                                   summarize(x$samples[[1]],
+                                             submitter_id = paste(submitter_id,collapse = ";"),
+                                             is_ffpe = any(is_ffpe),
+                                             sample_type =  paste(sample_type,collapse = ";"))
+                               }) %>% as.data.frame
+
+        }
         results$sample_type <- aux$sample_type %>% as.character()
         results$is_ffpe <- aux$is_ffpe %>% as.logical
-        results$cases <- aux$portions.analytes.aliquots.submitter_id  %>% as.character()
+
+        # ORGANOID-PANCREATIC does not have aliquots
+        if("aliquot.submiter.id" %in% colnames(aux)){
+            results$cases <- aux$aliquot.submiter.id  %>% as.character()
+            results$sample.submitter_id <- aux$submitter_id  %>% as.character()
+        } else{
+            results$cases <- aux$submitter_id  %>% as.character()
+        }
+
     } else  if(data.category %in% c("Clinical")){
         # Clinical has another structure
         aux <- plyr::laply(results$cases,
