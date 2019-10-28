@@ -621,7 +621,7 @@ colDataPrepareMMRF <- function(barcode){
   ret <- DataFrame(barcode = barcode,
                    sample = barcode,
                    patient = substr(barcode,1,9)
-                   )
+  )
 }
 
 colDataPrepareTARGET <- function(barcode){
@@ -826,9 +826,11 @@ colDataPrepare <- function(barcode){
   }
 
   if(!"project_id" %in% colnames(ret)) {
-    aux <- getGDCprojects()[,c(5,7)]
-    aux <- aux[aux$disease_type == unique(ret$disease_type),2]
-    ret$project_id <- as.character(aux)
+    if("disease_type" %in% colnames(ret)){
+      aux <- getGDCprojects()[,c(5,7)]
+      aux <- aux[aux$disease_type == unique(ret$disease_type),2]
+      ret$project_id <- as.character(aux)
+    }
   }
   # There is no subtype info for target, return as it is
   if(all(grepl("TARGET",barcode))) {
@@ -837,12 +839,13 @@ colDataPrepare <- function(barcode){
     rownames(ret) <- ret$barcode
     return(ret)
   }
-  # remove letter from 01A 01B etc
-  ret$sample.aux <- substr(ret$sample,1,15)
   # na.omit should not be here, exceptional case
   out <- NULL
   for(proj in na.omit(unique(ret$project_id))){
     if(grepl("TCGA",proj,ignore.case = TRUE)) {
+      # remove letter from 01A 01B etc
+      ret$sample.aux <- substr(ret$sample,1,15)
+
       message(" => Adding subtype information to samples")
       tumor <- gsub("TCGA-","",proj)
       available <- c("ACC",
@@ -885,6 +888,8 @@ colDataPrepare <- function(barcode){
       }
     }
   }
+
+  if(is.null(ret)) return(data.frame(barcode))
   # We need to put together the samples with subtypes with samples without subytpes
   ret.aux <- ret[!ret$sample %in% out$sample,]
   ret <- rbind.fill(as.data.frame(out),as.data.frame(ret.aux))
