@@ -348,6 +348,7 @@ GDCquery <- function(project,
             results$sample.submitter_id <- aux$submitter_id  %>% as.character()
         } else{
             results$cases <- aux$submitter_id  %>% as.character()
+            results$sample.submitter_id <- aux$submitter_id  %>% as.character()
         }
 
     } else  if(data.category %in% c("Clinical")){
@@ -359,7 +360,7 @@ GDCquery <- function(project,
         results$cases <- aux  %>% dplyr::pull(1) %>% as.character()
 
     } else  if(data.category %in% c("Biospecimen")){
-        # Clinical has another structure
+        # Biospecimen has another structure
         aux <- plyr::laply(results$cases,
                            function(x) {
                                paste(x$submitter_id,collapse = ",")
@@ -373,7 +374,7 @@ GDCquery <- function(project,
         aux <- plyr::laply(results$cases,
                            function(x) {
                                lapply(x$samples,FUN = function(y)   unlist(y,recursive = T)[c("portions.analytes.aliquots.submitter_id")]) %>% unlist %>% paste(collapse = ",")
-                           }) %>% as.data.frame %>% pull(1)
+                           }) %>% as.data.frame %>% pull(1) %>% as.character()
         results$cases <- aux
     } else if(data.category == "Simple Nucleotide Variation"){
 
@@ -383,9 +384,11 @@ GDCquery <- function(project,
                                function(x) {
                                    unlist(x,recursive = T)[c("portions.analytes.aliquots.submitter_id","sample_type1","sample_type2","is_ffpe1","is_ffpe2")]
                                }) %>% as.data.frame
+
             results$cases <- aux$portions.analytes.aliquots.submitter_id  %>% as.character() %>% paste(collapse = ",")
             if(!is.na(sample.type)) sample.type <- NA # ensure no filtering will be applied
         } else {
+            # TODO: Add comnetary with case
             aux <- plyr::laply(results$cases,
                                function(x) {
                                    unlist(x$samples[[1]],recursive = T)[c("portions.analytes.aliquots.submitter_id","sample_type1","sample_type2","is_ffpe1","is_ffpe2")]

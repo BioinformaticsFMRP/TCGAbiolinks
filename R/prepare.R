@@ -98,11 +98,12 @@ GDCprepare <- function(query,
   if(!all(file.exists(files))) stop(paste0("I couldn't find all the files from the query. ",
                                            "Please check if the directory parameter is right or `GDCdownload` downloaded the samples."))
 
+  cases <- ifelse(grepl("TCGA|TARGET",query$results[[1]]$project %>% unlist()),query$results[[1]]$cases,query$results[[1]]$sample.submitter_id)
   if(grepl("Transcriptome Profiling", query$data.category, ignore.case = TRUE)){
     data <- readTranscriptomeProfiling(files = files,
                                        data.type = ifelse(!is.na(query$data.type),  as.character(query$data.type),  unique(query$results[[1]]$data_type)),
                                        workflow.type = unique(query$results[[1]]$analysis_workflow_type),
-                                       cases = query$results[[1]]$cases,
+                                       cases = cases,
                                        summarizedExperiment)
   } else if(grepl("Copy Number Variation",query$data.category,ignore.case = TRUE)) {
     if(unique(query$results[[1]]$data_type) == "Gene Level Copy Number Scores") {
@@ -111,29 +112,29 @@ GDCprepare <- function(query,
       data <- readCopyNumberVariation(files, query$results[[1]]$cases)
     }
   }  else if(grepl("DNA methylation",query$data.category, ignore.case = TRUE)) {
-    data <- readDNAmethylation(files, query$results[[1]]$cases, summarizedExperiment, unique(query$platform))
+    data <- readDNAmethylation(files, cases = cases, summarizedExperiment, unique(query$platform))
   }  else if(grepl("Raw intensities",query$data.type, ignore.case = TRUE)) {
     # preparing IDAT files
-    data <- readIDATDNAmethylation(files, query$results[[1]]$cases, summarizedExperiment, unique(query$platform), query$legacy)
+    data <- readIDATDNAmethylation(files, barcode = cases, summarizedExperiment, unique(query$platform), query$legacy)
   }  else if(grepl("Protein expression",query$data.category,ignore.case = TRUE)) {
-    data <- readProteinExpression(files, query$results[[1]]$cases)
+    data <- readProteinExpression(files, cases = cases)
   }  else if(grepl("Simple Nucleotide Variation",query$data.category,ignore.case = TRUE)) {
     if(grepl("Masked Somatic Mutation",query$results[[1]]$data_type,ignore.case = TRUE) | source == "legacy")
       suppressWarnings(data <- readSimpleNucleotideVariationMaf(files))
   }  else if(grepl("Clinical|Biospecimen", query$data.category, ignore.case = TRUE)){
-    data <- readClinical(files, query$data.type, query$results[[1]]$cases)
+    data <- readClinical(files, query$data.type, cases = cases)
     summarizedExperiment <- FALSE
   } else if (grepl("Gene expression",query$data.category,ignore.case = TRUE)) {
     if(query$data.type == "Gene expression quantification")
       data <- readGeneExpressionQuantification(files = files,
-                                               cases = query$results[[1]]$cases,
+                                               cases = cases,
                                                summarizedExperiment = summarizedExperiment,
                                                genome = ifelse(query$legacy,"hg19","hg38"),
                                                experimental.strategy = unique(query$results[[1]]$experimental_strategy))
 
     if(query$data.type == "miRNA gene quantification")
       data <- readGeneExpressionQuantification(files = files,
-                                               cases = query$results[[1]]$cases,
+                                               cases = cases,
                                                summarizedExperiment = FALSE,
                                                genome = ifelse(query$legacy,"hg19","hg38"),
                                                experimental.strategy = unique(query$results[[1]]$experimental_strategy))
@@ -142,11 +143,11 @@ GDCprepare <- function(query,
                                              cases = query$results[[1]]$cases)
 
     if(query$data.type == "Isoform expression quantification")
-      data <- readIsoformExpressionQuantification(files = files, cases = query$results[[1]]$cases)
+      data <- readIsoformExpressionQuantification(files = files, cases = cases)
 
     if(query$data.type == "Exon quantification")
       data <- readExonQuantification(files = files,
-                                     cases = query$results[[1]]$cases,
+                                     cases = cases,
                                      summarizedExperiment = summarizedExperiment)
 
   }
@@ -772,14 +773,7 @@ colDataPrepareTCGA <- function(barcode){
 #' @param barcode TCGA or TARGET barcode
 #' @importFrom plyr rbind.fill
 #' @examples
-#' \dontrun{
-#'   query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
-#'                         legacy = TRUE,
-#'                         data.category = "DNA methylation",
-#'                         platform = c("Illumina Human Methylation 450",
-#'                                       "Illumina Human Methylation 27"))
-#'   colDataPrepare(getResults(query.met)$cases)
-#' }
+#   colDataPrepare(c("TCGA-OR-A5K3-01A","C3N-00321-01"))
 #' @export
 colDataPrepare <- function(barcode){
   # For the moment this will work only for TCGA Data
@@ -790,39 +784,45 @@ colDataPrepare <- function(barcode){
   if(all(grepl("TARGET",barcode))) ret <- colDataPrepareTARGET(barcode)
   if(all(grepl("TCGA",barcode))) ret <- colDataPrepareTCGA(barcode)
   if(all(grepl("MMRF",barcode))) ret <- colDataPrepareMMRF(barcode)
+  if(is.null(ret)) ret <- data.frame(sample = barcode)
 
   message(" => Add clinical information to samples")
   # There is a limitation on the size of the string, so this step will be splited in cases of 100
   patient.info <- NULL
-  if(all(grepl("TARGET|TCGA|MMRF",barcode))) {
 
-    patient.info <- tryCatch({
-      step <- 20 # more than 50 gives a bug =/
-      for(i in 0:(ceiling(length(ret$patient)/step) - 1)){
-        start <- 1 + step * i
-        end <- ifelse(((i + 1) * step) > length(ret$patient), length(ret$patient),((i + 1) * step))
-        if(is.null(patient.info)) {
-          patient.info <- getBarcodeInfo(ret$patient[start:end])
-        } else {
-          patient.info <- rbind.fill(patient.info,getBarcodeInfo(ret$patient[start:end]))
-        }
+  patient.info <- tryCatch({
+    step <- 20 # more than 50 gives a bug =/
+    for(i in 0:(ceiling(length(ret$sample)/step) - 1)){
+      start <- 1 + step * i
+      end <- ifelse(((i + 1) * step) > length(ret$sample), length(ret$sample),((i + 1) * step))
+      if(is.null(patient.info)) {
+        patient.info <- getBarcodeInfo(ret$sample[start:end])
+      } else {
+        patient.info <- rbind.fill(patient.info,getBarcodeInfo(ret$sample[start:end]))
       }
-      patient.info
-    }, error = function(e) {
-      step <- 2 # more than 50 gives a bug =/
-      for(i in 0:(ceiling(length(ret$patient)/step) - 1)){
-        start <- 1 + step * i
-        end <- ifelse(((i + 1) * step) > length(ret$patient), length(ret$patient),((i + 1) * step))
-        if(is.null(patient.info)) {
-          patient.info <- getBarcodeInfo(ret$patient[start:end])
-        } else {
-          patient.info <- rbind.fill(patient.info,getBarcodeInfo(ret$patient[start:end]))
-        }
+    }
+    patient.info
+  }, error = function(e) {
+    step <- 2 # more than 50 gives a bug =/
+    for(i in 0:(ceiling(length(ret$sample)/step) - 1)){
+      start <- 1 + step * i
+      end <- ifelse(((i + 1) * step) > length(ret$sample), length(ret$sample),((i + 1) * step))
+      if(is.null(patient.info)) {
+        patient.info <- getBarcodeInfo(ret$sample[start:end])
+      } else {
+        patient.info <- rbind.fill(patient.info,getBarcodeInfo(ret$sample[start:end]))
       }
-      patient.info
-    })
-    ret <- merge(ret,patient.info, by.x = "patient", by.y = "submitter_id", all.x = TRUE )
-    if(all(grepl("TARGET|TCGA",barcode))) ret <- addFFPE(ret)
+    }
+    patient.info
+  })
+
+  if(!is.null(patient.info)) {
+    ret <- merge(ret,
+                 patient.info,
+                 by.x = "sample",
+                 by.y = "sample_submitter_id",
+                 all.x = TRUE,
+                 sort = FALSE)
   }
 
   if(!"project_id" %in% colnames(ret)) {
@@ -833,74 +833,20 @@ colDataPrepare <- function(barcode){
     }
   }
   # There is no subtype info for target, return as it is
-  if(all(grepl("TARGET",barcode))) {
-    # Put data in the right order
-    ret <- ret[match(barcode,ret$barcode),]
-    rownames(ret) <- ret$barcode
-    return(ret)
+  if(any(grepl("TCGA",barcode))) {
+    ret <- addSubtypeInfo(ret)
   }
+
   # na.omit should not be here, exceptional case
-  out <- NULL
-  for(proj in na.omit(unique(ret$project_id))){
-    if(grepl("TCGA",proj,ignore.case = TRUE)) {
-      # remove letter from 01A 01B etc
-      ret$sample.aux <- substr(ret$sample,1,15)
+  if(is.null(ret)) return(data.frame(row.names = barcode, barcode))
 
-      message(" => Adding subtype information to samples")
-      tumor <- gsub("TCGA-","",proj)
-      available <- c("ACC",
-                     "BRCA",
-                     "BLCA",
-                     "CESC",
-                     "CHOL",
-                     "COAD",
-                     "ESCA",
-                     "GBM",
-                     "HNSC",
-                     "KICH",
-                     "KIRC",
-                     "KIRP",
-                     "LGG",
-                     "LUAD",
-                     "LUSC",
-                     "PAAD",
-                     "PCPG",
-                     "PRAD",
-                     "READ",
-                     "SKCM",
-                     "SARC",
-                     "STAD",
-                     "THCA",
-                     "UCEC",
-                     "UCS",
-                     "UVM")
-      if (grepl(paste(c(available,"all"),collapse = "|"),tumor,ignore.case = TRUE)) {
-        subtype <- TCGAquery_subtype(tumor)
-        colnames(subtype) <- paste0("subtype_", colnames(subtype))
-
-        if(all(str_length(subtype$subtype_patient) == 12)){
-          # Subtype information were to primary tumor in priority
-          subtype$sample.aux <- paste0(subtype$subtype_patient,"-01")
-        }
-        ret.aux <- ret[ret$sample.aux %in% subtype$sample.aux,]
-        ret.aux <- merge(ret.aux,subtype, by = "sample.aux", all.x = TRUE)
-        out <- rbind.fill(as.data.frame(out),as.data.frame(ret.aux))
-      }
-    }
-  }
-
-  if(is.null(ret)) return(data.frame(barcode))
-  # We need to put together the samples with subtypes with samples without subytpes
-  ret.aux <- ret[!ret$sample %in% out$sample,]
-  ret <- rbind.fill(as.data.frame(out),as.data.frame(ret.aux))
-  ret$sample.aux <- NULL
   # Add purity information from http://www.nature.com/articles/ncomms9971
   # purity  <- getPurityinfo()
   # ret <- merge(ret, purity, by = "sample", all.x = TRUE, sort = FALSE)
 
   # Put data in the right order
-  ret <- ret[match(barcode,ret$barcode),]
-  rownames(ret) <- ret$barcode
+  ret <- ret[match(substr(barcode,1,unique(na.omit(str_length(ret$bcr_patient_barcode)))),ret$bcr_patient_barcode),]
+  rownames(ret) <- barcode
   return(ret)
 }
 
@@ -966,6 +912,64 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
   return(gene.location)
 }
 
+addSubtypeInfo <- function(ret){
+  out <- NULL
+  for(proj in na.omit(unique(ret$project_id))){
+    if(grepl("TCGA",proj,ignore.case = TRUE)) {
+      # remove letter from 01A 01B etc
+      ret$sample.aux <- substr(ret$sample,1,15)
+
+      message(" => Adding subtype information to samples")
+      tumor <- gsub("TCGA-","",proj)
+      available <- c("ACC",
+                     "BRCA",
+                     "BLCA",
+                     "CESC",
+                     "CHOL",
+                     "COAD",
+                     "ESCA",
+                     "GBM",
+                     "HNSC",
+                     "KICH",
+                     "KIRC",
+                     "KIRP",
+                     "LGG",
+                     "LUAD",
+                     "LUSC",
+                     "PAAD",
+                     "PCPG",
+                     "PRAD",
+                     "READ",
+                     "SKCM",
+                     "SARC",
+                     "STAD",
+                     "THCA",
+                     "UCEC",
+                     "UCS",
+                     "UVM")
+      if (grepl(paste(c(available,"all"),collapse = "|"),tumor,ignore.case = TRUE)) {
+        subtype <- TCGAquery_subtype(tumor)
+        colnames(subtype) <- paste0("subtype_", colnames(subtype))
+
+        if(all(str_length(subtype$subtype_patient) == 12)){
+          # Subtype information were to primary tumor in priority
+          subtype$sample.aux <- paste0(subtype$subtype_patient,"-01")
+        }
+        ret.aux <- ret[ret$sample.aux %in% subtype$sample.aux,]
+        ret.aux <- merge(ret.aux,subtype, by = "sample.aux", all.x = TRUE)
+        out <- rbind.fill(as.data.frame(out),as.data.frame(ret.aux))
+      }
+    }
+  }
+  if(is.null(out)) return(ret)
+
+  # We need to put together the samples with subtypes with samples without subytpes
+  ret.aux <- ret[!ret$sample %in% out$sample,]
+  ret <- rbind.fill(as.data.frame(out),as.data.frame(ret.aux))
+  ret$sample.aux <- NULL
+
+  return(ret)
+}
 
 readProteinExpression <- function(files,cases) {
   pb <- txtProgressBar(min = 0, max = length(files), style = 3)
@@ -985,7 +989,6 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
   # How many cases do we have?
   # We wil consider col 1 is the ensemble gene id, other ones are data
   size <- ncol(data)
-
   # Prepare Patient table
   colData <-  colDataPrepare(cases)
 
@@ -1020,9 +1023,9 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
                        external_gene_name = data$external_gene_name,
                        original_ensembl_gene_id = data$X1)
   names(rowRanges) <- as.character(data$ensembl_gene_id)
-  rse <- SummarizedExperiment(assays=assays,
-                              rowRanges=rowRanges,
-                              colData=colData)
+  rse <- SummarizedExperiment(assays = assays,
+                              rowRanges = rowRanges,
+                              colData = colData)
 
   return(rse)
 }
@@ -1032,8 +1035,8 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
 #' @importFrom dplyr left_join
 #' @importFrom plyr alply
 readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,summarizedExperiment) {
-  if(grepl("Gene Expression Quantification", data.type, ignore.case = TRUE)){
 
+  if(grepl("Gene Expression Quantification", data.type, ignore.case = TRUE)){
     # Status working for:
     #  - htseq
     #  - FPKM
@@ -1234,16 +1237,27 @@ getAliquot_ids <- function(barcode){
   colnames(df) <- c("aliquot_id","barcode")
   return(df)
 }
-# getBarcodeInfo(c("TCGA-A6-6650"))
+
+
+# getBarcodeInfo(c("TCGA-OR-A5K3-01A","C3N-00321-01"))
+# barcode is: sample_submitter_id
 getBarcodeInfo <- function(barcode) {
   baseURL <- "https://api.gdc.cancer.gov/cases/?"
   options.pretty <- "pretty=true"
-  options.expand <- "expand=project,diagnoses,diagnoses.treatments,annotations,family_histories,demographic,exposures"
+  options.expand <- "expand=samples,project,diagnoses,diagnoses.treatments,annotations,family_histories,demographic,exposures"
   option.size <- paste0("size=",length(barcode))
   options.filter <- paste0("filters=",
-                           URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.submitter_id","value":['),
+                           URLencode('{"op":"or","content":[{"op":"in","content":{"field":"cases.submitter_id","value":['),
                            paste0('"',paste(barcode,collapse = '","')),
-                           URLencode('"]}}]}'))
+                           URLencode('"]}},'),
+                           URLencode('{"op":"in","content":{"field":"submitter_sample_ids","value":['),
+                           paste0('"',paste(barcode,collapse = '","')),
+                           URLencode('"]}},'),
+                           URLencode('{"op":"in","content":{"field":"submitter_aliquot_ids","value":['),
+                           paste0('"',paste(barcode,collapse = '","')),
+                           URLencode('"]}}'),
+                           URLencode(']}')
+  )
   url <- paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&"))
   #message(url)
   json  <- tryCatch(
@@ -1258,32 +1272,39 @@ getBarcodeInfo <- function(barcode) {
 
   results <- json$data$hits
   submitter_id <- results$submitter_id
+  submitter_aliquot_ids <- results$submitter_aliquot_ids
+
+  if(!is.null(results$samples)) {
+    samples <- rbindlist(results$samples, fill = TRUE)
+    samples <- samples[match(barcode,samples$submitter_id),]
+    samples$sample_submitter_id <- barcode
+    samples$submitter_id <- str_extract_all(samples$submitter_id,paste(barcode,collapse = "|")) %>% unlist
+    df <- samples
+  }
+
 
   # We dont have the same cols for TCGA and TARGET so we need to check them
   if(!is.null(results$diagnoses)) {
     diagnoses <- rbindlist(results$diagnoses, fill = TRUE)
+    diagnoses[,c("updated_datetime","created_datetime","state")] <- NULL
     if(any(grepl("submitter_id", colnames(diagnoses)))) {
-      diagnoses$submitter_id <- gsub("_diagnosis.*","", diagnoses$submitter_id)
+      diagnoses$submitter_id <- gsub("_diagnosis.*|-DIAG","", diagnoses$submitter_id)
     }  else {
       diagnoses$submitter_id <- submitter_id
     }
     # this is required since the sample might not have a diagnosis
-    df <- merge(data.frame("submitter_id" = submitter_id),
+    df <- merge(df,
                 diagnoses,
                 by = "submitter_id",
                 all.x = T,
                 sort = FALSE)
-  } else {
-    df <- as.data.frame(submitter_id)
-
   }
 
-
-
-  if(!is.null(results$exposures) > 0) {
+  if(!is.null(results$exposures)) {
     exposures <- rbindlist(results$exposures, fill = TRUE)
+    exposures[,c("updated_datetime","created_datetime","state")] <- NULL
     if(any(grepl("submitter_id", colnames(exposures)))) {
-      exposures$submitter_id <- gsub("_exposure.*","", exposures$submitter_id)
+      exposures$submitter_id <- gsub("_exposure.*|-EXP","", exposures$submitter_id)
     }  else {
       exposures$submitter_id <- submitter_id
     }
@@ -1293,8 +1314,9 @@ getBarcodeInfo <- function(barcode) {
 
   if(!is.null(results$demographic)) {
     demographic <- results$demographic
+    demographic[,c("updated_datetime","created_datetime","state")] <- NULL
     if(any(grepl("submitter_id", colnames(demographic)))) {
-      demographic$submitter_id <- gsub("_demographic.*","", results$demographic$submitter_id)
+      demographic$submitter_id <- gsub("_demographic.*|-DEMO","", results$demographic$submitter_id)
     } else {
       demographic$submitter_id <-submitter_id
     }
@@ -1302,31 +1324,53 @@ getBarcodeInfo <- function(barcode) {
     df <- merge(df,demographic, by = "submitter_id", all = TRUE, sort = FALSE)
   }
 
-  treatments <- rbindlist(results$treatments,fill = TRUE)
+  treatments <- rbindlist(df$treatments,fill = TRUE)
   if (nrow(treatments) > 0) {
     df[,treatments:=NULL]
 
-    if (any(grepl("submitter_id", colnames(treatments)))) {
-      treatments$submitter_id <- gsub("_treatment.*","", treatments$submitter_id)
-    } else {
-      treatments$submitter_id <-submitter_id
-    }
-    df <- merge(df,treatments, by="submitter_id", all = TRUE,sort = FALSE)
+    treatments$submitter_id <- gsub("_treatment(_[0-9])?","", treatments$submitter_id)
+    treatments <- treatments[,-c("updated_datetime", "state", "created_datetime")]
+
+    # we have now two types of treatment
+    treatments.pharmaceutical <- treatments[grep("Pharmaceutical",treatments$treatment_type,ignore.case = TRUE),]
+    treatments.radiation <- treatments[grep("radiation",treatments$treatment_type,ignore.case = TRUE),]
+
+    # Adding a prefix
+    colnames(treatments.pharmaceutical) <- paste0("treatments_pharmaceutical_",colnames(treatments.pharmaceutical))
+    colnames(treatments.radiation) <- paste0("treatments_radiation_",colnames(treatments.radiation))
+    colnames(treatments.radiation)[grep("submitter",colnames(treatments.radiation))] <- "submitter_id"
+    colnames(treatments.pharmaceutical)[grep("submitter",colnames(treatments.pharmaceutical))] <- "submitter_id"
+
+    df <- merge(df, as.data.table(treatments.pharmaceutical), by = "submitter_id",  all = TRUE)
+    df <- merge(df, as.data.table(treatments.radiation), by = "submitter_id",  all = TRUE)
   }
+
+
   df$bcr_patient_barcode <- df$submitter_id %>% as.character()
   projects.info <- results$project
   projects.info <- results$project[,grep("state",colnames(projects.info),invert = TRUE)]
   df <- merge(df,
               cbind("submitter_id" = submitter_id, projects.info),
-              sort = FALSE, by = "submitter_id")
+              sort = FALSE,
+              all.x = TRUE,
+              by = "submitter_id")
 
   # Adding in the same order
-  df <- df[match(barcode,df$submitter_id),]
-  # This line should not exists, but some patients does not have clinical data
-  # case: TCGA-R8-A6YH"
-  # this has been reported to GDC, waiting answers
-  # So we will remove this NA cases
-  df <- df[!is.na(df$submitter_id),]
+  if(any(substr(barcode,1,str_length(df$submitter_id)) %in% df$submitter_id)){
+    df <- df[match(substr(barcode,1,str_length(df$submitter_id)),df$submitter_id),]
+    # This line should not exists, but some patients does not have clinical data
+    # case: TCGA-R8-A6YH"
+    # this has been reported to GDC, waiting answers
+    # So we will remove this NA cases
+    df <- df[!is.na(df$submitter_id),]
+  } else {
+    idx <- sapply(substr(barcode,1,str_length(df$submitter_aliquot_ids)),FUN = function(x){
+      grep(x,df$submitter_aliquot_ids)
+    })
+    df <- df[idx,]
+  }
+ # remove empty columns
+ df <- df[,colSums(is.na(df) < nrow(df))]
   return(df)
 }
 
