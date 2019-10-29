@@ -849,7 +849,8 @@ colDataPrepare <- function(barcode){
   # ret <- merge(ret, purity, by = "sample", all.x = TRUE, sort = FALSE)
 
   # Put data in the right order
-  ret <- ret[match(barcode, ret$bcr_patient_barcode),]
+  idx <- sapply(ret$bcr_patient_barcode, function(x) {grep(x,barcode)})
+  ret <- ret[idx,]
   rownames(ret) <- barcode
   return(ret)
 }
