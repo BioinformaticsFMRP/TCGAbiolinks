@@ -45,7 +45,9 @@ BiocManager::install("TCGAbiolinks")
 
 * Development version:
 ```{r message=FALSE, warning=FALSE, eval=FALSE}
-devtools::install_github('BioinformaticsFMRP/TCGAbiolinks')
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("BioinformaticsFMRP/TCGAbiolinks")
 ```
 
 ## Docker image
