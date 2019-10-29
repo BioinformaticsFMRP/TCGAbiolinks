@@ -13,12 +13,7 @@ colDataPrepare(barcode)
 Create samples information matrix for GDC samples add subtype information
 }
 \examples{
-\dontrun{
-  query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
-                        legacy = TRUE,
-                        data.category = "DNA methylation",
-                        platform = c("Illumina Human Methylation 450",
-                                      "Illumina Human Methylation 27"))
-  colDataPrepare(getResults(query.met)$cases)
-}
+ metadata <- colDataPrepare(c("TCGA-OR-A5K3-01A","C3N-00321-01"))
+ metadata <- colDataPrepare(c("BLGSP-71-06-00157-01A",
+                              "BLGSP-71-22-00332-01A"))
 }
