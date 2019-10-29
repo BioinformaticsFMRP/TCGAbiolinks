@@ -57,3 +57,22 @@ test_that("GDCprepare accepts more than one project", {
     obj <- GDCprepare(acc.gbm,  directory = "ex")
     expect_true(all(c("TCGA-ACC","TCGA-GBM") %in% SummarizedExperiment::colData(obj)$project_id))
 })
+
+test_that("Non TCGA data is processed", {
+    proj <- "MMRF-COMMPASS"
+    query <- GDCquery(
+        project = proj,
+        data.category = "Transcriptome Profiling",
+        data.type = "Gene Expression Quantification",
+        workflow.type = "STAR - Counts"
+    )
+    query <- GDCquery(
+        project = proj,
+        data.category = "Transcriptome Profiling",
+        data.type = "Gene Expression Quantification",
+        workflow.type = "STAR - Counts",
+        barcode = getResults(query)$cases[1:4]
+    )
+    GDCdownload(query)
+    data <- GDCprepare(query)
+})
