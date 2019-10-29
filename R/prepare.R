@@ -773,7 +773,9 @@ colDataPrepareTCGA <- function(barcode){
 #' @param barcode TCGA or TARGET barcode
 #' @importFrom plyr rbind.fill
 #' @examples
-#   colDataPrepare(c("TCGA-OR-A5K3-01A","C3N-00321-01"))
+#'  metadata <- colDataPrepare(c("TCGA-OR-A5K3-01A","C3N-00321-01"))
+#'  metadata <- colDataPrepare(c("BLGSP-71-06-00157-01A",
+#'                               "BLGSP-71-22-00332-01A"))
 #' @export
 colDataPrepare <- function(barcode){
   # For the moment this will work only for TCGA Data
@@ -1242,6 +1244,7 @@ getAliquot_ids <- function(barcode){
 
 # getBarcodeInfo(c("TCGA-OR-A5K3-01A","C3N-00321-01"))
 # barcode is: sample_submitter_id
+#' @importFrom dplyr bind_cols
 getBarcodeInfo <- function(barcode) {
   baseURL <- "https://api.gdc.cancer.gov/cases/?"
   options.pretty <- "pretty=true"
