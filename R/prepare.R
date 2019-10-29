@@ -1285,8 +1285,13 @@ getBarcodeInfo <- function(barcode) {
     samples <- samples[match(barcode,samples$submitter_id),]
     samples$sample_submitter_id <- str_extract_all(samples$submitter_id,paste(barcode,collapse = "|")) %>%
       unlist %>% as.character
-    samples$submitter_id <- str_extract_all(samples$submitter_id, paste(submitter_id,collapse = "|")) %>%
-      unlist %>% as.character
+
+    tryCatch({
+      samples$submitter_id <- str_extract_all(samples$submitter_id, paste(submitter_id,collapse = "|")) %>%
+        unlist %>% as.character
+    }, error = function(e){
+      samples$submitter_id <- submitter_id
+    })
     df <- samples[!is.na(samples$submitter_id),]
     df[,c("updated_datetime","created_datetime")] <- NULL
   }
