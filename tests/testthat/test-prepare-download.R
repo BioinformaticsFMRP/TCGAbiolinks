@@ -47,6 +47,7 @@ test_that("getBarcodeInfo works", {
 test_that("GDCprepare accepts more than one project", {
     cases <-  c("TCGA-OR-A5JX-01A", "TCGA-OR-A5J3-01A",
                 "TCGA-06-0680-11A","TCGA-14-0871-01A")
+    expect_true(all(c("TCGA-ACC","TCGA-GBM") %in% colDataPrepare(cases)$project_id))
     acc.gbm <- GDCquery(project =  c("TCGA-ACC","TCGA-GBM"),
                         data.category = "Transcriptome Profiling",
                         data.type = "Gene Expression Quantification",
