@@ -345,6 +345,9 @@ data <- GDCprepare(query)
 ```
 
 ### Gene expression: aligned against hg38
+
+For more examples, please check: http://rpubs.com/tiagochst/TCGAbiolinks_RNA-seq_new_projects
+
 ```{r, eval = FALSE}
 # mRNA pipeline: https://gdc-docs.nci.nih.gov/Data/Bioinformatics_Pipelines/Expression_mRNA_Pipeline/
 query.exp.hg38 <- GDCquery(project = "TCGA-GBM", 
@@ -357,6 +360,7 @@ expdat <- GDCprepare(query = query.exp.hg38,
                      save = TRUE, 
                      save.filename = "exp.rda")
 ```
+
 
 ### miRNA
 ```{r, eval = FALSE}
