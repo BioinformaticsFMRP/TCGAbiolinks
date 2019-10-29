@@ -1,3 +1,11 @@
+CHANGES IN VERSION 2.14.0
+-------------------------
+
+* Code was rewritten to support projects other than TCGA/TARGET projects
+* Add support to STAR counts RNA-Seq
+* Add workshops for ATAC-Seq, ELMER, TCGAbiolinks to main vignette
+
+
 CHANGES IN VERSION 2.11.2
 -------------------------
 * Add GISTIC2 case to GDC prepare and manuals
