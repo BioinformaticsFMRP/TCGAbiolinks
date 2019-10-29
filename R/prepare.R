@@ -990,6 +990,57 @@ readProteinExpression <- function(files,cases) {
   return(df)
 }
 
+
+makeSEfromTranscriptomeProfilingSTAR <- function(data, cases, assay.list){
+  # How many cases do we have?
+  # We wil consider col 1 is the ensemble gene id, other ones are data
+  size <- ncol(data)
+  # Prepare Patient table
+  colData <-  colDataPrepare(cases)
+
+  # one ensemblID can be mapped to multiple entrezgene ID
+  gene.location <- get.GRCh.bioMart("hg38")
+  gene.location <- gene.location[!duplicated(gene.location$ensembl_gene_id),]
+
+  data$ensembl_gene_id <-  as.character(gsub("\\.[0-9]*","",data$`#gene`))
+  metrics <- subset(data, !grepl("ENSG", data$ensembl_gene_id))
+  data <- subset(data, grepl("ENSG", data$ensembl_gene_id))
+  found.genes <- table(data$ensembl_gene_id %in% gene.location$ensembl_gene_id)
+
+  if("FALSE" %in% names(found.genes))
+    message(paste0("From the ", nrow(data), " genes we couldn't map ", found.genes[["FALSE"]]))
+
+  data <- merge(data, gene.location, by = "ensembl_gene_id")
+
+  # Prepare data table
+  # Remove the version from the ensembl gene id
+  assays <- list(data.matrix(data[,grep("unstranded",colnames(data))]),
+                 data.matrix(data[,grep("stranded_first",colnames(data))]),
+                 data.matrix(data[,grep("stranded_second",colnames(data))]))
+  names(assays) <- c("unstranded","stranded_first","stranded_second")
+  assays <- lapply(assays, function(x){
+    colnames(x) <- NULL
+    rownames(x) <- NULL
+    return(x)
+  })
+
+  # Prepare rowRanges
+  rowRanges <- GRanges(seqnames = paste0("chr", data$chromosome_name),
+                       ranges = IRanges(start = data$start_position,
+                                        end = data$end_position),
+                       strand = data$strand,
+                       ensembl_gene_id = data$ensembl_gene_id,
+                       external_gene_name = data$external_gene_name,
+                       original_ensembl_gene_id = data$`#gene`)
+  names(rowRanges) <- as.character(data$ensembl_gene_id)
+  rse <- SummarizedExperiment(assays = assays,
+                              rowRanges = rowRanges,
+                              colData = colData)
+  metadata(rse) <- metrics
+  return(rse)
+}
+
+
 makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
   # How many cases do we have?
   # We wil consider col 1 is the ensemble gene id, other ones are data
@@ -1057,6 +1108,16 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,su
       df <- x %>% purrr::reduce(left_join, by = "X1")
       if(!missing(cases))  colnames(df)[-1] <- cases
       if(summarizedExperiment) df <- makeSEfromTranscriptomeProfiling(df,cases,workflow.type)
+    } else  if(grepl("STAR",workflow.type)){
+      x <- plyr::alply(files,1, function(f) {
+        readr::read_tsv(file = f,
+                        col_names = TRUE,
+                        progress = FALSE)
+      }, .progress = "time")
+
+      df <- x %>% purrr::reduce(left_join, by = "#gene")
+      if(!missing(cases))  colnames(df)[-1] <- sapply(cases, function(x){stringr::str_c(c("unstranded_","stranded_first_", "stranded_second_"),x)}) %>% as.character()
+      if(summarizedExperiment) df <- makeSEfromTranscriptomeProfilingSTAR(df,cases,workflow.type)
     }
   } else if(grepl("miRNA", workflow.type, ignore.case = TRUE) & grepl("miRNA", data.type, ignore.case = TRUE)) {
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
@@ -1293,7 +1354,9 @@ getBarcodeInfo <- function(barcode) {
       samples$submitter_id <- submitter_id
     })
     df <- samples[!is.na(samples$submitter_id),]
-    df[,c("updated_datetime","created_datetime")] <- NULL
+    suppressWarnings({
+      df[,c("updated_datetime","created_datetime")] <- NULL
+    })
   }
 
 
