@@ -56,7 +56,7 @@ to define which file types to be used.}
 \item{data.format}{Data format filter ("VCF", "TXT", "BAM","SVS","BCR XML","BCR SSF XML",
 "TSV", "BCR Auxiliary XML", "BCR OMF XML", "BCR Biotab", "MAF", "BCR PPS XML", "XLSX")}
 
-\item{experimental.strategy}{Filter to experimental stratey. Harmonized: WXS, RNA-Seq, miRNA-Seq, Genotyping Array.
+\item{experimental.strategy}{Filter to experimental strategy. Harmonized: WXS, RNA-Seq, miRNA-Seq, Genotyping Array.
 Legacy:  WXS, RNA-Seq, miRNA-Seq, Genotyping Array,
 DNA-Seq, Methylation array, Protein expression array, WXS,CGH array, VALIDATION, Gene expression array,WGS,
 MSI-Mono-Dinucleotide Assay, miRNA expression array, Mixed strategies, AMPLICON, Exon array,

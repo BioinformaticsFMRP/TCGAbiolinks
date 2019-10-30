@@ -39,12 +39,12 @@ Example: c("Not Significant","Hypermethylated in group1",
 
 \item{color}{vector of colors to be used in graph}
 
-\item{names}{Names to be ploted if significant.
+\item{names}{Names to be plotted if significant.
 Should be the same size of x and y}
 
 \item{names.fill}{Names should be filled in a color box?  Default: TRUE}
 
-\item{show.names}{What names will be showd? Possibilities: "both", "significant", "highlighted"}
+\item{show.names}{What names will be showed? Possibilities: "both", "significant", "highlighted"}
 
 \item{x.cut}{x-axis threshold. Default: 0.0 If you give only one number (e.g. 0.2) the cut-offs will be
 -0.2 and 0.2. Or you can give different cut-offs as a vector (e.g. c(-0.3,0.4))}
