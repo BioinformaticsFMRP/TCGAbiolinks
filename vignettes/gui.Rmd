@@ -74,7 +74,7 @@ devtools::install_github("BioinformaticsFMRP/TCGAbiolinksGUI")
 
 If you receive this error message:  `maximal number of DLLs reached...`
 You will need to increase the maximum number of DLL R can load wit the
-enriroment variable `R_MAX_NUM_DLLS`.
+environment variable `R_MAX_NUM_DLLS`.
 
 For MACOS please modify the file `/Library/Frameworks/R.framework/Resources/etc/Renviron`
 and add `R_MAX_NUM_DLLS=150` in the end. Or you can run in R the following command as R administrator:

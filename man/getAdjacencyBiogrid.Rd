@@ -16,7 +16,7 @@ A matrix with 1 for genes that interacts, 0 for no interaction.
 }
 \description{
 Using biogrid database, it will create a matrix of gene interactions.
-If columns A and row B has value 1, it means the gene A and gene B interatcs.
+If columns A and row B has value 1, it means the gene A and gene B interacts.
 }
 \examples{
 names.genes.de <- c("PLCB1","MCL1","PRDX4","TTF2","TACC3", "PARP4","LSM1")
