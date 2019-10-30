@@ -316,7 +316,7 @@ query.harmonized  %>%
 
 
 # Legacy archive files
-The clincal data types available in legacy database are:
+The clinical data types available in legacy database are:
 
 * Biospecimen data (Biotab format)
 * Tissue slide image (SVS format)
