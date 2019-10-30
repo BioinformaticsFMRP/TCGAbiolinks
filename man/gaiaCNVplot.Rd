@@ -2,7 +2,7 @@
 % Please edit documentation in R/analyze.R
 \name{gaiaCNVplot}
 \alias{gaiaCNVplot}
-\title{Creates a plot for GAIA ouptut (all significant aberrant regions.)}
+\title{Creates a plot for GAIA output (all significant aberrant regions.)}
 \usage{
 gaiaCNVplot(calls, threshold = 0.01)
 }
@@ -16,7 +16,7 @@ Region Start, Region End, Region Size and score}
 A plot with all significant aberrant regions.
 }
 \description{
-This function is a auxiliary function to visualize GAIA ouptut
+This function is a auxiliary function to visualize GAIA output
 (all significant aberrant regions.)
 }
 \examples{

@@ -44,7 +44,7 @@ caption will be based in this column}
 
 \item{pvalue}{show p-value of log-rank test}
 
-\item{conf.int}{show confidence intervals for point estimaes of survival curves.}
+\item{conf.int}{show confidence intervals for point estimates of survival curves.}
 
 \item{...}{Further arguments passed to \link[survminer]{ggsurvplot}.}
 }

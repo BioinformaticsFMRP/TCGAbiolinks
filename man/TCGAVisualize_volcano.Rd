@@ -47,7 +47,7 @@ Should be the same size of x and y}
 \item{show.names}{What names will be showd? Possibilities: "both", "significant", "highlighted"}
 
 \item{x.cut}{x-axis threshold. Default: 0.0 If you give only one number (e.g. 0.2) the cut-offs will be
--0.2 and 0.2. Or you can give diffenrent cutt-ofs as a vector (e.g. c(-0.3,0.4))}
+-0.2 and 0.2. Or you can give different cut-offs as a vector (e.g. c(-0.3,0.4))}
 
 \item{y.cut}{p-values threshold.}
 

@@ -30,7 +30,6 @@ each column represents a sample
 }
 \description{
 TCGAanalyze_Filtering allows user to filter mRNA transcripts and miRNA,
-   selecting a threshold. For istance returns all mRNA or miRNA with mean across all
    samples, higher than the threshold defined quantile mean across all samples.
 }
 \examples{

@@ -41,8 +41,8 @@ is significant. ie the confidence that overlap between the list is not due to ch
  assigned to it in the "changed-gene" list is higher than expected by chance
  (is over-represented), relative to the fraction of genes assigned to that term in the
  reference set.
- In statistical terms it peform the analysis tests the null hypothesis that,
- for any particular ontology term, there is no diffeerence in the proportion of genes
+ In statistical terms it perform the analysis tests the null hypothesis that,
+ for any particular ontology term, there is no difference in the proportion of genes
  annotated to it in the reference list and the proportion annotated to it in the test list.
  We adopted a Fisher Exact Test to perform the EA.
 }

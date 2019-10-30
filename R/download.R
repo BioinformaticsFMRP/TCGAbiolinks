@@ -4,7 +4,7 @@
 #'   The user can use query argument
 #'   The data from query will be save in a folder: project/data.category
 #' @param query A query for GDCquery function
-#' @param token.file Token file to download controled data (only for method = "client")
+#' @param token.file Token file to download controlled data (only for method = "client")
 #' @param method Uses the API (POST method) or gdc client tool. Options "api", "client".
 #' API is faster, but the data might get corrupted in the download, and it might need to be executed again
 #' @param directory Directory/Folder where the data was downloaded. Default: GDCdata

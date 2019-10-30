@@ -353,7 +353,7 @@ the caption will be based in this column
 *  **color** Define the colors of the lines.
 *  **pvalue** Show pvalue in the plot. 
 *  **risk.table** 	Show or not the risk table
-*  **conf.int** 	Show confidence intervals for point estimaes of survival curves.
+*  **conf.int** 	Show confidence intervals for point estimates of survival curves.
 
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
@@ -483,7 +483,7 @@ function will save the plot as pdf and return the same SummarizedExperiment
 that was given as input with the values of p-value,
 p-value adjusted, diffmean and the group it belongs in the graph 
 (non significant, hypomethylated, hypermethylated) in the rowRanges. 
-The collumns will be (where group1 and group2 are the names of the groups): 
+The columns will be (where group1 and group2 are the names of the groups): 
 
 * diffmean.group1.group2 (mean.group2 - mean.group1) 
 * diffmean.group2.group1 (mean.group1 - mean.group2)
@@ -560,7 +560,7 @@ The arguments of this function are:
 | names 	| Names to be ploted if significant. Should be the same size of x and y 	|
 | names.fill 	| Names should be filled in a color box? Default: TRUE 	|
 | show.names 	| What names will be showd? Possibilities: "both", "significant", "highlighted" 	|
-| x.cut 	| x-axis threshold. Default: 0.0 If you give only one number (e.g. 0.2) the cut-offs will be -0.2 and 0.2. Or you can give diffenrent cutt-ofs as a vector (e.g. c(-0.3,0.4)) 	|
+| x.cut 	| x-axis threshold. Default: 0.0 If you give only one number (e.g. 0.2) the cut-offs will be -0.2 and 0.2. Or you can give different cut-offs as a vector (e.g. c(-0.3,0.4)) 	|
 | y.cut 	| p-values threshold. 	|
 | height 	| Figure height 	|
 | width 	| Figure width 	|

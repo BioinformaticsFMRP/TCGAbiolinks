@@ -49,7 +49,7 @@ Should have a column bcr_patient_barcode with the same ID of the mutation object
 
 \item{dist.row}{distance between rows in the plot}
 
-\item{information}{Which column to use as informastion from MAF.
+\item{information}{Which column to use as information from MAF.
 Options: 1) "Variant_Classification" (The information will be "Frame_Shift_Del", "Frame_Shift_Ins",
         "In_Frame_Del", "In_Frame_Ins", "Missense_Mutation",  "Nonsense_Mutation",
              "Nonstop_Mutation",  "RNA",  "Silent" ,  "Splice_Site",  "Targeted_Region",  "Translation_Start_Site")

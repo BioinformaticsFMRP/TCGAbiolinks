@@ -15,7 +15,7 @@ getAdjacencyBiogrid(tmp.biogrid, names.genes = NULL)
 A matrix with 1 for genes that interacts, 0 for no interaction.
 }
 \description{
-Using biogrid database, it will create a matrix of gene interations.
+Using biogrid database, it will create a matrix of gene interactions.
 If columns A and row B has value 1, it means the gene A and gene B interatcs.
 }
 \examples{

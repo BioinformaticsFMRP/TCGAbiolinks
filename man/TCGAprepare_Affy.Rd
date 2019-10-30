@@ -14,7 +14,7 @@ TCGAprepare_Affy(ClinData, PathFolder, TabCel)
 \item{TabCel}{write}
 }
 \value{
-Normalizd Expression data from Affy eSets
+Normalized Expression data from Affy eSets
 }
 \description{
 Prepare CEL files into an AffyBatch.

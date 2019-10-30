@@ -7,7 +7,7 @@
 TCGAvisualize_Heatmap(data, col.metadata, row.metadata,
   col.colors = NULL, row.colors = NULL, show_column_names = FALSE,
   show_row_names = FALSE, cluster_rows = FALSE,
-  cluster_columns = FALSE, sortCol, extrems = NULL,
+  cluster_columns = FALSE, sortCol, extremes = NULL,
   rownames.size = 12, title = NULL, color.levels = NULL,
   values.label = NULL, filename = "heatmap.pdf", width = 10,
   height = 10, type = "expression", scale = "none",
@@ -38,7 +38,7 @@ The code will throw a warning in case two samples are from the same patient.}
 
 \item{sortCol}{Name of the column to be used to sort the columns}
 
-\item{extrems}{Extrems of colors (vector of 3 values)}
+\item{extremes}{Extremes of colors (vector of 3 values)}
 
 \item{rownames.size}{Rownames size}
 
@@ -65,7 +65,7 @@ If we want to show differences between samples, it is good to make Z-score by ge
 Possibilities: "row", "col". Default "none"}
 
 \item{heatmap.legend.color.bar}{Heatmap legends values type.
-Options: "continuous", "disctrete}
+Options: "continuous", "discrete"}
 }
 \value{
 Heatmap plotted in the device

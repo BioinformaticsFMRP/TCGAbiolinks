@@ -101,7 +101,7 @@ This function will search for differentially methylated CpG sites,
 
   If the calculus already exists in the object it will not recalculated.
   You should set overwrite parameter to TRUE to force it, or remove the
-  collumns with the results from the object.
+  columns with the results from the object.
 }
 \examples{
 nrows <- 200; ncols <- 20
