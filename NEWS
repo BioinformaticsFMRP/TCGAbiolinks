@@ -4,7 +4,7 @@ CHANGES IN VERSION 2.14.0
 * Code was rewritten to support projects other than TCGA/TARGET projects
 * Add support to STAR counts RNA-Seq
 * Add workshops for ATAC-Seq, ELMER, TCGAbiolinks to main vignette
-
+* Function getMC3MAF added to download open MAF file from https://gdc.cancer.gov/about-data/publications/mc3-2017
 
 CHANGES IN VERSION 2.11.2
 -------------------------
