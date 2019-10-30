@@ -546,10 +546,10 @@ TCGAvisualize_BarPlot <- function(DFfilt,
 #' @param title Title of the plot
 #' @param rownames.size Rownames size
 #' @param color.levels A vector with the colors (low level, middle level, high level)
-#' @param extrems Extrems of colors (vector of 3 values)
+#' @param extremes Extremes of colors (vector of 3 values)
 #' @param values.label Text of the levels in the heatmap
 #' @param heatmap.legend.color.bar Heatmap legends values type.
-#' Options: "continuous", "disctrete
+#' Options: "continuous", "discrete"
 #' @param scale Use z-score to make the heatmap?
 #' If we want to show differences between genes, it is good to make Z-score by samples
 #' (force each sample to have zero mean and standard deviation=1).
@@ -611,7 +611,7 @@ TCGAvisualize_Heatmap <- function(data,
                                   cluster_rows = FALSE,
                                   cluster_columns = FALSE,
                                   sortCol,
-                                  extrems = NULL,
+                                  extremes = NULL,
                                   rownames.size = 12,
                                   title = NULL,
                                   color.levels = NULL,
@@ -709,15 +709,15 @@ TCGAvisualize_Heatmap <- function(data,
         data <- scale(data)
     }
 
-    if(is.null(extrems)) {
+    if(is.null(extremes)) {
         if(min(data,na.rm = TRUE) < 0) {
-            extrems <- c(min(data,na.rm = TRUE), (max(data,na.rm = TRUE) + min(data,na.rm = TRUE))/2, max(data,na.rm = TRUE))
+            extremes <- c(min(data,na.rm = TRUE), (max(data,na.rm = TRUE) + min(data,na.rm = TRUE))/2, max(data,na.rm = TRUE))
         } else {
-            extrems <- c(0, max(data,na.rm = TRUE)/2, max(data,na.rm = TRUE))
+            extremes <- c(0, max(data,na.rm = TRUE)/2, max(data,na.rm = TRUE))
         }
     }
-    if (type == "expression") color <- circlize::colorRamp2(extrems, color.levels)
-    if (type == "methylation") color <- circlize::colorRamp2(extrems, color.levels)
+    if (type == "expression") color <- circlize::colorRamp2(extremes, color.levels)
+    if (type == "methylation") color <- circlize::colorRamp2(extremes, color.levels)
 
     # Creating plot title
     if(is.null(title)) {
@@ -852,7 +852,7 @@ unlistlabels <- function(lab) {
 #' @param label.title Title of the label
 #' @param annotation.legend.side Position of the annotation legend
 #' @param heatmap.legend.side Position of the heatmap legend
-#' @param information Which column to use as informastion from MAF.
+#' @param information Which column to use as information from MAF.
 #' Options: 1) "Variant_Classification" (The information will be "Frame_Shift_Del", "Frame_Shift_Ins",
 #'         "In_Frame_Del", "In_Frame_Ins", "Missense_Mutation",  "Nonsense_Mutation",
 #'              "Nonstop_Mutation",  "RNA",  "Silent" ,  "Splice_Site",  "Targeted_Region",  "Translation_Start_Site")

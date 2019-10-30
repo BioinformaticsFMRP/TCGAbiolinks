@@ -20,7 +20,7 @@ library(DT)
 ```
 
 **TCGAbiolinks** has provided a few functions to download and prepare data from GDC for analysis.
-This section starts by explaning the different downloads methods and the SummarizedExperiment object, which 
+This section starts by explaining the different downloads methods and the SummarizedExperiment object, which 
 is the default data structure used in TCGAbiolinks, followed by some examples.
 
 
@@ -97,7 +97,7 @@ Related discussions: [issue 91](https://github.com/BioinformaticsFMRP/TCGAbiolin
 | Argument 	| Description	|
 |-----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | query           | A query for GDCquery function        |
-| token.file      | Token file to download controled data (only for method = "client")           |
+| token.file      | Token file to download controlled data (only for method = "client")           |
 | method          | Uses the API (POST method) or gdc client tool. Options "api", "client". API is faster, but the data might get corrupted in the download, and it might need to be executed again     |
 | directory       | Directory/Folder where the data was downloaded. Default: GDCdata         |
 | files.per.chunk | This will make the API method only download n (files.per.chunk) files at a time. This may reduce the download problems when the data size is too large. Expected a integer number (example files.per.chunk = 6) |

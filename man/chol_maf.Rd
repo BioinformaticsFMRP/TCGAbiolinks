@@ -3,9 +3,9 @@
 \docType{data}
 \name{chol_maf}
 \alias{chol_maf}
-\title{TCGA CHOL MAF transformed to maftools obejct}
+\title{TCGA CHOL MAF transformed to maftools object}
 \format{An object of class  MAF}
 \description{
-TCGA CHOL MAF transformed to maftools obejct
+TCGA CHOL MAF transformed to maftools object
 }
 \keyword{internal}

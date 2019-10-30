@@ -20,7 +20,7 @@ object of class hclust if method selected is 'hclust'.
 If method selected is 'Consensus' returns a list of length maxK
 (maximum cluster number to evaluate.). Each element is a list containing
 consensusMatrix (numerical matrix), consensusTree (hclust), consensusClass
-(consensus class asssignments). ConsensusClusterPlus also produces images.
+(consensus class assignments). ConsensusClusterPlus also produces images.
 }
 \description{
 Hierarchical cluster analysis using several methods such as

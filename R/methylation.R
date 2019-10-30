@@ -101,7 +101,7 @@ diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save =
 #' @param width Image width
 #' @param height Image height
 #' @param pvalue show p-value of log-rank test
-#' @param conf.int  show confidence intervals for point estimaes of survival curves.
+#' @param conf.int  show confidence intervals for point estimates of survival curves.
 #' @param ... Further arguments passed to \link[survminer]{ggsurvplot}.
 #' @param dpi Figure quality
 #' @importFrom survminer ggsurvplot
@@ -243,7 +243,7 @@ TCGAanalyze_survival <- function(data,
 #' @title Mean methylation boxplot
 #' @description
 #'   Creates a mean methylation boxplot for groups (groupCol),
-#'   subgroups will be highlited  as shapes if the subgroupCol was set.
+#'   subgroups will be highlighted as shapes if the subgroupCol was set.
 #'
 #'   Observation: Data is a summarizedExperiment.
 #'
@@ -263,7 +263,7 @@ TCGAanalyze_survival <- function(data,
 #' @param xlab x axis text in the plot
 #' @param labels Labels of the groups
 #' @param sort Sort boxplot by mean or median.
-#' Possible values: mean.asc, mean.desc, median.asc, meadian.desc
+#' Possible values: mean.asc, mean.desc, median.asc, median.desc
 #' @param plot.jitter Plot jitter? Default TRUE
 #' @param jitter.size Plot jitter size? Default 3
 #' @param height Plot height default:10
@@ -646,7 +646,7 @@ calculate.pvalues <- function(data,
 #' @param y y-axis data
 #' @param y.cut p-values threshold.
 #' @param x.cut  x-axis threshold. Default: 0.0 If you give only one number (e.g. 0.2) the cut-offs will be
-#'  -0.2 and 0.2. Or you can give diffenrent cutt-ofs as a vector (e.g. c(-0.3,0.4))
+#'  -0.2 and 0.2. Or you can give different cut-offs as a vector (e.g. c(-0.3,0.4))
 #' @param filename Filename. Default: volcano.pdf, volcano.svg, volcano.png
 #' @param legend Legend title
 #' @param color vector of colors to be used in graph
@@ -878,7 +878,7 @@ TCGAVisualize_volcano <- function(x,y,
 #'
 #'   If the calculus already exists in the object it will not recalculated.
 #'   You should set overwrite parameter to TRUE to force it, or remove the
-#'   collumns with the results from the object.
+#'   columns with the results from the object.
 #'
 #' @param data  SummarizedExperiment obtained from the TCGAPrepare
 #' @param groupCol  Columns with the groups inside the SummarizedExperiment

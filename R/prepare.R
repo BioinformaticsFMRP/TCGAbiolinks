@@ -1462,7 +1462,7 @@ getBarcodeInfo <- function(barcode) {
 #' to add example
 #' }
 #' @export
-#' @return Normalizd Expression data from Affy eSets
+#' @return Normalized Expression data from Affy eSets
 TCGAprepare_Affy <- function(ClinData, PathFolder, TabCel){
   if (!requireNamespace("affy", quietly = TRUE)) {
     stop("affy package is needed for this function to work. Please install it.",
