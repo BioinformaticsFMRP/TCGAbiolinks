@@ -26,7 +26,8 @@ library(DT)
 There are two options to download the data:
 
 1. Use `GDCquery_Maf` which will download MAF aligned against hg38
-2. Use `GDCquery`, `GDCdownload` and `GDCpreprare` to downoad MAF aligned against hg19
+2. Use `GDCquery`, `GDCdownload` and `GDCpreprare` to download MAF aligned against hg19
+3. Use `getMC3MAF()`, to download MC3 MAF from  https://gdc.cancer.gov/about-data/publications/mc3-2017
 
 ## Mutation data (hg38)
 
@@ -89,6 +90,17 @@ datatable(maf[1:20,],
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = FALSE)
 ```
+
+
+## Mutation data MC3 file
+
+This will download the MC3 MAF file from https://gdc.cancer.gov/about-data/publications/mc3-2017,
+and add project each sample belongs.
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval=FALSE}
+maf <- getMC3MAF()
+```
+
 
 # Visualize the data
 To visualize the data you can use the Bioconductor package [maftools](https://bioconductor.org/packages/release/bioc/html/maftools.html). For more information, please check its [vignette](https://bioconductor.org/packages/release/bioc/vignettes/maftools/inst/doc/maftools.html#rainfall-plots).
