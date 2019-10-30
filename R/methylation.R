@@ -658,7 +658,7 @@ calculate.pvalues <- function(data,
 #' @param ylim y limits to cut image
 #' @param height Figure height
 #' @param width Figure width
-#' @param names Names to be ploted if significant.
+#' @param names Names to be plotted if significant.
 #' Should be the same size of x and y
 #' @param names.fill Names should be filled in a color box?  Default: TRUE
 #' @param names.size Size of the names text
@@ -668,7 +668,7 @@ calculate.pvalues <- function(data,
 #' "Hypomethylated in group1"))#'
 #' @param highlight List of genes/probes to be highlighted. It should be in the names argument.
 #' @param highlight.color Color of the points highlighted
-#' @param show.names What names will be showd? Possibilities: "both", "significant", "highlighted"
+#' @param show.names What names will be showed? Possibilities: "both", "significant", "highlighted"
 #' @export
 #' @importFrom ggrepel geom_label_repel geom_text_repel
 #' @return Saves the volcano plot in the current folder

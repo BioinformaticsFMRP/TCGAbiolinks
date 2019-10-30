@@ -105,7 +105,7 @@ report in our package:
 
 These subtypes will be automatically added in the summarizedExperiment
 object through GDCprepare. But you can also use the `TCGAquery_subtype` function
-to retrive this information.
+to retrieve this information.
 
 ```{r, eval = FALSE}
 lgg.gbm.subtype <- TCGAquery_subtype(tumor = "lgg")
