@@ -187,7 +187,7 @@ function, which performs an Array Array Intensity correlation AAIC.
 We used all samples in expression data which contain molecular subtypes, filtering 
 out samples without molecular information, and using only IDHmut-codel (n=85),
 IDHmut-non-codel (n=141) and IDHwt (n=56), NA (11), to define a square 
-symetric matrix of pearson correlation among all samples (n=293). 
+symmetric matrix of pearson correlation among all samples (n=293). 
 According to this matrix we found no samples with low correlation (cor.cut = 0.6) 
 that can be identified as possible outliers, so we continued our analysis 
 with 70 samples. 

@@ -23,7 +23,7 @@
 #' and dnet package related to survival analysis with an identification of gene-active networks from
 #' high-throughput omics data using gene expression and clinical data.
 #' \enumerate{
-#' \item Cox regression survival analysis to obtain hazard ratio (HR) and pvaules
+#' \item Cox regression survival analysis to obtain hazard ratio (HR) and p-values
 #' \item fit a Cox proportional hazards model and ANOVA (Chisq test)
 #' \item Network comunites
 #' \item An igraph object that contains a functional protein association network in human.
@@ -37,7 +37,7 @@
 #' \item color nodes according to communities (identified via a spin-glass model and simulated annealing)
 #' \item node sizes according to degrees
 #' \item highlight different communities
-#' \item visualise the subnetwork
+#' \item visualize the subnetwork
 #' }
 #' @param clinical_patient is a data.frame using function 'clinic' with information
 #' related to barcode / samples such as bcr_patient_barcode, days_to_death ,
