@@ -1545,7 +1545,7 @@ gaiaCNVplot <- function (calls,  threshold = 0.01) {
 #' Get a matrix of interactions of genes from biogrid
 #' @description
 #' Using biogrid database, it will create a matrix of gene interactions.
-#' If columns A and row B has value 1, it means the gene A and gene B interatcs.
+#' If columns A and row B has value 1, it means the gene A and gene B interacts.
 #' @param tmp.biogrid Biogrid table
 #' @export
 #' @param names.genes List of genes to filter from output. Default: consider all genes

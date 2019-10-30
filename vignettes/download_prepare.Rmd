@@ -67,7 +67,7 @@ has three main matrices that can be accessed using the [SummarizedExperiment pac
 <div class="panel-body">
 
 
-When using the funciton `GDCprepare` there is an argument called `SummarizedExperiment`
+When using the function `GDCprepare` there is an argument called `SummarizedExperiment`
 which defines the output type a Summarized Experiment (default option) or a data frame.
 To create a summarized Experiment object we annotate the data with genomic positions
 with last patch release version of the genome available. 

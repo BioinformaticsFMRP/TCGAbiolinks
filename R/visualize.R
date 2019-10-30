@@ -535,10 +535,10 @@ TCGAvisualize_BarPlot <- function(DFfilt,
 #' @param row.colors A list of named colors
 #' @param type Select the colors of the heatmap values. Possible values are
 #'  "expression" (default), "methylation"
-#' @param show_column_names  Show column names names? Dafault: FALSE
-#' @param show_row_names Show row names? Dafault: FALSE
-#' @param cluster_rows Cluster rows ? Dafault: FALSE
-#' @param cluster_columns Cluster columns ? Dafault: FALSE
+#' @param show_column_names  Show column names names? Default: FALSE
+#' @param show_row_names Show row names? Default: FALSE
+#' @param cluster_rows Cluster rows ? Default: FALSE
+#' @param cluster_columns Cluster columns ? Default: FALSE
 #' @param filename Filename to save the heatmap. Default: heatmap.png
 #' @param width figure width
 #' @param height figure height

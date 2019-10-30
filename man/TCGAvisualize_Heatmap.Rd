@@ -28,13 +28,13 @@ The code will throw a warning in case two samples are from the same patient.}
 
 \item{row.colors}{A list of named colors}
 
-\item{show_column_names}{Show column names names? Dafault: FALSE}
+\item{show_column_names}{Show column names names? Default: FALSE}
 
-\item{show_row_names}{Show row names? Dafault: FALSE}
+\item{show_row_names}{Show row names? Default: FALSE}
 
-\item{cluster_rows}{Cluster rows ? Dafault: FALSE}
+\item{cluster_rows}{Cluster rows ? Default: FALSE}
 
-\item{cluster_columns}{Cluster columns ? Dafault: FALSE}
+\item{cluster_columns}{Cluster columns ? Default: FALSE}
 
 \item{sortCol}{Name of the column to be used to sort the columns}
 
