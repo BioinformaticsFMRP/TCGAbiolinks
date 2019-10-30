@@ -690,6 +690,46 @@ GDCquery_Maf <- function(tumor,
 }
 
 
+
+#' @title Retrieve open access mc3 MAF file from GDC server
+#' @description
+#'   Download data from https://gdc.cancer.gov/about-data/publications/mc3-2017
+#'   https://gdc-docs.nci.nih.gov/Data/Release_Notes/Data_Release_Notes/
+#' @examples
+#' \dontrun{
+#'    maf <- getMC3MAF()
+#' }
+#' @return A data frame with the MAF file information from https://gdc.cancer.gov/about-data/publications/mc3-2017
+#' @export
+getMC3MAF <- function(){
+    fout <- "mc3.v0.2.8.PUBLIC.maf.gz"
+    fpath <- "https://api.gdc.cancer.gov/data/1c8cfe5f-e52d-41ba-94da-f15ea1337efc"
+    if(is.windows()) mode <- "wb" else  mode <- "w"
+    message("o--------------------------------------------------------------------------------o")
+    message("o Starting to download Publi MAF from GDC")
+    message("o More information at: https://gdc.cancer.gov/about-data/publications/mc3-2017")
+    message("o Please, cite: Cell Systems. Volume 6 Issue 3: p271-281.e7, 28 March 2018 10.1016/j.cels.2018.03.002")
+    if(!file.exists(gsub("\\.gz", "", fout))){
+        download(fpath, fout, mode = mode)
+        message("o Uncompressing file")
+        gunzip(fout, remove = FALSE)
+    }
+    message("o Reading MAF")
+    maf <- readr::read_tsv(gsub("\\.gz", "", fout),progress = TRUE)
+    message("o Adding project_id information")
+    project <- grep("TCGA",sort(getGDCprojects()$project_id),value = TRUE)
+    df <- plyr::adply(project,
+                .margins = 1,
+                .fun = function(proj) {
+                    samples <- getSubmitterID(proj)
+                    return(data.frame(proj,samples))
+                    }
+                )
+    maf$project_id <- df$proj[match(substr(maf$Tumor_Sample_Barcode,1,12),df$samples)] %>% as.character
+    message("o--------------------------------------------------------------------------------o")
+}
+
+
 #' @title Query gene counts of TCGA and GTEx data from the Recount2 project
 #' @description
 #'   TCGArecount2_query queries and downloads data produced by the Recount2 project. User can specify which project and which tissue to query
