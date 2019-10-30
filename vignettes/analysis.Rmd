@@ -498,7 +498,7 @@ acessesor (`rowRanges(data)`).
 **Observation:** Calling the same function again, with the same arguments 
 will only plot the results,  as it was already calculated. 
 If you want to have them recalculated, please set
-`overwrite` to `TRUE` or remove the calculated collumns.
+`overwrite` to `TRUE` or remove the calculated columns.
 
 # `TCGAvisualize`: Visualize results from analysis functions with TCGA's data. 
 You can easily visualize results from some following functions:
@@ -518,10 +518,10 @@ The arguments of this function are:
 * **row.metadata** Metadata for the rows genes (expression) or probes (methylation)
 * **col.colors ** A list of names colors
 * **row.colors ** A list of named colors
-* **show_column_names **	Show column names names? Dafault: FALSE
-* **show_row_names ** Show row names? Dafault: FALSE
-* **cluster_rows ** Cluster rows ? Dafault: FALSE
-* **cluster_columns** Cluster columns ? Dafault: FALSE
+* **show_column_names **	Show column names names? Default: FALSE
+* **show_row_names ** Show row names? Default: FALSE
+* **cluster_rows ** Cluster rows ? Default: FALSE
+* **cluster_columns** Cluster columns ? Default: FALSE
 * **sortCol** Name of the column to be used to sort the columns
 * **title** Title of the plot
 * **type** Select the colors of the heatmap values. Possible values are "expression" (default), "methylation"
