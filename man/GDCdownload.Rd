@@ -10,7 +10,7 @@ GDCdownload(query, token.file, method = "api", directory = "GDCdata",
 \arguments{
 \item{query}{A query for GDCquery function}
 
-\item{token.file}{Token file to download controled data (only for method = "client")}
+\item{token.file}{Token file to download controlled data (only for method = "client")}
 
 \item{method}{Uses the API (POST method) or gdc client tool. Options "api", "client".
 API is faster, but the data might get corrupted in the download, and it might need to be executed again}

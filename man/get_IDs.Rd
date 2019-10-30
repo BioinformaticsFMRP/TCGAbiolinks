@@ -13,6 +13,6 @@ get_IDs(data)
 data frame with columns 'project', 'tss','participant', 'sample', "portion", "plate", "center", "condition"
 }
 \description{
-get_IDs allows user to extract metadata from barcodes. The dataframe returned has columnns for
+get_IDs allows user to extract metadata from barcodes. The dataframe returned has columns for
  'project', 'tss','participant', 'sample', "portion", "plate", and "center"
 }

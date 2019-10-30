@@ -52,7 +52,7 @@ datatable(maf[1:20,],
 
 ## Mutation data (hg19)
 
-This exmaple will download MAF (mutation annotation files) aligned against hg19 (Old TCGA maf files)
+This example will download MAF (mutation annotation files) aligned against hg19 (Old TCGA maf files)
 
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
