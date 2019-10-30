@@ -170,7 +170,7 @@ The process to get data directly from the XML are:
 
 The relation between one patient and other clinical information are 1:n, 
 one patient could have several radiation treatments. For that reason, we only give the option
-to parse individual tables (only drug information, only radiation informtaion,...)
+to parse individual tables (only drug information, only radiation information,...)
 The selection of the table is done by the argument `clinical.info`.
 
 <div class="panel panel-info">

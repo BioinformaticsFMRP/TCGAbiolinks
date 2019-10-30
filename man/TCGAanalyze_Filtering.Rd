@@ -20,9 +20,9 @@ See genefilter documentation}
 
 \item{var.cutoff}{is a numeric value. See genefilter documentation}
 
-\item{eta}{is a paramter for filter1. default eta = 0.05.}
+\item{eta}{is a parameter for filter1. default eta = 0.05.}
 
-\item{foldChange}{is a paramter for filter2. default foldChange = 1.}
+\item{foldChange}{is a parameter for filter2. default foldChange = 1.}
 }
 \value{
 A filtered dataframe or numeric matrix where each row represents a gene,

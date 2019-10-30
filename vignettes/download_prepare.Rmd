@@ -78,7 +78,7 @@ Unfortunately, some of the updates changes/remove gene symbols, change coordinat
 Which might introduce some loss of data. For example, if the gene was removed we cannot map
 it anymore and that information will be lost in the `SummarizedExperiment`.
 
-If you set `SummarizedExperiment` to `FALSE`, you will get the data unmofied 
+If you set `SummarizedExperiment` to `FALSE`, you will get the data unmodified 
 just as they are in the files and ad your own annotation.
 
 Also, there are no updated for DNA methylation data. But the last metadata available can be found

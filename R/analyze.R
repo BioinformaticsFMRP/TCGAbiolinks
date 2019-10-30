@@ -392,8 +392,8 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
 #' @param var.func is function used as the per-feature filtering statistic.
 #' See genefilter documentation
 #' @param var.cutoff is a numeric value. See genefilter documentation
-#' @param eta is a paramter for filter1. default eta = 0.05.
-#' @param foldChange is a paramter for filter2. default foldChange = 1.
+#' @param eta is a parameter for filter1. default eta = 0.05.
+#' @param foldChange is a parameter for filter2. default foldChange = 1.
 #' @importFrom genefilter varFilter
 #' @export
 #' @return A filtered dataframe or numeric matrix where each row represents a gene,
