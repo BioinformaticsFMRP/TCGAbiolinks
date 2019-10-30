@@ -779,7 +779,7 @@ getURL <- function(URL, FUN, ..., N.TRIES=3L) {
 
 #' @title Extract information from TCGA barcodes.
 #' @description
-#'    get_IDs allows user to extract metadata from barcodes. The dataframe returned has columnns for
+#'    get_IDs allows user to extract metadata from barcodes. The dataframe returned has columns for
 #'  'project', 'tss','participant', 'sample', "portion", "plate", and "center"
 #' @param data numeric matrix, each row represents a gene, each column represents a sample
 #' @export

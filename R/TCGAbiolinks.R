@@ -86,7 +86,7 @@ NULL
 #' @format A data frame with 11382 rows and 3 variables
 NULL
 
-#' TCGA CHOL MAF transformed to maftools obejct
+#' TCGA CHOL MAF transformed to maftools object
 #' @docType data
 #' @keywords internal
 #' @name chol_maf

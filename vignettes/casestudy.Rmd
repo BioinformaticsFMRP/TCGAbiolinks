@@ -209,7 +209,7 @@ Then we applied two Hierarchical cluster analysis on 1187 mRNAs after the three
 filters described above, the first cluster using as method ward.D2, and the 
 second with ConsensusClusterPlus.
 
-After the two clustering analysis, with cut.tree = 4 we obtained n= 4 espression clusters (EC).
+After the two clustering analysis, with cut.tree = 4 we obtained n= 4 expression clusters (EC).
 
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}

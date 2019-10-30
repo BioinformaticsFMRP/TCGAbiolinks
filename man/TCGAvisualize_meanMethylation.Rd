@@ -51,7 +51,7 @@ of the subgroups. Example: shapes = c(21,23) if for two levels}
 \item{y.limits}{Change lower/upper y-axis limit}
 
 \item{sort}{Sort boxplot by mean or median.
-Possible values: mean.asc, mean.desc, median.asc, meadian.desc}
+Possible values: mean.asc, mean.desc, median.asc, median.desc}
 
 \item{order}{Order of the boxplots}
 
@@ -76,7 +76,7 @@ Save the pdf survival plot
 }
 \description{
 Creates a mean methylation boxplot for groups (groupCol),
-  subgroups will be highlited  as shapes if the subgroupCol was set.
+  subgroups will be highlighted as shapes if the subgroupCol was set.
 
   Observation: Data is a summarizedExperiment.
 }

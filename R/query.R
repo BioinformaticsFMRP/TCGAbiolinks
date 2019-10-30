@@ -1,7 +1,7 @@
 #' @title Query GDC data
 #' @description
 #'   Uses GDC API to search for search, it searches for both controlled and
-#'   open-acess data.
+#'   open-access data.
 #'   For GDC data arguments project, data.category, data.type and workflow.type should be used
 #'   For the legacy data arguments project, data.category, platform and/or file.extension should be used.
 #'   Please, see the vignette for a table with the possibilities.

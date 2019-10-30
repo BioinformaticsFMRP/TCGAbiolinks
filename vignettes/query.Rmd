@@ -315,7 +315,7 @@ getManifest(query.exp.hg19,save = FALSE)
 # ATAC-seq data
 
 For the moment, ATAC-seq data is available at the [GDC publication page](https://gdc.cancer.gov/about-data/publications/ATACseq-AWG).
-Also, for more details, you can check an ATAC-seq workhop at http://rpubs.com/tiagochst/atac_seq_workshop
+Also, for more details, you can check an ATAC-seq workshop at http://rpubs.com/tiagochst/atac_seq_workshop
 
 The list of file available is below:
 ```{r message=FALSE, warning=FALSE}

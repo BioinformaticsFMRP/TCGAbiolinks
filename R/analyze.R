@@ -14,7 +14,7 @@
 #' If method selected is 'Consensus' returns a list of length maxK
 #' (maximum cluster number to evaluate.). Each element is a list containing
 #' consensusMatrix (numerical matrix), consensusTree (hclust), consensusClass
-#' (consensus class asssignments). ConsensusClusterPlus also produces images.
+#' (consensus class assignments). ConsensusClusterPlus also produces images.
 TCGAanalyze_Clustering <- function(tabDF, method,  methodHC = "ward.D2"){
 
     if( method == "hclust"){
@@ -384,7 +384,6 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
 #' @title Filtering mRNA transcripts and miRNA selecting a threshold.
 #' @description
 #'    TCGAanalyze_Filtering allows user to filter mRNA transcripts and miRNA,
-#'    selecting a threshold. For istance returns all mRNA or miRNA with mean across all
 #'    samples, higher than the threshold defined quantile mean across all samples.
 #' @param tabDF is a dataframe or numeric matrix, each row represents a gene,
 #' each column represents a sample come from TCGAPrepare
@@ -1157,8 +1156,8 @@ TCGAanalyze_EAcomplete <- function(TFname, RegulonList){
 #'  assigned to it in the "changed-gene" list is higher than expected by chance
 #'  (is over-represented), relative to the fraction of genes assigned to that term in the
 #'  reference set.
-#'  In statistical terms it peform the analysis tests the null hypothesis that,
-#'  for any particular ontology term, there is no diffeerence in the proportion of genes
+#'  In statistical terms it perform the analysis tests the null hypothesis that,
+#'  for any particular ontology term, there is no difference in the proportion of genes
 #'  annotated to it in the reference list and the proportion annotated to it in the test list.
 #'  We adopted a Fisher Exact Test to perform the EA.
 #' @param GeneName is the name of gene signatures list
@@ -1467,9 +1466,9 @@ TCGAanalyze_networkInference <- function(data, optionMethod = "clr" ){
 }
 
 
-#' Creates a plot for GAIA ouptut (all significant aberrant regions.)
+#' Creates a plot for GAIA output (all significant aberrant regions.)
 #' @description
-#' This function is a auxiliary function to visualize GAIA ouptut
+#' This function is a auxiliary function to visualize GAIA output
 #' (all significant aberrant regions.)
 #' @param calls A matrix with the following columns: Chromossome, Aberration Kind
 #' Region Start, Region End, Region Size and score
@@ -1545,7 +1544,7 @@ gaiaCNVplot <- function (calls,  threshold = 0.01) {
 
 #' Get a matrix of interactions of genes from biogrid
 #' @description
-#' Using biogrid database, it will create a matrix of gene interations.
+#' Using biogrid database, it will create a matrix of gene interactions.
 #' If columns A and row B has value 1, it means the gene A and gene B interatcs.
 #' @param tmp.biogrid Biogrid table
 #' @export
