@@ -1338,6 +1338,12 @@ getBarcodeInfo <- function(barcode) {
   )
 
   results <- json$data$hits
+
+  # no results
+  if(length(results) == 0){
+    return(data.frame(barcode,stringsAsFactors = FALSE))
+  }
+
   submitter_id <- results$submitter_id
   submitter_aliquot_ids <- results$submitter_aliquot_ids
 
@@ -1348,8 +1354,7 @@ getBarcodeInfo <- function(barcode) {
       unlist %>% as.character
 
     tryCatch({
-      samples$submitter_id <- str_extract_all(samples$submitter_id, paste(submitter_id,collapse = "|")) %>%
-        unlist %>% as.character
+      samples$submitter_id <- str_extract_all(samples$submitter_id, paste(submitter_id,collapse = "|"),simplify = T) %>% as.character
     }, error = function(e){
       samples$submitter_id <- submitter_id
     })
@@ -1374,11 +1379,7 @@ getBarcodeInfo <- function(barcode) {
       diagnoses$submitter_id <- NULL
       df <- dplyr::bind_cols(df,diagnoses)
     } else {
-      df <- merge(df,
-                  diagnoses,
-                  by = "submitter_id",
-                  all.x = T,
-                  sort = FALSE)
+      df <- left_join(df, diagnoses, by = "submitter_id")
     }
   }
   if(!is.null(results$exposures)) {
@@ -1393,10 +1394,7 @@ getBarcodeInfo <- function(barcode) {
       exposures$submitter_id <- NULL
       df <- dplyr::bind_cols(df,exposures)
     } else {
-      df <- merge(df,exposures,
-                  by = "submitter_id",
-                  all.x = TRUE,
-                  sort = FALSE)
+      df <- left_join(df, exposures, by = "submitter_id")
     }
   }
 
@@ -1414,7 +1412,7 @@ getBarcodeInfo <- function(barcode) {
       demographic$submitter_id <- NULL
       df <- dplyr::bind_cols(df,demographic)
     } else {
-      df <- merge(df,demographic, by = "submitter_id", all.x = TRUE, sort = FALSE)
+      df <- left_join(df,demographic, by = "submitter_id")
     }
   }
 
@@ -1423,16 +1421,20 @@ getBarcodeInfo <- function(barcode) {
   projects.info <- results$project[,grep("state",colnames(projects.info),invert = TRUE)]
 
   if(any(submitter_id %in% df$submitter_id)){
-    df <- merge(df,
-                cbind("submitter_id" = submitter_id, projects.info),
-                sort = FALSE,
-                all.x = TRUE,
-                by = "submitter_id")
+    projects.info <-  cbind("submitter_id" = submitter_id, projects.info)
+
+    suppressWarnings({
+      df <- left_join(df,
+                      projects.info,
+                      by = "submitter_id")
+    })
   } else {
     df <- dplyr::bind_cols(df,projects.info)
   }
 
   # Adding in the same order
+
+
   if(any(substr(barcode,1,str_length(df$submitter_id)) %in% df$submitter_id)){
     df <- df[match(substr(barcode,1,str_length(df$sample_submitter_id)),df$sample_submitter_id),]
     # This line should not exists, but some patients does not have clinical data
@@ -1441,9 +1443,10 @@ getBarcodeInfo <- function(barcode) {
     # So we will remove this NA cases
     df <- df[!is.na(df$submitter_id),]
   } else {
-    idx <- sapply(substr(barcode,1,str_length(df$submitter_aliquot_ids)),FUN = function(x){
-      grep(x,df$submitter_aliquot_ids)
-    })
+    idx <- sapply(substr(barcode,1,str_length(df$submitter_aliquot_ids) %>% max),
+                  FUN = function(x){
+                    grep(x,df$submitter_aliquot_ids)
+                  })
     df <- df[idx,]
   }
 
