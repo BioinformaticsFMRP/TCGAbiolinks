@@ -772,6 +772,7 @@ colDataPrepareTCGA <- function(barcode){
 #' @description Create samples information matrix for GDC samples add subtype information
 #' @param barcode TCGA or TARGET barcode
 #' @importFrom plyr rbind.fill
+#' @importFrom dplyr left_join
 #' @examples
 #'  metadata <- colDataPrepare(c("TCGA-OR-A5K3-01A","C3N-00321-01"))
 #'  metadata <- colDataPrepare(c("BLGSP-71-06-00157-01A",
@@ -786,7 +787,7 @@ colDataPrepare <- function(barcode){
   if(all(grepl("TARGET",barcode))) ret <- colDataPrepareTARGET(barcode)
   if(all(grepl("TCGA",barcode))) ret <- colDataPrepareTCGA(barcode)
   if(all(grepl("MMRF",barcode))) ret <- colDataPrepareMMRF(barcode)
-  if(is.null(ret)) ret <- data.frame(sample = barcode)
+  if(is.null(ret)) ret <- data.frame(sample = barcode,stringsAsFactors = FALSE)
 
   message(" => Add clinical information to samples")
   # There is a limitation on the size of the string, so this step will be splited in cases of 100
@@ -819,15 +820,11 @@ colDataPrepare <- function(barcode){
   })
 
   if(!is.null(patient.info)) {
-    ret <- merge(ret,
-                 patient.info,
-                 by.x = "sample",
-                 by.y = "sample_submitter_id",
-                 all.x = TRUE,
-                 sort = FALSE)
+    ret$sample_submitter_id <- ret$sample %>% as.character()
+    ret <- left_join(ret, patient.info, by = "sample_submitter_id")
   }
-  ret$bcr_patient_barcode <- ret$sample
-  ret$sample_submitter_id <- ret$sample
+  ret$bcr_patient_barcode <- ret$sample %>% as.character()
+  ret$sample_submitter_id <- ret$sample %>% as.character()
 
   if(!"project_id" %in% colnames(ret)) {
     if("disease_type" %in% colnames(ret)){
@@ -842,14 +839,17 @@ colDataPrepare <- function(barcode){
   }
 
   # na.omit should not be here, exceptional case
-  if(is.null(ret)) return(data.frame(row.names = barcode, barcode))
+  if(is.null(ret)) return(data.frame(row.names = barcode, barcode,stringsAsFactors = FALSE))
 
   # Add purity information from http://www.nature.com/articles/ncomms9971
   # purity  <- getPurityinfo()
   # ret <- merge(ret, purity, by = "sample", all.x = TRUE, sort = FALSE)
 
   # Put data in the right order
-  idx <- sapply(ret$bcr_patient_barcode, function(x) {grep(x,barcode)})
+  idx <- sapply(substr(barcode,1,min(str_length(ret$bcr_patient_barcode))), function(x) {
+    grep(x,ret$bcr_patient_barcode)
+  })
+
   ret <- ret[idx,]
   rownames(ret) <- barcode
   return(ret)
