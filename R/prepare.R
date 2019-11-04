@@ -821,7 +821,7 @@ colDataPrepare <- function(barcode){
 
   if(!is.null(patient.info)) {
     ret$sample_submitter_id <- ret$sample %>% as.character()
-    ret <- left_join(ret, patient.info, by = "sample_submitter_id")
+    ret <- left_join(ret %>% as.data.frame, patient.info, by = "sample_submitter_id")
   }
   ret$bcr_patient_barcode <- ret$sample %>% as.character()
   ret$sample_submitter_id <- ret$sample %>% as.character()

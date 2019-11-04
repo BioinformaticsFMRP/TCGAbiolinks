@@ -1,7 +1,9 @@
 context("Download AND PREPARE")
 
-test_that("GDCdownload API method for one files is working ", {
-    cases <-  c("TCGA-OR-A5JX-01A-11D-A29H-01")
+test_that("GDCdownload API method is working ", {
+    cases <-  c("TCGA-OR-A5JX-01A-11R-A29S-07",
+                "TCGA-OR-A5KY-01A-11R-A29S-07",
+                "TCGA-PK-A5HA-01A-11R-A29S-07")
     acc.gbm <- GDCquery(project =  c("TCGA-ACC"),
                         data.category = "Transcriptome Profiling",
                         data.type = "Gene Expression Quantification",
@@ -9,8 +11,27 @@ test_that("GDCdownload API method for one files is working ", {
                         barcode = substr(cases,1,12))
     GDCdownload(acc.gbm, method = "api", directory = "ex")
     obj <- GDCprepare(acc.gbm,  directory = "ex",summarizedExperiment = FALSE)
-    expect_true( substr(colnames(obj)[2],1,12) == substr(cases,1,12))
+    expect_true(all(substr(colnames(obj)[-1],1,12) == substr(cases,1,12)))
+
+    obj <- GDCprepare(acc.gbm,  directory = "ex",summarizedExperiment = TRUE)
+    expect_true(all(substr(colData(obj) %>% rownames(),1,12) == substr(cases,1,12)))
+    expect_true(all(obj$barcode == cases))
+
+    query <- GDCquery(
+        project = projects,
+        data.category = "Transcriptome Profiling",
+        data.type = "Gene Expression Quantification",
+        workflow.type = "HTSeq - Counts",
+        barcode = c("CPT0010260013","CPT0000870008","CPT0105190006","CPT0077490006")
+    )
+    GDCdownload(query)
+    data <- GDCprepare(query)
+    expect_true(all(query$results[[1]]$sample.submitter_id == colnames(data)))
+    expect_true(all(query$results[[1]]$sample.submitter_id == data$sample_submitter_id))
 })
+
+
+
 
 test_that("getBarcodeInfo works", {
     cols <- c("gender","project_id","days_to_last_follow_up","alcohol_history")
@@ -21,10 +42,12 @@ test_that("getBarcodeInfo works", {
     x <- getBarcodeInfo(c("TARGET-20-PARUDL-03A"))
     expect_true(all(cols %in% colnames(x)))
 
-    x <- colDataPrepare(c("HCM-CSHL-0063-C18-85A",
-                          "HCM-CSHL-0065-C20-06A",
-                          "HCM-CSHL-0065-C20-85A",
-                          "HCM-CSHL-0063-C18-01A"))
+    samples <- c("HCM-CSHL-0063-C18-85A",
+                 "HCM-CSHL-0065-C20-06A",
+                 "HCM-CSHL-0065-C20-85A",
+                 "HCM-CSHL-0063-C18-01A")
+    x <- colDataPrepare(samples)
+    expect_true(rownames(x) == samples)
     expect_true(x[x$sample_submitter_id == "HCM-CSHL-0065-C20-06A","gender"] == "male")
     expect_true(x[x$sample_submitter_id == "HCM-CSHL-0065-C20-06A","tumor_grade"] == "G2")
     expect_true(x[x$sample_submitter_id == "HCM-CSHL-0065-C20-06A","ajcc_pathologic_stage"] == "Stage IVA")
