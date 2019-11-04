@@ -18,7 +18,7 @@ test_that("GDCdownload API method is working ", {
     expect_true(all(obj$barcode == cases))
 
     query <- GDCquery(
-        project = projects,
+        project = "CPTAC-3",
         data.category = "Transcriptome Profiling",
         data.type = "Gene Expression Quantification",
         workflow.type = "HTSeq - Counts",
@@ -47,7 +47,7 @@ test_that("getBarcodeInfo works", {
                  "HCM-CSHL-0065-C20-85A",
                  "HCM-CSHL-0063-C18-01A")
     x <- colDataPrepare(samples)
-    expect_true(rownames(x) == samples)
+    expect_true(all(rownames(x) == samples))
     expect_true(x[x$sample_submitter_id == "HCM-CSHL-0065-C20-06A","gender"] == "male")
     expect_true(x[x$sample_submitter_id == "HCM-CSHL-0065-C20-06A","tumor_grade"] == "G2")
     expect_true(x[x$sample_submitter_id == "HCM-CSHL-0065-C20-06A","ajcc_pathologic_stage"] == "Stage IVA")
