@@ -526,12 +526,20 @@ readIDATDNAmethylation <- function(files,
     stop("sesame package is needed for this function to work. Please install it.",
          call. = FALSE)
   }
-
-  moved.files <- file.path(dirname(dirname(files)), basename(files))
-
-  # for eah file move it to upper parent folder
+  
+  # Check if moved files would be moved outside of scope folder, if so, path doesn't change
+  moved.files <- sapply(files,USE.NAMES=FALSE,function(x){
+    if(grepl("Raw_intensities",dirname(dirname(x)))){
+      return(file.path(dirname(dirname(x)), basename(x)))
+    }
+    return(x)
+  })
+  
+  # for each file move it to upper parent folder if necessary
   plyr::a_ply(files, 1,function(x){
-    tryCatch(TCGAbiolinks:::move(x,file.path(dirname(dirname(x)), basename(x)),keep.copy = FALSE),error = function(e){})
+    if(grepl("Raw_intensities",dirname(dirname(x)))){
+      tryCatch(TCGAbiolinks:::move(x,file.path(dirname(dirname(x)), basename(x)),keep.copy = FALSE),error = function(e){})
+    }
   })
 
   samples <- unique(gsub("_Grn.idat|_Red.idat","",moved.files))
