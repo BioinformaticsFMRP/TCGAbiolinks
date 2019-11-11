@@ -1154,7 +1154,7 @@ readGISTIC <- function(files, cases){
     message("Reading file: ", file)
     data <- read_tsv(file = file, col_names = TRUE, progress = TRUE,col_types = readr::cols())
 
-    patient <- substr(unlist(str_split(cases,",")),1,12)
+    patient <- colnames(data)[-c(1:3)]
     info <- NULL
     info <- tryCatch({
       step <- 20 # more than 50 gives a bug =/
@@ -1162,9 +1162,9 @@ readGISTIC <- function(files, cases){
         start <- 1 + step * i
         end <- ifelse(((i + 1) * step) > length(patient), length(patient),((i + 1) * step))
         if(is.null(info)) {
-          info <- getAliquot_ids(patient[start:end])
+          info <- getBarcodefromAliquot(patient[start:end])
         } else {
-          info <- rbind(info, getAliquot_ids(patient[start:end]))
+          info <- rbind(info, getBarcodefromAliquot(patient[start:end]))
         }
       }
       info
@@ -1174,17 +1174,16 @@ readGISTIC <- function(files, cases){
         start <- 1 + step * i
         end <- ifelse(((i + 1) * step) > length(patient), length(patient),((i + 1) * step))
         if(is.null(info)) {
-          info <- getAliquot_ids(patient[start:end])
+          info <- getBarcodefromAliquot(patient[start:end])
         } else {
-          info <- rbind(info, getAliquot_ids(patient[start:end]))
+          info <- rbind(info, getBarcodefromAliquot(patient[start:end]))
         }
       }
       info
     })
 
-    barcode <- as.character(info$barcode)[match(colnames(data),as.character(info$aliquot_id))]
-    idx <- which(!is.na(barcode))
-    colnames(data)[idx] <- barcode[idx]
+    barcode <- as.character(info$submitter_id)[match(patient,as.character(info$aliquot_id))]
+    colnames(data)[-c(1:3)] <- barcode
     return(data)
   })
   gistic.df <- gistic.list %>% purrr::reduce(dplyr::full_join, by = c("Gene Symbol","Gene ID","Cytoband"))
