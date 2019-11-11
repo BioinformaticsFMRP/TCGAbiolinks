@@ -172,4 +172,36 @@ getBarcodefromAliquot <- function(aliquot){
     return(results)
 }
 
-
+#' internal function to break a huge API call into smaller ones
+#' so it repects the max character limit of a string
+#' @param items vector of items to be using within the function
+#' (list of barcodes, aliquot ids, etc)
+#' @param step How many items to be evaluated per API call
+#' @param FUN function that calls the API
+splitAPICall <- function(FUN,step = 20,items){
+   info <- NULL
+   info <- tryCatch({
+        for(i in 0:(ceiling(length(items)/step) - 1)){
+            start <- 1 + step * i
+            end <- ifelse(((i + 1) * step) > length(items), length(items),((i + 1) * step))
+            if(is.null(info)) {
+                info <- FUN(items[start:end])
+            } else {
+                info <- rbind(info, FUN(items[start:end]))
+            }
+        }
+       info
+    }, error = function(e) {
+        step <- 2
+        for(i in 0:(ceiling(length(items)/step) - 1)){
+            start <- 1 + step * i
+            end <- ifelse(((i + 1) * step) > length(items), length(items),((i + 1) * step))
+            if(is.null(info)) {
+                info <- FUN(items[start:end])
+            } else {
+                info <- rbind(info, FUN(items[start:end]))
+            }
+        }
+    })
+   info
+}
