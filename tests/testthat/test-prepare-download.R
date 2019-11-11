@@ -106,7 +106,7 @@ test_that("GISTIC2 data is being correclty prepare", {
                       data.type = "Gene Level Copy Number Scores",
                       access = "open")
     GDCdownload(query,directory = "ex")
-    data <- GDCprepare(query)
+    data <- GDCprepare(query,directory = "ex")
 
     files <- dir("ex",pattern = "focal_score",recursive = TRUE,full.names = TRUE)
     raw.data <- readr::read_tsv(files)
@@ -114,4 +114,5 @@ test_that("GISTIC2 data is being correclty prepare", {
                     "cfd4127e-cd08-4f8c-b5b2-e440b452e044"),
                  colnames(raw.data))
     expect_true(all(substr(colnames(data)[idx],1,12) == c("TCGA-A6-5664","TCGA-AY-A71X")))
+    unlink("ex",recursive = TRUE,force = TRUE)
 })
