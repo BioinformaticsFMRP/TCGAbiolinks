@@ -139,6 +139,7 @@ getBarcodefromAliquot <- function(aliquot){
                              URLencode('"]}}]}'))
     #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
     url <- paste0(baseURL,paste(options.pretty,options.fields, option.size, options.filter, sep = "&"))
+    #message(url)
     json  <- tryCatch(
         getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
         error = function(e) {
@@ -155,7 +156,11 @@ getBarcodefromAliquot <- function(aliquot){
     }
 
     results <- plyr::ldply(results$samples,.fun = function(x){
-        x$portions[[1]]$analytes[[1]]$aliquots %>% bind_rows()
+        plyr::ldply(x$portions,.fun = function(y){
+            plyr::ldply(y$analytes,.fun = function(z){
+                z$aliquots %>% bind_rows()
+            })
+        })
     })
 
     idx <- is.na(match(aliquot,results$aliquot_id))
