@@ -315,7 +315,12 @@ GDCquery <- function(project,
     # 1) Normally for each sample we will have only single information
     # however the mutation call uses both normal and tumor which are both
     # reported by the API
-    if(!data.category %in% c("Clinical","Biospecimen","Other","Simple Nucleotide Variation", "Simple nucleotide variation")){
+    if(!data.category %in% c("Clinical",
+                             "Copy Number Variation",
+                             "Biospecimen",
+                             "Other",
+                             "Simple Nucleotide Variation",
+                             "Simple nucleotide variation")){
 
         # we also need to deal with pooled samples (mixed from different patients)
         # example CPT0000870008
@@ -370,10 +375,13 @@ GDCquery <- function(project,
         # Auxiliary test files does not have information linked toit.
         # get frm file names
         results$cases <- str_extract_all(results$file_name,"TCGA-[:alnum:]{2}-[:alnum:]{4}") %>% unlist
-    } else if(data.category == "Simple nucleotide variation"){
+    } else if(data.category %in% c( "Copy Number Variation","Simple nucleotide variation")){
         aux <- plyr::laply(results$cases,
                            function(x) {
-                               lapply(x$samples,FUN = function(y)   unlist(y,recursive = T)[c("portions.analytes.aliquots.submitter_id")]) %>% unlist %>% paste(collapse = ",")
+                               lapply(x$samples,FUN = function(y)  unlist(y,recursive = T)[c("portions.analytes.aliquots.submitter_id")]) %>%
+                                   unlist %>%
+                                   na.omit %>%
+                                   paste(collapse = ",")
                            }) %>% as.data.frame %>% pull(1) %>% as.character()
         results$cases <- aux
     } else if(data.category == "Simple Nucleotide Variation"){
@@ -719,12 +727,12 @@ getMC3MAF <- function(){
     message("o Adding project_id information")
     project <- grep("TCGA",sort(getGDCprojects()$project_id),value = TRUE)
     df <- plyr::adply(project,
-                .margins = 1,
-                .fun = function(proj) {
-                    samples <- getSubmitterID(proj)
-                    return(data.frame(proj,samples))
-                    }
-                )
+                      .margins = 1,
+                      .fun = function(proj) {
+                          samples <- getSubmitterID(proj)
+                          return(data.frame(proj,samples))
+                      }
+    )
     maf$project_id <- df$proj[match(substr(maf$Tumor_Sample_Barcode,1,12),df$samples)] %>% as.character
     message(rep("-",100))
 }
