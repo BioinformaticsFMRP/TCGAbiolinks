@@ -526,7 +526,7 @@ readIDATDNAmethylation <- function(files,
     stop("sesame package is needed for this function to work. Please install it.",
          call. = FALSE)
   }
-  
+
   # Check if moved files would be moved outside of scope folder, if so, path doesn't change
   moved.files <- sapply(files,USE.NAMES=FALSE,function(x){
     if(grepl("Raw_intensities",dirname(dirname(x)))){
@@ -534,7 +534,7 @@ readIDATDNAmethylation <- function(files,
     }
     return(x)
   })
-  
+
   # for each file move it to upper parent folder if necessary
   plyr::a_ply(files, 1,function(x){
     if(grepl("Raw_intensities",dirname(dirname(x)))){
@@ -801,31 +801,9 @@ colDataPrepare <- function(barcode){
   # There is a limitation on the size of the string, so this step will be splited in cases of 100
   patient.info <- NULL
 
-  patient.info <- tryCatch({
-    step <- 20 # more than 50 gives a bug =/
-    for(i in 0:(ceiling(length(ret$sample)/step) - 1)){
-      start <- 1 + step * i
-      end <- ifelse(((i + 1) * step) > length(ret$sample), length(ret$sample),((i + 1) * step))
-      if(is.null(patient.info)) {
-        patient.info <- getBarcodeInfo(ret$sample[start:end])
-      } else {
-        patient.info <- rbind.fill(patient.info,getBarcodeInfo(ret$sample[start:end]))
-      }
-    }
-    patient.info
-  }, error = function(e) {
-    step <- 2 # more than 50 gives a bug =/
-    for(i in 0:(ceiling(length(ret$sample)/step) - 1)){
-      start <- 1 + step * i
-      end <- ifelse(((i + 1) * step) > length(ret$sample), length(ret$sample),((i + 1) * step))
-      if(is.null(patient.info)) {
-        patient.info <- getBarcodeInfo(ret$sample[start:end])
-      } else {
-        patient.info <- rbind.fill(patient.info,getBarcodeInfo(ret$sample[start:end]))
-      }
-    }
-    patient.info
-  })
+  patient.info <- splitAPICall(FUN = getBarcodeInfo,
+                               step = 20,
+                               items = ret$sample)
 
   if(!is.null(patient.info)) {
     ret$sample_submitter_id <- ret$sample %>% as.character()
@@ -1162,35 +1140,12 @@ readGISTIC <- function(files, cases){
     message("Reading file: ", file)
     data <- read_tsv(file = file, col_names = TRUE, progress = TRUE,col_types = readr::cols())
 
-    patient <- colnames(data)[-c(1:3)]
-    info <- NULL
-    info <- tryCatch({
-      step <- 20 # more than 50 gives a bug =/
-      for(i in 0:(ceiling(length(patient)/step) - 1)){
-        start <- 1 + step * i
-        end <- ifelse(((i + 1) * step) > length(patient), length(patient),((i + 1) * step))
-        if(is.null(info)) {
-          info <- getBarcodefromAliquot(patient[start:end])
-        } else {
-          info <- rbind(info, getBarcodefromAliquot(patient[start:end]))
-        }
-      }
-      info
-    }, error = function(e) {
-      step <- 2
-      for(i in 0:(ceiling(length(patient)/step) - 1)){
-        start <- 1 + step * i
-        end <- ifelse(((i + 1) * step) > length(patient), length(patient),((i + 1) * step))
-        if(is.null(info)) {
-          info <- getBarcodefromAliquot(patient[start:end])
-        } else {
-          info <- rbind(info, getBarcodefromAliquot(patient[start:end]))
-        }
-      }
-      info
-    })
+    aliquot <- colnames(data)[-c(1:3)]
+    info <- splitAPICall(FUN = getBarcodefromAliquot,
+                         step = 20,
+                         items = aliquot)
 
-    barcode <- as.character(info$submitter_id)[match(patient,as.character(info$aliquot_id))]
+    barcode <- as.character(info$submitter_id)[match(aliquot,as.character(info$aliquot_id))]
     colnames(data)[-c(1:3)] <- barcode
     return(data)
   })
@@ -1221,31 +1176,9 @@ addFFPE <- function(df) {
   patient <- df$patient
 
   ffpe.info <- NULL
-  ffpe.info <- tryCatch({
-    step <- 20 # more than 50 gives a bug =/
-    for(i in 0:(ceiling(length(df$patient)/step) - 1)){
-      start <- 1 + step * i
-      end <- ifelse(((i + 1) * step) > length(df$patient), length(df$patient),((i + 1) * step))
-      if(is.null(ffpe.info)) {
-        ffpe.info <- getFFPE(df$patient[start:end])
-      } else {
-        ffpe.info <- rbind(ffpe.info,getFFPE(df$patient[start:end]))
-      }
-    }
-    ffpe.info
-  }, error = function(e) {
-    step <- 2
-    for(i in 0:(ceiling(length(df$patient)/step) - 1)){
-      start <- 1 + step * i
-      end <- ifelse(((i + 1) * step) > length(df$patient), length(df$patient),((i + 1) * step))
-      if(is.null(ffpe.info)) {
-        ffpe.info <- getFFPE(df$patient[start:end])
-      } else {
-        ffpe.info <- rbind(ffpe.info,getFFPE(df$patient[start:end]))
-      }
-    }
-    ffpe.info
-  })
+  ffpe.info <- splitAPICall(FUN = getFFPE,
+                               step = 20,
+                               items = df$patient)
 
   df <- merge(df, ffpe.info,by.x = "sample", by.y = "submitter_id")
   df <- df[match(barcode,df$barcode),]
