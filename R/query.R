@@ -82,6 +82,7 @@
 #' @importFrom  jsonlite fromJSON
 #' @importFrom knitr kable
 #' @importFrom httr timeout
+#' @importFrom dplyr pull
 GDCquery <- function(project,
                      data.category,
                      data.type,
