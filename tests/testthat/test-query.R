@@ -39,6 +39,28 @@ test_that("GDCquery can filter by sample.type", {
                       sample.type = sample.type)
     expect_equal(as.character(unique(query$results[[1]]$sample_type)),sample.type)
 
+    sample.type <- "Solid Tissue Normal"
+    query <- GDCquery(project =  c("TCGA-COAD"),
+                        data.category = "Transcriptome Profiling",
+                        data.type = "Gene Expression Quantification",
+                        workflow.type = "HTSeq - FPKM-UQ",
+                        sample.type = sample.type)
+    expect_equal(as.character(unique(query$results[[1]]$sample_type)),sample.type)
+
+
+    sample.type <- "Solid Tissue Normal"
+    query <- GDCquery(project = "TCGA-BRCA",
+                     legacy = TRUE,
+                     data.category = "Gene expression",
+                     data.type = "Gene expression quantification",
+                     platform = "Illumina HiSeq",
+                     file.type = "results",
+                     experimental.strategy = "RNA-Seq",
+                     sample.type = sample.type)
+    expect_equal(as.character(unique(query$results[[1]]$sample_type)),sample.type)
+
+
+
     sample.type <- c("Solid Tissue Normal", "Primary Tumor")
     query <- GDCquery(project = "TCGA-ACC",
                       data.category =  "Copy Number Variation",
