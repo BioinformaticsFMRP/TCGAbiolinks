@@ -4,8 +4,7 @@
 \alias{diffmean}
 \title{Calculate diffmean methylation between two groups}
 \usage{
-diffmean(data, groupCol = NULL, group1 = NULL, group2 = NULL,
-  save = FALSE)
+diffmean(data, groupCol = NULL, group1 = NULL, group2 = NULL, save = FALSE)
 }
 \arguments{
 \item{data}{SummarizedExperiment object obtained from TCGAPrepare}
