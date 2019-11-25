@@ -4,8 +4,7 @@
 \alias{GDCquery_Maf}
 \title{Retrieve open access maf files from GDC server}
 \usage{
-GDCquery_Maf(tumor, save.csv = FALSE, directory = "GDCdata",
-  pipelines = NULL)
+GDCquery_Maf(tumor, save.csv = FALSE, directory = "GDCdata", pipelines = NULL)
 }
 \arguments{
 \item{tumor}{a valid tumor}

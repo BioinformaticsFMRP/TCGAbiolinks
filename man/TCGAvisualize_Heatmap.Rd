@@ -4,14 +4,29 @@
 \alias{TCGAvisualize_Heatmap}
 \title{Heatmap with more sensible behavior using heatmap.plus}
 \usage{
-TCGAvisualize_Heatmap(data, col.metadata, row.metadata,
-  col.colors = NULL, row.colors = NULL, show_column_names = FALSE,
-  show_row_names = FALSE, cluster_rows = FALSE,
-  cluster_columns = FALSE, sortCol, extremes = NULL,
-  rownames.size = 12, title = NULL, color.levels = NULL,
-  values.label = NULL, filename = "heatmap.pdf", width = 10,
-  height = 10, type = "expression", scale = "none",
-  heatmap.legend.color.bar = "continuous")
+TCGAvisualize_Heatmap(
+  data,
+  col.metadata,
+  row.metadata,
+  col.colors = NULL,
+  row.colors = NULL,
+  show_column_names = FALSE,
+  show_row_names = FALSE,
+  cluster_rows = FALSE,
+  cluster_columns = FALSE,
+  sortCol,
+  extremes = NULL,
+  rownames.size = 12,
+  title = NULL,
+  color.levels = NULL,
+  values.label = NULL,
+  filename = "heatmap.pdf",
+  width = 10,
+  height = 10,
+  type = "expression",
+  scale = "none",
+  heatmap.legend.color.bar = "continuous"
+)
 }
 \arguments{
 \item{data}{The object to with the heatmap data (expression, methylation)}

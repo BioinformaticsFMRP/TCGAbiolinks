@@ -4,8 +4,14 @@
 \alias{TCGAanalyze_LevelTab}
 \title{Adding information related to DEGs genes from DEA as mean values in two conditions.}
 \usage{
-TCGAanalyze_LevelTab(FC_FDR_table_mRNA, typeCond1, typeCond2, TableCond1,
-  TableCond2, typeOrder = TRUE)
+TCGAanalyze_LevelTab(
+  FC_FDR_table_mRNA,
+  typeCond1,
+  typeCond2,
+  TableCond1,
+  TableCond2,
+  typeOrder = TRUE
+)
 }
 \arguments{
 \item{FC_FDR_table_mRNA}{Output of dataDEGs filter by abs(LogFC) >=1}

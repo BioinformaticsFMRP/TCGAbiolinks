@@ -4,8 +4,15 @@
 \alias{TCGAanalyze_Filtering}
 \title{Filtering mRNA transcripts and miRNA selecting a threshold.}
 \usage{
-TCGAanalyze_Filtering(tabDF, method, qnt.cut = 0.25, var.func = IQR,
-  var.cutoff = 0.75, eta = 0.05, foldChange = 1)
+TCGAanalyze_Filtering(
+  tabDF,
+  method,
+  qnt.cut = 0.25,
+  var.func = IQR,
+  var.cutoff = 0.75,
+  eta = 0.05,
+  foldChange = 1
+)
 }
 \arguments{
 \item{tabDF}{is a dataframe or numeric matrix, each row represents a gene,
