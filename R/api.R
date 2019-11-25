@@ -187,7 +187,7 @@ splitAPICall <- function(FUN,step = 20,items){
             if(is.null(info)) {
                 info <- FUN(items[start:end])
             } else {
-                info <- rbind(info, FUN(items[start:end]))
+                info <- plyr::rbind.fill(info, FUN(items[start:end]))
             }
         }
        info
@@ -199,7 +199,7 @@ splitAPICall <- function(FUN,step = 20,items){
             if(is.null(info)) {
                 info <- FUN(items[start:end])
             } else {
-                info <- rbind(info, FUN(items[start:end]))
+                info <- plyr::rbind.fill(info, FUN(items[start:end]))
             }
         }
     })
