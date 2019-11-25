@@ -383,7 +383,7 @@ GDCquery <- function(project,
                                    unlist %>%
                                    na.omit %>%
                                    paste(collapse = ",")
-                           }) %>% as.data.frame %>% pull(1) %>% as.character()
+                           }) %>% as.data.frame %>% dplyr::pull(1) %>% as.character()
         results$cases <- aux
     } else if(data.category == "Simple Nucleotide Variation"){
 
