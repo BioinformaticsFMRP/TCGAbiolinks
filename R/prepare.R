@@ -610,15 +610,11 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
       setcolorder(data,c(1, 3:ncol(data), 2))
     }, .progress = "time")
 
-    df <- x %>% purrr::reduce(left_join)
 
     print.header(paste0("Merging ", length(files)," files"),"subsection")
-    merging.col <- colnames(x[[1]])[1]
     df <- purrr::reduce(x,
                         purrrogress::with_progress(dplyr::left_join,
-                                                   length(x),
-                                                   title = "Merging files"),
-                        by = merging.col)
+                                                   length(x)))
 
     if (summarizedExperiment) {
       if(skip == 0) {
