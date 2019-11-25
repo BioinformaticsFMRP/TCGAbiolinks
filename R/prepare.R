@@ -353,40 +353,42 @@ readSimpleNucleotideVariationMaf <- function(files){
   return(ret)
 }
 
+
+#' @importFrom purrrogress with_progress
+#' @importFrom purrr reduce
 readGeneExpressionQuantification <- function(files,
                                              cases,
                                              genome = "hg19",
                                              summarizedExperiment = TRUE,
                                              experimental.strategy,
                                              platform){
-  pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-
   skip <- unique((ifelse(experimental.strategy == "Gene expression array",1,0)))
 
   if(length(skip) > 1) stop("It is not possible to handle those different platforms together")
 
-  for (i in seq_along(files)) {
-    suppressWarnings({
-      data <- fread(files[i],
-                    header = TRUE,
-                    sep = "\t",
-                    stringsAsFactors = FALSE,
-                    skip = skip)
-    })
+  print.header(paste0("Reading ", length(files)," files"),"subsection")
+  ret <- plyr::alply(seq_along(files),1,.fun = function(i,cases){
+    data <- fread(files[i],
+                  header = TRUE,
+                  sep = "\t",
+                  stringsAsFactors = FALSE,
+                  skip = skip)
     if(!missing(cases)) {
-      assay.list <- gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)])
+      assay.list <<- gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)])
       # We will use this because there might be more than one col for each samples
       setnames(data,colnames(data)[2:ncol(data)],
                paste0(gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)]),"_",cases[i]))
     }
-    if (i == 1) {
-      df <- data
-    } else {
-      df <- merge(df, data, by = colnames(data)[1], all = TRUE)
-    }
-    setTxtProgressBar(pb, i)
-  }
-  setDF(df)
+    data
+  },.progress = "time",cases = cases)
+
+  print.header(paste0("Merging ", length(files)," files"),"subsection")
+  merging.col <- colnames(ret[[1]])[1]
+  df <- purrr::reduce(ret,
+                      purrrogress::with_progress(dplyr::full_join,
+                                                 length(ret),
+                                                 title = "Merging files"),
+                      by = merging.col)
 
   if (summarizedExperiment) {
     df <- makeSEfromGeneExpressionQuantification(df,assay.list, genome = genome)
@@ -610,6 +612,14 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
 
     df <- x %>% purrr::reduce(left_join)
 
+    print.header(paste0("Merging ", length(files)," files"),"subsection")
+    merging.col <- colnames(x[[1]])[1]
+    df <- purrr::reduce(x,
+                        purrrogress::with_progress(dplyr::left_join,
+                                                   length(x),
+                                                   title = "Merging files"),
+                        by = merging.col)
+
     if (summarizedExperiment) {
       if(skip == 0) {
         df <- makeSEfromDNAmethylation(df, probeInfo = as_data_frame(df)[,grep("TCGA",colnames(df),invert = TRUE)])
@@ -627,9 +637,9 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
 
 # Barcode example MMRF_1358_1_BM_CD138pos_T1_TSMRU_L02337
 colDataPrepareMMRF <- function(barcode){
-  ret <- DataFrame(barcode = barcode,
-                   sample = barcode,
-                   patient = substr(barcode,1,9)
+  DataFrame(barcode = barcode,
+            sample = barcode,
+            patient = substr(barcode,1,9)
   )
 }
 
@@ -1177,8 +1187,8 @@ addFFPE <- function(df) {
 
   ffpe.info <- NULL
   ffpe.info <- splitAPICall(FUN = getFFPE,
-                               step = 20,
-                               items = df$patient)
+                            step = 20,
+                            items = df$patient)
 
   df <- merge(df, ffpe.info,by.x = "sample", by.y = "submitter_id")
   df <- df[match(barcode,df$barcode),]
