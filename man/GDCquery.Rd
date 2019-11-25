@@ -4,9 +4,20 @@
 \alias{GDCquery}
 \title{Query GDC data}
 \usage{
-GDCquery(project, data.category, data.type, workflow.type,
-  legacy = FALSE, access, platform, file.type, barcode, data.format,
-  experimental.strategy, sample.type)
+GDCquery(
+  project,
+  data.category,
+  data.type,
+  workflow.type,
+  legacy = FALSE,
+  access,
+  platform,
+  file.type,
+  barcode,
+  data.format,
+  experimental.strategy,
+  sample.type
+)
 }
 \arguments{
 \item{project}{A list of valid project (see list with TCGAbiolinks:::getGDCprojects()$project_id)]}
