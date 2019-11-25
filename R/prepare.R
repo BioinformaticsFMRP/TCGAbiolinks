@@ -186,9 +186,9 @@ GDCprepare <- function(query,
 
   if(save){
     if(missing(save.filename) & !missing(query)) save.filename <- paste0(query$project,gsub(" ","_", query$data.category),gsub(" ","_",date()),".RData")
-    message(paste0("Saving file:",save.filename))
+    message(paste0("=> Saving file: ",save.filename))
     save(data, file = save.filename)
-    message("File saved")
+    message("=> File saved")
 
     # save is true, due to the check in the beggining of the code
     if(remove.files.prepared){
@@ -911,12 +911,14 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
 
 addSubtypeInfo <- function(ret){
   out <- NULL
+  message(" => Adding TCGA molecular information from marker papers")
+  message(" => Information will have prefix 'paper_' ")
+
   for(proj in na.omit(unique(ret$project_id))){
     if(grepl("TCGA",proj,ignore.case = TRUE)) {
       # remove letter from 01A 01B etc
       ret$sample.aux <- substr(ret$sample,1,15)
 
-      message(" => Adding subtype information to samples")
       tumor <- gsub("TCGA-","",proj)
       available <- c("ACC",
                      "BRCA",
@@ -946,11 +948,11 @@ addSubtypeInfo <- function(ret){
                      "UVM")
       if (grepl(paste(c(available,"all"),collapse = "|"),tumor,ignore.case = TRUE)) {
         subtype <- TCGAquery_subtype(tumor)
-        colnames(subtype) <- paste0("subtype_", colnames(subtype))
+        colnames(subtype) <- paste0("paper_", colnames(subtype))
 
-        if(all(str_length(subtype$subtype_patient) == 12)){
+        if(all(str_length(subtype$paper_patient) == 12)){
           # Subtype information were to primary tumor in priority
-          subtype$sample.aux <- paste0(subtype$subtype_patient,"-01")
+          subtype$sample.aux <- paste0(subtype$paper_patient,"-01")
         }
         ret.aux <- ret[ret$sample.aux %in% subtype$sample.aux,]
         ret.aux <- merge(ret.aux,subtype, by = "sample.aux", all.x = TRUE)
