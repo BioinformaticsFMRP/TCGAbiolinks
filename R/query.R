@@ -377,14 +377,24 @@ GDCquery <- function(project,
         # get frm file names
         results$cases <- str_extract_all(results$file_name,"TCGA-[:alnum:]{2}-[:alnum:]{4}") %>% unlist
     } else if(data.category %in% c( "Copy Number Variation","Simple nucleotide variation")){
-        aux <- plyr::laply(results$cases,
+        cases <- plyr::laply(results$cases,
                            function(x) {
                                lapply(x$samples,FUN = function(y)  unlist(y,recursive = T)[c("portions.analytes.aliquots.submitter_id")]) %>%
                                    unlist %>%
                                    na.omit %>%
                                    paste(collapse = ",")
                            }) %>% as.data.frame %>% dplyr::pull(1) %>% as.character()
-        results$cases <- aux
+
+        sample_type <- plyr::laply(results$cases,
+                           function(x) {
+                               lapply(x$samples,FUN = function(y)  unlist(y,recursive = T)[c("sample_type")]) %>%
+                                   unlist %>%
+                                   na.omit %>%
+                                   paste(collapse = ",")
+                           }) %>% as.data.frame %>% dplyr::pull(1) %>% as.character()
+        results$sample_type <- sample_type
+        results$cases <- cases
+
     } else if(data.category == "Simple Nucleotide Variation"){
 
         if(data.type %in% "Masked Somatic Mutation"){
