@@ -41,7 +41,7 @@ data.type = "Gene expression quantification",
 platform = "Illumina HiSeq", 
 file.type = "results",
 experimental.strategy = "RNA-Seq",
-sample.type = c("Primary solid Tumor","Solid Tissue Normal"))
+sample.type = c("Primary Tumor","Solid Tissue Normal"))
 GDCdownload(query.exp)
 brca.exp <- GDCprepare(query = query.exp, save = TRUE, save.filename = "brcaExp.rda")
 
@@ -51,7 +51,7 @@ dataSubt <- TCGAquery_subtype(tumor = "BRCA")
 # get clinical data
 dataClin <- GDCquery_clinic(project = "TCGA-BRCA","clinical") 
 
-# Which samples are primary solid tumor
+# Which samples are Primary Tumor
 dataSmTP <- TCGAquery_SampleTypes(getResults(query.exp,cols="cases"),"TP") 
 # which samples are solid tissue normal
 dataSmNT <- TCGAquery_SampleTypes(getResults(query.exp,cols="cases"),"NT")
@@ -177,7 +177,7 @@ query.exp <- GDCquery(project = "TCGA-LGG",
                       platform = "Illumina HiSeq", 
                       file.type = "results",
                       experimental.strategy = "RNA-Seq",
-                      sample.type = "Primary solid Tumor")
+                      sample.type = "Primary Tumor")
 GDCdownload(query.exp)
 lgg.exp <- GDCprepare(query = query.exp, save = TRUE, save.filename = "lggExp.rda")
 ```
@@ -585,7 +585,7 @@ compared to the normal samples.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 group.col <- "definition"
-group1 <-  "Primary solid Tumor"
+group1 <-  "Primary Tumor"
 group2 <- "Solid Tissue Normal"
 direction <- "hypo"
 dir.out <- file.path("kirc",direction)
@@ -697,7 +697,7 @@ You cen see the anticorrelated pairs of gene and probes by drawing a heatmap.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 heatmapPairs(data = mae, 
              group.col = "definition",
-             group1 = "Primary solid Tumor", 
+             group1 = "Primary Tumor", 
              annotation.col = c("gender"),
              group2 = "Solid Tissue Normal",
              pairs = pair,

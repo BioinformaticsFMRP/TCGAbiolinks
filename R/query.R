@@ -67,7 +67,7 @@
 #' query <- GDCquery(project = "TCGA-ACC",
 #'                   data.category =  "Copy Number Variation",
 #'                   data.type = "Masked Copy Number Segment",
-#'                   sample.type = c("Primary solid Tumor"))
+#'                   sample.type = c("Primary Tumor"))
 #' query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
 #'                       legacy = TRUE,
 #'                       data.category = "DNA methylation",
@@ -596,8 +596,8 @@ getBarcodeDefinition <- function(type = "TCGA"){
         tissue.code <- c('01','02','03','04','05','06','07','08','09','10','11',
                          '12','13','14','15','16','17','20','40','41','42','50','60','61','99')
 
-        tissue.definition <- c("Primary solid Tumor", # 01
-                               "Recurrent Solid Tumor", # 02
+        tissue.definition <- c("Primary Tumor", # 01
+                               "Recurrent Tumor", # 02
                                "Primary Blood Derived Cancer - Peripheral Blood", # 03
                                "Recurrent Blood Derived Cancer - Bone Marrow", # 04
                                "Additional - New Primary", # 05
