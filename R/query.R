@@ -287,18 +287,31 @@ GDCquery <- function(project,
         message("ooo By file.type")
         pat <- file.type
         invert <- FALSE
+
+        # RNA-seq
         if(file.type == "normalized_results") pat <- "normalized_results"
         if(file.type == "results") pat <- "[^normalized_]results"
+
+
         if(file.type == "nocnv_hg18" | file.type == "nocnv_hg18.seg") pat <- "nocnv_hg18"
         if(file.type == "cnv_hg18" | file.type == "hg18.seg") pat <- "[^nocnv_]hg18.seg"
         if(file.type == "nocnv_hg19" | file.type == "nocnv_hg19.seg") pat <- "nocnv_hg19"
         if(file.type == "cnv_hg19" | file.type == "hg19.seg") pat <- "[^nocnv_]hg19.seg"
+
+        # miRNA-seq
+        # examples:
+        # TCGA-E9-A1R5-01A-11R-A14L-13.mirna.quantification.txt
         if(file.type == "mirna") {
             pat <-  "hg19.*mirna"
             invert <- TRUE
         }
-        # if(file.type == "hg19.mirna") pat <- "hg19.mirna"
-        # if(file.type == "hg19.mirbase20.mirna") pat <- "hg19.mirbase20.mirna"
+        # TCGA-F5-6464-01A-11H-1735-13.hg19.mirna.quantification.txt
+        if(file.type == "hg19.mirna") pat <- "hg19.mirna"
+
+        # TCGA-AC-A4ZE-01A-11R-A41G-13.hg19.mirbase20.mirna.quantification.txt
+        if(file.type == "hg19.mirbase20.mirna") pat <- "hg19.mirbase20.mirna"
+
+        # TCGA-CJ-4878-01A-01R-1304-13.isoform.quantification.txt
         if(file.type == "hg19.isoform") pat <- "hg19.*isoform"
         if(file.type == "isoform") {
             pat <-  "hg19.*isoform"
