@@ -54,7 +54,6 @@ Verify if the data is significant between two groups. For the methylation
    Output: p-values (non-adj/adj) histograms, p-values (non-adj/adj)
 }
 \examples{
-\dontrun{
 nrows <- 200; ncols <- 20
  counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows,
            dimnames = list(paste0("cg",1:200),LETTERS[1:20]))
@@ -70,6 +69,5 @@ data <- SummarizedExperiment::SummarizedExperiment(
          rowRanges=rowRanges,
          colData=colData)
 results <- TCGAbiolinks:::dmc.non.parametric.se(data,"group")
-}
 }
 \keyword{internal}
