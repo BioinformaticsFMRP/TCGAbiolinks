@@ -596,7 +596,6 @@ TCGAvisualize_BarPlot <- function(DFfilt,
 #'                     show_row_names=TRUE)
 #' if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 #' @export
-#' @importFrom matlab jet.colors
 #' @importFrom circlize colorRamp2
 #' @importFrom tools file_ext
 #' @import ComplexHeatmap
@@ -624,7 +623,14 @@ TCGAvisualize_Heatmap <- function(data,
                                   heatmap.legend.color.bar = "continuous"){
 
     # STEP 1 add columns labels (top of heatmap)
-
+    if (!requireNamespace("ComplexHeatmap", quietly = TRUE)) {
+        stop("ComplexHeatmap package is needed for this function to work. Please install it.",
+             call. = FALSE)
+    }
+    if (!requireNamespace("circlize", quietly = TRUE)) {
+        stop("circlize package is needed for this function to work. Please install it.",
+             call. = FALSE)
+    }
     ha <-  NULL
     if(!missing(col.metadata)) {
         if(!is.null(col.metadata)) {

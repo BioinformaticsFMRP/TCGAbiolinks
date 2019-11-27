@@ -227,6 +227,7 @@ readClinical <- function(files, data.type, cases){
 #' @importFrom tidyr separate
 readExonQuantification <- function (files, cases, summarizedExperiment = TRUE){
   pb <- txtProgressBar(min = 0, max = length(files), style = 3)
+  assay.list <- NULL
 
   for (i in seq_along(files)) {
     data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE)
