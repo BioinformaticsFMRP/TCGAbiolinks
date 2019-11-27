@@ -1306,11 +1306,11 @@ TCGAanalyze_EA <- function (GeneName, RegulonList, TableEnrichment, EAGenes, GOt
 #' of the top-ranked genes from a linear model fitted by DEA's limma
 TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01){
     if (!requireNamespace("Biobase", quietly = TRUE)) {
-        stop("affy package is needed for this function to work. Please install it.",
+        stop("Biobase package is needed for this function to work. Please install it.",
              call. = FALSE)
     }
     if (!requireNamespace("limma", quietly = TRUE)) {
-        stop("affy package is needed for this function to work. Please install it.",
+        stop("limma package is needed for this function to work. Please install it.",
              call. = FALSE)
     }
     Pdatatable <- Biobase::phenoData(AffySet)
@@ -1341,7 +1341,7 @@ TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01){
         for( j in 1: length(groupColors)){
             col2 <- rownames(tmp)[j]
 
-            if( i!=j ){
+            if( i!= j ){
 
                 if(tmp[i,j]!=0){
 
@@ -1353,9 +1353,9 @@ TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01){
 
                     print( paste(i, j, Comparison,"to do..." ))
 
-                    cont.matrix <- limmamakeContrasts(I=Comparison,levels=design)
+                    cont.matrix <- limma::makeContrasts(I=Comparison,levels=design)
 
-                    fit2 <- limmacontrasts.fit(fit, cont.matrix)
+                    fit2 <- limma::contrasts.fit(fit, cont.matrix)
                     fit2 <- limma::eBayes(fit2)
 
 
@@ -1396,11 +1396,11 @@ TCGAanalyze_analyseGRN <- function(TFs, normCounts,kNum) {
     geneNames <- rownames(normCounts)
 
     messageMI_TFgenes <- paste("Estimation of MI among [", length(MRcandidates), " TRs and ", nrow(normCounts), " genes].....", sep = "")
-    timeEstimatedMI_TFgenes1 <- length(MRcandidates)*nrow(normCounts)/1000
-    timeEstimatedMI_TFgenes <- format(timeEstimatedMI_TFgenes1*ncol(normCounts)/17000, digits = 2)
+    timeEstimatedMI_TFgenes1 <- length(MRcandidates) * nrow(normCounts)/1000
+    timeEstimatedMI_TFgenes <- format(timeEstimatedMI_TFgenes1 * ncol(normCounts)/17000, digits = 2)
     messageEstimation <- print(paste("I Need about ", timeEstimatedMI_TFgenes, "seconds for this MI estimation. [Processing 17000k elements /s]  "))
 
-    system.time(miTFGenes <- knnmi.cross(normCounts[MRcandidates, ], normCounts, k = kNum))
+    system.time(miTFGenes <- parmigene::knnmi.cross(normCounts[MRcandidates, ], normCounts, k = kNum))
 
     return(miTFGenes)
 
