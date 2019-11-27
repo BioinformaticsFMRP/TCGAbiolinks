@@ -108,6 +108,7 @@ Suggests:
     circlize,
     ConsensusClusterPlus,
     igraph,
+    TCGAbiolinksGUI.data,
     supraHex
 VignetteBuilder: knitr
 LazyData: true
