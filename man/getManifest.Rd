@@ -4,7 +4,7 @@
 \alias{getManifest}
 \title{Get a Manifest from GDCquery output that can be used with GDC-client}
 \usage{
-getManifest(query, save = F)
+getManifest(query, save = FALSE)
 }
 \arguments{
 \item{query}{A query for GDCquery function}

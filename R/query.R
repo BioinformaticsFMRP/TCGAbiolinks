@@ -881,10 +881,12 @@ TCGAquery_recount2<-function(project, tissue=c()){
 #' @param file.type Write maf file into a csv document
 #' @export
 #' @examples
+#'  query <- GDCquery_ATAC_seq(file.type = "txt")
 #' \dontrun{
-#'    query <- GDCquery_ATAC_seq(file.type = "txt")
 #'    GDCdownload(query)
-#'    query <- GDCquery_ATAC_seq(file.type = "bigWigs")
+#' }
+#' query <- GDCquery_ATAC_seq(file.type = "bigWigs")
+#' \dontrun{
 #'    GDCdownload(query)
 #' }
 #' @return A data frame with the maf file information
@@ -893,8 +895,8 @@ GDCquery_ATAC_seq <- function(tumor = NULL,
     isServeOK()
     results <- readr::read_tsv("https://gdc.cancer.gov/files/public/file/ATACseq-AWG_Open_GDC-Manifest.txt")
 
-    if(!is.null(tumor)) results <- results[grep(tumor,results$filename,ignore.case = T),]
-    if(!is.null(file.type))  results <- results[grep(file.type,results$filename,ignore.case = T),]
+    if(!is.null(tumor)) results <- results[grep(tumor,results$filename,ignore.case = TRUE),]
+    if(!is.null(file.type))  results <- results[grep(file.type,results$filename,ignore.case = TRUE),]
 
     colnames(results) <- c("file_id", "file_name", "md5sum", "file_size")
     results$state <- "released"
