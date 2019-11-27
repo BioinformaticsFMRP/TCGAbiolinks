@@ -596,9 +596,7 @@ TCGAvisualize_BarPlot <- function(DFfilt,
 #'                     show_row_names=TRUE)
 #' if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 #' @export
-#' @importFrom circlize colorRamp2
 #' @importFrom tools file_ext
-#' @import ComplexHeatmap
 #' @return Heatmap plotted in the device
 TCGAvisualize_Heatmap <- function(data,
                                   col.metadata,
@@ -863,7 +861,6 @@ unlistlabels <- function(lab) {
 #'         "In_Frame_Del", "In_Frame_Ins", "Missense_Mutation",  "Nonsense_Mutation",
 #'              "Nonstop_Mutation",  "RNA",  "Silent" ,  "Splice_Site",  "Targeted_Region",  "Translation_Start_Site")
 #' 2) "Variant_Type" (The information will be INS,DEL,SNP)
-#' @importFrom ComplexHeatmap oncoPrint draw HeatmapAnnotation
 #' @importFrom grid gpar grid.rect
 #' @importFrom data.table dcast setDT setDF :=
 #' @examples
@@ -909,7 +906,14 @@ TCGAvisualize_oncoprint <- function (mut,
                                      heatmap.legend.side = "bottom",
                                      annotation.legend.side = "bottom"){
 
-
+    if (!requireNamespace("ComplexHeatmap", quietly = TRUE)) {
+        stop("ComplexHeatmap package is needed for this function to work. Please install it.",
+             call. = FALSE)
+    }
+    if (!requireNamespace("circlize", quietly = TRUE)) {
+        stop("circlize package is needed for this function to work. Please install it.",
+             call. = FALSE)
+    }
     if(missing(mut))   stop("Missing mut argument")
     mut <- setDT(mut)
     mut$value <- 1
