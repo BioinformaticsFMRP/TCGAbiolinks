@@ -15,6 +15,8 @@ dmc.non.parametric(
 )
 }
 \arguments{
+\item{matrix}{A matrix}
+
 \item{idx1}{Index columns group1}
 
 \item{idx2}{Index columns group2}
@@ -26,8 +28,6 @@ dmc.non.parametric(
 \item{alternative}{wilcoxon test alternative}
 
 \item{cores}{Number of cores to be used}
-
-\item{data}{A matrix}
 }
 \value{
 Data frame with p-values and diff mean

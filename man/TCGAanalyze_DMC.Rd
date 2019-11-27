@@ -42,6 +42,8 @@ the name of the group}
 \item{group2}{In case our object has more than 2 groups, you should set
 the name of the group}
 
+\item{alternative}{wilcoxon test alternative}
+
 \item{diffmean.cut}{diffmean threshold. Default: 0.2}
 
 \item{paired}{Wilcoxon paired parameter. Default: FALSE}
@@ -81,13 +83,6 @@ Default = groupCol.group1.group2.rda}
 \item{save.directory}{Directory to save the files. Default: working directory}
 
 \item{filename}{Name of the file to save the object.}
-
-\item{calculate.pvalues.probes}{In order to get the probes faster the user can select to calculate the pvalues
-only for the probes with a difference in DNA methylation. The default is to calculate to all probes.
-Possible values: "all", "differential". Default "all"}
-
-\item{overwrite}{Overwrite the pvalues and diffmean values if already in the object
-for both groups? Default: FALSE}
 }
 \value{
 Volcano plot saved and the given data with the results

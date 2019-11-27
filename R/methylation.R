@@ -514,7 +514,7 @@ dmc.non.parametric.se <- function(data,
 
 #' @title Perform non-parametrix wilcoxon test
 #' @description Perform non-parametrix wilcoxon test
-#' @param data  A matrix
+#' @param matrix  A matrix
 #' @param idx1  Index columns group1
 #' @param idx2  Index columns group2
 #' @param paired  Do a paired wilcoxon test? Default: True
@@ -817,9 +817,6 @@ TCGAVisualize_volcano <- function(x,y,
 #' the name of the group
 #' @param group2 In case our object has more than 2 groups, you should set
 #' the name of the group
-#' @param calculate.pvalues.probes In order to get the probes faster the user can select to calculate the pvalues
-#' only for the probes with a difference in DNA methylation. The default is to calculate to all probes.
-#' Possible values: "all", "differential". Default "all"
 #' @param plot.filename Filename. Default: volcano.pdf, volcano.svg, volcano.png. If set to FALSE, there will be no plot.
 #' @param legend Legend title
 #' @param color vector of colors to be used in graph
@@ -837,8 +834,7 @@ TCGAVisualize_volcano <- function(x,y,
 #' @param diffmean.cut diffmean threshold. Default: 0.2
 #' @param adj.method Adjusted method for the p-value calculation
 #' @param paired Wilcoxon paired parameter. Default: FALSE
-#' @param overwrite Overwrite the pvalues and diffmean values if already in the object
-#' for both groups? Default: FALSE
+#' @param alternative wilcoxon test alternative
 #' @param save Save object with results? Default: TRUE
 #' @param save.directory Directory to save the files. Default: working directory
 #' @param filename Name of the file to save the object.
