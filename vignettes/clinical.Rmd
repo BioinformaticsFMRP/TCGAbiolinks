@@ -86,7 +86,7 @@ clinical.BCRtab.radiation <- GDCprepare(query)
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 clinical.BCRtab.all$clinical_drug_acc  %>% 
   head  %>% 
-  datatable(options = list(scrollX = TRUE, keys = TRUE))
+ DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 
@@ -120,7 +120,7 @@ DT::datatable(options = list(scrollX = TRUE))
 # All columns content first rows
 clinical.BCRtab.all$clinical_patient_brca %>% 
   head  %>% 
-  datatable(options = list(scrollX = TRUE, keys = TRUE))
+  DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 ## Biospecimen
@@ -142,7 +142,7 @@ names(biospecimen.BCRtab.all)
 
 biospecimen.BCRtab.all$ssf_normal_controls_ov  %>% 
   head  %>% 
-  datatable(options = list(scrollX = TRUE, keys = TRUE))
+  DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 
@@ -156,7 +156,7 @@ clinical <- GDCquery_clinic(project = "TCGA-LUAD", type = "clinical")
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 clinical %>%
-  datatable(filter = 'top', 
+  DT::datatable(filter = 'top', 
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
           rownames = FALSE)
 ```
@@ -264,7 +264,7 @@ GDCdownload(query)
 msi_results <- GDCprepare_clinic(query, "msi")
 ```
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
-msi_results %>% datatable(options = list(scrollX = TRUE, keys = TRUE))
+msi_results %>% DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 
@@ -287,12 +287,12 @@ query.harmonized <- GDCquery(project = "TCGA-OV",
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 query.legacy %>% 
   getResults %>% 
-  datatable(options = list(scrollX = TRUE, keys = TRUE))
+ DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 
 query.harmonized  %>% 
   getResults %>% 
   head  %>% 
-  datatable(options = list(scrollX = TRUE, keys = TRUE))
+ DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 # Diagnostic Slide (SVS format)
@@ -310,7 +310,7 @@ query.harmonized <- GDCquery(project = "TCGA-COAD",
 query.harmonized  %>% 
   getResults %>% 
   head  %>% 
-  datatable(options = list(scrollX = TRUE, keys = TRUE))
+ DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 
@@ -337,7 +337,7 @@ query.legacy <- GDCquery(project = "TCGA-COAD",
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 query.legacy %>% 
   getResults %>% 
-  datatable(options = list(scrollX = TRUE, keys = TRUE))
+ DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 ## Tissue slide image (SVS format)
@@ -354,7 +354,7 @@ query <- GDCquery(project = "TCGA-COAD",
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 query %>% 
   getResults %>% 
-  datatable(options = list(scrollX = TRUE, keys = TRUE))
+ DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 ## Clinical Supplement (XML format)
@@ -371,7 +371,7 @@ query <- GDCquery(project = "TCGA-COAD",
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 query %>% 
   getResults %>% 
-  datatable(options = list(scrollX = TRUE, keys = TRUE))
+ DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 
@@ -389,7 +389,7 @@ query <- GDCquery(project = "TCGA-COAD",
 query %>% 
   getResults %>% 
   select(-matches("cases"))%>% 
-  datatable(options = list(scrollX = TRUE, keys = TRUE))
+ DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE, eval = FALSE}
