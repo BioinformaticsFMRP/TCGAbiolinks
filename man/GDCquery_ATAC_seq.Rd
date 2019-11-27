@@ -20,10 +20,12 @@ Retrieve open access ATAC-seq files from GDC server
  Manifest available at: https://gdc.cancer.gov/files/public/file/ATACseq-AWG_Open_GDC-Manifest.txt
 }
 \examples{
+ query <- GDCquery_ATAC_seq(file.type = "txt")
 \dontrun{
-   query <- GDCquery_ATAC_seq(file.type = "txt")
    GDCdownload(query)
-   query <- GDCquery_ATAC_seq(file.type = "bigWigs")
+}
+query <- GDCquery_ATAC_seq(file.type = "bigWigs")
+\dontrun{
    GDCdownload(query)
 }
 }

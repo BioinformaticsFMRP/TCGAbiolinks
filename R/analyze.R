@@ -17,22 +17,29 @@
 TCGAanalyze_Clustering <- function(tabDF, method,  methodHC = "ward.D2"){
 
     if (!requireNamespace("ConsensusClusterPlus", quietly = TRUE)) {
-        stop("ConsensusClusterPlus package is needed for this function to work. Please install it.",
+        stop("ConsensusClusterPlus is needed. Please install it.",
              call. = FALSE)
     }
 
-    if( method == "hclust"){
+    if(method == "hclust"){
         ans <- hclust(ddist <- dist(tabDF), method = methodHC)
     }
 
-    if( method == "consensus"){
-        sHc <- hclust(ddist <- dist(tabDF), method = methodHC)      # time = 1.270 )
-        ans <- ConsensusClusterPlus::ConsensusClusterPlus(ddist, maxK = 7, pItem = 0.9, reps=1000
-                                    , title="mc_consensus_k7_1000"
-                                    , clusterAlg = "hc"
-                                    , innerLinkage = "ward.D2"
-                                    , finalLinkage = "complete"
-                                    , plot = 'pdf', writeTable = TRUE)
+    if(method == "consensus"){
+        sHc <- hclust(ddist <- dist(tabDF), method = methodHC)
+        ans <-
+            ConsensusClusterPlus::ConsensusClusterPlus(
+                ddist,
+                maxK = 7,
+                pItem = 0.9,
+                reps = 1000,
+                title = "mc_consensus_k7_1000",
+                clusterAlg = "hc",
+                innerLinkage = "ward.D2",
+                finalLinkage = "complete",
+                plot = 'pdf',
+                writeTable = TRUE
+            )
     }
 
     return(ans)
@@ -87,7 +94,7 @@ TCGAanalyze_Preprocessing <- function(object,
     pmat_new$SampleID <- as.character(colData(object)$barcode)
     pmat_new$Study <- "study"
 
-    tabGroupCol <-cbind(pmat_new, Color = matrix(0,nrow(pmat_new),1))
+    tabGroupCol <- cbind(pmat_new, Color = matrix(0,nrow(pmat_new),1))
     for(i in seq_along(unique(tabGroupCol$Disease))){
         tabGroupCol[which(tabGroupCol$Disease == tabGroupCol$Disease[i]),"Color"] <- rainbow(length(unique(tabGroupCol$Disease)))[i]
     }
@@ -1449,7 +1456,8 @@ TCGAanalyze_Pathview <- function(dataDEGs, pathwayKEGG = "hsa05200" ){
 
 
 #' @title infer gene regulatory networks
-#' @description TCGAanalyze_networkInference taking expression data as input, this will return an adjacency matrix of interactions
+#' @description TCGAanalyze_networkInference taking expression data as input,
+#' this will return an adjacency matrix of interactions
 #' @param data expression data, genes in columns, samples in rows
 #' @param optionMethod inference method, chose from aracne, c3net, clr and mrnet
 #' @export

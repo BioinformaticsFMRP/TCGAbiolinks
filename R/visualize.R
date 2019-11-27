@@ -1037,12 +1037,21 @@ TCGAvisualize_oncoprint <- function (mut,
         })
         names(col.annot) <-  colnames(annotation)
 
-        annotHeatmap <- HeatmapAnnotation(df=annotation,
-                                          col=col.annot,
-                                          annotation_legend_param=list(title_gp=gpar(fontsize=label.font.size,
-                                                                                     fontface="bold"),
-                                                                       labels_gp=gpar(fontsize=label.font.size),#sizelabels
-                                                                       grid_height=unit(8,"mm"))
+
+        annotHeatmap <-
+            ComplexHeatmap::HeatmapAnnotation(
+                df = annotation,
+                col = col.annot,
+                annotation_legend_param = list(
+                    title_gp = gpar(fontsize = label.font.size,
+                                    fontface =
+                                        "bold"),
+                    labels_gp =
+                        gpar(fontsize = label.font.size),
+                    #sizelabels
+                    grid_height =
+                        unit(8, "mm")
+                )
         )
     }
     if(heatmap.legend.side == "bottom") {
@@ -1335,7 +1344,9 @@ TCGAvisualize_oncoprint <- function (mut,
         )
     }
 
-    draw(p, heatmap_legend_side = heatmap.legend.side, annotation_legend_side = annotation.legend.side)
+    ComplexHeatmap::draw(p, heatmap_legend_side = heatmap.legend.side,
+                         annotation_legend_side = annotation.legend.side)
+
     if(!missing(filename)) {
         dev.off()
         message(paste0("File saved as: ", filename ))

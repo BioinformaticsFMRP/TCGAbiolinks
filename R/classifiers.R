@@ -51,7 +51,7 @@ gliomaClassifier <- function(data){
         # If it is a Summarized Experiment object
 
         # keep only probes used in the model
-        aux <- met[,colnames(met) %in% colnames(model$trainingData),drop=FALSE]
+        aux <- met[,colnames(met) %in% colnames(model$trainingData),drop = FALSE]
 
         # This should not happen!
         if(any(apply(aux,2,function(x) all(is.na(x))))) {
@@ -60,8 +60,8 @@ gliomaClassifier <- function(data){
         }
         if(any(apply(aux,2,function(x) any(is.na(x))))) {
             print("NA values")
-            colMedians <- colMedians(aux,na.rm = T)
-            x <- which(is.na(aux),arr.ind = T)
+            colMedians <- colMedians(aux,na.rm = TRUE)
+            x <- which(is.na(aux),arr.ind = TRUE)
             for(l in 1:nrow(x)){
                 aux[x[l,1],x[l,2]] <- colMedians[x[l,2]]
             }

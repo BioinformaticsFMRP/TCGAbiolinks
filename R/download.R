@@ -166,7 +166,7 @@ GDCdownload <- function(query,
 #'                   barcode = c("TARGET-20-PADZCG-04A-01R","TARGET-20-PARJCR-09A-01R"))
 #' getManifest(query)
 #' @export
-getManifest <- function(query, save = F) {
+getManifest <- function(query, save = FALSE) {
     manifest <- query$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
     colnames(manifest) <- c("id","filename","md5","size","state")
     if(save)  {
@@ -287,7 +287,7 @@ GDCclientInstall <- function(){
     if(is.windows()) bin <- bin[grep("client*.*windows", bin,ignore.case = TRUE)]
     if(is.mac()) bin <- bin[grep("client*.*OSX", bin)]
     if(is.linux()) {
-        if(grepl("ubuntu",Sys.info()["version"],ignore.case = T)){
+        if(grepl("ubuntu",Sys.info()["version"],ignore.case = TRUE)){
             bin <- bin[grep("client*.*Ubuntu", bin)]
         } else {
             bin <- bin[grep("client*.*Cent", bin)]
