@@ -23,7 +23,7 @@ Retrieve the numner of files under each
   Almost like https://portal.gdc.cancer.gov/exploration
 }
 \examples{
-   summary <- getSampleFilesSummary("TCGA-LUAD")
+   summary <- getSampleFilesSummary("TCGA-UCS")
 \dontrun{
    summary <- getSampleFilesSummary(c("TCGA-OV","TCGA-ACC"))
 }
