@@ -685,9 +685,9 @@ TCGAvisualize_Heatmap <- function(data,
                 column_order <- order(df[,sortCol])
             }
             if(is.null(col.colors)) {
-                ha <- HeatmapAnnotation(df = df)
+                ha <- ComplexHeatmap::HeatmapAnnotation(df = df)
             } else {
-                ha <- HeatmapAnnotation(df = df,
+                ha <- ComplexHeatmap::HeatmapAnnotation(df = df,
                                         col = col.colors)
             }
         }
@@ -746,7 +746,7 @@ TCGAvisualize_Heatmap <- function(data,
         }
     }
     if(!missing(sortCol) & heatmap.legend.color.bar == "continuous"){
-        heatmap  <- Heatmap(data, name = values.label,
+        heatmap  <- ComplexHeatmap::Heatmap(data, name = values.label,
                             top_annotation = ha,
                             col = color,
                             row_names_gp =  gpar(fontsize = rownames.size),
@@ -758,7 +758,7 @@ TCGAvisualize_Heatmap <- function(data,
                             column_title = title,
                             heatmap_legend_param = heatmap_legend_param)
     } else if(missing(sortCol) & heatmap.legend.color.bar == "continuous"){
-        heatmap  <- Heatmap(data, name = values.label,
+        heatmap  <- ComplexHeatmap::Heatmap(data, name = values.label,
                             top_annotation = ha,
                             col = color,
                             show_row_names = show_row_names,
@@ -769,7 +769,7 @@ TCGAvisualize_Heatmap <- function(data,
                             column_title = title,
                             heatmap_legend_param = heatmap_legend_param)
     }  else if(!missing(sortCol)){
-        heatmap  <- Heatmap(data, name = values.label,
+        heatmap  <- ComplexHeatmap::Heatmap(data, name = values.label,
                             top_annotation = ha,
                             col = color,
                             row_names_gp =  gpar(fontsize = rownames.size),
@@ -780,7 +780,7 @@ TCGAvisualize_Heatmap <- function(data,
                             column_order = column_order,
                             column_title = title)
     } else {
-        heatmap  <- Heatmap(data, name = values.label,
+        heatmap  <- ComplexHeatmap::Heatmap(data, name = values.label,
                             top_annotation = ha,
                             col = color,
                             row_names_gp =  gpar(fontsize = rownames.size),
@@ -798,27 +798,27 @@ TCGAvisualize_Heatmap <- function(data,
             for (i in 1:ncol(row.metadata)) {
                 if (!missing(row.colors) && !is.null(row.colors[[colnames(row.metadata)[i]]])) {
                     color <- row.colors[[colnames(row.metadata)[i]]]
-                    x = Heatmap(row.metadata[,i] ,
+                    x = ComplexHeatmap::Heatmap(row.metadata[,i] ,
                                 name = colnames(row.metadata)[i],
                                 width = unit(0.5, "cm"),
                                 show_row_names = FALSE, col = color )
                 } else {
-                    x = Heatmap(row.metadata[,i] ,
+                    x = ComplexHeatmap::Heatmap(row.metadata[,i] ,
                                 name = colnames(row.metadata)[i],
                                 width = unit(0.5, "cm"),
                                 show_row_names = FALSE)
                 }
-                heatmap <- add_heatmap(heatmap,x)
+                heatmap <- ComplexHeatmap::add_heatmap(heatmap,x)
             }
         }
     }
     if(!is.null(filename)){
         if(file_ext(filename) == "png") png(filename, width = width, height = height )
         if(file_ext(filename) == "pdf") pdf(filename, width = width, height = height )
-        draw(heatmap)
+        ComplexHeatmap::draw(heatmap)
         dev.off()
     } else {
-        draw(heatmap)
+        ComplexHeatmap::draw(heatmap)
     }
 }
 
@@ -1054,7 +1054,7 @@ TCGAvisualize_oncoprint <- function (mut,
     }
 
     if(is.null(annotation) & !row.order & !col.order){
-        p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
+        p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                        row_order = NULL,
                        remove_empty_columns = FALSE,
                        show_column_names = show.column.names,
@@ -1078,7 +1078,7 @@ TCGAvisualize_oncoprint <- function (mut,
         )
     } else if(!is.null(annotation) & annotation.position == "bottom" & !row.order & !col.order){
 
-        p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
+        p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                        row_order = NULL,
                        remove_empty_columns = FALSE,
                        column_names_gp = gpar(fontsize = column.names.size),
@@ -1103,7 +1103,7 @@ TCGAvisualize_oncoprint <- function (mut,
         )
 
     } else if(!is.null(annotation) & annotation.position == "top" & !row.order  & !col.order){
-        p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
+        p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                        row_order = NULL,
                        remove_empty_columns = FALSE,
                        column_names_gp = gpar(fontsize = column.names.size),
@@ -1127,7 +1127,7 @@ TCGAvisualize_oncoprint <- function (mut,
                        )
         )
     }  else if(is.null(annotation) & row.order  & !col.order){
-        p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
+        p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                        remove_empty_columns = FALSE,
                        show_column_names = show.column.names,
                        show_row_barplot = show.row.barplot,
@@ -1150,7 +1150,7 @@ TCGAvisualize_oncoprint <- function (mut,
         )
     } else if(!is.null(annotation) & annotation.position == "bottom" & row.order & !col.order){
 
-        p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
+        p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                        remove_empty_columns = FALSE,
                        column_names_gp = gpar(fontsize = column.names.size),
                        show_row_barplot = show.row.barplot,
@@ -1174,7 +1174,7 @@ TCGAvisualize_oncoprint <- function (mut,
         )
 
     } else if(!is.null(annotation) & annotation.position == "top" & row.order & !col.order){
-        p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
+        p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                        remove_empty_columns = FALSE,
                        show_column_names = show.column.names,
                        show_row_barplot = show.row.barplot,
@@ -1197,7 +1197,7 @@ TCGAvisualize_oncoprint <- function (mut,
                        )
         )
     } else if(is.null(annotation) & !row.order & col.order){
-        p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
+        p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                        row_order = NULL,
                        remove_empty_columns = FALSE,
                        show_column_names = show.column.names,
@@ -1220,7 +1220,7 @@ TCGAvisualize_oncoprint <- function (mut,
         )
     } else if(!is.null(annotation) & annotation.position == "bottom" & !row.order & col.order){
 
-        p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
+        p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                        row_order = NULL,
                        remove_empty_columns = FALSE,
                        column_names_gp = gpar(fontsize = column.names.size),
@@ -1244,7 +1244,7 @@ TCGAvisualize_oncoprint <- function (mut,
         )
 
     } else if(!is.null(annotation) & annotation.position == "top" & !row.order & col.order){
-        p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
+        p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                        row_order = NULL,
                        remove_empty_columns = FALSE,
                        column_names_gp = gpar(fontsize = column.names.size),
@@ -1267,7 +1267,7 @@ TCGAvisualize_oncoprint <- function (mut,
                        )
         )
     }  else if(is.null(annotation) & row.order & col.order){
-        p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
+        p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                        remove_empty_columns = FALSE,
                        show_column_names = show.column.names,
                        show_row_barplot = show.row.barplot,
@@ -1289,7 +1289,7 @@ TCGAvisualize_oncoprint <- function (mut,
         )
     } else if(!is.null(annotation) & annotation.position == "bottom" & row.order & col.order){
 
-        p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
+        p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                        remove_empty_columns = FALSE,
                        column_names_gp = gpar(fontsize = column.names.size),
                        show_row_barplot = show.row.barplot,
@@ -1312,7 +1312,7 @@ TCGAvisualize_oncoprint <- function (mut,
         )
 
     } else if(!is.null(annotation) & annotation.position == "top" & row.order & col.order){
-        p <- oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
+        p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                        remove_empty_columns = FALSE,
                        show_column_names = show.column.names,
                        show_row_barplot = show.row.barplot,
