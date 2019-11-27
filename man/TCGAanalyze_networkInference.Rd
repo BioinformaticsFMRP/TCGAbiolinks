@@ -15,5 +15,6 @@ TCGAanalyze_networkInference(data, optionMethod = "clr")
 an adjacent matrix
 }
 \description{
-TCGAanalyze_networkInference taking expression data as input, this will return an adjacency matrix of interactions
+TCGAanalyze_networkInference taking expression data as input,
+this will return an adjacency matrix of interactions
 }

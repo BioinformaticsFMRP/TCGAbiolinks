@@ -541,7 +541,7 @@ readIDATDNAmethylation <- function(files,
   # for each file move it to upper parent folder if necessary
   plyr::a_ply(files, 1,function(x){
     if(grepl("Raw_intensities",dirname(dirname(x)))){
-      tryCatch(TCGAbiolinks:::move(x,file.path(dirname(dirname(x)), basename(x)),keep.copy = FALSE),error = function(e){})
+      tryCatch(move(x,file.path(dirname(dirname(x)), basename(x)),keep.copy = FALSE),error = function(e){})
     }
   })
 
@@ -1303,7 +1303,10 @@ getBarcodeInfo <- function(barcode) {
       unlist %>% as.character
 
     tryCatch({
-      samples$submitter_id <- str_extract_all(samples$submitter_id, paste(submitter_id,collapse = "|"),simplify = T) %>% as.character
+      samples$submitter_id <-
+        str_extract_all(samples$submitter_id,
+                        paste(submitter_id, collapse = "|"),
+                        simplify = TRUE) %>% as.character
     }, error = function(e){
       samples$submitter_id <- submitter_id
     })
@@ -1316,7 +1319,7 @@ getBarcodeInfo <- function(barcode) {
 
   # We dont have the same cols for TCGA and TARGET so we need to check them
   if(!is.null(results$diagnoses)) {
-    diagnoses <- rbindlist(lapply(results$diagnoses, function(x) if(is.null(x)) data.frame(NA) else x),fill = T)
+    diagnoses <- rbindlist(lapply(results$diagnoses, function(x) if(is.null(x)) data.frame(NA) else x),fill = TRUE)
     diagnoses[,c("updated_datetime","created_datetime","state")] <- NULL
     if(any(grepl("submitter_id", colnames(diagnoses)))) {
       diagnoses$submitter_id <- gsub("_diagnosis.*|-DIAG|diag-","", diagnoses$submitter_id)
@@ -1332,7 +1335,7 @@ getBarcodeInfo <- function(barcode) {
     }
   }
   if(!is.null(results$exposures)) {
-    exposures <- rbindlist(lapply(results$exposures, function(x) if(is.null(x)) data.frame(NA) else x),fill = T)
+    exposures <- rbindlist(lapply(results$exposures, function(x) if(is.null(x)) data.frame(NA) else x),fill = TRUE)
     exposures[,c("updated_datetime","created_datetime","state")] <- NULL
     if(any(grepl("submitter_id", colnames(exposures)))) {
       exposures$submitter_id <- gsub("_exposure.*|-EXP","", exposures$submitter_id)
@@ -1424,7 +1427,7 @@ TCGAprepare_Affy <- function(ClinData, PathFolder, TabCel){
     stop("affy package is needed for this function to work. Please install it.",
          call. = FALSE)
   }
-  affy_batch <- affy::ReadAffy(filenames=as.character(paste(TabCel$samples, ".CEL", sep="")))
+  affy_batch <- affy::ReadAffy(filenames = as.character(paste(TabCel$samples, ".CEL", sep = "")))
 
   eset <- affy::rma(affy_batch)
 

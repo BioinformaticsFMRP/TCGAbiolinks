@@ -443,7 +443,6 @@ TCGAvisualize_meanMethylation <- function(data,
 #' @return Data frame with two cols
 #'         p-values/p-values adjusted
 #' @examples
-#' \dontrun{
 #' nrows <- 200; ncols <- 20
 #'  counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows,
 #'            dimnames = list(paste0("cg",1:200),LETTERS[1:20]))
@@ -459,7 +458,6 @@ TCGAvisualize_meanMethylation <- function(data,
 #'          rowRanges=rowRanges,
 #'          colData=colData)
 #' results <- TCGAbiolinks:::dmc.non.parametric.se(data,"group")
-#' }
 #' @importFrom plyr adply
 #' @importFrom stats wilcox.test
 #' @importFrom doParallel registerDoParallel

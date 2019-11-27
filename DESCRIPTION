@@ -86,7 +86,8 @@ biocViews: DNAMethylation,
     Pathways,
     Network,
     Sequencing,
-    Survival
+    Survival,
+    Software
 Suggests:
     jpeg,
     png,
