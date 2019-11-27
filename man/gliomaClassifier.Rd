@@ -21,7 +21,7 @@ Classify DNA methylation gliomas using data from
 https://doi.org/10.1016/j.cell.2015.12.028
 }
 \examples{
-\donrun{
+\dontrun{
 query <- GDCquery(project= "TCGA-GBM",
                   data.category = "DNA methylation",
                   barcode = c("TCGA-06-0122","TCGA-14-1456"),

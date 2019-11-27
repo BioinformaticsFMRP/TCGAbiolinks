@@ -9,7 +9,7 @@
 #' 2) Each model final classification
 #' 3) Each class probability of classification
 #' @examples
-#' \donrun{
+#' \dontrun{
 #' query <- GDCquery(project= "TCGA-GBM",
 #'                   data.category = "DNA methylation",
 #'                   barcode = c("TCGA-06-0122","TCGA-14-1456"),
