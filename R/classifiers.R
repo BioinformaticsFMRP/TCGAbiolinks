@@ -42,11 +42,12 @@ gliomaClassifier <- function(data){
 
 
     df.all <- NULL
+    env <- new.env()
     models <- c("idh","gcimp","idhwt","idhmut")
     models <- paste("glioma",models,"model",sep = ".")
-    data(list = models, package = "TCGAbiolinksGUI.data")
+    data(list = models, package = "TCGAbiolinksGUI.data",envir = env)
     for(i in models){
-        model <- get(i)
+        model <- get(i,envir = env)
         # If it is a Summarized Experiment object
 
         # keep only probes used in the model
