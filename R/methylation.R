@@ -1,85 +1,3 @@
-#' @title Calculate diffmean methylation between two groups
-#' @description
-#'    Calculate diffmean methylation of probes between two groups removing lines
-#'    that has NA values.
-#' @param data SummarizedExperiment object obtained from TCGAPrepare
-#' @param groupCol Columns in colData(data) that defines the groups.
-#' @param group1 Name of group1 to be used in the analysis
-#' @param group2 Name of group2  to be used in the analysis
-#' @param save Save histogram of diffmean
-#' @import ggplot2
-#' @import graphics
-#' @importFrom grDevices png dev.off
-#' @importFrom S4Vectors values
-#' @importFrom SummarizedExperiment colData rowRanges assay rowRanges<- values<-
-#' @return Saves in the rowRages(data) the columns: mean.group1, mean.group2
-#'        diffmean.group1.group2; Where group1 and group2 are the names of the
-#'        groups.
-#' @examples
-#' nrows <- 200; ncols <- 20
-#' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
-#' rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
-#'                    IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
-#'                     strand=sample(c("+", "-"), 200, TRUE),
-#'                     feature_id=sprintf("ID%03d", 1:200))
-#'colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 10),
-#'                     row.names=LETTERS[1:20],
-#'                     group=rep(c("group1","group2"),c(10,10)))
-#'data <- SummarizedExperiment::SummarizedExperiment(
-#'          assays=S4Vectors::SimpleList(counts=counts),
-#'          rowRanges=rowRanges,
-#'          colData=colData)
-#'  diff.mean <- TCGAbiolinks:::diffmean(data,groupCol = "group")
-#' @keywords internal
-diffmean <- function(data, groupCol = NULL, group1 = NULL, group2 = NULL, save = FALSE) {
-
-    if (is.null(groupCol)) {
-        message("Please, set the groupCol parameter")
-        return(NULL)
-    }
-    if ( length(unique(colData(data)[,groupCol])) != 2 &&
-         is.null(group1) && is.null(group2)) {
-        message("Please, set the group1 and group2 parameters")
-        return(NULL)
-    } else if (length(unique(colData(data)[,groupCol])) == 2 &&
-               is.null(group1) && is.null(group2)) {
-        group1 <- unique(colData(data)[,groupCol])[1]
-        group2 <- unique(colData(data)[,groupCol])[2]
-    }
-    message("Calculating the diference between the mean methylation of the groups...")
-
-    m <- assay(data)
-    idx1 <- which(colData(data)[,groupCol] == group1)
-    idx2 <- which(colData(data)[,groupCol] == group2)
-    mean.g1 <- rowMeans(m[,idx1], na.rm = TRUE)
-    mean.g2 <- rowMeans(m[,idx2], na.rm = TRUE)
-    diffmean <- mean.g2 - mean.g1
-
-    # Saves the result
-    group1.col <- gsub("[[:punct:]]| ", ".", group1)
-    group2.col <- gsub("[[:punct:]]| ", ".", group2)
-    values(rowRanges(data))[,paste0("mean.", group1.col)] <-  mean.g1
-    values(rowRanges(data))[,paste0("mean.", group2.col)] <-  mean.g2
-    values(rowRanges(data))[,paste0("diffmean.",group1.col,".", group2.col)] <-  diffmean
-    values(rowRanges(data))[,paste0("diffmean.",group2.col,".", group1.col)] <-  -diffmean
-    # Ploting a histogram to evaluate the data
-    tryCatch({
-        if(save) {
-            fhist <- paste0("histogram_diffmean.",group1.col,group2.col,".png")
-            message("Saving histogram of diffmean values: ", fhist)
-            p <- qplot(diffmean,
-                       geom="histogram",
-                       binwidth = 0.5,
-                       main = "Histogram for diffmeans",
-                       xlab = "Diffmean",
-                       fill=I("blue"))
-            png(filename = fhist)
-            print(p)
-            dev.off()
-        }
-    })
-    return(data)
-}
 
 #' @title Creates survival analysis
 #' @description Creates a survival plot from TCGA patient clinical data
@@ -514,60 +432,47 @@ TCGAvisualize_meanMethylation <- function(data,
 #' @param group2 In case our object has more than 2 groups, you should set the
 #'  groups
 #' @param paired  Do a paired wilcoxon test? Default: True
-#' @param exact  Do a exact wilcoxon test? Default: True
-#' @param  method P-value adjustment method. Default:"BH" Benjamini-Hochberg
+#' @param adj.method P-value adjustment method. Default:"BH" Benjamini-Hochberg
+#' @param alternative wilcoxon test alternative
 #' @param cores Number of cores to be used
-#' @param save Save histogram of pvalues
 #' @return Data frame with cols p values/p values adjusted
 #' @import graphics
 #' @importFrom grDevices png dev.off pdf
 #' @import stats
-#' @importFrom parallel detectCores
 #' @importFrom SummarizedExperiment colData rowRanges rowRanges<- colData<-
 #' @return Data frame with two cols
 #'         p-values/p-values adjusted
 #' @examples
 #' \dontrun{
 #' nrows <- 200; ncols <- 20
-#' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
+#'  counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows,
+#'            dimnames = list(paste0("cg",1:200),LETTERS[1:20]))
 #' rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
 #'                    IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
 #'                     strand=sample(c("+", "-"), 200, TRUE),
 #'                     feature_id=sprintf("ID%03d", 1:200))
-#'colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 10),
+#' colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 10),
 #'                     row.names=LETTERS[1:20],
 #'                     group=rep(c("group1","group2"),c(10,10)))
-#'data <- SummarizedExperiment::SummarizedExperiment(
+#' data <- SummarizedExperiment::SummarizedExperiment(
 #'          assays=S4Vectors::SimpleList(counts=counts),
 #'          rowRanges=rowRanges,
 #'          colData=colData)
-#' data <- calculate.pvalues(data,"group")
+#' results <- TCGAbiolinks:::dmc.non.parametric.se(data,"group")
 #' }
 #' @importFrom plyr adply
 #' @importFrom stats wilcox.test
 #' @importFrom doParallel registerDoParallel
 #' @keywords internal
-calculate.pvalues <- function(data,
-                              groupCol = NULL,
-                              group1 = NULL,
-                              group2 = NULL,
-                              paired = FALSE,
-                              method = "BH",
-                              exact = TRUE,
-                              cores = 1, save = FALSE) {
+dmc.non.parametric.se <- function(data,
+                                  groupCol = NULL,
+                                  group1 = NULL,
+                                  group2 = NULL,
+                                  paired = FALSE,
+                                  adj.method = "BH",
+                                  alternative = "two.sided",
+                                  cores = 1) {
 
-    parallel <- FALSE
-    if (cores > 1){
-        if(is.windows()){
-            if (cores > detectCores()) cores <- detectCores()
-            registerDoParallel(cores)
-            parallel = TRUE
-        } else {
-            if (cores > detectCores()) cores <- detectCores()
-            registerDoParallel(cores)
-            parallel = TRUE
-        }
-    }
 
 
     if (is.null(groupCol)) {
@@ -592,47 +497,72 @@ calculate.pvalues <- function(data,
             colData(data)[,groupCol]
         )
     }
+    m <- assay(data)
+    df <- dmc.non.parametric(m,idx1,idx2,paired,adj.method,alternative,cores)
 
-    val <- assay(data)
-    p.value <- adply(val,1,
-                     function(x) {
-                         wilcox.test(x[idx1],x[idx2],
-                                     paired = paired)$p.value
-                     }, .progress = "text", .parallel = parallel
-    )
-    p.value <- p.value[,2]
-    ## Plot a histogram
-    if(save) {
-        message("Saved histogram_pvalues.png...")
-        png(filename = "histogram_pvalues.png")
-        hist(p.value)
-        dev.off()
-    }
-
-    ## Calculate the adjusted p-values by using Benjamini-Hochberg
-    ## (BH) method
-    p.value.adj <- p.adjust(p.value, method = method)
-
-    ## Plot a histogram
-    if(save) {
-        message("Saved histogram_pvalues_adj.png")
-        png(filename = "histogram_pvalues_adj.png")
-        hist(p.value.adj)
-        dev.off()
-    }
-    #Saving the values into the object
     group1.col <- gsub("[[:punct:]]| ", ".", group1)
     group2.col <- gsub("[[:punct:]]| ", ".", group2)
     colp <- paste("p.value",  group1.col,  group2.col, sep = ".")
-    values(rowRanges(data))[,colp] <-  p.value
     coladj <- paste("p.value.adj", group1.col,  group2.col, sep = ".")
-    values(rowRanges(data))[,coladj] <-  p.value.adj
-    colp <- paste("p.value",  group2.col,  group1.col, sep = ".")
-    values(rowRanges(data))[,colp] <-  p.value
-    coladj <- paste("p.value.adj", group2.col,  group1.col, sep = ".")
-    values(rowRanges(data))[,coladj] <-  p.value.adj
+    coldiffmean <- paste("mean", group1.col,"minus.mean", group2.col, sep = ".")
+    colmeang1 <- paste("mean", group1.col, sep = ".")
+    colmeang2 <- paste("mean", group2.col, sep = ".")
 
-    return(data)
+    colnames(df) <- c(colmeang1,colmeang2,coldiffmean,colp,coladj)
+    return(df)
+}
+
+#' @title Perform non-parametrix wilcoxon test
+#' @description Perform non-parametrix wilcoxon test
+#' @param data  A matrix
+#' @param idx1  Index columns group1
+#' @param idx2  Index columns group2
+#' @param paired  Do a paired wilcoxon test? Default: True
+#' @param adj.method P-value adjustment method. Default:"BH" Benjamini-Hochberg
+#' @param alternative wilcoxon test alternative
+#' @param cores Number of cores to be used
+#' @return Data frame with p-values and diff mean
+#' @import stats
+#' @importFrom parallel detectCores
+#' @examples
+#'  nrows <- 200; ncols <- 20
+#'  counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows,
+#'            dimnames = list(paste0("cg",1:200),paste0("S",1:20)))
+#'  TCGAbiolinks:::dmc.non.parametric(counts,1:10,11:20)
+dmc.non.parametric <-  function(matrix,
+                                idx1 = NULL,
+                                idx2 = NULL,
+                                paired = FALSE,
+                                adj.method = "BH",
+                                alternative = "two.sided",
+                                cores = 1) {
+
+    parallel <- FALSE
+    if (cores > 1){
+        if(is.windows()){
+            if (cores > detectCores()) cores <- detectCores()
+            registerDoParallel(cores)
+            parallel = TRUE
+        } else {
+            if (cores > detectCores()) cores <- detectCores()
+            registerDoParallel(cores)
+            parallel = TRUE
+        }
+    }
+    p.value <- adply(matrix,1,
+                     function(x) {
+                         wilcox.test(x[idx1],x[idx2],
+                                     paired = paired,
+                                     alternative = alternative)$p.value
+                     }, .progress = "time", .parallel = parallel
+    )
+    p.value <- p.value[,2]
+    p.value.adj <- p.adjust(p.value, method = adj.method)
+    mean.g1 <- rowMeans(matrix[,idx1], na.rm = TRUE)
+    mean.g2 <- rowMeans(matrix[,idx2], na.rm = TRUE)
+    mean.g1_minus_mean.g2 <- mean.g1 - mean.g2
+
+    return(data.frame(mean.g1,mean.g2,mean.g1_minus_mean.g2,p.value,p.value.adj))
 }
 
 #' @title Creates a volcano plot for DNA methylation or expression
@@ -928,7 +858,8 @@ TCGAVisualize_volcano <- function(x,y,
 #' in the rowRanges where group1 and group2 are the names of the groups
 #' @examples
 #' nrows <- 200; ncols <- 20
-#' counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
+#'  counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows,
+#'            dimnames = list(paste0("cg",1:200),paste0("S",1:20)))
 #' rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
 #'                    IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
 #'                     strand=sample(c("+", "-"), 200, TRUE),
@@ -942,15 +873,18 @@ TCGAVisualize_volcano <- function(x,y,
 #'          colData=colData)
 #' SummarizedExperiment::colData(data)$group <- c(rep("group 1",ncol(data)/2),
 #'                          rep("group 2",ncol(data)/2))
-#' hypo.hyper <- TCGAanalyze_DMR(data, p.cut = 0.85,"group","group 1","group 2")
+#' hypo.hyper <- TCGAanalyze_DMC(data, p.cut = 0.85,"group","group 1","group 2")
 #' SummarizedExperiment::colData(data)$group2 <- c(rep("group_1",ncol(data)/2),
 #'                          rep("group_2",ncol(data)/2))
-#' hypo.hyper <- TCGAanalyze_DMR(data, p.cut = 0.85,"group2","group_1","group_2")
-TCGAanalyze_DMR <- function(data,
-                            groupCol=NULL,
-                            group1=NULL,
-                            group2=NULL,
-                            calculate.pvalues.probes = "all",
+#' hypo.hyper <- TCGAanalyze_DMC(data, p.cut = 0.85,"group2","group_1","group_2")
+TCGAanalyze_DMC <- function(data,
+                            groupCol = NULL,
+                            group1 = NULL,
+                            group2 = NULL,
+                            alternative = "two.sided",
+                            diffmean.cut = 0.2,
+                            paired = FALSE,
+                            adj.method = "BH",
                             plot.filename = "methylation_volcano.pdf",
                             ylab =  expression(paste(-Log[10],
                                                      " (FDR corrected -P values)")),
@@ -965,23 +899,19 @@ TCGAanalyze_DMR <- function(data,
                             ylim = NULL,
                             p.cut = 0.01,
                             probe.names = FALSE,
-                            diffmean.cut = 0.2,
-                            paired = FALSE,
-                            adj.method="BH",
-                            overwrite=FALSE,
                             cores = 1,
-                            save=TRUE,
+                            save = TRUE,
                             save.directory = ".",
-                            filename=NULL) {
-    .e <- environment()
+                            filename = NULL) {
 
     names(color) <- as.character(1:3)
     # Check if object is a summarized Experiment
-    if(class(data)!= class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+    if(!is(data,"RangedSummarizedExperiment")){
         stop(paste0("Sorry, but I'm expecting a Summarized Experiment object, but I got a: ", class(data)))
     }
+
     # Check if object has NAs for all samples
-    if(any(rowSums(!is.na(assay(data)))== 0)){
+    if(any(rowSums(!is.na(assay(data))) == 0)){
         stop(paste0("Sorry, but we found some probes with NA for all samples in your data, please either remove/or replace them"))
     }
 
@@ -989,6 +919,7 @@ TCGAanalyze_DMR <- function(data,
         message("Please, set the groupCol parameter")
         return(NULL)
     }
+
     if(!(groupCol %in% colnames(colData(data)))){
         stop(paste0("column ",groupCol, " not found in the object"))
     }
@@ -1015,6 +946,15 @@ TCGAanalyze_DMR <- function(data,
     }
 
 
+    results <- dmc.non.parametric.se(data,
+                          groupCol = groupCol,
+                          group1 = group1,
+                          group2 = group2,
+                          paired = paired,
+                          adj.method = adj.method,
+                          alternative = alternative,
+                          cores = cores)
+
     # defining title and label if not specified by the user
     if (is.null(title)) {
         title <- paste("Volcano plot", "(", group2, "vs", group1,")")
@@ -1026,103 +966,40 @@ TCGAanalyze_DMR <- function(data,
                    "Hypomethylated")
         label[2:3] <-  paste(label[2:3], "in", group2)
     }
-    group1.col <- gsub("[[:punct:]]| ", ".", group1)
-    group2.col <- gsub("[[:punct:]]| ", ".", group2)
-    diffcol <- paste("diffmean", group1.col, group2.col,sep = ".")
-    if (!(diffcol %in% colnames(values(data))) || overwrite) {
-        data <- diffmean(data,groupCol, group1 = group1, group2 = group2, save = save)
-        if (!(diffcol %in% colnames(values(rowRanges(data))))) {
-            stop(paste0("Error! Not found ", diffcol))
-        }
-    }
 
-    pcol <- paste("p.value.adj", group2.col, group1.col,sep = ".")
-    if(!(pcol %in% colnames(values(data)))){
-        pcol <- paste("p.value.adj", group1.col, group2.col, sep = ".")
-    }
-    if (!(pcol %in% colnames(values(data))) | overwrite) {
-        if(calculate.pvalues.probes == "all"){
-            suppressWarnings({
-                data <- calculate.pvalues(data, groupCol, group1, group2,
-                                          paired = paired,
-                                          method = adj.method,
-                                          cores = cores,
-                                          save = save)
-            })
-        } else  if(calculate.pvalues.probes == "differential"){
-            message(paste0("Caculating p-values only for probes with a difference of mean methylation equal or higher than ", diffmean.cut))
-            print(diffcol)
-            print(colnames(values(data)))
-            diff.probes <- abs(values(data)[,diffcol]) > diffmean.cut
-            nb <- length(which(diff.probes == TRUE))
-            if(nb == 0) {
-                warning("No probes differenly methylated")
-                return(NULL)
-            }
-            print(paste0("Number of probes differenly methylated: ",nb))
-            data <- calculate.pvalues(data[diff.probes,], groupCol, group1, group2,
-                                      paired = paired,
-                                      method = adj.method,
-                                      cores = cores,
-                                      save = save)
-        }
 
-        # An error should not happen, if it happens (probably due to an incorret
-        # user input) we will stop
-        if (!(pcol %in% colnames(values(data))))  stop(paste0("Error! Not found ", pcol))
-    }
-    log <- paste0("TCGAanalyze_DMR.",gsub(" ", ".",group1),".",gsub(" ", ".",group2))
-    assign(log,c("groupCol" = groupCol,
-                 "group1" = group1.col,
-                 "group2" = group2.col,
-                 "plot.filename" = plot.filename,
-                 "xlim" = xlim,
-                 "ylim" = ylim,
-                 "p.cut" = p.cut,
-                 "diffmean.cut" = diffmean.cut,
-                 "paired" = "paired",
-                 "adj.method" = adj.method))
-    metadata(data)[[log]] <- (eval(as.symbol(log)))
-    statuscol <- paste("status",group1.col,group2.col,sep = ".")
-    statuscol2 <- paste("status",group2.col,group1.col,sep = ".")
-    values(data)[,statuscol] <-  "Not Significant"
-    values(data)[,statuscol2] <-  "Not Significant"
+    group1.col <- gsub("[[:punct:]]| ", ".",group1)
+    group2.col <- gsub("[[:punct:]]| ", ".",group2)
 
     # get significant data
-    sig <-  values(data)[,pcol] < p.cut
-    sig[is.na(sig)] <- FALSE
-    # hypermethylated samples compared to old state
-    hyper <- values(data)[,diffcol]  > diffmean.cut
-    hyper[is.na(hyper)] <- FALSE
-    if (any(hyper & sig)) values(data)[hyper & sig,statuscol] <- "Hypermethylated"
-    if (any(hyper & sig)) values(data)[hyper & sig,statuscol2] <- "Hypomethylated"
+    results$status <- "Not Significant"
+    sig <-  which(results[,grep("p.value.adj",colnames(results))] < p.cut)
+    hyper <- which(results[,grep("minus",colnames(results))] > diffmean.cut)
+    hypo <-  which(results[,grep("minus",colnames(results))] < -diffmean.cut)
+    hyper.sig <- intersect(hyper,sig)
+    hypo.sig <- intersect(hypo,sig)
 
-    # hypomethylated samples compared to old state
-    hypo <-  values(data)[,diffcol] < (-diffmean.cut)
-    hypo[is.na(hypo)] <- FALSE
-
-    if (any(hypo & sig)) values(data)[hypo & sig,statuscol] <- "Hypomethylated"
-    if (any(hypo & sig)) values(data)[hypo & sig,statuscol2] <- "Hypermethylated"
+    if (length(hyper.sig)) results[hyper.sig, "status"] <- paste0("Hypermethylated in ", group1)
+    if (length(hypo.sig)) results[hypo.sig, "status"] <- paste0("Hypermethylated in ", group1)
 
     # Plot a volcano plot
     names <- NULL
-    if(probe.names) names <- values(data)$probeID
+    if(probe.names) names <- rownames(results)
 
     if(plot.filename != FALSE) {
-        TCGAVisualize_volcano(x = values(data)[,diffcol],
-                              y = values(data)[,pcol],
+        TCGAVisualize_volcano(x = results[,grep("minus",colnames(results))],
+                              y = results[,grep("p.value.adj",colnames(results))],
                               filename = plot.filename,
                               ylab =  ylab,
                               xlab = xlab,
                               title = title,
-                              legend= legend,
+                              legend = legend,
                               label = label,
                               names = names,
                               x.cut = diffmean.cut,
                               y.cut = p.cut)
     }
     if (save) {
-
         # saving results into a csv file
         csv <- paste0(paste("DMR_results",
                             gsub("_",".",groupCol),
@@ -1132,43 +1009,9 @@ TCGAanalyze_DMR <- function(data,
         dir.create(save.directory,showWarnings = FALSE,recursive = TRUE)
         csv <- file.path(save.directory,csv)
         message(paste0("Saving the results also in a csv file: "), csv)
-        df <- values(data)
-        if (any(hyper & sig)) df[hyper & sig,statuscol] <- paste("Hypermethylated","in", group2)
-        if (any(hyper & sig)) df[hyper & sig,statuscol2] <- paste("Hypomethylated","in", group1)
-        if (any(hypo & sig)) df[hypo & sig,statuscol] <- paste("Hypomethylated","in", group2)
-        if (any(hypo & sig)) df[hypo & sig,statuscol2] <- paste("Hypermethylated","in", group1)
-        # get metadata not created by this function
-        idx <- grep("mean|status|value",colnames(df),invert = TRUE)
-
-        write_csv(as.data.frame(df[,
-                                   c(colnames(df)[idx],
-                                     paste("mean", group1.col,sep = "."),
-                                     paste("mean", group2.col,sep = "."),
-                                     paste("diffmean", group1.col, group2.col, sep = "."),
-                                     paste("p.value", group1.col, group2.col, sep = "."),
-                                     paste("p.value.adj", group1.col, group2.col, sep = "."),
-                                     statuscol,
-                                     paste("diffmean",group2.col,group1.col,sep = "."),
-                                     paste("p.value",group2.col,group1.col,sep = "."),
-                                     paste("p.value.adj",group2.col,group1.col,sep = "."),
-                                     statuscol2)
-                                   ]),path =  csv)
-        if (is.null(filename)) {
-            filename <- paste0(paste(
-                gsub("_",".",groupCol),
-                group1.col,
-                group2.col,
-                "pcut",p.cut,
-                "meancut",diffmean.cut,
-                sep = "_"),
-                ".rda")
-            filename <- file.path(save.directory, filename)
-        }
-
-        # saving results into R object
-        save(data, file = filename)
+        write.csv(results,csv)
     }
-    return(data)
+    return(results)
 }
 
 #' @title Create starburst plot
