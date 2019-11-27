@@ -152,17 +152,5 @@ result <- TCGAvisualize_starburst(met,
                                   met.platform = "27K",
                                   diffmean.cut = 0.0,
                                   names  = TRUE)
-# It can also receive a data frame as input
-result <- TCGAvisualize_starburst(SummarizedExperiment::values(met),
-                                  exp,
-                                  exp.p.cut = 0.05,
-                                  met.p.cut = 0.05,
-                                  logFC.cut = 2,
-                                  group1 = "g1",
-                                  group2 = "g2",
-                                  genome = "hg38",
-                                  met.platform = "27K",
-                                  diffmean.cut = 0.0,
-                                  names  = TRUE)
 }
 }
