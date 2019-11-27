@@ -80,7 +80,7 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
 
     ## fit a Cox proportional hazards model for age, gender, tumor type
     cfu <- clinical_patient[clinical_patient[,"bcr_patient_barcode"] %in% substr(colnames(dataGE),1,12),]
-    rownames(cfu)<- cfu$bcr_patient_barcode
+    rownames(cfu) <- cfu$bcr_patient_barcode
     cfu <- as.data.frame(subset(cfu, select=c("bcr_patient_barcode",
                                               "days_to_last_followup",
                                               "days_to_death",
@@ -90,15 +90,15 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
     )
     )
 
-    rownames(cfu)<- cfu$bcr_patient_barcode
-    cfu<-cfu[,-1]
+    rownames(cfu) <- cfu$bcr_patient_barcode
+    cfu <- cfu[,-1]
     colnames(cfu)   <- c("time","timeDead","status","Age","Gender")
 
-    cfu[which(cfu$status=="Alive"),"status"]<-0
-    cfu[which(cfu$status=="Dead"),"time"]<- cfu[which(cfu$status=="Dead"),"timeDead"]
-    cfu[which(cfu$status=="Dead"),"status"]<-1
-    cfu$Gender <-tolower(cfu$Gender)
-    cfu<-cfu[,-2]
+    cfu[which(cfu$status == "Alive"),"status"]<-0
+    cfu[which(cfu$status == "Dead"),"time"]<- cfu[which(cfu$status=="Dead"),"timeDead"]
+    cfu[which(cfu$status == "Dead"),"status"]<-1
+    cfu$Gender <- tolower(cfu$Gender)
+    cfu <- cfu[,-2]
     cfu <- as.data.frame(subset(cfu, select=c("time","status")))
     cfu$time <- as.numeric(cfu$time)
     cfu$status <- as.numeric(cfu$status)
@@ -114,7 +114,7 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
     #colnames(Cancer_rnaseqv2) <- substr(colnames(Cancer_rnaseqv2),1,12)
     #md_selected<-log2(Cancer_rnaseqv2[rownames(tabSurvKMfilt),rownames(cfu)])
 
-    md_selected<- data
+    md_selected <- data
     pd <- cfu
 
     ## survival analysis to obtain hazard ratio (HR) and pvaules
@@ -153,12 +153,12 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
     ind <- match(igraph::V(network)$symbol, names(pvals))
     ## for extracted graph
     nodes_mapped <- igraph::V(network)$name[!is.na(ind)]
-    network <- dNetInduce(g=network, nodes_query=nodes_mapped, knn=0,
+    network <- dnet::dNetInduce(g=network, nodes_query=nodes_mapped, knn=0,
                           remove.loops=FALSE, largest.comp=TRUE)
     igraph::V(network)$name <- igraph::V(network)$symbol
 
     # Identification of gene-active network
-    net <- dNetPipeline(g=network, pval=pvals, method="customised",
+    net <- dnet::dNetPipeline(g=network, pval=pvals, method="customised",
                         significance.threshold=5e-02)
     # visualisation of the gene-active network itself
     ## the layout of the network visualisation (fixed in different visuals)
@@ -171,7 +171,7 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
     palette.name <- supraHex::visColormap(colormap=colormap)
     mcolors <- palette.name(length(com))
     vcolors <- mcolors[vgroups]
-    com$significance <- dCommSignif(net, com)
+    com$significance <- dnet::dCommSignif(net, com)
     ## node sizes according to degrees
     vdegrees <- igraph::degree(net)
     ## highlight different communities
@@ -181,7 +181,7 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
     edge.color <- c("#C0C0C0", "#000000")[igraph::crossing(com,net)+1]
     edge.color <- supraHex::visColoralpha(edge.color, alpha=0.5)
     ## visualise the subnetwrok
-    visNet(g=net, glayout=glayout, vertex.label=igraph::V(net)$geneSymbol,
+    dnet::visNet(g=net, glayout=glayout, vertex.label=igraph::V(net)$geneSymbol,
            vertex.color=vcolors, vertex.frame.color=vcolors,
            vertex.shape="sphere", mark.groups=mark.groups, mark.col=mark.col,
            mark.border=mark.border, mark.shape=1, mark.expand=10,
