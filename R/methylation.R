@@ -947,13 +947,13 @@ TCGAanalyze_DMC <- function(data,
 
 
     results <- dmc.non.parametric.se(data,
-                          groupCol = groupCol,
-                          group1 = group1,
-                          group2 = group2,
-                          paired = paired,
-                          adj.method = adj.method,
-                          alternative = alternative,
-                          cores = cores)
+                                     groupCol = groupCol,
+                                     group1 = group1,
+                                     group2 = group2,
+                                     paired = paired,
+                                     adj.method = adj.method,
+                                     alternative = alternative,
+                                     cores = cores)
 
     # defining title and label if not specified by the user
     if (is.null(title)) {
@@ -1587,3 +1587,4 @@ getTSS <- function(genome = "hg38", TSS = list(upstream = NULL, downstream = NUL
 
     return(tss)
 }
+
