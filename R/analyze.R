@@ -71,7 +71,7 @@ TCGAanalyze_Preprocessing <- function(object,
     if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
     if(is.null(filename)) filename <- "PreprocessingOutput.png"
     png(filename, width = width, height = height)
-    par(oma=c(10,10,10,10))
+    par(oma = c(10,10,10,10))
     ArrayIndex <-  as.character(1:length( colData(object)$barcode))
 
     pmat_new <- matrix(0, length(ArrayIndex),4)
@@ -132,7 +132,7 @@ TCGAanalyze_Preprocessing <- function(object,
             lwd = 6,
             # names = NULL,
             col = tabGroupCol$Color,
-            main ="Boxplot of correlation samples by samples after normalization")
+            main = "Boxplot of correlation samples by samples after normalization")
     dev.off()
 
     samplesCor <- rowMeans(c)
@@ -241,8 +241,8 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
     followUpLevel <- FALSE
 
     #FC_FDR_table_mRNA
-    tabSurv_Matrix<-matrix(0,nrow(as.matrix(rownames(dataNormal))),8)
-    colnames(tabSurv_Matrix)<-c("mRNA",
+    tabSurv_Matrix <- matrix(0,nrow(as.matrix(rownames(dataNormal))),8)
+    colnames(tabSurv_Matrix) <- c("mRNA",
                                 "pvalue",
                                 "Cancer Deaths",
                                 "Cancer Deaths with Top",
@@ -251,17 +251,17 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
                                 "Mean Tumor Down",
                                 "Mean Normal")
 
-    tabSurv_Matrix<-as.data.frame(tabSurv_Matrix)
+    tabSurv_Matrix <- as.data.frame(tabSurv_Matrix)
 
-    cfu$days_to_death<-as.numeric(as.character(cfu$days_to_death))
-    cfu$days_to_last_follow_up<-as.numeric(as.character(cfu$days_to_last_follow_up))
+    cfu$days_to_death <- as.numeric(as.character(cfu$days_to_death))
+    cfu$days_to_last_follow_up <- as.numeric(as.character(cfu$days_to_last_follow_up))
     rownames(cfu) <- cfu[, "bcr_patient_barcode" ] #mod1
 
     cfu <- cfu[ !(is.na(cfu[,"days_to_last_follow_up"])),]
     cfu <- cfu[ !(is.na(cfu[,"days_to_death"])),]
 
-    cfu_complete<-cfu
-    ngenes<-nrow(as.matrix(rownames(dataNormal)))
+    cfu_complete <- cfu
+    ngenes <- nrow(as.matrix(rownames(dataNormal)))
 
     # Evaluate each gene
     for(i in 1:nrow(as.matrix(rownames(dataNormal))))  {
@@ -908,7 +908,12 @@ TCGAanalyze_DEA <- function (mat1, mat2, metadata = TRUE, Cond1type, Cond2type,
 #' @importFrom sva ComBat
 #' @export
 #' @return data frame with ComBat batch correction applied
-TCGAbatch_Correction<-function (tabDF, batch.factor = NULL, adjustment = NULL, ClinicalDF = data.frame(),  UnpublishedData = FALSE, AnnotationDF = data.frame())
+TCGAbatch_Correction <- function (tabDF,
+                                batch.factor = NULL,
+                                adjustment = NULL,
+                                ClinicalDF = data.frame(),
+                                UnpublishedData = FALSE,
+                                AnnotationDF = data.frame())
 
 {
     if( UnpublishedData == TRUE) {
@@ -1323,9 +1328,9 @@ TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01){
 
     groupColors <- names(table(Pdatatable$Disease))
 
-    CompleteList<-vector("list",sum(tmp))
+    CompleteList <- vector("list",sum(tmp))
 
-    k<-1
+    k <- 1
 
     for( i in 1: length(groupColors)){
         col1 <- colnames(tmp)[i]
@@ -1375,7 +1380,7 @@ TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01){
 #' Must be less than the number of columns of normCounts.
 #' @export
 #' @return an adjacent matrix
-TCGAanalyze_analyseGRN<- function(TFs, normCounts,kNum) {
+TCGAanalyze_analyseGRN <- function(TFs, normCounts,kNum) {
     if (!requireNamespace("parmigene", quietly = TRUE)) {
         stop("parmigene package is needed for this function to work. Please install it.",
              call. = FALSE)
@@ -1453,13 +1458,13 @@ TCGAanalyze_networkInference <- function(data, optionMethod = "clr" ){
                  call. = FALSE)
         }
 
-        net <- c3net(t(data))
-    }else{
+        net <- c3net::c3net(t(data))
+    } else {
         if (!requireNamespace("minet", quietly = TRUE)) {
             stop("minet package is needed for this function to work. Please install it.",
                  call. = FALSE)
         }
-        net <- minet(data, method = optionMethod)
+        net <- mint::minet(data, method = optionMethod)
     }
     return(net)
 
@@ -1611,7 +1616,7 @@ matchedMetExp <- function(project, legacy = FALSE, n = NULL){
                             data.category = "DNA methylation",
                             platform = "Illumina Human Methylation 450",
                             legacy = TRUE,
-                            sample.type = c("Primary solid Tumor"))
+                            sample.type = c("Primary Tumor"))
 
         # get primary solid tumor samples: RNAseq
         message("Download gene expression information")
@@ -1620,7 +1625,7 @@ matchedMetExp <- function(project, legacy = FALSE, n = NULL){
                         data.type = "Gene expression quantification",
                         platform = "Illumina HiSeq",
                         file.type  = "results",
-                        sample.type = c("Primary solid Tumor"),
+                        sample.type = c("Primary Tumor"),
                         legacy = TRUE)
     } else {
         # get primary solid tumor samples: DNA methylation
@@ -1628,7 +1633,7 @@ matchedMetExp <- function(project, legacy = FALSE, n = NULL){
         met450k <- GDCquery(project = project,
                             data.category = "DNA Methylation",
                             platform = "Illumina Human Methylation 450",
-                            sample.type = c("Primary solid Tumor"))
+                            sample.type = c("Primary Tumor"))
 
         # get primary solid tumor samples: RNAseq
         message("Download gene expression information")
@@ -1647,39 +1652,6 @@ matchedMetExp <- function(project, legacy = FALSE, n = NULL){
     return(patients)
 }
 
-#' Create a Summary table for each sample in a project saying if it contains
-#' or not files for a certain data category
-#' @description
-#' Create a Summary table for each sample in a project saying if it contains
-#' or not files for a certain data category
-#' @param project A GDC project
-#' @param legacy Access legacy (hg19) or harmonized database (hg38).
-#' @return A data frame
-#' @export
-#' @importFrom stats xtabs
-#' @examples
-#' summary <- getDataCategorySummary("TCGA-ACC", legacy = TRUE)
-getDataCategorySummary <- function(project, legacy = FALSE){
-    baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/files/?","https://api.gdc.cancer.gov/files/?")
-    url <- paste0(baseURL,"&expand=cases&size=100000&fields=cases.submitter_id,data_category&filters=",
-                  URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
-                  URLencode(project),
-                  URLencode('"]}}]}'))
-
-    json  <- tryCatch(
-        getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
-        error = function(e) {
-            fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
-        }
-    )
-    json <- json$data$hits
-    json$submitter_id <- unlist(lapply(json$cases, function(x) paste0(x$submitter_id,collapse = ",")))
-    json$cases <- NULL
-    json <- json[!duplicated(json),]
-    json <- json[stringr::str_length(json$submitter_id) == 12,]
-    ret <- as.data.frame.matrix(xtabs(~ submitter_id + data_category , json))
-    return(ret)
-}
 
 #' @title Generate Stemness Score based on RNASeq (mRNAsi stemness index) Malta et al., Cell, 2018
 #' @description TCGAanalyze_Stemness generate the mRNAsi score
