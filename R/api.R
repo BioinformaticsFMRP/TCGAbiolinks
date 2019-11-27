@@ -30,9 +30,14 @@ getSampleFilesSummary <- function(project, legacy = FALSE, files.access = NA) {
         df <- ldply(y, data.frame)
 
         df <- df %>%
-            unite(type, data_category, data_type, experimental_strategy, platform, na.rm = TRUE) %>%
+            unite("type",
+                  "data_category",
+                  "data_type",
+                  "experimental_strategy",
+                  "platform",
+                  na.rm = TRUE) %>%
             plyr::count(c(".id","type")) %>%
-            tidyr::spread(type, freq)
+            tidyr::spread("type", "freq")
         df$project <- proj
         df[is.na(df)] <- 0
         out <- rbind.fill(out,df)
@@ -204,4 +209,39 @@ splitAPICall <- function(FUN,step = 20,items){
         }
     })
    info
+}
+
+
+#' Create a Summary table for each sample in a project saying if it contains
+#' or not files for a certain data category
+#' @description
+#' Create a Summary table for each sample in a project saying if it contains
+#' or not files for a certain data category
+#' @param project A GDC project
+#' @param legacy Access legacy (hg19) or harmonized database (hg38).
+#' @return A data frame
+#' @export
+#' @importFrom stats xtabs
+#' @examples
+#' summary <- getDataCategorySummary("TCGA-ACC", legacy = TRUE)
+getDataCategorySummary <- function(project, legacy = FALSE){
+    baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/files/?","https://api.gdc.cancer.gov/files/?")
+    url <- paste0(baseURL,"&expand=cases&size=100000&fields=cases.submitter_id,data_category&filters=",
+                  URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
+                  URLencode(project),
+                  URLencode('"]}}]}'))
+
+    json  <- tryCatch(
+        getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
+        error = function(e) {
+            fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+        }
+    )
+    json <- json$data$hits
+    json$submitter_id <- unlist(lapply(json$cases, function(x) paste0(x$submitter_id,collapse = ",")))
+    json$cases <- NULL
+    json <- json[!duplicated(json),]
+    json <- json[stringr::str_length(json$submitter_id) == 12,]
+    ret <- as.data.frame.matrix(xtabs(~ submitter_id + data_category , json))
+    return(ret)
 }
