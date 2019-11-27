@@ -32,13 +32,21 @@ navbar:
           icon: fa-flask
           href: http://rpubs.com/tiagochst/atac_seq_workshop
     - text: "Analysis"
-      href: analysis.html
       icon: fa-flask
+      menu:
+        - text: "---------"
+        - text: "Analysis functions"
+          icon: fa-flask
+          href: analysis.html
+        - text: "Other functions"
+          icon: fa-flask
+          href: extension.html
+        - text: "---------"
+        - text: "Glioma classsifier"
+          icon: fa-bulleye
+          href: classifiers.html
     - text: "Case Study"
       href: casestudy.html
-    - text: "Other functions"
-      icon: fa-book
-      href: extension.html
     - text: "GUI"
       icon: fa-hand-pointer-o
       href: gui.html

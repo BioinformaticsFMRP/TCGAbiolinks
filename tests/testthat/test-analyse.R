@@ -83,7 +83,7 @@ test_that("TCGAanalyze_DMC is handling NAs correctly", {
         c(rep("group1", 10),  rep("group2", 10))
     hypo.hyper <-
         TCGAanalyze_DMC(data, p.cut = 0.85, "group", "group1", "group2")
-    result <- hypo.hyper
+    result <- hypo.hyper[1,]
     expect_equal(result$mean.group1, 0.9)
     expect_equal(result$mean.group2, 0.1)
     expect_equal(result$mean.group1.minus.mean.group2 , 0.8)
