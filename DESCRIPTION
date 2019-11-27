@@ -50,11 +50,9 @@ Imports:
     utils,
     selectr,
     S4Vectors,
-    ComplexHeatmap (>= 1.10.2),
     R.utils,
     SummarizedExperiment (>= 1.4.0),
     genefilter,
-    ConsensusClusterPlus,
     readr,
     RColorBrewer,
     doParallel,
@@ -68,9 +66,7 @@ Imports:
     purrr,
     xml2,
     httr (>= 1.2.1),
-    matlab,
     purrrogress,
-    circlize,
     ggrepel (>= 0.6.3)
 Description: The aim of TCGAbiolinks is : i) facilitate the GDC open-access
     data retrieval, ii) prepare the data using the appropriate pre-processing
@@ -108,6 +104,9 @@ Suggests:
     sesame,
     pathview,
     clusterProfiler,
+    ComplexHeatmap,
+    circlize,
+    ConsensusClusterPlus,
     igraph,
     supraHex
 VignetteBuilder: knitr

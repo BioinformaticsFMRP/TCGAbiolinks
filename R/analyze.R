@@ -8,7 +8,6 @@
 #' or 'consensus'
 #' @param methodHC is method to be used for Hierarchical cluster.
 #' @import stats
-#' @importFrom ConsensusClusterPlus ConsensusClusterPlus
 #' @export
 #' @return object of class hclust if method selected is 'hclust'.
 #' If method selected is 'Consensus' returns a list of length maxK
@@ -17,13 +16,18 @@
 #' (consensus class assignments). ConsensusClusterPlus also produces images.
 TCGAanalyze_Clustering <- function(tabDF, method,  methodHC = "ward.D2"){
 
+    if (!requireNamespace("ConsensusClusterPlus", quietly = TRUE)) {
+        stop("ConsensusClusterPlus package is needed for this function to work. Please install it.",
+             call. = FALSE)
+    }
+
     if( method == "hclust"){
         ans <- hclust(ddist <- dist(tabDF), method = methodHC)
     }
 
     if( method == "consensus"){
         sHc <- hclust(ddist <- dist(tabDF), method = methodHC)      # time = 1.270 )
-        ans <- ConsensusClusterPlus(ddist, maxK = 7, pItem = 0.9, reps=1000
+        ans <- ConsensusClusterPlus::ConsensusClusterPlus(ddist, maxK = 7, pItem = 0.9, reps=1000
                                     , title="mc_consensus_k7_1000"
                                     , clusterAlg = "hc"
                                     , innerLinkage = "ward.D2"
