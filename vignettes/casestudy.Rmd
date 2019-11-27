@@ -353,7 +353,7 @@ GDCdownload(query.exp)
 acc.exp <- GDCprepare(query = query.exp, save = TRUE, save.filename = "accExp.rda")
 ```
 
-For DNA methylation, we perform a DMR (different methylated region) analysis, which will give the difference of DNA methylation for the probes of the groups and their significance value.
+For DNA methylation, we perform a DMC (different methylated CpGs) analysis, which will give the difference of DNA methylation for the probes of the groups and their significance value.
 The output can be seen in a volcano plot. 
 Note: Depending on the number of samples this function can be very slow
 due to the wilcoxon test, taking from hours to days.
@@ -363,7 +363,7 @@ due to the wilcoxon test, taking from hours to days.
 acc.met <- subset(acc.met,subset = (rowSums(is.na(assay(acc.met))) == 0))
 
 # Volcano plot
-acc.met <- TCGAanalyze_DMR(acc.met, groupCol = "subtype_MethyLevel",
+acc.met <- TCGAanalyze_DMC(acc.met, groupCol = "subtype_MethyLevel",
                            group1 = "CIMP-high",
                            group2="CIMP-low",
                            p.cut = 10^-5,
