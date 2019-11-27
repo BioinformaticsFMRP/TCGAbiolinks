@@ -1468,7 +1468,7 @@ TCGAanalyze_networkInference <- function(data, optionMethod = "clr" ){
             stop("minet package is needed for this function to work. Please install it.",
                  call. = FALSE)
         }
-        net <- mint::minet(data, method = optionMethod)
+        net <- minet::minet(data, method = optionMethod)
     }
     return(net)
 
