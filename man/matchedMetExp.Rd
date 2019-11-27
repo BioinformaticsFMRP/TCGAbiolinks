@@ -23,5 +23,5 @@ from GDC database
 }
 \examples{
 # Get ACC samples with both  DNA methylation (HM450K) and gene expression aligned to hg19
-samples <- matchedMetExp("TCGA-ACC", legacy = TRUE)
+samples <- matchedMetExp("TCGA-UCS", legacy = TRUE)
 }

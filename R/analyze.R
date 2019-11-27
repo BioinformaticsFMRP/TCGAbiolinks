@@ -1619,7 +1619,7 @@ getAdjacencyBiogrid <- function(tmp.biogrid, names.genes = NULL){
 #' @export
 #' @examples
 #' # Get ACC samples with both  DNA methylation (HM450K) and gene expression aligned to hg19
-#' samples <- matchedMetExp("TCGA-ACC", legacy = TRUE)
+#' samples <- matchedMetExp("TCGA-UCS", legacy = TRUE)
 matchedMetExp <- function(project, legacy = FALSE, n = NULL){
     if(legacy) {
         # get primary solid tumor samples: DNA methylation
