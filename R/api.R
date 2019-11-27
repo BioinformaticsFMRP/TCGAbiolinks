@@ -10,7 +10,7 @@
 #' Default: no filter
 #' @export
 #' @examples
-#'    summary <- getSampleFilesSummary("TCGA-LUAD")
+#'    summary <- getSampleFilesSummary("TCGA-UCS")
 #' \dontrun{
 #'    summary <- getSampleFilesSummary(c("TCGA-OV","TCGA-ACC"))
 #' }
