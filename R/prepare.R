@@ -802,7 +802,7 @@ colDataPrepare <- function(barcode){
   if(all(grepl("TARGET",barcode))) ret <- colDataPrepareTARGET(barcode)
   if(all(grepl("TCGA",barcode))) ret <- colDataPrepareTCGA(barcode)
   if(all(grepl("MMRF",barcode))) ret <- colDataPrepareMMRF(barcode)
-  if(is.null(ret)) ret <- data.frame(sample = barcode,stringsAsFactors = FALSE)
+  if(is.null(ret)) ret <- data.frame(sample = barcode %>% unique,stringsAsFactors = FALSE)
 
   message(" => Add clinical information to samples")
   # There is a limitation on the size of the string, so this step will be splited in cases of 100
@@ -814,7 +814,7 @@ colDataPrepare <- function(barcode){
 
   if(!is.null(patient.info)) {
     ret$sample_submitter_id <- ret$sample %>% as.character()
-    ret <- left_join(ret %>% as.data.frame, patient.info, by = "sample_submitter_id")
+    ret <- left_join(ret %>% as.data.frame, patient.info %>% unique, by = "sample_submitter_id")
   }
   ret$bcr_patient_barcode <- ret$sample %>% as.character()
   ret$sample_submitter_id <- ret$sample %>% as.character()
@@ -839,6 +839,7 @@ colDataPrepare <- function(barcode){
   # ret <- merge(ret, purity, by = "sample", all.x = TRUE, sort = FALSE)
 
   # Put data in the right order
+  ret <- ret[!duplicated(ret$bcr_patient_barcode),]
   idx <- sapply(substr(barcode,1,min(str_length(ret$bcr_patient_barcode))), function(x) {
     grep(x,ret$bcr_patient_barcode)
   })

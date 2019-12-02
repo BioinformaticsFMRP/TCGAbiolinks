@@ -65,6 +65,16 @@ test_that("getBarcodeInfo works", {
     expect_true(x[x$sample_submitter_id == "HCM-CSHL-0065-C20-06A","ajcc_pathologic_stage"] == "Stage IVA")
     expect_true(x[x$sample_submitter_id == "HCM-CSHL-0065-C20-06A","sample_type"] == "Metastatic")
     expect_true(x[x$sample_submitter_id == "HCM-CSHL-0063-C18-85A","sample_type"] == "Next Generation Cancer Model")
+
+
+
+})
+
+test_that("colDataPrepare handle replicates", {
+    barcodes <- c("TCGA-06-0156-01A-02R-1849-01","TCGA-06-0156-01A-03R-1849-01")
+    x <- colDataPrepare(barcodes)
+    expect_true(nrow(x) == 2)
+    expect_true(all(x$barcode == c("TCGA-06-0156-01A-02R-1849-01","TCGA-06-0156-01A-03R-1849-01")))
 })
 
 test_that("GDCprepare accepts more than one project", {
