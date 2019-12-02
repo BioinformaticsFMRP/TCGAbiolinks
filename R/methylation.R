@@ -549,9 +549,12 @@ dmc.non.parametric <-  function(matrix,
     }
     p.value <- adply(matrix,1,
                      function(x) {
-                         wilcox.test(x[idx1],x[idx2],
-                                     paired = paired,
-                                     alternative = alternative)$p.value
+                         suppressMessages({
+                             wilcox.test(x[idx1],
+                                         x[idx2],
+                                         paired = paired,
+                                         alternative = alternative)$p.value
+                         })
                      }, .progress = "time", .parallel = parallel
     )
     p.value <- p.value[,2]
