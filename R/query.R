@@ -360,6 +360,7 @@ GDCquery <- function(project,
         }
         results$sample_type <- aux$sample_type %>% as.character()
         results$is_ffpe <- aux$is_ffpe %>% as.logical
+        results$cases.submitter_id <- plyr::laply(results$cases,function(x) {x$submitter_id})  %>% as.character()
 
         # ORGANOID-PANCREATIC does not have aliquots
         if("aliquot.submiter.id" %in% colnames(aux)){
@@ -367,6 +368,7 @@ GDCquery <- function(project,
             results$sample.submitter_id <- aux$submitter_id  %>% as.character()
         } else{
             results$cases <- aux$submitter_id  %>% as.character()
+            results$cases.submitter_id <- results$cases[[1]]$submitter_id  %>% as.character()
             results$sample.submitter_id <- aux$submitter_id  %>% as.character()
         }
 
@@ -502,7 +504,7 @@ getGDCquery <- function(project, data.category, data.type, legacy, workflow.type
     } else if(data.category %in% c("Clinical","Biospecimen")) {
         options.expand <- "expand=cases,cases.project,center,analysis"
     } else {
-        options.expand <- "expand=cases.samples.portions.analytes.aliquots,cases.project,center,analysis,cases.samples"
+        options.expand <- "expand=cases,cases.samples.portions.analytes.aliquots,cases.project,center,analysis,cases.samples"
     }
     option.size <- paste0("size=",getNbFiles(project,data.category,legacy))
     option.format <- paste0("format=JSON")
