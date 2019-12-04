@@ -334,7 +334,8 @@ GDCquery <- function(project,
                              "Biospecimen",
                              "Other",
                              "Simple Nucleotide Variation",
-                             "Simple nucleotide variation")){
+                             "Simple nucleotide variation",
+                             "Protein expression")){
 
         # we also need to deal with pooled samples (mixed from different patients)
         # example CPT0000870008
@@ -360,15 +361,25 @@ GDCquery <- function(project,
         }
         results$sample_type <- aux$sample_type %>% as.character()
         results$is_ffpe <- aux$is_ffpe %>% as.logical
-        results$cases.submitter_id <- plyr::laply(results$cases,function(x) {x$submitter_id})  %>% as.character()
 
+        if("submitter_id" %in% unlist(results$cases)) {
+            results$cases.submitter_id <- plyr::laply(results$cases,
+                                                      function(x) {
+                                                          x$submitter_id
+                                                      })  %>%
+                as.character()
+        }
         # ORGANOID-PANCREATIC does not have aliquots
         if("aliquot.submiter.id" %in% colnames(aux)){
             results$cases <- aux$aliquot.submiter.id  %>% as.character()
             results$sample.submitter_id <- aux$submitter_id  %>% as.character()
         } else{
             results$cases <- aux$submitter_id  %>% as.character()
-            results$cases.submitter_id <- results$cases[[1]]$submitter_id  %>% as.character()
+
+            if("submitter_id" %in% unlist(results$cases)) {
+                results$cases.submitter_id <- results$cases[[1]]$submitter_id  %>% as.character()
+            }
+
             results$sample.submitter_id <- aux$submitter_id  %>% as.character()
         }
 
@@ -393,23 +404,32 @@ GDCquery <- function(project,
         results$cases <- str_extract_all(results$file_name,"TCGA-[:alnum:]{2}-[:alnum:]{4}") %>% unlist
     } else if(data.category %in% c( "Copy Number Variation","Simple nucleotide variation")){
         cases <- plyr::laply(results$cases,
-                           function(x) {
-                               lapply(x$samples,FUN = function(y)  unlist(y,recursive = T)[c("portions.analytes.aliquots.submitter_id")]) %>%
-                                   unlist %>%
-                                   na.omit %>%
-                                   paste(collapse = ",")
-                           }) %>% as.data.frame %>% dplyr::pull(1) %>% as.character()
+                             function(x) {
+                                 lapply(x$samples,FUN = function(y)  unlist(y,recursive = T)[c("portions.analytes.aliquots.submitter_id")]) %>%
+                                     unlist %>%
+                                     na.omit %>%
+                                     paste(collapse = ",")
+                             }) %>% as.data.frame %>% dplyr::pull(1) %>% as.character()
 
         sample_type <- plyr::laply(results$cases,
-                           function(x) {
-                               lapply(x$samples,FUN = function(y)  unlist(y,recursive = T)[c("sample_type")]) %>%
-                                   unlist %>%
-                                   na.omit %>%
-                                   paste(collapse = ",")
-                           }) %>% as.data.frame %>% dplyr::pull(1) %>% as.character()
+                                   function(x) {
+                                       lapply(x$samples,FUN = function(y)  unlist(y,recursive = T)[c("sample_type")]) %>%
+                                           unlist %>%
+                                           na.omit %>%
+                                           paste(collapse = ",")
+                                   }) %>% as.data.frame %>% dplyr::pull(1) %>% as.character()
         results$sample_type <- sample_type
         results$cases <- cases
+    } else  if(data.category %in% c("Protein expression")){
+        aux <- plyr::laply(results$cases,
+                           function(x) {
+                               summarize(x$samples[[1]]$portions[[1]],
+                                         submitter_id = paste(submitter_id,collapse = ";"),
+                                         is_ffpe = any(is_ffpe))
+                           }) %>% as.data.frame
 
+        results$is_ffpe <- aux$is_ffpe %>% unlist() %>% as.logical
+        results$cases <- aux$submitter_id %>% unlist
     } else if(data.category == "Simple Nucleotide Variation"){
 
         if(data.type %in% "Masked Somatic Mutation"){
@@ -421,6 +441,7 @@ GDCquery <- function(project,
 
             results$cases <- aux$portions.analytes.aliquots.submitter_id  %>% as.character() %>% paste(collapse = ",")
             if(!is.na(sample.type)) sample.type <- NA # ensure no filtering will be applied
+
         } else {
             # TODO: Add comnetary with case
             aux <- plyr::laply(results$cases,
