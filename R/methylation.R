@@ -282,8 +282,10 @@ TCGAvisualize_meanMethylation <- function(data,
     }
     message("==================== DATA Summary ====================")
     data.summary <- ddply(df, .(groups), summarize,
-                          Mean=mean(mean), Median=median(mean),
-                          Max = max(mean),Min=min(mean))
+                          Mean = mean(mean),
+                          Median = median(mean),
+                          Max = max(mean),
+                          Min = min(mean))
     print(data.summary)
     message("==================== END DATA Summary ====================")
 
