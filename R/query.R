@@ -362,7 +362,7 @@ GDCquery <- function(project,
         results$sample_type <- aux$sample_type %>% as.character()
         results$is_ffpe <- aux$is_ffpe %>% as.logical
 
-        if("submitter_id" %in% unlist(results$cases)) {
+        if("submitter_id" %in% names(unlist(results$cases))) {
             results$cases.submitter_id <- plyr::laply(results$cases,
                                                       function(x) {
                                                           x$submitter_id
@@ -376,7 +376,7 @@ GDCquery <- function(project,
         } else{
             results$cases <- aux$submitter_id  %>% as.character()
 
-            if("submitter_id" %in% unlist(results$cases)) {
+            if("submitter_id" %in% names(unlist(results$cases))) {
                 results$cases.submitter_id <- results$cases[[1]]$submitter_id  %>% as.character()
             }
 
