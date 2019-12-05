@@ -246,6 +246,7 @@ getDataCategorySummary <- function(project, legacy = FALSE){
     return(ret)
 }
 
+#' @title Get Project Summary from GDC
 #' @examples
 #' getProjectSummary("TCGA-ACC")
 #' getProjectSummary("CPTAC-2")
@@ -255,6 +256,7 @@ getProjectSummary <- function(project, legacy = FALSE){
     return(fromJSON(url,simplifyDataFrame = TRUE)$data$summary)
 }
 
+#' @title Get Number of cases in GDC for a project
 #' @examples
 #' getNbCases("TCGA-ACC","Clinical")
 #' getNbCases("CPTAC-2","Clinical")
@@ -269,6 +271,7 @@ getNbCases <- function(project, data.category, legacy = FALSE){
     return(nb)
 }
 
+#' @title Get Number of files in GDC for a project
 #' @examples
 #' getNbFiles("TCGA-ACC","Clinical")
 #' getNbFiles("CPTAC-2","Clinical")

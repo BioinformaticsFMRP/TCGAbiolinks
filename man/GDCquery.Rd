@@ -20,11 +20,92 @@ GDCquery(
 )
 }
 \arguments{
-\item{project}{A list of valid project (see list with TCGAbiolinks:::getGDCprojects()$project_id)]}
+\item{project}{A list of valid project (see list with TCGAbiolinks:::getGDCprojects()$project_id)]
+\itemize{
+\item{ BEATAML1.0-COHORT }
+\item{ BEATAML1.0-CRENOLANIB }
+\item{ CGCI-BLGSP }
+\item{ CPTAC-2 }
+\item{ CPTAC-3 }
+\item{ CTSP-DLBCL1 }
+\item{ FM-AD }
+\item{ HCMI-CMDC }
+\item{ MMRF-COMMPASS }
+\item{ NCICCR-DLBCL }
+\item{ OHSU-CNL }
+\item{ ORGANOID-PANCREATIC }
+\item{ TARGET-ALL-P1 }
+\item{ TARGET-ALL-P2 }
+\item{ TARGET-ALL-P3 }
+\item{ TARGET-AML }
+\item{ TARGET-CCSK }
+\item{ TARGET-NBL }
+\item{ TARGET-OS }
+\item{ TARGET-RT }
+\item{ TARGET-WT }
+\item{ TCGA-ACC }
+\item{ TCGA-BLCA }
+\item{ TCGA-BRCA }
+\item{ TCGA-CESC }
+\item{ TCGA-CHOL }
+\item{ TCGA-COAD }
+\item{ TCGA-DLBC }
+\item{ TCGA-ESCA }
+\item{ TCGA-GBM }
+\item{ TCGA-HNSC }
+\item{ TCGA-KICH }
+\item{ TCGA-KIRC }
+\item{ TCGA-KIRP }
+\item{ TCGA-LAML }
+\item{ TCGA-LGG }
+\item{ TCGA-LIHC }
+\item{ TCGA-LUAD }
+\item{ TCGA-LUSC }
+\item{ TCGA-MESO }
+\item{ TCGA-OV }
+\item{ TCGA-PAAD }
+\item{ TCGA-PCPG }
+\item{ TCGA-PRAD }
+\item{ TCGA-READ }
+\item{ TCGA-SARC }
+\item{ TCGA-SKCM }
+\item{ TCGA-STAD }
+\item{ TCGA-TGCT }
+\item{ TCGA-THCA }
+\item{ TCGA-THYM }
+\item{ TCGA-UCEC }
+\item{ TCGA-UCS }
+\item{ TCGA-UVM }
+\item{ VAREPOP-APOLLO }
+}}
 
-\item{data.category}{A valid project (see list with TCGAbiolinks:::getProjectSummary(project))}
+\item{data.category}{A valid project (see list with TCGAbiolinks:::getProjectSummary(project))
+For the complete list please check the vignette.
+List for harmonized database:
+\itemize{
+\item{ Biospecimen }
+\item{ Clinical }
+\item{ Copy Number Variation }
+\item{ DNA Methylation }
+\item{ Sequencing Reads }
+\item{ Simple Nucleotide Variation }
+\item{ Transcriptome Profiling }
+}
+List for legacy archive
+\itemize{
+\item{ Biospecimen }
+\item{ Clinical }
+\item{ Copy number variation }
+\item{ DNA methylation }
+\item{ Gene expression }
+\item{ Protein expression }
+\item{ Raw microarray data }
+\item{ Raw sequencing data }
+\item{ Simple nucleotide variation }
+}}
 
-\item{data.type}{A data type to filter the files to download}
+\item{data.type}{A data type to filter the files to download
+For the complete list please check the vignette.}
 
 \item{workflow.type}{GDC workflow type}
 
