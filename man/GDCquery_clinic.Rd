@@ -7,7 +7,64 @@
 GDCquery_clinic(project, type = "clinical", save.csv = FALSE)
 }
 \arguments{
-\item{project}{A valid project (see list with getGDCprojects()$project_id)]}
+\item{project}{A valid project (see list with getGDCprojects()$project_id)]
+\itemize{
+\item{ BEATAML1.0-COHORT }
+\item{ BEATAML1.0-CRENOLANIB }
+\item{ CGCI-BLGSP }
+\item{ CPTAC-2 }
+\item{ CPTAC-3 }
+\item{ CTSP-DLBCL1 }
+\item{ FM-AD }
+\item{ HCMI-CMDC }
+\item{ MMRF-COMMPASS }
+\item{ NCICCR-DLBCL }
+\item{ OHSU-CNL }
+\item{ ORGANOID-PANCREATIC }
+\item{ TARGET-ALL-P1 }
+\item{ TARGET-ALL-P2 }
+\item{ TARGET-ALL-P3 }
+\item{ TARGET-AML }
+\item{ TARGET-CCSK }
+\item{ TARGET-NBL }
+\item{ TARGET-OS }
+\item{ TARGET-RT }
+\item{ TARGET-WT }
+\item{ TCGA-ACC }
+\item{ TCGA-BLCA }
+\item{ TCGA-BRCA }
+\item{ TCGA-CESC }
+\item{ TCGA-CHOL }
+\item{ TCGA-COAD }
+\item{ TCGA-DLBC }
+\item{ TCGA-ESCA }
+\item{ TCGA-GBM }
+\item{ TCGA-HNSC }
+\item{ TCGA-KICH }
+\item{ TCGA-KIRC }
+\item{ TCGA-KIRP }
+\item{ TCGA-LAML }
+\item{ TCGA-LGG }
+\item{ TCGA-LIHC }
+\item{ TCGA-LUAD }
+\item{ TCGA-LUSC }
+\item{ TCGA-MESO }
+\item{ TCGA-OV }
+\item{ TCGA-PAAD }
+\item{ TCGA-PCPG }
+\item{ TCGA-PRAD }
+\item{ TCGA-READ }
+\item{ TCGA-SARC }
+\item{ TCGA-SKCM }
+\item{ TCGA-STAD }
+\item{ TCGA-TGCT }
+\item{ TCGA-THCA }
+\item{ TCGA-THYM }
+\item{ TCGA-UCEC }
+\item{ TCGA-UCS }
+\item{ TCGA-UVM }
+\item{ VAREPOP-APOLLO }
+}}
 
 \item{type}{A valid type. Options "clinical", "Biospecimen"  (see list with getGDCprojects()$project_id)]}
 
@@ -23,4 +80,7 @@ as the one with using the button from each project
 \examples{
 clin <- GDCquery_clinic("TCGA-ACC", type = "clinical", save.csv = TRUE)
 clin <- GDCquery_clinic("TCGA-ACC", type = "biospecimen", save.csv = TRUE)
+clin.cptac2 <- GDCquery_clinic("CPTAC-2", type = "clinical")
+clin.TARGET_ALL_P1 <- GDCquery_clinic("TARGET-ALL-P1", type = "clinical")
+clin.fm_ad <- GDCquery_clinic("FM-AD", type = "clinical")
 }
