@@ -225,14 +225,14 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
                 exposures <- rbindlist(results$exposures, fill = TRUE)
                 exposures <- exposures[,-c("updated_datetime","state","created_datetime")]
                 exposures$submitter_id <- gsub("_exposure","", exposures$submitter_id)
-                df <- merge(df,exposures, by="submitter_id", all = TRUE)
+                df <- merge(df,exposures, by="submitter_id", all = TRUE, sort = FALSE)
             }
             if("demographic" %in% colnames(results)){
                 results$demographic$submitter_id <- gsub("_demographic","", results$demographic$submitter_id)
                 demographic <- results$demographic[!is.na(results$demographic$submitter_id),]
                 df <- merge(df,
                             as.data.table(demographic)[,-c("updated_datetime","state","created_datetime")],
-                            by="submitter_id", all = TRUE)
+                            by="submitter_id", all = TRUE, sort = FALSE)
             }
             if("treatments" %in% colnames(df)){
                 treatments <- rbindlist(df$treatments,fill = TRUE)
@@ -250,13 +250,15 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
                 colnames(treatments.radiation)[grep("submitter",colnames(treatments.radiation))] <- "submitter_id"
                 colnames(treatments.pharmaceutical)[grep("submitter",colnames(treatments.pharmaceutical))] <- "submitter_id"
 
-                df <- merge(df, as.data.table(treatments.pharmaceutical), by = "submitter_id",  all = TRUE)
-                df <- merge(df, as.data.table(treatments.radiation), by = "submitter_id",  all = TRUE)
+                df <- merge(df, as.data.table(treatments.pharmaceutical), by = "submitter_id",  all = TRUE, sort = FALSE)
+                df <- merge(df, as.data.table(treatments.radiation), by = "submitter_id",  all = TRUE, sort = FALSE)
             }
             df$bcr_patient_barcode <- df$submitter_id
             df$disease <- gsub("TCGA-|TARGET-", "", project)
         } else {
+
             df <- rbindlist(results$diagnoses, fill = TRUE)
+            df$submitter_id <- gsub("_diagnosis|diag-","", df$submitter_id)
             if("exposures" %in% colnames(results)){
                 exposures <- rbindlist(results$exposures, fill = TRUE)
                 df <- cbind(df,exposures)
@@ -266,9 +268,18 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
                 df[,treatments:=NULL]
                 df <- cbind(df,treatments)
             }
-            if("demographic" %in% colnames(results)){
-                df <- cbind(df,results$demographic)
+            if("submitter_sample_ids" %in% colnames(results)){
+                submitter_sample_ids <- lapply(results$submitter_sample_ids, function(x) {paste(x,collapse = ",")}) %>% unlist
+                df <- cbind(df,submitter_sample_ids)
             }
+            if("demographic" %in% colnames(results)){
+                results$demographic$submitter_id <- gsub("_demographic|demo-","", results$demographic$submitter_id)
+                demographic <- results$demographic[!is.na(results$demographic$submitter_id),]
+                df <- merge(df,
+                            as.data.table(demographic)[,-c("updated_datetime","state","created_datetime")],
+                            by = "submitter_id", all = TRUE, sort = FALSE)
+            }
+
             df$disease <- gsub("TCGA-|TARGET-", "", project)
         }
     } else {
