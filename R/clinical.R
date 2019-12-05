@@ -176,6 +176,13 @@ TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
 #' clin.cptac2 <- GDCquery_clinic("CPTAC-2", type = "clinical")
 #' clin.TARGET_ALL_P1 <- GDCquery_clinic("TARGET-ALL-P1", type = "clinical")
 #' clin.fm_ad <- GDCquery_clinic("FM-AD", type = "clinical")
+#' \dontrun{
+#' clin <- GDCquery_clinic(project = "CPTAC-3", type = "clinical")
+#' clin <- GDCquery_clinic(project = "CPTAC-2", type = "clinical")
+#' clin <- GDCquery_clinic(project = "HCMI-CMDC", type = "clinical")
+#' clin <- GDCquery_clinic(project = "NCICCR-DLBCL", type = "clinical")
+#' clin <- GDCquery_clinic(project = "ORGANOID-PANCREATIC", type = "clinical")
+#' }
 #' @return A data frame with the clinical information
 GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
     checkProjectInput(project)
@@ -193,12 +200,12 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
     }
 
     if(grepl("TCGA|TARGET",project)){
-    options.filter <- paste0("filters=",
-                             URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
-                             project,
-                             URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["'),
-                             files.data_category,
-                             URLencode('"]}}]}'))
+        options.filter <- paste0("filters=",
+                                 URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
+                                 project,
+                                 URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["'),
+                                 files.data_category,
+                                 URLencode('"]}}]}'))
     } else {
         options.filter <- paste0("filters=",
                                  URLencode('{"op":"in","content":{"field":"cases.project.project_id","value":["'),
@@ -256,12 +263,18 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
             df$bcr_patient_barcode <- df$submitter_id
             df$disease <- gsub("TCGA-|TARGET-", "", project)
         } else {
-
             df <- rbindlist(results$diagnoses, fill = TRUE)
-            df$submitter_id <- gsub("_diagnosis|diag-|-DX","", df$submitter_id)
+            # ^d ORGANOID-PANCREATIC
+            # -DX CPTAC-2
+            # -DIAG CPTAC-3
+            # -diagnosis NCICCR-DLBCL
+            # _diagnosis HCMI-CMDC
+            df$submitter_id <- gsub("^d|_diagnosis|diag-|-DX|-DIAG|-diagnosis","", df$submitter_id)
             if("exposures" %in% colnames(results)){
                 exposures <- rbindlist(results$exposures, fill = TRUE)
-                df <- cbind(df,exposures)
+                exposures <- exposures[,-c("updated_datetime","state","created_datetime")]
+                exposures$submitter_id <- gsub("_exposure|-EXP","", exposures$submitter_id)
+                df <- merge(df,exposures, by="submitter_id", all = TRUE, sort = FALSE)
             }
             if("treatments" %in% colnames(results)){
                 treatments <- rbindlist(results$treatments, fill = TRUE)
@@ -269,11 +282,21 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
                 df <- cbind(df,treatments)
             }
             if("submitter_sample_ids" %in% colnames(results)){
-                submitter_sample_ids <- lapply(results$submitter_sample_ids, function(x) {paste(x,collapse = ",")}) %>% unlist
+                submitter_sample_ids <- lapply(results$submitter_sample_ids,
+                                               function(x) {
+                                                   paste(x,collapse = ",")
+                                               }) %>% unlist
                 df <- cbind(df,submitter_sample_ids)
             }
+
+            # We do a merge because some cases might not have demographic information
+            # DEMOGRAPHIC ORGANOID-PANCREATIC
+            # -demographic NCICCR-DLBCL
+            # _demographic HCMI-CMDC
+            # -DG and -DM CPTAC-2
+            # -DEMO CPTAC-3
             if("demographic" %in% colnames(results)){
-                results$demographic$submitter_id <- gsub("_demographic|demo-|-DG|-DM","", results$demographic$submitter_id)
+                results$demographic$submitter_id <- gsub("_demographic|DEMOGRAPHIC|_demographic|demo-|-DG|-DM|-DEMO","", results$demographic$submitter_id)
                 demographic <- results$demographic[!is.na(results$demographic$submitter_id),]
                 df <- merge(df,
                             as.data.table(demographic)[,-c("updated_datetime","state","created_datetime")],
@@ -284,6 +307,10 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
         }
     } else {
         df <- rbindlist(results$samples,fill = TRUE)
+    }
+
+    if(nrow(results) != nrow(df)){
+        stop("Error: API returned more information")
     }
 
     if(save.csv){
@@ -759,7 +786,7 @@ TCGA_MolecularSubtype <- function(barcodes){
         ##filt will be empty because all samples have molecular subtype info
         return(list(subtypes = Subtypes, filtered = filt))
     }
-    }
+}
 
 #' @title Filters TCGA barcodes according to purity parameters
 #' @description

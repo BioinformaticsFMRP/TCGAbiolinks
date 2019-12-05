@@ -83,4 +83,11 @@ clin <- GDCquery_clinic("TCGA-ACC", type = "biospecimen", save.csv = TRUE)
 clin.cptac2 <- GDCquery_clinic("CPTAC-2", type = "clinical")
 clin.TARGET_ALL_P1 <- GDCquery_clinic("TARGET-ALL-P1", type = "clinical")
 clin.fm_ad <- GDCquery_clinic("FM-AD", type = "clinical")
+\dontrun{
+clin <- GDCquery_clinic(project = "CPTAC-3", type = "clinical")
+clin <- GDCquery_clinic(project = "CPTAC-2", type = "clinical")
+clin <- GDCquery_clinic(project = "HCMI-CMDC", type = "clinical")
+clin <- GDCquery_clinic(project = "NCICCR-DLBCL", type = "clinical")
+clin <- GDCquery_clinic(project = "ORGANOID-PANCREATIC", type = "clinical")
+}
 }
