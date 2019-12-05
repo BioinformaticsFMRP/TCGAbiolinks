@@ -24,8 +24,10 @@ library(DT)
 <br>
 
 ## Classifying gliomas samples with `gliomaClassifier`
+<hr>
 
-Classify glioma samples with DNA methylation array based on:
+Classifying glioma samples with DNA methylation array based on:
+
 
 **Ceccarelli, Michele, et al. "Molecular profiling reveals biologically discrete subsets and pathways of progression in diffuse glioma." Cell 164.3 (2016): 550-563.** (https://doi.org/10.1016/j.cell.2015.12.028)
 
@@ -38,7 +40,8 @@ Possible classifications are:
 - LGm6-GBM
 - Codel
 
-### Data
+## Data
+<hr>
 
 The input data can be either a Summarized Experiment object of a matrix 
 (samples as columns, probes as rows) from the following platforms:
@@ -64,13 +67,15 @@ data.hg19 <- GDCprepare(query)
 assay(data.hg19)[1:5,1:2]
 ```
 
-### Function
+## Function
+<hr>
+
 ```{r, eval = TRUE}
 classification <- gliomaClassifier(data.hg19)
 ```
 
-### Results
-
+## Results
+<hr>
 The classfier will return a list of 3 data frames:
 
 1. Sample final classification
@@ -84,7 +89,8 @@ classification$model.classifications
 classification$model.probabilities
 ```
 
-### Comparing results with paper
+## Comparing results with paper
+<hr>
 ```{R}
 TCGAquery_subtype("GBM") %>%
  dplyr::filter(patient %in% c("TCGA-06-0122","TCGA-14-1456")) %>%
