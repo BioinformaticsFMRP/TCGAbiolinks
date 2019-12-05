@@ -16,3 +16,11 @@ table td {
     border-bottom: none;
     border-right: none;
 }
+h1 {
+  font-size: 28px;
+}
+
+.section.level1 h1 {
+    padding-top: 65px;
+    margin-top: -40px;
+}
