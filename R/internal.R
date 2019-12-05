@@ -213,23 +213,6 @@ move <- function(from, to, keep.copy = FALSE) {
     }
 }
 
-getProjectSummary <- function(project, legacy = FALSE){
-    baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/projects/","https://api.gdc.cancer.gov/projects/")
-    url <- paste0(baseURL, project,"?expand=summary,summary.data_categories&pretty=true")
-    return(fromJSON(url,simplifyDataFrame = TRUE)$data$summary)
-}
-
-getNbCases <- function(project, data.category, legacy = FALSE){
-    summary <- getProjectSummary(project, legacy)$data_categories
-    nb <- summary[summary$data_category == data.category,"case_count"]
-    return(nb)
-}
-getNbFiles <- function(project, data.category, legacy = FALSE){
-    summary <- getProjectSummary(project, legacy)$data_categories
-    nb <- summary[summary$data_category == data.category,"file_count"]
-    return(nb)
-}
-
 .quantileNormalization <-
     function(wd, distribution) {
         n <- nrow(wd)
