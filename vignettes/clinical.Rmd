@@ -156,11 +156,37 @@ clinical <- GDCquery_clinic(project = "TCGA-LUAD", type = "clinical")
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 clinical %>%
+    head %>% 
   DT::datatable(filter = 'top', 
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
           rownames = FALSE)
 ```
 
+
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
+clinical <- GDCquery_clinic(project = "BEATAML1.0-COHORT", type = "clinical")
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+clinical %>% 
+  head %>% 
+  DT::datatable(filter = 'top', 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+          rownames = FALSE)
+```
+
+
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
+clinical <- GDCquery_clinic(project = "CPTAC-2", type = "clinical")
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+clinical %>% 
+  head %>% 
+  DT::datatable(filter = 'top', 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+          rownames = FALSE)
+```
 
 # XML clinical data
 
