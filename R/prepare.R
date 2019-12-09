@@ -100,12 +100,12 @@ GDCprepare <- function(query,
   if(!all(file.exists(files))) {
     # We have to check we movedthe files
     if(query$data.category == "Raw microarray data"){
-      files <- file.path(query$results[[1]]$project, source,
+      files.idat <- file.path(query$results[[1]]$project, source,
                          gsub(" ","_",query$results[[1]]$data_category),
                          gsub(" ","_",query$results[[1]]$data_type),
                          gsub(" ","_",query$results[[1]]$file_name))
-      files <- file.path(directory, files)
-      if(!all(file.exists(files))) {
+      files.idat <- file.path(directory, files.idat)
+      if(!all(file.exists(files) | file.exists(files.idat))) {
         stop(paste0("I couldn't find all the files from the query. ",
                     "Please check if the directory parameter is right or `GDCdownload` downloaded the samples."))
 
