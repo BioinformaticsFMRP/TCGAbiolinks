@@ -863,6 +863,9 @@ colDataPrepare <- function(barcode){
   })
 
   ret <- ret[idx,]
+
+  if("barcode" %in% colnames(ret)) ret$barcode <- barcode
+
   rownames(ret) <- barcode
   return(ret)
 }
