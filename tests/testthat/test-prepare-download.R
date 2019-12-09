@@ -74,6 +74,7 @@ test_that("colDataPrepare handle replicates", {
     barcodes <- c("TCGA-06-0156-01A-02R-1849-01","TCGA-06-0156-01A-03R-1849-01")
     x <- colDataPrepare(barcodes)
     expect_true(nrow(x) == 2)
+    expect_true(all(rownames(x) == c("TCGA-06-0156-01A-02R-1849-01","TCGA-06-0156-01A-03R-1849-01")))
     expect_true(all(x$barcode == c("TCGA-06-0156-01A-02R-1849-01","TCGA-06-0156-01A-03R-1849-01")))
 })
 
@@ -125,4 +126,22 @@ test_that("GISTIC2 data is being correclty prepare", {
                  colnames(raw.data))
     expect_true(all(substr(colnames(data)[idx],1,12) == c("TCGA-A6-5664","TCGA-AY-A71X")))
     unlink("ex",recursive = TRUE,force = TRUE)
+})
+
+test_that("IDAT files is processed", {
+proj <- "TCGA-LUAD"
+query <- GDCquery(project = proj,
+                  data.category = "Raw microarray data",
+                  data.type = "Raw intensities",
+                  experimental.strategy = "Methylation array",
+                  legacy = TRUE,
+                  file.type = ".idat",
+                  barcode = "TCGA-55-7724",
+                  platform = "Illumina Human Methylation 450")
+
+    tryCatch(GDCdownload(query, method = "api", files.per.chunk = 20),
+         error = function(e) GDCdownload(query, method = "client"))
+    betas <- GDCprepare(query)
+    expect_true(nrow(betas) == 485577)
+    expect_true(ncol(betas) == 1)
 })
