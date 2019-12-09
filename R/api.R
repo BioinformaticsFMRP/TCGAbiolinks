@@ -279,7 +279,7 @@ getNbFiles <- function(project, data.category, legacy = FALSE){
     summary <- getProjectSummary(project, legacy)
     if(data.category %in% summary$data_categories$data_category){
         summary <- getProjectSummary(project, legacy)$data_categories
-        nb <- summary[summary$data_category == data.category,"case_count"]
+        nb <- summary[summary$data_category == data.category,"file_count"]
     } else {
         nb <- summary$file_count
     }
