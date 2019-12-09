@@ -95,8 +95,26 @@ GDCprepare <- function(query,
 
   files <- file.path(directory, files)
 
-  if(!all(file.exists(files))) stop(paste0("I couldn't find all the files from the query. ",
-                                           "Please check if the directory parameter is right or `GDCdownload` downloaded the samples."))
+  # For IDAT prepare since we need to put all IDATs in the same folder the code below will not work
+  # a second run
+  if(!all(file.exists(files))) {
+    # We have to check we movedthe files
+    if(query$data.category == "Raw microarray data"){
+      files <- file.path(query$results[[1]]$project, source,
+                         gsub(" ","_",query$results[[1]]$data_category),
+                         gsub(" ","_",query$results[[1]]$data_type),
+                         gsub(" ","_",query$results[[1]]$file_name))
+      files <- file.path(directory, files)
+      if(!all(file.exists(files))) {
+        stop(paste0("I couldn't find all the files from the query. ",
+                    "Please check if the directory parameter is right or `GDCdownload` downloaded the samples."))
+
+      }
+    } else {
+      stop(paste0("I couldn't find all the files from the query. ",
+                  "Please check if the directory parameter is right or `GDCdownload` downloaded the samples."))
+    }
+  }
 
   cases <- ifelse(grepl("TCGA|TARGET",query$results[[1]]$project %>% unlist()),query$results[[1]]$cases,query$results[[1]]$sample.submitter_id)
   if(grepl("Transcriptome Profiling", query$data.category, ignore.case = TRUE)){
@@ -549,7 +567,7 @@ readIDATDNAmethylation <- function(files,
   message("Processing  IDATs with Sesame - http://bioconductor.org/packages/sesame/")
   message("Running opensesame - applying quality masking and nondetection masking (threshold P-value 0.05)")
   message("Please cite: doi: 10.1093/nar/gky691 and 10.1093/nar/gkt090")
-  betas <- sesame::openSesame(samples)
+  betas <- sesame::openSesame(samples)  %>% as.matrix
   barcode <- unique(data.frame("file" = gsub("_Grn.idat|_Red.idat","",basename(moved.files)), "barcode" = barcode))
   colnames(betas) <- barcode$barcode[match(basename(samples),barcode$file)]
 
