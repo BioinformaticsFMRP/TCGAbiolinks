@@ -301,7 +301,7 @@ GDCclientInstall <- function(){
 }
 
 checkAlreadyDownloaded <- function(path,manifest){
-    files2Download <- !file.exists(file.path(path,manifest$id,manifest$filename))
+    files2Download <- !(file.exists(file.path(path,manifest$id,manifest$filename)) | file.exists(file.path(path,manifest$filename)))
     if(any(files2Download == FALSE)) {
         message("Of the ", nrow(manifest), " files for download ",
                 table(files2Download)["FALSE"] , " already exist.")
