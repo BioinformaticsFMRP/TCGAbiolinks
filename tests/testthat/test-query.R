@@ -154,3 +154,11 @@ test_that("GDCquery_Maf works", {
     unlink("GDCdata",recursive = TRUE, force = TRUE)
     unlink("maf",recursive = TRUE, force = TRUE)
 })
+
+
+test_that("getNbFiles and getNbCases works", {
+    aux <- getProjectSummary("TCGA-LUAD",TRUE)
+    files <- getNbFiles("TCGA-LUAD","Raw microarray data",legacy = T)
+    cases <- getNbCases("TCGA-LUAD","Raw microarray data")
+    expect_true(cases < files)
+})
