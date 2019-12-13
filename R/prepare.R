@@ -567,6 +567,7 @@ readIDATDNAmethylation <- function(files,
   message("Processing  IDATs with Sesame - http://bioconductor.org/packages/sesame/")
   message("Running opensesame - applying quality masking and nondetection masking (threshold P-value 0.05)")
   message("Please cite: doi: 10.1093/nar/gky691 and 10.1093/nar/gkt090")
+  message("This might take a while....")
   betas <- sesame::openSesame(samples)  %>% as.matrix
   barcode <- unique(data.frame("file" = gsub("_Grn.idat|_Red.idat","",basename(moved.files)), "barcode" = barcode))
   colnames(betas) <- barcode$barcode[match(basename(samples),barcode$file)]
