@@ -227,10 +227,10 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
     if(grepl("clinical",type,ignore.case = TRUE)) {
         if(grepl("TCGA",project)) {
             df <- data.frame("submitter_id" = results$submitter_id)
-            if("exposures" %in% colnames(results)){
-            diagnoses <- rbindlist(lapply(results$diagnoses, function(x) if(is.null(x)) data.frame(NA) else x),fill = T)
-            diagnoses$submitter_id <- gsub("_diagnosis","", df$submitter_id)
-            df <- merge(df,diagnoses, by="submitter_id", all = TRUE, sort = FALSE)
+            if("diagnoses" %in% colnames(results)){
+                diagnoses <- rbindlist(lapply(results$diagnoses, function(x) if(is.null(x)) data.frame(NA) else x),fill = T)
+                diagnoses$submitter_id <- gsub("_diagnosis","", df$submitter_id)
+                df <- merge(df,diagnoses, by="submitter_id", all = TRUE, sort = FALSE)
             }
             if("exposures" %in% colnames(results)){
                 exposures <- rbindlist(results$exposures, fill = TRUE)
@@ -267,18 +267,28 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
             df$bcr_patient_barcode <- df$submitter_id
             df$disease <- gsub("TCGA-|TARGET-", "", project)
         } else {
-            df <- rbindlist(results$diagnoses, fill = TRUE)
-            # ^d ORGANOID-PANCREATIC
-            # -DX CPTAC-2
-            # -DIAG CPTAC-3
-            # -diagnosis NCICCR-DLBCL
-            # _diagnosis HCMI-CMDC
-            df$submitter_id <- gsub("^d|_diagnosis|diag-|-DX|-DIAG|-diagnosis","", df$submitter_id)
+
+            # Although for TCGA and TARGET IDs from diagnosis, treatments, exposures etc are the same
+            # for the other projects this might not be true!
+            # example: ORGANOID-PANCREATIC
+            # https://api.gdc.cancer.gov/cases/?pretty=true&expand=diagnoses,demographic&size=1&filters=%7B%22op%22:%22in%22,%22content%22:%7B%22field%22:%22cases.project.project_id%22,%22value%22:[%22ORGANOID-PANCREATIC%22]%7D%7D&format=json
+            # DEMOGRAPHIC 48, while everything else is 42
+            df <- data.frame("submitter_id" = results$submitter_id)
+
+            if("diagnoses" %in% colnames(results)){
+                diagnoses <- rbindlist(lapply(results$diagnoses, function(x) if(is.null(x)) data.frame(NA) else x),fill = T)
+                #df$submitter_id <- gsub("^d|_diagnosis|diag-|-DX|-DIAG|-diagnosis","", df$submitter_id)
+                # ^d ORGANOID-PANCREATIC
+                # -DX CPTAC-2
+                # -DIAG CPTAC-3
+                # -diagnosis NCICCR-DLBCL
+                # _diagnosis HCMI-CMDC
+                df <- cbind(df,diagnoses)
+            }
             if("exposures" %in% colnames(results)){
-                exposures <- rbindlist(results$exposures, fill = TRUE)
+                exposures <- rbindlist(lapply(results$exposures, function(x) if(is.null(x)) data.frame(NA) else x),fill = T)
                 exposures <- exposures[,-c("updated_datetime","state","created_datetime")]
-                exposures$submitter_id <- gsub("_exposure|-EXP","", exposures$submitter_id)
-                df <- merge(df,exposures, by="submitter_id", all = TRUE, sort = FALSE)
+                df <- cbind(df,exposures)
             }
             if("treatments" %in% colnames(results)){
                 treatments <- rbindlist(results$treatments, fill = TRUE)
@@ -301,10 +311,8 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
             # -DEMO CPTAC-3
             if("demographic" %in% colnames(results)){
                 results$demographic$submitter_id <- gsub("_demographic|DEMOGRAPHIC|_demographic|demo-|-DG|-DM|-DEMO","", results$demographic$submitter_id)
-                demographic <- results$demographic[!is.na(results$demographic$submitter_id),]
-                df <- merge(df,
-                            as.data.table(demographic)[,-c("updated_datetime","state","created_datetime")],
-                            by = "submitter_id", all = TRUE, sort = FALSE)
+                demographic <-  results$demographic %>% dplyr::select(-c("updated_datetime","state","created_datetime"))
+                df <- cbind(df,demographic)
             }
 
             df$disease <- gsub("TCGA-|TARGET-", "", project)
