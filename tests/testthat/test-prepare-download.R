@@ -145,3 +145,10 @@ query <- GDCquery(project = proj,
     expect_true(nrow(betas) == 485577)
     expect_true(ncol(betas) == 1)
 })
+
+test_that("Prepare Samples without clinical data", {
+    # x <-  GDCquery_clinic(project = "TCGA-LUAD", type = "clinical")
+    # x[is.na(x$diagnosis_id),]
+    x <- colDataPrepare(c("TCGA-80-5608-01A","TCGA-17-Z053-01A","TCGA-78-7158-01A"))
+   expect_true(nrow(x) == 3)
+})
