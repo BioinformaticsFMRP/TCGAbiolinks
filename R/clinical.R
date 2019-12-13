@@ -226,8 +226,12 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 
     if(grepl("clinical",type,ignore.case = TRUE)) {
         if(grepl("TCGA",project)) {
-            df <- rbindlist(results$diagnoses, fill = TRUE)
-            df$submitter_id <- gsub("_diagnosis","", df$submitter_id)
+            df <- data.frame("submitter_id" = results$submitter_id)
+            if("exposures" %in% colnames(results)){
+            diagnoses <- rbindlist(lapply(results$diagnoses, function(x) if(is.null(x)) data.frame(NA) else x),fill = T)
+            diagnoses$submitter_id <- gsub("_diagnosis","", df$submitter_id)
+            df <- merge(df,diagnoses, by="submitter_id", all = TRUE, sort = FALSE)
+            }
             if("exposures" %in% colnames(results)){
                 exposures <- rbindlist(results$exposures, fill = TRUE)
                 exposures <- exposures[,-c("updated_datetime","state","created_datetime")]
@@ -243,7 +247,7 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
             }
             if("treatments" %in% colnames(df)){
                 treatments <- rbindlist(df$treatments,fill = TRUE)
-                df[,treatments:=NULL]
+                df$treatments <- NULL
                 treatments$submitter_id <- gsub("_treatment(_[0-9])?","", treatments$submitter_id)
                 treatments <- treatments[,-c("updated_datetime", "state", "created_datetime")]
 
