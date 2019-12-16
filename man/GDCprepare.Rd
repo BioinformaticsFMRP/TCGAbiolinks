@@ -4,19 +4,12 @@
 \alias{GDCprepare}
 \title{Prepare GDC data}
 \usage{
-GDCprepare(
-  query,
-  save = FALSE,
-  save.filename,
-  directory = "GDCdata",
-  summarizedExperiment = TRUE,
-  remove.files.prepared = FALSE,
-  add.gistic2.mut = NULL,
-  mut.pipeline = "mutect2",
+GDCprepare(query, save = FALSE, save.filename, directory = "GDCdata",
+  summarizedExperiment = TRUE, remove.files.prepared = FALSE,
+  add.gistic2.mut = NULL, mut.pipeline = "mutect2",
   mutant_variant_classification = c("Frame_Shift_Del", "Frame_Shift_Ins",
-    "Missense_Mutation", "Nonsense_Mutation", "Splice_Site", "In_Frame_Del",
-    "In_Frame_Ins", "Translation_Start_Site", "Nonstop_Mutation")
-)
+  "Missense_Mutation", "Nonsense_Mutation", "Splice_Site", "In_Frame_Del",
+  "In_Frame_Ins", "Translation_Start_Site", "Nonstop_Mutation"))
 }
 \arguments{
 \item{query}{A query for GDCquery function}

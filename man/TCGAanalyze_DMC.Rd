@@ -4,31 +4,15 @@
 \alias{TCGAanalyze_DMC}
 \title{Differentially methylated regions Analysis}
 \usage{
-TCGAanalyze_DMC(
-  data,
-  groupCol = NULL,
-  group1 = NULL,
-  group2 = NULL,
-  alternative = "two.sided",
-  diffmean.cut = 0.2,
-  paired = FALSE,
-  adj.method = "BH",
-  plot.filename = "methylation_volcano.pdf",
+TCGAanalyze_DMC(data, groupCol = NULL, group1 = NULL, group2 = NULL,
+  alternative = "two.sided", diffmean.cut = 0.2, paired = FALSE,
+  adj.method = "BH", plot.filename = "methylation_volcano.pdf",
   ylab = expression(paste(-Log[10], " (FDR corrected -P values)")),
-  xlab = expression(paste("DNA Methylation difference (", beta, "-values)")),
-  title = NULL,
-  legend = "Legend",
-  color = c("black", "red", "darkgreen"),
-  label = NULL,
-  xlim = NULL,
-  ylim = NULL,
-  p.cut = 0.01,
-  probe.names = FALSE,
-  cores = 1,
-  save = TRUE,
-  save.directory = ".",
-  filename = NULL
-)
+  xlab = expression(paste("DNA Methylation difference (", beta,
+  "-values)")), title = NULL, legend = "Legend", color = c("black",
+  "red", "darkgreen"), label = NULL, xlim = NULL, ylim = NULL,
+  p.cut = 0.01, probe.names = FALSE, cores = 1, save = TRUE,
+  save.directory = ".", filename = NULL)
 }
 \arguments{
 \item{data}{SummarizedExperiment obtained from the TCGAPrepare}

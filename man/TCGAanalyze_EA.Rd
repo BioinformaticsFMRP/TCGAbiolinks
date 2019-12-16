@@ -4,15 +4,8 @@
 \alias{TCGAanalyze_EA}
 \title{Enrichment analysis of a gene-set with GO [BP,MF,CC]  and pathways.}
 \usage{
-TCGAanalyze_EA(
-  GeneName,
-  RegulonList,
-  TableEnrichment,
-  EAGenes,
-  GOtype,
-  FDRThresh = 0.01,
-  GeneSymbolsTable = FALSE
-)
+TCGAanalyze_EA(GeneName, RegulonList, TableEnrichment, EAGenes, GOtype,
+  FDRThresh = 0.01, GeneSymbolsTable = FALSE)
 }
 \arguments{
 \item{GeneName}{is the name of gene signatures list}

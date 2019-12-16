@@ -3,6 +3,7 @@
 \docType{package}
 \name{TCGAbiolinks}
 \alias{TCGAbiolinks}
+\alias{TCGAbiolinks-package}
 \title{The aim of TCGAbiolinks is : i) facilitate the TCGA open-access data retrieval,
 ii) prepare the data using the appropriate pre-processing strategies,
  iii) provide the means to carry out different standard analyses and

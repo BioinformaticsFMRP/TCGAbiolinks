@@ -4,30 +4,14 @@
 \alias{TCGAvisualize_oncoprint}
 \title{Creating a oncoprint}
 \usage{
-TCGAvisualize_oncoprint(
-  mut,
-  genes,
-  filename,
-  color,
-  annotation.position = "bottom",
-  annotation,
-  height,
-  width = 10,
-  rm.empty.columns = FALSE,
-  show.column.names = FALSE,
-  show.row.barplot = TRUE,
-  label.title = "Mutation",
-  column.names.size = 8,
-  label.font.size = 16,
-  rows.font.size = 16,
-  dist.col = 0.5,
-  dist.row = 0.5,
-  information = "Variant_Type",
-  row.order = TRUE,
-  col.order = TRUE,
-  heatmap.legend.side = "bottom",
-  annotation.legend.side = "bottom"
-)
+TCGAvisualize_oncoprint(mut, genes, filename, color,
+  annotation.position = "bottom", annotation, height, width = 10,
+  rm.empty.columns = FALSE, show.column.names = FALSE,
+  show.row.barplot = TRUE, label.title = "Mutation",
+  column.names.size = 8, label.font.size = 16, rows.font.size = 16,
+  dist.col = 0.5, dist.row = 0.5, information = "Variant_Type",
+  row.order = TRUE, col.order = TRUE, heatmap.legend.side = "bottom",
+  annotation.legend.side = "bottom")
 }
 \arguments{
 \item{mut}{A dataframe from the mutation annotation file (see TCGAquery_maf from TCGAbiolinks)}
