@@ -4,15 +4,8 @@
 \alias{dmc.non.parametric}
 \title{Perform non-parametrix wilcoxon test}
 \usage{
-dmc.non.parametric(
-  matrix,
-  idx1 = NULL,
-  idx2 = NULL,
-  paired = FALSE,
-  adj.method = "BH",
-  alternative = "two.sided",
-  cores = 1
-)
+dmc.non.parametric(matrix, idx1 = NULL, idx2 = NULL, paired = FALSE,
+  adj.method = "BH", alternative = "two.sided", cores = 1)
 }
 \arguments{
 \item{matrix}{A matrix}

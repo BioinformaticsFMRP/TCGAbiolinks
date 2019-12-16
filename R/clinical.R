@@ -317,13 +317,15 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 
             df$disease <- gsub("TCGA-|TARGET-", "", project)
         }
+        if(nrow(results) != nrow(df)){
+            stop("Error: API returned more information")
+        }
+
     } else {
         df <- rbindlist(results$samples,fill = TRUE)
     }
 
-    if(nrow(results) != nrow(df)){
-        stop("Error: API returned more information")
-    }
+
 
     if(save.csv){
         if(grepl("biospecimen",type))  {
