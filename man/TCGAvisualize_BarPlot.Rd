@@ -4,8 +4,18 @@
 \alias{TCGAvisualize_BarPlot}
 \title{Barplot of subtypes and clinical info in groups of gene expression clustered.}
 \usage{
-TCGAvisualize_BarPlot(DFfilt, DFclin, DFsubt, data_Hc2, Subtype, cbPalette,
-  filename, width, height, dpi)
+TCGAvisualize_BarPlot(
+  DFfilt,
+  DFclin,
+  DFsubt,
+  data_Hc2,
+  Subtype,
+  cbPalette,
+  filename,
+  width,
+  height,
+  dpi
+)
 }
 \arguments{
 \item{DFfilt}{write}
