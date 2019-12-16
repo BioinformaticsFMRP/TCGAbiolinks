@@ -4,9 +4,16 @@
 \alias{dmc.non.parametric.se}
 \title{Calculate pvalues}
 \usage{
-dmc.non.parametric.se(data, groupCol = NULL, group1 = NULL,
-  group2 = NULL, paired = FALSE, adj.method = "BH",
-  alternative = "two.sided", cores = 1)
+dmc.non.parametric.se(
+  data,
+  groupCol = NULL,
+  group1 = NULL,
+  group2 = NULL,
+  paired = FALSE,
+  adj.method = "BH",
+  alternative = "two.sided",
+  cores = 1
+)
 }
 \arguments{
 \item{data}{SummarizedExperiment obtained from the TCGAPrepare}

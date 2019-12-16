@@ -4,9 +4,14 @@
 \alias{TCGAbatch_Correction}
 \title{Batch correction using ComBat and Voom transformation using limma package.}
 \usage{
-TCGAbatch_Correction(tabDF, batch.factor = NULL, adjustment = NULL,
-  ClinicalDF = data.frame(), UnpublishedData = FALSE,
-  AnnotationDF = data.frame())
+TCGAbatch_Correction(
+  tabDF,
+  batch.factor = NULL,
+  adjustment = NULL,
+  ClinicalDF = data.frame(),
+  UnpublishedData = FALSE,
+  AnnotationDF = data.frame()
+)
 }
 \arguments{
 \item{tabDF}{numeric matrix, each row represents a gene,

@@ -4,8 +4,14 @@
 \alias{TCGAanalyze_Preprocessing}
 \title{Array Array Intensity correlation (AAIC) and correlation boxplot to define outlier}
 \usage{
-TCGAanalyze_Preprocessing(object, cor.cut = 0, filename = NULL,
-  width = 1000, height = 1000, datatype = names(assays(object))[1])
+TCGAanalyze_Preprocessing(
+  object,
+  cor.cut = 0,
+  filename = NULL,
+  width = 1000,
+  height = 1000,
+  datatype = names(assays(object))[1]
+)
 }
 \arguments{
 \item{object}{of gene expression of class RangedSummarizedExperiment from TCGAprepare}
