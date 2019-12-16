@@ -446,7 +446,7 @@ GDCquery <- function(project,
         if("submitter_id" %in% names(unlist(results$cases))) {
             results$cases.submitter_id <- plyr::laply(results$cases,
                                                       function(x) {
-                                                          x$submitter_id
+                                                          paste(x$submitter_id,collapse = ";")
                                                       })  %>%
                 as.character()
         }
