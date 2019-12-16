@@ -29,7 +29,7 @@ net.biogrid.de <- getAdjacencyBiogrid(tmp.biogrid, names.genes.de)
   downloader::download(file,basename(file))
   unzip(basename(file),junkpaths =TRUE)
   tmp.biogrid <- read.csv(gsub("zip","txt",basename(file)),
-                          header=TRUE, sep="\\t", stringsAsFactors=FALSE)
+                          header=TRUE, sep="\t", stringsAsFactors=FALSE)
   names.genes.de <- c("PLCB1","MCL1","PRDX4","TTF2","TACC3", "PARP4","LSM1")
   net.biogrid.de <- getAdjacencyBiogrid(tmp.biogrid, names.genes.de)
 }
