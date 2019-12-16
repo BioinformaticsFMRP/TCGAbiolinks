@@ -4,9 +4,17 @@
 \alias{TCGAanalyze_SurvivalKM}
 \title{survival analysis (SA) univariate with Kaplan-Meier (KM) method.}
 \usage{
-TCGAanalyze_SurvivalKM(clinical_patient, dataGE, Genelist,
-  Survresult = FALSE, ThreshTop = 0.67, ThreshDown = 0.33,
-  p.cut = 0.05, group1, group2)
+TCGAanalyze_SurvivalKM(
+  clinical_patient,
+  dataGE,
+  Genelist,
+  Survresult = FALSE,
+  ThreshTop = 0.67,
+  ThreshDown = 0.33,
+  p.cut = 0.05,
+  group1,
+  group2
+)
 }
 \arguments{
 \item{clinical_patient}{is a data.frame using function 'clinic' with information

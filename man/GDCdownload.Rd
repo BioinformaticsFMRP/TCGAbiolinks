@@ -4,8 +4,13 @@
 \alias{GDCdownload}
 \title{Download GDC data}
 \usage{
-GDCdownload(query, token.file, method = "api", directory = "GDCdata",
-  files.per.chunk = NULL)
+GDCdownload(
+  query,
+  token.file,
+  method = "api",
+  directory = "GDCdata",
+  files.per.chunk = NULL
+)
 }
 \arguments{
 \item{query}{A query for GDCquery function}
