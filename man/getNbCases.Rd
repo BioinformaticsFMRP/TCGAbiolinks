@@ -10,6 +10,8 @@ getNbCases(project, data.category, legacy = FALSE)
 Get Number of cases in GDC for a project
 }
 \examples{
+\dontrun{
 getNbCases("TCGA-ACC","Clinical")
 getNbCases("CPTAC-2","Clinical")
+}
 }

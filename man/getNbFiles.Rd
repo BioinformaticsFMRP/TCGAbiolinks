@@ -10,6 +10,8 @@ getNbFiles(project, data.category, legacy = FALSE)
 Get Number of files in GDC for a project
 }
 \examples{
+\dontrun{
 getNbFiles("TCGA-ACC","Clinical")
 getNbFiles("CPTAC-2","Clinical")
+}
 }
