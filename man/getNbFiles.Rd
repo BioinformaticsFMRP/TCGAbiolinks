@@ -6,6 +6,13 @@
 \usage{
 getNbFiles(project, data.category, legacy = FALSE)
 }
+\arguments{
+\item{project}{A  GDC project}
+
+\item{data.category}{A  GDC project data category}
+
+\item{legacy}{Select between Harmonized or Legacy database}
+}
 \description{
 Get Number of files in GDC for a project
 }
