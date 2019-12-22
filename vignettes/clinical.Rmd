@@ -188,6 +188,19 @@ clinical %>%
           rownames = FALSE)
 ```
 
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
+clinical <- GDCquery_clinic(project = "GENIE-MSK", type = "clinical")
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+clinical %>% 
+  head %>% 
+  DT::datatable(filter = 'top', 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+          rownames = FALSE)
+```
+
+
 # XML clinical data
 
 The process to get data directly from the XML are:

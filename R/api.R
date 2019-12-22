@@ -250,8 +250,10 @@ getDataCategorySummary <- function(project, legacy = FALSE){
 #' @param project A  GDC project
 #' @param legacy Select between Harmonized or Legacy database
 #' @examples
+#' \dontrun{
 #' getProjectSummary("TCGA-ACC")
 #' getProjectSummary("CPTAC-2")
+#' }
 getProjectSummary <- function(project, legacy = FALSE){
     baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/projects/","https://api.gdc.cancer.gov/projects/")
     url <- paste0(baseURL, project,"?expand=summary,summary.data_categories&pretty=true")
@@ -263,8 +265,10 @@ getProjectSummary <- function(project, legacy = FALSE){
 #' @param data.category A  GDC project data category
 #' @param legacy Select between Harmonized or Legacy database
 #' @examples
+#' \dontrun{
 #' getNbCases("TCGA-ACC","Clinical")
 #' getNbCases("CPTAC-2","Clinical")
+#' }
 getNbCases <- function(project, data.category, legacy = FALSE){
     summary <- getProjectSummary(project, legacy)
     if(data.category %in% summary$data_categories$data_category){
@@ -281,8 +285,10 @@ getNbCases <- function(project, data.category, legacy = FALSE){
 #' @param data.category A  GDC project data category
 #' @param legacy Select between Harmonized or Legacy database
 #' @examples
+#' \dontrun{
 #' getNbFiles("TCGA-ACC","Clinical")
 #' getNbFiles("CPTAC-2","Clinical")
+#' }
 getNbFiles <- function(project, data.category, legacy = FALSE){
     summary <- getProjectSummary(project, legacy)
     if(data.category %in% summary$data_categories$data_category){
