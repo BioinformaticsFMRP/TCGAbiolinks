@@ -247,6 +247,8 @@ getDataCategorySummary <- function(project, legacy = FALSE){
 }
 
 #' @title Get Project Summary from GDC
+#' @param project A  GDC project
+#' @param legacy Select between Harmonized or Legacy database
 #' @examples
 #' getProjectSummary("TCGA-ACC")
 #' getProjectSummary("CPTAC-2")
@@ -257,6 +259,9 @@ getProjectSummary <- function(project, legacy = FALSE){
 }
 
 #' @title Get Number of cases in GDC for a project
+#' @param project A  GDC project
+#' @param data.category A  GDC project data category
+#' @param legacy Select between Harmonized or Legacy database
 #' @examples
 #' getNbCases("TCGA-ACC","Clinical")
 #' getNbCases("CPTAC-2","Clinical")
@@ -272,6 +277,9 @@ getNbCases <- function(project, data.category, legacy = FALSE){
 }
 
 #' @title Get Number of files in GDC for a project
+#' @param project A  GDC project
+#' @param data.category A  GDC project data category
+#' @param legacy Select between Harmonized or Legacy database
 #' @examples
 #' getNbFiles("TCGA-ACC","Clinical")
 #' getNbFiles("CPTAC-2","Clinical")
