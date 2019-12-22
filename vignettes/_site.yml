@@ -42,6 +42,9 @@ navbar:
           icon: fa-flask
           href: extension.html
         - text: "---------"
+        - text: "Importing data to DESeq2"
+          icon: fa-flask
+          href: http://rpubs.com/tiagochst/TCGAbiolinks_to_DESEq2
         - text: "Glioma classsifier"
           icon: fa-bulleye
           href: classifiers.html
