@@ -989,10 +989,10 @@ TCGAquery_recount2<-function(project, tissue=c()){
 #' \dontrun{
 #'    GDCdownload(query)
 #' }
-#' query <- GDCquery_ATAC_seq(file.type = "bigWigs")
+#' query <- GDCquery_ATAC_seq(tumor = "BRCA",file.type = "bigWigs")
 #' \dontrun{
-#'    GDCdownload(query)
-#' }
+#'    GDCdownload(query,method = "client")
+#' } 
 #' @return A data frame with the maf file information
 GDCquery_ATAC_seq <- function(tumor = NULL,
                               file.type = NULL) {
