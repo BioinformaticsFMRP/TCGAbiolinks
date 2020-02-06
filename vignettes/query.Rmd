@@ -180,7 +180,7 @@ and search for all patients with DNA methylation (platform HumanMethylation450k)
 for Colon Adenocarcinoma tumor (TCGA-COAD).
 
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning = FALSE, eval = FALSE}
 query.met <- GDCquery(project = "TCGA-COAD",
                       data.category = "DNA Methylation",
                       legacy = FALSE,
@@ -205,6 +205,9 @@ query.exp <- GDCquery(project = "TCGA-COAD",
                       data.type = "Gene Expression Quantification", 
                       workflow.type = "HTSeq - FPKM-UQ",
                       barcode = common.patients[1:5])
+```
+
+```{r results_matched, message=FALSE, warning=FALSE, eval = FALSE}
 datatable(getResults(query.met, cols = c("data_type","cases")),
           filter = 'top',
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
