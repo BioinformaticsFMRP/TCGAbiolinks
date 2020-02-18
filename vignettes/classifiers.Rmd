@@ -53,7 +53,7 @@ The input data can be either a Summarized Experiment object of a matrix
 In this example we will retrieve two samples from TCGA and classify them expecting 
 the same result as the paper.
 
-```{r, eval = TRUE, message = FALSE, results = "hide"}
+```{r, eval = FALSE, message = FALSE, results = "hide"}
 query <- GDCquery(project = "TCGA-GBM",
                    data.category = "DNA methylation",
                    barcode = c("TCGA-06-0122","TCGA-14-1456"),
@@ -63,14 +63,14 @@ GDCdownload(query)
 data.hg19 <- GDCprepare(query)
 ```
 
-```{r, eval = TRUE}
+```{r, eval = FALSE}
 assay(data.hg19)[1:5,1:2]
 ```
 
 ## Function
 <hr>
 
-```{r, eval = TRUE}
+```{r, eval = FALSE}
 classification <- gliomaClassifier(data.hg19)
 ```
 
@@ -82,7 +82,7 @@ The classfier will return a list of 3 data frames:
 2. Each model final classification
 3. Each class probability of classification
 
-```{r, eval = TRUE}
+```{r, eval = FALSE}
 names(classification)
 classification$final.classification
 classification$model.classifications
