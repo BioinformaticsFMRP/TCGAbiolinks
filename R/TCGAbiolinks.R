@@ -151,3 +151,10 @@ NULL
 #' @name PCBC_stemSig
 #' @format A numeric vector with 12955 genes
 NULL
+
+#' Result of gliomaclassifier function
+#' @docType data
+#' @keywords internal
+#' @name classification
+#' @format A list of data frames
+NULL
