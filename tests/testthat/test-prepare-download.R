@@ -129,26 +129,26 @@ test_that("GISTIC2 data is being correclty prepare", {
 })
 
 test_that("IDAT files is processed", {
-proj <- "TCGA-LUAD"
-query <- GDCquery(project = proj,
-                  data.category = "Raw microarray data",
-                  data.type = "Raw intensities",
-                  experimental.strategy = "Methylation array",
-                  legacy = TRUE,
-                  file.type = ".idat",
-                  barcode = "TCGA-55-7724",
-                  platform = "Illumina Human Methylation 450")
+ #   proj <- "TCGA-LUAD"
+ #   query <- GDCquery(project = proj,
+ #                     data.category = "Raw microarray data",
+ #                     data.type = "Raw intensities",
+ #                     experimental.strategy = "Methylation array",
+ #                     legacy = TRUE,
+ #                     file.type = ".idat",
+ #                     barcode = "TCGA-55-7724",
+ #                     platform = "Illumina Human Methylation 450")
 
-    tryCatch(GDCdownload(query, method = "api", files.per.chunk = 20),
-         error = function(e) GDCdownload(query, method = "client"))
-    betas <- GDCprepare(query)
-    expect_true(nrow(betas) == 485577)
-    expect_true(ncol(betas) == 1)
+#    tryCatch(GDCdownload(query, method = "api", files.per.chunk = 20),
+#             error = function(e) GDCdownload(query, method = "client"))
+#    betas <- GDCprepare(query)
+#    expect_true(nrow(betas) == 485577)
+#    expect_true(ncol(betas) == 1)
 })
 
 test_that("Prepare Samples without clinical data", {
     # x <-  GDCquery_clinic(project = "TCGA-LUAD", type = "clinical")
     # x[is.na(x$diagnosis_id),]
     x <- colDataPrepare(c("TCGA-80-5608-01A","TCGA-17-Z053-01A","TCGA-78-7158-01A"))
-   expect_true(nrow(x) == 3)
+    expect_true(nrow(x) == 3)
 })
