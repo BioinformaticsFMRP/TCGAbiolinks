@@ -4,7 +4,9 @@
 \name{clinBRCA}
 \alias{clinBRCA}
 \title{Clinical data TCGA BRCA}
-\format{A data frame with 1061 rows and 109 variables}
+\format{
+A data frame with 1061 rows and 109 variables
+}
 \description{
 Clinical data TCGA BRCA
 }

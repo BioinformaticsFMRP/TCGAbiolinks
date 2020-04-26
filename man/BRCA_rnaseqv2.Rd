@@ -4,7 +4,9 @@
 \name{BRCA_rnaseqv2}
 \alias{BRCA_rnaseqv2}
 \title{BRCA_rnaseqv2}
-\format{A data frame with 200 rows (genes) and 1172 variables (samples)}
+\format{
+A data frame with 200 rows (genes) and 1172 variables (samples)
+}
 \description{
 BRCA_rnaseqv2
 }

@@ -5,7 +5,9 @@
 \alias{met.gbm.27k}
 \title{A DNA methylation RangedSummarizedExperiment for 8 samples (only first 20 probes)
 aligned against hg19}
-\format{A RangedSummarizedExperiment: 20 probes, 8 samples}
+\format{
+A RangedSummarizedExperiment: 20 probes, 8 samples
+}
 \description{
 A DNA methylation RangedSummarizedExperiment for 8 samples (only first 20 probes)
 aligned against hg19

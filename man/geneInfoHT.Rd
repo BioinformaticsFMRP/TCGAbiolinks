@@ -4,7 +4,9 @@
 \name{geneInfoHT}
 \alias{geneInfoHT}
 \title{geneInfoHT for normalization of HTseq data}
-\format{A data frame with 23486 rows and 2 variables}
+\format{
+A data frame with 23486 rows and 2 variables
+}
 \description{
 geneInfoHT for normalization of HTseq data
 }

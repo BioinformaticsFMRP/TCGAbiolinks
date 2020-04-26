@@ -4,7 +4,9 @@
 \name{clinical.biotab}
 \alias{clinical.biotab}
 \title{A list of data frames with clinical data parsed from XML (code in vignettes)}
-\format{A list with 7 elements}
+\format{
+A list with 7 elements
+}
 \description{
 A list of data frames with clinical data parsed from XML (code in vignettes)
 }
