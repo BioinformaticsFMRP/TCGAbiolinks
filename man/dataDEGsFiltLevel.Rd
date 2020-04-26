@@ -4,7 +4,9 @@
 \name{dataDEGsFiltLevel}
 \alias{dataDEGsFiltLevel}
 \title{TCGA data matrix BRCA DEGs}
-\format{A data frame with 3649 rows and 6 variables}
+\format{
+A data frame with 3649 rows and 6 variables
+}
 \description{
 TCGA data matrix BRCA DEGs
 }

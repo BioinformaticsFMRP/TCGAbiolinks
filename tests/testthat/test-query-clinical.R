@@ -9,7 +9,7 @@ test_that("TCGAquery_SampleTypes returns the correct barcodes", {
 })
 
 
-test_that("GDCquery_clinic  populates correctly the data", {
+test_that("GDCquery_clinic populates correctly the data", {
     results <- GDCquery_clinic( "BEATAML1.0-COHORT")
     results.2028 <- results[results$submitter_id == "2028",]
     expect_equal(results.2028$vital_status,"Alive")

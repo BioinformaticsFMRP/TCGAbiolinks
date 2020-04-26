@@ -4,7 +4,9 @@
 \name{PCBC_stemSig}
 \alias{PCBC_stemSig}
 \title{A numeric vector with Stemness signature trained on PCBC's dataset}
-\format{A numeric vector with 12955 genes}
+\format{
+A numeric vector with 12955 genes
+}
 \description{
 A numeric vector with Stemness signature trained on PCBC's dataset
 }
