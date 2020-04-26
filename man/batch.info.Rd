@@ -4,7 +4,9 @@
 \name{batch.info}
 \alias{batch.info}
 \title{TCGA batch information from Biospecimen Metadata Browser}
-\format{A data frame with 11382 rows and 3 variables}
+\format{
+A data frame with 11382 rows and 3 variables
+}
 \description{
 TCGA batch information from Biospecimen Metadata Browser
 }

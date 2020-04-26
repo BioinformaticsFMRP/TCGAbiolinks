@@ -4,7 +4,9 @@
 \name{dataBRCA}
 \alias{dataBRCA}
 \title{TCGA data matrix BRCA}
-\format{A data frame with 20531 rows (genes) and 50 variables (samples)}
+\format{
+A data frame with 20531 rows (genes) and 50 variables (samples)
+}
 \description{
 TCGA data matrix BRCA
 }

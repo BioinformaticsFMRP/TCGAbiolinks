@@ -4,7 +4,9 @@
 \name{dataREAD}
 \alias{dataREAD}
 \title{TCGA data SummarizedExperiment READ}
-\format{A SummarizedExperiment of READ with 2 samples}
+\format{
+A SummarizedExperiment of READ with 2 samples
+}
 \description{
 TCGA data SummarizedExperiment READ
 }

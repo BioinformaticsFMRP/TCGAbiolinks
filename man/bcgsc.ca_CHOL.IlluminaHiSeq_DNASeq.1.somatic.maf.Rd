@@ -4,7 +4,9 @@
 \name{bcgsc.ca_CHOL.IlluminaHiSeq_DNASeq.1.somatic.maf}
 \alias{bcgsc.ca_CHOL.IlluminaHiSeq_DNASeq.1.somatic.maf}
 \title{TCGA CHOL MAF}
-\format{A tibble: 3,555 x 34}
+\format{
+A tibble: 3,555 x 34
+}
 \description{
 TCGA CHOL MAF
 }

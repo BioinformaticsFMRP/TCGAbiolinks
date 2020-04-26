@@ -5,7 +5,9 @@
 \alias{gbm.exp.legacy}
 \title{A RangedSummarizedExperiment two samples with gene expression data from vignette
 aligned against hg19}
-\format{A RangedSummarizedExperiment: 21022 genes, 2 samples}
+\format{
+A RangedSummarizedExperiment: 21022 genes, 2 samples
+}
 \description{
 A RangedSummarizedExperiment two samples with gene expression data from vignette
 aligned against hg19

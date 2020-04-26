@@ -4,7 +4,9 @@
 \name{msi_results}
 \alias{msi_results}
 \title{MSI data for two samples}
-\format{A data frame: 2 rows, 4 columns}
+\format{
+A data frame: 2 rows, 4 columns
+}
 \description{
 MSI data for two samples
 }

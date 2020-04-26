@@ -4,7 +4,9 @@
 \name{pancan2018}
 \alias{pancan2018}
 \title{A data frame with all TCGA molecular subtypes}
-\format{A data frame with 7,734 lines and 10 columns}
+\format{
+A data frame with 7,734 lines and 10 columns
+}
 \description{
 A data frame with all TCGA molecular subtypes
 }
