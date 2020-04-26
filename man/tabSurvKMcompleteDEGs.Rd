@@ -4,7 +4,9 @@
 \name{tabSurvKMcompleteDEGs}
 \alias{tabSurvKMcompleteDEGs}
 \title{tabSurvKMcompleteDEGs}
-\format{A data frame with 200 rows and 7 variables}
+\format{
+A data frame with 200 rows and 7 variables
+}
 \description{
 tabSurvKMcompleteDEGs
 }

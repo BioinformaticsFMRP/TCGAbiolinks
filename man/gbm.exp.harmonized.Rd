@@ -5,7 +5,9 @@
 \alias{gbm.exp.harmonized}
 \title{A RangedSummarizedExperiment two samples with gene expression data from vignette
 aligned against hg38}
-\format{A RangedSummarizedExperiment: 56963 genes, 2 samples}
+\format{
+A RangedSummarizedExperiment: 56963 genes, 2 samples
+}
 \description{
 A RangedSummarizedExperiment two samples with gene expression data from vignette
 aligned against hg38

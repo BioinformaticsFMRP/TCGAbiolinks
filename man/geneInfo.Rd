@@ -4,7 +4,9 @@
 \name{geneInfo}
 \alias{geneInfo}
 \title{geneInfo for normalization of RNAseq data}
-\format{A data frame with 20531 rows and 2 variables}
+\format{
+A data frame with 20531 rows and 2 variables
+}
 \description{
 geneInfo for normalization of RNAseq data
 }
