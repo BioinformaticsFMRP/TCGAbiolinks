@@ -16,8 +16,9 @@ Author: Antonio Colaprico,
     Michele Ceccarelli,
     Gianluca Bontempi,
     Houtan Noushmehr
-Maintainer: Antonio Colaprico <axc1833@med.miami.edu>,
-    Tiago Chedraoui Silva <tiagochst@alumni.usp.br>
+Maintainer:  
+    Tiago Chedraoui Silva <tiagochst@gmail.com>,
+    Antonio Colaprico <axc1833@med.miami.edu>
 Depends:
     R (>= 3.5)
 Imports:
