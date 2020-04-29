@@ -26,7 +26,7 @@
 #' \item Cox regression survival analysis to obtain hazard ratio (HR) and p-values
 #' \item fit a Cox proportional hazards model and ANOVA (Chisq test)
 #' \item Network comunites
-#' \item An igraph object that contains a functional protein association network in human.
+#' \item An igraph object that contains a functional protein  association network in human.
 #' The network is extracted from the STRING database (version 9.1).
 #' Only those associations with medium confidence (score>=400) are retained.
 #' \item restrict to those edges with high confidence (score>=700)

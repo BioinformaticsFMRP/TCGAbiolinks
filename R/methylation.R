@@ -230,12 +230,12 @@ TCGAanalyze_survival <- function(data,
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="median.desc",filename="mediandesc.pdf")
 #' if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 TCGAvisualize_meanMethylation <- function(data,
-                                          groupCol=NULL,
-                                          subgroupCol=NULL,
+                                          groupCol = NULL,
+                                          subgroupCol = NULL,
                                           shapes = NULL,
-                                          print.pvalue=FALSE,
+                                          print.pvalue = FALSE,
                                           plot.jitter = TRUE,
-                                          jitter.size=3,
+                                          jitter.size = 3,
                                           filename = "groupMeanMet.pdf",
                                           ylab = expression(
                                               paste("Mean DNA methylation (",
@@ -253,9 +253,9 @@ TCGAvisualize_meanMethylation <- function(data,
                                           legend.title.position = "top",
                                           legend.ncols = 3,
                                           add.axis.x.text = TRUE,
-                                          width=10,
-                                          height=10,
-                                          dpi=600,
+                                          width = 10,
+                                          height = 10,
+                                          dpi = 600,
                                           axis.text.x.angle = 90
 ) {
     .e <- environment()
@@ -289,14 +289,14 @@ TCGAvisualize_meanMethylation <- function(data,
     print(data.summary)
     message("==================== END DATA Summary ====================")
 
-    #comb2by2 <- combinations(length(levels(droplevels(df$groups))),
-    #                  2,
-    #                 levels(droplevels(df$groups)))
-    groups <- levels(droplevels(df$groups))
-    mat.pvalue <- matrix(ncol=length(groups),nrow=length(groups),
-                         dimnames=list(groups,groups))
+    groups <- unique(df$groups)
+    mat.pvalue <- matrix(ncol = length(groups),
+                         nrow = length(groups),
+                         dimnames = list(groups,groups)
+    )
+
     if(length(groups) > 1){
-        comb2by2 <- t(combn(levels(droplevels(df$groups)),2))
+        comb2by2 <- t(combn(unique(df$groups),2))
 
         for (i in 1:nrow(comb2by2)){
             try({
@@ -313,7 +313,7 @@ TCGAvisualize_meanMethylation <- function(data,
         message("==================== END T test results ====================")
 
     }
-    if(print.pvalue & length(levels(droplevels(df$groups))) == 2) {
+    if(print.pvalue & length(unique(df$groups)) == 2) {
         pvalue <- t.test(mean ~ groups, data = df)$p.value
     } else {
         print.pvalue <- FALSE
@@ -346,17 +346,19 @@ TCGAvisualize_meanMethylation <- function(data,
     } else if(sort == "median.desc") {
         x <- reorder(df$groups, -df$mean, FUN="median")
     }
-    x <- droplevels(x)
+    x <- as.character(x)
     if (is.null(labels)) {
-        labels <- levels(x)
-        labels <-  sapply(labels,label.add.n)
+        labels <- unique(x)
+        labels <- sapply(labels,label.add.n)
     }
 
     if(is.null(color)){
         color <- rainbow(length(labels))
-        color <- color[(match(levels(x),levels(factor(df$groups))))]
+        color <- color[(match(unique(x),unique(as.character(df$groups))))]
     }
-
+    print(x)
+    print(df$groups)
+    print(color)
     p <- ggplot(df, aes(x, df$mean),
                 environment = .e) +
         geom_boxplot(aes(fill = x),
