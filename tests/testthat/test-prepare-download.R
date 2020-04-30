@@ -93,22 +93,22 @@ test_that("GDCprepare accepts more than one project", {
 })
 
 test_that("Non TCGA data is processed", {
-    # proj <- "MMRF-COMMPASS"
-    # query <- GDCquery(
-    #     project = proj,
-    #    data.category = "Transcriptome Profiling",
-    #    data.type = "Gene Expression Quantification",
-    #    workflow.type = "STAR - Counts"
-    # )
-    # query <- GDCquery(
-    #     project = proj,
-    #     data.category = "Transcriptome Profiling",
-    #     data.type = "Gene Expression Quantification",
-    #     workflow.type = "STAR - Counts",
-    #     barcode = getResults(query)$cases[1:4]
-    # )
-    # GDCdownload(query)
-    # data <- GDCprepare(query)
+     proj <- "MMRF-COMMPASS"
+     query <- GDCquery(
+         project = proj,
+        data.category = "Transcriptome Profiling",
+        data.type = "Gene Expression Quantification",
+        workflow.type = "STAR - Counts"
+     )
+     query <- GDCquery(
+         project = proj,
+         data.category = "Transcriptome Profiling",
+         data.type = "Gene Expression Quantification",
+         workflow.type = "STAR - Counts",
+         barcode = getResults(query)$cases[1:4]
+     )
+     GDCdownload(query)
+     data <- GDCprepare(query)
 })
 
 test_that("GISTIC2 data is being correclty prepare", {
@@ -138,12 +138,11 @@ test_that("IDAT files is processed", {
  #                     file.type = ".idat",
  #                     barcode = "TCGA-55-7724",
  #                     platform = "Illumina Human Methylation 450")
-
-#    tryCatch(GDCdownload(query, method = "api", files.per.chunk = 20),
-#             error = function(e) GDCdownload(query, method = "client"))
-#    betas <- GDCprepare(query)
-#    expect_true(nrow(betas) == 485577)
-#    expect_true(ncol(betas) == 1)
+ #    tryCatch(GDCdownload(query, method = "api", files.per.chunk = 20),
+ #             error = function(e) GDCdownload(query, method = "client"))
+ #    betas <- GDCprepare(query)
+ #    expect_true(nrow(betas) == 485577)
+ #    expect_true(ncol(betas) == 1)
 })
 
 test_that("Prepare Samples without clinical data", {

@@ -27,5 +27,5 @@ Retrieve open access ATAC-seq files from GDC server
 query <- GDCquery_ATAC_seq(tumor = "BRCA",file.type = "bigWigs")
 \dontrun{
    GDCdownload(query,method = "client")
-} 
+}
 }
