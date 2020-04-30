@@ -290,10 +290,19 @@ GDCquery <- function(project,
         if("analysis" %in% colnames(json$data$hits)){
             if(is.data.frame(json$data$hits$analysis)){
                 analysis <- json$data$hits$analysis
+                # Columns
+                # "analysis_id"
+                # "created_datetime"
+                # "state"
+                # "submitter_id"
+                # "updated_datetime"
+                # "workflow_link"
+                # "workflow_type"
+                # "workflow_version"
                 analysis <- analysis[,order(colnames(analysis))]
-                analysis <- analysis %>%
-                    dplyr::select(!contains("datetime"))
-                colnames(analysis)[2:ncol(analysis)] <- paste0("analysis_", colnames(analysis)[2:ncol(analysis)])
+                analysis <- analysis %>% dplyr::select(!contains("datetime"))
+                idx <- which(colnames(analysis) != "analysis_id")
+                colnames(analysis)[idx] <- paste0("analysis_", colnames(analysis)[idx])
                 json$data$hits$analysis <- NULL
                 json$data$hits <- cbind(json$data$hits, analysis)
             }
