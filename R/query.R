@@ -163,7 +163,7 @@
 #' @importFrom  jsonlite fromJSON
 #' @importFrom knitr kable
 #' @importFrom httr timeout
-#' @importFrom dplyr pull
+#' @importFrom dplyr pull relocate
 GDCquery <- function(project,
                      data.category,
                      data.type,
@@ -277,8 +277,10 @@ GDCquery <- function(project,
             )
         }
 
+
         json$data$hits$acl <- NULL
         json$data$hits$project <- proj
+
         if("archive" %in% colnames(json$data$hits)){
             if(is.data.frame(json$data$hits$archive)){
                 archive <- json$data$hits$archive
@@ -316,6 +318,7 @@ GDCquery <- function(project,
                 json$data$hits <- cbind(json$data$hits, center)
             }
         }
+
         results <-  plyr::rbind.fill(as.data.frame(results),as.data.frame(json$data$hits))
 
     }
@@ -596,6 +599,22 @@ GDCquery <- function(project,
 
     message("ooo Check if there results for the query")
     if(nrow(results) == 0) stop("Sorry, no results were found for this query")
+
+    # Try ordering
+    results <- tryCatch({
+        results %>% relocate("project") %>%
+            relocate(contains("type"), .after = project) %>%
+            relocate(contains("category"), .after = project) %>%
+            relocate(contains("experimental_strategy"), .after = project) %>%
+            relocate(contains("submitter_id"), .after = project) %>%
+            relocate(contains("sample_type"), .before = experimental_strategy) %>%
+            relocate(access,.after = last_col())  %>%
+            relocate(starts_with("analysis"), .before = access) %>%
+            relocate(contains("datetime"),.after = last_col())
+    },error = function(e){
+        results
+    })
+
 
     print.header("Preparing output","section")
     ret <- data.frame(results = I(list(results)),
