@@ -276,6 +276,7 @@ GDCquery <- function(project,
                 }
             )
         }
+
         json$data$hits$acl <- NULL
         json$data$hits$project <- proj
         if("archive" %in% colnames(json$data$hits)){
@@ -289,6 +290,9 @@ GDCquery <- function(project,
         if("analysis" %in% colnames(json$data$hits)){
             if(is.data.frame(json$data$hits$analysis)){
                 analysis <- json$data$hits$analysis
+                analysis <- analysis[,order(colnames(analysis))]
+                analysis <- analysis %>%
+                    dplyr::select(!contains("datetime"))
                 colnames(analysis)[2:ncol(analysis)] <- paste0("analysis_", colnames(analysis)[2:ncol(analysis)])
                 json$data$hits$analysis <- NULL
                 json$data$hits <- cbind(json$data$hits, analysis)
@@ -297,6 +301,7 @@ GDCquery <- function(project,
         if("center" %in% colnames(json$data$hits)){
             if(is.data.frame(json$data$hits$center)){
                 center <- json$data$hits$center
+                center <- center[,order(colnames(center))]
                 colnames(center)[2:ncol(center)] <- paste0("center_", colnames(center)[2:ncol(center)])
                 json$data$hits$center <- NULL
                 json$data$hits <- cbind(json$data$hits, center)
@@ -347,7 +352,8 @@ GDCquery <- function(project,
     # Filter by data.type
     if(!is.na(data.type)) {
         if(!(tolower(data.type) %in% tolower(results$data_type))) {
-            stop("Please set a valid data.type argument from the list below:\n  => ", paste(unique(results$data_type), collapse = "\n  => "))
+            stop("Please set a valid data.type argument from the list below:\n  => ",
+                 paste(unique(results$data_type), collapse = "\n  => "))
         }
         message("ooo By data.type")
         results <- results[tolower(results$data_type) %in% tolower(data.type),]
@@ -356,7 +362,8 @@ GDCquery <- function(project,
     # Filter by workflow.type
     if(!is.na(workflow.type)) {
         if(!(workflow.type %in% results$analysis_workflow_type)) {
-            stop("Please set a valid workflow.type argument from the list below:\n  => ", paste(unique(results$analysis_workflow_type), collapse = "\n  => "))
+            stop("Please set a valid workflow.type argument from the list below:\n  => ",
+                 paste(unique(results$analysis_workflow_type), collapse = "\n  => "))
         }
         message("ooo By workflow.type")
         results <- results[results$analysis_workflow_type %in% workflow.type,]
@@ -992,7 +999,7 @@ TCGAquery_recount2<-function(project, tissue=c()){
 #' query <- GDCquery_ATAC_seq(tumor = "BRCA",file.type = "bigWigs")
 #' \dontrun{
 #'    GDCdownload(query,method = "client")
-#' } 
+#' }
 #' @return A data frame with the maf file information
 GDCquery_ATAC_seq <- function(tumor = NULL,
                               file.type = NULL) {
