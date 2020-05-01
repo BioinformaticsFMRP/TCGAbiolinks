@@ -101,9 +101,9 @@ GDCprepare <- function(query,
     # We have to check we movedthe files
     if(query$data.category == "Raw microarray data"){
       files.idat <- file.path(query$results[[1]]$project, source,
-                         gsub(" ","_",query$results[[1]]$data_category),
-                         gsub(" ","_",query$results[[1]]$data_type),
-                         gsub(" ","_",query$results[[1]]$file_name))
+                              gsub(" ","_",query$results[[1]]$data_category),
+                              gsub(" ","_",query$results[[1]]$data_type),
+                              gsub(" ","_",query$results[[1]]$file_name))
       files.idat <- file.path(directory, files.idat)
       if(!all(file.exists(files) | file.exists(files.idat))) {
         stop(paste0("I couldn't find all the files from the query. ",
@@ -1187,18 +1187,22 @@ readGISTIC <- function(files, cases){
 }
 
 # Reads Copy Number Variation files to a data frame, basically it will rbind it
+#' @importFrom future plan multicore
+#' @importFrom furrr future_map2_dfr
 readCopyNumberVariation <- function(files, cases){
   message("Reading copy number variation files")
-  pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-  for (i in seq_along(files)) {
-    data <- read_tsv(file = files[i], col_names = TRUE, col_types = "ccnnnd")
-    if(!missing(cases)) data$Sample <- cases[i]
-    if(i == 1) df <- data
-    if(i != 1) df <- rbind(df, data)
-    setTxtProgressBar(pb, i)
-  }
-  close(pb)
-  return(df)
+
+  col_types <- ifelse(any(grepl('ascat2', files)),"ccnnnnn","ccnnnd")
+
+  plan("multicore")
+  future_map2_dfr(
+    .x = files,
+    .y = cases,
+    .f = function(file,case) {
+      data <- readr::read_tsv(file, col_names = TRUE, col_types = col_types);
+      if(!missing(case)) data$Sample <- case
+      data
+    }, .progress = TRUE)
 }
 
 # getBarcodeInfo(c("TCGA-A6-6650-01B"))
