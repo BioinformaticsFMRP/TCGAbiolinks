@@ -1283,7 +1283,8 @@ getAliquot_ids <- function(barcode){
 
 # getBarcodeInfo(c("TCGA-OR-A5K3-01A","C3N-00321-01"))
 # barcode is: sample_submitter_id
-#' @importFrom dplyr bind_cols
+#' @importFrom dplyr bind_cols slice row_number
+#'
 getBarcodeInfo <- function(barcode) {
   baseURL <- "https://api.gdc.cancer.gov/cases/?"
   options.pretty <- "pretty=true"
@@ -1332,7 +1333,7 @@ getBarcodeInfo <- function(barcode) {
     tryCatch({
       samples$submitter_id <-
         str_extract_all(samples$submitter_id,
-                        paste(submitter_id, collapse = "|"),
+                        paste(c(submitter_id,barcode), collapse = "|"),
                         simplify = TRUE) %>% as.character
     }, error = function(e){
       samples$submitter_id <- submitter_id
@@ -1356,7 +1357,22 @@ getBarcodeInfo <- function(barcode) {
     # this is required since the sample might not have a diagnosis
     if(!any(df$submitter_id %in% diagnoses$submitter_id)){
       diagnoses$submitter_id <- NULL
-      df <- dplyr::bind_cols(df,diagnoses)
+      # The sample migth have different sample types
+      # The diagnosis the same for each one of these samples
+      # in that case we will have a 1 to mapping and binding will
+      # not work. We need then to replicate diagnosis to each sample
+      # and not each patient
+      # Cases can be replicated with getBarcodeInfo(c("BA2691R","BA2577R","BA2748R"))
+      if(nrow(diagnoses) <  nrow(df)){
+        diagnoses <- plyr::ldply(
+          1:length(results$submitter_sample_ids),
+          .fun = function(x){
+            diagnoses[x] %>% # replicate diagnoses the number of samples
+              as.data.frame() %>%
+              dplyr::slice(rep(dplyr::row_number(), sum(results$submitter_sample_ids[[x]] %in% barcode)))})
+      }
+
+      df <- dplyr::bind_cols(df %>% as.data.frame,diagnoses %>% as.data.frame)
     } else {
       df <- left_join(df, diagnoses, by = "submitter_id")
     }
@@ -1389,7 +1405,24 @@ getBarcodeInfo <- function(barcode) {
 
     if(!any(df$submitter_id %in% demographic$submitter_id)){
       demographic$submitter_id <- NULL
-      df <- dplyr::bind_cols(df,demographic)
+      demographic$updated_datetime  <- NULL
+      demographic$created_datetime <- NULL
+      # The sample migth have different sample types
+      # The diagnosis the same for each one of these samples
+      # in that case we will have a 1 to mapping and binding will
+      # not work. We need then to replicate diagnosis to each sample
+      # and not each patient
+      # Cases can be replicated with getBarcodeInfo(c("BA2691R","BA2577R","BA2748R"))
+      if(nrow(demographic) <  nrow(df)){
+        demographic <- plyr::ldply(
+          1:length(results$submitter_sample_ids),
+          .fun = function(x){
+            demographic[x,] %>% # replicate diagnoses the number of samples
+              as.data.frame() %>%
+              dplyr::slice(rep(dplyr::row_number(), sum(results$submitter_sample_ids[[x]] %in% barcode)))})
+      }
+
+      df <- dplyr::bind_cols(df  %>% as.data.frame,demographic)
     } else {
       df <- left_join(df,demographic, by = "submitter_id")
     }
@@ -1408,6 +1441,16 @@ getBarcodeInfo <- function(barcode) {
                       by = "submitter_id")
     })
   } else {
+
+    if(nrow(projects.info) <  nrow(df)){
+      projects.info <- plyr::ldply(
+        1:length(results$submitter_sample_ids),
+        .fun = function(x){
+          projects.info[x,] %>% # replicate diagnoses the number of samples
+            as.data.frame() %>%
+            dplyr::slice(rep(dplyr::row_number(), sum(results$submitter_sample_ids[[x]] %in% barcode)))})
+    }
+
     df <- dplyr::bind_cols(df,projects.info)
   }
 
