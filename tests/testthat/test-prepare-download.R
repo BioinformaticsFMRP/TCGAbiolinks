@@ -145,9 +145,18 @@ test_that("IDAT files is processed", {
  #    expect_true(ncol(betas) == 1)
 })
 
-test_that("Prepare Samples without clinical data", {
+test_that("Prepare samples without clinical data", {
     # x <-  GDCquery_clinic(project = "TCGA-LUAD", type = "clinical")
     # x[is.na(x$diagnosis_id),]
     x <- colDataPrepare(c("TCGA-80-5608-01A","TCGA-17-Z053-01A","TCGA-78-7158-01A"))
     expect_true(nrow(x) == 3)
+})
+
+test_that("Prepare multiple samples from the same patient", {
+    # https://portal.gdc.cancer.gov/cases/d7d3de82-802d-4664-8e42-d40408b129b0?bioId=548a300f-a7eb-4dc0-b9bc-5a643ef03d5d
+    x <- colDataPrepare(c("BA2691R","BA2577R","BA2748R","BA2577D"))
+    expect_true(nrow(x) == 4)
+    expect_equal(x["BA2748R","sample_type"],"Primary Blood Derived Cancer - Bone Marrow")
+    expect_equal(x["BA2577D","sample_type"],"Recurrent Blood Derived Cancer - Bone Marrow")
+    expect_true("age_at_diagnosis" %in% colnames(x))
 })
