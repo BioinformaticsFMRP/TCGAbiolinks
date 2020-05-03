@@ -183,7 +183,7 @@ getBarcodefromAliquot <- function(aliquot){
 #' (list of barcodes, aliquot ids, etc)
 #' @param step How many items to be evaluated per API call
 #' @param FUN function that calls the API
-splitAPICall <- function(FUN,step = 20,items){
+splitAPICall <- function(FUN, step = 20, items){
    info <- NULL
    info <- tryCatch({
         for(i in 0:(ceiling(length(items)/step) - 1)){
