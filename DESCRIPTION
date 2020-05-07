@@ -65,8 +65,6 @@ Imports:
     sva,
     limma,
     purrr,
-    furrr,
-    future,
     xml2,
     httr (>= 1.2.1),
     purrrogress,
