@@ -33,8 +33,6 @@ Imports:
     GenomicRanges,
     XML (>= 3.98.0),
     data.table,
-    EDASeq (>= 2.0.0),
-    edgeR (>= 3.0.0),
     jsonlite (>= 1.0.0),
     plyr,
     knitr,
@@ -62,8 +60,6 @@ Imports:
     parallel,
     tools,
     tidyr,
-    sva,
-    limma,
     purrr,
     xml2,
     httr (>= 1.2.1),
@@ -111,7 +107,11 @@ Suggests:
     ConsensusClusterPlus,
     igraph,
     TCGAbiolinksGUI.data,
-    supraHex
+    supraHex,
+    limma,
+    edgeR,
+    sva,
+    EDASeq
 VignetteBuilder: knitr
 LazyData: true
 URL: https://github.com/BioinformaticsFMRP/TCGAbiolinks
