@@ -1187,22 +1187,20 @@ readGISTIC <- function(files, cases){
 }
 
 # Reads Copy Number Variation files to a data frame, basically it will rbind it
-#' @importFrom future plan multicore
-#' @importFrom furrr future_map2_dfr
+#' @importFrom purrr map2_dfr
 readCopyNumberVariation <- function(files, cases){
   message("Reading copy number variation files")
 
   col_types <- ifelse(any(grepl('ascat2', files)),"ccnnnnn","ccnnnd")
 
-  plan("multicore")
-  future_map2_dfr(
+  purrr::map2_dfr(
     .x = files,
     .y = cases,
     .f = function(file,case) {
       data <- readr::read_tsv(file, col_names = TRUE, col_types = col_types);
       if(!missing(case)) data$Sample <- case
       data
-    }, .progress = TRUE)
+    })
 }
 
 # getBarcodeInfo(c("TCGA-A6-6650-01B"))
