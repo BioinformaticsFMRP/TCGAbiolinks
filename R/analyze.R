@@ -922,7 +922,6 @@ TCGAanalyze_DEA <- function (mat1, mat2, metadata = TRUE, Cond1type, Cond2type,
 #' @param UnpublishedData if TRUE perform a batch correction after adding new data
 #' @param ClinicalDF a dataframe returned by GDCquery_clinic() to be used to extract year data
 #' @param AnnotationDF a dataframe with column Batch indicating different batches of the samples in the tabDF
-#' @importFrom limma voom
 #' @export
 #' @return data frame with ComBat batch correction applied
 TCGAbatch_Correction <- function (tabDF,
@@ -1053,7 +1052,6 @@ map.ensg <- function(genome = "hg38", genes) {
 #' @param TableCond2 numeric matrix, each row represents a gene, each column
 #' represents a sample with Cond2type
 #' @param typeOrder typeOrder
-#' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags
 #' @export
 #' @return table with DEGs, log Fold Change (FC), false discovery rate (FDR),
 #' the gene expression level
