@@ -533,7 +533,7 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
         ffData  <- as.data.frame(geneInfo)
         rawCounts <- floor(rawCounts)
         message("Step 1 of 4: newSeqExpressionSet ...")
-        tmp <- newSeqExpressionSet(as.matrix(rawCounts), featureData = ffData)
+        tmp <- EDASeq::newSeqExpressionSet(as.matrix(rawCounts), featureData = ffData)
 
         #fData(tmp)[, "gcContent"] <- as.numeric(geneInfo[, "gcContent"])
 
