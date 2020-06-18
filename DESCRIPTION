@@ -63,7 +63,6 @@ Imports:
     purrr,
     xml2,
     httr (>= 1.2.1),
-    purrrogress,
     ggrepel (>= 0.6.3)
 Description: The aim of TCGAbiolinks is : i) facilitate the GDC open-access
     data retrieval, ii) prepare the data using the appropriate pre-processing
