@@ -288,7 +288,6 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes,group1, grou
 #' @param xlim Upper limit of the x-axis.
 #' @param mfrow Vector with number of rows/columns of the plot. Default  2 rows/2 columns "c(2,2)"
 #' @export
-#' @importFrom EDASeq barplot
 #' @import graphics
 #' @return Complete barPlot from Enrichment Analysis showing significant (default FDR < 0.01)
 #' BP,CC,MF and pathways enriched by list of genes.
@@ -322,6 +321,10 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
                                     text.size = 1.0, mfrow = c(2, 2), xlim = NULL,
                                     color = c("orange", "cyan","green","yellow") ){
 
+    if (!requireNamespace("EDASeq", quietly = TRUE)) {
+        stop("EDASeq is needed. Please install it.",
+             call. = FALSE)
+    }
     if(!is.null(filename)) pdf(filename, width = 30, height = 15)
 
     splitFun <- function(tf, Tab, nBar){
@@ -353,7 +356,7 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
         if(!is.null(GOBPTab) & !all(is.na(GOBPTab))){
             # Plotting GOBPTab
             toPlot <- splitFun(tf, GOBPTab, nBar)
-            xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[1],
+            xAxis <- EDASeq::barplot(toPlot[, 2], horiz = TRUE, col = color[1],
                              main = "GO:Biological Process", xlab = "-log10(FDR)",xlim = xlim)
             labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
             text(x = 1, y = xAxis, labs, pos = 4, cex = text.size)
@@ -366,7 +369,7 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
         if(!is.null(GOCCTab) & !all(is.na(GOCCTab))){
             # Plotting GOCCTab
             toPlot <- splitFun(tf, GOCCTab, nBar)
-            xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[2],
+            xAxis <- EDASeq::barplot(toPlot[, 2], horiz = TRUE, col = color[2],
                              main = "GO:Cellular Component", xlab = "-log10(FDR)",xlim = xlim)
             labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
             text(x = 1, y = xAxis, labs, pos = 4, cex = text.size)
@@ -379,7 +382,7 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
         if(!is.null(GOMFTab) & !all(is.na(GOMFTab))){
             # Plotting GOMFTab
             toPlot <- splitFun(tf, GOMFTab, nBar)
-            xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[3],
+            xAxis <- EDASeq::barplot(toPlot[, 2], horiz = TRUE, col = color[3],
                              main = "GO:Molecular Function", xlab = "-log10(FDR)",xlim = xlim)
             labs <- matrix(unlist(strsplit(toPlot[, 1], "~")), nrow = 2)[2, ]
             text(x = 1, y = xAxis, labs, pos = 4, cex = text.size)
@@ -392,7 +395,7 @@ TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar
         if(!is.null(PathTab) & !all(is.na(PathTab))){
             # Plotting PathTab
             toPlot <- splitFun(tf, PathTab, nBar)
-            xAxis <- barplot(toPlot[, 2], horiz = TRUE, col = color[4],
+            xAxis <- EDASeq::barplot(toPlot[, 2], horiz = TRUE, col = color[4],
                              main = "Pathways", xlab = "-log10(FDR)",xlim = xlim)
             labs <- toPlot[, 1]
             text(x = 1, y = xAxis, labs, pos = 4, cex = text.size)
