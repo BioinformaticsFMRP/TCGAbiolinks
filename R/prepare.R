@@ -373,7 +373,6 @@ readSimpleNucleotideVariationMaf <- function(files){
 }
 
 
-#' @importFrom purrrogress with_progress
 #' @importFrom purrr reduce
 readGeneExpressionQuantification <- function(files,
                                              cases,
@@ -403,11 +402,11 @@ readGeneExpressionQuantification <- function(files,
 
   print.header(paste0("Merging ", length(files)," files"),"subsection")
   merging.col <- colnames(ret[[1]])[1]
-  df <- purrr::reduce(ret,
-                      purrrogress::with_progress(dplyr::full_join,
-                                                 length(ret),
-                                                 title = "Merging files"),
-                      by = merging.col)
+  df <- purrr::reduce(
+    ret,
+    dplyr::full_join,,
+    by = merging.col
+  )
 
   if (summarizedExperiment) {
     df <- makeSEfromGeneExpressionQuantification(df,assay.list, genome = genome)
@@ -632,9 +631,7 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
 
 
     print.header(paste0("Merging ", length(files)," files"),"subsection")
-    df <- purrr::reduce(x,
-                        purrrogress::with_progress(dplyr::left_join,
-                                                   length(x)))
+    df <- purrr::reduce(x, dplyr::left_join)
 
     if (summarizedExperiment) {
       if(skip == 0) {
