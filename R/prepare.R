@@ -101,9 +101,9 @@ GDCprepare <- function(query,
     # We have to check we movedthe files
     if(query$data.category == "Raw microarray data"){
       files.idat <- file.path(query$results[[1]]$project, source,
-                         gsub(" ","_",query$results[[1]]$data_category),
-                         gsub(" ","_",query$results[[1]]$data_type),
-                         gsub(" ","_",query$results[[1]]$file_name))
+                              gsub(" ","_",query$results[[1]]$data_category),
+                              gsub(" ","_",query$results[[1]]$data_type),
+                              gsub(" ","_",query$results[[1]]$file_name))
       files.idat <- file.path(directory, files.idat)
       if(!all(file.exists(files) | file.exists(files.idat))) {
         stop(paste0("I couldn't find all the files from the query. ",
@@ -373,7 +373,6 @@ readSimpleNucleotideVariationMaf <- function(files){
 }
 
 
-#' @importFrom purrrogress with_progress
 #' @importFrom purrr reduce
 readGeneExpressionQuantification <- function(files,
                                              cases,
@@ -403,11 +402,11 @@ readGeneExpressionQuantification <- function(files,
 
   print.header(paste0("Merging ", length(files)," files"),"subsection")
   merging.col <- colnames(ret[[1]])[1]
-  df <- purrr::reduce(ret,
-                      purrrogress::with_progress(dplyr::full_join,
-                                                 length(ret),
-                                                 title = "Merging files"),
-                      by = merging.col)
+  df <- purrr::reduce(
+    ret,
+    dplyr::full_join,,
+    by = merging.col
+  )
 
   if (summarizedExperiment) {
     df <- makeSEfromGeneExpressionQuantification(df,assay.list, genome = genome)
@@ -632,9 +631,7 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
 
 
     print.header(paste0("Merging ", length(files)," files"),"subsection")
-    df <- purrr::reduce(x,
-                        purrrogress::with_progress(dplyr::left_join,
-                                                   length(x)))
+    df <- purrr::reduce(x, dplyr::left_join)
 
     if (summarizedExperiment) {
       if(skip == 0) {
@@ -1187,18 +1184,20 @@ readGISTIC <- function(files, cases){
 }
 
 # Reads Copy Number Variation files to a data frame, basically it will rbind it
+#' @importFrom purrr map2_dfr
 readCopyNumberVariation <- function(files, cases){
   message("Reading copy number variation files")
-  pb <- txtProgressBar(min = 0, max = length(files), style = 3)
-  for (i in seq_along(files)) {
-    data <- read_tsv(file = files[i], col_names = TRUE, col_types = "ccnnnd")
-    if(!missing(cases)) data$Sample <- cases[i]
-    if(i == 1) df <- data
-    if(i != 1) df <- rbind(df, data)
-    setTxtProgressBar(pb, i)
-  }
-  close(pb)
-  return(df)
+
+  col_types <- ifelse(any(grepl('ascat2', files)),"ccnnnnn","ccnnnd")
+
+  purrr::map2_dfr(
+    .x = files,
+    .y = cases,
+    .f = function(file,case) {
+      data <- readr::read_tsv(file, col_names = TRUE, col_types = col_types);
+      if(!missing(case)) data$Sample <- case
+      data
+    })
 }
 
 # getBarcodeInfo(c("TCGA-A6-6650-01B"))
@@ -1279,7 +1278,8 @@ getAliquot_ids <- function(barcode){
 
 # getBarcodeInfo(c("TCGA-OR-A5K3-01A","C3N-00321-01"))
 # barcode is: sample_submitter_id
-#' @importFrom dplyr bind_cols
+#' @importFrom dplyr bind_cols slice row_number
+#'
 getBarcodeInfo <- function(barcode) {
   baseURL <- "https://api.gdc.cancer.gov/cases/?"
   options.pretty <- "pretty=true"
@@ -1328,7 +1328,7 @@ getBarcodeInfo <- function(barcode) {
     tryCatch({
       samples$submitter_id <-
         str_extract_all(samples$submitter_id,
-                        paste(submitter_id, collapse = "|"),
+                        paste(c(submitter_id,barcode), collapse = "|"),
                         simplify = TRUE) %>% as.character
     }, error = function(e){
       samples$submitter_id <- submitter_id
@@ -1352,7 +1352,22 @@ getBarcodeInfo <- function(barcode) {
     # this is required since the sample might not have a diagnosis
     if(!any(df$submitter_id %in% diagnoses$submitter_id)){
       diagnoses$submitter_id <- NULL
-      df <- dplyr::bind_cols(df,diagnoses)
+      # The sample migth have different sample types
+      # The diagnosis the same for each one of these samples
+      # in that case we will have a 1 to mapping and binding will
+      # not work. We need then to replicate diagnosis to each sample
+      # and not each patient
+      # Cases can be replicated with getBarcodeInfo(c("BA2691R","BA2577R","BA2748R"))
+      if(nrow(diagnoses) <  nrow(df)){
+        diagnoses <- plyr::ldply(
+          1:length(results$submitter_sample_ids),
+          .fun = function(x){
+            diagnoses[x] %>% # replicate diagnoses the number of samples
+              as.data.frame() %>%
+              dplyr::slice(rep(dplyr::row_number(), sum(results$submitter_sample_ids[[x]] %in% barcode)))})
+      }
+
+      df <- dplyr::bind_cols(df %>% as.data.frame,diagnoses %>% as.data.frame)
     } else {
       df <- left_join(df, diagnoses, by = "submitter_id")
     }
@@ -1385,7 +1400,24 @@ getBarcodeInfo <- function(barcode) {
 
     if(!any(df$submitter_id %in% demographic$submitter_id)){
       demographic$submitter_id <- NULL
-      df <- dplyr::bind_cols(df,demographic)
+      demographic$updated_datetime  <- NULL
+      demographic$created_datetime <- NULL
+      # The sample migth have different sample types
+      # The diagnosis the same for each one of these samples
+      # in that case we will have a 1 to mapping and binding will
+      # not work. We need then to replicate diagnosis to each sample
+      # and not each patient
+      # Cases can be replicated with getBarcodeInfo(c("BA2691R","BA2577R","BA2748R"))
+      if(nrow(demographic) <  nrow(df)){
+        demographic <- plyr::ldply(
+          1:length(results$submitter_sample_ids),
+          .fun = function(x){
+            demographic[x,] %>% # replicate diagnoses the number of samples
+              as.data.frame() %>%
+              dplyr::slice(rep(dplyr::row_number(), sum(results$submitter_sample_ids[[x]] %in% barcode)))})
+      }
+
+      df <- dplyr::bind_cols(df  %>% as.data.frame,demographic)
     } else {
       df <- left_join(df,demographic, by = "submitter_id")
     }
@@ -1404,6 +1436,16 @@ getBarcodeInfo <- function(barcode) {
                       by = "submitter_id")
     })
   } else {
+
+    if(nrow(projects.info) <  nrow(df)){
+      projects.info <- plyr::ldply(
+        1:length(results$submitter_sample_ids),
+        .fun = function(x){
+          projects.info[x,] %>% # replicate diagnoses the number of samples
+            as.data.frame() %>%
+            dplyr::slice(rep(dplyr::row_number(), sum(results$submitter_sample_ids[[x]] %in% barcode)))})
+    }
+
     df <- dplyr::bind_cols(df,projects.info)
   }
 
