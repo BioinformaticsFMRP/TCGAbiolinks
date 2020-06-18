@@ -254,13 +254,13 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
     #FC_FDR_table_mRNA
     tabSurv_Matrix <- matrix(0,nrow(as.matrix(rownames(dataNormal))),8)
     colnames(tabSurv_Matrix) <- c("mRNA",
-                                "pvalue",
-                                "Cancer Deaths",
-                                "Cancer Deaths with Top",
-                                "Cancer Deaths with Down",
-                                "Mean Tumor Top",
-                                "Mean Tumor Down",
-                                "Mean Normal")
+                                  "pvalue",
+                                  "Cancer Deaths",
+                                  "Cancer Deaths with Top",
+                                  "Cancer Deaths with Down",
+                                  "Mean Tumor Top",
+                                  "Mean Tumor Down",
+                                  "Mean Normal")
 
     tabSurv_Matrix <- as.data.frame(tabSurv_Matrix)
 
@@ -479,8 +479,6 @@ TCGAanalyze_Filtering <- function(tabDF,method,
 #' @param geneInfo Information matrix of 20531 genes about geneLength and gcContent.
 #' Two objects are provided: TCGAbiolinks::geneInfoHT,TCGAbiolinks::geneInfo
 #' @param method is method of normalization such as 'gcContent' or 'geneLength'
-#' @importFrom EDASeq newSeqExpressionSet withinLaneNormalization
-#'  betweenLaneNormalization exprs counts offst
 #' @export
 #' @return Rnaseq matrix normalized with counts slot holds the count data as a matrix
 #' of non-negative integer count values, one row for each observational unit (gene or the like),
@@ -488,6 +486,11 @@ TCGAanalyze_Filtering <- function(tabDF,method,
 #' @examples
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
+
+    if (!requireNamespace("EDASeq", quietly = TRUE)) {
+        stop("EDASeq is needed. Please install it.",
+             call. = FALSE)
+    }
 
     # Check if we have a SE, we need a gene expression matrix
     if(is(tabDF,"SummarizedExperiment")) tabDF <- assay(tabDF)
@@ -517,12 +520,12 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
         tmp <- table(geneNames[,1])
         rownames(tabDF) <- geneNames[,1]
 
-        rawCounts<- tabDF
+        rawCounts <- tabDF
         commonGenes <- intersect(rownames(geneInfo), rownames(rawCounts))
         geneInfo <- geneInfo[commonGenes,]
         rawCounts <- rawCounts[commonGenes,]
 
-        timeEstimated <- format(ncol(tabDF)*nrow(tabDF)/80000,digits = 2)
+        timeEstimated <- format(ncol(tabDF) * nrow(tabDF) / 80000, digits = 2)
         message(messageEstimation <- paste("I Need about ", timeEstimated,
                                            "seconds for this Complete Normalization Upper Quantile",
                                            " [Processing 80k elements /s]  "))
@@ -530,14 +533,14 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
         ffData  <- as.data.frame(geneInfo)
         rawCounts <- floor(rawCounts)
         message("Step 1 of 4: newSeqExpressionSet ...")
-        tmp <- newSeqExpressionSet(as.matrix(rawCounts), featureData = ffData)
+        tmp <- EDASeq::newSeqExpressionSet(as.matrix(rawCounts), featureData = ffData)
 
         #fData(tmp)[, "gcContent"] <- as.numeric(geneInfo[, "gcContent"])
 
         message("Step 2 of 4: withinLaneNormalization ...")
-        tmp <- withinLaneNormalization(tmp, "gcContent", which = "upper", offset = TRUE)
+        tmp <- EDASeq::withinLaneNormalization(tmp, "gcContent", which = "upper", offset = TRUE)
         message("Step 3 of 4: betweenLaneNormalization ...")
-        tmp <- betweenLaneNormalization(tmp, which = "upper", offset = TRUE)
+        tmp <- EDASeq::betweenLaneNormalization(tmp, which = "upper", offset = TRUE)
         normCounts <-  log(rawCounts + .1) + offst(tmp)
         normCounts <-  floor(exp(normCounts) - .1)
         message("Step 4 of 4: .quantileNormalization ...")
@@ -638,9 +641,6 @@ TCGAanalyze_Normalization <- function(tabDF,geneInfo,method = "geneLength"){
 #' @param contrast.formula string input to determine coefficients and to design contrasts in a customized way
 #' @param Condtypes vector of grouping for samples in MAT
 #' @param voom boolean to perform voom transformation for limma-voom pipeline. Set to TRUE for voom transformation
-#' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags estimateGLMCommonDisp
-#' estimateGLMTagwiseDisp glmFit glmLRT
-#' @importFrom limma makeContrasts lmFit contrasts.fit eBayes toptable
 #' @export
 #' @examples
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
@@ -659,6 +659,19 @@ TCGAanalyze_DEA <- function (mat1, mat2, metadata = TRUE, Cond1type, Cond2type,
                              paired = FALSE, log.trans = FALSE, voom = FALSE, trend = FALSE,
                              MAT = data.frame(), contrast.formula = "", Condtypes = c())
 {
+
+    if (pipeline == "limma"){
+        if (!requireNamespace("limma", quietly = TRUE)) {
+            stop("limma is needed. Please install it.",
+                 call. = FALSE)
+        }
+    }
+
+    if (!requireNamespace("edgeR", quietly = TRUE)) {
+        stop("edgeR is needed. Please install it.",
+             call. = FALSE)
+    }
+
     table.code <- c("TP", "TR", "TB", "TRBM", "TAP", "TM", "TAM",
                     "THOC", "TBM", "NB", "NT", "NBC", "NEBV", "NBM", "CELLC",
                     "TRB", "CELL", "XP", "XCL")
@@ -736,31 +749,25 @@ TCGAanalyze_DEA <- function (mat1, mat2, metadata = TRUE, Cond1type, Cond2type,
         if (pipeline == "edgeR")
             design <- model.matrix(~tumorType)
         else design <- model.matrix(~0 + tumorType)
-    }
-    else if (length(batch.factors) == 0 & length(Condtypes) ==
-             0) {
+    } else if (length(batch.factors) == 0 & length(Condtypes) == 0) {
         if (pipeline == "edgeR")
             design <- model.matrix(~tumorType)
         else design <- model.matrix(~0 + tumorType)
-    }
-    else if (length(batch.factors) > 0 & length(Condtypes) ==
-             0) {
+    } else if (length(batch.factors) > 0 & length(Condtypes) == 0) {
         if (pipeline == "edgeR")
             formula <- paste0("~tumorType+", additiveformula)
         else formula <- paste0("~0+tumorType+", additiveformula)
         design <- model.matrix(eval(parse(text = formula)))
-    }
-    else if (length(batch.factors) > 0 & length(Condtypes) >
-             0) {
+    } else if (length(batch.factors) > 0 & length(Condtypes) > 0) {
         if (pipeline == "edgeR") {
             formula <- paste0("~tumorType+", additiveformula)
             if(length(Condtypes)>2)
                 formula <- paste0("~0+tumorType+", additiveformula)
         }
-
         else formula <- paste0("~0+tumorType+", additiveformula)
         design <- model.matrix(eval(parse(text = formula)))
     }
+
     if (pipeline == "edgeR") {
         if (method == "exactTest") {
             DGE <- edgeR::DGEList(TOC, group = rep(c(Cond1type,
@@ -915,18 +922,21 @@ TCGAanalyze_DEA <- function (mat1, mat2, metadata = TRUE, Cond1type, Cond2type,
 #' @param UnpublishedData if TRUE perform a batch correction after adding new data
 #' @param ClinicalDF a dataframe returned by GDCquery_clinic() to be used to extract year data
 #' @param AnnotationDF a dataframe with column Batch indicating different batches of the samples in the tabDF
-#' @importFrom limma voom
-#' @importFrom sva ComBat
 #' @export
 #' @return data frame with ComBat batch correction applied
 TCGAbatch_Correction <- function (tabDF,
-                                batch.factor = NULL,
-                                adjustment = NULL,
-                                ClinicalDF = data.frame(),
-                                UnpublishedData = FALSE,
-                                AnnotationDF = data.frame())
+                                  batch.factor = NULL,
+                                  adjustment = NULL,
+                                  ClinicalDF = data.frame(),
+                                  UnpublishedData = FALSE,
+                                  AnnotationDF = data.frame())
 
 {
+
+    if (!requireNamespace("sva", quietly = TRUE)) {
+        stop("sva is needed. Please install it.",
+             call. = FALSE)
+    }
     if( UnpublishedData == TRUE) {
         batch.factor <- as.factor(AnnotationDF$Batch)
         batch_corr <- sva::ComBat(dat = tabDF, batch = batch.factor, par.prior = TRUE, prior.plots = TRUE)
@@ -934,68 +944,68 @@ TCGAbatch_Correction <- function (tabDF,
 
     if( UnpublishedData == FALSE) {
 
-     if (length(batch.factor) == 0 & length(adjustment) == 0)
-        message("batch correction will be skipped")
-    else if (batch.factor %in% adjustment) {
-        stop(paste0("Cannot adjust and correct for the same factor|"))
-    }
-    my_IDs <- get_IDs(tabDF)
-    if (length(batch.factor) > 0 || length(adjustment) > 0)
-        if ((nrow(ClinicalDF) > 0 & batch.factor == "Year") ||
-            ("Year" %in% adjustment == TRUE & nrow(ClinicalDF) >
-             0)) {
-            names(ClinicalDF)[names(ClinicalDF) == "bcr_patient_barcode"] <- "patient"
-            ClinicalDF$age_at_diag_year <- floor(ClinicalDF$age_at_diagnosis/365)
-            ClinicalDF$diag_year <- ClinicalDF$age_at_diag_year +
-                ClinicalDF$year_of_birth
-            diag_yearDF <- ClinicalDF[, c("patient", "diag_year")]
-            Year <- merge(my_IDs, diag_yearDF, by = "patient")
-            Year <- Year$diag_year
-            Year <- as.factor(Year)
+        if (length(batch.factor) == 0 & length(adjustment) == 0)
+            message("batch correction will be skipped")
+        else if (batch.factor %in% adjustment) {
+            stop(paste0("Cannot adjust and correct for the same factor|"))
         }
-    else if (nrow(ClinicalDF) == 0 & batch.factor == "Year") {
-        stop("Cannot extract Year data. Clinical data was not provided")
-    }
-    Plate <- as.factor(my_IDs$plate)
-    Condition <- as.factor(my_IDs$condition)
-    TSS <- as.factor(my_IDs$tss)
-    Portion <- as.factor(my_IDs$portion)
-    Sequencing.Center <- as.factor(my_IDs$center)
-    design.matrix <- model.matrix(~Condition)
-    design.mod.combat <- model.matrix(~Condition)
-    options <- c("Plate", "TSS", "Year", "Portion", "Sequencing Center")
+        my_IDs <- get_IDs(tabDF)
+        if (length(batch.factor) > 0 || length(adjustment) > 0)
+            if ((nrow(ClinicalDF) > 0 & batch.factor == "Year") ||
+                ("Year" %in% adjustment == TRUE & nrow(ClinicalDF) >
+                 0)) {
+                names(ClinicalDF)[names(ClinicalDF) == "bcr_patient_barcode"] <- "patient"
+                ClinicalDF$age_at_diag_year <- floor(ClinicalDF$age_at_diagnosis/365)
+                ClinicalDF$diag_year <- ClinicalDF$age_at_diag_year +
+                    ClinicalDF$year_of_birth
+                diag_yearDF <- ClinicalDF[, c("patient", "diag_year")]
+                Year <- merge(my_IDs, diag_yearDF, by = "patient")
+                Year <- Year$diag_year
+                Year <- as.factor(Year)
+            }
+        else if (nrow(ClinicalDF) == 0 & batch.factor == "Year") {
+            stop("Cannot extract Year data. Clinical data was not provided")
+        }
+        Plate <- as.factor(my_IDs$plate)
+        Condition <- as.factor(my_IDs$condition)
+        TSS <- as.factor(my_IDs$tss)
+        Portion <- as.factor(my_IDs$portion)
+        Sequencing.Center <- as.factor(my_IDs$center)
+        design.matrix <- model.matrix(~Condition)
+        design.mod.combat <- model.matrix(~Condition)
+        options <- c("Plate", "TSS", "Year", "Portion", "Sequencing Center")
 
-    if (length(batch.factor) > 1)
-        stop("Combat can only correct for one batch variable. Provide one batch factor")
-    if (batch.factor %in% options == FALSE)
-        stop(paste0(o, " is not a valid batch correction factor"))
+        if (length(batch.factor) > 1)
+            stop("Combat can only correct for one batch variable. Provide one batch factor")
+        if (batch.factor %in% options == FALSE)
+            stop(paste0(o, " is not a valid batch correction factor"))
 
-    for (o in adjustment) {
-        if (o %in% options == FALSE)
-            stop(paste0(o, " is not a valid adjustment factor"))
+        for (o in adjustment) {
+            if (o %in% options == FALSE)
+                stop(paste0(o, " is not a valid adjustment factor"))
 
-    }
-    adjustment.data <- c()
-    for (a in adjustment) {
-        if (a == "Sequencing Center")
-            a <- Sequencing.Center
-        adjustment.data <- cbind(eval(parse(text = a)), adjustment.data)
-    }
-    if (batch.factor == "Sequencing Center")
-        batch.factor <- Sequencing.Center
-    batchCombat <- eval(parse(text = batch.factor))
-    if (length(adjustment) > 0) {
-        adjustment.formula <- paste(adjustment, collapse = "+")
-        adjustment.formula <- paste0("+", adjustment.formula)
-        adjustment.formula <- paste0("~Condition", adjustment.formula)
-        print(adjustment.formula)
-        model <- data.frame(batchCombat, row.names = colnames(tabDF))
-        design.mod.combat <- model.matrix(eval(parse(text = adjustment.formula)),
-                                          data = model)
-    }
-    print(unique(batchCombat))
-    batch_corr <- sva::ComBat(dat = tabDF, batch = batchCombat,
-                              mod = design.mod.combat, par.prior = TRUE, prior.plots = TRUE)
+        }
+        adjustment.data <- c()
+        for (a in adjustment) {
+            if (a == "Sequencing Center")
+                a <- Sequencing.Center
+            adjustment.data <- cbind(eval(parse(text = a)), adjustment.data)
+        }
+        if (batch.factor == "Sequencing Center")
+            batch.factor <- Sequencing.Center
+        batchCombat <- eval(parse(text = batch.factor))
+        if (length(adjustment) > 0) {
+            adjustment.formula <- paste(adjustment, collapse = "+")
+            adjustment.formula <- paste0("+", adjustment.formula)
+            adjustment.formula <- paste0("~Condition", adjustment.formula)
+            print(adjustment.formula)
+            model <- data.frame(batchCombat, row.names = colnames(tabDF))
+            design.mod.combat <- model.matrix(eval(parse(text = adjustment.formula)),
+                                              data = model)
+        }
+        print(unique(batchCombat))
+        batch_corr <- sva::ComBat(dat = tabDF, batch = batchCombat,
+                                  mod = design.mod.combat, par.prior = TRUE, prior.plots = TRUE)
     }
 
     return(batch_corr)
@@ -1042,7 +1052,6 @@ map.ensg <- function(genome = "hg38", genes) {
 #' @param TableCond2 numeric matrix, each row represents a gene, each column
 #' represents a sample with Cond2type
 #' @param typeOrder typeOrder
-#' @importFrom edgeR DGEList estimateCommonDisp exactTest topTags
 #' @export
 #' @return table with DEGs, log Fold Change (FC), false discovery rate (FDR),
 #' the gene expression level
@@ -1199,7 +1208,7 @@ TCGAanalyze_EAcomplete <- function(TFname, RegulonList){
 #'                            EAGenes,GOtype = "DavidBP")
 #'}
 TCGAanalyze_EA <- function (GeneName, RegulonList, TableEnrichment, EAGenes, GOtype,
-          FDRThresh = 0.01,GeneSymbolsTable= FALSE )
+                            FDRThresh = 0.01,GeneSymbolsTable= FALSE )
 {
     topPathways <- nrow(TableEnrichment)
     topPathways_tab <- matrix(0, 1, topPathways)
@@ -1724,14 +1733,14 @@ TCGAanalyze_Stemness <- function(stemSig,
 
         dataAnnotationSC[sampleTP,"Annotation"] <- "TP"
         dataAnnotationSC[sampleNT,"Annotation"] <- "NT"
-        }
+    }
 
 
 
     if( annotation == "subtype"){
         dataSubt <- TCGAquery_subtype(tumor = "BRCA")
 
-         for( i in 1: nrow(dataAnnotationSC)){
+        for( i in 1: nrow(dataAnnotationSC)){
             curSample <- dataAnnotationSC$Sample[i]
             dataAnnotationSC$Annotation <- dataSubt[dataSubt$patient %in% substr(curSample,1,12),"BRCA_Subtype_PAM50"]
         }

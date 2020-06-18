@@ -133,6 +133,7 @@ checkDataTypeInput <- function(legacy, data.type){
             "Raw Simple Somatic Mutation",
             "Masked Somatic Mutation",
             "Copy Number Segment",
+            "Allele-specific Copy Number Segment",
             "Masked Copy Number Segment",
             "Isoform Expression Quantification",
             "miRNA Expression Quantification",
