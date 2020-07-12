@@ -16,14 +16,13 @@ Author: Antonio Colaprico,
     Michele Ceccarelli,
     Gianluca Bontempi,
     Houtan Noushmehr
-Maintainer:  
+Maintainer: 
     Tiago Chedraoui Silva <tiagochst@gmail.com>,
     Antonio Colaprico <axc1833@med.miami.edu>
 Depends:
     R (>= 3.5)
 Imports:
     downloader (>= 0.4),
-    survminer,
     grDevices,
     dplyr,
     gridExtra,
@@ -51,12 +50,10 @@ Imports:
     S4Vectors,
     R.utils,
     SummarizedExperiment (>= 1.4.0),
-    genefilter,
     readr,
     RColorBrewer,
     doParallel,
     GenomeInfoDb,
-    GenomicFeatures,
     parallel,
     tools,
     tidyr,
@@ -110,9 +107,11 @@ Suggests:
     limma,
     edgeR,
     sva,
-    EDASeq
+    EDASeq,
+    survminer,
+    genefilter
 VignetteBuilder: knitr
 LazyData: true
 URL: https://github.com/BioinformaticsFMRP/TCGAbiolinks
 BugReports: https://github.com/BioinformaticsFMRP/TCGAbiolinks/issues
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1

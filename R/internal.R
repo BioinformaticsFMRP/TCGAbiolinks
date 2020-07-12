@@ -782,3 +782,14 @@ get_IDs <- function(data) {
     IDs$myorder  <- 1:nrow(IDs)
     return(IDs)
 }
+
+
+#' @title register cores
+#' @param package Package name
+#' @noRd
+check_package <- function(package){
+    if (!requireNamespace(package, quietly = TRUE)) {
+        stop(package, " package is needed for this function to work. Please install it.",
+             call. = FALSE)
+    }
+}

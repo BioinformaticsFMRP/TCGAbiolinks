@@ -72,6 +72,7 @@ TCGAanalyze_survival <- function(data,
 ) {
     .e <- environment()
 
+    check_package("survminer")
     if(!all(c("vital_status", "days_to_death","days_to_last_follow_up") %in% colnames(data)))
         stop("Columns vital_status, days_to_death and  days_to_last_follow_up should be in data frame")
 
@@ -1526,7 +1527,6 @@ getMetPlatInfo <- function(genome, platform) {
 #'     getTSS <- getTSS(genome.build = "hg38", TSS=list(upstream=1000, downstream=1000))
 #' }
 #' @import GenomeInfoDb
-#' @importFrom GenomicFeatures transcripts
 #' @importFrom GenomicRanges makeGRangesFromDataFrame promoters
 #' @importFrom biomaRt useEnsembl
 getTSS <- function(genome = "hg38", TSS = list(upstream = NULL, downstream = NULL)){
