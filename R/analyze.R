@@ -405,7 +405,6 @@ TCGAanalyze_SurvivalKM <- function(clinical_patient,
 #' @param var.cutoff is a numeric value. See genefilter documentation
 #' @param eta is a parameter for filter1. default eta = 0.05.
 #' @param foldChange is a parameter for filter2. default foldChange = 1.
-#' @importFrom genefilter varFilter
 #' @export
 #' @return A filtered dataframe or numeric matrix where each row represents a gene,
 #' each column represents a sample
@@ -429,6 +428,7 @@ TCGAanalyze_Filtering <- function(tabDF,method,
     }
 
     if(method == "varFilter"){
+        check_package("genefilter")
         tabDF_Filt <- genefilter::varFilter(tabDF, var.func = IQR,
                                             var.cutoff= 0.75,
                                             filterByQuantile = TRUE)
