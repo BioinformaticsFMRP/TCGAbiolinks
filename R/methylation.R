@@ -22,7 +22,6 @@
 #' @param conf.int  show confidence intervals for point estimates of survival curves.
 #' @param ... Further arguments passed to \link[survminer]{ggsurvplot}.
 #' @param dpi Figure quality
-#' @importFrom survminer ggsurvplot
 #' @importFrom survival survfit Surv
 #' @importFrom scales percent
 #' @importFrom ggthemes theme_base
@@ -129,7 +128,7 @@ TCGAanalyze_survival <- function(data,
         xlim <- c(0,xlim)
     }
     suppressWarnings({
-        surv <- ggsurvplot(
+        surv <- survminer::ggsurvplot(
             fit,                       # survfit object with calculated statistics.
             risk.table = risk.table,   # show risk table.
             pval = pvalue,             # show p-value of log-rank test.
