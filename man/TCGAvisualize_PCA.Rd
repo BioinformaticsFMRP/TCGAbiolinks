@@ -39,5 +39,4 @@ dataFilt <- TCGAanalyze_Filtering(tabDF = dataBRCA, method = "quantile", qnt.cut
     # selection of normal samples "TP"
     group2 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 pca <- TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200, group1, group2)
-if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 }

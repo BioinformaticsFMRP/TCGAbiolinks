@@ -18,7 +18,6 @@
 #' \item dnet::visNet
 #' \item dnet::dCommSignif
 #' }
-#' @importFrom grDevices dev.list
 #' @details TCGAvisualize_SurvivalCoxNET allow user to perform the complete workflow using coxph
 #' and dnet package related to survival analysis with an identification of gene-active networks from
 #' high-throughput omics data using gene expression and clinical data.
@@ -48,8 +47,6 @@
 #' in human. The network is extracted from the STRING database (version 10).
 #' @param scoreConfidence restrict to those edges with high confidence (eg. score>=700)
 #' @param titlePlot is the title to show in the final plot.
-#' @importFrom survival coxph
-#' @importFrom grDevices dev.list
 #' @export
 #' @return net IGRAPH with related Cox survival genes in community (same pval and color) and with
 #' interactions from STRING database.
@@ -60,21 +57,11 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
                                          scoreConfidence = 700,
                                          titlePlot = "TCGAvisualize_SurvivalCoxNET Example"){
 
-    if (!requireNamespace("dnet", quietly = TRUE)) {
-        stop("dnet package is needed for this function to work. Please install it.",
-             call. = FALSE)
-    }
-    if (!requireNamespace("igraph", quietly = TRUE)) {
-        stop("igraph package is needed for this function to work. Please install it.",
-             call. = FALSE)
-    }
-    #clinical_patient<- dataClin
-    #dataGE <- dataFilt
-    #Genelist <- rownames(dataSurv)
-    #scoreConfidence = 700
+    check_package("survival")
+    check_package("dnet")
+    check_package("igraph")
 
     combined_score <- NULL
-    if (!(is.null(dev.list()["RStudioGD"]))) dev.off()
 
     pdf("SurvivalCoxNETOutput.pdf", width = 15, height = 10)
 
@@ -125,7 +112,7 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
         data <- cbind(pd, gene = md_selected[,i])
         data <- data [which(data$gene !="-Inf"),]
 
-        fit <- coxph(formula=Surv(time,status) ~., data=data)
+        fit <- survival::coxph(formula=survival::Surv(time,status) ~., data=data)
         ## ANOVA (Chisq test)
         cox <- summary(fit)
         cat(paste( (ncol(md_selected)-i),".",sep=""))
@@ -223,7 +210,6 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
 #'     # selection of normal samples "TP"
 #'     group2 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 #' pca <- TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200, group1, group2)
-#' if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes,group1, group2) {
     ComparisonSelected <- "Normal vs Tumor"
     TitlePlot <- paste0("PCA ", "top ", ntopgenes,
@@ -302,7 +288,6 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes,group1, grou
 #'          nRGTab = Genelist,
 #'          nBar = 10,
 #'          filename="a.pdf")
-#' while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 #' \dontrun{
 #' Genelist <- rownames(dataDEGsFiltLevel)
 #' system.time(ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",Genelist))
@@ -597,9 +582,7 @@ TCGAvisualize_BarPlot <- function(DFfilt,
 #'                                       ,"IDHMut-noncod"="gold")),
 #'                     type = "methylation",
 #'                     show_row_names=TRUE)
-#' if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 #' @export
-#' @importFrom tools file_ext
 #' @return Heatmap plotted in the device
 TCGAvisualize_Heatmap <- function(
     data,
@@ -821,8 +804,8 @@ TCGAvisualize_Heatmap <- function(
         }
     }
     if(!is.null(filename)){
-        if(file_ext(filename) == "png") png(filename, width = width, height = height )
-        if(file_ext(filename) == "pdf") pdf(filename, width = width, height = height )
+        if(tools::file_ext(filename) == "png") png(filename, width = width, height = height )
+        if(tools::file_ext(filename) == "pdf") pdf(filename, width = width, height = height )
         ComplexHeatmap::draw(heatmap)
         dev.off()
     } else {
