@@ -40,11 +40,9 @@ Imports:
     ggthemes,
     stringr (>= 1.0.0),
     IRanges,
-    scales,
     rvest (>= 0.3.0),
     stats,
     utils,
-    selectr,
     S4Vectors,
     R.utils,
     SummarizedExperiment (>= 1.4.0),
@@ -107,7 +105,8 @@ Suggests:
     survival,
     doParallel,
     parallel,
-    ggrepel (>= 0.6.3)
+    ggrepel (>= 0.6.3),
+    scales
 VignetteBuilder: knitr
 LazyData: true
 URL: https://github.com/BioinformaticsFMRP/TCGAbiolinks
