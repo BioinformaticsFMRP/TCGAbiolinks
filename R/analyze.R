@@ -218,15 +218,16 @@ TCGAanalyze_Preprocessing <- function(object,
 #'                                      ThreshTop = 0.67,
 #'                                      ThreshDown = 0.33)
 #' }
-TCGAanalyze_SurvivalKM <- function(clinical_patient,
-                                   dataGE,
-                                   Genelist,
-                                   Survresult = FALSE,
-                                   ThreshTop = 0.67,
-                                   ThreshDown = 0.33,
-                                   p.cut = 0.05,
-                                   group1,
-                                   group2){
+TCGAanalyze_SurvivalKM <- function(
+    clinical_patient,
+    dataGE,
+    Genelist,
+    Survresult = FALSE,
+    ThreshTop = 0.67,
+    ThreshDown = 0.33,
+    p.cut = 0.05,
+    group1,
+    group2){
 
     # Check which genes we really have in the matrix
     Genelist <- intersect(rownames(dataGE),Genelist)

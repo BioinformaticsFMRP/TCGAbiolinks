@@ -72,7 +72,7 @@ and when var.scale = 1)}
 \item{varname.abbrev}{whether or not to abbreviate the variable names}
 }
 \value{
-a ggplot2 plot
+A ggplot2 plot
 }
 \description{
 Biplot for Principal Components using ggplot2
