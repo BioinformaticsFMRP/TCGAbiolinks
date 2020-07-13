@@ -101,13 +101,21 @@ Retrieve linkedOmics data from http://linkedomics.org/
 }
 \examples{
 \dontrun{
-TCGA_COAD_protein <- getLinkedOmicsData(project = "TCGA-COADREAD",
-dataset = "Proteome (Gene level)")
-TCGA_COAD_RNASeq_hiseq <- getLinkedOmicsData(project = "TCGA-COADREAD",
-dataset = "RNAseq (HiSeq, Gene level)")
-TCGA_COAD_RNASeq_ga <- getLinkedOmicsData(project = "TCGA-COADREAD",
-dataset = "RNAseq (GA, Gene level)")
-TCGA_COAD_RPPA <- getLinkedOmicsData(project = "TCGA-COADREAD",
-dataset = "RPPA (Gene level)")
+TCGA_COAD_protein <- getLinkedOmicsData(
+  project = "TCGA-COADREAD",
+  dataset = "Proteome (Gene level)"
+)
+TCGA_COAD_RNASeq_hiseq <- getLinkedOmicsData(
+  project = "TCGA-COADREAD",
+  dataset = "RNAseq (HiSeq, Gene level)"
+)
+TCGA_COAD_RNASeq_ga <- getLinkedOmicsData(
+  project = "TCGA-COADREAD",
+  dataset = "RNAseq (GA, Gene level)"
+)
+TCGA_COAD_RPPA <- getLinkedOmicsData(
+  project = "TCGA-COADREAD",
+  dataset = "RPPA (Gene level)"
+)
 }
 }
