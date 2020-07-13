@@ -88,18 +88,26 @@
 #' @return A matrix with the data
 #' @examples
 #' \dontrun{
-#' TCGA_COAD_protein <- getLinkedOmicsData(project = "TCGA-COADREAD",
-#' dataset = "Proteome (Gene level)")
-#' TCGA_COAD_RNASeq_hiseq <- getLinkedOmicsData(project = "TCGA-COADREAD",
-#' dataset = "RNAseq (HiSeq, Gene level)")
-#' TCGA_COAD_RNASeq_ga <- getLinkedOmicsData(project = "TCGA-COADREAD",
-#' dataset = "RNAseq (GA, Gene level)")
-#' TCGA_COAD_RPPA <- getLinkedOmicsData(project = "TCGA-COADREAD",
-#' dataset = "RPPA (Gene level)")
+#' TCGA_COAD_protein <- getLinkedOmicsData(
+#'   project = "TCGA-COADREAD",
+#'   dataset = "Proteome (Gene level)"
+#' )
+#' TCGA_COAD_RNASeq_hiseq <- getLinkedOmicsData(
+#'   project = "TCGA-COADREAD",
+#'   dataset = "RNAseq (HiSeq, Gene level)"
+#' )
+#' TCGA_COAD_RNASeq_ga <- getLinkedOmicsData(
+#'   project = "TCGA-COADREAD",
+#'   dataset = "RNAseq (GA, Gene level)"
+#' )
+#' TCGA_COAD_RPPA <- getLinkedOmicsData(
+#'   project = "TCGA-COADREAD",
+#'   dataset = "RPPA (Gene level)"
+#' )
 #' }
 getLinkedOmicsData <- function(project, dataset){
 
-    tab <- get(data("linkedOmics.data",package = "TCGAbiolinksGUI.data"))
+    tab <- get(data("linkedOmics.data",package = "TCGAbiolinksGUI.data", envir = environment()))
 
     if(missing(project) || !project %in% tab$project){
         print(knitr::kable(data.frame("Avail projects" = tab$project %>% unique())))
