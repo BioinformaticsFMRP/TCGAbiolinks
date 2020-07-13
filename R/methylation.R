@@ -1,4 +1,5 @@
 
+
 #' @title Creates survival analysis
 #' @description Creates a survival plot from TCGA patient clinical data
 #' using survival library. It uses the fields days_to_death and vital, plus a
@@ -22,11 +23,6 @@
 #' @param conf.int  show confidence intervals for point estimates of survival curves.
 #' @param ... Further arguments passed to \link[survminer]{ggsurvplot}.
 #' @param dpi Figure quality
-#' @importFrom survival survfit Surv
-#' @importFrom scales percent
-#' @importFrom ggthemes theme_base
-#' @importFrom ggrepel geom_text_repel
-#' @importFrom gridExtra gtable_rbind
 #' @export
 #' @return Survival plot
 #' @examples
@@ -51,108 +47,157 @@
 #'                      xlim = c(100,1000),
 #'                      conf.int = FALSE,
 #'                      color = c("Dark2"))
-TCGAanalyze_survival <- function(data,
-                                 clusterCol = NULL,
-                                 legend = "Legend",
-                                 labels = NULL,
-                                 risk.table = TRUE,
-                                 xlim = NULL,
-                                 main = "Kaplan-Meier Overall Survival Curves",
-                                 ylab = "Probability of survival",
-                                 xlab = "Time since diagnosis (days)",
-                                 filename = "survival.pdf",
-                                 color = NULL,
-                                 height = 8,
-                                 width = 12,
-                                 dpi = 300,
-                                 pvalue = TRUE,
-                                 conf.int = TRUE,
-                                 ...
-) {
+TCGAanalyze_survival <- function(
+    data,
+    clusterCol = NULL,
+    legend = "Legend",
+    labels = NULL,
+    risk.table = TRUE,
+    xlim = NULL,
+    main = "Kaplan-Meier Overall Survival Curves",
+    ylab = "Probability of survival",
+    xlab = "Time since diagnosis (days)",
+    filename = "survival.pdf",
+    color = NULL,
+    height = 8,
+    width = 12,
+    dpi = 300,
+    pvalue = TRUE,
+    conf.int = TRUE,
+    ...) {
     .e <- environment()
 
     check_package("survminer")
-    if(!all(c("vital_status", "days_to_death","days_to_last_follow_up") %in% colnames(data)))
-        stop("Columns vital_status, days_to_death and  days_to_last_follow_up should be in data frame")
+    check_package("survival")
+    check_package("gridExtra")
 
-    if(is.null(color)){
-        color <- rainbow(length(unique(data[,clusterCol])))
+    if (!all(
+        c(
+            "vital_status",
+            "days_to_death",
+            "days_to_last_follow_up"
+        ) %in% colnames(data)
+    ))
+        stop(
+            "Columns vital_status, days_to_death and  days_to_last_follow_up should be in data frame"
+        )
+
+    if (is.null(color)) {
+        color <- rainbow(length(unique(data[, clusterCol])))
     }
 
     group <- NULL
     if (is.null(clusterCol)) {
         stop("Please provide the clusterCol argument")
-    } else if(length(unique(data[,clusterCol])) == 1) {
-        stop( paste0("Sorry, but I'm expecting at least two groups\n",
-                     "  Only this group found: ", unique(data[,clusterCol])))
+    } else if (length(unique(data[, clusterCol])) == 1) {
+        stop(
+            paste0(
+                "Sorry, but I'm expecting at least two groups\n",
+                "  Only this group found: ",
+                unique(data[, clusterCol])
+            )
+        )
     }
     notDead <- is.na(data$days_to_death)
 
     if (any(notDead == TRUE)) {
-        data[notDead,"days_to_death"] <- data[notDead,"days_to_last_follow_up"]
+        data[notDead, "days_to_death"] <-
+            data[notDead, "days_to_last_follow_up"]
     }
-    if(length(data[which((data[,"days_to_death"] < 0) == T),"sample"]) > 0 & "sample" %in% colnames(data)) {
-        message("Incosistencies in the data were found. The following samples have a negative days_to_death value:")
-        message(paste(data[which((data[,"days_to_death"] < 0) == T),"sample"], collapse = ", "))
+    if (length(data[which((data[, "days_to_death"] < 0) == T), "sample"]) > 0 &
+        "sample" %in% colnames(data)) {
+        message(
+            "Incosistencies in the data were found. The following samples have a negative days_to_death value:"
+        )
+        message(paste(data[which((data[, "days_to_death"] < 0) == T), "sample"], collapse = ", "))
     }
-    if(any(is.na(data[,"days_to_death"])) & "sample" %in% colnames(data)) {
-        message("Incosistencies in the data were found. The following samples have a NA days_to_death value:")
-        message(paste(data[is.na(data[,"days_to_death"]),"sample"], collapse = ", "))
+    if (any(is.na(data[, "days_to_death"])) &
+        "sample" %in% colnames(data)) {
+        message(
+            "Incosistencies in the data were found. The following samples have a NA days_to_death value:"
+        )
+        message(paste(data[is.na(data[, "days_to_death"]), "sample"], collapse = ", "))
     }
 
     # create a column to be used with survival package, info need
     # to be TRUE(DEAD)/FALSE (ALIVE)
-    data$s <- grepl("dead|deceased",data$vital_status,ignore.case = TRUE)
+    data$s <- grepl("dead|deceased", data$vital_status, ignore.case = TRUE)
 
     # Column with groups
-    data$type <- as.factor(data[,clusterCol])
-    data <-  data[,c("days_to_death","s","type")]
+    data$type <- as.factor(data[, clusterCol])
+    data <-  data[, c("days_to_death", "s", "type")]
     # create the formula for survival analysis
-    f.m <- formula(Surv(as.numeric(data$days_to_death),event=data$s) ~ data$type)
-    fit <- do.call(survfit, list(formula = f.m, data = data))
+    f.m <-
+        formula(survival::Surv(as.numeric(data$days_to_death), event = data$s) ~ data$type)
+    fit <- do.call(survival::survfit, list(formula = f.m, data = data))
 
     label.add.n <- function(x) {
-        na.idx <- is.na(data[,"days_to_death"])
-        negative.idx <- data[,"days_to_death"] < 0
+        na.idx <- is.na(data[, "days_to_death"])
+        negative.idx <- data[, "days_to_death"] < 0
         idx <- !(na.idx | negative.idx)
         return(paste0(x, " (n = ",
-                      sum(data[idx,"type"] == x), ")"))
+                      sum(data[idx, "type"] == x), ")"))
     }
 
-    if(is.null(labels)){
+    if (is.null(labels)) {
         d <- survminer::surv_summary(fit, data = data)
-        order <- unname(sapply(levels(d$strata), function(x) unlist(str_split(x, "="))[2]))
-        labels <- sapply(order,label.add.n)
+        order <-
+            unname(sapply(levels(d$strata), function(x)
+                unlist(str_split(x, "="))[2]))
+        labels <- sapply(order, label.add.n)
     }
-    if(length(xlim) == 1) {
-        xlim <- c(0,xlim)
+    if (length(xlim) == 1) {
+        xlim <- c(0, xlim)
     }
     suppressWarnings({
         surv <- survminer::ggsurvplot(
-            fit,                       # survfit object with calculated statistics.
-            risk.table = risk.table,   # show risk table.
-            pval = pvalue,             # show p-value of log-rank test.
-            conf.int = conf.int,       # show confidence intervals for point estimaes of survival curves.
-            xlim = xlim,               # present narrower X axis, but not affect survival estimates.
-            main = main,               # Title
-            xlab = xlab,               # customize X axis label.
-            legend.title = legend,     # Legend title
-            legend.labs = labels,      # change legend labels.
-            palette =  color,          # custom color palettes.
+            fit,
+            # survfit object with calculated statistics.
+            risk.table = risk.table,
+            # show risk table.
+            pval = pvalue,
+            # show p-value of log-rank test.
+            conf.int = conf.int,
+            # show confidence intervals for point estimaes of survival curves.
+            xlim = xlim,
+            # present narrower X axis, but not affect survival estimates.
+            main = main,
+            # Title
+            xlab = xlab,
+            # customize X axis label.
+            legend.title = legend,
+            # Legend title
+            legend.labs = labels,
+            # change legend labels.
+            palette =  color,
+            # custom color palettes.
             ...
         )
     })
 
 
-    if(!is.null(filename)) {
-        ggsave(surv$plot, filename = filename, width = width, height = height, dpi = dpi)
+    if (!is.null(filename)) {
+        ggsave(
+            surv$plot,
+            filename = filename,
+            width = width,
+            height = height,
+            dpi = dpi
+        )
         message(paste0("File saved as: ", filename))
-        if(risk.table){
+        if (risk.table) {
             g1 <- ggplotGrob(surv$plot)
             g2 <- ggplotGrob(surv$table)
             min_ncol <- min(ncol(g2), ncol(g1))
-            g <- gtable_rbind(g1[, 1:min_ncol], g2[, 1:min_ncol], size="last")
-            ggsave(g, filename = filename, width = width, height = height, dpi = dpi)
+            g <-
+                gridExtra::gtable_rbind(g1[, 1:min_ncol], g2[, 1:min_ncol], size = "last")
+            ggsave(
+                g,
+                filename = filename,
+                width = width,
+                height = height,
+                dpi = dpi
+            )
         }
     } else {
         return(surv)
@@ -237,9 +282,8 @@ TCGAvisualize_meanMethylation <- function(data,
                                           plot.jitter = TRUE,
                                           jitter.size = 3,
                                           filename = "groupMeanMet.pdf",
-                                          ylab = expression(
-                                              paste("Mean DNA methylation (",
-                                                    beta,"-values)")),
+                                          ylab = expression(paste("Mean DNA methylation (",
+                                                                  beta, "-values)")),
                                           xlab = NULL,
                                           title = "Mean DNA methylation",
                                           labels = NULL,
@@ -256,64 +300,79 @@ TCGAvisualize_meanMethylation <- function(data,
                                           width = 10,
                                           height = 10,
                                           dpi = 600,
-                                          axis.text.x.angle = 90
-) {
+                                          axis.text.x.angle = 90) {
     .e <- environment()
-    mean <- colMeans(assay(data),na.rm = TRUE)
+    mean <- colMeans(assay(data), na.rm = TRUE)
 
-    if (is.null(groupCol)){
-        groups <- rep("Patient",length(mean))
+    if (is.null(groupCol)) {
+        groups <- rep("Patient", length(mean))
     } else {
-        if(!(groupCol %in% colnames(colData(data)))) stop("groupCol not found in the object")
-        groups <- colData(data)[,groupCol]
+        if (!(groupCol %in% colnames(colData(data))))
+            stop("groupCol not found in the object")
+        groups <- colData(data)[, groupCol]
     }
 
-    if (is.null(subgroupCol)){
+    if (is.null(subgroupCol)) {
         subgroups <- NULL
     } else {
-        if(!(subgroupCol %in% colnames(colData(data)))) stop("subgroupCol not found in the object")
-        subgroups <- colData(data)[,subgroupCol]
+        if (!(subgroupCol %in% colnames(colData(data))))
+            stop("subgroupCol not found in the object")
+        subgroups <- colData(data)[, subgroupCol]
     }
 
-    if (!is.null(subgroupCol)){
-        df <- data.frame(mean = mean, groups = groups, subgroups = subgroups, samples = colnames(data))
+    if (!is.null(subgroupCol)) {
+        df <-
+            data.frame(
+                mean = mean,
+                groups = groups,
+                subgroups = subgroups,
+                samples = colnames(data)
+            )
     } else {
-        df <- data.frame(mean = mean, groups = groups,samples = colnames(data))
+        df <-
+            data.frame(mean = mean,
+                       groups = groups,
+                       samples = colnames(data))
     }
     message("==================== DATA Summary ====================")
-    data.summary <- ddply(df, .(groups), summarize,
-                          Mean = mean(mean),
-                          Median = median(mean),
-                          Max = max(mean),
-                          Min = min(mean))
+    data.summary <- ddply(
+        df,
+        .(groups),
+        summarize,
+        Mean = mean(mean),
+        Median = median(mean),
+        Max = max(mean),
+        Min = min(mean)
+    )
     print(data.summary)
     message("==================== END DATA Summary ====================")
 
     groups <- unique(df$groups)
-    mat.pvalue <- matrix(ncol = length(groups),
-                         nrow = length(groups),
-                         dimnames = list(groups,groups)
+    mat.pvalue <- matrix(
+        ncol = length(groups),
+        nrow = length(groups),
+        dimnames = list(groups, groups)
     )
 
-    if(length(groups) > 1){
-        comb2by2 <- t(combn(unique(df$groups),2))
+    if (length(groups) > 1) {
+        comb2by2 <- t(combn(unique(df$groups), 2))
 
-        for (i in 1:nrow(comb2by2)){
+        for (i in 1:nrow(comb2by2)) {
             try({
                 aux <- t.test(mean ~ groups,
-                              data = subset(df,subset=df$groups %in% comb2by2[i,]) )$p.value;
-                mat.pvalue[comb2by2[i,1],comb2by2[i,2]] <- aux
-                mat.pvalue[comb2by2[i,2],comb2by2[i,1]] <- aux
+                              data = subset(df, subset = df$groups %in% comb2by2[i, ]))$p.value
+
+                mat.pvalue[comb2by2[i, 1], comb2by2[i, 2]] <- aux
+                mat.pvalue[comb2by2[i, 2], comb2by2[i, 1]] <- aux
             },
-            silent = TRUE
-            )
+            silent = TRUE)
         }
         message("==================== T test results ====================")
         print(mat.pvalue)
         message("==================== END T test results ====================")
 
     }
-    if(print.pvalue & length(unique(df$groups)) == 2) {
+    if (print.pvalue & length(unique(df$groups)) == 2) {
         pvalue <- t.test(mean ~ groups, data = df)$p.value
     } else {
         print.pvalue <- FALSE
@@ -322,7 +381,9 @@ TCGAvisualize_meanMethylation <- function(data,
     # mean methylation
     label.add.n <- function(x) {
         paste0(x, " (n = ",
-               nrow(subset(df,subset = (df$groups == x))), ")")
+               nrow(subset(df, subset = (
+                   df$groups == x
+               ))), ")")
     }
     if (is.null(group.legend)) {
         group.legend <- groupCol
@@ -331,30 +392,31 @@ TCGAvisualize_meanMethylation <- function(data,
         subgroup.legend <- subgroupCol
     }
 
-    if(missing(sort)){
-        if(missing(order)){
+    if (missing(sort)) {
+        if (missing(order)) {
             x <- factor(df$groups)
         } else {
-            x <- factor(df$groups,levels = order)
+            x <- factor(df$groups, levels = order)
         }
-    } else if(sort == "mean.asc") {
-        x <- reorder(df$groups, df$mean, FUN="mean")
-    } else  if(sort == "mean.desc") {
-        x <- reorder(df$groups, -df$mean, FUN="mean")
-    } else if(sort == "median.asc") {
-        x <- reorder(df$groups, df$mean, FUN="median")
-    } else if(sort == "median.desc") {
-        x <- reorder(df$groups, -df$mean, FUN="median")
+    } else if (sort == "mean.asc") {
+        x <- reorder(df$groups, df$mean, FUN = "mean")
+    } else  if (sort == "mean.desc") {
+        x <- reorder(df$groups, -df$mean, FUN = "mean")
+    } else if (sort == "median.asc") {
+        x <- reorder(df$groups, df$mean, FUN = "median")
+    } else if (sort == "median.desc") {
+        x <- reorder(df$groups, -df$mean, FUN = "median")
     }
     x <- as.character(x)
     if (is.null(labels)) {
         labels <- unique(x)
-        labels <- sapply(labels,label.add.n)
+        labels <- sapply(labels, label.add.n)
     }
 
-    if(is.null(color)){
+    if (is.null(color)) {
         color <- rainbow(length(labels))
-        color <- color[(match(unique(x),unique(as.character(df$groups))))]
+        color <-
+            color[(match(unique(x), unique(as.character(df$groups))))]
     }
     print(x)
     print(df$groups)
@@ -362,57 +424,83 @@ TCGAvisualize_meanMethylation <- function(data,
     p <- ggplot(df, aes(x, df$mean),
                 environment = .e) +
         geom_boxplot(aes(fill = x),
-                     notchwidth = 0.25, outlier.shape = NA)
+                     notchwidth = 0.25,
+                     outlier.shape = NA)
 
-    if (plot.jitter){
-
-        if (!is.null(subgroupCol)){
-
-            p <- p + geom_jitter(aes(shape = subgroups,
-                                     size =  subgroups),
-                                 position = position_jitter(width = 0.1),
-                                 size = jitter.size)
+    if (plot.jitter) {
+        if (!is.null(subgroupCol)) {
+            p <- p + geom_jitter(
+                aes(shape = subgroups,
+                    size =  subgroups),
+                position = position_jitter(width = 0.1),
+                size = jitter.size
+            )
         } else {
             p <- p + geom_jitter(position = position_jitter(width = 0.1),
                                  size = jitter.size)
         }
     }
-    if(add.axis.x.text){
+    if (add.axis.x.text) {
         axis.text.x <- element_text(angle = axis.text.x.angle,
                                     vjust = 0.5)
     } else {
         axis.text.x <-  element_blank()
     }
-    p <- p + scale_fill_manual(values = color,labels = labels, name = group.legend)
-    p <- p + scale_x_discrete(limits=levels(x))
+    p <-
+        p + scale_fill_manual(values = color,
+                              labels = labels,
+                              name = group.legend)
+    p <- p + scale_x_discrete(limits = levels(x))
     p <- p + ylab(ylab) + xlab(xlab) + labs(title = title) +
-        labs(shape=subgroup.legend, color=group.legend) +
+        labs(shape = subgroup.legend, color = group.legend) +
         theme_minimal() +
-        theme(axis.text.x = axis.text.x,
-              plot.title = element_text(face = "bold", hjust = 0.5),
-              legend.position=legend.position,
-              legend.key = element_rect(colour = 'white')) +
-        guides(fill=guide_legend(ncol=legend.ncols,title.position = legend.title.position, title.hjust =0.5))
+        theme(
+            axis.text.x = axis.text.x,
+            plot.title = element_text(face = "bold", hjust = 0.5),
+            legend.position = legend.position,
+            legend.key = element_rect(colour = 'white')
+        ) +
+        guides(
+            fill = guide_legend(
+                ncol = legend.ncols,
+                title.position = legend.title.position,
+                title.hjust = 0.5
+            )
+        )
 
-    if (!is.null(shapes)){
+    if (!is.null(shapes)) {
         p <- p + scale_shape_manual(values = shapes)
     }
 
-    if (print.pvalue){
-        p <- p + annotate("text",x = -Inf,y = -Inf, hjust = -0.1,
-                          vjust = -1.0, size = 5,
-                          label = paste0("P-value = ",
-                                         format(pvalue,scientific = TRUE,
-                                                digits = 2)))
+    if (print.pvalue) {
+        p <- p + annotate(
+            "text",
+            x = -Inf,
+            y = -Inf,
+            hjust = -0.1,
+            vjust = -1.0,
+            size = 5,
+            label = paste0("P-value = ",
+                           format(
+                               pvalue, scientific = TRUE,
+                               digits = 2
+                           ))
+        )
     }
-    if(!is.null(y.limits)){
-        p <- p + expand_limits(y = y.limits )
+    if (!is.null(y.limits)) {
+        p <- p + expand_limits(y = y.limits)
     }
 
     # saving box plot to analyse it
-    if(!is.null(filename)){
-        ggsave(p, filename = filename, width = width, height = height, dpi = dpi)
-        message(paste("Plot saved in: ", file.path(getwd(),filename)))
+    if (!is.null(filename)) {
+        ggsave(
+            p,
+            filename = filename,
+            width = width,
+            height = height,
+            dpi = dpi
+        )
+        message(paste("Plot saved in: ", file.path(getwd(), filename)))
     } else {
         return(p)
     }
@@ -464,7 +552,6 @@ TCGAvisualize_meanMethylation <- function(data,
 #' results <- TCGAbiolinks:::dmc.non.parametric.se(data,"group")
 #' @importFrom plyr adply
 #' @importFrom stats wilcox.test
-#' @importFrom doParallel registerDoParallel
 #' @keywords internal
 dmc.non.parametric.se <- function(data,
                                   groupCol = NULL,
@@ -474,43 +561,41 @@ dmc.non.parametric.se <- function(data,
                                   adj.method = "BH",
                                   alternative = "two.sided",
                                   cores = 1) {
-
-
-
     if (is.null(groupCol)) {
         message("Please, set the groupCol parameter")
         return(NULL)
     }
-    if ( length(unique(colData(data)[,groupCol])) != 2 &&
-         is.null(group1) && is.null(group2)) {
+    if (length(unique(colData(data)[, groupCol])) != 2 &&
+        is.null(group1) && is.null(group2)) {
         message("Please, set the group1 and group2 parameters")
         return(NULL)
-    } else if (length(unique(colData(data)[,groupCol])) == 2) {
-        group1 <- unique(colData(data)[,groupCol])[1]
-        group2 <- unique(colData(data)[,groupCol])[2]
+    } else if (length(unique(colData(data)[, groupCol])) == 2) {
+        group1 <- unique(colData(data)[, groupCol])[1]
+        group2 <- unique(colData(data)[, groupCol])[2]
     }
     message("Calculating the p-values of each probe...")
     # Apply Wilcoxon test in order to calculate the p-values
-    idx1 <- which(colData(data)[,groupCol] == group1)
-    idx2 <- which(colData(data)[,groupCol] == group2)
+    idx1 <- which(colData(data)[, groupCol] == group1)
+    idx2 <- which(colData(data)[, groupCol] == group2)
 
-    if(!is.factor(colData(data)[,groupCol])) {
-        colData(data)[,groupCol] <- factor(
-            colData(data)[,groupCol]
-        )
+    if (!is.factor(colData(data)[, groupCol])) {
+        colData(data)[, groupCol] <- factor(colData(data)[, groupCol])
     }
     m <- assay(data)
-    df <- dmc.non.parametric(m,idx1,idx2,paired,adj.method,alternative,cores)
+    df <-
+        dmc.non.parametric(m, idx1, idx2, paired, adj.method, alternative, cores)
 
     group1.col <- gsub("[[:punct:]]| ", ".", group1)
     group2.col <- gsub("[[:punct:]]| ", ".", group2)
     colp <- paste("p.value",  group1.col,  group2.col, sep = ".")
-    coladj <- paste("p.value.adj", group1.col,  group2.col, sep = ".")
-    coldiffmean <- paste("mean", group1.col,"minus.mean", group2.col, sep = ".")
+    coladj <-
+        paste("p.value.adj", group1.col,  group2.col, sep = ".")
+    coldiffmean <-
+        paste("mean", group1.col, "minus.mean", group2.col, sep = ".")
     colmeang1 <- paste("mean", group1.col, sep = ".")
     colmeang2 <- paste("mean", group2.col, sep = ".")
 
-    colnames(df) <- c(colmeang1,colmeang2,coldiffmean,colp,coladj)
+    colnames(df) <- c(colmeang1, colmeang2, coldiffmean, colp, coladj)
     return(df)
 }
 
@@ -525,7 +610,6 @@ dmc.non.parametric.se <- function(data,
 #' @param cores Number of cores to be used
 #' @return Data frame with p-values and diff mean
 #' @import stats
-#' @importFrom parallel detectCores
 #' @examples
 #'  nrows <- 200; ncols <- 20
 #'  counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows,
@@ -538,36 +622,47 @@ dmc.non.parametric <-  function(matrix,
                                 adj.method = "BH",
                                 alternative = "two.sided",
                                 cores = 1) {
-
     parallel <- FALSE
-    if (cores > 1){
-        if(is.windows()){
-            if (cores > detectCores()) cores <- detectCores()
-            registerDoParallel(cores)
+    if (cores > 1) {
+        check_package("parallel")
+        check_package("doParallel")
+        if (is.windows()) {
+            if (cores > parallel::detectCores())
+                cores <- parallel::detectCores()
+            doParallel::registerDoParallel(cores)
             parallel = TRUE
         } else {
-            if (cores > detectCores()) cores <- detectCores()
-            registerDoParallel(cores)
+            if (cores > parallel::detectCores())
+                cores <- parallel::detectCores()
+            doParallel::registerDoParallel(cores)
             parallel = TRUE
         }
     }
-    p.value <- adply(matrix,1,
+    p.value <- adply(matrix, 1,
                      function(x) {
                          suppressMessages({
-                             wilcox.test(x[idx1],
-                                         x[idx2],
-                                         paired = paired,
-                                         alternative = alternative)$p.value
+                             wilcox.test(
+                                 x[idx1],
+                                 x[idx2],
+                                 paired = paired,
+                                 alternative = alternative)$p.value
                          })
-                     }, .progress = "time", .parallel = parallel
-    )
-    p.value <- p.value[,2]
+                     }, .progress = "time", .parallel = parallel)
+    p.value <- p.value[, 2]
     p.value.adj <- p.adjust(p.value, method = adj.method)
-    mean.g1 <- rowMeans(matrix[,idx1], na.rm = TRUE)
-    mean.g2 <- rowMeans(matrix[,idx2], na.rm = TRUE)
+    mean.g1 <- rowMeans(matrix[, idx1], na.rm = TRUE)
+    mean.g2 <- rowMeans(matrix[, idx2], na.rm = TRUE)
     mean.g1_minus_mean.g2 <- mean.g1 - mean.g2
 
-    return(data.frame(mean.g1,mean.g2,mean.g1_minus_mean.g2,p.value,p.value.adj))
+    return(
+        data.frame(
+            mean.g1,
+            mean.g2,
+            mean.g1_minus_mean.g2,
+            p.value,
+            p.value.adj
+        )
+    )
 }
 
 #' @title Creates a volcano plot for DNA methylation or expression
@@ -605,7 +700,6 @@ dmc.non.parametric <-  function(matrix,
 #' @param highlight.color Color of the points highlighted
 #' @param show.names What names will be showed? Possibilities: "both", "significant", "highlighted"
 #' @export
-#' @importFrom ggrepel geom_label_repel geom_text_repel
 #' @return Saves the volcano plot in the current folder
 #' @examples
 #' x <- runif(200, -1, 1)
@@ -623,38 +717,41 @@ dmc.non.parametric <-  function(matrix,
 #'                       names.fill = TRUE, highlight = c("1","2"),show="both")
 #' }
 #' while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
-TCGAVisualize_volcano <- function(x,y,
+TCGAVisualize_volcano <- function(x,
+                                  y,
                                   filename = "volcano.pdf",
                                   ylab =  expression(paste(-Log[10],
                                                            " (FDR corrected -P values)")),
-                                  xlab=NULL,
-                                  title="Volcano plot",
-                                  legend=NULL,
-                                  label=NULL, xlim=NULL, ylim=NULL,
+                                  xlab = NULL,
+                                  title = "Volcano plot",
+                                  legend = NULL,
+                                  label = NULL,
+                                  xlim = NULL,
+                                  ylim = NULL,
                                   color = c("black", "red", "green"),
-                                  names=NULL,
-                                  names.fill= TRUE,
-                                  show.names="significant",
-                                  x.cut=0,
-                                  y.cut=0.01,
-                                  height=5,
-                                  width=10,
-                                  highlight=NULL,
+                                  names = NULL,
+                                  names.fill = TRUE,
+                                  show.names = "significant",
+                                  x.cut = 0,
+                                  y.cut = 0.01,
+                                  height = 5,
+                                  width = 10,
+                                  highlight = NULL,
                                   highlight.color = "orange",
                                   names.size = 4,
-                                  dpi = 300){
-
-    if(!is.null(names)) {
-        if(all(grepl("\\|",names))){
-            names <- strsplit(names,"\\|")
-            names <- unlist(lapply(names,function(x) x[1]))
+                                  dpi = 300) {
+    if (!is.null(names)) {
+        if (all(grepl("\\|", names))) {
+            names <- strsplit(names, "\\|")
+            names <- unlist(lapply(names, function(x)
+                x[1]))
         }
     }
     .e <- environment()
-    threshold <- rep("1",length(x))
+    threshold <- rep("1", length(x))
     names(color) <- as.character(1:3)
 
-    if(is.null(label)) {
+    if (is.null(label)) {
         label = c("1" = "Not Significant",
                   "2" = "Up regulated",
                   "3" = "Down regulated")
@@ -666,11 +763,11 @@ TCGAVisualize_volcano <- function(x,y,
     sig[is.na(sig)] <- FALSE
 
     # If x.cut
-    if(length(x.cut) == 1) {
+    if (length(x.cut) == 1) {
         x.cut.min <- -x.cut
         x.cut.max <- x.cut
     }
-    if(length(x.cut) == 2) {
+    if (length(x.cut) == 2) {
         x.cut.min <- x.cut[1]
         x.cut.max <- x.cut[2]
     }
@@ -678,77 +775,94 @@ TCGAVisualize_volcano <- function(x,y,
     # hypermethylated/up regulated samples compared to old state
     up <- x  > x.cut.max
     up[is.na(up)] <- FALSE
-    if (any(up & sig)) threshold[up & sig] <- "2"
+    if (any(up & sig))
+        threshold[up & sig] <- "2"
 
     # hypomethylated/ down regulated samples compared to old state
     down <-  x < x.cut.min
     down[is.na(down)] <- FALSE
-    if (any(down & sig)) threshold[down & sig] <- "3"
+    if (any(down & sig))
+        threshold[down & sig] <- "3"
 
-    if(!is.null(highlight)){
+    if (!is.null(highlight)) {
         idx <- which(names %in% highlight)
-        if(length(idx) >0 ){
+        if (length(idx) > 0) {
             threshold[which(names %in% highlight)]  <- "4"
-            color <- c(color,highlight.color)
+            color <- c(color, highlight.color)
             names(color) <- as.character(1:4)
         }
     }
-    df <- data.frame(x=x,y=y,threshold=threshold)
+    df <- data.frame(x = x,
+                     y = y,
+                     threshold = threshold)
 
     # As last color should be the highlighthed, we need to order all the vectors
-    if(!is.null(highlight)){
+    if (!is.null(highlight)) {
         order.idx <-  order(df$threshold)
         down <- down[order.idx]
         sig <- sig[order.idx]
         up <- up[order.idx]
-        df <- df[order.idx, ]
+        df <- df[order.idx,]
         names <- names[order.idx]
     }
     # Plot a volcano plot
-    p <- ggplot(data=df,
-                aes(x = x , y = -1 * log10(y), colour = threshold ),
-                environment = .e) +
+    p <- ggplot(
+        data = df,
+        aes(
+            x = x ,
+            y = -1 * log10(y),
+            colour = threshold
+        ),
+        environment = .e
+    ) +
         geom_point() +
         ggtitle(title) + ylab(ylab) + xlab(xlab) +
         geom_vline(aes(xintercept = x.cut.min),
-                   colour = "black", linetype = "dashed") +
+                   colour = "black",
+                   linetype = "dashed") +
         geom_vline(aes(xintercept = x.cut.max),
-                   colour = "black", linetype = "dashed") +
+                   colour = "black",
+                   linetype = "dashed") +
         geom_hline(aes(yintercept = -1 * log10(y.cut)),
-                   colour = "black", linetype = "dashed") +
-        scale_color_manual(breaks = as.numeric(names(label)),
-                           values = color,
-                           labels = label,
-                           name = legend) +
-        theme_bw() + theme(panel.border = element_blank(),
-                           panel.grid.major = element_blank(),
-                           panel.grid.minor = element_blank(),
-                           legend.text = element_text(size = 10),
-                           plot.title = element_text(hjust = 0.5),
-                           axis.line.x=element_line(colour = "black"),
-                           axis.line.y=element_line(colour = "black"),
-                           legend.position="top",
-                           legend.key = element_rect(colour = 'white'))
+                   colour = "black",
+                   linetype = "dashed") +
+        scale_color_manual(
+            breaks = as.numeric(names(label)),
+            values = color,
+            labels = label,
+            name = legend
+        ) +
+        theme_bw() + theme(
+            panel.border = element_blank(),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            legend.text = element_text(size = 10),
+            plot.title = element_text(hjust = 0.5),
+            axis.line.x = element_line(colour = "black"),
+            axis.line.y = element_line(colour = "black"),
+            legend.position = "top",
+            legend.key = element_rect(colour = 'white')
+        )
 
     # Label points with the textxy function from the calibrate plot
-    if(!is.null(names)){
+    if (!is.null(names)) {
         # With the names the user can highlight the significant genes, up and down
         # or the ones highlighted
-        if(show.names == "significant"){
+        if (show.names == "significant") {
             idx <- (up & sig) | (down & sig)
-            important <- c("2","3")
-        } else if(show.names == "highlighted") {
-            if(!is.null(highlight)){
+            important <- c("2", "3")
+        } else if (show.names == "highlighted") {
+            if (!is.null(highlight)) {
                 idx <- (names %in% highlight)
                 important <- c("4")
             } else {
                 message("Missing highlight argument")
                 return(NULL)
             }
-        } else if(show.names == "both"){
-            if(!is.null(highlight)){
+        } else if (show.names == "both") {
+            if (!is.null(highlight)) {
                 idx <- (up & sig) | (down & sig) |  (names %in% highlight)
-                important <- c("2","3","4")
+                important <- c("2", "3", "4")
             } else {
                 message("Missing highlight argument")
                 return(NULL)
@@ -758,24 +872,29 @@ TCGAVisualize_volcano <- function(x,y,
             return(NULL)
         }
 
-        if(any(threshold %in% important)){
-            if(names.fill){
-                p <- p + geom_label_repel(
+        if (any(threshold %in% important)) {
+            check_package("ggrepel")
+            if (names.fill) {
+                p <- p + ggrepel::geom_label_repel(
                     data = subset(df, threshold %in% important),
-                    aes(label = names[idx],fill=threshold),
-                    size = names.size, show.legend = FALSE,
-                    fontface = 'bold', color = 'white',
+                    aes(label = names[idx], fill = threshold),
+                    size = names.size,
+                    show.legend = FALSE,
+                    fontface = 'bold',
+                    color = 'white',
                     box.padding = unit(0.35, "lines"),
                     segment.colour = "grey",
                     point.padding = unit(0.3, "lines")
-                ) +   scale_fill_manual(values=color[as.numeric(important)])
+                ) +   scale_fill_manual(values = color[as.numeric(important)])
             }  else {
-                p <- p + geom_text_repel(
+                p <- p + ggrepel::geom_text_repel(
                     data = subset(df, threshold %in% important),
                     aes(label = names[idx]),
-                    size = names.size, show.legend = FALSE,
+                    size = names.size,
+                    show.legend = FALSE,
                     segment.colour = "grey",
-                    fontface = 'bold', color = 'black',
+                    fontface = 'bold',
+                    color = 'black',
                     point.padding = unit(0.3, "lines"),
                     box.padding = unit(0.5, 'lines')
                 )
@@ -783,8 +902,14 @@ TCGAVisualize_volcano <- function(x,y,
         }
     }
 
-    if(!is.null(filename)){
-        ggsave(p, filename = filename, width = width, height = height, dpi = dpi)
+    if (!is.null(filename)) {
+        ggsave(
+            p,
+            filename = filename,
+            width = width,
+            height = height,
+            dpi = dpi
+        )
     } else {
         return(p)
     }
@@ -889,9 +1014,7 @@ TCGAanalyze_DMC <- function(data,
                             plot.filename = "methylation_volcano.pdf",
                             ylab =  expression(paste(-Log[10],
                                                      " (FDR corrected -P values)")),
-                            xlab =  expression(paste(
-                                "DNA Methylation difference (",beta,"-values)")
-                            ),
+                            xlab =  expression(paste("DNA Methylation difference (", beta, "-values)")),
                             title = NULL,
                             legend = "Legend",
                             color = c("black",  "red", "darkgreen"),
@@ -904,16 +1027,24 @@ TCGAanalyze_DMC <- function(data,
                             save = TRUE,
                             save.directory = ".",
                             filename = NULL) {
-
     names(color) <- as.character(1:3)
     # Check if object is a summarized Experiment
-    if(!is(data,"RangedSummarizedExperiment")){
-        stop(paste0("Sorry, but I'm expecting a Summarized Experiment object, but I got a: ", class(data)))
+    if (!is(data, "RangedSummarizedExperiment")) {
+        stop(
+            paste0(
+                "Sorry, but I'm expecting a Summarized Experiment object, but I got a: ",
+                class(data)
+            )
+        )
     }
 
     # Check if object has NAs for all samples
-    if(any(rowSums(!is.na(assay(data))) == 0)){
-        stop(paste0("Sorry, but we found some probes with NA for all samples in your data, please either remove/or replace them"))
+    if (any(rowSums(!is.na(assay(data))) == 0)) {
+        stop(
+            paste0(
+                "Sorry, but we found some probes with NA for all samples in your data, please either remove/or replace them"
+            )
+        )
     }
 
     if (is.null(groupCol)) {
@@ -921,44 +1052,46 @@ TCGAanalyze_DMC <- function(data,
         return(NULL)
     }
 
-    if(!(groupCol %in% colnames(colData(data)))){
-        stop(paste0("column ",groupCol, " not found in the object"))
+    if (!(groupCol %in% colnames(colData(data)))) {
+        stop(paste0("column ", groupCol, " not found in the object"))
     }
 
-    if ( length(unique(colData(data)[,groupCol])) != 2 &&
-         is.null(group1) && is.null(group2)) {
+    if (length(unique(colData(data)[, groupCol])) != 2 &&
+        is.null(group1) && is.null(group2)) {
         message("Please, set the group1 and group2 parameters")
         return(NULL)
-    } else if (length(unique(colData(data)[,groupCol])) == 2  && (
-        is.null(group1) || is.null(group2)) ) {
-        group1 <- unique(colData(data)[,groupCol])[1]
-        group2 <- unique(colData(data)[,groupCol])[2]
+    } else if (length(unique(colData(data)[, groupCol])) == 2  && (is.null(group1) ||
+                                                                   is.null(group2))) {
+        group1 <- unique(colData(data)[, groupCol])[1]
+        group2 <- unique(colData(data)[, groupCol])[2]
     } else {
         message(paste0("Group1:", group1))
         message(paste0("Group2:", group2))
     }
 
     # Check if groups has at least one sample
-    if(!any(colData(data)[,groupCol] == group1,na.rm = TRUE)){
-        stop(paste0("Sorry, but ", group1, " has no samples" ))
+    if (!any(colData(data)[, groupCol] == group1, na.rm = TRUE)) {
+        stop(paste0("Sorry, but ", group1, " has no samples"))
     }
-    if(!any(colData(data)[,groupCol] == group2,na.rm = TRUE)){
-        stop(paste0("Sorry, but ", group2, " has no samples" ))
+    if (!any(colData(data)[, groupCol] == group2, na.rm = TRUE)) {
+        stop(paste0("Sorry, but ", group2, " has no samples"))
     }
 
 
-    results <- dmc.non.parametric.se(data,
-                                     groupCol = groupCol,
-                                     group1 = group1,
-                                     group2 = group2,
-                                     paired = paired,
-                                     adj.method = adj.method,
-                                     alternative = alternative,
-                                     cores = cores)
+    results <- dmc.non.parametric.se(
+        data,
+        groupCol = groupCol,
+        group1 = group1,
+        group2 = group2,
+        paired = paired,
+        adj.method = adj.method,
+        alternative = alternative,
+        cores = cores
+    )
 
     # defining title and label if not specified by the user
     if (is.null(title)) {
-        title <- paste("Volcano plot", "(", group2, "vs", group1,")")
+        title <- paste("Volcano plot", "(", group2, "vs", group1, ")")
     }
 
     if (is.null(label)) {
@@ -969,48 +1102,69 @@ TCGAanalyze_DMC <- function(data,
     }
 
 
-    group1.col <- gsub("[[:punct:]]| ", ".",group1)
-    group2.col <- gsub("[[:punct:]]| ", ".",group2)
+    group1.col <- gsub("[[:punct:]]| ", ".", group1)
+    group2.col <- gsub("[[:punct:]]| ", ".", group2)
 
     # get significant data
     results$status <- "Not Significant"
-    sig <-  which(results[,grep("p.value.adj",colnames(results))] < p.cut)
-    hyper <- which(results[,grep("minus",colnames(results))] > diffmean.cut)
-    hypo <-  which(results[,grep("minus",colnames(results))] < -diffmean.cut)
-    hyper.sig <- intersect(hyper,sig)
-    hypo.sig <- intersect(hypo,sig)
+    sig <-
+        which(results[, grep("p.value.adj", colnames(results))] < p.cut)
+    hyper <-
+        which(results[, grep("minus", colnames(results))] > diffmean.cut)
+    hypo <-
+        which(results[, grep("minus", colnames(results))] < -diffmean.cut)
+    hyper.sig <- intersect(hyper, sig)
+    hypo.sig <- intersect(hypo, sig)
 
-    if (length(hyper.sig)) results[hyper.sig, "status"] <- paste0("Hypermethylated in ", group1)
-    if (length(hypo.sig)) results[hypo.sig, "status"] <- paste0("Hypermethylated in ", group1)
+    if (length(hyper.sig))
+        results[hyper.sig, "status"] <-
+        paste0("Hypermethylated in ", group1)
+    if (length(hypo.sig))
+        results[hypo.sig, "status"] <-
+        paste0("Hypermethylated in ", group1)
 
     # Plot a volcano plot
     names <- NULL
-    if(probe.names) names <- rownames(results)
+    if (probe.names)
+        names <- rownames(results)
 
-    if(plot.filename != FALSE) {
-        TCGAVisualize_volcano(x = results[,grep("minus",colnames(results))],
-                              y = results[,grep("p.value.adj",colnames(results))],
-                              filename = plot.filename,
-                              ylab =  ylab,
-                              xlab = xlab,
-                              title = title,
-                              legend = legend,
-                              label = label,
-                              names = names,
-                              x.cut = diffmean.cut,
-                              y.cut = p.cut)
+    if (plot.filename != FALSE) {
+        TCGAVisualize_volcano(
+            x = results[, grep("minus", colnames(results))],
+            y = results[, grep("p.value.adj", colnames(results))],
+            filename = plot.filename,
+            ylab =  ylab,
+            xlab = xlab,
+            title = title,
+            legend = legend,
+            label = label,
+            names = names,
+            x.cut = diffmean.cut,
+            y.cut = p.cut
+        )
     }
     if (save) {
         # saving results into a csv file
-        csv <- paste0(paste("DMR_results",
-                            gsub("_",".",groupCol),
-                            group1.col,
-                            group2.col,
-                            "pcut",p.cut,"meancut",diffmean.cut,  sep = "_"),".csv")
-        dir.create(save.directory,showWarnings = FALSE,recursive = TRUE)
-        csv <- file.path(save.directory,csv)
+        csv <- paste0(
+            paste(
+                "DMR_results",
+                gsub("_", ".", groupCol),
+                group1.col,
+                group2.col,
+                "pcut",
+                p.cut,
+                "meancut",
+                diffmean.cut,
+                sep = "_"
+            ),
+            ".csv"
+        )
+        dir.create(save.directory,
+                   showWarnings = FALSE,
+                   recursive = TRUE)
+        csv <- file.path(save.directory, csv)
         message(paste0("Saving the results also in a csv file: "), csv)
-        write.csv(results,csv)
+        write.csv(results, csv)
     }
     return(results)
 }
@@ -1072,8 +1226,6 @@ TCGAanalyze_DMC <- function(data,
 #' @import ggplot2
 #' @importFrom GenomicRanges distanceToNearest
 #' @importFrom SummarizedExperiment rowRanges rowRanges<- values<-
-#' @importFrom RColorBrewer brewer.pal
-#' @importFrom ggrepel geom_label_repel geom_text_repel
 #' @importFrom S4Vectors subjectHits queryHits
 #' @export
 #' @return Save a starburst plot
@@ -1112,95 +1264,125 @@ TCGAanalyze_DMC <- function(data,
 #'                                   diffmean.cut = 0.0,
 #'                                   names  = TRUE)
 #' }
-TCGAvisualize_starburst <- function(met,
-                                    exp,
-                                    group1 = NULL,
-                                    group2 = NULL,
-                                    exp.p.cut = 0.01,
-                                    met.p.cut = 0.01,
-                                    diffmean.cut = 0,
-                                    logFC.cut = 0,
-                                    met.platform,
-                                    genome,
-                                    names = FALSE,
-                                    names.fill = TRUE,
-                                    filename = "starburst.pdf",
-                                    return.plot = FALSE,
-                                    ylab = expression(atop("Gene Expression",
-                                                           paste(Log[10],
-                                                                 " (FDR corrected P values)"))),
-                                    xlab = expression(atop("DNA Methylation",
-                                                           paste(Log[10],
-                                                                 " (FDR corrected P values)"))),
-                                    title = "Starburst Plot",
-                                    legend = "DNA Methylation/Expression Relation",
-                                    color = NULL,
-                                    label = c("Not Significant",
-                                              "Up regulated & Hypo methylated",
-                                              "Down regulated & Hypo methylated",
-                                              "hypo methylated",
-                                              "hyper methylated",
-                                              "Up regulated",
-                                              "Down regulated",
-                                              "Up regulated & Hyper methylated",
-                                              "Down regulated & Hyper methylated"),
-                                    xlim = NULL, ylim = NULL,
-                                    height = 10,
-                                    width = 20,
-                                    dpi = 600
-)
-{
-    if(missing(genome)) stop("Please set genome (hg19 or hg38)")
-    if(missing(met.platform)) stop("Please set met.platform (EPIC, 450K or 27K)")
+TCGAvisualize_starburst <- function(
+    met,
+    exp,
+    group1 = NULL,
+    group2 = NULL,
+    exp.p.cut = 0.01,
+    met.p.cut = 0.01,
+    diffmean.cut = 0,
+    logFC.cut = 0,
+    met.platform,
+    genome,
+    names = FALSE,
+    names.fill = TRUE,
+    filename = "starburst.pdf",
+    return.plot = FALSE,
+    ylab = expression(atop("Gene Expression",
+                           paste(Log[10],
+                                 " (FDR corrected P values)"))),
+    xlab = expression(atop("DNA Methylation",
+                           paste(Log[10],
+                                 " (FDR corrected P values)"))),
+    title = "Starburst Plot",
+    legend = "DNA Methylation/Expression Relation",
+    color = NULL,
+    label = c(
+        "Not Significant",
+        "Up regulated & Hypo methylated",
+        "Down regulated & Hypo methylated",
+        "hypo methylated",
+        "hyper methylated",
+        "Up regulated",
+        "Down regulated",
+        "Up regulated & Hyper methylated",
+        "Down regulated & Hyper methylated"
+    ),
+    xlim = NULL,
+    ylim = NULL,
+    height = 10,
+    width = 20,
+    dpi = 600
+) {
+    if (missing(genome))
+        stop("Please set genome (hg19 or hg38)")
+    if (missing(met.platform))
+        stop("Please set met.platform (EPIC, 450K or 27K)")
 
     .e <- environment()
 
-    group1.col <- gsub("[[:punct:]]| ", ".",group1)
-    group2.col <- gsub("[[:punct:]]| ", ".",group2)
+    group1.col <- gsub("[[:punct:]]| ", ".", group1)
+    group2.col <- gsub("[[:punct:]]| ", ".", group2)
 
-    if(title == "Starburst Plot") {
-        if(diffmean.cut != 0 & logFC.cut == 0) {
-            title <- bquote(atop("Starburst Plot",scriptstyle((list(
-                Delta ~ bar(beta) >= .(diffmean.cut),
-                FDR[expression]  <=  .(exp.p.cut),
-                FDR[DNAmethylation]  <=  .(met.p.cut))))))
-        } else if(logFC.cut != 0 & diffmean.cut == 0) {
-            title <- bquote(atop("Starburst Plot",scriptstyle((list(
-                group("|",logFC,"|")  >=  .(logFC.cut),
-                FDR[expression]  <=  .(exp.p.cut),
-                FDR[DNAmethylation]  <=  .(met.p.cut))))))
+    if (title == "Starburst Plot") {
+        if (diffmean.cut != 0 & logFC.cut == 0) {
+            title <- bquote(atop("Starburst Plot", scriptstyle((
+                list(
+                    Delta ~ bar(beta) >= .(diffmean.cut),
+                    FDR[expression]  <=  .(exp.p.cut),
+                    FDR[DNAmethylation]  <=  .(met.p.cut)
+                )
+            ))))
+        } else if (logFC.cut != 0 & diffmean.cut == 0) {
+            title <- bquote(atop("Starburst Plot", scriptstyle((
+                list(
+                    group("|", logFC, "|")  >=  .(logFC.cut),
+                    FDR[expression]  <=  .(exp.p.cut),
+                    FDR[DNAmethylation]  <=  .(met.p.cut)
+                )
+            ))))
         } else if (logFC.cut != 0 & diffmean.cut != 0) {
-            title <- bquote(atop("Starburst Plot",scriptstyle((list(
-                Delta,bar(beta)  >=  .(diffmean.cut),
-                group("|",logFC,"|")  >=  .(logFC.cut),
-                FDR[expression]  <=  .(exp.p.cut),
-                FDR[DNAmethylation]  <=  .(met.p.cut))))))
+            title <- bquote(atop("Starburst Plot", scriptstyle((
+                list(
+                    Delta,
+                    bar(beta)  >=  .(diffmean.cut),
+                    group("|", logFC, "|")  >=  .(logFC.cut),
+                    FDR[expression]  <=  .(exp.p.cut),
+                    FDR[DNAmethylation]  <=  .(met.p.cut)
+                )
+            ))))
         }
     }
 
-    if(is.null(color)) color <- c("#000000", "#E69F00","#56B4E9", "#009E73",
-                                  "red", "#0072B2","#D55E00", "#CC79A7",
-                                  "purple")
+    if (is.null(color))
+        color <- c(
+            "#000000",
+            "#E69F00",
+            "#56B4E9",
+            "#009E73",
+            "red",
+            "#0072B2",
+            "#D55E00",
+            "#CC79A7",
+            "purple"
+        )
     names(color) <- as.character(1:9)
     names(label) <- as.character(1:9)
     names.color <- color
     names(names.color) <- label
 
-    if ( is.null(group1) || is.null(group2)) {
+    if (is.null(group1) || is.null(group2)) {
         message("Please, set the group1 and group2 parameters")
         return(NULL)
     }
 
-    if (class(met) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+    if (class(met) == class(as(SummarizedExperiment(), "RangedSummarizedExperiment"))) {
         met <- values(met)
     }
 
     # Preparing methylation
-    pcol <- gsub("[[:punct:]]| ", ".",paste("p.value.adj",group1,group2,sep = "."))
-    if(!(pcol %in%  colnames(met))){
-        pcol <- gsub("[[:punct:]]| ", ".",paste("p.value.adj",group2,group1,sep = "."))
+    pcol <-
+        gsub("[[:punct:]]| ",
+             ".",
+             paste("p.value.adj", group1, group2, sep = "."))
+    if (!(pcol %in%  colnames(met))) {
+        pcol <-
+            gsub("[[:punct:]]| ",
+                 ".",
+                 paste("p.value.adj", group2, group1, sep = "."))
     }
-    if(!(pcol %in%  colnames(met))){
+    if (!(pcol %in%  colnames(met))) {
         stop("Error! p-values adjusted not found. Please, run TCGAanalyze_DMR")
     }
 
@@ -1208,30 +1390,38 @@ TCGAvisualize_starburst <- function(met,
     fctr.cols <- sapply(exp, is.factor)
     exp[, fctr.cols] <- sapply(exp[, fctr.cols], as.character)
     # Methylation matrix and expression matrix should have the same name column for merge
-    idx <- grep("ENSG",exp[1,])
-    if(length(idx) > 0) {
+    idx <- grep("ENSG", exp[1, ])
+    if (length(idx) > 0) {
         colnames(exp)[idx] <- "ensembl_gene_id"
-    } else { # it is in the row names ?
-        if(grepl("ENSG",rownames(exp)[1])) {
+    } else {
+        # it is in the row names ?
+        if (grepl("ENSG", rownames(exp)[1])) {
             exp$ensembl_gene_id <- rownames(exp)
         } else {
             # We will consider our rownames has the gene symbol
             gene.info <- get.GRCh.bioMart(genome)
-            if(any(sapply(rownames(exp)[1:10], function(y) any(grepl(y,gene.info[,grep("external_gene_", colnames(gene.info))]))))) {
-                idx <- match(rownames(exp),gene.info[,grep("external_gene_", colnames(gene.info))])
-                exp <- exp[!is.na(idx),]
-                idx <- match(rownames(exp),gene.info[,grep("external_gene_", colnames(gene.info))])
-                exp$ensembl_gene_id <- gene.info[idx,"ensembl_gene_id"]
+            if (any(sapply(rownames(exp)[1:10], function(y)
+                any(grepl(
+                    y, gene.info[, grep("external_gene_", colnames(gene.info))]
+                ))))) {
+                idx <-
+                    match(rownames(exp), gene.info[, grep("external_gene_", colnames(gene.info))])
+                exp <- exp[!is.na(idx), ]
+                idx <-
+                    match(rownames(exp), gene.info[, grep("external_gene_", colnames(gene.info))])
+                exp$ensembl_gene_id <-
+                    gene.info[idx, "ensembl_gene_id"]
             }
         }
 
     }
 
-    if(!"probeID" %in% colnames(met))  met$probeID <- met$Composite.Element.REF
+    if (!"probeID" %in% colnames(met))
+        met$probeID <- met$Composite.Element.REF
 
 
     # Check if gene symbol columns exists
-    if(!"ensembl_gene_id" %in% colnames(exp)) {
+    if (!"ensembl_gene_id" %in% colnames(exp)) {
         stop("Column ensembl_gene_id was not found")
     }
 
@@ -1241,35 +1431,35 @@ TCGAvisualize_starburst <- function(met,
     #         the met (by probe name) and gene expression (by gene name) results
     message("o Fetching auxiliary information")
     message("oo Fetching probes genomic information")
-    met.info <- getMetPlatInfo(genome = genome,platform = met.platform)
+    met.info <- getMetPlatInfo(genome = genome, platform = met.platform)
     values(met.info) <- NULL
     message("oo Fetching TSS information")
     tss <- getTSS(genome = genome)
-    tss <- promoters(tss,upstream = 0,downstream = 0)
+    tss <- promoters(tss, upstream = 0, downstream = 0)
     message("o Mapping probes to nearest TSS")
-    dist <- distanceToNearest(tss,met.info)
+    dist <- distanceToNearest(tss, met.info)
     g <- suppressWarnings(as.data.frame(tss[queryHits(dist)]))
     g$start_position <- NULL
     g$end_position <- NULL
-    colnames(g)[1:5] <- paste0("gene_",colnames(g)[1:5])
-    m <- suppressWarnings(as.data.frame(met.info[subjectHits(dist)],row.names = NULL))
-    colnames(m) <- paste0("probe_",colnames(m))
+    colnames(g)[1:5] <- paste0("gene_", colnames(g)[1:5])
+    m <- suppressWarnings(as.data.frame(met.info[subjectHits(dist)], row.names = NULL))
+    colnames(m) <- paste0("probe_", colnames(m))
     m$probeID <- names(met.info[subjectHits(dist)])
-    nearest <- cbind(m,g)
+    nearest <- cbind(m, g)
     nearest$distance_TSS <- values(dist)$distance
     # Keep only one entry
-    nearest$id <- paste0(nearest$probeID,nearest$ensembl_gene_id)
-    nearest <- nearest[order(nearest$id, -abs(nearest$distance_TSS) ), ]
-    nearest <- nearest[ !duplicated(nearest$id), ]
+    nearest$id <- paste0(nearest$probeID, nearest$ensembl_gene_id)
+    nearest <- nearest[order(nearest$id, -abs(nearest$distance_TSS)),]
+    nearest <- nearest[!duplicated(nearest$id),]
     nearest$id <- NULL
-    nearest <- nearest[,c("distance_TSS","probeID","ensembl_gene_id")]
+    nearest <- nearest[, c("distance_TSS", "probeID", "ensembl_gene_id")]
     # END mapping nearest probe to nearest gene
     message("o Mapping results information")
     volcano <- plyr::join(nearest, exp, by = "ensembl_gene_id")
     volcano <- merge(volcano, met, by = "probeID")
 
     volcano$ID <- paste(volcano$ensembl_gene_id, volcano$probeID, sep = ".")
-    volcano <- volcano[!is.na(volcano$FDR),] # Some genes have no values
+    volcano <- volcano[!is.na(volcano$FDR), ] # Some genes have no values
     # Preparing gene expression
     volcano$geFDR <- log10(volcano$FDR)
     volcano$geFDR2 <- volcano$geFDR
@@ -1277,10 +1467,14 @@ TCGAvisualize_starburst <- function(met,
         -1 * volcano[volcano$logFC > 0, "geFDR"]
 
     # Preparing DNA methylation
-    diffcol <- gsub("[[:punct:]]| ", ".",paste("diffmean",group1,group2,sep = "."))
-    volcano$meFDR <- log10(volcano[,pcol])
+    diffcol <- gsub(
+        "[[:punct:]]| ",
+        ".",
+        paste("diffmean", group1, group2, sep = ".")
+    )
+    volcano$meFDR <- log10(volcano[, pcol])
     volcano$meFDR2 <- volcano$meFDR
-    idx <- volcano[,diffcol] > 0
+    idx <- volcano[, diffcol] > 0
     idx[is.na(idx)] <- FALSE # handling NAs
     volcano[idx, "meFDR2"] <- -1 * volcano[idx, "meFDR"]
 
@@ -1297,62 +1491,78 @@ TCGAvisualize_starburst <- function(met,
     volcano <- suppressWarnings(tibble::as.tibble(volcano))
 
     # Group 2:up regulated and hypomethylated
-    a <- dplyr::filter(volcano,
-                       volcano$geFDR2 > exp.upperthr &
-                           volcano$meFDR2 < met.lowerthr &
-                           abs(volcano[,diffcol]) > diffmean.cut &
-                           abs(volcano$logFC) > logFC.cut)
+    a <- dplyr::filter(
+        volcano,
+        volcano$geFDR2 > exp.upperthr &
+            volcano$meFDR2 < met.lowerthr &
+            abs(volcano[, diffcol]) > diffmean.cut &
+            abs(volcano$logFC) > logFC.cut
+    )
 
     # Group 3: down regulated and hypomethylated
-    b <- dplyr::filter(volcano,
-                       volcano$geFDR2 < exp.lowerthr &
-                           volcano$meFDR2 < met.lowerthr &
-                           abs(volcano[,diffcol]) > diffmean.cut &
-                           volcano$logFC < logFC.cut)
+    b <- dplyr::filter(
+        volcano,
+        volcano$geFDR2 < exp.lowerthr &
+            volcano$meFDR2 < met.lowerthr &
+            abs(volcano[, diffcol]) > diffmean.cut &
+            volcano$logFC < logFC.cut
+    )
 
     # Group 4: hypomethylated
-    c <- dplyr::filter(volcano,
-                       volcano$geFDR2 > exp.lowerthr &
-                           volcano$geFDR2 < exp.upperthr &
-                           volcano$meFDR2 < met.lowerthr &
-                           abs(volcano[,diffcol]) > diffmean.cut)
+    c <- dplyr::filter(
+        volcano,
+        volcano$geFDR2 > exp.lowerthr &
+            volcano$geFDR2 < exp.upperthr &
+            volcano$meFDR2 < met.lowerthr &
+            abs(volcano[, diffcol]) > diffmean.cut
+    )
 
     # Group 5: hypermethylated
-    d <- dplyr::filter(volcano,
-                       volcano$geFDR2 > exp.lowerthr &
-                           volcano$geFDR2 < exp.upperthr &
-                           volcano$meFDR2 > met.upperthr &
-                           abs(volcano[,diffcol]) > diffmean.cut)
+    d <- dplyr::filter(
+        volcano,
+        volcano$geFDR2 > exp.lowerthr &
+            volcano$geFDR2 < exp.upperthr &
+            volcano$meFDR2 > met.upperthr &
+            abs(volcano[, diffcol]) > diffmean.cut
+    )
 
     # Group 6: upregulated
-    e <- dplyr::filter(volcano,
-                       volcano$geFDR2 > exp.upperthr &
-                           volcano$meFDR2 < met.upperthr &
-                           volcano$meFDR2 > met.lowerthr &
-                           volcano$logFC > logFC.cut)
+    e <- dplyr::filter(
+        volcano,
+        volcano$geFDR2 > exp.upperthr &
+            volcano$meFDR2 < met.upperthr &
+            volcano$meFDR2 > met.lowerthr &
+            volcano$logFC > logFC.cut
+    )
 
     # Group 7: downregulated
-    f <- dplyr::filter(volcano,
-                       volcano$geFDR2 < exp.lowerthr &
-                           volcano$meFDR2 < met.upperthr &
-                           volcano$meFDR2 > met.lowerthr &
-                           abs(volcano$logFC) > logFC.cut)
+    f <- dplyr::filter(
+        volcano,
+        volcano$geFDR2 < exp.lowerthr &
+            volcano$meFDR2 < met.upperthr &
+            volcano$meFDR2 > met.lowerthr &
+            abs(volcano$logFC) > logFC.cut
+    )
 
     # Group 8: upregulated and hypermethylated
-    g <- dplyr::filter(volcano,
-                       volcano$geFDR2 > exp.upperthr &
-                           volcano$meFDR2 > met.upperthr &
-                           abs(volcano[,diffcol]) > diffmean.cut &
-                           volcano$logFC > logFC.cut)
+    g <- dplyr::filter(
+        volcano,
+        volcano$geFDR2 > exp.upperthr &
+            volcano$meFDR2 > met.upperthr &
+            abs(volcano[, diffcol]) > diffmean.cut &
+            volcano$logFC > logFC.cut
+    )
 
     # Group 9: downregulated and hypermethylated
-    h <- dplyr::filter(volcano,
-                       volcano$geFDR2 < exp.lowerthr &
-                           volcano$meFDR2 > met.upperthr &
-                           abs(volcano[,diffcol]) > diffmean.cut &
-                           volcano$logFC < logFC.cut)
+    h <- dplyr::filter(
+        volcano,
+        volcano$geFDR2 < exp.lowerthr &
+            volcano$meFDR2 > met.upperthr &
+            abs(volcano[, diffcol]) > diffmean.cut &
+            volcano$logFC < logFC.cut
+    )
 
-    groups <- as.character(seq(2,9))
+    groups <- as.character(seq(2, 9))
 
     # return methylation < 0, expression > 0
     volcano$starburst.status  <-  "Not Significant"
@@ -1360,66 +1570,87 @@ TCGAvisualize_starburst <- function(met,
     volcano$threshold.starburst <- "1"
     volcano$threshold.size <- "1"
 
-    state <- c("Up regulated & Hypo methylated",    # a
-               "Down regulated & Hypo methylated",  # b
-               "hypo methylated",                   # c
-               "hyper methylated",                  # d
-               "Up regulated",                      # e
-               "Down regulated",                    # f
-               "Up regulated & Hyper methylated",   # g
-               "Down regulated & Hyper methylated") # h
+    state <- c(
+        "Up regulated & Hypo methylated",
+        # a
+        "Down regulated & Hypo methylated",
+        # b
+        "hypo methylated",
+        # c
+        "hyper methylated",
+        # d
+        "Up regulated",
+        # e
+        "Down regulated",
+        # f
+        "Up regulated & Hyper methylated",
+        # g
+        "Down regulated & Hyper methylated"
+    ) # h
 
     s <- list(a, b, c, d, e, f, g, h)
     for (i in seq_along(s)) {
         idx <- s[[i]]$ID
         if (length(idx) > 0) {
             volcano[volcano$ID %in% idx, "threshold.starburst"] <- groups[i]
-            volcano[volcano$ID %in% idx, "starburst.status"] <-  state[i]
+            volcano[volcano$ID %in% idx, "starburst.status"] <-
+                state[i]
         }
     }
 
-    s <- list(a, b,g, h)
+    s <- list(a, b, g, h)
     significant <- NULL
     for (i in seq_along(s)) {
         idx <- s[[i]]$ID
         if (length(idx) > 0) {
-            significant <-  rbind(significant,volcano[volcano$ID %in% idx,])
+            significant <-  rbind(significant, volcano[volcano$ID %in% idx, ])
         }
     }
     message("o Plotting figure")
     volcano.aux <- volcano # we need an auxiliry data if dats is returned
     ## starburst plot
-    p <- ggplot(data = volcano.aux, environment = .e,
-                aes(x = volcano.aux$meFDR2,
-                    y = volcano.aux$geFDR2,
-                    colour = volcano.aux$threshold.starburst)) +
-        geom_point()
+    p <- ggplot(
+        data = volcano.aux,
+        environment = .e,
+        aes(
+            x = volcano.aux$meFDR2,
+            y = volcano.aux$geFDR2,
+            colour = volcano.aux$threshold.starburst
+        )
+    ) + geom_point()
 
-    if(names == TRUE & !is.null(significant)){
+    if (names == TRUE & !is.null(significant)) {
+        check_package("ggrepel")
         message("oo Adding names to genes")
-        if(names.fill){
-            p <- p + geom_label_repel(
+        if (names.fill) {
+            p <- p + ggrepel::geom_label_repel(
                 data = significant,
-                aes(x = significant$meFDR2,
+                aes(
+                    x = significant$meFDR2,
                     y =  significant$geFDR2,
-                    label = map.ensg(genome,significant$ensembl_gene_id)$external_gene_name,
-                    fill = as.factor(significant$starburst.status)),
+                    label = map.ensg(genome, significant$ensembl_gene_id)$external_gene_name,
+                    fill = as.factor(significant$starburst.status)
+                ),
                 size = 4,
                 show.legend = FALSE,
                 fontface = 'bold',
                 color = 'black',
                 box.padding = unit(0.35, "lines"),
                 point.padding = unit(0.3, "lines")
-            ) + scale_fill_manual(values=names.color)
+            ) + scale_fill_manual(values = names.color)
         }  else {
-            p <- p + geom_text_repel(
+            p <- p + ggrepel::geom_text_repel(
                 data = significant,
-                aes(x = significant$meFDR2,
+                aes(
+                    x = significant$meFDR2,
                     y =  significant$geFDR2,
-                    label = map.ensg(genome,significant$ensembl_gene_id)$external_gene_name,
-                    fill = significant$starburst.status),
-                size = 4, show.legend = FALSE,
-                fontface = 'bold', color = 'black',
+                    label = map.ensg(genome, significant$ensembl_gene_id)$external_gene_name,
+                    fill = significant$starburst.status
+                ),
+                size = 4,
+                show.legend = FALSE,
+                fontface = 'bold',
+                color = 'black',
                 point.padding = unit(0.3, "lines"),
                 box.padding = unit(0.5, 'lines')
             )
@@ -1433,58 +1664,83 @@ TCGAvisualize_starburst <- function(met,
     if (!is.null(ylim)) {
         p <- p + ylim(ylim)
     }
-    p <- p + ggtitle(title) + ylab(ylab) + xlab(xlab) + guides(size=FALSE)
-    p <- p + scale_color_manual(values = color, labels = label, name = legend) +
+    p <- p + ggtitle(title) + ylab(ylab) + xlab(xlab) + guides(size = FALSE)
+    p <- p + scale_color_manual(values = color,
+                                labels = label,
+                                name = legend) +
         guides(col = guide_legend(nrow = 3))
 
-    p <-  p + geom_hline(aes(yintercept = exp.lowerthr), colour = "black",
-                         linetype = "dashed") +
-        geom_hline(aes(yintercept = exp.upperthr), colour = "black",
+    p <-
+        p + geom_hline(aes(yintercept = exp.lowerthr),
+                       colour = "black",
+                       linetype = "dashed") +
+        geom_hline(aes(yintercept = exp.upperthr),
+                   colour = "black",
                    linetype = "dashed") +
-        geom_vline(aes(xintercept = met.lowerthr), colour = "black",
+        geom_vline(aes(xintercept = met.lowerthr),
+                   colour = "black",
                    linetype = "dashed") +
-        geom_vline(aes(xintercept = met.upperthr), colour = "black",
+        geom_vline(aes(xintercept = met.upperthr),
+                   colour = "black",
                    linetype = "dashed")  +
         theme_bw() +
-        theme(panel.border = element_blank(),
-              panel.grid.major = element_blank(),
-              panel.grid.minor = element_blank(),
-              axis.line.x=element_line(colour = "black"),
-              axis.line.y=element_line(colour = "black"),
-              legend.position="top",
-              legend.key = element_rect(colour = 'white'),
-              plot.title = element_text(face = "bold", size = 16,hjust = 0.5),
-              legend.text = element_text(size = 14),
-              legend.title = element_text(size = 14),
-              axis.text= element_text(size = 14),
-              axis.title.x = element_text(face = "bold", size = 14),
-              axis.text.x = element_text(vjust = 0.5,
-                                         size = 14),
-              axis.title.y = element_text(face = "bold",
-                                          size = 14),
-              axis.text.y = element_text(size = 14))
-    if(!return.plot) ggsave(filename = filename, width = width, height = height, dpi = dpi)
+        theme(
+            panel.border = element_blank(),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.line.x = element_line(colour = "black"),
+            axis.line.y = element_line(colour = "black"),
+            legend.position = "top",
+            legend.key = element_rect(colour = 'white'),
+            plot.title = element_text(
+                face = "bold",
+                size = 16,
+                hjust = 0.5
+            ),
+            legend.text = element_text(size = 14),
+            legend.title = element_text(size = 14),
+            axis.text = element_text(size = 14),
+            axis.title.x = element_text(face = "bold", size = 14),
+            axis.text.x = element_text(vjust = 0.5,
+                                       size = 14),
+            axis.title.y = element_text(face = "bold",
+                                        size = 14),
+            axis.text.y = element_text(size = 14)
+        )
+    if (!return.plot)
+        ggsave(
+            filename = filename,
+            width = width,
+            height = height,
+            dpi = dpi
+        )
     volcano$shape <- NULL
     volcano$threshold.starburst <- NULL
     volcano$threshold.size <- NULL
 
-    volcano <- dplyr::filter(volcano, volcano$geFDR <= exp.lowerthr &
-                                 volcano$meFDR <= met.lowerthr)
+    volcano <- dplyr::filter(
+        volcano,
+        volcano$geFDR <= exp.lowerthr &
+            volcano$meFDR <= met.lowerthr
+    )
 
     if (diffmean.cut != 0) {
-        volcano <- dplyr::filter(volcano, abs(volcano[,diffcol]) > diffmean.cut)
+        volcano <-
+            dplyr::filter(volcano, abs(volcano[, diffcol]) > diffmean.cut)
     }
-    if (logFC.cut != 0){
+    if (logFC.cut != 0) {
         volcano <- dplyr::filter(volcano, abs(volcano$logFC) >= logFC.cut)
     }
 
     message("o Saving results")
     message("oo Saving significant results as: starburst_results.csv")
-    message("oo It contains pair with changes both in the expression level of the nearest gene and  in the DNA methylation level")
-    suppressWarnings(write_csv(x = volcano,path = "starburst_results.csv"))
+    message(
+        "oo It contains pair with changes both in the expression level of the nearest gene and  in the DNA methylation level"
+    )
+    suppressWarnings(write_csv(x = volcano, path = "starburst_results.csv"))
 
-    if(return.plot) {
-        return(list(plot=p,starburst=volcano))
+    if (return.plot) {
+        return(list(plot = p, starburst = volcano))
     }
 
     return(volcano)
@@ -1494,17 +1750,30 @@ TCGAvisualize_starburst <- function(met,
 getMetPlatInfo <- function(genome, platform) {
     base <- "http://zwdzwd.io/InfiniumAnnotation/current"
 
-    platform <-  switch(platform,
-                        "450K" = "hm450",
-                        "450k" = "hm450",
-                        "27k"  = "hm27",
-                        "27K"  = "hm27",
-                        "EPIC" = "EPIC")
-    path <- file.path(base,platform,paste(platform,"hg19.manifest.rds", sep ="."))
-    if (grepl("hg38", genome)) path <- gsub("hg19","hg38",path)
+    platform <-  switch(
+        platform,
+        "450K" = "hm450",
+        "450k" = "hm450",
+        "27k"  = "hm27",
+        "27K"  = "hm27",
+        "EPIC" = "EPIC"
+    )
+    path <- file.path(
+        base,
+        platform,
+        paste(platform, "hg19.manifest.rds", sep = ".")
+    )
+    if (grepl("hg38", genome)) path <- gsub("hg19", "hg38", path)
     message(path)
-    if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
-    if(!file.exists(basename(path))) downloader::download(path,basename(path), mode = mode)
+
+    if (Sys.info()["sysname"] == "Windows")
+        mode <- "wb"
+    else
+        mode <- "w"
+
+    if (!file.exists(basename(path)))
+        downloader::download(path, basename(path), mode = mode)
+
     gr <- readRDS(basename(path))
     return(gr)
 }
@@ -1525,54 +1794,73 @@ getMetPlatInfo <- function(genome, platform) {
 #'     getTSS <- getTSS()
 #'     getTSS <- getTSS(genome.build = "hg38", TSS=list(upstream=1000, downstream=1000))
 #' }
-#' @import GenomeInfoDb
 #' @importFrom GenomicRanges makeGRangesFromDataFrame promoters
 #' @importFrom biomaRt useEnsembl
-getTSS <- function(genome = "hg38", TSS = list(upstream = NULL, downstream = NULL)){
-
-    host <- ifelse(genome == "hg19",  "grch37.ensembl.org","www.ensembl.org")
+getTSS <- function(
+    genome = "hg38",
+    TSS = list(upstream = NULL, downstream = NULL)
+) {
+    host <- ifelse(genome == "hg19",  "grch37.ensembl.org", "www.ensembl.org")
     ensembl <- tryCatch({
         useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host =  host)
     },  error = function(e) {
-        useEnsembl("ensembl",
-                   dataset = "hsapiens_gene_ensembl",
-                   mirror = "uswest",
-                   host =  host)
+        useEnsembl(
+            "ensembl",
+            dataset = "hsapiens_gene_ensembl",
+            mirror = "uswest",
+            host =  host
+        )
     })
-    attributes <- c("chromosome_name",
-                    "start_position",
-                    "end_position",
-                    "strand",
-                    "transcript_start",
-                    "transcription_start_site",
-                    "transcript_end",
-                    "ensembl_transcript_id",
-                    "ensembl_gene_id",
-                    "entrezgene",
-                    "external_gene_name")
+    attributes <- c(
+        "chromosome_name",
+        "start_position",
+        "end_position",
+        "strand",
+        "transcript_start",
+        "transcription_start_site",
+        "transcript_end",
+        "ensembl_transcript_id",
+        "ensembl_gene_id",
+        "entrezgene",
+        "external_gene_name"
+    )
 
-    chrom <- c(1:22, "X", "Y","M","*")
+    chrom <- c(1:22, "X", "Y", "M", "*")
     db.datasets <- listDatasets(ensembl)
-    description <- db.datasets[db.datasets$dataset=="hsapiens_gene_ensembl",]$description
+    description <- db.datasets[db.datasets$dataset == "hsapiens_gene_ensembl", ]$description
     message(paste0("Downloading transcripts information. Using: ", description))
 
-    filename <-  paste0(gsub("[[:punct:]]| ", "_",description),"_tss.rda")
-    if(!file.exists(filename)) {
-        tss <- getBM(attributes = attributes, filters = c("chromosome_name"), values = list(chrom), mart = ensembl)
-        tss <- tss[!duplicated(tss$ensembl_transcript_id),]
+    filename <- paste0(gsub("[[:punct:]]| ", "_", description), "_tss.rda")
+    if (!file.exists(filename)) {
+        tss <- getBM(
+            attributes = attributes,
+            filters = c("chromosome_name"),
+            values = list(chrom),
+            mart = ensembl
+        )
+        tss <- tss[!duplicated(tss$ensembl_transcript_id), ]
         save(tss, file = filename)
     } else {
         tss <- get(load(filename))
     }
-    if(genome == "hg19") tss$external_gene_name <- tss$external_gene_id
+    if (genome == "hg19") tss$external_gene_name <- tss$external_gene_id
     tss$chromosome_name <-  paste0("chr", tss$chromosome_name)
     tss$strand[tss$strand == 1] <- "+"
     tss$strand[tss$strand == -1] <- "-"
-    tss <- makeGRangesFromDataFrame(tss,start.field = "transcript_start", end.field = "transcript_end", keep.extra.columns = TRUE)
 
-    if(!is.null(TSS$upstream) & !is.null(TSS$downstream))
-        tss <- promoters(tss, upstream = TSS$upstream, downstream = TSS$downstream)
+    tss <- makeGRangesFromDataFrame(
+        tss,
+        start.field = "transcript_start",
+        end.field = "transcript_end",
+        keep.extra.columns = TRUE
+    )
+
+    if (!is.null(TSS$upstream) & !is.null(TSS$downstream))
+        tss <- promoters(
+            tss,
+            upstream = TSS$upstream,
+            downstream = TSS$downstream
+        )
 
     return(tss)
 }
-
