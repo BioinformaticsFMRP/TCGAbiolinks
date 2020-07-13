@@ -27,7 +27,6 @@ Imports:
     dplyr,
     graphics,
     tibble,
-    grid,
     GenomicRanges,
     XML (>= 3.98.0),
     data.table,
@@ -37,7 +36,6 @@ Imports:
     methods,
     biomaRt,
     ggplot2,
-    ggthemes,
     stringr (>= 1.0.0),
     IRanges,
     rvest (>= 0.3.0),
@@ -106,7 +104,8 @@ Suggests:
     doParallel,
     parallel,
     ggrepel (>= 0.6.3),
-    scales
+    scales,
+    grid
 VignetteBuilder: knitr
 LazyData: true
 URL: https://github.com/BioinformaticsFMRP/TCGAbiolinks
