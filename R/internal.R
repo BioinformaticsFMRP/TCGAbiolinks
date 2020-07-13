@@ -307,10 +307,9 @@ is.linux <- function() {
 #' @param varname.abbrev  whether or not to abbreviate the variable names
 #' @import ggplot2
 #' @importFrom plyr ddply
-#' @importFrom scales muted
 #' @import stats
 #' @keywords internal
-#' @return  a ggplot2 plot
+#' @return A ggplot2 plot
 #' @author Vincent Q. Vu.
 # @examples
 # data(iris)
@@ -333,7 +332,7 @@ ggbiplot <- function(pcobj, choices = 1:2, scale = 1, pc.biplot = TRUE,
     hjust <- NULL
 
     stopifnot(length(choices) == 2)
-
+    check_package("scales")
     # Recover the SVD
     if(inherits(pcobj, 'prcomp')){
         nobs.factor <- sqrt(nrow(pcobj$x) - 1)
@@ -426,7 +425,7 @@ ggbiplot <- function(pcobj, choices = 1:2, scale = 1, pc.biplot = TRUE,
         {
             theta <- c(seq(-pi, pi, length = 50), seq(pi, -pi, length = 50))
             circle <- data.frame(xvar = r * cos(theta), yvar = r * sin(theta))
-            g <- g + geom_path(data = circle, color = muted('white'),
+            g <- g + geom_path(data = circle, color = scales::muted('white'),
                                size = 1/2, alpha = 1/3)
         }
 
@@ -435,7 +434,7 @@ ggbiplot <- function(pcobj, choices = 1:2, scale = 1, pc.biplot = TRUE,
             geom_segment(data = df.v,
                          aes(x = 0, y = 0, xend = xvar, yend = yvar),
                          arrow = arrow(length = unit(1/2, 'picas')),
-                         color = muted('red'))
+                         color = scales::muted('red'))
     }
 
     # Draw either labels or points

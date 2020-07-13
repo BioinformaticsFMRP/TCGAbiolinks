@@ -25,7 +25,6 @@ Imports:
     downloader (>= 0.4),
     grDevices,
     dplyr,
-    gridExtra,
     graphics,
     tibble,
     grid,
@@ -39,7 +38,6 @@ Imports:
     biomaRt,
     ggplot2,
     ggthemes,
-    survival,
     stringr (>= 1.0.0),
     IRanges,
     scales,
@@ -51,16 +49,11 @@ Imports:
     R.utils,
     SummarizedExperiment (>= 1.4.0),
     readr,
-    RColorBrewer,
-    doParallel,
-    GenomeInfoDb,
-    parallel,
     tools,
     tidyr,
     purrr,
     xml2,
-    httr (>= 1.2.1),
-    ggrepel (>= 0.6.3)
+    httr (>= 1.2.1)
 Description: The aim of TCGAbiolinks is : i) facilitate the GDC open-access
     data retrieval, ii) prepare the data using the appropriate pre-processing
     strategies, iii) provide the means to carry out different standard analyses
@@ -109,7 +102,12 @@ Suggests:
     sva,
     EDASeq,
     survminer,
-    genefilter
+    genefilter,
+    gridExtra,
+    survival,
+    doParallel,
+    parallel,
+    ggrepel (>= 0.6.3)
 VignetteBuilder: knitr
 LazyData: true
 URL: https://github.com/BioinformaticsFMRP/TCGAbiolinks
