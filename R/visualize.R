@@ -588,8 +588,8 @@ TCGAvisualize_Heatmap <- function(
     data,
     col.metadata,
     row.metadata,
-    col.colors=NULL,
-    row.colors=NULL,
+    col.colors = NULL,
+    row.colors = NULL,
     show_column_names = FALSE,
     show_row_names = FALSE,
     cluster_rows = FALSE,
@@ -732,7 +732,7 @@ TCGAvisualize_Heatmap <- function(
             name = values.label,
             top_annotation = ha,
             col = color,
-            row_names_gp =  gpar(fontsize = rownames.size),
+            row_names_gp =  grid::gpar(fontsize = rownames.size),
             show_row_names = show_row_names,
             cluster_rows = cluster_rows,
             cluster_columns = cluster_columns,
@@ -747,7 +747,7 @@ TCGAvisualize_Heatmap <- function(
             top_annotation = ha,
             col = color,
             show_row_names = show_row_names,
-            row_names_gp =  gpar(fontsize = rownames.size),
+            row_names_gp =  grid::gpar(fontsize = rownames.size),
             cluster_rows = cluster_rows,
             cluster_columns = cluster_columns,
             show_column_names = show_column_names,
@@ -759,7 +759,7 @@ TCGAvisualize_Heatmap <- function(
             name = values.label,
             top_annotation = ha,
             col = color,
-            row_names_gp =  gpar(fontsize = rownames.size),
+            row_names_gp =  grid::gpar(fontsize = rownames.size),
             show_row_names = show_row_names,
             cluster_rows = cluster_rows,
             cluster_columns = cluster_columns,
@@ -772,7 +772,7 @@ TCGAvisualize_Heatmap <- function(
             name = values.label,
             top_annotation = ha,
             col = color,
-            row_names_gp =  gpar(fontsize = rownames.size),
+            row_names_gp =  grid::gpar(fontsize = rownames.size),
             show_row_names = show_row_names,
             cluster_rows = cluster_rows,
             cluster_columns = cluster_columns,
@@ -852,7 +852,6 @@ unlistlabels <- function(lab) {
 #'         "In_Frame_Del", "In_Frame_Ins", "Missense_Mutation",  "Nonsense_Mutation",
 #'              "Nonstop_Mutation",  "RNA",  "Silent" ,  "Splice_Site",  "Targeted_Region",  "Translation_Start_Site")
 #' 2) "Variant_Type" (The information will be INS,DEL,SNP)
-#' @importFrom grid gpar grid.rect
 #' @importFrom data.table dcast setDT setDF :=
 #' @examples
 #' \dontrun{
@@ -874,38 +873,37 @@ unlistlabels <- function(lab) {
 #' }
 #' @export
 #' @return A oncoprint plot
-TCGAvisualize_oncoprint <- function (mut,
-                                     genes,
-                                     filename,
-                                     color,
-                                     annotation.position = "bottom",
-                                     annotation,
-                                     height,
-                                     width = 10,
-                                     rm.empty.columns = FALSE,
-                                     show.column.names = FALSE,
-                                     show.row.barplot = TRUE,
-                                     label.title = "Mutation",
-                                     column.names.size = 8,
-                                     label.font.size = 16,
-                                     rows.font.size = 16,
-                                     dist.col = 0.5,
-                                     dist.row = 0.5,
-                                     information = "Variant_Type",
-                                     row.order = TRUE,
-                                     col.order = TRUE,
-                                     heatmap.legend.side = "bottom",
-                                     annotation.legend.side = "bottom"){
+TCGAvisualize_oncoprint <- function(
+    mut,
+    genes,
+    filename,
+    color,
+    annotation.position = "bottom",
+    annotation,
+    height,
+    width = 10,
+    rm.empty.columns = FALSE,
+    show.column.names = FALSE,
+    show.row.barplot = TRUE,
+    label.title = "Mutation",
+    column.names.size = 8,
+    label.font.size = 16,
+    rows.font.size = 16,
+    dist.col = 0.5,
+    dist.row = 0.5,
+    information = "Variant_Type",
+    row.order = TRUE,
+    col.order = TRUE,
+    heatmap.legend.side = "bottom",
+    annotation.legend.side = "bottom"
+){
 
-    if (!requireNamespace("ComplexHeatmap", quietly = TRUE)) {
-        stop("ComplexHeatmap package is needed for this function to work. Please install it.",
-             call. = FALSE)
-    }
-    if (!requireNamespace("circlize", quietly = TRUE)) {
-        stop("circlize package is needed for this function to work. Please install it.",
-             call. = FALSE)
-    }
-    if(missing(mut))   stop("Missing mut argument")
+
+    check_package("ComplexHeatmap")
+    check_package("circlize")
+    check_package("grid")
+
+    if(missing(mut)) stop("Missing mut argument")
     mut <- setDT(mut)
     mut$value <- 1
     if(rm.empty.columns == FALSE) all.samples <- unique(mut$Tumor_Sample_Barcode)
@@ -964,40 +962,40 @@ TCGAvisualize_oncoprint <- function (mut,
         # Oncoprint with one value does not have names in v
         if(is.null(names(v))){
             if(v){
-                grid.rect(
+                grid::grid.rect(
                     x,
                     y - h * 0.5 + 1:n / n * h,
                     w - unit(dist.col, "mm"),
                     1 / n * h,
-                    gp = gpar(fill = setdiff(color,color["background"]), col = NA),
+                    gp = grid::gpar(fill = setdiff(color,color["background"]), col = NA),
                     just = "top"
                 )
             } else {
-                grid.rect(
+                grid::grid.rect(
                     x,
                     y,
                     w - unit(dist.col, "mm"),
                     h - unit(dist.row, "mm"),
-                    gp = gpar(fill = color["background"], col = NA)
+                    gp = grid::gpar(fill = color["background"], col = NA)
                 )
             }
         } else {
             if (length(names(which(v)))) {
-                grid.rect(
+                grid::grid.rect(
                     x,
                     y - h * 0.5 + 1:n / n * h,
                     w - unit(dist.col, "mm"),
                     1 / n * h,
-                    gp = gpar(fill = color[names(which(v))], col = NA),
+                    gp = grid::gpar(fill = color[names(which(v))], col = NA),
                     just = "top"
                 )
             } else {
-                grid.rect(
+                grid::grid.rect(
                     x,
                     y,
                     w - unit(dist.col, "mm"),
                     h - unit(dist.row, "mm"),
-                    gp = gpar(fill = color["background"], col = NA)
+                    gp = grid::gpar(fill = color["background"], col = NA)
                 )
             }
         }
@@ -1006,7 +1004,8 @@ TCGAvisualize_oncoprint <- function (mut,
     # get only the colors to the mutations
     # otherwise it gives errors
     if(missing(color)){
-        color <- c(rainbow(length(mutation.type)), "#CCCCCC")
+        check_package("grDevices")
+        color <- c(grDevices::rainbow(length(mutation.type)), "#CCCCCC")
         names(color) <- c(mutation.type,"background")
     } else{
         if("background" %in% names(color)) {
@@ -1070,11 +1069,11 @@ TCGAvisualize_oncoprint <- function (mut,
                 df = annotation,
                 col = col.annot,
                 annotation_legend_param = list(
-                    title_gp = gpar(fontsize = label.font.size,
-                                    fontface =
-                                        "bold"),
+                    title_gp = grid::gpar(fontsize = label.font.size,
+                                          fontface =
+                                              "bold"),
                     labels_gp =
-                        gpar(fontsize = label.font.size),
+                        grid::gpar(fontsize = label.font.size),
                     #sizelabels
                     grid_height =
                         unit(8, "mm")
@@ -1096,15 +1095,15 @@ TCGAvisualize_oncoprint <- function (mut,
                                        show_column_names = show.column.names,
                                        column_order = NULL, # Do not sort the columns
                                        alter_fun = alter_fun, col = color,
-                                       column_names_gp = gpar(fontsize = column.names.size),
-                                       row_names_gp = gpar(fontsize = rows.font.size),  # set size for row names
-                                       pct_gp = gpar(fontsize = rows.font.size), # set size for percentage labels
+                                       column_names_gp = grid::gpar(fontsize = column.names.size),
+                                       row_names_gp = grid::gpar(fontsize = rows.font.size),  # set size for row names
+                                       pct_gp = grid::gpar(fontsize = rows.font.size), # set size for percentage labels
                                        #column_title = "OncoPrint for TCGA LGG, genes in Glioma signaling",
-                                       #column_title_gp = gpar(fontsize = 11),
+                                       #column_title_gp = grid::gpar(fontsize = 11),
                                        heatmap_legend_param = list(title = label.title, at = names(color),
                                                                    labels = names(color),
-                                                                   title_gp = gpar(fontsize = label.font.size, fontface = "bold"),
-                                                                   labels_gp = gpar(fontsize = label.font.size), # size labels
+                                                                   title_gp = grid::gpar(fontsize = label.font.size, fontface = "bold"),
+                                                                   labels_gp = grid::gpar(fontsize = label.font.size), # size labels
                                                                    grid_height = unit(8, "mm"), # vertical distance labels
                                                                    nrow = nrow, title_position = title_position
                                        )
@@ -1114,19 +1113,19 @@ TCGAvisualize_oncoprint <- function (mut,
         p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                                        row_order = NULL,
                                        remove_empty_columns = FALSE,
-                                       column_names_gp = gpar(fontsize = column.names.size),
+                                       column_names_gp = grid::gpar(fontsize = column.names.size),
                                        show_column_names = show.column.names,
                                        column_order = NULL, # Do not sort the columns
                                        alter_fun = alter_fun, col = color,
-                                       row_names_gp = gpar(fontsize = rows.font.size),  # set size for row names
-                                       pct_gp = gpar(fontsize = rows.font.size), # set size for percentage labels
+                                       row_names_gp = grid::gpar(fontsize = rows.font.size),  # set size for row names
+                                       pct_gp = grid::gpar(fontsize = rows.font.size), # set size for percentage labels
                                        #column_title = "OncoPrint for TCGA LGG, genes in Glioma signaling",
-                                       #column_title_gp = gpar(fontsize = 11),
+                                       #column_title_gp = grid::gpar(fontsize = 11),
                                        bottom_annotation = annotHeatmap,
                                        heatmap_legend_param = list(title = label.title, at = names(color),
                                                                    labels = names(color),
-                                                                   title_gp = gpar(fontsize = label.font.size, fontface = "bold"),
-                                                                   labels_gp = gpar(fontsize = label.font.size), # size labels
+                                                                   title_gp = grid::gpar(fontsize = label.font.size, fontface = "bold"),
+                                                                   labels_gp = grid::gpar(fontsize = label.font.size), # size labels
                                                                    grid_height = unit(8, "mm"), # vertical distance labels
                                                                    nrow = nrow, title_position = title_position
                                        )
@@ -1136,19 +1135,19 @@ TCGAvisualize_oncoprint <- function (mut,
         p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                                        row_order = NULL,
                                        remove_empty_columns = FALSE,
-                                       column_names_gp = gpar(fontsize = column.names.size),
+                                       column_names_gp = grid::gpar(fontsize = column.names.size),
                                        show_column_names = show.column.names,
                                        column_order = NULL, # Do not sort the columns
                                        alter_fun = alter_fun, col = color,
-                                       row_names_gp = gpar(fontsize = rows.font.size),  # set size for row names
-                                       pct_gp = gpar(fontsize = rows.font.size), # set size for percentage labels
+                                       row_names_gp = grid::gpar(fontsize = rows.font.size),  # set size for row names
+                                       pct_gp = grid::gpar(fontsize = rows.font.size), # set size for percentage labels
                                        #column_title = "OncoPrint for TCGA LGG, genes in Glioma signaling",
-                                       #column_title_gp = gpar(fontsize = 11),
+                                       #column_title_gp = grid::gpar(fontsize = 11),
                                        top_annotation = annotHeatmap,
                                        heatmap_legend_param = list(title = label.title, at = names(color),
                                                                    labels = names(color),
-                                                                   title_gp = gpar(fontsize = label.font.size, fontface = "bold"),
-                                                                   labels_gp = gpar(fontsize = label.font.size), # size labels
+                                                                   title_gp = grid::gpar(fontsize = label.font.size, fontface = "bold"),
+                                                                   labels_gp = grid::gpar(fontsize = label.font.size), # size labels
                                                                    grid_height = unit(8, "mm"),  # vertical distance labels
                                                                    nrow = nrow, title_position = title_position
                                        )
@@ -1159,15 +1158,15 @@ TCGAvisualize_oncoprint <- function (mut,
                                        show_column_names = show.column.names,
                                        column_order = NULL, # Do not sort the columns
                                        alter_fun = alter_fun, col = color,
-                                       column_names_gp = gpar(fontsize = column.names.size),
-                                       row_names_gp = gpar(fontsize = rows.font.size),  # set size for row names
-                                       pct_gp = gpar(fontsize = rows.font.size), # set size for percentage labels
+                                       column_names_gp = grid::gpar(fontsize = column.names.size),
+                                       row_names_gp = grid::gpar(fontsize = rows.font.size),  # set size for row names
+                                       pct_gp = grid::gpar(fontsize = rows.font.size), # set size for percentage labels
                                        #column_title = "OncoPrint for TCGA LGG, genes in Glioma signaling",
-                                       #column_title_gp = gpar(fontsize = 11),
+                                       #column_title_gp = grid::gpar(fontsize = 11),
                                        heatmap_legend_param = list(title = label.title, at = names(color),
                                                                    labels = names(color),
-                                                                   title_gp = gpar(fontsize = label.font.size, fontface = "bold"),
-                                                                   labels_gp = gpar(fontsize = label.font.size), # size labels
+                                                                   title_gp = grid::gpar(fontsize = label.font.size, fontface = "bold"),
+                                                                   labels_gp = grid::gpar(fontsize = label.font.size), # size labels
                                                                    grid_height = unit(8, "mm"), # vertical distance labels
                                                                    nrow = nrow, title_position = title_position
                                        )
@@ -1176,19 +1175,19 @@ TCGAvisualize_oncoprint <- function (mut,
 
         p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                                        remove_empty_columns = FALSE,
-                                       column_names_gp = gpar(fontsize = column.names.size),
+                                       column_names_gp = grid::gpar(fontsize = column.names.size),
                                        show_column_names = show.column.names,
                                        column_order = NULL, # Do not sort the columns
                                        alter_fun = alter_fun, col = color,
-                                       row_names_gp = gpar(fontsize = rows.font.size),  # set size for row names
-                                       pct_gp = gpar(fontsize = rows.font.size), # set size for percentage labels
+                                       row_names_gp = grid::gpar(fontsize = rows.font.size),  # set size for row names
+                                       pct_gp = grid::gpar(fontsize = rows.font.size), # set size for percentage labels
                                        #column_title = "OncoPrint for TCGA LGG, genes in Glioma signaling",
-                                       #column_title_gp = gpar(fontsize = 11),
+                                       #column_title_gp = grid::gpar(fontsize = 11),
                                        bottom_annotation = annotHeatmap,
                                        heatmap_legend_param = list(title = label.title, at = names(color),
                                                                    labels = names(color),
-                                                                   title_gp = gpar(fontsize = label.font.size, fontface = "bold"),
-                                                                   labels_gp = gpar(fontsize = label.font.size), # size labels
+                                                                   title_gp = grid::gpar(fontsize = label.font.size, fontface = "bold"),
+                                                                   labels_gp = grid::gpar(fontsize = label.font.size), # size labels
                                                                    grid_height = unit(8, "mm"), # vertical distance labels
                                                                    nrow = nrow, title_position = title_position
                                        )
@@ -1200,16 +1199,16 @@ TCGAvisualize_oncoprint <- function (mut,
                                        show_column_names = show.column.names,
                                        column_order = NULL, # Do not sort the columns
                                        alter_fun = alter_fun, col = color,
-                                       column_names_gp = gpar(fontsize = column.names.size),
-                                       row_names_gp = gpar(fontsize = rows.font.size),  # set size for row names
-                                       pct_gp = gpar(fontsize = rows.font.size), # set size for percentage labels
+                                       column_names_gp = grid::gpar(fontsize = column.names.size),
+                                       row_names_gp = grid::gpar(fontsize = rows.font.size),  # set size for row names
+                                       pct_gp = grid::gpar(fontsize = rows.font.size), # set size for percentage labels
                                        #column_title = "OncoPrint for TCGA LGG, genes in Glioma signaling",
-                                       #column_title_gp = gpar(fontsize = 11),
+                                       #column_title_gp = grid::gpar(fontsize = 11),
                                        top_annotation = annotHeatmap,
                                        heatmap_legend_param = list(title = label.title, at = names(color),
                                                                    labels = names(color),
-                                                                   title_gp = gpar(fontsize = label.font.size, fontface = "bold"),
-                                                                   labels_gp = gpar(fontsize = label.font.size), # size labels
+                                                                   title_gp = grid::gpar(fontsize = label.font.size, fontface = "bold"),
+                                                                   labels_gp = grid::gpar(fontsize = label.font.size), # size labels
                                                                    grid_height = unit(8, "mm"),  # vertical distance labels
                                                                    nrow = nrow, title_position = title_position
                                        )
@@ -1220,15 +1219,15 @@ TCGAvisualize_oncoprint <- function (mut,
                                        remove_empty_columns = FALSE,
                                        show_column_names = show.column.names,
                                        alter_fun = alter_fun, col = color,
-                                       column_names_gp = gpar(fontsize = column.names.size),
-                                       row_names_gp = gpar(fontsize = rows.font.size),  # set size for row names
-                                       pct_gp = gpar(fontsize = rows.font.size), # set size for percentage labels
+                                       column_names_gp = grid::gpar(fontsize = column.names.size),
+                                       row_names_gp = grid::gpar(fontsize = rows.font.size),  # set size for row names
+                                       pct_gp = grid::gpar(fontsize = rows.font.size), # set size for percentage labels
                                        #column_title = "OncoPrint for TCGA LGG, genes in Glioma signaling",
-                                       #column_title_gp = gpar(fontsize = 11),
+                                       #column_title_gp = grid::gpar(fontsize = 11),
                                        heatmap_legend_param = list(title = label.title, at = names(color),
                                                                    labels = names(color),
-                                                                   title_gp = gpar(fontsize = label.font.size, fontface = "bold"),
-                                                                   labels_gp = gpar(fontsize = label.font.size), # size labels
+                                                                   title_gp = grid::gpar(fontsize = label.font.size, fontface = "bold"),
+                                                                   labels_gp = grid::gpar(fontsize = label.font.size), # size labels
                                                                    grid_height = unit(8, "mm"), # vertical distance labels
                                                                    nrow = nrow, title_position = title_position
                                        )
@@ -1238,18 +1237,18 @@ TCGAvisualize_oncoprint <- function (mut,
         p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                                        row_order = NULL,
                                        remove_empty_columns = FALSE,
-                                       column_names_gp = gpar(fontsize = column.names.size),
+                                       column_names_gp = grid::gpar(fontsize = column.names.size),
                                        show_column_names = show.column.names,
                                        alter_fun = alter_fun, col = color,
-                                       row_names_gp = gpar(fontsize = rows.font.size),  # set size for row names
-                                       pct_gp = gpar(fontsize = rows.font.size), # set size for percentage labels
+                                       row_names_gp = grid::gpar(fontsize = rows.font.size),  # set size for row names
+                                       pct_gp = grid::gpar(fontsize = rows.font.size), # set size for percentage labels
                                        #column_title = "OncoPrint for TCGA LGG, genes in Glioma signaling",
-                                       #column_title_gp = gpar(fontsize = 11),
+                                       #column_title_gp = grid::gpar(fontsize = 11),
                                        bottom_annotation = annotHeatmap,
                                        heatmap_legend_param = list(title = label.title, at = names(color),
                                                                    labels = names(color),
-                                                                   title_gp = gpar(fontsize = label.font.size, fontface = "bold"),
-                                                                   labels_gp = gpar(fontsize = label.font.size), # size labels
+                                                                   title_gp = grid::gpar(fontsize = label.font.size, fontface = "bold"),
+                                                                   labels_gp = grid::gpar(fontsize = label.font.size), # size labels
                                                                    grid_height = unit(8, "mm"), # vertical distance labels
                                                                    nrow = nrow, title_position = title_position
                                        )
@@ -1259,18 +1258,18 @@ TCGAvisualize_oncoprint <- function (mut,
         p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
                                        row_order = NULL,
                                        remove_empty_columns = FALSE,
-                                       column_names_gp = gpar(fontsize = column.names.size),
+                                       column_names_gp = grid::gpar(fontsize = column.names.size),
                                        show_column_names = show.column.names,
                                        alter_fun = alter_fun, col = color,
-                                       row_names_gp = gpar(fontsize = rows.font.size),  # set size for row names
-                                       pct_gp = gpar(fontsize = rows.font.size), # set size for percentage labels
+                                       row_names_gp = grid::gpar(fontsize = rows.font.size),  # set size for row names
+                                       pct_gp = grid::gpar(fontsize = rows.font.size), # set size for percentage labels
                                        #column_title = "OncoPrint for TCGA LGG, genes in Glioma signaling",
-                                       #column_title_gp = gpar(fontsize = 11),
+                                       #column_title_gp = grid::gpar(fontsize = 11),
                                        top_annotation = annotHeatmap,
                                        heatmap_legend_param = list(title = label.title, at = names(color),
                                                                    labels = names(color),
-                                                                   title_gp = gpar(fontsize = label.font.size, fontface = "bold"),
-                                                                   labels_gp = gpar(fontsize = label.font.size), # size labels
+                                                                   title_gp = grid::gpar(fontsize = label.font.size, fontface = "bold"),
+                                                                   labels_gp = grid::gpar(fontsize = label.font.size), # size labels
                                                                    grid_height = unit(8, "mm"),  # vertical distance labels
                                                                    nrow = nrow, title_position = title_position
                                        )
@@ -1283,15 +1282,15 @@ TCGAvisualize_oncoprint <- function (mut,
 
                                        alter_fun = alter_fun,
                                        col = color,
-                                       column_names_gp = gpar(fontsize = column.names.size),
-                                       row_names_gp = gpar(fontsize = rows.font.size),  # set size for row names
-                                       pct_gp = gpar(fontsize = rows.font.size), # set size for percentage labels
+                                       column_names_gp = grid::gpar(fontsize = column.names.size),
+                                       row_names_gp = grid::gpar(fontsize = rows.font.size),  # set size for row names
+                                       pct_gp = grid::gpar(fontsize = rows.font.size), # set size for percentage labels
                                        #column_title = "OncoPrint for TCGA LGG, genes in Glioma signaling",
-                                       #column_title_gp = gpar(fontsize = 11),
+                                       #column_title_gp = grid::gpar(fontsize = 11),
                                        heatmap_legend_param = list(title = label.title, at = names(color),
                                                                    labels = names(color),
-                                                                   title_gp = gpar(fontsize = label.font.size, fontface = "bold"),
-                                                                   labels_gp = gpar(fontsize = label.font.size), # size labels
+                                                                   title_gp = grid::gpar(fontsize = label.font.size, fontface = "bold"),
+                                                                   labels_gp = grid::gpar(fontsize = label.font.size), # size labels
                                                                    grid_height = unit(8, "mm"), # vertical distance labels
                                                                    nrow = nrow, title_position = title_position
                                        )
@@ -1299,47 +1298,51 @@ TCGAvisualize_oncoprint <- function (mut,
     } else if(!is.null(annotation) & annotation.position == "bottom" & row.order & col.order){
 
 
-        p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
-                                       remove_empty_columns = FALSE,
-                                       column_names_gp = gpar(fontsize = column.names.size),
-                                       #show_row_barplot = show.row.barplot,
-                                       show_column_names = show.column.names,
-                                       alter_fun = alter_fun, col = color,
-                                       row_names_gp = gpar(fontsize = rows.font.size),  # set size for row names
-                                       pct_gp = gpar(fontsize = rows.font.size), # set size for percentage labels
-                                       #axis_gp = gpar(fontsize = rows.font.size),# size of axis
-                                       #column_title = "OncoPrint for TCGA LGG, genes in Glioma signaling",
-                                       #column_title_gp = gpar(fontsize = 11),
-                                       #row_barplot_width = unit(2, "cm"), #size barplot
-                                       bottom_annotation = annotHeatmap,
-                                       heatmap_legend_param = list(title = label.title, at = names(color),
-                                                                   labels = names(color),
-                                                                   title_gp = gpar(fontsize = label.font.size, fontface = "bold"),
-                                                                   labels_gp = gpar(fontsize = label.font.size), # size labels
-                                                                   grid_height = unit(8, "mm"), # vertical distance labels
-                                                                   nrow = nrow,
-                                                                   title_position = title_position
-                                       )
+        p <- ComplexHeatmap::oncoPrint(
+            mat, get_type = function(x) strsplit(x, ";")[[1]],
+            remove_empty_columns = FALSE,
+            column_names_gp = grid::gpar(fontsize = column.names.size),
+            #show_row_barplot = show.row.barplot,
+            show_column_names = show.column.names,
+            alter_fun = alter_fun, col = color,
+            row_names_gp = grid::gpar(fontsize = rows.font.size),  # set size for row names
+            pct_gp = grid::gpar(fontsize = rows.font.size), # set size for percentage labels
+            #axis_gp = grid::gpar(fontsize = rows.font.size),# size of axis
+            #column_title = "OncoPrint for TCGA LGG, genes in Glioma signaling",
+            #column_title_gp = grid::gpar(fontsize = 11),
+            #row_barplot_width = unit(2, "cm"), #size barplot
+            bottom_annotation = annotHeatmap,
+            heatmap_legend_param = list(
+                title = label.title, at = names(color),
+                labels = names(color),
+                title_gp = grid::gpar(fontsize = label.font.size, fontface = "bold"),
+                labels_gp = grid::gpar(fontsize = label.font.size), # size labels
+                grid_height = unit(8, "mm"), # vertical distance labels
+                nrow = nrow,
+                title_position = title_position
+            )
         )
 
     } else if(!is.null(annotation) & annotation.position == "top" & row.order & col.order){
-        p <- ComplexHeatmap::oncoPrint(mat, get_type = function(x) strsplit(x, ";")[[1]],
-                                       remove_empty_columns = FALSE,
-                                       show_column_names = show.column.names,
-                                       alter_fun = alter_fun, col = color,
-                                       column_names_gp = gpar(fontsize = column.names.size),
-                                       row_names_gp = gpar(fontsize = rows.font.size),  # set size for row names
-                                       pct_gp = gpar(fontsize = rows.font.size), # set size for percentage labels
-                                       #column_title = "OncoPrint for TCGA LGG, genes in Glioma signaling",
-                                       #column_title_gp = gpar(fontsize = 11),
-                                       top_annotation = annotHeatmap,
-                                       heatmap_legend_param = list(title = label.title, at = names(color),
-                                                                   labels = names(color),
-                                                                   title_gp = gpar(fontsize = label.font.size, fontface = "bold"),
-                                                                   labels_gp = gpar(fontsize = label.font.size), # size labels
-                                                                   grid_height = unit(8, "mm"),  # vertical distance labels
-                                                                   nrow = nrow, title_position = title_position
-                                       )
+        p <- ComplexHeatmap::oncoPrint(
+            mat, get_type = function(x) strsplit(x, ";")[[1]],
+            remove_empty_columns = FALSE,
+            show_column_names = show.column.names,
+            alter_fun = alter_fun, col = color,
+            column_names_gp = grid::gpar(fontsize = column.names.size),
+            row_names_gp = grid::gpar(fontsize = rows.font.size),  # set size for row names
+            pct_gp = grid::gpar(fontsize = rows.font.size), # set size for percentage labels
+            #column_title = "OncoPrint for TCGA LGG, genes in Glioma signaling",
+            #column_title_gp = grid::gpar(fontsize = 11),
+            top_annotation = annotHeatmap,
+            heatmap_legend_param = list(
+                title = label.title, at = names(color),
+                labels = names(color),
+                title_gp = grid::gpar(fontsize = label.font.size, fontface = "bold"),
+                labels_gp = grid::gpar(fontsize = label.font.size), # size labels
+                grid_height = unit(8, "mm"),  # vertical distance labels
+                nrow = nrow, title_position = title_position
+            )
         )
     }
 
