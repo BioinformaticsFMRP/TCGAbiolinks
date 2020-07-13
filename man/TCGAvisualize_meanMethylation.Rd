@@ -124,5 +124,4 @@ TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="mean.desc",filename
 TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="mean.asc",filename="meanasc.pdf")
 TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="median.asc",filename="medianasc.pdf")
 TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="median.desc",filename="mediandesc.pdf")
-if (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 }

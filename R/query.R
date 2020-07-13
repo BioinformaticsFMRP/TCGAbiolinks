@@ -443,19 +443,21 @@ GDCquery <- function(project,
         if("portions" %in% (results$cases[[1]]$samples[[1]] %>% names)) {
             aux <- plyr::laply(results$cases,
                                function(x) {
-                                   summarize(x$samples[[1]],
-                                             submitter_id = paste(submitter_id,collapse = ";"),
-                                             is_ffpe = any(is_ffpe),
-                                             sample_type =  paste(sample_type,collapse = ";"),
-                                             aliquot.submiter.id = x$samples[[1]]$portions[[1]]$analytes[[1]]$aliquots[[1]]$submitter_id)
+                                   summarize(
+                                       x$samples[[1]],
+                                       submitter_id = paste(submitter_id,collapse = ";"),
+                                       is_ffpe = any(is_ffpe),
+                                       sample_type =  paste(sample_type,collapse = ";"),
+                                       aliquot.submiter.id = x$samples[[1]]$portions[[1]]$analytes[[1]]$aliquots[[1]]$submitter_id)
                                }) %>% as.data.frame
         } else {
             aux <- plyr::laply(results$cases,
                                function(x) {
-                                   summarize(x$samples[[1]],
-                                             submitter_id = paste(submitter_id,collapse = ";"),
-                                             is_ffpe = any(is_ffpe),
-                                             sample_type =  paste(sample_type,collapse = ";"))
+                                   summarize(
+                                       x$samples[[1]],
+                                       submitter_id = paste(submitter_id,collapse = ";"),
+                                       is_ffpe = any(is_ffpe),
+                                       sample_type =  paste(sample_type,collapse = ";"))
                                }) %>% as.data.frame
 
         }
@@ -603,15 +605,15 @@ GDCquery <- function(project,
     # Try ordering (needs dplyr 1.0 - still not published)
     results <- tryCatch({
         results
-    #    results %>% relocate("project") %>%
-    #        relocate(contains("type"), .after = project) %>%
-    #        relocate(contains("category"), .after = project) %>%
-    #        relocate(contains("experimental_strategy"), .after = project) %>%
-    #        relocate(contains("submitter_id"), .after = project) %>%
-    #        relocate(contains("sample_type"), .before = experimental_strategy) %>%
-    #        relocate(access,.after = last_col())  %>%
-    #        relocate(starts_with("analysis"), .before = access) %>%
-    #        relocate(contains("datetime"),.after = last_col())
+        #    results %>% relocate("project") %>%
+        #        relocate(contains("type"), .after = project) %>%
+        #        relocate(contains("category"), .after = project) %>%
+        #        relocate(contains("experimental_strategy"), .after = project) %>%
+        #        relocate(contains("submitter_id"), .after = project) %>%
+        #        relocate(contains("sample_type"), .before = experimental_strategy) %>%
+        #        relocate(access,.after = last_col())  %>%
+        #        relocate(starts_with("analysis"), .before = access) %>%
+        #        relocate(contains("datetime"),.after = last_col())
     },error = function(e){
         results
     })
