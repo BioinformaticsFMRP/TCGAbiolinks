@@ -528,7 +528,6 @@ GeneSplitRegulon <- function(Genelist,Sep){
 #' http://gdac.broadinstitute.org/runs/analyses__latest/data/
 #' @param type Results type: thresholded or data
 #' @export
-#' @import selectr
 getGistic <- function(disease, type = "thresholded") {
     if(type == "thresholded") {
         file.type <- "all_thresholded.by_genes.txt"
@@ -554,10 +553,12 @@ getGistic <- function(disease, type = "thresholded") {
         downloader::download(file.path(base,x[1]),x[1], mode = mode)
     }
     # Check if download was not corrupted
-    md5 <- readr::read_table(file.path(base,x[2]),
-                             col_names = FALSE,
-                             progress = FALSE,
-                             col_types = "cc")$X1
+    md5 <- readr::read_table(
+        file.path(base,x[2]),
+        col_names = FALSE,
+        progress = FALSE,
+        col_types = "cc")$X1
+
     if(tools::md5sum(x[1]) != md5) stop("Error while downloading CNV data")
     file <- paste0(gsub(".tar.gz","",x[1]),"/",file.type)
     if(!file.exists(file)) {
@@ -574,6 +575,7 @@ getGistic <- function(disease, type = "thresholded") {
     })
     return(ret)
 }
+
 get.cnv <- function(project, genes){
     if(missing(project)) stop("Argument project is missing")
     if(missing(genes)) stop("Argument genes is missing")
