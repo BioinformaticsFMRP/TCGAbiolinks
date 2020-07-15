@@ -679,9 +679,8 @@ TCGAanalyze_Normalization <-
             tmp <-
                 EDASeq::withinLaneNormalization(tmp, "gcContent", which = "upper", offset = TRUE)
             message("Step 3 of 4: betweenLaneNormalization ...")
-            tmp <-
-                EDASeq::betweenLaneNormalization(tmp, which = "upper", offset = TRUE)
-            normCounts <-  log(rawCounts + .1) + offst(tmp)
+            tmp <- EDASeq::betweenLaneNormalization(tmp, which = "upper", offset = TRUE)
+            normCounts <-  log(rawCounts + .1) + EDASeq::offst(tmp)
             normCounts <-  floor(exp(normCounts) - .1)
             message("Step 4 of 4: .quantileNormalization ...")
             tmp <- t(.quantileNormalization(t(normCounts)))
@@ -690,12 +689,10 @@ TCGAanalyze_Normalization <-
 
         if (method == "geneLength") {
             tabDF <- tabDF[!(GenesCutID(as.matrix(rownames(tabDF))) == "?"), ]
-            tabDF <-
-                tabDF[!(GenesCutID(as.matrix(rownames(tabDF))) == "SLC35E2"), ]
+            tabDF <- tabDF[!(GenesCutID(as.matrix(rownames(tabDF))) == "SLC35E2"), ]
             rownames(tabDF) <- GenesCutID(as.matrix(rownames(tabDF)))
             tabDF <- tabDF[rownames(tabDF) != "?",]
-            tabDF <-
-                tabDF[!duplicated(rownames(tabDF)), !duplicated(colnames(tabDF))]
+            tabDF <- tabDF[!duplicated(rownames(tabDF)), !duplicated(colnames(tabDF))]
             tabDF <- tabDF[rownames(tabDF) %in% rownames(geneInfo), ]
             tabDF <- as.matrix(tabDF)
 
