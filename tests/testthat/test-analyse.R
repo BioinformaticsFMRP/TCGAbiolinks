@@ -199,8 +199,7 @@ test_that("Results from TCGAanalyze_DMC are correct", {
     )
     SummarizedExperiment::colData(data)$group <-
         c(rep("group1", 10),  rep("group2", 10))
-    hypo.hyper <-
-        TCGAanalyze_DMC(data, p.cut = 0.85, "group", "group1", "group2")
+    hypo.hyper <- TCGAanalyze_DMC(data, p.cut = 0.85, "group", "group1", "group2")
     result <- hypo.hyper[1,]
     expect_equal(result$mean.group1, 0.9)
     expect_equal(result$mean.group2, 0.1)
