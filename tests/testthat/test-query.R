@@ -2,6 +2,9 @@ context("Query")
 
 
 test_that("GDCquery can filter by data.category", {
+    skip_on_bioc()
+    skip_if_offline()
+
     query <- GDCquery(project = "TCGA-ACC",data.category = "Copy Number Variation")
     expect_equal(unique(query$results[[1]]$data_category),"Copy Number Variation")
     query <- GDCquery(project = "TCGA-ACC",data.category = "Copy Number Variation", data.type = "Copy Number Segment")
@@ -9,6 +12,9 @@ test_that("GDCquery can filter by data.category", {
 })
 
 test_that("GDCquery accepts more than one project", {
+    skip_on_bioc()
+    skip_if_offline()
+
     acc <- GDCquery(project = "TCGA-ACC",
                     data.category = "Copy Number Variation",
                     data.type = "Copy Number Segment")
@@ -26,6 +32,9 @@ test_that("GDCquery accepts more than one project", {
 })
 
 test_that("GDCquery can filter by sample.type", {
+    skip_on_bioc()
+    skip_if_offline()
+
     sample.type <- "Primary Tumor"
     query <- GDCquery(project = "TCGA-ACC",
                       data.category =  "Copy Number Variation",
@@ -71,6 +80,9 @@ test_that("GDCquery can filter by sample.type", {
 })
 
 test_that("GDCquery can filter by barcode", {
+    skip_on_bioc()
+    skip_if_offline()
+
     barcode <- c("TARGET-20-PADZCG-04A-01R","TARGET-20-PARJCR-09A-01R")
     query <- GDCquery(project = "TARGET-AML",
                       data.category = "Transcriptome Profiling",
@@ -98,6 +110,9 @@ test_that("GDCquery can filter by barcode", {
 })
 
 test_that("GDCquery can filter copy number from legacy data by file type. Case: nocnv_hg18", {
+    skip_on_bioc()
+    skip_if_offline()
+
     query <- GDCquery(project = "TCGA-ACC",
                       data.category =  "Copy number variation",
                       legacy = TRUE,
@@ -107,6 +122,9 @@ test_that("GDCquery can filter copy number from legacy data by file type. Case: 
 })
 
 test_that("GDCquery can filter copy number from legacy data by file type. Case: hg18", {
+    skip_on_bioc()
+    skip_if_offline()
+
     query <- GDCquery(project = "TCGA-ACC",
                       data.category =  "Copy number variation",
                       legacy = TRUE,
@@ -116,6 +134,9 @@ test_that("GDCquery can filter copy number from legacy data by file type. Case: 
 })
 
 test_that("GDCquery can filter copy number from legacy data by file type. Case: hg19", {
+    skip_on_bioc()
+    skip_if_offline()
+
     query <- GDCquery(project = "TCGA-ACC",
                       data.category =  "Copy number variation",
                       legacy = TRUE,
@@ -126,6 +147,9 @@ test_that("GDCquery can filter copy number from legacy data by file type. Case: 
 
 
 test_that("GDCquery can filter copy number from legacy data by file type. Case: nocnv_hg19", {
+    skip_on_bioc()
+    skip_if_offline()
+
     query <- GDCquery(project = "TCGA-ACC",
                       data.category =  "Copy number variation",
                       legacy = TRUE,
@@ -137,6 +161,9 @@ test_that("GDCquery can filter copy number from legacy data by file type. Case: 
 
 
 test_that("GDCquery can filter by access level", {
+    skip_on_bioc()
+    skip_if_offline()
+
     query <- GDCquery(project = "TCGA-KIRP",
                       data.category = "Simple Nucleotide Variation",
                       access = "open")
@@ -148,16 +175,22 @@ test_that("GDCquery can filter by access level", {
 })
 
 test_that("GDCquery_Maf works", {
-    #    acc.maf <- GDCquery_Maf("ACC",pipelines = "muse")
-    #    expect_true(nrow(acc.maf) > 0)
-    #    acc.maf <- GDCquery_Maf("ACC", directory = "maf", pipelines = "muse")
-    #    expect_true(nrow(acc.maf) > 0)
-    #    unlink("GDCdata",recursive = TRUE, force = TRUE)
-    #    unlink("maf",recursive = TRUE, force = TRUE)
+    skip_on_bioc()
+    skip_if_offline()
+
+    acc.maf <- GDCquery_Maf("ACC",pipelines = "muse")
+    expect_true(nrow(acc.maf) > 0)
+    acc.maf <- GDCquery_Maf("ACC", directory = "maf", pipelines = "muse")
+    expect_true(nrow(acc.maf) > 0)
+    unlink("GDCdata",recursive = TRUE, force = TRUE)
+    unlink("maf",recursive = TRUE, force = TRUE)
 })
 
 
 test_that("getNbFiles and getNbCases works", {
+    skip_on_bioc()
+    skip_if_offline()
+
     aux <- getProjectSummary("TCGA-LUAD",TRUE)
     files <- getNbFiles("TCGA-LUAD","Raw microarray data",legacy = T)
     cases <- getNbCases("TCGA-LUAD","Raw microarray data")
