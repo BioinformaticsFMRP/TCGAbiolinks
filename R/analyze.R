@@ -614,21 +614,17 @@ TCGAanalyze_Filtering <- function(tabDF,
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 TCGAanalyze_Normalization <-
     function(tabDF, geneInfo, method = "geneLength") {
-        if (!requireNamespace("EDASeq", quietly = TRUE)) {
-            stop("EDASeq is needed. Please install it.",
-                 call. = FALSE)
-        }
+
+        check_package("EDASeq")
 
         # Check if we have a SE, we need a gene expression matrix
-        if (is(tabDF, "SummarizedExperiment"))
-            tabDF <- assay(tabDF)
+        if (is(tabDF, "SummarizedExperiment")) tabDF <- assay(tabDF)
 
         geneInfo <- geneInfo[!is.na(geneInfo[, 1]), ]
         geneInfo <- as.data.frame(geneInfo)
         geneInfo$geneLength <-
             as.numeric(as.character(geneInfo$geneLength))
-        geneInfo$gcContent <-
-            as.numeric(as.character(geneInfo$gcContent))
+        geneInfo$gcContent <- as.numeric(as.character(geneInfo$gcContent))
 
 
         if (method == "gcContent") {
@@ -645,19 +641,16 @@ TCGAanalyze_Normalization <-
             geneNames[tmp, 1] <- geneNames[tmp, 2]
             tmp <- table(geneNames[, 1])
             tmp <- which(geneNames[, 1] %in% names(tmp[which(tmp > 1)]))
-            geneNames[tmp, 1] <-
-                paste(geneNames[tmp, 1], geneNames[tmp, 2], sep = ".")
+            geneNames[tmp, 1] <- paste(geneNames[tmp, 1], geneNames[tmp, 2], sep = ".")
             tmp <- table(geneNames[, 1])
             rownames(tabDF) <- geneNames[, 1]
 
             rawCounts <- tabDF
-            commonGenes <-
-                intersect(rownames(geneInfo), rownames(rawCounts))
+            commonGenes <-  intersect(rownames(geneInfo), rownames(rawCounts))
             geneInfo <- geneInfo[commonGenes, ]
             rawCounts <- rawCounts[commonGenes, ]
 
-            timeEstimated <-
-                format(ncol(tabDF) * nrow(tabDF) / 80000, digits = 2)
+            timeEstimated <- format(ncol(tabDF) * nrow(tabDF) / 80000, digits = 2)
             message(
                 messageEstimation <- paste(
                     "I Need about ",
@@ -669,19 +662,28 @@ TCGAanalyze_Normalization <-
 
             ffData  <- as.data.frame(geneInfo)
             rawCounts <- floor(rawCounts)
+
             message("Step 1 of 4: newSeqExpressionSet ...")
-            tmp <-
-                EDASeq::newSeqExpressionSet(as.matrix(rawCounts), featureData = ffData)
+            tmp <- EDASeq::newSeqExpressionSet(as.matrix(rawCounts), featureData = ffData)
 
             #fData(tmp)[, "gcContent"] <- as.numeric(geneInfo[, "gcContent"])
 
             message("Step 2 of 4: withinLaneNormalization ...")
-            tmp <-
-                EDASeq::withinLaneNormalization(tmp, "gcContent", which = "upper", offset = TRUE)
+            tmp <- EDASeq::withinLaneNormalization(
+                tmp, "gcContent",
+                which = "upper",
+                offset = TRUE
+            )
+
             message("Step 3 of 4: betweenLaneNormalization ...")
-            tmp <- EDASeq::betweenLaneNormalization(tmp, which = "upper", offset = TRUE)
+            tmp <- EDASeq::betweenLaneNormalization(
+                tmp,
+                which = "upper",
+                offset = TRUE
+            )
             normCounts <-  log(rawCounts + .1) + EDASeq::offst(tmp)
             normCounts <-  floor(exp(normCounts) - .1)
+
             message("Step 4 of 4: .quantileNormalization ...")
             tmp <- t(.quantileNormalization(t(normCounts)))
             tabDF_norm <- floor(tmp)
