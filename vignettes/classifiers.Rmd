@@ -12,7 +12,7 @@ knitr::opts_chunk$set(cache = FALSE)
 ```
   
 ```{r, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
-devtools::load_all(".")
+library(TCGAbiolinks)
 ```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
@@ -54,11 +54,13 @@ In this example we will retrieve two samples from TCGA and classify them expecti
 the same result as the paper.
 
 ```{r, eval = FALSE, message = FALSE, results = "hide"}
-query <- GDCquery(project = "TCGA-GBM",
-                   data.category = "DNA methylation",
-                   barcode = c("TCGA-06-0122","TCGA-14-1456"),
-                   platform = "Illumina Human Methylation 27",
-                   legacy = TRUE)
+query <- GDCquery(
+  project = "TCGA-GBM",
+  data.category = "DNA methylation",
+  barcode = c("TCGA-06-0122","TCGA-14-1456"),
+  platform = "Illumina Human Methylation 27",
+  legacy = TRUE
+)
 GDCdownload(query)
 data.hg19 <- GDCprepare(query)
 ```
