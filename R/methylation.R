@@ -1,5 +1,3 @@
-
-
 #' @title Creates survival analysis
 #' @description Creates a survival plot from TCGA patient clinical data
 #' using survival library. It uses the fields days_to_death and vital, plus a
@@ -447,10 +445,10 @@ TCGAvisualize_meanMethylation <- function(
         axis.text.x <-  element_blank()
     }
     p <- p + scale_fill_manual(
-            values = color,
-            labels = labels,
-            name = group.legend
-        )
+        values = color,
+        labels = labels,
+        name = group.legend
+    )
     p <- p + scale_x_discrete(limits = levels(x))
     p <- p + ylab(ylab) + xlab(xlab) + labs(title = title) +
         labs(shape = subgroup.legend, color = group.legend) +
@@ -583,16 +581,21 @@ dmc.non.parametric.se <- function(data,
         colData(data)[, groupCol] <- factor(colData(data)[, groupCol])
     }
     m <- assay(data)
-    df <-
-        dmc.non.parametric(m, idx1, idx2, paired, adj.method, alternative, cores)
+    df <- dmc.non.parametric(
+        matrix = m,
+        idx1 = idx1,
+        idx2 =  idx2,
+        paired = paired,
+        adj.method = adj.method,
+        alternative =  alternative,
+        cores =  cores
+    )
 
     group1.col <- gsub("[[:punct:]]| ", ".", group1)
     group2.col <- gsub("[[:punct:]]| ", ".", group2)
     colp <- paste("p.value",  group1.col,  group2.col, sep = ".")
-    coladj <-
-        paste("p.value.adj", group1.col,  group2.col, sep = ".")
-    coldiffmean <-
-        paste("mean", group1.col, "minus.mean", group2.col, sep = ".")
+    coladj <- paste("p.value.adj", group1.col,  group2.col, sep = ".")
+    coldiffmean <- paste("mean", group1.col, "minus.mean", group2.col, sep = ".")
     colmeang1 <- paste("mean", group1.col, sep = ".")
     colmeang2 <- paste("mean", group2.col, sep = ".")
 
@@ -616,39 +619,30 @@ dmc.non.parametric.se <- function(data,
 #'  counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows,
 #'            dimnames = list(paste0("cg",1:200),paste0("S",1:20)))
 #'  TCGAbiolinks:::dmc.non.parametric(counts,1:10,11:20)
-dmc.non.parametric <-  function(matrix,
-                                idx1 = NULL,
-                                idx2 = NULL,
-                                paired = FALSE,
-                                adj.method = "BH",
-                                alternative = "two.sided",
-                                cores = 1) {
-    parallel <- FALSE
-    if (cores > 1) {
-        check_package("parallel")
-        check_package("doParallel")
-        if (is.windows()) {
-            if (cores > parallel::detectCores())
-                cores <- parallel::detectCores()
-            doParallel::registerDoParallel(cores)
-            parallel = TRUE
-        } else {
-            if (cores > parallel::detectCores())
-                cores <- parallel::detectCores()
-            doParallel::registerDoParallel(cores)
-            parallel = TRUE
-        }
-    }
-    p.value <- adply(matrix, 1,
-                     function(x) {
-                         suppressMessages({
-                             wilcox.test(
-                                 x[idx1],
-                                 x[idx2],
-                                 paired = paired,
-                                 alternative = alternative)$p.value
-                         })
-                     }, .progress = "time", .parallel = parallel)
+dmc.non.parametric <-  function(
+    matrix,
+    idx1 = NULL,
+    idx2 = NULL,
+    paired = FALSE,
+    adj.method = "BH",
+    alternative = "two.sided",
+    cores = 1)
+{
+    parallel <- set_cores(cores)
+
+    p.value <- plyr::adply(
+        .data = matrix,
+        .margins =  1,
+        .fun = function(x) {
+            suppressMessages({
+                wilcox.test(
+                    x[idx1],
+                    x[idx2],
+                    paired = paired,
+                    alternative = alternative)$p.value
+            })
+        }, .progress = "time", .parallel = parallel)
+
     p.value <- p.value[, 2]
     p.value.adj <- p.adjust(p.value, method = adj.method)
     mean.g1 <- rowMeans(matrix[, idx1], na.rm = TRUE)
@@ -718,29 +712,31 @@ dmc.non.parametric <-  function(matrix,
 #'                       names.fill = TRUE, highlight = c("1","2"),show="both")
 #' }
 #' while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
-TCGAVisualize_volcano <- function(x,
-                                  y,
-                                  filename = "volcano.pdf",
-                                  ylab =  expression(paste(-Log[10],
-                                                           " (FDR corrected -P values)")),
-                                  xlab = NULL,
-                                  title = "Volcano plot",
-                                  legend = NULL,
-                                  label = NULL,
-                                  xlim = NULL,
-                                  ylim = NULL,
-                                  color = c("black", "red", "green"),
-                                  names = NULL,
-                                  names.fill = TRUE,
-                                  show.names = "significant",
-                                  x.cut = 0,
-                                  y.cut = 0.01,
-                                  height = 5,
-                                  width = 10,
-                                  highlight = NULL,
-                                  highlight.color = "orange",
-                                  names.size = 4,
-                                  dpi = 300) {
+TCGAVisualize_volcano <- function(
+    x,
+    y,
+    filename = "volcano.pdf",
+    ylab =  expression(paste(-Log[10],
+                             " (FDR corrected -P values)")),
+    xlab = NULL,
+    title = "Volcano plot",
+    legend = NULL,
+    label = NULL,
+    xlim = NULL,
+    ylim = NULL,
+    color = c("black", "red", "green"),
+    names = NULL,
+    names.fill = TRUE,
+    show.names = "significant",
+    x.cut = 0,
+    y.cut = 0.01,
+    height = 5,
+    width = 10,
+    highlight = NULL,
+    highlight.color = "orange",
+    names.size = 4,
+    dpi = 300)
+{
     if (!is.null(names)) {
         if (all(grepl("\\|", names))) {
             names <- strsplit(names, "\\|")
@@ -991,7 +987,7 @@ TCGAVisualize_volcano <- function(x,
 #'                    IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
 #'                     strand=sample(c("+", "-"), 200, TRUE),
 #'                     feature_id=sprintf("ID%03d", 1:200))
-#'colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
+#' colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
 #'                     row.names=LETTERS[1:20],
 #'                     group=rep(c("group1","group2"),c(10,10)))
 #'data <- SummarizedExperiment::SummarizedExperiment(
@@ -1004,30 +1000,32 @@ TCGAVisualize_volcano <- function(x,
 #' SummarizedExperiment::colData(data)$group2 <- c(rep("group_1",ncol(data)/2),
 #'                          rep("group_2",ncol(data)/2))
 #' hypo.hyper <- TCGAanalyze_DMC(data, p.cut = 0.85,"group2","group_1","group_2")
-TCGAanalyze_DMC <- function(data,
-                            groupCol = NULL,
-                            group1 = NULL,
-                            group2 = NULL,
-                            alternative = "two.sided",
-                            diffmean.cut = 0.2,
-                            paired = FALSE,
-                            adj.method = "BH",
-                            plot.filename = "methylation_volcano.pdf",
-                            ylab =  expression(paste(-Log[10],
-                                                     " (FDR corrected -P values)")),
-                            xlab =  expression(paste("DNA Methylation difference (", beta, "-values)")),
-                            title = NULL,
-                            legend = "Legend",
-                            color = c("black",  "red", "darkgreen"),
-                            label = NULL,
-                            xlim = NULL,
-                            ylim = NULL,
-                            p.cut = 0.01,
-                            probe.names = FALSE,
-                            cores = 1,
-                            save = TRUE,
-                            save.directory = ".",
-                            filename = NULL) {
+TCGAanalyze_DMC <- function(
+    data,
+    groupCol = NULL,
+    group1 = NULL,
+    group2 = NULL,
+    alternative = "two.sided",
+    diffmean.cut = 0.2,
+    paired = FALSE,
+    adj.method = "BH",
+    plot.filename = "methylation_volcano.pdf",
+    ylab =  expression(paste(-Log[10],
+                             " (FDR corrected -P values)")),
+    xlab =  expression(paste("DNA Methylation difference (", beta, "-values)")),
+    title = NULL,
+    legend = "Legend",
+    color = c("black",  "red", "darkgreen"),
+    label = NULL,
+    xlim = NULL,
+    ylim = NULL,
+    p.cut = 0.01,
+    probe.names = FALSE,
+    cores = 1,
+    save = TRUE,
+    save.directory = ".",
+    filename = NULL)
+{
     names(color) <- as.character(1:3)
     # Check if object is a summarized Experiment
     if (!is(data, "RangedSummarizedExperiment")) {
@@ -1108,21 +1106,17 @@ TCGAanalyze_DMC <- function(data,
 
     # get significant data
     results$status <- "Not Significant"
-    sig <-
-        which(results[, grep("p.value.adj", colnames(results))] < p.cut)
-    hyper <-
-        which(results[, grep("minus", colnames(results))] > diffmean.cut)
-    hypo <-
-        which(results[, grep("minus", colnames(results))] < -diffmean.cut)
+    sig <- which(results[, grep("p.value.adj", colnames(results))] < p.cut)
+    hyper <- which(results[, grep("minus", colnames(results))] > diffmean.cut)
+    hypo <- which(results[, grep("minus", colnames(results))] < -diffmean.cut)
     hyper.sig <- intersect(hyper, sig)
     hypo.sig <- intersect(hypo, sig)
 
     if (length(hyper.sig))
-        results[hyper.sig, "status"] <-
-        paste0("Hypermethylated in ", group1)
+        results[hyper.sig, "status"] <- paste0("Hypermethylated in ", group1)
+
     if (length(hypo.sig))
-        results[hypo.sig, "status"] <-
-        paste0("Hypermethylated in ", group1)
+        results[hypo.sig, "status"] <-  paste0("Hypomethylated in ", group1)
 
     # Plot a volcano plot
     names <- NULL
