@@ -794,3 +794,26 @@ check_package <- function(package){
              call. = FALSE)
     }
 }
+
+#' @title register cores
+#' @param package Package name
+#' @noRd
+set_cores <- function(cores){
+    parallel <- FALSE
+    if (cores > 1) {
+        check_package("parallel")
+        check_package("doParallel")
+        if (is.windows()) {
+            if (cores > parallel::detectCores())
+                cores <- parallel::detectCores()
+            doParallel::registerDoParallel(cores)
+            parallel = TRUE
+        } else {
+            if (cores > parallel::detectCores())
+                cores <- parallel::detectCores()
+            doParallel::registerDoParallel(cores)
+            parallel = TRUE
+        }
+    }
+    return(parallel)
+}
