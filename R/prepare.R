@@ -1,4 +1,3 @@
-
 #' @title Prepare GDC data
 #' @description
 #'   Reads the data downloaded and prepare it into an R object
@@ -61,7 +60,8 @@ GDCprepare <- function(query,
                                                          "In_Frame_Del",
                                                          "In_Frame_Ins",
                                                          "Translation_Start_Site",
-                                                         "Nonstop_Mutation")){
+                                                         "Nonstop_Mutation")
+){
 
   isServeOK()
   if(missing(query)) stop("Please set query parameter")
@@ -374,31 +374,40 @@ readSimpleNucleotideVariationMaf <- function(files){
 
 
 #' @importFrom purrr reduce
-readGeneExpressionQuantification <- function(files,
-                                             cases,
-                                             genome = "hg19",
-                                             summarizedExperiment = TRUE,
-                                             experimental.strategy,
-                                             platform){
+readGeneExpressionQuantification <- function(
+  files,
+  cases,
+  genome = "hg19",
+  summarizedExperiment = TRUE,
+  experimental.strategy,
+  platform
+){
   skip <- unique((ifelse(experimental.strategy == "Gene expression array",1,0)))
 
   if(length(skip) > 1) stop("It is not possible to handle those different platforms together")
 
   print.header(paste0("Reading ", length(files)," files"),"subsection")
-  ret <- plyr::alply(seq_along(files),1,.fun = function(i,cases){
-    data <- fread(files[i],
-                  header = TRUE,
-                  sep = "\t",
-                  stringsAsFactors = FALSE,
-                  skip = skip)
-    if(!missing(cases)) {
-      assay.list <<- gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)])
-      # We will use this because there might be more than one col for each samples
-      setnames(data,colnames(data)[2:ncol(data)],
-               paste0(gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)]),"_",cases[i]))
-    }
-    data
-  },.progress = "time",cases = cases)
+  ret <- plyr::alply(
+    .data = seq_along(files),
+    .margins = 1,
+    .fun = function(i,cases){
+
+      data <- fread(
+        input = files[i],
+        header = TRUE,
+        sep = "\t",
+        stringsAsFactors = FALSE,
+        skip = skip
+      )
+
+      if(!missing(cases)) {
+        assay.list <<- gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)])
+        # We will use this because there might be more than one col for each samples
+        setnames(data,colnames(data)[2:ncol(data)],
+                 paste0(gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)]),"_",cases[i]))
+      }
+      data
+    },.progress = "time",cases = cases)
 
   print.header(paste0("Merging ", length(files)," files"),"subsection")
   merging.col <- colnames(ret[[1]])[1]
@@ -409,66 +418,81 @@ readGeneExpressionQuantification <- function(files,
   )
 
   if (summarizedExperiment) {
-    df <- makeSEfromGeneExpressionQuantification(df,assay.list, genome = genome)
+    df <- makeSEfromGeneExpressionQuantification(df, assay.list, genome = genome)
   } else {
     rownames(df) <- df$gene_id
     df$gene_id <- NULL
   }
   return(df)
 }
+
+
 makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome = "hg19"){
+
+  # Access genome information to create SE
   gene.location <- get.GRCh.bioMart(genome)
-  if(all(grepl("\\|",df[,1]))){
+
+  if(all(grepl("\\|",df[[1]]))){
     aux <- strsplit(df$gene_id,"\\|")
     GeneID <- unlist(lapply(aux,function(x) x[2]))
     df$entrezgene_id <- as.numeric(GeneID)
     gene.location <- gene.location[!duplicated(gene.location$entrezgene_id),]
     df <- merge(df, gene.location, by = "entrezgene_id")
   } else {
-    df$external_gene_name <- as.character(df[,1])
+    df$external_gene_name <- as.character(df[[1]])
     df <- merge(df, gene.location, by = "external_gene_name")
   }
 
 
   if("transcript_id" %in% assay.list){
-    rowRanges <- GRanges(seqnames = paste0("chr", df$chromosome_name),
-                         ranges = IRanges(start = df$start_position,
-                                          end = df$end_position),
-                         strand = df$strand,
-                         gene_id = df$external_gene_name,
-                         entrezgene = df$entrezgene_id,
-                         ensembl_gene_id = df$ensembl_gene_id,
-                         transcript_id = subset(df, select = 5))
+    rowRanges <- GRanges(
+      seqnames = paste0("chr", df$chromosome_name),
+      ranges = IRanges(start = df$start_position,
+                       end = df$end_position),
+      strand = df$strand,
+      gene_id = df$external_gene_name,
+      entrezgene = df$entrezgene_id,
+      ensembl_gene_id = df$ensembl_gene_id,
+      transcript_id = subset(df, select = 5)
+    )
     names(rowRanges) <- as.character(df$gene_id)
     assay.list <- assay.list[which(assay.list != "transcript_id")]
   } else {
-    rowRanges <- GRanges(seqnames = paste0("chr", df$chromosome_name),
-                         ranges = IRanges(start = df$start_position,
-                                          end = df$end_position),
-                         strand = df$strand,
-                         gene_id = df$external_gene_name,
-                         entrezgene = df$entrezgene_id,
-                         ensembl_gene_id = df$ensembl_gene_id)
+    rowRanges <- GRanges(
+      seqnames = paste0("chr", df$chromosome_name),
+      ranges = IRanges(start = df$start_position,
+                       end = df$end_position),
+      strand = df$strand,
+      gene_id = df$external_gene_name,
+      entrezgene = df$entrezgene_id,
+      ensembl_gene_id = df$ensembl_gene_id
+    )
     names(rowRanges) <- as.character(df$external_gene_name)
   }
+
   suppressWarnings({
     assays <- lapply(assay.list, function (x) {
       return(data.matrix(subset(df, select = grep(x,colnames(df),ignore.case = TRUE))))
     })
   })
+
   names(assays) <- assay.list
   regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
                   "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
   samples <- na.omit(unique(str_match(colnames(df),regex)[,1]))
   colData <-  colDataPrepare(samples)
+
   assays <- lapply(assays, function(x){
     colnames(x) <- NULL
     rownames(x) <- NULL
     return(x)
   })
-  rse <- SummarizedExperiment(assays=assays,
-                              rowRanges=rowRanges,
-                              colData=colData)
+
+  rse <- SummarizedExperiment(
+    assays = assays,
+    rowRanges = rowRanges,
+    colData = colData
+  )
   return(rse)
 }
 
