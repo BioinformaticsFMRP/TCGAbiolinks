@@ -183,3 +183,22 @@ test_that("Prepare multiple samples from the same patient", {
     expect_equal(x["BA2577D","sample_type"],"Recurrent Blood Derived Cancer - Bone Marrow")
     expect_true("age_at_diagnosis" %in% colnames(x))
 })
+
+test_that("Preparing HT_HG-U133A as SE works", {
+    skip_on_bioc()
+    skip_if_offline()
+
+    query <- GDCquery(
+        project = "TCGA-GBM",
+        legacy = TRUE,
+        data.category = "Gene expression",
+        data.type = "Gene expression quantification",
+        platform = c("HT_HG-U133A")
+    )
+    query$results[[1]] <- query$results[[1]][1:2,]
+    GDCdownload(query, method = "api", files.per.chunk = 100)
+    se <- GDCprepare(query, summarizedExperiment = TRUE)
+
+    expect_true(is(se,"SummarizedExperiment"))
+})
+
