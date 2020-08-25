@@ -1115,7 +1115,7 @@ TCGAanalyze_DEA <-
                 cont.matrix <- limma::makeContrasts(contrasts = contr,
                                                     levels = design)
                 fit <- limma::lmFit(logCPM, design)
-                fit <- contrasts.fit(fit, cont.matrix)
+                fit <- limma::contrasts.fit(fit, cont.matrix)
                 if (trend == TRUE) {
                     fit <- limma::eBayes(fit, trend = TRUE)
                 }
