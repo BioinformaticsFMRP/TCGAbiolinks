@@ -37,7 +37,9 @@ Perform non-parametrix wilcoxon test
 }
 \examples{
  nrows <- 200; ncols <- 20
- counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows,
-           dimnames = list(paste0("cg",1:200),paste0("S",1:20)))
+ counts <- matrix(
+   runif(nrows * ncols, 1, 1e4), nrows,
+   dimnames = list(paste0("cg",1:200),paste0("S",1:20))
+ )
  TCGAbiolinks:::dmc.non.parametric(counts,1:10,11:20)
 }
