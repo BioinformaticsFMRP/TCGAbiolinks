@@ -898,13 +898,20 @@ colDataPrepare <- function(barcode){
 #' @param as.granges Output as GRanges or data.frame
 #' @importFrom biomaRt getBM useMart listDatasets useEnsembl
 #' @export
-get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
+get.GRCh.bioMart <- function(
+  genome = c("hg19", "hg38"),
+  as.granges = FALSE
+) {
+
+  genome <- match.arg(genome)
   tries <- 0L
   msg <- character()
   while (tries < 3L) {
     gene.location <- tryCatch({
-      host <- ifelse(genome == "hg19", "grch37.ensembl.org",
-                     "www.ensembl.org")
+      host <- ifelse(genome == "hg19",
+                     "grch37.ensembl.org",
+                     "www.ensembl.org"
+      )
       mirror <- list(NULL, "useast", "uswest", "asia")[[tries + 1]]
 
       ensembl <- tryCatch({
@@ -917,21 +924,26 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
         return(NULL)
       })
 
-      attributes <- c("chromosome_name",
-                      "start_position",
-                      "end_position", "strand",
-                      "ensembl_gene_id",
-                      "entrezgene_id",
-                      "external_gene_name")
+      attributes <- c(
+        "chromosome_name",
+        "start_position",
+        "end_position",
+        "strand",
+        "ensembl_gene_id",
+        "entrezgene_id",
+        "external_gene_name"
+      )
 
       db.datasets <- listDatasets(ensembl)
       description <- db.datasets[db.datasets$dataset == "hsapiens_gene_ensembl",]$description
       message(paste0("Downloading genome information (try:", tries,") Using: ", description))
 
       chrom <- c(1:22, "X", "Y")
-      gene.location <- getBM(attributes = attributes,
-                             filters = c("chromosome_name"),
-                             values = list(chrom), mart = ensembl)
+      gene.location <- getBM(
+        attributes = attributes,
+        filters = c("chromosome_name"),
+        values = list(chrom), mart = ensembl
+      )
       gene.location
     }, error = function(e) {
       msg <<- conditionMessage(e)
@@ -946,10 +958,12 @@ get.GRCh.bioMart <- function(genome = "hg19", as.granges = FALSE) {
     gene.location$strand[gene.location$strand == 1] <- "+"
     gene.location$strand[gene.location$strand == -1] <- "-"
     gene.location$chromosome_name <- paste0("chr",gene.location$chromosome_name)
-    gene.location <- makeGRangesFromDataFrame(gene.location, seqnames.field = "chromosome_name",
-                                              start.field = "start_position",
-                                              end.field = "end_position",
-                                              keep.extra.columns = TRUE) # considering the whole gene no their promoters
+    gene.location <- makeGRangesFromDataFrame(
+      gene.location, seqnames.field = "chromosome_name",
+      start.field = "start_position",
+      end.field = "end_position",
+      keep.extra.columns = TRUE
+    )
   }
   return(gene.location)
 }
