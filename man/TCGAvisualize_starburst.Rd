@@ -121,18 +121,20 @@ Input: data with gene expression/methylation expression
 \examples{
 \dontrun{
 library(SummarizedExperiment)
-met <- TCGAbiolinks:::getMetPlatInfo(genome = "hg38",platform = "27K")
+met <- TCGAbiolinks:::getMetPlatInfo(genome = "hg38", platform = "27K")
 values(met) <- NULL
 met$probeID <- names(met)
 nrows <- length(met); ncols <- 20
 counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
-colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
-                    row.names=LETTERS[1:20],
-                    group=rep(c("group1","group2"),c(10,10)))
+colData <- S4Vectors::DataFrame(
+  Treatment = rep(c("ChIP", "Input"), 5),
+  row.names = LETTERS[1:20],
+  group = rep(c("group1","group2"),c(10,10))
+)
 met <- SummarizedExperiment::SummarizedExperiment(
-         assays=S4Vectors::SimpleList(counts=counts),
-         rowRanges=met,
-         colData=colData)
+         assays = S4Vectors::SimpleList(counts=counts),
+         rowRanges = met,
+         colData = colData)
 rowRanges(met)$diffmean.g1.g2 <- c(runif(nrows, -0.1, 0.1))
 rowRanges(met)$diffmean.g2.g1 <- -1*(rowRanges(met)$diffmean.g1.g2)
 rowRanges(met)$p.value.g1.g2 <- c(runif(nrows, 0, 1))
@@ -141,16 +143,18 @@ exp <- TCGAbiolinks:::get.GRCh.bioMart("hg38")
 exp$logFC <- runif(nrow(exp), -5, 5)
 exp$FDR <- runif(nrow(exp), 0.01, 1)
 
-result <- TCGAvisualize_starburst(met,
-                                  exp,
-                                  exp.p.cut = 0.05,
-                                  met.p.cut = 0.05,
-                                  logFC.cut = 2,
-                                  group1 = "g1",
-                                  group2 = "g2",
-                                  genome = "hg38",
-                                  met.platform = "27K",
-                                  diffmean.cut = 0.0,
-                                  names  = TRUE)
+result <- TCGAvisualize_starburst(
+  met,
+  exp,
+  exp.p.cut = 0.05,
+  met.p.cut = 0.05,
+  logFC.cut = 2,
+  group1 = "g1",
+  group2 = "g2",
+  genome = "hg38",
+  met.platform = "27K",
+  diffmean.cut = 0.0,
+  names  = TRUE
+)
 }
 }
