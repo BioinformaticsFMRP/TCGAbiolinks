@@ -1041,7 +1041,9 @@ TCGAanalyze_DMC <- function(
     if (any(rowSums(!is.na(assay(data))) == 0)) {
         stop(
             paste0(
-                "Sorry, but we found some probes with NA for all samples in your data, please either remove/or replace them"
+                "Sorry, but we found some probes with NA ",
+                "for all samples in your data, please either ",
+                "remove/or replace them"
             )
         )
     }
@@ -1059,8 +1061,9 @@ TCGAanalyze_DMC <- function(
         is.null(group1) && is.null(group2)) {
         message("Please, set the group1 and group2 parameters")
         return(NULL)
-    } else if (length(unique(colData(data)[, groupCol])) == 2  && (is.null(group1) ||
-                                                                   is.null(group2))) {
+    } else if (length(unique(colData(data)[, groupCol])) == 2  &&
+               (is.null(group1) || is.null(group2)))
+    {
         group1 <- unique(colData(data)[, groupCol])[1]
         group2 <- unique(colData(data)[, groupCol])[2]
     } else {
@@ -1075,7 +1078,6 @@ TCGAanalyze_DMC <- function(
     if (!any(colData(data)[, groupCol] == group2, na.rm = TRUE)) {
         stop(paste0("Sorry, but ", group2, " has no samples"))
     }
-
 
     results <- dmc.non.parametric.se(
         data,
@@ -1227,7 +1229,7 @@ TCGAanalyze_DMC <- function(
 #' @examples
 #' \dontrun{
 #' library(SummarizedExperiment)
-#' met <- TCGAbiolinks:::getMetPlatInfo(genome = "hg38",platform = "27K")
+#' met <- TCGAbiolinks:::getMetPlatInfo(genome = "hg38", platform = "27K")
 #' values(met) <- NULL
 #' met$probeID <- names(met)
 #' nrows <- length(met); ncols <- 20
@@ -1742,37 +1744,39 @@ TCGAvisualize_starburst <- function(
 }
 
 
-getMetPlatInfo <- function(genome, platform) {
-    base <- "http://zwdzwd.io/InfiniumAnnotation/current"
+
+getMetPlatInfo <- function(
+    genome = c("hg38","hg19"),
+    platform = c("450k","EPIC","27k")
+){
+    genome <- match.arg(genome)
+    # arrayType <- match.arg(arrayType)
 
     platform <-  switch(
         platform,
-        "450K" = "hm450",
-        "450k" = "hm450",
-        "27k"  = "hm27",
-        "27K"  = "hm27",
+        "450K" = "HM450",
+        "450k" = "HM450",
+        "27k"  = "HM27",
+        "27K"  = "HM27",
         "EPIC" = "EPIC"
     )
-    path <- file.path(
-        base,
-        platform,
-        paste(platform, "hg19.manifest.rds", sep = ".")
+    if(is.null(platform)){
+        stop("platform must one of the following options: 450k, EPIC or 27k")
+    }
+
+    check_package("sesameData")
+    check_package("sesame")
+
+    sesameData::sesameDataCacheAll()
+    sesameData::sesameDataGet(
+        str_c(
+            platform,
+            ".",
+            genome,
+            ".manifest"
+        )
     )
-    if (grepl("hg38", genome)) path <- gsub("hg19", "hg38", path)
-    message(path)
-
-    if (Sys.info()["sysname"] == "Windows")
-        mode <- "wb"
-    else
-        mode <- "w"
-
-    if (!file.exists(basename(path)))
-        downloader::download(path, basename(path), mode = mode)
-
-    gr <- readRDS(basename(path))
-    return(gr)
 }
-
 
 #' getTSS to fetch GENCODE gene annotation (transcripts level) from Bioconductor package biomaRt
 #' If upstream and downstream are specified in TSS list, promoter regions of GENCODE gene will be generated.
