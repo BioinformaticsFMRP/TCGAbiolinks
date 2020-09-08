@@ -4,7 +4,7 @@
 \alias{get.GRCh.bioMart}
 \title{Get hg19 or hg38 information from biomaRt}
 \usage{
-get.GRCh.bioMart(genome = "hg19", as.granges = FALSE)
+get.GRCh.bioMart(genome = c("hg19", "hg38"), as.granges = FALSE)
 }
 \arguments{
 \item{genome}{hg38 or hg19}

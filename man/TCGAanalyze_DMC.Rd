@@ -115,23 +115,36 @@ This function will search for differentially methylated CpG sites,
 }
 \examples{
 nrows <- 200; ncols <- 20
- counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows,
-           dimnames = list(paste0("cg",1:200),paste0("S",1:20)))
-rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
-                   IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
-                    strand=sample(c("+", "-"), 200, TRUE),
-                    feature_id=sprintf("ID\%03d", 1:200))
-colData <- S4Vectors::DataFrame(Treatment=rep(c("ChIP", "Input"), 5),
-                    row.names=LETTERS[1:20],
-                    group=rep(c("group1","group2"),c(10,10)))
+ counts <- matrix(
+   runif(nrows * ncols, 1, 1e4), nrows,
+   dimnames = list(paste0("cg",1:200),paste0("S",1:20))
+)
+rowRanges <- GenomicRanges::GRanges(
+  rep(c("chr1", "chr2"), c(50, 150)),
+  IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width = 100),
+  strand = sample(c("+", "-"), 200, TRUE),
+  feature_id = sprintf("ID\%03d", 1:200)
+)
+colData <- S4Vectors::DataFrame(
+  Treatment = rep(c("ChIP", "Input"), 5),
+  row.names = LETTERS[1:20],
+  group = rep(c("group1","group2"),c(10,10))
+)
 data <- SummarizedExperiment::SummarizedExperiment(
          assays=S4Vectors::SimpleList(counts=counts),
-         rowRanges=rowRanges,
-         colData=colData)
+         rowRanges = rowRanges,
+         colData = colData
+)
 SummarizedExperiment::colData(data)$group <- c(rep("group 1",ncol(data)/2),
                          rep("group 2",ncol(data)/2))
 hypo.hyper <- TCGAanalyze_DMC(data, p.cut = 0.85,"group","group 1","group 2")
 SummarizedExperiment::colData(data)$group2 <- c(rep("group_1",ncol(data)/2),
                          rep("group_2",ncol(data)/2))
-hypo.hyper <- TCGAanalyze_DMC(data, p.cut = 0.85,"group2","group_1","group_2")
+hypo.hyper <- TCGAanalyze_DMC(
+  data = data,
+  p.cut = 0.85,
+  groupCol = "group2",
+  group1 = "group_1",
+  group2 = "group_2"
+)
 }
