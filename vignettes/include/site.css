@@ -1,0 +1,34 @@
+.html-widget {
+  margin-bottom: 1em;
+}
+h1 .header-section-number::after {
+  content: ".";
+}
+th {
+    background-color: #336699;
+    color: white;
+}
+tr:nth-child(even) {background-color: #f2f2f2;}
+table td {
+    padding: 3px 10px;
+    border-top: none;
+    border-left: none;
+    border-bottom: none;
+    border-right: none;
+}
+h1 {
+  font-size: 28px;
+}
+
+h2 {
+  font-size: 28px;
+}
+
+.section.level2 h2 {
+    padding-top: 65px;
+    margin-top: -40px;
+}
+.section.level1 h1 {
+    padding-top: 65px;
+    margin-top: -40px;
+}

@@ -1,0 +1,101 @@
+---
+title: "Classifiers methods"
+bibliography: bibliography.bib    
+vignette: >
+    %\VignetteIndexEntry{10. Classifiers}
+    %\VignetteEngine{knitr::rmarkdown}
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dpi = 300)
+knitr::opts_chunk$set(cache = FALSE)
+```
+  
+```{r, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
+library(TCGAbiolinks)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(SummarizedExperiment)
+library(dplyr)
+library(DT)
+```
+
+<br>
+
+## Classifying gliomas samples with `gliomaClassifier`
+<hr>
+
+Classifying glioma samples with DNA methylation array based on:
+
+
+**Ceccarelli, Michele, et al. "Molecular profiling reveals biologically discrete subsets and pathways of progression in diffuse glioma." Cell 164.3 (2016): 550-563.** (https://doi.org/10.1016/j.cell.2015.12.028)
+
+Possible classifications are: 
+
+- Mesenchymal-like 
+- Classic-like
+- G-CIMP-high
+- G-CIMP-low
+- LGm6-GBM
+- Codel
+
+## Data
+<hr>
+
+The input data can be either a Summarized Experiment object of a matrix 
+(samples as columns, probes as rows) from the following platforms:
+
+- HM27
+- HM450 
+- EPIC array.
+
+In this example we will retrieve two samples from TCGA and classify them expecting 
+the same result as the paper.
+
+```{r, eval = FALSE, message = FALSE, results = "hide"}
+query <- GDCquery(
+  project = "TCGA-GBM",
+  data.category = "DNA methylation",
+  barcode = c("TCGA-06-0122","TCGA-14-1456"),
+  platform = "Illumina Human Methylation 27",
+  legacy = TRUE
+)
+GDCdownload(query)
+data.hg19 <- GDCprepare(query)
+```
+
+```{r, eval = FALSE}
+assay(data.hg19)[1:5,1:2]
+```
+
+## Function
+<hr>
+
+```{r, eval = FALSE}
+classification <- gliomaClassifier(data.hg19)
+```
+
+## Results
+<hr>
+The classfier will return a list of 3 data frames:
+
+1. Sample final classification
+2. Each model final classification
+3. Each class probability of classification
+
+```{r, eval = FALSE}
+names(classification)
+classification$final.classification
+classification$model.classifications
+classification$model.probabilities
+```
+
+## Comparing results with paper
+<hr>
+```{R}
+TCGAquery_subtype("GBM") %>%
+ dplyr::filter(patient %in% c("TCGA-06-0122","TCGA-14-1456")) %>%
+ dplyr::select("patient","Supervised.DNA.Methylation.Cluster")
+```
+

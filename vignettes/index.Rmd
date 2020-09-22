@@ -1,0 +1,83 @@
+---
+title: "Introduction"
+date: "`r BiocStyle::doc_date()`"
+vignette: >
+  %\VignetteIndexEntry{"1. Introduction"}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(progress = FALSE)
+```
+
+<hr>
+TCGAbiolinks is able to access The National Cancer Institute (NCI) Genomic Data Commons (GDC) thorough its  
+[GDC Application Programming Interface (API)](https://gdc.cancer.gov/developers/gdc-application-programming-interface-api) 
+to search, download and prepare relevant data for analysis in R. 
+
+# News
+<hr>
+- December 2019: 
+  - Added support to non TCGA/TARGET projects - https://rpubs.com/tiagochst/TCGAbiolinks_RNA-seq_new_projects
+  - Added support to linked Omics data retrieval - https://rpubs.com/tiagochst/linkedOmics
+  - Included Glioma classifier from GUI to the main package - https://bioconductor.org/packages/devel/bioc/vignettes/TCGAbiolinks/inst/doc/classifiers.html
+- Added support to BCR Biotab clinical files   
+- Workshop materials (ATAC-seq, ELMER and TCGAbiolinks) were added to vignette (https://bioconductor.org/packages/devel/bioc/vignettes/TCGAbiolinks/inst/doc/index.html)
+
+
+# Citation
+<hr>
+If you use TCGAbiolinks, please cite:
+
+* Colaprico, Antonio, et al. "TCGAbiolinks: an R/Bioconductor package for integrative analysis of TCGA data." Nucleic acids research 44.8 (2015): e71-e71.
+* Silva, Tiago C., et al. "TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages." F1000Research 5 (2016). (https://f1000research.com/articles/5-1542/v2)
+* Mounir, Mohamed, et al. "New functionalities in the TCGAbiolinks package for the study and integration of cancer data from GDC and GTEx." PLoS computational biology 15.3 (2019): e1006701. (https://doi.org/10.1371/journal.pcbi.1006701)
+
+# Other useful links
+<hr>
+* Gao, Galen F., et al. "Before and After: Comparison of Legacy and Harmonized TCGA Genomic Data Commons’ Data." Cell systems 9.1 (2019): 24-34. (https://doi.org/10.1016/j.cels.2019.06.006)
+
+* TCGA Workflow Analyze cancer genomics and epigenomics data using Bioconductor packages: http://bioconductor.org/packages/TCGAWorkflow/
+
+# Installation
+<hr>
+
+You can install the stable version from [Bioconductor](http://bioconductor.org/packages/release/bioc/html/TCGAbiolinks.html).
+If you are having issues with the stable version, try using the development version.
+
+* Stable version:
+```{r message=FALSE, warning=FALSE, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("TCGAbiolinks")
+```
+
+* Development version:
+```{r message=FALSE, warning=FALSE, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("BioinformaticsFMRP/TCGAbiolinksGUI.data")
+BiocManager::install("BioinformaticsFMRP/TCGAbiolinks")
+```
+
+# Question and issues
+<hr>
+Please use [Github issues](https://github.com/BioinformaticsFMRP/TCGAbiolinks/issues) if you want to file bug reports or feature requests.
+
+# Required libraries
+<hr>
+The examples in this tutorial use the following libraries: 
+```{r message=FALSE, warning=FALSE, include=TRUE}
+library(TCGAbiolinks)
+library(dplyr)
+library(DT)
+```
+
+# Session info
+<hr>
+```{r}
+version
+packageVersion("TCGAbiolinks")
+```

@@ -1,0 +1,102 @@
+language: r
+r:
+  - bioc-release
+sudo: true
+cache: packages
+bioc_required: true
+bioc_use_devel: true
+warnings_are_errors: false
+
+os:
+  - linux
+  - osx
+osx_image: xcode9
+
+addons:
+  apt:
+    packages:
+      - libgdal-dev
+      - libgdal1-dev
+      - libproj-dev
+      - libudunits2-dev
+  brew_packages:
+      - udunits
+
+before_install:
+  - if [ ${TRAVIS_OS_NAME} == linux ]; then sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable --yes; fi
+  - if [ ${TRAVIS_OS_NAME} == linux ]; then sudo apt-get --yes --force-yes update -qq; fi
+  - if [ ${TRAVIS_OS_NAME} == linux ]; then sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev; fi
+
+
+r_binary_packages:
+  - withr
+  - knitr
+  - crayon
+  - roxygen2
+  - testthat
+  - rex
+  - survival
+  - R6
+  - whisker
+  - jsonlite
+  - httr
+  - RCurl
+  - bitops
+  - DBI
+  - getopt
+  - rjson
+  - snow
+  - RSQLite
+  - base64enc
+  - fastmatch
+  - XML
+  - igraph
+
+bioc_packages:
+  - BiocStyle
+  - EDASeq
+  - edgeR
+  - biomaRt
+  - supraHex
+  - ComplexHeatmap
+  - SummarizedExperiment
+  - TxDb.Hsapiens.UCSC.hg19.knownGene
+  - limma
+  - genefilter
+  - ConsensusClusterPlus
+  - pathview
+  - clusterProfiler
+  - BiocCheck
+  - fgsea
+  - GO.db
+  - DO.db
+  - org.Hs.eg.db
+  - GenomicRanges
+  - Biobase
+  - S4Vectors
+  - IRanges
+  - BiocGenerics
+  - GenomicFeatures
+  - affy
+
+
+r_github_packages:
+  - kevinushey/later
+  - jimhester/covr
+  - hfang-bristol/dnet
+  - PoisonAlien/maftools
+
+after_script:
+  - ls -lah
+  - FILE=$(ls -1t *.tar.gz | head -n 1)
+  - Rscript -e "library(BiocCheck); BiocCheck(\"${FILE}\")
+
+after_success:
+  -  travis_wait Rscript -e 'library(covr);codecov()'
+
+r_build_args: --no-build-vignettes --no-manual --no-resave-data --no-tests
+r_check_args: --no-build-vignettes --no-manual --no-tests
+
+notifications:
+  slack: omics-team:mp8k727GslFLZPQrmuvOkCcc
+  email: false

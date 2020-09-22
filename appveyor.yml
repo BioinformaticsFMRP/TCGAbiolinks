@@ -1,0 +1,83 @@
+# DO NOT CHANGE the "init" and "install" sections below
+
+# Download script file from GitHub
+init:
+  ps: |
+        $ErrorActionPreference = "Stop"
+        Invoke-WebRequest http://raw.github.com/krlmlr/r-appveyor/master/scripts/appveyor-tool.ps1 -OutFile "..\appveyor-tool.ps1"
+        Import-Module '..\appveyor-tool.ps1'
+install:
+  ps: Bootstrap
+
+# Adapt as necessary starting from here
+
+build_script:
+  - travis-tool.sh install_bioc stringi
+  - travis-tool.sh install_deps
+  - travis-tool.sh install_bioc_deps
+  - travis-tool.sh install_bioc BiocStyle
+  - travis-tool.sh install_bioc GenomeInfoDbData
+  - travis-tool.sh install_bioc GenomicRanges
+  - travis-tool.sh install_bioc Biobase
+  - travis-tool.sh install_github zwdzwd/sesame
+  - travis-tool.sh install_github zwdzwd/sesameData
+  - travis-tool.sh install_bioc maftools affy
+  - travis-tool.sh install_bioc affy
+  - travis-tool.sh install_bioc EDASeq
+  - travis-tool.sh install_bioc edgeR
+  - travis-tool.sh install_bioc biomaRt
+  - travis-tool.sh install_bioc IRanges
+  - travis-tool.sh install_bioc supraHex
+  - travis-tool.sh install_bioc S4Vectors
+  - travis-tool.sh install_bioc ComplexHeatmap
+  - travis-tool.sh install_bioc SummarizedExperiment
+  - travis-tool.sh install_bioc DO.db BiocGenerics
+  - travis-tool.sh install_bioc GenomicFeatures
+  - travis-tool.sh install_bioc TxDb.Hsapiens.UCSC.hg19.knownGene
+  - travis-tool.sh install_bioc limma
+  - travis-tool.sh install_bioc genefilter
+  - travis-tool.sh install_bioc ConsensusClusterPlus
+  - travis-tool.sh install_bioc pathview
+  - travis-tool.sh install_bioc clusterProfiler
+
+test_script:
+  - travis-tool.sh run_tests
+
+on_failure:
+  - 7z a failure.zip *.Rcheck\*
+  - appveyor PushArtifact failure.zip
+
+environment:
+  matrix:
+    - R_VERSION: release
+      R_ARCH: x64
+      GCC_PATH: mingw_64
+      USE_RTOOLS: true
+      WARNINGS_ARE_ERRORS: 0
+      DOWNLOAD_FILE_METHOD: wininet
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: TRUE
+
+artifacts:
+  - path: '*.Rcheck\**\*.log'
+    name: Logs
+
+  - path: '*.Rcheck\**\*.out'
+    name: Logs
+
+  - path: '*.Rcheck\**\*.fail'
+    name: Logs
+
+  - path: '*.Rcheck\**\*.Rout'
+    name: Logs
+
+  - path: '\*_*.tar.gz'
+    name: Bits
+
+  - path: '\*_*.zip'
+    name: Bits
+
+notifications:
+- provider: Email
+  to:
+  - tiagochst@gmail.com
+  on_build_success: false

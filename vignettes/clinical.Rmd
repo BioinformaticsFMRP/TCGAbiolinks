@@ -1,0 +1,559 @@
+---
+title: "TCGAbiolinks: Clinical data"
+date: "`r BiocStyle::doc_date()`"
+vignette: >
+  %\VignetteIndexEntry{"4. Clinical data"}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+  
+<style> body {text-align: justify} </style>
+  
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(progress = FALSE)
+```
+  
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(TCGAbiolinks)
+library(SummarizedExperiment)
+library(dplyr)
+library(DT)
+```
+
+
+**TCGAbiolinks** has provided a few functions to search, download and parse clinical data.
+This section starts by explaining the different sources for clinical information in GDC, followed by the necessary
+function to access these sources.
+
+
+---
+# Useful information
+
+
+<div class="panel panel-info">
+<div class="panel-heading">Different sources</div>
+<div class="panel-body">
+
+In GDC database the clinical data can be retrieved from different sources:
+
+- indexed clinical: a refined clinical data that is created using the XML files.
+- XML files: original source of the data
+- BCR Biotab: tsv files parsed from XML files
+
+
+There are two main differences between the indexed clinical and XML files:
+
+- XML has more information: radiation, drugs information, follow-ups, biospecimen, etc. So the indexed one is only a subset of the XML files
+- The indexed data contains the updated data with the follow up information. 
+For example: if the patient is alive in the first time clinical data was collect and the in the next follow-up he is dead, 
+the indexed data will show dead. The XML will have two fields, one for the first time saying he is alive (in the clinical part) and the follow-up saying he is dead. 
+</div>
+</div>
+
+Other useful clinical information available are:
+
+* Tissue slide image 
+* Pathology report - Slide image
+
+
+#  BCR Biotab
+
+
+## Clinical
+In this example we will fetch clinical data from  BCR Biotab files.
+
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
+query <- GDCquery(project = "TCGA-ACC", 
+                  data.category = "Clinical",
+                  data.type = "Clinical Supplement", 
+                  data.format = "BCR Biotab")
+GDCdownload(query)
+clinical.BCRtab.all <- GDCprepare(query)
+names(clinical.BCRtab.all)
+
+query <- GDCquery(project = "TCGA-ACC", 
+                  data.category = "Clinical",
+                  data.type = "Clinical Supplement", 
+                  data.format = "BCR Biotab",
+                   file.type = "radiation")
+GDCdownload(query)
+clinical.BCRtab.radiation <- GDCprepare(query)
+
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+clinical.BCRtab.all$clinical_drug_acc  %>% 
+  head  %>% 
+ DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+```
+
+
+In this example we will fetch all BRCA BCR Biotab files, and look for the ER status.
+
+```{r, results = "hide",cache=TRUE, message=FALSE}
+library(TCGAbiolinks)
+query <- GDCquery(project = "TCGA-BRCA", 
+                  data.category = "Clinical",
+                  data.type = "Clinical Supplement", 
+                  data.format = "BCR Biotab")
+GDCdownload(query)
+clinical.BCRtab.all <- GDCprepare(query)
+```
+
+```{R}
+# All available tables
+names(clinical.BCRtab.all)
+
+# colnames from clinical_patient_brca
+tibble::tibble(sort(colnames(clinical.BCRtab.all$clinical_patient_brca)))
+
+# ER status count
+plyr::count(clinical.BCRtab.all$clinical_patient_brca$er_status_by_ihc)
+
+# ER content 
+er.cols <- grep("^er",colnames(clinical.BCRtab.all$clinical_patient_brca))
+clinical.BCRtab.all$clinical_patient_brca[,c(2,er.cols)] %>% 
+DT::datatable(options = list(scrollX = TRUE))
+
+# All columns content first rows
+clinical.BCRtab.all$clinical_patient_brca %>% 
+  head  %>% 
+  DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+```
+
+## Biospecimen
+
+
+```{r, results = "hide",cache=TRUE, message=FALSE,warning=FALSE}
+# Biospecimen BCR Biotab
+query.biospecimen <- GDCquery(project = "TCGA-BRCA", 
+                  data.category = "Biospecimen",
+                  data.type = "Biospecimen Supplement", 
+                  data.format = "BCR Biotab")
+GDCdownload(query.biospecimen)
+biospecimen.BCRtab.all <- GDCprepare(query.biospecimen)
+```
+
+```{R}
+# All available tables
+names(biospecimen.BCRtab.all)
+
+biospecimen.BCRtab.all$ssf_normal_controls_ov  %>% 
+  head  %>% 
+  DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+```
+
+
+# Clinical indexed data
+
+In this example we will fetch clinical indexed data (same as showed in the data portal).
+
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
+clinical <- GDCquery_clinic(project = "TCGA-LUAD", type = "clinical")
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+clinical %>%
+    head %>% 
+  DT::datatable(filter = 'top', 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+          rownames = FALSE)
+```
+
+
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
+clinical <- GDCquery_clinic(project = "BEATAML1.0-COHORT", type = "clinical")
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+clinical %>% 
+  head %>% 
+  DT::datatable(filter = 'top', 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+          rownames = FALSE)
+```
+
+
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
+clinical <- GDCquery_clinic(project = "CPTAC-2", type = "clinical")
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+clinical %>% 
+  head %>% 
+  DT::datatable(filter = 'top', 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+          rownames = FALSE)
+```
+
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
+clinical <- GDCquery_clinic(project = "GENIE-MSK", type = "clinical")
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+clinical %>% 
+  head %>% 
+  DT::datatable(filter = 'top', 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+          rownames = FALSE)
+```
+
+
+# XML clinical data
+
+The process to get data directly from the XML are:
+1. Use `GDCquery` and `GDCDownload` functions to search/download either biospecimen or clinical XML files
+2. Use `GDCprepare_clinic` function to parse the XML files.
+
+The relation between one patient and other clinical information are 1:n, 
+one patient could have several radiation treatments. For that reason, we only give the option
+to parse individual tables (only drug information, only radiation information,...)
+The selection of the table is done by the argument `clinical.info`.
+
+<div class="panel panel-info">
+<div class="panel-heading">clinical.info options to parse information for each data category </div>
+<div class="panel-body">
+| data.category | clinical.info |
+|------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Clinical | drug |
+| Clinical | admin |
+| Clinical | follow_up |
+| Clinical | radiation |
+| Clinical | patient |
+| Clinical | stage_event |
+| Clinical | new_tumor_event |
+| Biospecimen | sample |
+| Biospecimen | bio_patient |
+| Biospecimen | analyte |
+| Biospecimen | aliquot |
+| Biospecimen | protocol |
+| Biospecimen | portion |
+| Biospecimen | slide |
+| Other | msi |
+</div>
+</div>
+
+Below are several examples fetching clinical data directly from the clinical XML files.
+
+```{r results = 'hide',echo=TRUE, message=FALSE, warning=FALSE}
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Clinical", 
+                  file.type = "xml", 
+                  barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))
+GDCdownload(query)
+clinical <- GDCprepare_clinic(query, clinical.info = "patient")
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+clinical %>% 
+datatable(filter = 'top', 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+          rownames = FALSE)
+```
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+clinical.drug <- GDCprepare_clinic(query, clinical.info = "drug")
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+clinical.drug %>% 
+datatable(filter = 'top', 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+          rownames = FALSE)
+```
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+clinical.radiation <- GDCprepare_clinic(query, clinical.info = "radiation")
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+clinical.radiation %>% 
+datatable(filter = 'top', 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+          rownames = FALSE)
+```
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+clinical.admin <- GDCprepare_clinic(query, clinical.info = "admin")
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+clinical.admin %>% 
+datatable(filter = 'top', 
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+          rownames = FALSE)
+```
+
+
+# Microsatellite data
+
+
+MSI-Mono-Dinucleotide Assay is performed to test a panel of four mononucleotide repeat loci (polyadenine tracts BAT25, BAT26, BAT40, and transforming growth factor receptor type II) and three dinucleotide repeat loci (CA repeats in D2S123, D5S346, and D17S250). Two additional pentanucleotide loci (Penta D and Penta E) are included in this assay to evaluate sample identity. Multiplex fluorescent-labeled PCR and capillary electrophoresis were used to identify MSI if a variation in the number of microsatellite repeats was detected between tumor and matched non-neoplastic tissue or mononuclear blood cells. Equivocal or failed markers were re-evaluated by singleplex PCR.
+
+classifications: microsatellite-stable (MSS), low level MSI (MSI-L) if less than 40% of markers were altered and high level MSI (MSI-H) if greater than 40% of markers were altered.
+
+Reference: [TCGA wiki](https://wiki.nci.nih.gov/display/TCGA/Microsatellite+data)
+
+Level 3 data is included in BCR clinical-based submissions and can be downloaded as follows:
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval = F}
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Other",
+                  legacy = TRUE,
+                  access = "open",
+                  data.type = "Auxiliary test",
+                  barcode = c("TCGA-AD-A5EJ","TCGA-DM-A0X9"))  
+GDCdownload(query)
+msi_results <- GDCprepare_clinic(query, "msi")
+```
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+msi_results %>% DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+```
+
+
+# Tissue slide image (SVS format)
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+# Tissue slide image files from legacy database
+query.legacy <- GDCquery(project = "TCGA-COAD", 
+                         data.category = "Clinical", 
+                         data.type = "Tissue slide image",
+                         legacy = TRUE,
+                         barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")) 
+
+# Tissue slide image files from harmonized database
+query.harmonized <- GDCquery(project = "TCGA-OV",
+                             data.category = "Biospecimen",
+                             data.type = 'Slide Image')
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+query.legacy %>% 
+  getResults %>% 
+ DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+
+query.harmonized  %>% 
+  getResults %>% 
+  head  %>% 
+ DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+```
+
+# Diagnostic Slide (SVS format)
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+# Pathology report from harmonized portal 
+query.harmonized <- GDCquery(project = "TCGA-COAD", 
+                             data.category = "Biospecimen", 
+                             data.type = "Slide Image",
+                             experimental.strategy = "Diagnostic Slide",
+                             barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))  
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+query.harmonized  %>% 
+  getResults %>% 
+  head  %>% 
+ DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+```
+
+
+
+# Legacy archive files
+The clinical data types available in legacy database are:
+
+* Biospecimen data (Biotab format)
+* Tissue slide image (SVS format)
+* Clinical Supplement (XML format)
+* Pathology report (PDF)
+* Clinical data (Biotab format)
+
+## Pathology report (PDF)
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+# Pathology report from legacy portal 
+query.legacy <- GDCquery(project = "TCGA-COAD", 
+                         data.category = "Clinical", 
+                         data.type = "Pathology report",
+                         legacy = TRUE,
+                         barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))  
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+query.legacy %>% 
+  getResults %>% 
+ DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+```
+
+## Tissue slide image (SVS format)
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
+# Tissue slide image
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Clinical", 
+                  data.type = "Tissue slide image",
+                  legacy = TRUE,
+                  barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")) 
+```
+
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+query %>% 
+  getResults %>% 
+ DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+```
+
+## Clinical Supplement (XML format)
+
+```{r results = 'hide', echo = TRUE, message = FALSE, warning = FALSE}
+# Clinical Supplement
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Clinical", 
+                  data.type = "Clinical Supplement",
+                  legacy = TRUE,
+                  barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")) 
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+query %>% 
+  getResults %>% 
+ DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+```
+
+
+## Clinical data (Biotab format)
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+# Clinical data
+query <- GDCquery(project = "TCGA-COAD", 
+                  data.category = "Clinical", 
+                  data.type = "Clinical data",
+                  legacy = TRUE,
+                  file.type = "txt")  
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+query %>% 
+  getResults %>% 
+  select(-matches("cases"))%>% 
+ DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+```
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE, eval = FALSE}
+GDCdownload(query)
+clinical.biotab <- GDCprepare(query)
+```
+
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+names(clinical.biotab)
+datatable(clinical.biotab$clinical_radiation_coad, options = list(scrollX = TRUE, keys = TRUE))
+```
+
+# Filter functions 
+
+Also, some functions to work with clinical data are provided.
+
+For example the function `TCGAquery_SampleTypes` will filter barcodes based on a
+type the argument typesample. 
+
+
+| Argument 	| Description	|  	|
+|------------	|--------------------------------------------------------------	|-----------------------------------------------	|
+| barcode 	| is a list of samples as TCGA barcodes 	|  	|
+| typesample 	| a character vector indicating tissue type to query. Example: 	|  	|
+|  	| TP 	| PRIMARY TUMOR 	|
+|  	| TR 	| RECURRENT TUMOR 	|
+|  	| TB 	| Primary Blood Derived Cancer-Peripheral Blood 	|
+|  	| TRBM 	| Recurrent Blood Derived Cancer-Bone Marrow 	|
+|  	| TAP 	| Additional-New Primary 	|
+|  	| TM 	| Metastatic 	|
+|  	| TAM 	| Additional Metastatic 	|
+|  	| THOC 	| Human Tumor Original Cells 	|
+|  	| TBM 	| Primary Blood Derived Cancer-Bone Marrow 	|
+|  	| NB 	| Blood Derived Normal 	|
+|  	| NT 	| Solid Tissue Normal 	|
+|  	| NBC 	| Buccal Cell Normal 	|
+|  	| NEBV 	| EBV Immortalized Normal 	|
+|  	| NBM 	| Bone Marrow Normal 	|
+
+
+The function `TCGAquery_MatchedCoupledSampleTypes` will filter the samples that 
+have all the typesample provided as argument. For example, if TP and TR are set 
+as typesample, the function will return the barcodes of a patient if it has both types.
+So, if it has a TP, but not a  TR, no barcode will be returned. If it has a TP and a TR
+both barcodes are returned.
+
+An example of the function is below:
+
+```{r, eval = TRUE}
+bar <- c("TCGA-G9-6378-02A-11R-1789-07", "TCGA-CH-5767-04A-11R-1789-07",  
+         "TCGA-G9-6332-60A-11R-1789-07", "TCGA-G9-6336-01A-11R-1789-07",
+         "TCGA-G9-6336-11A-11R-1789-07", "TCGA-G9-7336-11A-11R-1789-07",
+         "TCGA-G9-7336-04A-11R-1789-07", "TCGA-G9-7336-14A-11R-1789-07",
+         "TCGA-G9-7036-04A-11R-1789-07", "TCGA-G9-7036-02A-11R-1789-07",
+         "TCGA-G9-7036-11A-11R-1789-07", "TCGA-G9-7036-03A-11R-1789-07",
+         "TCGA-G9-7036-10A-11R-1789-07", "TCGA-BH-A1ES-10A-11R-1789-07",
+         "TCGA-BH-A1F0-10A-11R-1789-07", "TCGA-BH-A0BZ-02A-11R-1789-07",
+         "TCGA-B6-A0WY-04A-11R-1789-07", "TCGA-BH-A1FG-04A-11R-1789-08",
+         "TCGA-D8-A1JS-04A-11R-2089-08", "TCGA-AN-A0FN-11A-11R-8789-08",
+         "TCGA-AR-A2LQ-12A-11R-8799-08", "TCGA-AR-A2LH-03A-11R-1789-07",
+         "TCGA-BH-A1F8-04A-11R-5789-07", "TCGA-AR-A24T-04A-55R-1789-07",
+         "TCGA-AO-A0J5-05A-11R-1789-07", "TCGA-BH-A0B4-11A-12R-1789-07",
+         "TCGA-B6-A1KN-60A-13R-1789-07", "TCGA-AO-A0J5-01A-11R-1789-07",
+         "TCGA-AO-A0J5-01A-11R-1789-07", "TCGA-G9-6336-11A-11R-1789-07",
+         "TCGA-G9-6380-11A-11R-1789-07", "TCGA-G9-6380-01A-11R-1789-07",
+         "TCGA-G9-6340-01A-11R-1789-07", "TCGA-G9-6340-11A-11R-1789-07")
+
+S <- TCGAquery_SampleTypes(bar,"TP")
+S2 <- TCGAquery_SampleTypes(bar,"NB")
+
+# Retrieve multiple tissue types  NOT FROM THE SAME PATIENTS
+SS <- TCGAquery_SampleTypes(bar,c("TP","NB"))
+
+# Retrieve multiple tissue types  FROM THE SAME PATIENTS
+SSS <- TCGAquery_MatchedCoupledSampleTypes(bar,c("NT","TP"))
+```
+
+# Other useful code
+
+To get all the information for TGCA samples you can use the script below:
+```{r, eval = FALSE}
+# This code will get all clinical indexed data from TCGA
+library(data.table)
+library(dplyr)
+library(regexPipes)
+clinical <- TCGAbiolinks:::getGDCprojects()$project_id %>% 
+  regexPipes::grep("TCGA",value=T) %>% 
+  sort %>% 
+  plyr::alply(1,GDCquery_clinic, .progress = "text") %>% 
+  rbindlist
+readr::write_csv(clinical,path = paste0("all_clin_indexed.csv"))
+
+# This code will get all clinical XML data from TCGA
+getclinical <- function(proj){
+  message(proj)
+  while(1){
+    result = tryCatch({
+      query <- GDCquery(project = proj, data.category = "Clinical",file.type = "xml")
+      GDCdownload(query)
+      clinical <- GDCprepare_clinic(query, clinical.info = "patient")
+      for(i in c("admin","radiation","follow_up","drug","new_tumor_event")){
+        message(i)
+        aux <- GDCprepare_clinic(query, clinical.info = i)
+        if(is.null(aux) || nrow(aux) == 0) next
+        # add suffix manually if it already exists
+        replicated <- which(grep("bcr_patient_barcode",colnames(aux), value = T,invert = T) %in% colnames(clinical))
+        colnames(aux)[replicated] <- paste0(colnames(aux)[replicated],".",i)
+        if(!is.null(aux)) clinical <- merge(clinical,aux,by = "bcr_patient_barcode", all = TRUE)
+      }
+      readr::write_csv(clinical,path = paste0(proj,"_clinical_from_XML.csv")) # Save the clinical data into a csv file
+      return(clinical)
+    }, error = function(e) {
+      message(paste0("Error clinical: ", proj))
+    })
+  }
+}
+clinical <- TCGAbiolinks:::getGDCprojects()$project_id %>% 
+  regexPipes::grep("TCGA",value=T) %>% sort %>% 
+  plyr::alply(1,getclinical, .progress = "text") %>% 
+  rbindlist(fill = TRUE) %>% setDF %>% subset(!duplicated(clinical))
+
+readr::write_csv(clinical,path = "all_clin_XML.csv")
+# result: https://drive.google.com/open?id=0B0-8N2fjttG-WWxSVE5MSGpva1U
+# Obs: this table has multiple lines for each patient, as the patient might have several followups, drug treatments,
+# new tumor events etc...
+```
+
+

@@ -1,0 +1,7 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.git$
+^\.travis\.yml$
+^appveyor\.yml$
+^doc$
+^Meta$

@@ -1,0 +1,111 @@
+name: "TCGAbiolinks"
+navbar:
+  title: '<a href="http://bioconductor.org/packages/TCGAbiolinks/" class="navbar-left"><img  src="./include/logo.png" height="42" width="170"vspace=10 hspace=10"></a>'
+  href: https://www.bioconductor.org/help/course-materials/2017/BioC2017/
+  left:
+    - text: "Introduction"
+      icon: fa-home
+      href: index.html
+    - text: "Data"
+      icon: fa-database
+      menu:
+        - text: "---------"
+        - text: "Molecular data"
+        - text: "Query"
+          icon: fa-search
+          href: query.html
+        - text: "Download & Prepare"
+          icon: fa-database
+          href: download_prepare.html
+        - text: "---------"
+        - text: "Other data"
+        - text: "Clinical data"
+          icon: fa-user
+          href: clinical.html
+        - text: "Mutation data"
+          icon: fa-random
+          href: mutation.html
+        - text: "Molecular subtypes"
+          icon: fa-table
+          href: subtypes.html
+        - text: "ATAC-seq"
+          icon: fa-flask
+          href: http://rpubs.com/tiagochst/atac_seq_workshop
+    - text: "Analysis"
+      icon: fa-flask
+      menu:
+        - text: "---------"
+        - text: "Analysis functions"
+          icon: fa-flask
+          href: analysis.html
+        - text: "Other functions"
+          icon: fa-flask
+          href: extension.html
+        - text: "---------"
+        - text: "Importing data to DESeq2"
+          icon: fa-flask
+          href: http://rpubs.com/tiagochst/TCGAbiolinks_to_DESEq2
+        - text: "Glioma classsifier"
+          icon: fa-bulleye
+          href: classifiers.html
+    - text: "Case Study"
+      href: casestudy.html
+    - text: "GUI"
+      icon: fa-hand-pointer-o
+      href: gui.html
+  right:
+    - text: "Workshops"
+      icon: fa-book fa-lg
+      menu:
+        - text: "TCGA workshop"
+        - text: "Workshop - TCGA data analysis"
+          href: http://rpubs.com/tiagochst/TCGAworkshop
+        - text: "---------"
+        - text: "ELMER workshop"
+        - text: "Workshop for multi-omics analysis with ELMER"
+          href: http://rpubs.com/tiagochst/ELMER_workshop
+        - text: "---------"
+        - text: "ATAC-Seq workshop"
+        - text: "Workshop for ATAC-Seq analysis"
+          href: http://rpubs.com/tiagochst/atac_seq_workshop
+        - text: "---------"
+        - text: "Bioc2017 workshop"
+        - text: "Github ELMER/TCGAbiolinks"
+          href: https://github.com/BioinformaticsFMRP/Bioc2017.TCGAbiolinks.ELMER
+    - icon: fa-code fa-lg
+      menu:
+        - text: "TCGAbiolinks package"
+        - text: "Github"
+          href: https://github.com/BioinformaticsFMRP/TCGAbiolinks
+        - text: "Bioconductor"
+          href: http://bioconductor.org/packages/devel/bioc/html/TCGAbiolinks.html
+        - text: "---------"
+        - text: "TCGAbiolinksGUI package"
+        - text: "Github"
+          href: https://github.com/BioinformaticsFMRP/TCGAbiolinksGUI
+        - text: "Bioconductor"
+          href: http://bioconductor.org/packages/devel/bioc/html/TCGAbiolinksGUI.html
+        - text: "---------"
+        - text: "ELMER package"
+        - text: "Github"
+          href: https://github.com/tiagochst/ELMER
+        - text: "Bioconductor"
+          href: http://bioconductor.org/packages/devel/bioc/html/ELMER.html
+        - text: "---------"
+        - text: "ELMER.data package"
+        - text: "Github"
+          href: https://github.com/tiagochst/ELMER
+        - text: "Bioconductor"
+          href: http://bioconductor.org/packages/devel/bioc/html/ELMER.html
+    - icon: fa-info-circle fa-lg
+      menu:
+        - text: "University of São Paulo (USP)"
+        - icon: fa-home fa-lg
+          text: "fmrp.usp.br"
+          href: http://www.fmrp.usp.br/?lang=en
+        - text: "---------"
+        - text: "Fundings"
+        - text: "FAPESP (16/10436-9)"
+          href: http://www.bv.fapesp.br/en/pesquisa/?sort=-data_inicio&q2=%28instituicao%3A%22Cedars-Sinai+Medical+Center%22%29+AND+%28%28bolsa_en_exact%3A%22Scholarships+abroad%22+AND+situacao_en_exact%3A%22Ongoing%22%29%29
+        - text: "FAPESP (16/01389-7)"
+          href: http://bv.fapesp.br/en/pesquisa/?sort=-data_inicio&q2=%28id_pesquisador_exact%3A679917%29+AND+%28%28bolsa_en_exact%3A%22Scholarships+in+Brazil%22+AND+situacao_en_exact%3A%22Ongoing%22%29%29

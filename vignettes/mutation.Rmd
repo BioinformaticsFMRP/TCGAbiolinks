@@ -1,0 +1,133 @@
+---
+title: "TCGAbiolinks: Searching, downloading and visualizing mutation files"
+date: "`r BiocStyle::doc_date()`"
+vignette: >
+  %\VignetteIndexEntry{"5. Mutation data"}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(progress = FALSE)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(TCGAbiolinks)
+library(SummarizedExperiment)
+library(dplyr)
+library(DT)
+```
+
+
+# Search and Download
+
+**TCGAbiolinks** has provided a few functions to download mutation data from GDC.
+There are two options to download the data:
+
+1. Use `GDCquery_Maf` which will download MAF aligned against hg38
+2. Use `GDCquery`, `GDCdownload` and `GDCpreprare` to download MAF aligned against hg19
+3. Use `getMC3MAF()`, to download MC3 MAF from  https://gdc.cancer.gov/about-data/publications/mc3-2017
+
+## Mutation data (hg38)
+
+This example will download MAF (mutation annotation files) for variant calling pipeline muse.
+Pipelines options are: `muse`, `varscan2`, `somaticsniper`, `mutect`. For more information please access
+[GDC docs](https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/).
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval=F}
+maf <- GDCquery_Maf("CHOL", pipelines = "muse")
+```
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval=T,include=F}
+maf <- chol_maf@data
+```
+
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+# Only first 50 to make render faster
+datatable(maf[1:20,],
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
+```
+
+## Mutation data (hg19)
+
+This example will download MAF (mutation annotation files) aligned against hg19 (Old TCGA maf files)
+
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+query.maf.hg19 <- GDCquery(project = "TCGA-CHOL", 
+                           data.category = "Simple nucleotide variation", 
+                           data.type = "Simple somatic mutation",
+                           access = "open", 
+                           legacy = TRUE)
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+# Check maf availables
+datatable(dplyr::select(getResults(query.maf.hg19),-contains("cases")),
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 10), 
+          rownames = FALSE)
+```
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval=FALSE}
+query.maf.hg19 <- GDCquery(project = "TCGA-CHOL", 
+                           data.category = "Simple nucleotide variation", 
+                           data.type = "Simple somatic mutation",
+                           access = "open", 
+                           file.type = "bcgsc.ca_CHOL.IlluminaHiSeq_DNASeq.1.somatic.maf",
+                           legacy = TRUE)
+GDCdownload(query.maf.hg19)
+maf <- GDCprepare(query.maf.hg19)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+data <- bcgsc.ca_CHOL.IlluminaHiSeq_DNASeq.1.somatic.maf
+```
+```{r  echo = TRUE, message = FALSE, warning = FALSE}
+# Only first 50 to make render faster
+datatable(maf[1:20,],
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
+```
+
+
+## Mutation data MC3 file
+
+This will download the MC3 MAF file from https://gdc.cancer.gov/about-data/publications/mc3-2017,
+and add project each sample belongs.
+
+```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval=FALSE}
+maf <- getMC3MAF()
+```
+
+
+# Visualize the data
+To visualize the data you can use the Bioconductor package [maftools](https://bioconductor.org/packages/release/bioc/html/maftools.html). For more information, please check its [vignette](https://bioconductor.org/packages/release/bioc/vignettes/maftools/inst/doc/maftools.html#rainfall-plots).
+
+
+```{r  results = "hide",echo = TRUE, message = FALSE, warning = FALSE, eval=FALSE}
+library(maftools)
+library(dplyr)
+maf <- GDCquery_Maf("CHOL", pipelines = "muse") %>% read.maf
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(maftools)
+library(dplyr)
+maf <- chol_maf
+```
+
+```{r  results = "hide",echo = TRUE, message = FALSE, warning = FALSE}
+datatable(getSampleSummary(maf),
+          filter = 'top',
+          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+          rownames = FALSE)
+plotmafSummary(maf = maf, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE)
+```
+```{r  echo = TRUE, message = FALSE,eval = FALSE, warning = FALSE}
+oncoplot(maf = maf, top = 10, removeNonMutated = TRUE)
+titv = titv(maf = maf, plot = FALSE, useSyn = TRUE)
+#plot titv summary
+plotTiTv(res = titv)
+```
