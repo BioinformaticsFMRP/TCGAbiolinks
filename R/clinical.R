@@ -377,29 +377,62 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
 #' clinical.drug <- GDCprepare_clinic(query,"sample")
 #' clinical.radiation <- GDCprepare_clinic(query,"portion")
 #' clinical.admin <- GDCprepare_clinic(query,"slide")
-GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
-    if(unique(query$results[[1]]$data_category) == "Clinical") {
-        valid.clinical.info <- c("drug","admin","follow_up","radiation","patient","stage_event","new_tumor_event")
-    } else  if(unique(query$results[[1]]$data_category) == "Biospecimen" ) {
-        valid.clinical.info <- c("protocol","admin","aliquot","analyte","bio_patient","sample", "portion", "slide")
-    } else  if(unique(query$results[[1]]$data_category) == "Other") {
+GDCprepare_clinic <- function(
+    query,
+    clinical.info,
+    directory = "GDCdata"
+){
+
+    if (unique(query$results[[1]]$data_category) == "Clinical") {
+        valid.clinical.info <- c(
+            "drug",
+            "admin",
+            "follow_up",
+            "radiation",
+            "patient",
+            "stage_event",
+            "new_tumor_event"
+        )
+    } else  if (unique(query$results[[1]]$data_category) == "Biospecimen" ) {
+        valid.clinical.info <- c(
+            "protocol",
+            "admin",
+            "aliquot",
+            "analyte",
+            "bio_patient",
+            "sample",
+            "portion",
+            "slide"
+        )
+    } else  if (unique(query$results[[1]]$data_category) == "Other") {
         valid.clinical.info <- c("admin","msi")
     } else {
         stop("Data category should be Clinical or Biospecimen or Other (auxiliary files)")
     }
-    if(missing(clinical.info)) stop(paste0("Please set clinical.info argument:\n=> ",paste(valid.clinical.info,collapse = "\n=> ")))
-    if(!(clinical.info %in% valid.clinical.info)) stop(paste0("Please set a valid clinical.info argument:\n=> ",paste(valid.clinical.info,collapse = "\n=> ")))
+
+    if (missing(clinical.info) || !(clinical.info %in% valid.clinical.info)) {
+        stop(
+            "Please set clinical.info argument:\n=> ",
+            paste(valid.clinical.info, collapse = "\n=> ")
+        )
+    }
 
     # Get all the clincal xml files
     source <- ifelse(query$legacy,"legacy","harmonized")
-    files <- file.path(query$results[[1]]$project, source,
-                       gsub(" ","_",query$results[[1]]$data_category),
-                       gsub(" ","_",query$results[[1]]$data_type),
-                       gsub(" ","_",query$results[[1]]$file_id),
-                       gsub(" ","_",query$results[[1]]$file_name))
+    files <- file.path(
+        query$results[[1]]$project, source,
+        gsub(" ","_",query$results[[1]]$data_category),
+        gsub(" ","_",query$results[[1]]$data_type),
+        gsub(" ","_",query$results[[1]]$file_id),
+        gsub(" ","_",query$results[[1]]$file_name)
+    )
     files <- file.path(directory, files)
-    if(!all(file.exists(files))) stop(paste0("I couldn't find all the files from the query.",
-                                             "Please check directory parameter right"))
+    if(!all(file.exists(files))) {
+        stop(
+            "I couldn't find all the files from the query.",
+            "Please check directory parameter right"
+        )
+    }
     xpath <- NULL
 
     disease <- tolower(gsub("TCGA-","",unlist(query$project)))
@@ -419,21 +452,21 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
     else if(tolower(clinical.info) == "slide") xpath <- "//bio:slide"
     else if(tolower(clinical.info) == "msi") xpath <- "//auxiliary:microsatellite_instability_test_result"
 
-    if(tolower(clinical.info) == "follow_up") {
-        clin <- parseFollowup(files,xpath,clinical.info)
+    if (tolower(clinical.info) == "follow_up") {
+        clin <- parseFollowup(files, xpath, clinical.info)
     } else {
         clin <- parseXML(files,xpath,clinical.info)
         if(is.null(clin)) return(NULL)
         clin <- merge(clin,getResults(query)[,c("project","cases")],by.x = c("bcr_patient_barcode"), by.y = "cases",all.x = TRUE)
     }
 
-    if(tolower(clinical.info) == "patient") {
+    if (tolower(clinical.info) == "patient") {
         composed.cols <- c("new_tumor_events","drugs","follow_ups","radiations")
         composed.cols <- composed.cols[composed.cols %in% colnames(clin)]
         message("To get the following information please change the clinical.info argument")
         message("=> new_tumor_events: new_tumor_event \n=> drugs: drug \n=> follow_ups: follow_up \n=> radiations: radiation")
 
-        for(i in composed.cols){
+        for (i in composed.cols){
             clin[,i] <- as.character(clin[,i])
             clin[!clin[,i] %in%  c("","NO"),i] <- "YES"
             clin[clin[,i] %in% c("","NO"),i] <- "NO"
@@ -445,6 +478,7 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
             }
             colnames(clin)[which(colnames(clin) == i)] <- paste0("has_",i,"_information")
         }
+
         if("stage_event" %in% colnames(clin)) {
             message("Adding stage event information")
             aux <- parseXML(files,"//shared_stage:stage_event","stage_event")
@@ -452,6 +486,7 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
             clin <- merge(clin, aux, by = "bcr_patient_barcode" , sort = FALSE, all.x = TRUE)
             clin$stage_event <- NULL
         }
+
         if("primary_pathology" %in% colnames(clin)) {
             message("Adding primary pathology information")
             aux <- parseXML(files,paste0("//",disease,":primary_pathology"),"primary_pathology")
@@ -462,23 +497,25 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
         }
 
     }
-    if(tolower(clinical.info) == "sample") {
+
+    if (tolower(clinical.info) == "sample") {
         clin$portions <- NULL
         clin$samples <- NULL
     }
-    if(tolower(clinical.info) == "bio_patient") {
+
+    if (tolower(clinical.info) == "bio_patient") {
         clin$samples <- NULL
     }
 
-    if(tolower(clinical.info) == "portion") {
-        for(i in c("slides","analytes")){
+    if (tolower(clinical.info) == "portion") {
+        for (i in c("slides","analytes")) {
             clin[,i] <- as.character(clin[,i])
             clin[which(clin[,i] != ""),i] <- "YES"
             clin[which(clin[,i] == ""),i] <- "NO"
             colnames(clin)[which(colnames(clin) == i)] <- paste0("has_",i,"_information")
         }
     }
-    if(is.null(clin)) {
+    if (is.null(clin)) {
         message("No information found")
         return(NULL)
     }
@@ -491,29 +528,37 @@ GDCprepare_clinic <- function(query, clinical.info, directory = "GDCdata"){
         )
 
     # Change columns back to factor
-    for(i in colnames(out)[!grepl("has_",colnames(out))]) {
-        if(class(out[,i]) == "character" &  length(unique(out[,i])) < nrow(out)/2)
+    for (i in colnames(out)[!grepl("has_",colnames(out))]) {
+        if (class(out[,i]) == "character" &  length(unique(out[,i])) < nrow(out)/2)
             out[,i] <-  as.factor(out[,i])
     }
     return(out)
 }
 
 parseFollowup <- function(files, xpath, clinical.info){
-    follow_up_version <- sort(unique(unlist(sapply(files,function(x) {
-        n <- names(xml_ns(read_xml(x)))
-        n[grepl("follow_up",n)]
-    }))))
-    if(length(follow_up_version) > 1) {
+
+    follow_up_version <- files %>%
+        sapply(function(x) {
+            name <- names(xml_ns(read_xml(x)))
+            name[grepl("follow_up",name)]
+        }) %>% unlist() %>% unique() %>% sort()
+
+    if (length(follow_up_version) > 1) {
         message("We found more than one follow up version!")
         message("We will parse all and add a collumn (follow_up_version) to identify each version")
     }
-    clin <- plyr::adply(follow_up_version, 1,function(x){
-        message("Parsing follow up version: ", x)
-        xpath <- paste0("//", x, ":follow_up")
-        clin <- parseXML(files,xpath,clinical.info)
-        clin$follow_up_version <- x
-        return(clin)
-    }, .id = "follow_up_version")
+
+    clin <- plyr::adply(
+        .data = follow_up_version,
+        .margins =  1,
+        .fun = function(x){
+            message("Parsing follow up version: ", x)
+            xpath <- paste0("//", x, ":follow_up")
+            clin <- parseXML(files,xpath,clinical.info)
+            clin$follow_up_version <- x
+            return(clin)
+        }, .id = "follow_up_version"
+    )
     col_idx <- grep("follow_up_version", names(clin))
     clin <- clin[, c(col_idx, (1:ncol(clin))[-col_idx])]
 }
@@ -523,24 +568,25 @@ parseXML <- function(files, xpath, clinical.info ){
 
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
 
-    for(i in seq_along(files)){
+    for (i in seq_along(files)){
+
         xmlfile <- files[i]
         xml <- read_xml(xmlfile)
         doc = xmlParse(xmlfile)
 
         patient <- str_extract(xmlfile,"[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}")
         # Test if this xpath exists before parsing it
-        for(xpath.it in xpath){
-            if(gsub("\\/\\/","", unlist(stringr::str_split(xpath.it,":"))[1]) %in% names(xml_ns(xml))){
+        for (xpath.it in xpath) {
+            if (gsub("\\/\\/","", unlist(stringr::str_split(xpath.it,":"))[1]) %in% names(xml_ns(xml))){
                 nodes <- getNodeSet(doc,xpath.it)
-                if(length(nodes) == 0) next;
+                if (length(nodes) == 0) next;
                 df <- NULL
-                for(j in 1:length(nodes)) {
+                for (j in 1:length(nodes)) {
                     df.aux <- xmlToDataFrame(nodes = nodes[j])
-                    if(NA %in% colnames(df.aux)) df.aux <- df.aux[,!is.na(colnames(df.aux))]
-                    if(nrow(df.aux) == 0) next
+                    if (NA %in% colnames(df.aux)) df.aux <- df.aux[,!is.na(colnames(df.aux))]
+                    if (nrow(df.aux) == 0) next
 
-                    if(j == 1) {
+                    if (j == 1) {
                         df <- df.aux
                     } else {
                         df <- rbind.fill(df,df.aux)
@@ -615,37 +661,39 @@ TCGAquery_subtype <- function(tumor){
     if (grepl(paste(c(available,"all"),collapse = "|"),
               tumor,ignore.case = TRUE)) {
 
-        doi <- c("acc"  = "doi:10.1016/j.ccell.2016.04.002",
-                 "aml"  = "doi:10.1056/NEJMoa1301689",
-                 "blca" = "doi:10.1016/j.cell.2017.09.007",
-                 "brca" = "doi.org/10.1016/j.ccell.2018.03.014",
-                 "cesc" = "doi:10.1038/nature21386",
-                 "chol" = "doi:10.1016/j.celrep.2017.02.033",
-                 "coad" = "doi:10.1038/nature11252",
-                 "esca" = "doi:10.1038/nature20805",
-                 "gbm"  = "doi:10.1016/j.cell.2015.12.028",
-                 "lgg"  = "doi:10.1016/j.cell.2015.12.028",
-                 "lihc"  = "https://doi.org/10.1016/j.cell.2017.05.046",
-                 "hnsc" = "doi:10.1038/nature14129",
-                 "kich" = "doi:10.1016/j.ccr.2014.07.014",
-                 "kirc" = "doi:10.1038/nature12222",
-                 "kirp" = "doi:10.1056/NEJMoa1505917",
-                 "lihc" = "doi:10.1016/j.cell.2017.05.046",
-                 "luad" = "doi:10.1038/nature13385",
-                 "lusc" = "doi:10.1038/nature11404",
-                 "paad"  = "doi:10.1016/j.ccell.2017.07.007",
-                 "ovca" = "doi:10.1038/nature10166",
-                 "pancan"="doi:10.1016/j.cell.2014.06.049",
-                 "pcpg" = "doi:10.1016/j.ccell.2017.01.001",
-                 "prad" = "doi:10.1016/j.cell.2015.10.025",
-                 "read" = "doi:10.1038/nature11252",
-                 "sarc" = "doi:10.1016/j.cell.2017.10.014",
-                 "skcm" = "doi:10.1016/j.cell.2015.05.044",
-                 "stad" = "doi:10.1038/nature13480",
-                 "thca" = "doi:10.1016/j.cell.2014.09.050",
-                 "ucec" = "doi:10.1038/nature12113",
-                 "ucs"  = "doi:10.1016/j.ccell.2017.02.010",
-                 "uvm"  = "doi:10.1016/j.ccell.2017.07.003")
+        doi <- c(
+            "acc"  = "doi:10.1016/j.ccell.2016.04.002",
+            "aml"  = "doi:10.1056/NEJMoa1301689",
+            "blca" = "doi:10.1016/j.cell.2017.09.007",
+            "brca" = "doi.org/10.1016/j.ccell.2018.03.014",
+            "cesc" = "doi:10.1038/nature21386",
+            "chol" = "doi:10.1016/j.celrep.2017.02.033",
+            "coad" = "doi:10.1038/nature11252",
+            "esca" = "doi:10.1038/nature20805",
+            "gbm"  = "doi:10.1016/j.cell.2015.12.028",
+            "lgg"  = "doi:10.1016/j.cell.2015.12.028",
+            "lihc"  = "https://doi.org/10.1016/j.cell.2017.05.046",
+            "hnsc" = "doi:10.1038/nature14129",
+            "kich" = "doi:10.1016/j.ccr.2014.07.014",
+            "kirc" = "doi:10.1038/nature12222",
+            "kirp" = "doi:10.1056/NEJMoa1505917",
+            "lihc" = "doi:10.1016/j.cell.2017.05.046",
+            "luad" = "doi:10.1038/nature13385",
+            "lusc" = "doi:10.1038/nature11404",
+            "paad"  = "doi:10.1016/j.ccell.2017.07.007",
+            "ovca" = "doi:10.1038/nature10166",
+            "pancan"="doi:10.1016/j.cell.2014.06.049",
+            "pcpg" = "doi:10.1016/j.ccell.2017.01.001",
+            "prad" = "doi:10.1016/j.cell.2015.10.025",
+            "read" = "doi:10.1038/nature11252",
+            "sarc" = "doi:10.1016/j.cell.2017.10.014",
+            "skcm" = "doi:10.1016/j.cell.2015.05.044",
+            "stad" = "doi:10.1038/nature13480",
+            "thca" = "doi:10.1016/j.cell.2014.09.050",
+            "ucec" = "doi:10.1038/nature12113",
+            "ucs"  = "doi:10.1016/j.ccell.2017.02.010",
+            "uvm"  = "doi:10.1016/j.ccell.2017.07.003"
+        )
 
         if(tolower(tumor) != "all") message(paste0(tolower(tumor)," subtype information from:", doi[tolower(tumor)]))
         if(tolower(tumor) == "all") {
@@ -833,14 +881,14 @@ TCGAtumor_purity <- function(barcodes, estimate, absolute, lump, ihc, cpe){
 
     #print(head(Tumor.purity.L))
 
-    samples.id<-sapply(barcodes, function(x) paste(unlist(stringr::str_split(x, "-"))[1:4], collapse = "-"))
+    samples.id <- sapply(barcodes, function(x) paste(unlist(stringr::str_split(x, "-"))[1:4], collapse = "-"))
 
 
     df.barcodes_sampID <- data.frame(barcodes=barcodes, sampID=samples.id, row.names = 1:length(barcodes))
     filt.s <- c()
 
     for(s in samples.id){
-        if(s %in% Tumor.purity$Sample.ID==FALSE)
+        if(s %in% Tumor.purity$Sample.ID == FALSE)
             filt.s <- c(filt.s, s)
     }
 
@@ -848,17 +896,18 @@ TCGAtumor_purity <- function(barcodes, estimate, absolute, lump, ihc, cpe){
         message("the following TCGA barcodes do not have info on tumor purity:")
         filt <- as.character(df.barcodes_sampID[which(df.barcodes_sampID$sampID %in% filt.s),]$barcodes)
         print(filt)
-    }
-    else filt<-c()
+    } else filt <- c()
 
     samples.filtered<-unlist(samples.id[samples.id %in% filt.s == FALSE])
 
-    idx.samples <- which(Tumor.purity.L$Sample.ID %in% samples.filtered
-                         & (Tumor.purity.L$ESTIMATE >= estimate | Tumor.purity.L$ESTIMATE == 'NaN')
-                         & (Tumor.purity.L$ABSOLUTE >= absolute| Tumor.purity.L$ABSOLUTE == 'NaN')
-                         & (Tumor.purity.L$IHC >= ihc | Tumor.purity.L$IHC == 'NaN')
-                         & (Tumor.purity.L$LUMP >= lump | Tumor.purity.L$LUMP == 'NaN')
-                         & (Tumor.purity.L$CPE >= cpe | Tumor.purity.L$CPE == 'NaN') )
+    idx.samples <- which(
+        Tumor.purity.L$Sample.ID %in% samples.filtered
+        & (Tumor.purity.L$ESTIMATE >= estimate | Tumor.purity.L$ESTIMATE == 'NaN')
+        & (Tumor.purity.L$ABSOLUTE >= absolute| Tumor.purity.L$ABSOLUTE == 'NaN')
+        & (Tumor.purity.L$IHC >= ihc | Tumor.purity.L$IHC == 'NaN')
+        & (Tumor.purity.L$LUMP >= lump | Tumor.purity.L$LUMP == 'NaN')
+        & (Tumor.purity.L$CPE >= cpe | Tumor.purity.L$CPE == 'NaN')
+    )
 
     df.purity <- Tumor.purity.L[idx.samples,]
 
