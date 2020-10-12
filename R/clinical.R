@@ -433,6 +433,7 @@ GDCprepare_clinic <- function(
             "Please check directory parameter right"
         )
     }
+
     xpath <- NULL
 
     disease <- tolower(gsub("TCGA-","",unlist(query$project)))
@@ -456,7 +457,7 @@ GDCprepare_clinic <- function(
         clin <- parseFollowup(files, xpath, clinical.info)
     } else {
         clin <- parseXML(files,xpath,clinical.info)
-        if(is.null(clin)) return(NULL)
+        if (is.null(clin)) return(NULL)
         clin <- merge(clin,getResults(query)[,c("project","cases")],by.x = c("bcr_patient_barcode"), by.y = "cases",all.x = TRUE)
     }
 
@@ -466,12 +467,12 @@ GDCprepare_clinic <- function(
         message("To get the following information please change the clinical.info argument")
         message("=> new_tumor_events: new_tumor_event \n=> drugs: drug \n=> follow_ups: follow_up \n=> radiations: radiation")
 
-        for (i in composed.cols){
+        for (i in composed.cols) {
             clin[,i] <- as.character(clin[,i])
             clin[!clin[,i] %in%  c("","NO"),i] <- "YES"
             clin[clin[,i] %in% c("","NO"),i] <- "NO"
 
-            if(i == "new_tumor_events") {
+            if (i == "new_tumor_events") {
                 followup <- parseFollowup(files,xpath,clinical.info)
                 barcode <- followup$bcr_patient_barcode[!followup$new_tumor_events %in% c("","NO")]
                 clin[clin$bcr_patient_barcode %in% barcode,i] <- "YES"
@@ -479,7 +480,7 @@ GDCprepare_clinic <- function(
             colnames(clin)[which(colnames(clin) == i)] <- paste0("has_",i,"_information")
         }
 
-        if("stage_event" %in% colnames(clin)) {
+        if ("stage_event" %in% colnames(clin)) {
             message("Adding stage event information")
             aux <- parseXML(files,"//shared_stage:stage_event","stage_event")
             colnames(aux)[grep("bcr_patient_barcode",colnames(aux),invert = TRUE)] <- paste0("stage_event_",grep("bcr_patient_barcode",colnames(aux),invert = TRUE,value = TRUE))
@@ -487,7 +488,7 @@ GDCprepare_clinic <- function(
             clin$stage_event <- NULL
         }
 
-        if("primary_pathology" %in% colnames(clin)) {
+        if ("primary_pathology" %in% colnames(clin)) {
             message("Adding primary pathology information")
             aux <- parseXML(files,paste0("//",disease,":primary_pathology"),"primary_pathology")
             # Last column is the idx to merge
@@ -515,6 +516,7 @@ GDCprepare_clinic <- function(
             colnames(clin)[which(colnames(clin) == i)] <- paste0("has_",i,"_information")
         }
     }
+
     if (is.null(clin)) {
         message("No information found")
         return(NULL)
@@ -536,7 +538,6 @@ GDCprepare_clinic <- function(
 }
 
 parseFollowup <- function(files, xpath, clinical.info){
-
     follow_up_version <- files %>%
         sapply(function(x) {
             name <- names(xml_ns(read_xml(x)))
@@ -559,6 +560,7 @@ parseFollowup <- function(files, xpath, clinical.info){
             return(clin)
         }, .id = "follow_up_version"
     )
+
     col_idx <- grep("follow_up_version", names(clin))
     clin <- clin[, c(col_idx, (1:ncol(clin))[-col_idx])]
 }
@@ -568,7 +570,7 @@ parseXML <- function(files, xpath, clinical.info ){
 
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
 
-    for (i in seq_along(files)){
+    for (i in seq_along(files)) {
 
         xmlfile <- files[i]
         xml <- read_xml(xmlfile)
@@ -587,6 +589,7 @@ parseXML <- function(files, xpath, clinical.info ){
                     if (nrow(df.aux) == 0) next
 
                     if (j == 1) {
+
                         df <- df.aux
                     } else {
                         df <- rbind.fill(df,df.aux)
@@ -594,7 +597,7 @@ parseXML <- function(files, xpath, clinical.info ){
                 }
 
                 df$bcr_patient_barcode <- patient
-                if(i == 1) {
+                if (i == 1) {
                     clin <- df
                 } else {
                     clin <- rbind.fill(clin,df)
@@ -657,9 +660,14 @@ TCGAquery_subtype <- function(tumor){
                    "THCA",
                    "UCEC",
                    "UCS",
-                   "UVM")
-    if (grepl(paste(c(available,"all"),collapse = "|"),
-              tumor,ignore.case = TRUE)) {
+                   "UVM"
+    )
+    if (
+        grepl(
+            paste(c(available,"all"),collapse = "|"), tumor,
+            ignore.case = TRUE
+        )
+    ) {
 
         doi <- c(
             "acc"  = "doi:10.1016/j.ccell.2016.04.002",
@@ -694,8 +702,15 @@ TCGAquery_subtype <- function(tumor){
             "ucs"  = "doi:10.1016/j.ccell.2017.02.010",
             "uvm"  = "doi:10.1016/j.ccell.2017.07.003"
         )
-
-        if(tolower(tumor) != "all") message(paste0(tolower(tumor)," subtype information from:", doi[tolower(tumor)]))
+        if(tolower(tumor) != "all") {
+            message(
+                paste0(
+                    tolower(tumor),
+                    " subtype information from:",
+                    doi[tolower(tumor)]
+                )
+            )
+        }
         if(tolower(tumor) == "all") {
             all <- NULL
             for(i in available){
@@ -735,7 +750,6 @@ TCGAquery_subtype <- function(tumor){
         stop("For the moment we have only subtype for:\no ", paste(available,collapse = "\no "))
     }
 }
-
 
 
 #' @title Retrieve molecular subtypes for given TCGA barcodes
@@ -834,11 +848,7 @@ TCGA_MolecularSubtype <- function(barcodes){
 
         filt <- setdiff(df.barcodes_patID$barcodes, Subtypes$samples)
         return(list(subtypes = Subtypes, filtered = filt))
-
-
-    }
-
-    else {
+    } else {
         message("All barcodes have available molecular subtype info")
         filt <- c()
         idx.patient <- which(dataTableSubt$samples %in% df.barcodes_patID$barcodes)
@@ -880,15 +890,17 @@ TCGAtumor_purity <- function(barcodes, estimate, absolute, lump, ihc, cpe){
     Tumor.purity.L$CPE <- as.numeric(gsub(",", ".", Tumor.purity$CPE))
 
     #print(head(Tumor.purity.L))
-
     samples.id <- sapply(barcodes, function(x) paste(unlist(stringr::str_split(x, "-"))[1:4], collapse = "-"))
 
-
-    df.barcodes_sampID <- data.frame(barcodes=barcodes, sampID=samples.id, row.names = 1:length(barcodes))
+    df.barcodes_sampID <- data.frame(
+        barcodes = barcodes,
+        sampID = samples.id,
+        row.names = 1:length(barcodes)
+    )
     filt.s <- c()
 
     for(s in samples.id){
-        if(s %in% Tumor.purity$Sample.ID == FALSE)
+        if (s %in% Tumor.purity$Sample.ID == FALSE)
             filt.s <- c(filt.s, s)
     }
 
@@ -909,11 +921,12 @@ TCGAtumor_purity <- function(barcodes, estimate, absolute, lump, ihc, cpe){
         & (Tumor.purity.L$CPE >= cpe | Tumor.purity.L$CPE == 'NaN')
     )
 
+
     df.purity <- Tumor.purity.L[idx.samples,]
 
     idx <- which(df.barcodes_sampID$sampID%in%df.purity$Sample.ID)
 
     filtered.barcodes <- as.character(df.barcodes_sampID[idx,]$barcodes)
 
-    return(list(pure_barcodes=filtered.barcodes, filtered=filt))
+    return(list(pure_barcodes = filtered.barcodes, filtered = filt))
 }
