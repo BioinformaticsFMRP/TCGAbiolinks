@@ -1331,15 +1331,6 @@ UseRaw_afterFilter <- function(DataPrep, DataFilt) {
     return(Res)
 }
 
-
-#' @importFrom biomaRt getBM useMart listDatasets
-map.ensg <- function(genome = "hg38", genes) {
-    gene.location <- get.GRCh.bioMart(genome)
-    gene.location <-
-        gene.location[match(genes, gene.location$ensembl_gene_id), ]
-    return(gene.location)
-}
-
 #' @title Adding information related to DEGs genes from DEA as mean values in two conditions.
 #' @description
 #'    TCGAanalyze_LevelTab allows user to add information related to DEGs genes from
