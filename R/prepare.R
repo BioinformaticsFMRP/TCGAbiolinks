@@ -892,7 +892,6 @@ colDataPrepare <- function(barcode){
   return(ret)
 }
 
-
 addSubtypeInfo <- function(ret){
   out <- NULL
   message(" => Adding TCGA molecular information from marker papers")
