@@ -427,7 +427,11 @@ readGeneExpressionQuantification <- function(
 }
 
 
-makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome = "hg19"){
+makeSEfromGeneExpressionQuantification <- function(
+  df,
+  assay.list,
+  genome = "hg19"
+){
 
   # Access genome information to create SE
   gene.location <- get.GRCh.bioMart(genome)
@@ -460,8 +464,10 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome = "hg1
   } else {
     rowRanges <- GRanges(
       seqnames = paste0("chr", df$chromosome_name),
-      ranges = IRanges(start = df$start_position,
-                       end = df$end_position),
+      ranges = IRanges(
+        start = df$start_position,
+        end = df$end_position
+      ),
       strand = df$strand,
       gene_id = df$external_gene_name,
       entrezgene = df$entrezgene_id,
@@ -471,8 +477,12 @@ makeSEfromGeneExpressionQuantification <- function(df, assay.list, genome = "hg1
   }
 
   suppressWarnings({
-    assays <- lapply(assay.list, function (x) {
-      return(data.matrix(subset(df, select = grep(x,colnames(df),ignore.case = TRUE))))
+    assays <- lapply(assay.list, function(x) {
+      return(
+        data.matrix(
+          subset(df, select = grep(x,colnames(df),ignore.case = TRUE))
+        )
+      )
     })
   })
 
@@ -560,20 +570,19 @@ makeSEfromDNAmethylation <- function(df, probeInfo=NULL){
   rse <- SummarizedExperiment(assays = assay, rowRanges = rowRanges, colData = colData)
 }
 
-readIDATDNAmethylation <- function(files,
-                                   barcode,
-                                   summarizedExperiment,
-                                   platform,
-                                   legacy){
+readIDATDNAmethylation <- function(
+  files,
+  barcode,
+  summarizedExperiment,
+  platform,
+  legacy
+) {
 
-  if (!requireNamespace("sesame", quietly = TRUE)) {
-    stop("sesame package is needed for this function to work. Please install it.",
-         call. = FALSE)
-  }
+  check_package("sesame")
 
   # Check if moved files would be moved outside of scope folder, if so, path doesn't change
   moved.files <- sapply(files,USE.NAMES=FALSE,function(x){
-    if(grepl("Raw_intensities",dirname(dirname(x)))){
+    if (grepl("Raw_intensities",dirname(dirname(x)))) {
       return(file.path(dirname(dirname(x)), basename(x)))
     }
     return(x)
@@ -581,8 +590,14 @@ readIDATDNAmethylation <- function(files,
 
   # for each file move it to upper parent folder if necessary
   plyr::a_ply(files, 1,function(x){
-    if(grepl("Raw_intensities",dirname(dirname(x)))){
-      tryCatch(move(x,file.path(dirname(dirname(x)), basename(x)),keep.copy = FALSE),error = function(e){})
+    if (grepl("Raw_intensities",dirname(dirname(x)))) {
+      tryCatch(
+        move(x,
+             file.path(dirname(dirname(x)), basename(x)),
+             keep.copy = FALSE
+        ),
+        error = function(e){
+        })
     }
   })
 
@@ -595,10 +610,10 @@ readIDATDNAmethylation <- function(files,
   barcode <- unique(data.frame("file" = gsub("_Grn.idat|_Red.idat","",basename(moved.files)), "barcode" = barcode))
   colnames(betas) <- barcode$barcode[match(basename(samples),barcode$file)]
 
-  if(summarizedExperiment){
+  if (summarizedExperiment) {
     met.platform <- "EPIC"
-    if(grepl("450",platform)) met.platform <- "450K"
-    if(grepl("27",platform)) met.platform <- "27K"
+    if (grepl("450",platform)) met.platform <- "450K"
+    if (grepl("27",platform)) met.platform <- "27K"
     betas <- makeSEFromDNAMethylationMatrix(betas,genome = ifelse(legacy,"hg19","hg38"),met.platform = met.platform)
     colData(betas) <- DataFrame(colDataPrepare(colnames(betas)))
   }
@@ -614,17 +629,23 @@ readIDATDNAmethylation <- function(files,
 #' @importFrom GenomicRanges makeGRangesFromDataFrame
 #' @importFrom tibble as_data_frame
 readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platform){
-  if(missing(cases)) cases <- NULL
-  if (grepl("OMA00",platform)){
+  if (missing(cases)) cases <- NULL
+  if (grepl("OMA00",platform)) {
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     for (i in seq_along(files)) {
-      data <- fread(files[i], header = TRUE, sep = "\t",
-                    stringsAsFactors = FALSE,skip = 1,
-                    na.strings="N/A",
-                    colClasses=c("character", # Composite Element REF
-                                 "numeric"))   # beta value
+      data <- fread(
+        files[i], header = TRUE,
+        sep = "\t",
+        stringsAsFactors = FALSE,
+        skip = 1,
+        na.strings = "N/A",
+        colClasses = c(
+          "character", # Composite Element REF
+          "numeric" # # beta value
+        )
+      )
       setnames(data,gsub(" ", "\\.", colnames(data)))
-      if(!is.null(cases)) setnames(data,2,cases[i])
+      if (!is.null(cases)) setnames(data,2,cases[i])
       if (i == 1) {
         df <- data
       } else {
@@ -638,18 +659,28 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
   } else {
     skip <- ifelse(all(grepl("hg38",files)), 0,1)
     colClasses <- NULL
-    if(!all(grepl("hg38",files))) colClasses <- c("character", # Composite Element REF
-                                                  "numeric",   # beta value
-                                                  "character", # Gene symbol
-                                                  "character", # Chromosome
-                                                  "integer")
+    if (!all(grepl("hg38",files))) {
+      colClasses <- c(
+        "character", # Composite Element REF
+        "numeric",   # beta value
+        "character", # Gene symbol
+        "character", # Chromosome
+        "integer"
+      )
+    }
 
 
     x <- plyr::alply(files,1, function(f) {
-      data <- fread(f, header = TRUE, sep = "\t",
-                    stringsAsFactors = FALSE,skip = skip, colClasses = colClasses)
+      data <- fread(
+        f,
+        header = TRUE,
+        sep = "\t",
+        stringsAsFactors = FALSE,
+        skip = skip,
+        colClasses = colClasses
+      )
       setnames(data,gsub(" ", "\\.", colnames(data)))
-      if(!is.null(cases)) setnames(data,2,cases[which(f == files)])
+      if (!is.null(cases)) setnames(data,2,cases[which(f == files)])
       setcolorder(data,c(1, 3:ncol(data), 2))
     }, .progress = "time")
 
@@ -674,9 +705,10 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
 
 # Barcode example MMRF_1358_1_BM_CD138pos_T1_TSMRU_L02337
 colDataPrepareMMRF <- function(barcode){
-  DataFrame(barcode = barcode,
-            sample = barcode,
-            patient = substr(barcode,1,9)
+  DataFrame(
+    barcode = barcode,
+    sample = barcode,
+    patient = substr(barcode,1,9)
   )
 }
 
@@ -717,55 +749,61 @@ colDataPrepareTARGET <- function(barcode){
                   "-[:alnum:]{3}-[:alnum:]{3}")
   samples <- str_match(barcode,regex)[,1]
 
-  ret <- DataFrame(barcode = barcode,
-                   sample = substr(barcode, 1, 20),
-                   patient = substr(barcode, 1, 16),
-                   tumor.code = substr(barcode, 8, 9),
-                   case.unique.id = substr(barcode, 11, 16),
-                   tissue.code = substr(barcode, 18, 19),
-                   nucleic.acid.code = substr(barcode, 24, 24))
+  ret <- DataFrame(
+    barcode = barcode,
+    sample = substr(barcode, 1, 20),
+    patient = substr(barcode, 1, 16),
+    tumor.code = substr(barcode, 8, 9),
+    case.unique.id = substr(barcode, 11, 16),
+    tissue.code = substr(barcode, 18, 19),
+    nucleic.acid.code = substr(barcode, 24, 24)
+  )
 
   ret <- merge(ret,aux, by = "tissue.code", sort = FALSE)
 
   tumor.code <- c('00','01','02','03','04','10','15','20','21','30','40',
                   '41','50','51','52','60','61','62','63','64','65','70','71','80','81')
 
-  tumor.definition <- c("Non-cancerous tissue", # 00
-                        "Diffuse Large B-Cell Lymphoma (DLBCL)", # 01
-                        "Lung Cancer (all types)", # 02
-                        "Cervical Cancer (all types)", # 03
-                        "Anal Cancer (all types)", # 04
-                        "Acute lymphoblastic leukemia (ALL)", # 10
-                        "Mixed phenotype acute leukemia (MPAL)", # 15
-                        "Acute myeloid leukemia (AML)", # 20
-                        "Induction Failure AML (AML-IF)", # 21
-                        "Neuroblastoma (NBL)", # 30
-                        "Osteosarcoma (OS)",  # 40
-                        "Ewing sarcoma",   # 41
-                        "Wilms tumor (WT)", # 50
-                        "Clear cell sarcoma of the kidney (CCSK)", # 51
-                        "Rhabdoid tumor (kidney) (RT)", # 52
-                        "CNS, ependymoma", # 60
-                        "CNS, glioblastoma (GBM)", # 61
-                        "CNS, rhabdoid tumor", # 62
-                        "CNS, low grade glioma (LGG)", # 63
-                        "CNS, medulloblastoma", # 64
-                        "CNS, other", # 65
-                        "NHL, anaplastic large cell lymphoma", # 70
-                        "NHL, Burkitt lymphoma (BL)", # 71
-                        "Rhabdomyosarcoma", #80
-                        "Soft tissue sarcoma, non-rhabdomyosarcoma") # 81
+  tumor.definition <- c(
+    "Non-cancerous tissue", # 00
+    "Diffuse Large B-Cell Lymphoma (DLBCL)", # 01
+    "Lung Cancer (all types)", # 02
+    "Cervical Cancer (all types)", # 03
+    "Anal Cancer (all types)", # 04
+    "Acute lymphoblastic leukemia (ALL)", # 10
+    "Mixed phenotype acute leukemia (MPAL)", # 15
+    "Acute myeloid leukemia (AML)", # 20
+    "Induction Failure AML (AML-IF)", # 21
+    "Neuroblastoma (NBL)", # 30
+    "Osteosarcoma (OS)",  # 40
+    "Ewing sarcoma",   # 41
+    "Wilms tumor (WT)", # 50
+    "Clear cell sarcoma of the kidney (CCSK)", # 51
+    "Rhabdoid tumor (kidney) (RT)", # 52
+    "CNS, ependymoma", # 60
+    "CNS, glioblastoma (GBM)", # 61
+    "CNS, rhabdoid tumor", # 62
+    "CNS, low grade glioma (LGG)", # 63
+    "CNS, medulloblastoma", # 64
+    "CNS, other", # 65
+    "NHL, anaplastic large cell lymphoma", # 70
+    "NHL, Burkitt lymphoma (BL)", # 71
+    "Rhabdomyosarcoma", #80
+    "Soft tissue sarcoma, non-rhabdomyosarcoma"
+  ) # 81
   aux <- DataFrame(tumor.code = tumor.code,tumor.definition)
   ret <- merge(ret,aux, by = "tumor.code", sort = FALSE)
 
   nucleic.acid.code <- c('D','E','W','X','Y','R','S')
-  nucleic.acid.description <-  c("DNA, unamplified, from the first isolation of a tissue",
-                                 "DNA, unamplified, from the first isolation of a tissue embedded in FFPE",
-                                 "DNA, whole genome amplified by Qiagen (one independent reaction)",
-                                 "DNA, whole genome amplified by Qiagen (a second, separate independent reaction)",
-                                 "DNA, whole genome amplified by Qiagen (pool of 'W' and 'X' aliquots)",
-                                 "RNA, from the first isolation of a tissue",
-                                 "RNA, from the first isolation of a tissue embedded in FFPE")
+  nucleic.acid.description <-  c(
+    "DNA, unamplified, from the first isolation of a tissue",
+    "DNA, unamplified, from the first isolation of a tissue embedded in FFPE",
+    "DNA, whole genome amplified by Qiagen (one independent reaction)",
+    "DNA, whole genome amplified by Qiagen (a second, separate independent reaction)",
+    "DNA, whole genome amplified by Qiagen (pool of 'W' and 'X' aliquots)",
+    "RNA, from the first isolation of a tissue",
+    "RNA, from the first isolation of a tissue embedded in FFPE"
+  )
   aux <- DataFrame(nucleic.acid.code = nucleic.acid.code,nucleic.acid.description)
   ret <- merge(ret,aux, by = "nucleic.acid.code", sort = FALSE)
 
@@ -903,32 +941,34 @@ addSubtypeInfo <- function(ret){
       ret$sample.aux <- substr(ret$sample,1,15)
 
       tumor <- gsub("TCGA-","",proj)
-      available <- c("ACC",
-                     "BRCA",
-                     "BLCA",
-                     "CESC",
-                     "CHOL",
-                     "COAD",
-                     "ESCA",
-                     "GBM",
-                     "HNSC",
-                     "KICH",
-                     "KIRC",
-                     "KIRP",
-                     "LGG",
-                     "LUAD",
-                     "LUSC",
-                     "PAAD",
-                     "PCPG",
-                     "PRAD",
-                     "READ",
-                     "SKCM",
-                     "SARC",
-                     "STAD",
-                     "THCA",
-                     "UCEC",
-                     "UCS",
-                     "UVM")
+      available <- c(
+        "ACC",
+        "BRCA",
+        "BLCA",
+        "CESC",
+        "CHOL",
+        "COAD",
+        "ESCA",
+        "GBM",
+        "HNSC",
+        "KICH",
+        "KIRC",
+        "KIRP",
+        "LGG",
+        "LUAD",
+        "LUSC",
+        "PAAD",
+        "PCPG",
+        "PRAD",
+        "READ",
+        "SKCM",
+        "SARC",
+        "STAD",
+        "THCA",
+        "UCEC",
+        "UCS",
+        "UVM"
+      )
       if (grepl(paste(c(available,"all"),collapse = "|"),tumor,ignore.case = TRUE)) {
         subtype <- TCGAquery_subtype(tumor)
         colnames(subtype) <- paste0("paper_", colnames(subtype))
@@ -1002,13 +1042,15 @@ makeSEfromTranscriptomeProfilingSTAR <- function(data, cases, assay.list){
   })
 
   # Prepare rowRanges
-  rowRanges <- GRanges(seqnames = paste0("chr", data$chromosome_name),
-                       ranges = IRanges(start = data$start_position,
-                                        end = data$end_position),
-                       strand = data$strand,
-                       ensembl_gene_id = data$ensembl_gene_id,
-                       external_gene_name = data$external_gene_name,
-                       original_ensembl_gene_id = data$`#gene`)
+  rowRanges <- GRanges(
+    seqnames = paste0("chr", data$chromosome_name),
+    ranges = IRanges(start = data$start_position,
+                     end = data$end_position),
+    strand = data$strand,
+    ensembl_gene_id = data$ensembl_gene_id,
+    external_gene_name = data$external_gene_name,
+    original_ensembl_gene_id = data$`#gene`
+  )
   names(rowRanges) <- as.character(data$ensembl_gene_id)
   rse <- SummarizedExperiment(assays = assays,
                               rowRanges = rowRanges,
@@ -1048,17 +1090,21 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
   })
 
   # Prepare rowRanges
-  rowRanges <- GRanges(seqnames = paste0("chr", data$chromosome_name),
-                       ranges = IRanges(start = data$start_position,
-                                        end = data$end_position),
-                       strand = data$strand,
-                       ensembl_gene_id = data$ensembl_gene_id,
-                       external_gene_name = data$external_gene_name,
-                       original_ensembl_gene_id = data$X1)
+  rowRanges <- GRanges(
+    seqnames = paste0("chr", data$chromosome_name),
+    ranges = IRanges(start = data$start_position,
+                     end = data$end_position),
+    strand = data$strand,
+    ensembl_gene_id = data$ensembl_gene_id,
+    external_gene_name = data$external_gene_name,
+    original_ensembl_gene_id = data$X1
+  )
   names(rowRanges) <- as.character(data$ensembl_gene_id)
-  rse <- SummarizedExperiment(assays = assays,
-                              rowRanges = rowRanges,
-                              colData = colData)
+  rse <- SummarizedExperiment(
+    assays = assays,
+    rowRanges = rowRanges,
+    colData = colData
+  )
 
   return(rse)
 }

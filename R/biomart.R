@@ -2,6 +2,7 @@
 #' @description Get hg19 or hg38 information from biomaRt
 #' @param genome hg38 or hg19
 #' @param as.granges Output as GRanges or data.frame
+#' @import TCGAbiolinksGUI.data
 #' @export
 get.GRCh.bioMart <- function(
     genome = c("hg19", "hg38"),
