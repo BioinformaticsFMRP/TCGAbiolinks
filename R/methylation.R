@@ -1801,7 +1801,8 @@ TCGAvisualize_starburst <- function(
 }
 
 
-
+#' @title Get DNA methylation array metadata from SesameData
+#' @noRd
 getMetPlatInfo <- function(
     genome = c("hg38","hg19"),
     platform = c("450k","EPIC","27k")
@@ -1817,15 +1818,15 @@ getMetPlatInfo <- function(
         "27K"  = "HM27",
         "EPIC" = "EPIC"
     )
-    if(is.null(platform)){
+    if (is.null(platform)) {
         stop("platform must one of the following options: 450k, EPIC or 27k")
     }
 
     check_package("sesameData")
     check_package("sesame")
 
-    sesameData::sesameDataCacheAll()
-    sesameData::sesameDataGet(
+    sesameDataCacheAll()
+    sesameDataGet(
         str_c(
             platform,
             ".",
