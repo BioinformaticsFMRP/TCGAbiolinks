@@ -44,23 +44,26 @@
 #' @importFrom data.table setcolorder setnames
 #' @importFrom GenomicRanges GRanges
 #' @importFrom IRanges IRanges
-GDCprepare <- function(query,
-                       save = FALSE,
-                       save.filename,
-                       directory = "GDCdata",
-                       summarizedExperiment = TRUE,
-                       remove.files.prepared = FALSE,
-                       add.gistic2.mut = NULL,
-                       mut.pipeline = "mutect2",
-                       mutant_variant_classification = c("Frame_Shift_Del",
-                                                         "Frame_Shift_Ins",
-                                                         "Missense_Mutation",
-                                                         "Nonsense_Mutation",
-                                                         "Splice_Site",
-                                                         "In_Frame_Del",
-                                                         "In_Frame_Ins",
-                                                         "Translation_Start_Site",
-                                                         "Nonstop_Mutation")
+GDCprepare <- function(
+  query,
+  save = FALSE,
+  save.filename,
+  directory = "GDCdata",
+  summarizedExperiment = TRUE,
+  remove.files.prepared = FALSE,
+  add.gistic2.mut = NULL,
+  mut.pipeline = "mutect2",
+  mutant_variant_classification = c(
+    "Frame_Shift_Del",
+    "Frame_Shift_Ins",
+    "Missense_Mutation",
+    "Nonsense_Mutation",
+    "Splice_Site",
+    "In_Frame_Del",
+    "In_Frame_Ins",
+    "Translation_Start_Site",
+    "Nonstop_Mutation"
+  )
 ){
 
   isServeOK()
@@ -82,30 +85,35 @@ GDCprepare <- function(query,
     print(knitr::kable(dup))
     stop("There are samples duplicated. We will not be able to prepare it")
   }
-  if(!save & remove.files.prepared) {
+
+  if (!save & remove.files.prepared) {
     stop("To remove the files, please set save to TRUE. Otherwise, the data will be lost")
   }
   # We save the files in project/source/data.category/data.type/file_id/file_name
   source <- ifelse(query$legacy,"legacy","harmonized")
-  files <- file.path(query$results[[1]]$project, source,
-                     gsub(" ","_",query$results[[1]]$data_category),
-                     gsub(" ","_",query$results[[1]]$data_type),
-                     gsub(" ","_",query$results[[1]]$file_id),
-                     gsub(" ","_",query$results[[1]]$file_name))
+  files <- file.path(
+    query$results[[1]]$project, source,
+    gsub(" ","_",query$results[[1]]$data_category),
+    gsub(" ","_",query$results[[1]]$data_type),
+    gsub(" ","_",query$results[[1]]$file_id),
+    gsub(" ","_",query$results[[1]]$file_name)
+  )
 
   files <- file.path(directory, files)
 
   # For IDAT prepare since we need to put all IDATs in the same folder the code below will not work
   # a second run
-  if(!all(file.exists(files))) {
+  if (!all(file.exists(files))) {
     # We have to check we movedthe files
-    if(query$data.category == "Raw microarray data"){
-      files.idat <- file.path(query$results[[1]]$project, source,
-                              gsub(" ","_",query$results[[1]]$data_category),
-                              gsub(" ","_",query$results[[1]]$data_type),
-                              gsub(" ","_",query$results[[1]]$file_name))
+    if (query$data.category == "Raw microarray data"){
+      files.idat <- file.path(
+        query$results[[1]]$project, source,
+        gsub(" ","_",query$results[[1]]$data_category),
+        gsub(" ","_",query$results[[1]]$data_type),
+        gsub(" ","_",query$results[[1]]$file_name)
+      )
       files.idat <- file.path(directory, files.idat)
-      if(!all(file.exists(files) | file.exists(files.idat))) {
+      if (!all(file.exists(files) | file.exists(files.idat))) {
         stop(paste0("I couldn't find all the files from the query. ",
                     "Please check if the directory parameter is right or `GDCdownload` downloaded the samples."))
 
@@ -117,78 +125,94 @@ GDCprepare <- function(query,
   }
 
   cases <- ifelse(grepl("TCGA|TARGET",query$results[[1]]$project %>% unlist()),query$results[[1]]$cases,query$results[[1]]$sample.submitter_id)
-  if(grepl("Transcriptome Profiling", query$data.category, ignore.case = TRUE)){
+  if (grepl("Transcriptome Profiling", query$data.category, ignore.case = TRUE)){
     data <- readTranscriptomeProfiling(files = files,
                                        data.type = ifelse(!is.na(query$data.type),  as.character(query$data.type),  unique(query$results[[1]]$data_type)),
                                        workflow.type = unique(query$results[[1]]$analysis_workflow_type),
                                        cases = cases,
                                        summarizedExperiment)
   } else if(grepl("Copy Number Variation",query$data.category,ignore.case = TRUE)) {
-    if(unique(query$results[[1]]$data_type) == "Gene Level Copy Number Scores") {
+    if (unique(query$results[[1]]$data_type) == "Gene Level Copy Number Scores") {
       data <- readGISTIC(files, query$results[[1]]$cases)
     } else {
       data <- readCopyNumberVariation(files, query$results[[1]]$cases)
     }
-  }  else if(grepl("DNA methylation",query$data.category, ignore.case = TRUE)) {
+  }  else if (grepl("DNA methylation",query$data.category, ignore.case = TRUE)) {
     data <- readDNAmethylation(files, cases = cases, summarizedExperiment, unique(query$platform))
-  }  else if(grepl("Raw intensities",query$data.type, ignore.case = TRUE)) {
+  }  else if (grepl("Raw intensities",query$data.type, ignore.case = TRUE)) {
     # preparing IDAT files
     data <- readIDATDNAmethylation(files, barcode = cases, summarizedExperiment, unique(query$platform), query$legacy)
-  }  else if(grepl("Protein expression",query$data.category,ignore.case = TRUE)) {
+  }  else if (grepl("Protein expression",query$data.category,ignore.case = TRUE)) {
     data <- readProteinExpression(files, cases = cases)
-  }  else if(grepl("Simple Nucleotide Variation",query$data.category,ignore.case = TRUE)) {
+  }  else if (grepl("Simple Nucleotide Variation",query$data.category,ignore.case = TRUE)) {
     if(grepl("Masked Somatic Mutation",query$results[[1]]$data_type,ignore.case = TRUE) | source == "legacy")
       suppressWarnings(data <- readSimpleNucleotideVariationMaf(files))
-  }  else if(grepl("Clinical|Biospecimen", query$data.category, ignore.case = TRUE)){
+  }  else if (grepl("Clinical|Biospecimen", query$data.category, ignore.case = TRUE)){
     data <- readClinical(files, query$data.type, cases = cases)
     summarizedExperiment <- FALSE
   } else if (grepl("Gene expression",query$data.category,ignore.case = TRUE)) {
-    if(query$data.type == "Gene expression quantification")
-      data <- readGeneExpressionQuantification(files = files,
-                                               cases = cases,
-                                               summarizedExperiment = summarizedExperiment,
-                                               genome = ifelse(query$legacy,"hg19","hg38"),
-                                               experimental.strategy = unique(query$results[[1]]$experimental_strategy))
+    if (query$data.type == "Gene expression quantification")
+      data <- readGeneExpressionQuantification(
+        files = files,
+        cases = cases,
+        summarizedExperiment = summarizedExperiment,
+        genome = ifelse(query$legacy,"hg19","hg38"),
+        experimental.strategy = unique(query$results[[1]]$experimental_strategy)
+      )
 
-    if(query$data.type == "miRNA gene quantification")
-      data <- readGeneExpressionQuantification(files = files,
-                                               cases = cases,
-                                               summarizedExperiment = FALSE,
-                                               genome = ifelse(query$legacy,"hg19","hg38"),
-                                               experimental.strategy = unique(query$results[[1]]$experimental_strategy))
-    if(query$data.type == "miRNA isoform quantification")
-      data <- readmiRNAIsoformQuantification(files = files,
-                                             cases = query$results[[1]]$cases)
+    if (query$data.type == "miRNA gene quantification")
+      data <- readGeneExpressionQuantification(
+        files = files,
+        cases = cases,
+        summarizedExperiment = FALSE,
+        genome = ifelse(query$legacy,"hg19","hg38"),
+        experimental.strategy = unique(query$results[[1]]$experimental_strategy)
+      )
 
-    if(query$data.type == "Isoform expression quantification")
+    if (query$data.type == "miRNA isoform quantification")
+      data <- readmiRNAIsoformQuantification(
+        files = files,
+        cases = query$results[[1]]$cases
+      )
+
+    if (query$data.type == "Isoform expression quantification")
       data <- readIsoformExpressionQuantification(files = files, cases = cases)
 
-    if(query$data.type == "Exon quantification")
-      data <- readExonQuantification(files = files,
-                                     cases = cases,
-                                     summarizedExperiment = summarizedExperiment)
+    if (query$data.type == "Exon quantification")
+      data <- readExonQuantification(
+        files = files,
+        cases = cases,
+        summarizedExperiment = summarizedExperiment
+      )
 
   }
   # Add data release to object
-  if(summarizedExperiment & !is.data.frame(data)){
+  if (summarizedExperiment & !is.data.frame(data)) {
     metadata(data) <- list("data_release" = getGDCInfo()$data_release)
   }
 
 
-  if((!is.null(add.gistic2.mut)) & summarizedExperiment) {
+  if ((!is.null(add.gistic2.mut)) & summarizedExperiment) {
     message("=> Adding GISTIC2 and mutation information....")
     genes <- tolower(levels(EAGenes$Gene))
-    if(!all(tolower(add.gistic2.mut) %in% genes)) message(paste("These genes were not found:\n",
-                                                                paste(add.gistic2.mut[! tolower(add.gistic2.mut) %in% genes],collapse = "\n=> ")))
+    if (!all(tolower(add.gistic2.mut) %in% genes)) {
+      message(
+        paste("These genes were not found:\n",
+              paste(add.gistic2.mut[! tolower(add.gistic2.mut) %in% genes],collapse = "\n=> ")
+        )
+      )
+    }
     add.gistic2.mut <- add.gistic2.mut[tolower(add.gistic2.mut) %in% tolower(genes)]
-    if(length(add.gistic2.mut) > 0){
+    if (length(add.gistic2.mut) > 0){
       info <- colData(data)
       for(i in unlist(query$project)){
-        info <- get.mut.gistc.information(info,
-                                          i,
-                                          add.gistic2.mut,
-                                          mut.pipeline = mut.pipeline,
-                                          mutant_variant_classification = mutant_variant_classification)
+        info <- get.mut.gistc.information(
+          info,
+          i,
+          add.gistic2.mut,
+          mut.pipeline = mut.pipeline,
+          mutant_variant_classification = mutant_variant_classification
+        )
       }
       colData(data) <- info
     }
@@ -197,7 +221,7 @@ GDCprepare <- function(query,
     if(any(duplicated(data$sample))) {
       message("Replicates found.")
       if(any(data$is_ffpe)) message("FFPE should be removed. You can modify the data with the following command:\ndata <- data[,!data$is_ffpe]")
-      print(as.data.frame(colData(data)[data$sample %in% data$sample[duplicated(data$sample)],c("is_ffpe"),drop=F]))
+      print(as.data.frame(colData(data)[data$sample %in% data$sample[duplicated(data$sample)],c("is_ffpe"),drop = FALSE]))
     }
   }
 
@@ -335,40 +359,45 @@ readmiRNAIsoformQuantification <- function (files, cases){
 
 }
 readSimpleNucleotideVariationMaf <- function(files){
-  ret <- read_tsv(files,
-                  comment = "#",
-                  col_types = cols(
-                    Entrez_Gene_Id = col_integer(),
-                    Start_Position = col_integer(),
-                    End_Position = col_integer(),
-                    t_depth = col_integer(),
-                    t_ref_count = col_integer(),
-                    t_alt_count = col_integer(),
-                    n_depth = col_integer(),
-                    ALLELE_NUM = col_integer(),
-                    TRANSCRIPT_STRAND = col_integer(),
-                    PICK = col_integer(),
-                    TSL = col_integer(),
-                    HGVS_OFFSET = col_integer(),
-                    MINIMISED = col_integer()),
-                  progress = TRUE)
-  if(ncol(ret) == 1) ret <- read_csv(files,
-                                     comment = "#",
-                                     col_types = cols(
-                                       Entrez_Gene_Id = col_integer(),
-                                       Start_Position = col_integer(),
-                                       End_Position = col_integer(),
-                                       t_depth = col_integer(),
-                                       t_ref_count = col_integer(),
-                                       t_alt_count = col_integer(),
-                                       n_depth = col_integer(),
-                                       ALLELE_NUM = col_integer(),
-                                       TRANSCRIPT_STRAND = col_integer(),
-                                       PICK = col_integer(),
-                                       TSL = col_integer(),
-                                       HGVS_OFFSET = col_integer(),
-                                       MINIMISED = col_integer()),
-                                     progress = TRUE)
+  ret <- read_tsv(
+    files,
+    comment = "#",
+    col_types = cols(
+      Entrez_Gene_Id = col_integer(),
+      Start_Position = col_integer(),
+      End_Position = col_integer(),
+      t_depth = col_integer(),
+      t_ref_count = col_integer(),
+      t_alt_count = col_integer(),
+      n_depth = col_integer(),
+      ALLELE_NUM = col_integer(),
+      TRANSCRIPT_STRAND = col_integer(),
+      PICK = col_integer(),
+      TSL = col_integer(),
+      HGVS_OFFSET = col_integer(),
+      MINIMISED = col_integer()),
+    progress = TRUE
+  )
+
+  if(ncol(ret) == 1) ret <- read_csv(
+    files,
+    comment = "#",
+    col_types = cols(
+      Entrez_Gene_Id = col_integer(),
+      Start_Position = col_integer(),
+      End_Position = col_integer(),
+      t_depth = col_integer(),
+      t_ref_count = col_integer(),
+      t_alt_count = col_integer(),
+      n_depth = col_integer(),
+      ALLELE_NUM = col_integer(),
+      TRANSCRIPT_STRAND = col_integer(),
+      PICK = col_integer(),
+      TSL = col_integer(),
+      HGVS_OFFSET = col_integer(),
+      MINIMISED = col_integer()),
+    progress = TRUE
+  )
   return(ret)
 }
 

@@ -20,7 +20,7 @@ Maintainer:
     Tiago Chedraoui Silva <tiagochst@gmail.com>,
     Antonio Colaprico <axc1833@med.miami.edu>
 Depends:
-    R (>= 3.5)
+    R (>= 4.0)
 Imports:
     downloader (>= 0.4),
     grDevices,
