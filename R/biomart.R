@@ -94,7 +94,7 @@ getTSS <- function(
         "transcript_end",
         "ensembl_transcript_id",
         "ensembl_gene_id",
-        "entrezgene",
+        "entrezgene_id",
         "external_gene_name"
     )
 
