@@ -164,18 +164,21 @@
 #' @importFrom knitr kable
 #' @importFrom httr timeout
 #' @importFrom dplyr pull
-GDCquery <- function(project,
-                     data.category,
-                     data.type,
-                     workflow.type,
-                     legacy = FALSE,
-                     access,
-                     platform,
-                     file.type,
-                     barcode,
-                     data.format,
-                     experimental.strategy,
-                     sample.type){
+#' @importFrom tidyr contains
+GDCquery <- function(
+    project,
+    data.category,
+    data.type,
+    workflow.type,
+    legacy = FALSE,
+    access,
+    platform,
+    file.type,
+    barcode,
+    data.format,
+    experimental.strategy,
+    sample.type
+){
 
     isServeOK()
     suppressWarnings({

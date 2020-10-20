@@ -68,7 +68,7 @@ map.ensg <- function(genome = "hg38", genes) {
 #'     getTSS <- getTSS(genome.build = "hg38", TSS=list(upstream=1000, downstream=1000))
 #' }
 #' @importFrom GenomicRanges makeGRangesFromDataFrame promoters
-#' @importFrom biomaRt useEnsembl
+#' @importFrom biomaRt useEnsembl listDatasets etBM
 getTSS <- function(
     genome = "hg38",
     TSS = list(upstream = NULL, downstream = NULL)
