@@ -538,39 +538,49 @@ makeSEfromGeneExpressionQuantification <- function(
 
 #' @importFrom downloader download
 #' @importFrom S4Vectors DataFrame
-makeSEFromDNAMethylationMatrix <- function(betas, genome = "hg38", met.platform = "450K") {
+makeSEFromDNAMethylationMatrix <- function(
+  betas,
+  genome = "hg38",
+  met.platform = "450K"
+) {
   message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
   message("Creating a SummarizedExperiment from DNA methylation input")
 
   # Instead of looking on the size, it is better to set it as a argument as the annotation is different
   annotation <-   getInfiniumAnnotation(met.platform, genome)
 
-  rowRanges <- annotation[names(annotation) %in% rownames(betas),,drop=FALSE]
+  rowRanges <- annotation[names(annotation) %in% rownames(betas),,drop = FALSE]
 
   colData <-  DataFrame(samples = colnames(betas))
   betas <- betas[rownames(betas) %in% names(rowRanges),,drop = FALSE]
   betas <- betas[names(rowRanges),,drop = FALSE]
   assay <- data.matrix(betas)
-  betas <- SummarizedExperiment(assays=assay,
-                                rowRanges=rowRanges,
-                                colData=colData)
+  betas <- SummarizedExperiment(
+    assays = assay,
+    rowRanges = rowRanges,
+    colData = colData
+  )
   return(betas)
 }
 
 
 getInfiniumAnnotation <- function(platform, genome){
+  genome <- match.arg(genome, choices = c("hg38","hg19"))
+  platform <- match.arg(platform, choices = c("EPIC","450K", "27K"))
+
   base <- "http://zwdzwd.io/InfiniumAnnotation/current/"
   path <- file.path(base,platform,paste(platform,"hg19.manifest.rds", sep ="."))
   if (grepl("hg38", genome)) path <- gsub("hg19","hg38",path)
-  if(platform == "EPIC") {
+  if (platform == "EPIC") {
     annotation <- paste0(base,"EPIC/EPIC.hg19.manifest.rds")
   } else if(platform == "450K") {
-    annotation <- paste0(base,"hm450/hm450.hg19.manifest.rds")
-  } else {
+    annotation <- paste0(base,"HM450/HM450.hg19.manifest.rds")
+  }  else if(platform == "27K") {
     annotation <- paste0(base,"hm27/hm27.hg19.manifest.rds")
   }
-  if(grepl("hg38", genome)) annotation <- gsub("hg19","hg38",annotation)
-  if(!file.exists(basename(annotation))) {
+  if (grepl("hg38", genome)) annotation <- gsub("hg19","hg38",annotation)
+
+  if (!file.exists(basename(annotation))) {
     if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
     downloader::download(annotation, basename(annotation), mode = mode)
   }
@@ -643,7 +653,11 @@ readIDATDNAmethylation <- function(
     met.platform <- "EPIC"
     if (grepl("450",platform)) met.platform <- "450K"
     if (grepl("27",platform)) met.platform <- "27K"
-    betas <- makeSEFromDNAMethylationMatrix(betas,genome = ifelse(legacy,"hg19","hg38"),met.platform = met.platform)
+    betas <- makeSEFromDNAMethylationMatrix(
+      betas = betas,
+      genome = ifelse(legacy,"hg19","hg38"),
+      met.platform = met.platform
+    )
     colData(betas) <- DataFrame(colDataPrepare(colnames(betas)))
   }
   return(betas)
