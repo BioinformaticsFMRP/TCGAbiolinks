@@ -547,7 +547,7 @@ makeSEFromDNAMethylationMatrix <- function(
   message("Creating a SummarizedExperiment from DNA methylation input")
 
   # Instead of looking on the size, it is better to set it as a argument as the annotation is different
-  annotation <-   getInfiniumAnnotation(met.platform, genome)
+  annotation <-   getMetPlatInfo(platform = met.platform, genome = genome)
 
   rowRanges <- annotation[names(annotation) %in% rownames(betas),,drop = FALSE]
 
@@ -563,38 +563,15 @@ makeSEFromDNAMethylationMatrix <- function(
   return(betas)
 }
 
-
-getInfiniumAnnotation <- function(platform, genome){
-  genome <- match.arg(genome, choices = c("hg38","hg19"))
-  platform <- match.arg(platform, choices = c("EPIC","450K", "27K"))
-
-  base <- "http://zwdzwd.io/InfiniumAnnotation/current/"
-  path <- file.path(base,platform,paste(platform,"hg19.manifest.rds", sep ="."))
-  if (grepl("hg38", genome)) path <- gsub("hg19","hg38",path)
-  if (platform == "EPIC") {
-    annotation <- paste0(base,"EPIC/EPIC.hg19.manifest.rds")
-  } else if(platform == "450K") {
-    annotation <- paste0(base,"HM450/HM450.hg19.manifest.rds")
-  }  else if(platform == "27K") {
-    annotation <- paste0(base,"hm27/hm27.hg19.manifest.rds")
-  }
-  if (grepl("hg38", genome)) annotation <- gsub("hg19","hg38",annotation)
-
-  if (!file.exists(basename(annotation))) {
-    if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
-    downloader::download(annotation, basename(annotation), mode = mode)
-  }
-  readRDS(basename(annotation))
-}
-
-
-makeSEfromDNAmethylation <- function(df, probeInfo=NULL){
+makeSEfromDNAmethylation <- function(df, probeInfo = NULL){
   if(is.null(probeInfo)) {
-    rowRanges <- GRanges(seqnames = paste0("chr", df$Chromosome),
-                         ranges = IRanges(start = df$Genomic_Coordinate,
-                                          end = df$Genomic_Coordinate),
-                         probeID = df$Composite.Element.REF,
-                         Gene_Symbol = df$Gene_Symbol)
+    rowRanges <- GRanges(
+      seqnames = paste0("chr", df$Chromosome),
+      ranges = IRanges(start = df$Genomic_Coordinate,
+                       end = df$Genomic_Coordinate),
+      probeID = df$Composite.Element.REF,
+      Gene_Symbol = df$Gene_Symbol
+    )
 
     names(rowRanges) <- as.character(df$Composite.Element.REF)
     colData <-  colDataPrepare(colnames(df)[5:ncol(df)])
