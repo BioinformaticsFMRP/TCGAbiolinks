@@ -283,7 +283,7 @@ GDCclientInstall <- function(){
           "https://gdc.cancer.gov/system/files/authenticated%20user/0/gdc-client_v1.4.0_Ubuntu_x64.zip",
           "https://gdc.cancer.gov/system/files/authenticated%20user/0/gdc-client_v1.4.0_OSX_x64_10.12.6.zip")
     })
-    bin <- links[grep("zip",links)]
+    bin <- links[grep("public.*zip",links)]
     if(is.windows()) bin <- bin[grep("client*.*windows", bin,ignore.case = TRUE)]
     if(is.mac()) bin <- bin[grep("client*.*OSX", bin)]
     if(is.linux()) {
