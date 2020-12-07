@@ -261,9 +261,9 @@ humanReadableByteCount <- function(bytes) {
 }
 GDCclientPath <- function(){
     global <- Sys.which("gdc-client")
-    if(global != "") return(global)
+    if (global != "") return(global)
     local <- dir(pattern = "gdc-client*[^zip]$")
-    if(length(local) > 0) return(dir(pattern = "gdc-client*[^zip]$",full.names = TRUE))
+    if (length(local) > 0) return(dir(pattern = "gdc-client*[^zip]$", full.names = TRUE))
     return("")
 }
 
@@ -274,7 +274,7 @@ GDCclientExists <- function(){
 #' @importFrom downloader download
 #' @importFrom rvest html_nodes html_attr %>%
 GDCclientInstall <- function(){
-    if(GDCclientExists()) return(GDCclientPath())
+    if (GDCclientExists()) return(GDCclientPath())
 
     links = tryCatch({
         read_html("https://gdc.cancer.gov/access-data/gdc-data-transfer-tool")  %>% html_nodes("a") %>% html_attr("href")
@@ -284,16 +284,16 @@ GDCclientInstall <- function(){
           "https://gdc.cancer.gov/system/files/authenticated%20user/0/gdc-client_v1.4.0_OSX_x64_10.12.6.zip")
     })
     bin <- links[grep("public.*zip",links)]
-    if(is.windows()) bin <- bin[grep("client*.*windows", bin,ignore.case = TRUE)]
-    if(is.mac()) bin <- bin[grep("client*.*OSX", bin)]
-    if(is.linux()) {
-        if(grepl("ubuntu",Sys.info()["version"],ignore.case = TRUE)){
+    if (is.windows()) bin <- bin[grep("client*.*windows", bin,ignore.case = TRUE)]
+    if (is.mac()) bin <- bin[grep("client*.*OSX", bin)]
+    if (is.linux()) {
+        if (grepl("ubuntu",Sys.info()["version"],ignore.case = TRUE)){
             bin <- bin[grep("client*.*Ubuntu", bin)]
         } else {
             bin <- bin[grep("client*.*Cent", bin)]
         }
     }
-    if(is.windows()) mode <- "wb" else  mode <- "w"
+    if (is.windows()) mode <- "wb" else  mode <- "w"
     download(bin, basename(bin), mode = mode)
     unzip(basename(bin))
     Sys.chmod("gdc-client")
@@ -302,10 +302,10 @@ GDCclientInstall <- function(){
 
 checkAlreadyDownloaded <- function(path,manifest){
     files2Download <- !(file.exists(file.path(path,manifest$id,manifest$filename)) | file.exists(file.path(path,manifest$filename)))
-    if(any(files2Download == FALSE)) {
+    if (any(files2Download == FALSE)) {
         message("Of the ", nrow(manifest), " files for download ",
                 table(files2Download)["FALSE"] , " already exist.")
-        if(any(files2Download == TRUE)) message("We will download only those that are missing ones.")
+        if (any(files2Download == TRUE)) message("We will download only those that are missing ones.")
     }
     return(manifest[files2Download,])
 }
