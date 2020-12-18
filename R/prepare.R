@@ -654,7 +654,8 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     for (i in seq_along(files)) {
       data <- fread(
-        files[i], header = TRUE,
+        files[i],
+        header = TRUE,
         sep = "\t",
         stringsAsFactors = FALSE,
         skip = 1,
@@ -710,7 +711,10 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
 
     if (summarizedExperiment) {
       if(skip == 0) {
-        df <- makeSEfromDNAmethylation(df, probeInfo = as_data_frame(df)[,grep("TCGA",colnames(df),invert = TRUE)])
+        df <- makeSEfromDNAmethylation(
+          df,
+          probeInfo = data.frame(df)[,grep("TCGA",colnames(df),invert = TRUE)]
+        )
       } else {
         df <- makeSEfromDNAmethylation(df)
       }
