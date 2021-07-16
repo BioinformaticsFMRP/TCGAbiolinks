@@ -1,7 +1,7 @@
 Package: TCGAbiolinks
 Type: Package
 Title: TCGAbiolinks: An R/Bioconductor package for integrative analysis with GDC data
-Version: 2.19.0
+Version: 2.21.0
 Date: 2020-07-09
 Author: Antonio Colaprico,
     Tiago Chedraoui Silva,
