@@ -883,6 +883,7 @@ getMC3MAF <- function(){
     fpath <- "https://api.gdc.cancer.gov/data/1c8cfe5f-e52d-41ba-94da-f15ea1337efc"
     if(is.windows()) mode <- "wb" else  mode <- "w"
     message(rep("-",100))
+    options(timeout = 1000) # set 1000 second to download the file, default is 60 seconds
     message("o Starting to download Public MAF from GDC")
     message("o More information at: https://gdc.cancer.gov/about-data/publications/mc3-2017")
     message("o Please, cite: Cell Systems. Volume 6 Issue 3: p271-281.e7, 28 March 2018 10.1016/j.cels.2018.03.002")
@@ -895,15 +896,17 @@ getMC3MAF <- function(){
     maf <- readr::read_tsv(gsub("\\.gz", "", fout),progress = TRUE, col_types = readr::cols())
     message("o Adding project_id information")
     project <- grep("TCGA",sort(getGDCprojects()$project_id),value = TRUE)
-    df <- plyr::adply(project,
-                      .margins = 1,
-                      .fun = function(proj) {
-                          samples <- getSubmitterID(proj)
-                          return(data.frame(proj,samples))
-                      }
+    df <- plyr::adply(
+        project,
+        .margins = 1,
+        .fun = function(proj) {
+            samples <- getSubmitterID(proj)
+            return(data.frame(proj,samples))
+        }
     )
     maf$project_id <- df$proj[match(substr(maf$Tumor_Sample_Barcode,1,12),df$samples)] %>% as.character
     message(rep("-",100))
+    return(maf)
 }
 
 
