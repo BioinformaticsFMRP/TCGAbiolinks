@@ -883,7 +883,7 @@ getMC3MAF <- function(){
     fpath <- "https://api.gdc.cancer.gov/data/1c8cfe5f-e52d-41ba-94da-f15ea1337efc"
     if(is.windows()) mode <- "wb" else  mode <- "w"
     message(rep("-",100))
-    message("o Starting to download Publi MAF from GDC")
+    message("o Starting to download Public MAF from GDC")
     message("o More information at: https://gdc.cancer.gov/about-data/publications/mc3-2017")
     message("o Please, cite: Cell Systems. Volume 6 Issue 3: p271-281.e7, 28 March 2018 10.1016/j.cels.2018.03.002")
     if(!file.exists(gsub("\\.gz", "", fout))){
