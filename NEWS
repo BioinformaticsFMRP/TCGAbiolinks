@@ -1,3 +1,9 @@
+CHANGES IN VERSION 2.21.1
+-------------------------
+
+* Function GDCPrepare for TARGET-ALL-P3 fixed
+* Function getMC3MAF fixed
+
 CHANGES IN VERSION 2.14.0
 -------------------------
 
