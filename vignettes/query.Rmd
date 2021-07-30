@@ -10,7 +10,7 @@ vignette: >
 
 <style> body {text-align: justify} </style>
 
-  
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(progress = FALSE)
@@ -114,21 +114,25 @@ with the following arguments:
 ## project options
 The options for the field `project` are below:
 ```{r, eval = TRUE, echo = FALSE}
-datatable(TCGAbiolinks:::getGDCprojects(),
-          filter = 'top',
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 10), 
-          rownames = FALSE,
-          caption = "List of projects")
+datatable(
+    TCGAbiolinks:::getGDCprojects(),
+    filter = 'top',
+    options = list(scrollX = TRUE, keys = TRUE, pageLength = 10), 
+    rownames = FALSE,
+    caption = "List of projects"
+)
 ```
 
 ## sample.type options
 The options for the field `sample.type` are below:
 ```{r, eval = TRUE, echo = FALSE}
-datatable(TCGAbiolinks:::getBarcodeDefinition(),
-          filter = 'top',
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 10), 
-          rownames = FALSE,
-          caption = "List sample types")
+datatable(
+    TCGAbiolinks:::getBarcodeDefinition(),
+    filter = 'top',
+    options = list(scrollX = TRUE, keys = TRUE, pageLength = 10), 
+    rownames = FALSE,
+    caption = "List sample types"
+)
 ```
 
 The other fields (data.category, data.type, workflow.type, platform, file.type) can be found below. 
@@ -244,44 +248,54 @@ datatable(getResults(query, rows = 1:100,cols = c("file_name","cases")),
 ### Array-based assays
 
 This example shows how the user can search for  glioblastoma multiform (GBM) 
-and low grade gliomas (LGG) DNA methylation data 
+and DNA methylation data 
 for platform Illumina Human Methylation 450 and Illumina Human Methylation 27.
 
 ```{r message=FALSE, warning=FALSE}
-query <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
-                  legacy = TRUE,
-                  data.category = "DNA methylation",
-                  platform = c("Illumina Human Methylation 450", "Illumina Human Methylation 27"))
-datatable(getResults(query, rows = 1:100), 
-          filter = 'top',
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = FALSE)
+query <- GDCquery(
+    project = c("TCGA-GBM"),
+    legacy = TRUE,
+    data.category = "DNA methylation",
+    platform = c("Illumina Human Methylation 450", "Illumina Human Methylation 27")
+)
+datatable(
+    getResults(query, rows = 1:100), 
+    filter = 'top',
+    options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+    rownames = FALSE
+)
 ```
 
 ### whole-genome bisulfite sequencing (WGBS) 
 
 ```{r message = FALSE, warning = FALSE, eval = FALSE}
 
-query <- GDCquery(project = c("TCGA-LUAD"),
-                  legacy = TRUE,
-		  data.category = "DNA methylation",
-                  data.type = "Methylation percentage",
-                  experimental.strategy = "Bisulfite-Seq")
+query <- GDCquery(
+    project = c("TCGA-LUAD"),
+    legacy = TRUE,
+    data.category = "DNA methylation",
+    data.type = "Methylation percentage",
+    experimental.strategy = "Bisulfite-Seq"
+)
 
 # VCF - controlled data
-query <- GDCquery(project = c("TCGA-LUAD"),
-                  legacy = TRUE,
-                  data.category = "DNA methylation",
-		  data.type = "Bisulfite sequence alignment",
-                  experimental.strategy = "Bisulfite-Seq")
+query <- GDCquery(
+    project = c("TCGA-LUAD"),
+    legacy = TRUE,
+    data.category = "DNA methylation",
+    data.type = "Bisulfite sequence alignment",
+    experimental.strategy = "Bisulfite-Seq"
+)
 
 
 # WGBS BAM files - controlled data
-query <- GDCquery(project = c("TCGA-LUAD"),
-                  legacy = TRUE,
-                  data.type = "Aligned reads",
-                  data.category = "Raw sequencing data",
-                  experimental.strategy = "Bisulfite-Seq")
+query <- GDCquery(
+    project = c("TCGA-LUAD"),
+    legacy = TRUE,
+    data.type = "Aligned reads",
+    data.category = "Raw sequencing data",
+    experimental.strategy = "Bisulfite-Seq"
+)
 ```
 
 
@@ -292,18 +306,23 @@ gene expression data with the normalized results for expression of a gene.
 For more information about file.types check [GDC TCGA file types](https://gdc.cancer.gov/resources-tcga-users/legacy-archive-tcga-tag-descriptions)
 ```{r message=FALSE, warning=FALSE}
 # Gene expression aligned against hg19.
-query.exp.hg19 <- GDCquery(project = "TCGA-GBM",
-                           data.category = "Gene expression",
-                           data.type = "Gene expression quantification",
-                           platform = "Illumina HiSeq", 
-                           file.type  = "normalized_results",
-                           experimental.strategy = "RNA-Seq",
-                           barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"),
-                           legacy = TRUE)
-datatable(getResults(query.exp.hg19), 
-          filter = 'top',
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = FALSE)
+query.exp.hg19 <- GDCquery(
+    project = "TCGA-GBM",
+    data.category = "Gene expression",
+    data.type = "Gene expression quantification",
+    platform = "Illumina HiSeq", 
+    file.type  = "normalized_results",
+    experimental.strategy = "RNA-Seq",
+    barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"),
+    legacy = TRUE
+)
+
+datatable(
+    getResults(query.exp.hg19), 
+    filter = 'top',
+    options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+    rownames = FALSE
+)
 ```
 
 # Get Manifest file
@@ -323,10 +342,12 @@ Also, for more details, you can check an ATAC-seq workshop at http://rpubs.com/t
 The list of file available is below:
 ```{r message=FALSE, warning=FALSE}
 
-datatable(getResults(TCGAbiolinks:::GDCquery_ATAC_seq())[,c("file_name","file_size")], 
-          filter = 'top',
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = FALSE)
+datatable(
+    getResults(TCGAbiolinks:::GDCquery_ATAC_seq())[,c("file_name","file_size")], 
+    filter = 'top',
+    options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+    rownames = FALSE
+)
 ```
 
 You can use the function `GDCquery_ATAC_seq` filter the manifest table and use `GDCdownload` to save the data locally.
@@ -346,8 +367,10 @@ Almost like https://portal.gdc.cancer.gov/exploration
 
 ```{r message=FALSE, warning=FALSE,eval = TRUE}
 tab <-  getSampleFilesSummary(project = "TCGA-ACC")
-datatable(head(tab),
-          filter = 'top',
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = FALSE)
+datatable(
+    head(tab),
+    filter = 'top',
+    options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+    rownames = FALSE
+)
 ```
