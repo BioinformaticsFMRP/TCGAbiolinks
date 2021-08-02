@@ -200,7 +200,7 @@ GDCquery <- function(
         }
         if(missing(platform)) {
             platform <- NA
-        } else if(platform == FALSE) {
+        } else if(any(platform == FALSE)) {
             platform <- NA
         }
         if(missing(file.type)) {
@@ -240,16 +240,18 @@ GDCquery <- function(
     results <- NULL
     print.header("Accessing GDC. This might take a while...","subsection")
     for(proj in project){
-        url <- getGDCquery(project = proj,
-                           data.category = data.category,
-                           data.type = data.type,
-                           legacy = legacy,
-                           workflow.type = workflow.type,
-                           platform = platform,
-                           file.type = file.type,
-                           files.access = access,
-                           experimental.strategy = experimental.strategy,
-                           sample.type = sample.type)
+        url <- getGDCquery(
+            project = proj,
+            data.category = data.category,
+            data.type = data.type,
+            legacy = legacy,
+            workflow.type = workflow.type,
+            platform = platform,
+            file.type = file.type,
+            files.access = access,
+            experimental.strategy = experimental.strategy,
+            sample.type = sample.type
+        )
         message("ooo Project: ", proj)
         json  <- tryCatch(
             getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
@@ -260,16 +262,18 @@ GDCquery <- function(
             }
         )
         if(json$data$pagination$count == 0) {
-            url <- getGDCquery(project = proj,
-                               data.category = data.category,
-                               data.type = data.type,
-                               legacy = legacy,
-                               workflow.type = NA,
-                               platform = NA,
-                               file.type = file.type,
-                               experimental.strategy = experimental.strategy,
-                               files.access = access,
-                               sample.type = sample.type)
+            url <- getGDCquery(
+                project = proj,
+                data.category = data.category,
+                data.type = data.type,
+                legacy = legacy,
+                workflow.type = NA,
+                platform = NA,
+                file.type = file.type,
+                experimental.strategy = experimental.strategy,
+                files.access = access,
+                sample.type = sample.type
+            )
             json  <- tryCatch(
                 getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
                 error = function(e) {
@@ -284,16 +288,17 @@ GDCquery <- function(
         json$data$hits$acl <- NULL
         json$data$hits$project <- proj
 
-        if("archive" %in% colnames(json$data$hits)){
-            if(is.data.frame(json$data$hits$archive)){
+        if ("archive" %in% colnames(json$data$hits)) {
+            if (is.data.frame(json$data$hits$archive)) {
                 archive <- json$data$hits$archive
                 colnames(archive)[1:ncol(archive)] <- paste0("archive_", colnames(archive)[1:ncol(archive)])
                 json$data$hits$archive <- NULL
                 json$data$hits <- cbind(json$data$hits, archive)
             }
         }
-        if("analysis" %in% colnames(json$data$hits)){
-            if(is.data.frame(json$data$hits$analysis)){
+
+        if ("analysis" %in% colnames(json$data$hits)){
+            if (is.data.frame(json$data$hits$analysis)){
                 analysis <- json$data$hits$analysis
                 # Columns
                 # "analysis_id"
