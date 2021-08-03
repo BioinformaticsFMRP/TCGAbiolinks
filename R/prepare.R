@@ -980,7 +980,7 @@ colDataPrepare <- function(barcode){
   })
 
   # the code above does not work, since the projects have different string lengths
-  if(unique(ret$project_id) == "TARGET-ALL-P3") {
+  if(all(ret$project_id == "TARGET-ALL-P3")) {
     idx <- sapply(gsub("-[[:alnum:]]{3}$","",barcode), function(x) {
       grep(x,ret$bcr_patient_barcode)
     })
