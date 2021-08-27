@@ -200,7 +200,7 @@ GDCquery <- function(
         }
         if(missing(platform)) {
             platform <- NA
-        } else if(platform == FALSE) {
+        } else if(any(platform == FALSE)) {
             platform <- NA
         }
         if(missing(file.type)) {
@@ -240,16 +240,18 @@ GDCquery <- function(
     results <- NULL
     print.header("Accessing GDC. This might take a while...","subsection")
     for(proj in project){
-        url <- getGDCquery(project = proj,
-                           data.category = data.category,
-                           data.type = data.type,
-                           legacy = legacy,
-                           workflow.type = workflow.type,
-                           platform = platform,
-                           file.type = file.type,
-                           files.access = access,
-                           experimental.strategy = experimental.strategy,
-                           sample.type = sample.type)
+        url <- getGDCquery(
+            project = proj,
+            data.category = data.category,
+            data.type = data.type,
+            legacy = legacy,
+            workflow.type = workflow.type,
+            platform = platform,
+            file.type = file.type,
+            files.access = access,
+            experimental.strategy = experimental.strategy,
+            sample.type = sample.type
+        )
         message("ooo Project: ", proj)
         json  <- tryCatch(
             getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
@@ -260,16 +262,18 @@ GDCquery <- function(
             }
         )
         if(json$data$pagination$count == 0) {
-            url <- getGDCquery(project = proj,
-                               data.category = data.category,
-                               data.type = data.type,
-                               legacy = legacy,
-                               workflow.type = NA,
-                               platform = NA,
-                               file.type = file.type,
-                               experimental.strategy = experimental.strategy,
-                               files.access = access,
-                               sample.type = sample.type)
+            url <- getGDCquery(
+                project = proj,
+                data.category = data.category,
+                data.type = data.type,
+                legacy = legacy,
+                workflow.type = NA,
+                platform = NA,
+                file.type = file.type,
+                experimental.strategy = experimental.strategy,
+                files.access = access,
+                sample.type = sample.type
+            )
             json  <- tryCatch(
                 getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
                 error = function(e) {
@@ -284,16 +288,17 @@ GDCquery <- function(
         json$data$hits$acl <- NULL
         json$data$hits$project <- proj
 
-        if("archive" %in% colnames(json$data$hits)){
-            if(is.data.frame(json$data$hits$archive)){
+        if ("archive" %in% colnames(json$data$hits)) {
+            if (is.data.frame(json$data$hits$archive)) {
                 archive <- json$data$hits$archive
                 colnames(archive)[1:ncol(archive)] <- paste0("archive_", colnames(archive)[1:ncol(archive)])
                 json$data$hits$archive <- NULL
                 json$data$hits <- cbind(json$data$hits, archive)
             }
         }
-        if("analysis" %in% colnames(json$data$hits)){
-            if(is.data.frame(json$data$hits$analysis)){
+
+        if ("analysis" %in% colnames(json$data$hits)){
+            if (is.data.frame(json$data$hits$analysis)){
                 analysis <- json$data$hits$analysis
                 # Columns
                 # "analysis_id"
@@ -883,7 +888,8 @@ getMC3MAF <- function(){
     fpath <- "https://api.gdc.cancer.gov/data/1c8cfe5f-e52d-41ba-94da-f15ea1337efc"
     if(is.windows()) mode <- "wb" else  mode <- "w"
     message(rep("-",100))
-    message("o Starting to download Publi MAF from GDC")
+    options(timeout = 1000) # set 1000 second to download the file, default is 60 seconds
+    message("o Starting to download Public MAF from GDC")
     message("o More information at: https://gdc.cancer.gov/about-data/publications/mc3-2017")
     message("o Please, cite: Cell Systems. Volume 6 Issue 3: p271-281.e7, 28 March 2018 10.1016/j.cels.2018.03.002")
     if(!file.exists(gsub("\\.gz", "", fout))){
@@ -895,15 +901,17 @@ getMC3MAF <- function(){
     maf <- readr::read_tsv(gsub("\\.gz", "", fout),progress = TRUE, col_types = readr::cols())
     message("o Adding project_id information")
     project <- grep("TCGA",sort(getGDCprojects()$project_id),value = TRUE)
-    df <- plyr::adply(project,
-                      .margins = 1,
-                      .fun = function(proj) {
-                          samples <- getSubmitterID(proj)
-                          return(data.frame(proj,samples))
-                      }
+    df <- plyr::adply(
+        project,
+        .margins = 1,
+        .fun = function(proj) {
+            samples <- getSubmitterID(proj)
+            return(data.frame(proj,samples))
+        }
     )
     maf$project_id <- df$proj[match(substr(maf$Tumor_Sample_Barcode,1,12),df$samples)] %>% as.character
     message(rep("-",100))
+    return(maf)
 }
 
 

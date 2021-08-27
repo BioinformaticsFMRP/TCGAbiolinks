@@ -551,7 +551,7 @@ makeSEFromDNAMethylationMatrix <- function(
   message("Creating a SummarizedExperiment from DNA methylation input")
 
   # Instead of looking on the size, it is better to set it as a argument as the annotation is different
-  annotation <-   getInfiniumAnnotation(met.platform, genome)
+  annotation <-   getMetPlatInfo(platform = met.platform, genome = genome)
 
   rowRanges <- annotation[names(annotation) %in% rownames(betas),,drop = FALSE]
 
@@ -567,38 +567,15 @@ makeSEFromDNAMethylationMatrix <- function(
   return(betas)
 }
 
-
-getInfiniumAnnotation <- function(platform, genome){
-  genome <- match.arg(genome, choices = c("hg38","hg19"))
-  platform <- match.arg(platform, choices = c("EPIC","450K", "27K"))
-
-  base <- "http://zwdzwd.io/InfiniumAnnotation/current/"
-  path <- file.path(base,platform,paste(platform,"hg19.manifest.rds", sep ="."))
-  if (grepl("hg38", genome)) path <- gsub("hg19","hg38",path)
-  if (platform == "EPIC") {
-    annotation <- paste0(base,"EPIC/EPIC.hg19.manifest.rds")
-  } else if(platform == "450K") {
-    annotation <- paste0(base,"HM450/HM450.hg19.manifest.rds")
-  }  else if(platform == "27K") {
-    annotation <- paste0(base,"hm27/hm27.hg19.manifest.rds")
-  }
-  if (grepl("hg38", genome)) annotation <- gsub("hg19","hg38",annotation)
-
-  if (!file.exists(basename(annotation))) {
-    if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
-    downloader::download(annotation, basename(annotation), mode = mode)
-  }
-  readRDS(basename(annotation))
-}
-
-
-makeSEfromDNAmethylation <- function(df, probeInfo=NULL){
+makeSEfromDNAmethylation <- function(df, probeInfo = NULL){
   if(is.null(probeInfo)) {
-    rowRanges <- GRanges(seqnames = paste0("chr", df$Chromosome),
-                         ranges = IRanges(start = df$Genomic_Coordinate,
-                                          end = df$Genomic_Coordinate),
-                         probeID = df$Composite.Element.REF,
-                         Gene_Symbol = df$Gene_Symbol)
+    rowRanges <- GRanges(
+      seqnames = paste0("chr", df$Chromosome),
+      ranges = IRanges(start = df$Genomic_Coordinate,
+                       end = df$Genomic_Coordinate),
+      probeID = df$Composite.Element.REF,
+      Gene_Symbol = df$Gene_Symbol
+    )
 
     names(rowRanges) <- as.character(df$Composite.Element.REF)
     colData <-  colDataPrepare(colnames(df)[5:ncol(df)])
@@ -681,7 +658,8 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     for (i in seq_along(files)) {
       data <- fread(
-        files[i], header = TRUE,
+        files[i],
+        header = TRUE,
         sep = "\t",
         stringsAsFactors = FALSE,
         skip = 1,
@@ -737,7 +715,10 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
 
     if (summarizedExperiment) {
       if(skip == 0) {
-        df <- makeSEfromDNAmethylation(df, probeInfo = as_data_frame(df)[,grep("TCGA",colnames(df),invert = TRUE)])
+        df <- makeSEfromDNAmethylation(
+          df,
+          probeInfo = data.frame(df)[,grep("TCGA",colnames(df),invert = TRUE)]
+        )
       } else {
         df <- makeSEfromDNAmethylation(df)
       }
@@ -761,49 +742,78 @@ colDataPrepareMMRF <- function(barcode){
 
 colDataPrepareTARGET <- function(barcode){
   message("Adding description to TARGET samples")
-  tissue.code <- c('01','02','03','04','05','06','07','08','09','10','11',
-                   '12','13','14','15','16','17','20','40','41','42','50','60','61','99')
+  tissue.code <- c(
+    '01',
+    '02',
+    '03',
+    '04',
+    '05',
+    '06',
+    '07',
+    '08',
+    '09',
+    '10',
+    '11',
+    '12',
+    '13',
+    '14',
+    '15',
+    '16',
+    '17',
+    '20',
+    '40',
+    '41',
+    '42',
+    '50',
+    '60',
+    '61',
+    '99'
+  )
 
-  definition <- c("Primary solid Tumor", # 01
-                  "Recurrent Solid Tumor", # 02
-                  "Primary Blood Derived Cancer - Peripheral Blood", # 03
-                  "Recurrent Blood Derived Cancer - Bone Marrow", # 04
-                  "Additional - New Primary", # 05
-                  "Metastatic", # 06
-                  "Additional Metastatic", # 07
-                  "Tissue disease-specific post-adjuvant therapy", # 08
-                  "Primary Blood Derived Cancer - Bone Marrow", # 09
-                  "Blood Derived Normal", # 10
-                  "Solid Tissue Normal",  # 11
-                  "Buccal Cell Normal",   # 12
-                  "EBV Immortalized Normal", # 13
-                  "Bone Marrow Normal", # 14
-                  "Fibroblasts from Bone Marrow Normal", # 15
-                  "Mononuclear Cells from Bone Marrow Normal", # 16
-                  "Lymphatic Tissue Normal (including centroblasts)", # 17
-                  "Control Analyte", # 20
-                  "Recurrent Blood Derived Cancer - Peripheral Blood", # 40
-                  "Blood Derived Cancer- Bone Marrow, Post-treatment", # 41
-                  "Blood Derived Cancer- Peripheral Blood, Post-treatment", # 42
-                  "Cell line from patient tumor", # 50
-                  "Xenograft from patient not grown as intermediate on plastic tissue culture dish", # 60
-                  "Xenograft grown in mice from established cell lines", #61
-                  "Granulocytes after a Ficoll separation") # 99
+  definition <- c(
+    "Primary solid Tumor", # 01
+    "Recurrent Solid Tumor", # 02
+    "Primary Blood Derived Cancer - Peripheral Blood", # 03
+    "Recurrent Blood Derived Cancer - Bone Marrow", # 04
+    "Additional - New Primary", # 05
+    "Metastatic", # 06
+    "Additional Metastatic", # 07
+    "Tissue disease-specific post-adjuvant therapy", # 08
+    "Primary Blood Derived Cancer - Bone Marrow", # 09
+    "Blood Derived Normal", # 10
+    "Solid Tissue Normal",  # 11
+    "Buccal Cell Normal",   # 12
+    "EBV Immortalized Normal", # 13
+    "Bone Marrow Normal", # 14
+    "Fibroblasts from Bone Marrow Normal", # 15
+    "Mononuclear Cells from Bone Marrow Normal", # 16
+    "Lymphatic Tissue Normal (including centroblasts)", # 17
+    "Control Analyte", # 20
+    "Recurrent Blood Derived Cancer - Peripheral Blood", # 40
+    "Blood Derived Cancer- Bone Marrow, Post-treatment", # 41
+    "Blood Derived Cancer- Peripheral Blood, Post-treatment", # 42
+    "Cell line from patient tumor", # 50
+    "Xenograft from patient not grown as intermediate on plastic tissue culture dish", # 60
+    "Xenograft grown in mice from established cell lines", #61
+    "Granulocytes after a Ficoll separation"
+  ) # 99
   aux <- DataFrame(tissue.code = tissue.code,definition)
 
   # in case multiple equal barcode
-  regex <- paste0("[:alnum:]{5}-[:alnum:]{2}-[:alnum:]{6}",
+  regex <- paste0("[:alnum:]{6}-[:alnum:]{2}-[:alnum:]{6}",
                   "-[:alnum:]{3}-[:alnum:]{3}")
   samples <- str_match(barcode,regex)[,1]
 
+  samples.df <- barcode %>% as.data.frame %>%  tidyr::separate(".",1:5 %>% as.character)
+
   ret <- DataFrame(
     barcode = barcode,
-    sample = substr(barcode, 1, 20),
-    patient = substr(barcode, 1, 16),
-    tumor.code = substr(barcode, 8, 9),
-    case.unique.id = substr(barcode, 11, 16),
-    tissue.code = substr(barcode, 18, 19),
-    nucleic.acid.code = substr(barcode, 24, 24)
+    tumor.code = samples.df[,2],
+    sample = paste0(samples.df[,1],"-",samples.df[,2],"-",samples.df[,3],"-",samples.df[,4]),
+    patient = paste0(samples.df[,1],"-",samples.df[,2],"-",samples.df[,3]),
+    case.unique.id = paste0(samples.df[,3]),
+    tissue.code = substr(samples.df[,4], 1, 2),
+    nucleic.acid.code = substr(samples.df[,5], 3, 3)
   )
 
   ret <- merge(ret,aux, by = "tissue.code", sort = FALSE)
@@ -933,9 +943,11 @@ colDataPrepare <- function(barcode){
   # There is a limitation on the size of the string, so this step will be splited in cases of 100
   patient.info <- NULL
 
-  patient.info <- splitAPICall(FUN = getBarcodeInfo,
-                               step = 20,
-                               items = ret$sample)
+  patient.info <- splitAPICall(
+    FUN = getBarcodeInfo,
+    step = 10,
+    items = ret$sample
+  )
 
   if(!is.null(patient.info)) {
     ret$sample_submitter_id <- ret$sample %>% as.character()
@@ -965,9 +977,18 @@ colDataPrepare <- function(barcode){
 
   # Put data in the right order
   ret <- ret[!duplicated(ret$bcr_patient_barcode),]
+
+
   idx <- sapply(substr(barcode,1,min(str_length(ret$bcr_patient_barcode))), function(x) {
     grep(x,ret$bcr_patient_barcode)
   })
+
+  # the code above does not work, since the projects have different string lengths
+  if(all(ret$project_id == "TARGET-ALL-P3")) {
+    idx <- sapply(gsub("-[[:alnum:]]{3}$","",barcode), function(x) {
+      grep(x,ret$bcr_patient_barcode)
+    })
+  }
 
   ret <- ret[idx,]
 
