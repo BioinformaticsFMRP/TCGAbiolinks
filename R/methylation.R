@@ -1825,8 +1825,8 @@ getMetPlatInfo <- function(
     check_package("sesameData")
     check_package("sesame")
 
-    sesameDataCacheAll()
-    sesameDataGet(
+    sesameData::sesameDataCacheAll()
+    sesameData::sesameDataGet(
         str_c(
             platform,
             ".",
