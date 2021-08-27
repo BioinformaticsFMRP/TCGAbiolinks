@@ -401,8 +401,6 @@ readSimpleNucleotideVariationMaf <- function(files){
   return(ret)
 }
 
-
-#' @importFrom purrr reduce
 readGeneExpressionQuantification <- function(
   files,
   cases,
@@ -443,11 +441,6 @@ readGeneExpressionQuantification <- function(
 
   print.header(paste0("Merging ", length(files)," files"),"subsection")
   merging.col <- colnames(ret[[1]])[1]
-  #df <- purrr::reduce(
-  #  ret,
-  #  dplyr::full_join,,
-  #  by = merging.col
-  #)
   df <- join_all(ret, by = merging.col, type='full')
 
   if (summarizedExperiment) {
@@ -1252,7 +1245,6 @@ readTranscriptomeProfiling <- function(
   return(df)
 }
 
-#' @importFrom purrr reduce
 readGISTIC <- function(files, cases){
   message("Reading GISTIC file")
   gistic.df <- NULL
@@ -1276,7 +1268,7 @@ readGISTIC <- function(files, cases){
     colnames(data)[-c(1:3)] <- barcode
     return(data)
   })
-  gistic.df <- gistic.list %>% purrr::reduce(dplyr::full_join, by = c("Gene Symbol","Gene ID","Cytoband"))
+  gistic.df <- gistic.list %>% join_all(by =  c("Gene Symbol","Gene ID","Cytoband"), type='full')
 
   return(gistic.df)
 }
