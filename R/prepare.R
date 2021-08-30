@@ -1110,9 +1110,11 @@ makeSEfromTranscriptomeProfilingSTAR <- function(data, cases, assay.list){
 
   # Prepare data table
   # Remove the version from the ensembl gene id
-  assays <- list(data.matrix(data[,grep("unstranded",colnames(data))]),
-                 data.matrix(data[,grep("stranded_first",colnames(data))]),
-                 data.matrix(data[,grep("stranded_second",colnames(data))]))
+  assays <- list(
+    data.matrix(data[,grep("unstranded",colnames(data))]),
+    data.matrix(data[,grep("stranded_first",colnames(data))]),
+    data.matrix(data[,grep("stranded_second",colnames(data))])
+  )
   names(assays) <- c("unstranded","stranded_first","stranded_second")
   assays <- lapply(assays, function(x){
     colnames(x) <- NULL
@@ -1196,6 +1198,7 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
 
 #' @importFrom dplyr left_join
 #' @importFrom plyr alply join_all
+#' @importFrom purrr map_dfc
 readTranscriptomeProfiling <- function(
   files,
   data.type,
@@ -1234,11 +1237,16 @@ readTranscriptomeProfiling <- function(
         readr::read_tsv(
           file = f,
           col_names = TRUE,
-          progress = FALSE
+          progress = FALSE,
+          show_col_types = FALSE
         )
       }, .progress = "time")
 
-      df <- join_all(x, by = '#gene', type = 'left')
+      suppressMessages({
+        df <- x %>%  map_dfc(.f = function(y) y[,2:4])
+        df <- bind_cols(x[[1]][,1],df)
+      })
+
       if(!missing(cases))  colnames(df)[-1] <- sapply(cases, function(x){stringr::str_c(c("unstranded_","stranded_first_", "stranded_second_"),x)}) %>% as.character()
       if(summarizedExperiment) df <- makeSEfromTranscriptomeProfilingSTAR(df,cases,workflow.type)
     }
