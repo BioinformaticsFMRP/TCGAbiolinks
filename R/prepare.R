@@ -1198,7 +1198,7 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
 
 #' @importFrom dplyr left_join
 #' @importFrom plyr alply join_all
-#' @importFrom purrr map_dfc map
+#' @importFrom purrr map_dfc map map_df
 readTranscriptomeProfiling <- function(
   files,
   data.type,
