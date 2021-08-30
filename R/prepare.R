@@ -704,7 +704,18 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
 
 
     print.header(paste0("Merging ", length(files)," files"),"subsection")
-    df <- join_all(x, type='left')
+
+    # Just check if the data is in the same order, since we will not merge
+    # the data frames to save memory
+    stopifnot(all(unlist(x %>% map(function(y){all(y[,1] ==  x[[1]][,1])}) )))
+
+    # if hg38 we have 10 columns with probe metadata
+    # if hg19 we have 4 columns with probe metadata
+    idx.dnam <- grep("TCGA",colnames(x[[1]]))
+    df <- x %>%  map_df(idx.dnam)
+    colnames(df) <- x %>%  map_chr(.f = function(y) colnames(y)[idx.dnam])
+    df <- bind_cols(x[[1]][,1:(idx.dnam-1)],df)
+
 
     if (summarizedExperiment) {
       if(skip == 0) {
@@ -1201,8 +1212,14 @@ readTranscriptomeProfiling <- function(
           col_types = c("cd")
         )
       }, .progress = "time")
-      df <- join_all(x, by = 'X1', type = 'left')
 
+      # Just check if the data is in the same order, since we will not merge
+      # the data frames to save memory
+      stopifnot(all(unlist(x %>% map(function(y){all(y[,1] ==  x[[1]][,1])}) )))
+
+      # need to check if it works in all cases
+      # tested for HTSeq - FPKM-UQ and Counts only
+      df <- bind_cols(x[[1]][,1],x %>%  map_df(2))
       if(!missing(cases))  colnames(df)[-1] <- cases
       if(summarizedExperiment) df <- makeSEfromTranscriptomeProfiling(df,cases,workflow.type)
     } else  if(grepl("STAR",workflow.type)){
