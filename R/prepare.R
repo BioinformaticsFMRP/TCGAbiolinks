@@ -440,8 +440,15 @@ readGeneExpressionQuantification <- function(
     },.progress = "time",cases = cases)
 
   print.header(paste0("Merging ", length(files)," files"),"subsection")
-  merging.col <- colnames(ret[[1]])[1]
-  df <- join_all(ret, by = merging.col, type='full')
+
+  # Just check if the data is in the same order, since we will not merge
+  # the data frames to save memory
+  stopifnot(all(unlist(ret %>% map(function(y){all(y[,1] ==  ret[[1]][,1])}) )))
+
+  # need to check if it works in all cases
+  df <- ret %>%  map_df(2)
+  colnames(df) <- ret %>%  map_chr(.f = function(y) colnames(y)[2])
+  df <- bind_cols(ret[[1]][,1],df)
 
   if (summarizedExperiment) {
     df <- makeSEfromGeneExpressionQuantification(df, assay.list, genome = genome)
@@ -1285,7 +1292,8 @@ readGISTIC <- function(files, cases){
     colnames(data)[-c(1:3)] <- barcode
     return(data)
   })
-  gistic.df <- gistic.list %>% join_all(by =  c("Gene Symbol","Gene ID","Cytoband"), type='full')
+  gistic.df <- gistic.list %>%
+    join_all(by =  c("Gene Symbol","Gene ID","Cytoband"), type='full')
 
   return(gistic.df)
 }
