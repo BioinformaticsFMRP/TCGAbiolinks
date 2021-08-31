@@ -125,9 +125,10 @@ rowRanges <- GenomicRanges::GRanges(
   strand = sample(c("+", "-"), 200, TRUE),
   feature_id = sprintf("ID\%03d", 1:200)
 )
+names(rowRanges) <-  paste0("cg",1:200)
 colData <- S4Vectors::DataFrame(
   Treatment = rep(c("ChIP", "Input"), 5),
-  row.names = LETTERS[1:20],
+  row.names = paste0("S",1:20),
   group = rep(c("group1","group2"),c(10,10))
 )
 data <- SummarizedExperiment::SummarizedExperiment(
