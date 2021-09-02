@@ -919,7 +919,7 @@ getMC3MAF <- function(){
 #' @description
 #'   TCGArecount2_query queries and downloads data produced by the Recount2 project. User can specify which project and which tissue to query
 #' @param project is a string denoting which project the user wants. Options are "tcga" and "gtex"
-#' @param tissue a vector of tissue(s) to download. Options are "adipose tissue", "adrenal", "gland", "bladder","blood", "blood vessel", "bone marrow", "brain", "breast","cervix uteri", "colon", "esophagus", "fallopian tube","heart", "kidney", "liver", "lung", "muscle", "nerve", "ovary","pancreas", "pituitary", "prostate", "salivary", "gland", "skin", "small intestine", "spleen", "stomach", "testis", "thyroid", "uterus", "vagina"
+#' @param tissue a vector of tissue(s) to download. Options are "adipose tissue", "adrenal gland", "bladder","blood", "blood vessel", "bone marrow", "brain", "breast","cervix uteri", "colon", "esophagus", "fallopian tube","heart", "kidney", "liver", "lung", "muscle", "nerve", "ovary","pancreas", "pituitary", "prostate", "salivary gland", "skin", "small intestine", "spleen", "stomach", "testis", "thyroid", "uterus", "vagina"
 #' @export
 #' @examples
 #' \dontrun{
