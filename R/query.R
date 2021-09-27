@@ -437,13 +437,15 @@ GDCquery <- function(
     # 1) Normally for each sample we will have only single information
     # however the mutation call uses both normal and tumor which are both
     # reported by the API
-    if(!data.category %in% c("Clinical",
-                             "Copy Number Variation",
-                             "Biospecimen",
-                             "Other",
-                             "Simple Nucleotide Variation",
-                             "Simple nucleotide variation",
-                             "Protein expression")){
+    if(!data.category %in% c(
+        "Clinical",
+        "Copy Number Variation",
+        "Biospecimen",
+        "Other",
+        "Simple Nucleotide Variation",
+        "Simple nucleotide variation",
+        "Protein expression")
+    ){
 
         # we also need to deal with pooled samples (mixed from different patients)
         # example CPT0000870008
@@ -454,7 +456,7 @@ GDCquery <- function(
                                    summarize(
                                        x$samples[[1]],
                                        submitter_id = paste(submitter_id,collapse = ";"),
-                                       is_ffpe = any(is_ffpe),
+                                       is_ffpe = ifelse("is_ffpe" %in% colnames(x),any(is_ffpe),NA),
                                        sample_type =  paste(sample_type,collapse = ";"),
                                        aliquot.submiter.id = x$samples[[1]]$portions[[1]]$analytes[[1]]$aliquots[[1]]$submitter_id)
                                }) %>% as.data.frame
@@ -464,7 +466,7 @@ GDCquery <- function(
                                    summarize(
                                        x$samples[[1]],
                                        submitter_id = paste(submitter_id,collapse = ";"),
-                                       is_ffpe = any(is_ffpe),
+                                       is_ffpe = ifelse("is_ffpe" %in% colnames(x),any(is_ffpe),NA),
                                        sample_type =  paste(sample_type,collapse = ";"))
                                }) %>% as.data.frame
 
@@ -473,11 +475,12 @@ GDCquery <- function(
         results$is_ffpe <- aux$is_ffpe %>% as.logical
 
         if("submitter_id" %in% names(unlist(results$cases))) {
-            results$cases.submitter_id <- plyr::laply(results$cases,
-                                                      function(x) {
-                                                          paste(x$submitter_id,collapse = ";")
-                                                      })  %>%
-                as.character()
+            results$cases.submitter_id <- plyr::laply(
+                results$cases,
+                function(x) {
+                    paste(x$submitter_id,collapse = ";")
+                }
+            )  %>% as.character()
         }
         # ORGANOID-PANCREATIC does not have aliquots
         if("aliquot.submiter.id" %in% colnames(aux)){

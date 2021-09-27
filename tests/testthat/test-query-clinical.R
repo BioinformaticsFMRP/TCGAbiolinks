@@ -20,7 +20,7 @@ test_that("GDCquery_clinic populates correctly the data", {
 
     results <- GDCquery_clinic(project = "ORGANOID-PANCREATIC", type = "clinical")
     results.42 <- results[results$submitter_id == "42",]
-    expect_equal(results.42$tumor_stage,"2A")
+    expect_equal(results.42$ajcc_pathologic_stage,"Stage IIA")
     expect_equal(results.42$ethnicity,"not hispanic or latino")
     expect_equal(as.integer(results.2028$age_at_diagnosis / 365.25),56)
 
