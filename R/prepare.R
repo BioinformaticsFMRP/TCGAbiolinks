@@ -401,8 +401,6 @@ readSimpleNucleotideVariationMaf <- function(files){
   return(ret)
 }
 
-
-#' @importFrom purrr reduce
 readGeneExpressionQuantification <- function(
   files,
   cases,
@@ -432,19 +430,25 @@ readGeneExpressionQuantification <- function(
       if(!missing(cases)) {
         assay.list <<- gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)])
         # We will use this because there might be more than one col for each samples
-        setnames(data,colnames(data)[2:ncol(data)],
-                 paste0(gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)]),"_",cases[i]))
+        setnames(
+          data,
+          colnames(data)[2:ncol(data)],
+          paste0(gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)]),"_",cases[i])
+        )
       }
       data
     },.progress = "time",cases = cases)
 
   print.header(paste0("Merging ", length(files)," files"),"subsection")
-  merging.col <- colnames(ret[[1]])[1]
-  df <- purrr::reduce(
-    ret,
-    dplyr::full_join,,
-    by = merging.col
-  )
+
+  # Just check if the data is in the same order, since we will not merge
+  # the data frames to save memory
+  stopifnot(all(unlist(ret %>% map(function(y){all(y[,1] ==  ret[[1]][,1])}) )))
+
+  # need to check if it works in all cases
+  df <- ret %>%  map_df(2)
+  colnames(df) <- ret %>%  map_chr(.f = function(y) colnames(y)[2])
+  df <- bind_cols(ret[[1]][,1],df)
 
   if (summarizedExperiment) {
     df <- makeSEfromGeneExpressionQuantification(df, assay.list, genome = genome)
@@ -707,7 +711,18 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
 
 
     print.header(paste0("Merging ", length(files)," files"),"subsection")
-    df <- purrr::reduce(x, dplyr::left_join)
+
+    # Just check if the data is in the same order, since we will not merge
+    # the data frames to save memory
+    stopifnot(all(unlist(x %>% map(function(y){all(y[,1] ==  x[[1]][,1])}) )))
+
+    # if hg38 we have 10 columns with probe metadata
+    # if hg19 we have 4 columns with probe metadata
+    idx.dnam <- grep("TCGA",colnames(x[[1]]))
+    df <- x %>%  map_df(idx.dnam)
+    colnames(df) <- x %>%  map_chr(.f = function(y) colnames(y)[idx.dnam])
+    df <- bind_cols(x[[1]][,1:(idx.dnam-1)],df)
+
 
     if (summarizedExperiment) {
       if(skip == 0) {
@@ -1095,9 +1110,11 @@ makeSEfromTranscriptomeProfilingSTAR <- function(data, cases, assay.list){
 
   # Prepare data table
   # Remove the version from the ensembl gene id
-  assays <- list(data.matrix(data[,grep("unstranded",colnames(data))]),
-                 data.matrix(data[,grep("stranded_first",colnames(data))]),
-                 data.matrix(data[,grep("stranded_second",colnames(data))]))
+  assays <- list(
+    data.matrix(data[,grep("unstranded",colnames(data))]),
+    data.matrix(data[,grep("stranded_first",colnames(data))]),
+    data.matrix(data[,grep("stranded_second",colnames(data))])
+  )
   names(assays) <- c("unstranded","stranded_first","stranded_second")
   assays <- lapply(assays, function(x){
     colnames(x) <- NULL
@@ -1116,9 +1133,11 @@ makeSEfromTranscriptomeProfilingSTAR <- function(data, cases, assay.list){
     original_ensembl_gene_id = data$`#gene`
   )
   names(rowRanges) <- as.character(data$ensembl_gene_id)
-  rse <- SummarizedExperiment(assays = assays,
-                              rowRanges = rowRanges,
-                              colData = colData)
+  rse <- SummarizedExperiment(
+    assays = assays,
+    rowRanges = rowRanges,
+    colData = colData
+  )
   metadata(rse) <- metrics
   return(rse)
 }
@@ -1138,10 +1157,11 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
   data$ensembl_gene_id <- as.character(gsub("\\.[0-9]*","",data$X1))
   data <- subset(data, grepl("ENSG", data$ensembl_gene_id))
   found.genes <- table(data$ensembl_gene_id %in% gene.location$ensembl_gene_id)
+
   if("FALSE" %in% names(found.genes))
     message(paste0("From the ", nrow(data), " genes we couldn't map ", found.genes[["FALSE"]]))
 
-  data <- merge(data, gene.location, by="ensembl_gene_id")
+  data <- merge(data, gene.location, by = "ensembl_gene_id")
 
   # Prepare data table
   # Remove the version from the ensembl gene id
@@ -1156,8 +1176,10 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
   # Prepare rowRanges
   rowRanges <- GRanges(
     seqnames = paste0("chr", data$chromosome_name),
-    ranges = IRanges(start = data$start_position,
-                     end = data$end_position),
+    ranges = IRanges(
+      start = data$start_position,
+      end = data$end_position
+    ),
     strand = data$strand,
     ensembl_gene_id = data$ensembl_gene_id,
     external_gene_name = data$external_gene_name,
@@ -1174,10 +1196,16 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
 }
 
 
-#' @importFrom purrr reduce
 #' @importFrom dplyr left_join
-#' @importFrom plyr alply
-readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,summarizedExperiment) {
+#' @importFrom plyr alply join_all
+#' @importFrom purrr map_dfc map map_df
+readTranscriptomeProfiling <- function(
+  files,
+  data.type,
+  workflow.type,
+  cases,
+  summarizedExperiment
+) {
 
   if(grepl("Gene Expression Quantification", data.type, ignore.case = TRUE)){
     # Status working for:
@@ -1187,22 +1215,38 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,su
     if(grepl("HTSeq",workflow.type)){
 
       x <- plyr::alply(files,1, function(f) {
-        readr::read_tsv(file = f,
-                        col_names = FALSE,
-                        progress = FALSE,
-                        col_types = c("cd"))
+        readr::read_tsv(
+          file = f,
+          col_names = FALSE,
+          progress = FALSE,
+          col_types = c("cd")
+        )
       }, .progress = "time")
-      df <- x %>% purrr::reduce(left_join, by = "X1")
+
+      # Just check if the data is in the same order, since we will not merge
+      # the data frames to save memory
+      stopifnot(all(unlist(x %>% map(function(y){all(y[,1] ==  x[[1]][,1])}) )))
+
+      # need to check if it works in all cases
+      # tested for HTSeq - FPKM-UQ and Counts only
+      df <- bind_cols(x[[1]][,1],x %>%  map_df(2))
       if(!missing(cases))  colnames(df)[-1] <- cases
       if(summarizedExperiment) df <- makeSEfromTranscriptomeProfiling(df,cases,workflow.type)
     } else  if(grepl("STAR",workflow.type)){
       x <- plyr::alply(files,1, function(f) {
-        readr::read_tsv(file = f,
-                        col_names = TRUE,
-                        progress = FALSE)
+        readr::read_tsv(
+          file = f,
+          col_names = TRUE,
+          progress = FALSE,
+          show_col_types = FALSE
+        )
       }, .progress = "time")
 
-      df <- x %>% purrr::reduce(left_join, by = "#gene")
+      suppressMessages({
+        df <- x %>%  map_dfc(.f = function(y) y[,2:4])
+        df <- bind_cols(x[[1]][,1],df)
+      })
+
       if(!missing(cases))  colnames(df)[-1] <- sapply(cases, function(x){stringr::str_c(c("unstranded_","stranded_first_", "stranded_second_"),x)}) %>% as.character()
       if(summarizedExperiment) df <- makeSEfromTranscriptomeProfilingSTAR(df,cases,workflow.type)
     }
@@ -1233,24 +1277,31 @@ readTranscriptomeProfiling <- function(files, data.type, workflow.type, cases,su
   return(df)
 }
 
-#' @importFrom purrr reduce
 readGISTIC <- function(files, cases){
   message("Reading GISTIC file")
   gistic.df <- NULL
   gistic.list <- plyr::alply(files,1,.fun = function(file) {
     message("Reading file: ", file)
-    data <- read_tsv(file = file, col_names = TRUE, progress = TRUE,col_types = readr::cols())
+    data <- read_tsv(
+      file = file,
+      col_names = TRUE,
+      progress = TRUE,
+      col_types = readr::cols()
+    )
 
     aliquot <- colnames(data)[-c(1:3)]
-    info <- splitAPICall(FUN = getBarcodefromAliquot,
-                         step = 20,
-                         items = aliquot)
+    info <- splitAPICall(
+      FUN = getBarcodefromAliquot,
+      step = 20,
+      items = aliquot
+    )
 
     barcode <- as.character(info$submitter_id)[match(aliquot,as.character(info$aliquot_id))]
     colnames(data)[-c(1:3)] <- barcode
     return(data)
   })
-  gistic.df <- gistic.list %>% purrr::reduce(dplyr::full_join, by = c("Gene Symbol","Gene ID","Cytoband"))
+  gistic.df <- gistic.list %>%
+    join_all(by =  c("Gene Symbol","Gene ID","Cytoband"), type='full')
 
   return(gistic.df)
 }
