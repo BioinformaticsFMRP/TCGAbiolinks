@@ -6,13 +6,15 @@ test_that("GDCdownload API method is working ", {
 
     cases <-  c("TCGA-OR-A5JX-01A-11R-A29S-07",
                 "TCGA-OR-A5KY-01A-11R-A29S-07",
-                "TCGA-PK-A5HA-01A-11R-A29S-07")
+                "TCGA-PK-A5HA-01A-11R-A29S-07"
+    )
     acc.gbm <- GDCquery(
         project =  c("TCGA-ACC"),
         data.category = "Transcriptome Profiling",
         data.type = "Gene Expression Quantification",
         workflow.type = "HTSeq - FPKM-UQ",
-        barcode = substr(cases,1,12))
+        barcode = substr(cases,1,12)
+    )
     GDCdownload(acc.gbm, method = "api", directory = "ex")
     obj <- GDCprepare(acc.gbm,  directory = "ex",summarizedExperiment = FALSE)
     expect_true(all(substr(colnames(obj)[-1],1,12) == substr(cases,1,12)))
@@ -61,12 +63,14 @@ test_that("getBarcodeInfo works", {
     expect_true(x[x$sample_submitter_id == "HCM-CSHL-0065-C20-06A","sample_type"] == "Metastatic")
     expect_true(x[x$sample_submitter_id == "HCM-CSHL-0063-C18-85A","sample_type"] == "Next Generation Cancer Model")
 
-    x <- getBarcodeInfo(c("HCM-CSHL-0063-C18-85A",
-                          "HCM-CSHL-0065-C20-06A",
-                          "HCM-CSHL-0065-C20-85A",
-                          "TARGET-20-PARUDL-03A",
-                          "TCGA-OR-A5LR-01A",
-                          "HCM-CSHL-0063-C18-01A"))
+    x <- getBarcodeInfo(
+        c("HCM-CSHL-0063-C18-85A",
+          "HCM-CSHL-0065-C20-06A",
+          "HCM-CSHL-0065-C20-85A",
+          "TARGET-20-PARUDL-03A",
+          "TCGA-OR-A5LR-01A",
+          "HCM-CSHL-0063-C18-01A")
+    )
     expect_true(x[x$sample_submitter_id == "HCM-CSHL-0065-C20-06A","gender"] == "male")
     expect_true(x[x$sample_submitter_id == "HCM-CSHL-0065-C20-06A","tumor_grade"] == "G2")
     expect_true(x[x$sample_submitter_id == "HCM-CSHL-0065-C20-06A","ajcc_pathologic_stage"] == "Stage IVA")
@@ -126,10 +130,12 @@ test_that("GISTIC2 data is being correclty prepare", {
     skip_on_bioc()
     skip_if_offline()
 
-    query <- GDCquery(project = "TCGA-COAD",
-                      data.category = "Copy Number Variation",
-                      data.type = "Gene Level Copy Number Scores",
-                      access = "open")
+    query <- GDCquery(
+        project = "TCGA-COAD",
+        data.category = "Copy Number Variation",
+        data.type = "Gene Level Copy Number Scores",
+        access = "open"
+    )
     GDCdownload(query,directory = "ex")
     data <- GDCprepare(query,directory = "ex")
 
@@ -147,14 +153,16 @@ test_that("IDAT files is processed", {
     skip_if_offline()
 
     proj <- "TCGA-LUAD"
-    query <- GDCquery(project = proj,
-                      data.category = "Raw microarray data",
-                      data.type = "Raw intensities",
-                      experimental.strategy = "Methylation array",
-                      legacy = TRUE,
-                      file.type = ".idat",
-                      barcode = "TCGA-55-7724",
-                      platform = "Illumina Human Methylation 450")
+    query <- GDCquery(
+        project = proj,
+        data.category = "Raw microarray data",
+        data.type = "Raw intensities",
+        experimental.strategy = "Methylation array",
+        legacy = TRUE,
+        file.type = ".idat",
+        barcode = "TCGA-55-7724",
+        platform = "Illumina Human Methylation 450"
+    )
     #tryCatch(GDCdownload(query, method = "api", files.per.chunk = 20),
     #         error = function(e) GDCdownload(query, method = "client"))
     #betas <- GDCprepare(query)
