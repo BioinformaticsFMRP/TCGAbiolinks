@@ -44,6 +44,7 @@
 #' @importFrom data.table setcolorder setnames
 #' @importFrom GenomicRanges GRanges
 #' @importFrom IRanges IRanges
+#' @importFrom purrr map_chr
 GDCprepare <- function(
   query,
   save = FALSE,
