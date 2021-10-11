@@ -922,7 +922,7 @@ getMC3MAF <- function(){
 #' @description
 #'   TCGArecount2_query queries and downloads data produced by the Recount2 project. User can specify which project and which tissue to query
 #' @param project is a string denoting which project the user wants. Options are "tcga" and "gtex"
-#' @param tissue a vector of tissue(s) to download. Options are "adipose tissue", "adrenal", "gland", "bladder","blood", "blood vessel", "bone marrow", "brain", "breast","cervix uteri", "colon", "esophagus", "fallopian tube","heart", "kidney", "liver", "lung", "muscle", "nerve", "ovary","pancreas", "pituitary", "prostate", "salivary", "gland", "skin", "small intestine", "spleen", "stomach", "testis", "thyroid", "uterus", "vagina"
+#' @param tissue a vector of tissue(s) to download. Options are "adipose tissue", "adrenal gland", "bladder","blood", "blood vessel", "bone marrow", "brain", "breast","cervix uteri", "colon", "esophagus", "fallopian tube","heart", "kidney", "liver", "lung", "muscle", "nerve", "ovary","pancreas", "pituitary", "prostate", "salivary gland", "skin", "small intestine", "spleen", "stomach", "testis", "thyroid", "uterus", "vagina"
 #' @export
 #' @examples
 #' \dontrun{
@@ -993,34 +993,34 @@ TCGAquery_recount2<-function(project, tissue=c()){
         "uterus")
 
 
-    tissue<-paste(unlist(strsplit(tissue, " ")), collapse="_")
+    tissue<-unlist(lapply(strsplit(tissue, " "), function(x) paste(x, collapse = "_")))
     Res<-list()
 
     if(tolower(project)=="gtex"){
         for(t_i in tissue){
-            if(tissue%in%tissuesGTEx){
+            if(t_i%in%tissuesGTEx){
                 con<-"http://duffel.rail.bio/recount/v2/SRP012682/rse_gene_"
-                con<-paste0(con,tissue,".Rdata")
+                con<-paste0(con,t_i,".Rdata")
 
-                message(paste0("downloading Range Summarized Experiment for: ", tissue))
+                message(paste0("downloading Range Summarized Experiment for: ", t_i))
                 load(url(con))
                 Res[[paste0(project,"_", t_i)]]<-rse_gene
             }
-            else stop(paste0(tissue, " is not an available tissue on Recount2"))
+            else stop(paste0(t_i, " is not an available tissue on Recount2"))
         }
         return(Res)
     }
     else if(tolower(project)=="tcga"){
         for(t_i in tissue){
-            if(tissue%in%tissuesTCGA){
+            if(t_i%in%tissuesTCGA){
                 con<-"http://duffel.rail.bio/recount/v2/TCGA/rse_gene_"
-                con<-paste0(con,tissue,".Rdata")
-                message(paste0("downloading Range Summarized Experiment for: ", tissue))
+                con<-paste0(con,t_i,".Rdata")
+                message(paste0("downloading Range Summarized Experiment for: ", t_i))
                 load(url(con))
                 Res[[paste0(project,"_", t_i)]]<-rse_gene
 
             }
-            else stop(paste0(tissue, " is not an available tissue on Recount2"))
+            else stop(paste0(t_i, " is not an available tissue on Recount2"))
         }
         return(Res)
     }
