@@ -447,8 +447,7 @@ readGeneExpressionQuantification <- function(
   stopifnot(all(unlist(ret %>% map(function(y){all(y[,1] ==  ret[[1]][,1])}) )))
 
   # need to check if it works in all cases
-  df <- ret %>%  map_df(2)
-  colnames(df) <- ret %>%  map_chr(.f = function(y) colnames(y)[2])
+  df <- ret %>% map( ~ (.x %>% dplyr::select(-1))) %>% bind_cols()
   df <- bind_cols(ret[[1]][,1],df)
 
   if (summarizedExperiment) {
