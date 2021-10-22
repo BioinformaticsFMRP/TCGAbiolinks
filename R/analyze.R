@@ -62,12 +62,14 @@ TCGAanalyze_Clustering <-
 #' @importFrom SummarizedExperiment assays
 #' @export
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
-TCGAanalyze_Preprocessing <- function(object,
-                                      cor.cut = 0,
-                                      filename = NULL,
-                                      width = 1000,
-                                      height = 1000,
-                                      datatype = names(assays(object))[1]) {
+TCGAanalyze_Preprocessing <- function(
+    object,
+    cor.cut = 0,
+    filename = NULL,
+    width = 1000,
+    height = 1000,
+    datatype = names(assays(object))[1]
+) {
     # This is a work around for raw_counts and raw_count
     if (grepl("raw_count", datatype) &
         any(grepl("raw_count", names(assays(object)))))
@@ -87,8 +89,8 @@ TCGAanalyze_Preprocessing <- function(object,
     if (!(is.null(dev.list()["RStudioGD"]))) {
         dev.off()
     }
-    if (is.null(filename))
-        filename <- "PreprocessingOutput.png"
+    if (is.null(filename)) filename <- "PreprocessingOutput.png"
+
     png(filename, width = width, height = height)
     par(oma = c(10, 10, 10, 10))
     ArrayIndex <-  as.character(1:length(colData(object)$barcode))
@@ -135,7 +137,8 @@ TCGAanalyze_Preprocessing <- function(object,
           yaxt = "n",
           #xlab = "Array Samples",
           #ylab = "Array Samples",
-          main = "Array-Array Intensity Correlation after RMA")
+          main = "Array-Array Intensity Correlation after RMA"
+    )
 
     for (i in 1:length(names(table(tabGroupCol$Color)))) {
         currentCol <- names(table(tabGroupCol$Color))[i]
@@ -189,8 +192,7 @@ TCGAanalyze_Preprocessing <- function(object,
     dev.off()
 
     samplesCor <- rowMeans(c)
-    objectWO <-  assay(object, datatype)[, samplesCor > cor.cut]
-    colnames(objectWO) <- colnames(object)[samplesCor > cor.cut]
+    objectWO <-  assay(object, datatype)[, names(samplesCor)[samplesCor > cor.cut]]
 
     return(objectWO)
 }
