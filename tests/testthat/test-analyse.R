@@ -104,20 +104,19 @@ test_that("TCGAanalyze_DMC is handling NAs correctly", {
 test_that(
     "Results of TCGAanalyze_DEA inverting groups changes signal and order of the signals are right",
     {
-        dataNorm <-
-            TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
+        dataNorm <-  TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
         dataFilt <-
-            TCGAanalyze_Filtering(tabDF = dataBRCA,
-                                  method = "quantile",
-                                  qnt.cut =  0.25)
+            TCGAanalyze_Filtering(
+                tabDF = dataBRCA,
+                method = "quantile",
+                qnt.cut =  0.25
+            )
 
         # 5 samples
-        samplesNT <-
-            TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
+        samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
 
         # 5 samples
-        samplesTP <-
-            TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
+        samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 
         # Get one line for example
         A <- rowMeans(dataFilt["CLDN6|9074", samplesNT])

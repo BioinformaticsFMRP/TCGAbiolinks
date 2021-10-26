@@ -950,9 +950,17 @@ colDataPrepare <- function(barcode){
   message("Starting to add information to samples")
   ret <- NULL
 
+
+
   if(all(grepl("TARGET",barcode))) ret <- colDataPrepareTARGET(barcode)
   if(all(grepl("TCGA",barcode))) ret <- colDataPrepareTCGA(barcode)
   if(all(grepl("MMRF",barcode))) ret <- colDataPrepareMMRF(barcode)
+
+  # How to deal with mixed samples "C3N-02003-01;C3N-02003-021" ?
+  # Check if this breaks the pacakge
+  if(any(grepl("C3N-|C3L-",barcode))) {
+    ret <- data.frame(sample =  sapply(barcode, function(x) stringr:::str_split(x,";") %>% unlist()) %>% unlist %>% unique,stringsAsFactors = FALSE)
+  }
   if(is.null(ret)) ret <- data.frame(sample = barcode %>% unique,stringsAsFactors = FALSE)
 
   message(" => Add clinical information to samples")
@@ -1002,6 +1010,13 @@ colDataPrepare <- function(barcode){
   # the code above does not work, since the projects have different string lengths
   if(all(ret$project_id == "TARGET-ALL-P3")) {
     idx <- sapply(gsub("-[[:alnum:]]{3}$","",barcode), function(x) {
+      grep(x,ret$bcr_patient_barcode)
+    })
+  }
+
+  if(any(ret$project_id == "CPTAC-3")) {
+    idx <- sapply(gsub("-[[:alnum:]]{3}$","",barcode), function(x) {
+      if(grepl(";",x = x)) x <- stringr::str_split(barcode[1],";")[[1]][1] # mixed samples
       grep(x,ret$bcr_patient_barcode)
     })
   }
