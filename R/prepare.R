@@ -139,7 +139,7 @@ GDCprepare <- function(
     if (unique(query$results[[1]]$data_type) == "Gene Level Copy Number Scores") {
       data <- readGISTIC(files, query$results[[1]]$cases)
     } else if (unique(query$results[[1]]$data_type) == "Gene Level Copy Number") {
-      data <- readGeneLevelCopyNumber(files, query$results[[1]]$cases)
+      data <- readGeneLevelCopyNumber(files, query$results[[1]]$cases,summarizedExperiment = summarizedExperiment)
     } else {
       data <- readCopyNumberVariation(files, query$results[[1]]$cases)
     }
@@ -315,9 +315,11 @@ readExonQuantification <- function (files, cases, summarizedExperiment = TRUE){
       return(x)
     })
     rowRanges <- makeGRangesFromDataFrame(df)
-    rse <- SummarizedExperiment(assays=assays,
-                                rowRanges=rowRanges,
-                                colData=colData)
+    rse <- SummarizedExperiment(
+      assays = assays,
+      rowRanges = rowRanges,
+      colData = colData
+    )
     return(rse)
   }
   return(df)
@@ -1297,11 +1299,11 @@ readTranscriptomeProfiling <- function(
   return(df)
 }
 
-readGeneLevelCopyNumber <- function(files, cases){
+readGeneLevelCopyNumber <- function(files, cases, summarizedExperiment = FALSE){
   message("Reading Gene Level Copy Number files")
   gistic.df <- NULL
   gistic.list <- plyr::alply(files,1,.fun = function(file) {
-    message("Reading file: ", file)
+    #message("Reading file: ", file)
     data <- read_tsv(
       file = file,
       col_names = TRUE,
@@ -1323,8 +1325,40 @@ readGeneLevelCopyNumber <- function(files, cases){
     gistic.list %>%  map_dfc(.f = function(x) x[,6:8]) # copy number, min,max
   )
 
+  if(summarizedExperiment) {
+    se <- makeSEfromGeneLevelCopyNumber(df, cases)
+    return(se)
+  }
   return(df)
 }
+
+makeSEfromGeneLevelCopyNumber <- function(df, cases){
+  message("Creating a SummarizedExperiment object")
+  rowRanges <- GRanges(
+    seqnames = df$chromosome,
+    ranges = IRanges(start = df$start, end = df$end),
+    gene_id = df$gene_id,
+    gene_name = df$gene_name
+  )
+
+  names(rowRanges) <- as.character(df$gene_id)
+  colData <-  colDataPrepare(cases)
+
+  # We have three data columns for each files
+  assays <- lapply(
+    c("[^max|min]_copy_number","min_copy_number", "max_copy_number"),
+    function(x){
+      ret <- data.matrix(subset(df,select = grep(x,colnames(df))))
+      colnames(ret) <- cases
+      rownames(ret) <- NULL
+      ret
+    })
+  names(assays) <-   c("copy_number","min_copy_number", "max_copy_number")
+
+  rse <- SummarizedExperiment(assays = assays, rowRanges = rowRanges, colData = colData)
+  return(rse)
+}
+
 
 readGISTIC <- function(files, cases){
   message("Reading GISTIC file")

@@ -165,11 +165,12 @@ and low grade gliomas (LGG) samples.
 
 
 ```{r message=FALSE, warning=FALSE}
-query <- GDCquery(project = c("TCGA-GBM", "TCGA-LGG"),
-                  data.category = "DNA Methylation",
-                  legacy = FALSE,
-                  platform = c("Illumina Human Methylation 450"),
-                  sample.type = "Recurrent Tumor"
+query <- GDCquery(
+    project = c("TCGA-GBM", "TCGA-LGG"),
+    data.category = "DNA Methylation",
+    legacy = FALSE,
+    platform = c("Illumina Human Methylation 450"),
+    sample.type = "Recurrent Tumor"
 )
 datatable(getResults(query), 
           filter = 'top',
