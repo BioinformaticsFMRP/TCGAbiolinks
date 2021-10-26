@@ -126,15 +126,20 @@ GDCprepare <- function(
   }
 
   cases <- ifelse(grepl("TCGA|TARGET",query$results[[1]]$project %>% unlist()),query$results[[1]]$cases,query$results[[1]]$sample.submitter_id)
+
   if (grepl("Transcriptome Profiling", query$data.category, ignore.case = TRUE)){
-    data <- readTranscriptomeProfiling(files = files,
-                                       data.type = ifelse(!is.na(query$data.type),  as.character(query$data.type),  unique(query$results[[1]]$data_type)),
-                                       workflow.type = unique(query$results[[1]]$analysis_workflow_type),
-                                       cases = cases,
-                                       summarizedExperiment)
+    data <- readTranscriptomeProfiling(
+      files = files,
+      data.type = ifelse(!is.na(query$data.type),  as.character(query$data.type),  unique(query$results[[1]]$data_type)),
+      workflow.type = unique(query$results[[1]]$analysis_workflow_type),
+      cases = cases,
+      summarizedExperiment
+    )
   } else if(grepl("Copy Number Variation",query$data.category,ignore.case = TRUE)) {
     if (unique(query$results[[1]]$data_type) == "Gene Level Copy Number Scores") {
       data <- readGISTIC(files, query$results[[1]]$cases)
+    } else if (unique(query$results[[1]]$data_type) == "Gene Level Copy Number") {
+      data <- readGeneLevelCopyNumber(files, query$results[[1]]$cases)
     } else {
       data <- readCopyNumberVariation(files, query$results[[1]]$cases)
     }
@@ -1274,6 +1279,35 @@ readTranscriptomeProfiling <- function(
     }
     close(pb)
   }
+  return(df)
+}
+
+readGeneLevelCopyNumber <- function(files, cases){
+  message("Reading Gene Level Copy Number files")
+  gistic.df <- NULL
+  gistic.list <- plyr::alply(files,1,.fun = function(file) {
+    message("Reading file: ", file)
+    data <- read_tsv(
+      file = file,
+      col_names = TRUE,
+      progress = TRUE,
+      col_types = readr::cols()
+    )
+    colnames(data)[-c(1:5)] <- paste0(cases[match(file,files)],"_",  colnames(data)[-c(1:5)])
+
+    return(data)
+  })
+
+  # Check if the data is in the same order
+  stopifnot(all(unlist(gistic.list %>% map(function(y){all(y[,1:5] ==  gistic.list[[1]][,1:5])}) )))
+
+  # need to check if it works in all cases
+  # tested for HTSeq - FPKM-UQ and Counts only
+  df <- bind_cols(
+    gistic.list[[1]][,1:5], # gene info
+    gistic.list %>%  map_dfc(.f = function(x) x[,6:8]) # copy number, min,max
+  )
+
   return(df)
 }
 
