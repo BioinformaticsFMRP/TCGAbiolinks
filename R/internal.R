@@ -137,6 +137,7 @@ checkDataTypeInput <- function(legacy, data.type){
             "Masked Copy Number Segment",
             "Isoform Expression Quantification",
             "miRNA Expression Quantification",
+            "Gene Level Copy Number",
             "Biospecimen Supplement",
             "Gene Level Copy Number Scores",
             "Clinical Supplement",
