@@ -140,6 +140,7 @@ checkDataTypeInput <- function(legacy, data.type){
             "Gene Level Copy Number",
             "Biospecimen Supplement",
             "Gene Level Copy Number Scores",
+            "Protein Expression Quantification",
             "Clinical Supplement",
             "Masked Somatic Mutation",
             "Slide Image")
