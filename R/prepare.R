@@ -73,13 +73,18 @@ GDCprepare <- function(
   test.duplicated.cases <-
     (
       any(
-        duplicated(query$results[[1]]$cases)) &
-        !(query$data.type %in% c("Clinical data",
-                                 "Protein expression quantification",
-                                 "Raw intensities",
-                                 "Clinical Supplement",
-                                 "Biospecimen Supplement"))
+        duplicated(query$results[[1]]$cases)) & # any duplicated
+        !(query$data.type %in% c(
+          "Clinical data",
+          "Protein expression quantification",
+          "Raw intensities",
+          "Clinical Supplement",
+          "Masked Somatic Mutation",
+          "Biospecimen Supplement")
+        )
     )
+
+  "Aliquot Ensemble Somatic Variant Merging and Masking"
 
   if(test.duplicated.cases) {
     dup <- query$results[[1]]$cases[duplicated(query$results[[1]]$cases)]
@@ -159,7 +164,7 @@ GDCprepare <- function(
   }  else if (grepl("Protein expression",query$data.category,ignore.case = TRUE)) {
     data <- readProteinExpression(files, cases = cases)
   }  else if (grepl("Simple Nucleotide Variation",query$data.category,ignore.case = TRUE)) {
-    if(grepl("Masked Somatic Mutation",query$results[[1]]$data_type,ignore.case = TRUE) | source == "legacy")
+    if(grepl("Masked Somatic Mutation",query$results[[1]]$data_type[1],ignore.case = TRUE) | source == "legacy")
       suppressWarnings(data <- readSimpleNucleotideVariationMaf(files))
   }  else if (grepl("Clinical|Biospecimen", query$data.category, ignore.case = TRUE)){
     data <- readClinical(files, query$data.type, cases = cases)
@@ -1129,15 +1134,15 @@ readProteomeProfiling <- function(files,cases) {
     data
   }, .progress = "time")
 
-    # Just check if the data is in the same order, since we will not merge
-    # the data frames to save memory
-    stopifnot(all(unlist(list.of.protein.df %>% map(function(y){all(y[,5] ==  list.of.protein.df[[1]][,5])}) )))
+  # Just check if the data is in the same order, since we will not merge
+  # the data frames to save memory
+  stopifnot(all(unlist(list.of.protein.df %>% map(function(y){all(y[,5] ==  list.of.protein.df[[1]][,5])}) )))
 
-    # need to check if it works in all cases
-    # tested for HTSeq - FPKM-UQ and Counts only
-    df <- bind_cols(list.of.protein.df[[1]][,1:5],list.of.protein.df %>%  map_df(6))
+  # need to check if it works in all cases
+  # tested for HTSeq - FPKM-UQ and Counts only
+  df <- bind_cols(list.of.protein.df[[1]][,1:5],list.of.protein.df %>%  map_df(6))
 
-    if(!missing(cases))  colnames(df)[-c(1:5)] <- cases
+  if(!missing(cases))  colnames(df)[-c(1:5)] <- cases
 
   return(df)
 }
