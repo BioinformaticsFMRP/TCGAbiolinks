@@ -163,6 +163,7 @@ GDCprepare <- function(
     data <- readProteomeProfiling(files, cases = cases)
   }  else if (grepl("Protein expression",query$data.category,ignore.case = TRUE)) {
     data <- readProteinExpression(files, cases = cases)
+    if(summarizedExperiment) message("SummarizedExperiment not implemented, if you need samples metadata use the function TCGAbiolinks:::colDataPrepare")
   }  else if (grepl("Simple Nucleotide Variation",query$data.category,ignore.case = TRUE)) {
     if(grepl("Masked Somatic Mutation",query$results[[1]]$data_type[1],ignore.case = TRUE) | source == "legacy")
       suppressWarnings(data <- readSimpleNucleotideVariationMaf(files))
