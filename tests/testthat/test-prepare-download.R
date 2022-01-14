@@ -1,5 +1,7 @@
 context("Download AND PREPARE")
 
+
+
 test_that("GDCdownload API method is working ", {
     skip_on_bioc()
     skip_if_offline()
@@ -208,5 +210,29 @@ test_that("Preparing HT_HG-U133A as SE works", {
     se <- GDCprepare(query, summarizedExperiment = TRUE)
 
     expect_true(is(se,"SummarizedExperiment"))
+})
+
+
+test_that("Preparing RRPA files with number of proteins works", {
+    skip_on_bioc()
+    skip_if_offline()
+
+
+    query_rppa <- GDCquery(
+        project = c("TCGA-COAD"),
+        data.category = "Proteome Profiling",
+        experimental.strategy = "Reverse Phase Protein Array",
+        platform = "RPPA",
+        barcode = c("TCGA-CM-6165-01A","TCGA-DM-A28M-01A"),
+        data.type = "Protein Expression Quantification"
+    )
+
+    GDCdownload(query_rppa)
+
+    expect_message(object = {
+        data_rppa <- GDCprepare(query_rppa)
+    },regexp = "Some files differ in the number of proteins, we will introduce NA for the missing values")
+
+    expect_true(is(data_rppa,"data.frame"))
 })
 
