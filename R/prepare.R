@@ -1137,11 +1137,17 @@ readProteomeProfiling <- function(files,cases) {
 
   # Just check if the data is in the same order, since we will not merge
   # the data frames to save memory
-  stopifnot(all(unlist(list.of.protein.df %>% map(function(y){all(y[,5] ==  list.of.protein.df[[1]][,5])}) )))
 
-  # need to check if it works in all cases
-  # tested for HTSeq - FPKM-UQ and Counts only
-  df <- bind_cols(list.of.protein.df[[1]][,1:5],list.of.protein.df %>%  map_df(6))
+  df <- tryCatch({
+    stopifnot(all(unlist(list.of.protein.df %>% map(function(y){all(y[,5] ==  list.of.protein.df[[1]][,5])}) )))
+
+    # need to check if it works in all cases
+    # tested for HTSeq - FPKM-UQ and Counts only
+    bind_cols(list.of.protein.df[[1]][,1:5],list.of.protein.df %>%  map_df(6))
+  },error = function(e){
+    message("Some files have a  different number of proteins, we will introduce NA for the missing values")
+    plyr::join_all(dfs = list.of.protein.df ,type = "full",by = c("AGID","lab_id","catalog_number","set_id","peptide_target"))
+  })
 
   if(!missing(cases))  colnames(df)[-c(1:5)] <- cases
 
