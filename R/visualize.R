@@ -50,12 +50,14 @@
 #' @export
 #' @return net IGRAPH with related Cox survival genes in community (same pval and color) and with
 #' interactions from STRING database.
-TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
-                                         dataGE,
-                                         Genelist,
-                                         org.Hs.string,
-                                         scoreConfidence = 700,
-                                         titlePlot = "TCGAvisualize_SurvivalCoxNET Example"){
+TCGAvisualize_SurvivalCoxNET <- function(
+    clinical_patient,
+    dataGE,
+    Genelist,
+    org.Hs.string,
+    scoreConfidence = 700,
+    titlePlot = "TCGAvisualize_SurvivalCoxNET Example"
+){
 
     check_package("survival")
     check_package("dnet")
@@ -68,13 +70,13 @@ TCGAvisualize_SurvivalCoxNET <- function(clinical_patient,
     ## fit a Cox proportional hazards model for age, gender, tumor type
     cfu <- clinical_patient[clinical_patient[,"bcr_patient_barcode"] %in% substr(colnames(dataGE),1,12),]
     rownames(cfu) <- cfu$bcr_patient_barcode
-    cfu <- as.data.frame(subset(cfu, select=c("bcr_patient_barcode",
-                                              "days_to_last_followup",
-                                              "days_to_death",
-                                              "vital_status",
-                                              "age_at_initial_pathologic_diagnosis",
-                                              "gender")
-    )
+    cfu <- cfu %>% dplyr::select(
+        "bcr_patient_barcode",
+        "days_to_last_follow_up",
+        "days_to_death",
+        "vital_status",
+        "age_at_diagnosis",
+        "gender"
     )
 
     rownames(cfu) <- cfu$bcr_patient_barcode
