@@ -5,41 +5,41 @@ vignette: >
     %\VignetteIndexEntry{8. Case Studies}
     %\VignetteEngine{knitr::rmarkdown}
 ---
-  
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(dpi = 300)
 knitr::opts_chunk$set(cache=FALSE)
 ```
-  
+
 ```{r message = FALSE, warning = FALSE, include = FALSE}
 library(TCGAbiolinks)
 library(SummarizedExperiment)
 library(dplyr)
 library(DT)
 ```
-  
+
 # Introduction 
-  
+
 This vignette shows a complete workflow of the TCGAbiolinks package. 
 The code is divided in 4 case study:
-  
+
 1. Expression pipeline (BRCA)
 2. Expression pipeline (GBM)
 3. Integration of DNA methylation and RNA expression pipeline (COAD)
 4. ELMER pipeline (KIRC)
-  
+
 # Case study n. 1: Pan Cancer downstream analysis BRCA
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(SummarizedExperiment)
 library(TCGAbiolinks)
 query.exp <- GDCquery(project = "TCGA-BRCA", 
-legacy = TRUE,
-data.category = "Gene expression",
-data.type = "Gene expression quantification",
-platform = "Illumina HiSeq", 
-file.type = "results",
-experimental.strategy = "RNA-Seq",
-sample.type = c("Primary Tumor","Solid Tissue Normal"))
+                      legacy = TRUE,
+                      data.category = "Gene expression",
+                      data.type = "Gene expression quantification",
+                      platform = "Illumina HiSeq", 
+                      file.type = "results",
+                      experimental.strategy = "RNA-Seq",
+                      sample.type = c("Primary Tumor","Solid Tissue Normal"))
 GDCdownload(query.exp)
 brca.exp <- GDCprepare(query = query.exp, save = TRUE, save.filename = "brcaExp.rda")
 
@@ -61,23 +61,32 @@ order to understand the underlying biological process from DEGs we performed an
 enrichment analysis using `TCGAnalyze_EA_complete` function.  
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-dataPrep <- TCGAanalyze_Preprocessing(object = brca.exp, cor.cut = 0.6)                      
+dataPrep <- TCGAanalyze_Preprocessing(
+  object = brca.exp, 
+  cor.cut = 0.6
+)                      
 
-dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
-                                      geneInfo = geneInfo,
-                                      method = "gcContent")                
+dataNorm <- TCGAanalyze_Normalization(
+  tabDF = dataPrep,
+  geneInfo = geneInfo,
+  method = "gcContent"
+)                
 
-dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
-                                  method = "quantile", 
-                                  qnt.cut =  0.25)   
+dataFilt <- TCGAanalyze_Filtering(
+  tabDF = dataNorm,
+  method = "quantile", 
+  qnt.cut =  0.25
+)   
 
-dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmNT],
-                            mat2 = dataFilt[,dataSmTP],
-                            Cond1type = "Normal",
-                            Cond2type = "Tumor",
-                            fdr.cut = 0.01 ,
-                            logFC.cut = 1,
-                            method = "glmLRT")  
+dataDEGs <- TCGAanalyze_DEA(
+  mat1 = dataFilt[,dataSmNT],
+  mat2 = dataFilt[,dataSmTP],
+  Cond1type = "Normal",
+  Cond2type = "Tumor",
+  fdr.cut = 0.01 ,
+  logFC.cut = 1,
+  method = "glmLRT"
+)  
 ```
 
 TCGAbiolinks outputs bar chart with the number of genes for the main categories of 
@@ -85,16 +94,20 @@ three ontologies (GO:biological process, GO:cellular component, and GO:molecular
 function, respectively). 
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",
-                                RegulonList = rownames(dataDEGs))  
+ansEA <- TCGAanalyze_EAcomplete(
+  TFname = "DEA genes Normal Vs Tumor",
+  RegulonList = rownames(dataDEGs)
+)  
 
-TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP),
-                        GOBPTab = ansEA$ResBP,
-                        GOCCTab = ansEA$ResCC,
-                        GOMFTab = ansEA$ResMF,
-                        PathTab = ansEA$ResPat,
-                        nRGTab = rownames(dataDEGs),
-                        nBar = 20)
+TCGAvisualize_EAbarplot(
+  tf = rownames(ansEA$ResBP),
+  GOBPTab = ansEA$ResBP,
+  GOCCTab = ansEA$ResCC,
+  GOMFTab = ansEA$ResMF,
+  PathTab = ansEA$ResPat,
+  nRGTab = rownames(dataDEGs),
+  nBar = 20
+)
 ```
 
 
@@ -116,13 +129,17 @@ significantly genes with p.value <0.05.
 group1 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
 group2 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 
-dataSurv <- TCGAanalyze_SurvivalKM(clinical_patient = dataClin,
-                                   dataGE = dataFilt,
-                                   Genelist = rownames(dataDEGs),
-                                   Survresult = FALSE,
-                                   ThreshTop = 0.67,
-                                   ThreshDown = 0.33,
-                                   p.cut = 0.05, group1, group2)
+dataSurv <- TCGAanalyze_SurvivalKM(
+  clinical_patient = dataClin,
+  dataGE = dataFilt,
+  Genelist = rownames(dataDEGs),
+  Survresult = FALSE,
+  ThreshTop = 0.67,
+  ThreshDown = 0.33,
+  p.cut = 0.05, 
+  group1, 
+  group2
+)
 ```
 
 Cox-regression analysis was used to compute survival multivariate curves, and cox 
@@ -142,12 +159,14 @@ by dnet package considering only multivariate survival genes, with strong intera
 require(dnet)  # to change
 org.Hs.string <- dRDataLoader(RData = "org.Hs.string")
 
-TabCoxNet <- TCGAvisualize_SurvivalCoxNET(dataClin,
-                                          dataFilt, 
-                                          Genelist = rownames(dataSurv),
-                                          scoreConfidence = 700,
-                                          org.Hs.string = org.Hs.string,
-                                          titlePlot = "Case Study n.1 dnet")
+TabCoxNet <- TCGAvisualize_SurvivalCoxNET(
+  dataClin,
+  dataFilt, 
+  Genelist = rownames(dataSurv),
+  scoreConfidence = 700,
+  org.Hs.string = org.Hs.string,
+  titlePlot = "Case Study n.1 dnet"
+)
 ```
 
 The figure resulted from the code above is shown below.
@@ -168,16 +187,24 @@ to download 293 samples with molecular subtypes. Link the complete [complete cod
 library(TCGAbiolinks)
 library(SummarizedExperiment)
 
-query.exp <- GDCquery(project = "TCGA-LGG", 
-                      legacy = TRUE,
-                      data.category = "Gene expression",
-                      data.type = "Gene expression quantification",
-                      platform = "Illumina HiSeq", 
-                      file.type = "results",
-                      experimental.strategy = "RNA-Seq",
-                      sample.type = "Primary Tumor")
+query.exp <- GDCquery(
+  project = "TCGA-LGG", 
+  legacy = TRUE,
+  data.category = "Gene expression",
+  data.type = "Gene expression quantification",
+  platform = "Illumina HiSeq", 
+  file.type = "results",
+  experimental.strategy = "RNA-Seq",
+  sample.type = "Primary Tumor"
+)
+
 GDCdownload(query.exp)
-lgg.exp <- GDCprepare(query = query.exp, save = TRUE, save.filename = "lggExp.rda")
+
+lgg.exp <- GDCprepare(
+  query = query.exp, 
+  save = TRUE, 
+  save.filename = "lggExp.rda"
+)
 ```
 
 First, we searched for possible outliers using the `TCGAanalyze_Preprocessing` 
@@ -214,16 +241,22 @@ After the two clustering analysis, with cut.tree = 4 we obtained n= 4 expression
 library(dplyr)
 
 dataPrep <- TCGAanalyze_Preprocessing(object = lgg.exp, cor.cut = 0.6)
-dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
-                                      geneInfo = geneInfo,
-                                      method = "gcContent")
+dataNorm <- TCGAanalyze_Normalization(
+  tabDF = dataPrep,
+  geneInfo = geneInfo,
+  method = "gcContent"
+)
 
-datFilt <- dataNorm %>% TCGAanalyze_Filtering(method = "varFilter") %>%
-    TCGAanalyze_Filtering(method = "filter1") %>%  TCGAanalyze_Filtering(method = "filter2",foldChange = 0.2)
+datFilt <- dataNorm %>% 
+  TCGAanalyze_Filtering(method = "varFilter") %>%
+  TCGAanalyze_Filtering(method = "filter1") %>%  
+  TCGAanalyze_Filtering(method = "filter2",foldChange = 0.2)
 
-data_Hc2 <- TCGAanalyze_Clustering(tabDF = datFilt,
-                                   method = "consensus",
-                                   methodHC = "ward.D2") 
+data_Hc2 <- TCGAanalyze_Clustering(
+  tabDF = datFilt,
+  method = "consensus",
+  methodHC = "ward.D2"
+) 
 # Add  cluster information to Summarized Experiment
 colData(lgg.exp)$groupsHC <- paste0("EC",data_Hc2[[4]]$consensusClass)
 
@@ -231,13 +264,15 @@ colData(lgg.exp)$groupsHC <- paste0("EC",data_Hc2[[4]]$consensusClass)
 
 The next steps will be to visualize the data. First, we created the survival plot.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-TCGAanalyze_survival(data = colData(lgg.exp),
-                     clusterCol = "groupsHC",
-                     main = "TCGA kaplan meier survival plot from consensus cluster",
-                     legend = "RNA Group",height = 10,
-                     risk.table = T,conf.int = F,
-                     color = c("black","red","blue","green3"),
-                     filename = "survival_lgg_expression_subtypes.png")
+TCGAanalyze_survival(
+  data = colData(lgg.exp),
+  clusterCol = "groupsHC",
+  main = "TCGA kaplan meier survival plot from consensus cluster",
+  legend = "RNA Group",height = 10,
+  risk.table = T,conf.int = F,
+  color = c("black","red","blue","green3"),
+  filename = "survival_lgg_expression_subtypes.png"
+)
 ```
 
 
@@ -251,27 +286,32 @@ grid.raster(img)
 
 We will also, create a heatmap of the expression.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-TCGAvisualize_Heatmap(t(datFilt),
-                      col.metadata =  colData(lgg.exp)[,c("barcode",
-                                                          "groupsHC",
-                                                          "subtype_Histology",
-                                                          "subtype_IDH.codel.subtype")],
-                      col.colors =  list(
-                          groupsHC = c("EC1"="black",
-                                       "EC2"="red",
-                                       "EC3"="blue",
-                                       "EC4"="green3")),
-                      sortCol = "groupsHC",
-                      type = "expression", # sets default color
-                      scale = "row", # use z-scores for better visualization. Center gene expression level around 0.
-                      title = "Heatmap from concensus cluster", 
-                      filename = "case2_Heatmap.png",
-                      cluster_rows = TRUE,
-                      color.levels = colorRampPalette(c("green", "black", "red"))(n = 11),
-                      extrems =seq(-5,5,1),
-                      cluster_columns = FALSE,
-                      width = 1000,
-                      height = 1000)
+TCGAvisualize_Heatmap(
+  data = t(datFilt),
+  col.metadata =  colData(lgg.exp)[,c("barcode",
+                                      "groupsHC",
+                                      "subtype_Histology",
+                                      "subtype_IDH.codel.subtype")
+  ],
+  col.colors =  list(
+    groupsHC = c(
+      "EC1"="black",
+      "EC2"="red",
+      "EC3"="blue",
+      "EC4"="green3")
+  ),
+  sortCol = "groupsHC",
+  type = "expression", # sets default color
+  scale = "row", # use z-scores for better visualization. Center gene expression level around 0.
+  title = "Heatmap from concensus cluster", 
+  filename = "case2_Heatmap.png",
+  cluster_rows = TRUE,
+  color.levels = colorRampPalette(c("green", "black", "red"))(n = 11),
+  extrems =seq(-5,5,1),
+  cluster_columns = FALSE,
+  width = 1000,
+  height = 1000
+)
 ```
 
 The result is shown below:
@@ -327,28 +367,38 @@ setwd("case3")
 #-----------------------------------
 # 1.1 - DNA methylation
 # ----------------------------------
-query.met <- GDCquery(project = "TCGA-ACC", 
-                      legacy = TRUE,
-                      data.category = "DNA methylation",
-                      platform = "Illumina Human Methylation 450")
+query.met <- GDCquery(
+  project = "TCGA-ACC", 
+  legacy = TRUE,
+  data.category = "DNA methylation",
+  platform = "Illumina Human Methylation 450"
+)
 GDCdownload(query.met)
 
-acc.met <- GDCprepare(query = query.met,
-                      save = TRUE, 
-                      save.filename = "accDNAmet.rda",
-                      summarizedExperiment = TRUE)
+acc.met <- GDCprepare(
+  query = query.met,
+  save = TRUE, 
+  save.filename = "accDNAmet.rda",
+  summarizedExperiment = TRUE
+)
 
 #-----------------------------------
 # 1.2 - RNA expression
 # ----------------------------------
-query.exp <- GDCquery(project = "TCGA-ACC", 
-                      legacy = TRUE,
-                      data.category = "Gene expression",
-                      data.type = "Gene expression quantification",
-                      platform = "Illumina HiSeq", 
-                      file.type = "results")
+query.exp <- GDCquery(
+  project = "TCGA-ACC", 
+  legacy = TRUE,
+  data.category = "Gene expression",
+  data.type = "Gene expression quantification",
+  platform = "Illumina HiSeq", 
+  file.type = "results"
+)
 GDCdownload(query.exp)
-acc.exp <- GDCprepare(query = query.exp, save = TRUE, save.filename = "accExp.rda")
+acc.exp <- GDCprepare(
+  query = query.exp, 
+  save = TRUE, 
+  save.filename = "accExp.rda"
+)
 ```
 
 For DNA methylation, we perform a DMC (different methylated CpGs) analysis, which will give the difference of DNA methylation for the probes of the groups and their significance value.
@@ -361,13 +411,16 @@ due to the wilcoxon test, taking from hours to days.
 acc.met <- subset(acc.met,subset = (rowSums(is.na(assay(acc.met))) == 0))
 
 # Volcano plot
-acc.met <- TCGAanalyze_DMC(acc.met, groupCol = "subtype_MethyLevel",
-                           group1 = "CIMP-high",
-                           group2="CIMP-low",
-                           p.cut = 10^-5,
-                           diffmean.cut = 0.25,
-                           legend = "State",
-                           plot.filename = "CIMP-highvsCIMP-low_metvolcano.png")
+acc.met <- TCGAanalyze_DMC(
+  data = acc.met, 
+  groupCol = "subtype_MethyLevel",
+  group1 = "CIMP-high",
+  group2="CIMP-low",
+  p.cut = 10^-5,
+  diffmean.cut = 0.25,
+  legend = "State",
+  plot.filename = "CIMP-highvsCIMP-low_metvolcano.png"
+)
 ```
 
 The figure resulted from the code above is shown below:
@@ -393,32 +446,40 @@ idx2 <- colData(acc.exp.aux)$subtype_MethyLevel %in% c("CIMP-low")
 
 dataPrep <- TCGAanalyze_Preprocessing(object = acc.exp.aux, cor.cut = 0.6)
 
-dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
-                                      geneInfo = geneInfo,
-                                      method = "gcContent")
+dataNorm <- TCGAanalyze_Normalization(
+  tabDF = dataPrep,
+  geneInfo = geneInfo,
+  method = "gcContent"
+)
 
-dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
-                                  qnt.cut = 0.25,
-                                  method='quantile')
+dataFilt <- TCGAanalyze_Filtering(
+  tabDF = dataNorm,
+  qnt.cut = 0.25,
+  method = 'quantile'
+)
 
-dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,idx],
-                            mat2 = dataFilt[,idx2],
-                            Cond1type = "CIMP-high",
-                            Cond2type = "CIMP-low",
-                            method = "glmLRT")
+dataDEGs <- TCGAanalyze_DEA(
+  mat1 = dataFilt[,idx],
+  mat2 = dataFilt[,idx2],
+  Cond1type = "CIMP-high",
+  Cond2type = "CIMP-low",
+  method = "glmLRT"
+)
 
-TCGAVisualize_volcano(x = dataDEGs$logFC,
-                      y = dataDEGs$FDR,
-                      filename = "Case3_volcanoexp.png",
-                      x.cut = 3,
-                      y.cut = 10^-5,
-                      names = rownames(dataDEGs),
-                      color = c("black","red","darkgreen"),
-                      names.size = 2,
-                      xlab = " Gene expression fold change (Log2)",
-                      legend = "State",
-                      title = "Volcano plot (CIMP-high vs CIMP-low)",
-                      width = 10)
+TCGAVisualize_volcano(
+  x = dataDEGs$logFC,
+  y = dataDEGs$FDR,
+  filename = "Case3_volcanoexp.png",
+  x.cut = 3,
+  y.cut = 10^-5,
+  names = rownames(dataDEGs),
+  color = c("black","red","darkgreen"),
+  names.size = 2,
+  xlab = " Gene expression fold change (Log2)",
+  legend = "State",
+  title = "Volcano plot (CIMP-high vs CIMP-low)",
+  width = 10
+)
 ```
 
 The figure resulted from the code above is shown below:
@@ -444,21 +505,23 @@ We used only the samples that had a classification in the examples.
 # expression and DNA methylation and respects all the thresholds)
 # will be shown
 # these genes are returned by the function see starburst object after the function is executed
-starburst <- TCGAvisualize_starburst(met = acc.met, 
-                                     exp = dataDEGs,
-                                     genome = "hg19"
-                                     group1 = "CIMP-high",
-                                     group2 = "CIMP-low",
-                                     filename = "starburst.png",
-                                     met.platform = "450K",
-                                     met.p.cut = 10^-5,
-                                     exp.p.cut = 10^-5,
-                                     diffmean.cut = 0.25,
-                                     logFC.cut = 3,
-                                     names = FALSE, 
-                                     height=10,
-                                     width=15,
-                                     dpi=300)
+starburst <- TCGAvisualize_starburst(
+  met = acc.met, 
+  exp = dataDEGs,
+  genome = "hg19"
+  group1 = "CIMP-high",
+  group2 = "CIMP-low",
+  filename = "starburst.png",
+  met.platform = "450K",
+  met.p.cut = 10^-5,
+  exp.p.cut = 10^-5,
+  diffmean.cut = 0.25,
+  logFC.cut = 3,
+  names = FALSE, 
+  height = 10,
+  width = 15,
+  dpi = 300
+)
 ```
 
 The figure resulted from the code above is shown below:
@@ -524,14 +587,18 @@ setwd("case4")
 #-----------------------------------
 # 1.1 - DNA methylation
 # ----------------------------------
-query.met <- GDCquery(project = "TCGA-KIRC", 
-                      data.category = "DNA Methylation",
-                      platform = "Illumina Human Methylation 450")
+query.met <- GDCquery(
+  project = "TCGA-KIRC", 
+  data.category = "DNA Methylation",
+  platform = "Illumina Human Methylation 450"
+)
 GDCdownload(query.met)
-kirc.met <- GDCprepare(query = query.met,
-                       save = TRUE, 
-                       save.filename = "kircDNAmet.rda",
-                       summarizedExperiment = TRUE)
+kirc.met <- GDCprepare(
+  query = query.met,
+  save = TRUE, 
+  save.filename = "kircDNAmet.rda",
+  summarizedExperiment = TRUE
+)
 ```
 
 For gene expression we will use Gene Expression Quantification.
@@ -541,14 +608,18 @@ For gene expression we will use Gene Expression Quantification.
 #-----------------------------------
 # 1.2 - RNA expression
 # ----------------------------------
-query.exp <- GDCquery(project = "TCGA-KIRC",
-                      data.category = "Transcriptome Profiling",
-                      data.type = "Gene Expression Quantification", 
-                      workflow.type = "HTSeq - FPKM-UQ")
+query.exp <- GDCquery(
+  project = "TCGA-KIRC",
+  data.category = "Transcriptome Profiling",
+  data.type = "Gene Expression Quantification", 
+  workflow.type = "HTSeq - FPKM-UQ"
+)
 GDCdownload(query.exp)
-kirc.exp <- GDCprepare(query = query.exp, 
-                       save = TRUE, 
-                       save.filename = "kircExp.rda")
+kirc.exp <- GDCprepare(
+  query = query.exp, 
+  save = TRUE, 
+  save.filename = "kircExp.rda"
+)
 kirc.exp <- kirc.exp
 ```
 
@@ -564,15 +635,17 @@ have both DNA methylation and gene expression.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(MultiAssayExperiment)
-mae <- createMAE(exp = kirc.exp, 
-                 met = kirc.met,
-                 save = TRUE,
-                 linearize.exp = TRUE,
-                 filter.probes = distal.probes,
-                 save.filename = "mae_kirc.rda",
-                 met.platform = "450K",
-                 genome = "hg38",
-                 TCGA = TRUE)
+mae <- createMAE(
+  exp = kirc.exp, 
+  met = kirc.met,
+  save = TRUE,
+  linearize.exp = TRUE,
+  filter.probes = distal.probes,
+  save.filename = "mae_kirc.rda",
+  met.platform = "450K",
+  genome = "hg38",
+  TCGA = TRUE
+)
 # Remove FFPE samples
 mae <- mae[,!mae$is_ffpe]
 ```
@@ -593,60 +666,70 @@ dir.create(dir.out, recursive = TRUE)
 #--------------------------------------
 # Step 3.1: Get diff methylated probes |
 #--------------------------------------
-sig.diff <- get.diff.meth(data = mae, 
-                          group.col = group.col,
-                          group1 =  group1,
-                          group2 = group2,
-                          minSubgroupFrac = 0.2,
-                          sig.dif = 0.3,
-                          diff.dir = direction, # Search for hypomethylated probes in group 1
-                          cores = 1, 
-                          dir.out = dir.out, 
-                          pvalue = 0.01)
+sig.diff <- get.diff.meth(
+  data = mae, 
+  group.col = group.col,
+  group1 =  group1,
+  group2 = group2,
+  minSubgroupFrac = 0.2,
+  sig.dif = 0.3,
+  diff.dir = direction, # Search for hypomethylated probes in group 1
+  cores = 1, 
+  dir.out = dir.out, 
+  pvalue = 0.01
+)
 
 #-------------------------------------------------------------
 # Step 3.2: Identify significant probe-gene pairs            |
 #-------------------------------------------------------------
 # Collect nearby 20 genes for Sig.probes
-nearGenes <- GetNearGenes(data = mae, 
-                          probes = sig.diff$probe, 
-                          numFlankingGenes = 20, # 10 upstream and 10 dowstream genes
-                          cores = 1)
+nearGenes <- GetNearGenes(
+  data = mae, 
+  probes = sig.diff$probe, 
+  numFlankingGenes = 20, # 10 upstream and 10 dowstream genes
+  cores = 1
+)
 
-pair <- get.pair(data = mae,
-                 group.col = group.col,
-                 group1 =  group1,
-                 group2 = group2,
-                 nearGenes = nearGenes,
-                 minSubgroupFrac = 0.4, # % of samples to use in to create groups U/M
-                 permu.dir = file.path(dir.out,"permu"),
-                 permu.size = 100, # Please set to 100000 to get significant results
-                 raw.pvalue  = 0.05,   
-                 Pe = 0.01, # Please set to 0.001 to get significant results
-                 filter.probes = TRUE, # See preAssociationProbeFiltering function
-                 filter.percentage = 0.05,
-                 filter.portion = 0.3,
-                 dir.out = dir.out,
-                 cores = 1,
-                 label = direction)
+pair <- get.pair(
+  data = mae,
+  group.col = group.col,
+  group1 =  group1,
+  group2 = group2,
+  nearGenes = nearGenes,
+  minSubgroupFrac = 0.4, # % of samples to use in to create groups U/M
+  permu.dir = file.path(dir.out,"permu"),
+  permu.size = 100, # Please set to 100000 to get significant results
+  raw.pvalue  = 0.05,   
+  Pe = 0.01, # Please set to 0.001 to get significant results
+  filter.probes = TRUE, # See preAssociationProbeFiltering function
+  filter.percentage = 0.05,
+  filter.portion = 0.3,
+  dir.out = dir.out,
+  cores = 1,
+  label = direction
+)
 
 # Identify enriched motif for significantly hypomethylated probes which 
 # have putative target genes.
-enriched.motif <- get.enriched.motif(data = mae,
-                                     probes = pair$Probe, 
-                                     dir.out = dir.out, 
-                                     label = direction,
-                                     min.incidence = 10,
-                                     lower.OR = 1.1)
-TF <- get.TFs(data = mae, 
-              group.col = group.col,
-              group1 =  group1,
-              group2 = group2,
-              minSubgroupFrac = 0.4,
-              enriched.motif = enriched.motif,
-              dir.out = dir.out, 
-              cores = 1, 
-              label = direction)
+enriched.motif <- get.enriched.motif(
+  data = mae,
+  probes = pair$Probe, 
+  dir.out = dir.out, 
+  label = direction,
+  min.incidence = 10,
+  lower.OR = 1.1
+)
+TF <- get.TFs(
+  data = mae, 
+  group.col = group.col,
+  group1 =  group1,
+  group2 = group2,
+  minSubgroupFrac = 0.4,
+  enriched.motif = enriched.motif,
+  dir.out = dir.out, 
+  cores = 1, 
+  label = direction
+)
 ```
 
 From this analysis it is possible to verify the relationship between nearby 20 
@@ -654,12 +737,14 @@ gene expression vs DNA methylation at this probe. The result of this is
 show by the ELMER scatter plot.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-scatter.plot(data = mae,
-             byProbe = list(probe = sig.diff$probe[1], numFlankingGenes = 20), 
-             category = "definition", 
-             dir.out = "plots",
-             lm = TRUE, # Draw linear regression curve
-             save = TRUE) 
+scatter.plot(
+  data = mae,
+  byProbe = list(probe = sig.diff$probe[1], numFlankingGenes = 20), 
+  category = "definition", 
+  dir.out = "plots",
+  lm = TRUE, # Draw linear regression curve
+  save = TRUE
+) 
 ```
 
 The result is shown below:
@@ -672,13 +757,17 @@ grid.raster(img)
 
 Each scatter plot showing the average DNA methylation level of sites with the UA6 motif in all KIRC samples plotted against the expression of the transcription factor ZNF677 and PEG3 respectively.
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-scatter.plot(data = mae,
-             byTF = list(TF = c("RUNX1","RUNX2","RUNX3"),
-                         probe = enriched.motif[[names(enriched.motif)[10]]]), 
-             category = "definition",
-             dir.out = "plots",
-             save = TRUE, 
-             lm_line = TRUE)
+scatter.plot(
+  data = mae,
+  byTF = list(
+    TF = c("RUNX1","RUNX2","RUNX3"),
+    probe = enriched.motif[[names(enriched.motif)[10]]]
+  ), 
+  category = "definition",
+  dir.out = "plots",
+  save = TRUE, 
+  lm_line = TRUE
+)
 ```
 
 The result is shown below:
@@ -693,13 +782,15 @@ grid.raster(img)
 You cen see the anticorrelated pairs of gene and probes by drawing a heatmap.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-heatmapPairs(data = mae, 
-             group.col = "definition",
-             group1 = "Primary Tumor", 
-             annotation.col = c("gender"),
-             group2 = "Solid Tissue Normal",
-             pairs = pair,
-             filename =  "heatmap.pdf")
+heatmapPairs(
+  data = mae, 
+  group.col = "definition",
+  group1 = "Primary Tumor", 
+  annotation.col = c("gender"),
+  group2 = "Solid Tissue Normal",
+  pairs = pair,
+  filename =  "heatmap.pdf"
+)
 ```
 The result is shown below:
 ```{r, fig.width=6, fig.height=4, echo = FALSE, fig.align="center",hide=TRUE, message=FALSE,warning=FALSE}
