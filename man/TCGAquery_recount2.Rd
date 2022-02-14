@@ -9,7 +9,7 @@ TCGAquery_recount2(project, tissue = c())
 \arguments{
 \item{project}{is a string denoting which project the user wants. Options are "tcga" and "gtex"}
 
-\item{tissue}{a vector of tissue(s) to download. Options are "adipose tissue", "adrenal", "gland", "bladder","blood", "blood vessel", "bone marrow", "brain", "breast","cervix uteri", "colon", "esophagus", "fallopian tube","heart", "kidney", "liver", "lung", "muscle", "nerve", "ovary","pancreas", "pituitary", "prostate", "salivary", "gland", "skin", "small intestine", "spleen", "stomach", "testis", "thyroid", "uterus", "vagina"}
+\item{tissue}{a vector of tissue(s) to download. Options are "adipose tissue", "adrenal gland", "bladder","blood", "blood vessel", "bone marrow", "brain", "breast","cervix uteri", "colon", "esophagus", "fallopian tube","heart", "kidney", "liver", "lung", "muscle", "nerve", "ovary","pancreas", "pituitary", "prostate", "salivary gland", "skin", "small intestine", "spleen", "stomach", "testis", "thyroid", "uterus", "vagina"}
 }
 \value{
 List with $subtypes attribute as a dataframe with barcodes, samples, subtypes, and colors. The $filtered attribute is returned as filtered samples with no subtype info
