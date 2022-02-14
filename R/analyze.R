@@ -1358,62 +1358,45 @@ UseRaw_afterFilter <- function(DataPrep, DataFilt) {
 #' dataFilt <- TCGAanalyze_Filtering(tabDF = dataBRCA, method = "quantile", qnt.cut =  0.25)
 #' samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
 #' samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
-#' dataDEGs <- TCGAanalyze_DEA(dataFilt[,samplesNT],
-#'                             dataFilt[,samplesTP],
-#'                             Cond1type = "Normal",
-#'                             Cond2type = "Tumor")
+#' dataDEGs <- TCGAanalyze_DEA(
+#'   dataFilt[,samplesNT],
+#'   dataFilt[,samplesTP],
+#'   Cond1type = "Normal",
+#'   Cond2type = "Tumor"
+#' )
 #' dataDEGsFilt <- dataDEGs[abs(dataDEGs$logFC) >= 1,]
 #' dataTP <- dataFilt[,samplesTP]
 #' dataTN <- dataFilt[,samplesNT]
-#' dataDEGsFiltLevel <- TCGAanalyze_LevelTab(dataDEGsFilt,"Tumor","Normal",
-#' dataTP,dataTN)
-TCGAanalyze_LevelTab <- function(FC_FDR_table_mRNA,
-                                 typeCond1,
-                                 typeCond2,
-                                 TableCond1,
-                                 TableCond2,
-                                 typeOrder = TRUE) {
-    TF_enriched <- as.matrix(rownames(FC_FDR_table_mRNA))
-    TableLevel <- matrix(0, nrow(TF_enriched), 6)
-    TableLevel <- as.data.frame(TableLevel)
+#' dataDEGsFiltLevel <- TCGAanalyze_LevelTab(
+#'   FC_FDR_table_mRNA = dataDEGsFilt,
+#'   typeCond1 = "Tumor",
+#'   typeCond2 = "Normal",
+#'   TableCond1 = dataTP,
+#'   TableCond2 = dataTN
+#' )
+TCGAanalyze_LevelTab <- function(
+    FC_FDR_table_mRNA,
+    typeCond1,
+    typeCond2,
+    TableCond1,
+    TableCond2,
+    typeOrder = TRUE
+) {
+    TableLevel <- data.frame(
+        "mRNA" = rownames(FC_FDR_table_mRNA),
+        "logFC" = FC_FDR_table_mRNA$logFC,
+        "FDR" = FC_FDR_table_mRNA$FDR,
+        "Delta" =  FC_FDR_table_mRNA$logFC * rowMeans(TableCond1[rownames(FC_FDR_table_mRNA),],na.rm = TRUE)
+    )
+    TableLevel[[typeCond1]] <- rowMeans(TableCond1[TableLevel$mRNA,],na.rm = TRUE)
+    TableLevel[[typeCond2]] <- rowMeans(TableCond2[TableLevel$mRNA,],na.rm = TRUE)
 
-    colnames(TableLevel) <-
-        c("mRNA", "logFC", "FDR", typeCond1, typeCond2, "Delta")
-
-
-    TableLevel[, "mRNA"] <- TF_enriched
-    Tabfilt <-
-        FC_FDR_table_mRNA[which(rownames(FC_FDR_table_mRNA) %in%
-                                    TF_enriched), ]
-    TableLevel[, "logFC"] <-
-        as.numeric(Tabfilt[TF_enriched, ][, "logFC"])
-    TableLevel[, "FDR"] <- as.numeric(Tabfilt[TF_enriched, ][, "FDR"])
-
-
-    MeanTumor <- matrix(0, nrow(TF_enriched), 1)
-    MeanDiffTumorNormal <- matrix(0, nrow(TF_enriched), 1)
-
-    for (i in 1:nrow(TF_enriched)) {
-        TableLevel[i, typeCond1] <-
-            mean(as.numeric(TableCond1[rownames(TableCond1) %in%
-                                           TF_enriched[i] ,]))
-        TableLevel[i, typeCond2] <-
-            mean(as.numeric(TableCond2[rownames(TableCond2) %in%
-                                           TF_enriched[i] ,]))
-    }
-
-
-    TableLevel[, "Delta"] <- as.numeric(abs(TableLevel[, "logFC"]) *
-                                            TableLevel[, typeCond1])
-
-    TableLevel <-
-        TableLevel[order(as.numeric(TableLevel[, "Delta"]),
-                         decreasing = typeOrder), ]
-
+    TableLevel <- TableLevel[order(as.numeric(TableLevel[, "Delta"]), decreasing = typeOrder),]
     rownames(TableLevel) <-  TableLevel[, "mRNA"]
+
     if (all(grepl("ENSG", rownames(TableLevel))))
-        TableLevel <-
-        cbind(TableLevel, map.ensg(genes = rownames(TableLevel))[, 2:3])
+        TableLevel <- cbind(TableLevel, map.ensg(genes = rownames(TableLevel))[, 2:3])
+
     return(TableLevel)
 }
 
