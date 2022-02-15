@@ -340,6 +340,9 @@ data <- GDCprepare(query.exp.hg19)
 
 ### Single cell
 
+GDC Single Cell RNA-Seq information: 
+https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/Expression_mRNA_Pipeline/#scrna-seq-pipeline-single-nuclei
+
 ```{r, eval = FALSE}
 query.sc.analysis <- GDCquery(
     project = "CPTAC-3", 
