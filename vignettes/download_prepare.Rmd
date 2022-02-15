@@ -338,6 +338,76 @@ data <- GDCprepare(query.exp.hg19)
 
 ## Harmonized database
 
+### Single cell
+
+```{r, eval = FALSE}
+query.sc.analysis <- GDCquery(
+    project = "CPTAC-3", 
+    data.category = "Transcriptome Profiling",
+    legacy = FALSE,
+    access = "open",
+    data.type = "Single Cell Analysis",
+    data.format =  "TSV"
+)  
+GDCdownload(query.sc.analysis)
+Single.Cell.Analysis.list <- GDCprepare(query.sc.analysis)
+```
+```{r, eval = FALSE,include=F}
+query.hdF5 <- GDCquery(
+    project = "CPTAC-3", 
+    data.category = "Transcriptome Profiling",
+    legacy = FALSE,
+    access = "open",
+    data.type = "Single Cell Analysis",
+    barcode = c("CPT0167860015","CPT0206880004"),
+    data.format =  "HDF5"
+)  
+GDCdownload(query.hdF5)
+df.HDF5 <- GDCprepare(query.hdF5)
+```
+```{r, eval = FALSE}
+query.raw.counts <- GDCquery(
+    project = "CPTAC-3", 
+    data.category = "Transcriptome Profiling",
+    legacy = FALSE,
+    access = "open",
+    data.type = "Gene Expression Quantification",
+    barcode = c("CPT0167860015","CPT0206880004"),
+    workflow.type = "CellRanger - 10x Raw Counts"
+)  
+GDCdownload(query.raw.counts)
+raw.counts.list <- GDCprepare(query.raw.counts)
+```
+
+```{r, eval = FALSE}
+query.filtered.counts <- GDCquery(
+    project = "CPTAC-3", 
+    data.category = "Transcriptome Profiling",
+    legacy = FALSE,
+    access = "open",
+    data.type = "Gene Expression Quantification",
+    barcode = c("CPT0167860015","CPT0206880004"),
+    workflow.type = "CellRanger - 10x Filtered Counts"
+)  
+GDCdownload(query.filtered.counts)
+filtered.counts.list <- GDCprepare(query.filtered.counts)
+```
+
+
+```{r, eval = FALSE}
+query.sc.dea <- GDCquery(
+    project = "CPTAC-3", 
+    data.category = "Transcriptome Profiling",
+    legacy = FALSE,
+    access = "open",
+    data.type = "Differential Gene Expression",
+    barcode = c("CPT0167860015","CPT0206880004"),
+    workflow.type = "Seurat - 10x Chromium"
+)  
+GDCdownload(query.sc.dea)
+sc.dea.list <- GDCprepare(query.sc.dea)
+```
+
 ### Copy Number
 
 ```{r, eval = FALSE}
