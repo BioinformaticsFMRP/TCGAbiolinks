@@ -23,18 +23,22 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' query <- GDCquery(project = "TCGA-KIRP",
-#'                   data.category = "Simple Nucleotide Variation",
-#'                   data.type = "Masked Somatic Mutation",
-#'                   workflow.type = "MuSE Variant Aggregation and Masking")
+#' query <- GDCquery(
+#'   project = "TCGA-KIRP",
+#'   data.category = "Simple Nucleotide Variation",
+#'   data.type = "Masked Somatic Mutation",
+#'   workflow.type = "MuSE Variant Aggregation and Masking"
+#' )
 #' GDCdownload(query, method = "api", directory = "maf")
 #' maf <- GDCprepare(query, directory = "maf")
 #'
 #' # Get GISTIC values
-#' gistic.query <- GDCquery(project = "TCGA-ACC",
-#'                          data.category = "Copy Number Variation",
-#'                          data.type = "Gene Level Copy Number Scores",
-#'                          access = "open")
+#' gistic.query <- GDCquery(
+#'   project = "TCGA-ACC",
+#'   data.category = "Copy Number Variation",
+#'   data.type = "Gene Level Copy Number Scores",
+#'   access = "open"
+#' )
 #' GDCdownload(gistic.query)
 #' gistic <- GDCprepare(gistic.query)
 #' }
@@ -139,13 +143,26 @@ GDCprepare <- function(
   cases <- ifelse(grepl("TCGA|TARGET",query$results[[1]]$project %>% unlist()),query$results[[1]]$cases,query$results[[1]]$sample.submitter_id)
 
   if (grepl("Transcriptome Profiling", query$data.category, ignore.case = TRUE)){
-    data <- readTranscriptomeProfiling(
-      files = files,
-      data.type = ifelse(!is.na(query$data.type),  as.character(query$data.type),  unique(query$results[[1]]$data_type)),
-      workflow.type = unique(query$results[[1]]$analysis_workflow_type),
-      cases = cases,
-      summarizedExperiment
-    )
+
+    if(unique(query$results[[1]]$experimental_strategy) == "scRNA-Seq"){
+      #if (grepl("Single Cell Analysis", unique(query$results[[1]]$data_type), ignore.case = TRUE)){
+
+      data <- readSingleCellAnalysis(
+        files = files,
+        data_format = unique(query$results[[1]]$data_format),
+        workflow.type = unique(query$results[[1]]$analysis_workflow_type),
+        cases = cases
+      )
+      return(data)
+    } else {
+      data <- readTranscriptomeProfiling(
+        files = files,
+        data.type = ifelse(!is.na(query$data.type),  as.character(query$data.type),  unique(query$results[[1]]$data_type)),
+        workflow.type = unique(query$results[[1]]$analysis_workflow_type),
+        cases = cases,
+        summarizedExperiment
+      )
+    }
   } else if(grepl("Copy Number Variation",query$data.category,ignore.case = TRUE)) {
     if (unique(query$results[[1]]$data_type) == "Gene Level Copy Number Scores") {
       data <- readGISTIC(files, query$results[[1]]$cases)
@@ -285,6 +302,52 @@ readClinical <- function(files, data.type, cases){
   return(ret)
 }
 
+
+readSingleCellAnalysis <- function(
+  files = files,
+  data_format = NULL,
+  workflow.type = NULL,
+  cases = cases
+) {
+
+  if(data_format == "MEX" & workflow.type == "CellRanger - 10x Filtered Counts"){
+    check_package("Seurat")
+    ret <- plyr::llply(files,.fun = function(f){
+      untar(tarfile = f,exdir = dirname(f))
+      Seurat::Read10X(data.dir = gsub("\\.tar\\.gz","",f))
+    },.progress = "time")
+    names(ret) <- cases
+  }
+
+  if(data_format == "MEX" & workflow.type == "CellRanger - 10x Raw Counts"){
+    ret <- plyr::llply(files,.fun = function(f){
+      # uncompress raw file
+      untar(tarfile = f,exdir = dirname(f))
+      Read10X(data.dir = gsub("\\.tar\\.gz","",f))
+    },.progress = "time")
+    names(ret) <- cases
+  }
+  # TSV files
+  if(data_format == "TSV"){
+    ret <- plyr::llply(files,.fun = function(f){
+      readr::read_tsv(f)
+    },.progress = "time")
+    names(ret) <- cases
+  }
+
+  if(data_format == "HDF5"){
+
+    stop("We are not preparing loom files")
+    check_package("SeuratDisk")
+    check_package("Seurat")
+    ret <- SeuratDisk::Connect(filename = files, mode = "r")
+    ret <- Seurat::as.Seurat(ret)
+    print(files)
+  }
+
+  # HDF5
+  return(ret)
+}
 
 #' @importFrom tidyr separate
 readExonQuantification <- function (files, cases, summarizedExperiment = TRUE){

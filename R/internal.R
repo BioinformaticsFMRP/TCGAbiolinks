@@ -128,6 +128,7 @@ checkDataTypeInput <- function(legacy, data.type){
             "Gene Expression Quantification",
             "Raw CGI Variant",
             "Methylation Beta Value",
+            "Differential Gene Expression",
             "Splice Junction Quantification",
             "Annotated Somatic Mutation",
             "Raw Simple Somatic Mutation",
@@ -142,6 +143,7 @@ checkDataTypeInput <- function(legacy, data.type){
             "Gene Level Copy Number Scores",
             "Protein Expression Quantification",
             "Clinical Supplement",
+            "Single Cell Analysis",
             "Masked Somatic Mutation",
             "Slide Image")
         if(!data.type %in% harmonized.data.type) {
