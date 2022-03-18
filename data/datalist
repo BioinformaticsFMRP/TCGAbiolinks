@@ -11,4 +11,8 @@ tabPackage1
 tabPackage2
 tabPackageKey
 tabSurvKMcompleteDEGs
-PCBC_stemSig
+DE_PCBC_stemSig
+EB_PCBC_stemSig
+ECTO_PCBC_stemSig
+MESO_PCBC_stemSig
+SC_PCBC_stemSig
