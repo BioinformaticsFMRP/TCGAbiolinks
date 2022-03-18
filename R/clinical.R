@@ -186,6 +186,9 @@ TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
 #' @return A data frame with the clinical information
 GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
     checkProjectInput(project)
+
+    if(length(project) > 1) stop("Please, project should be only one valid project")
+
     if(!grepl("clinical|Biospecimen",type,ignore.case = TRUE)) stop("Type must be clinical or biospecemen")
     baseURL <- "https://api.gdc.cancer.gov/cases/?"
     options.pretty <- "pretty=true"
@@ -200,17 +203,21 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
     }
 
     if(grepl("TCGA|TARGET",project)){
-        options.filter <- paste0("filters=",
-                                 URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
-                                 project,
-                                 URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["'),
-                                 files.data_category,
-                                 URLencode('"]}}]}'))
+        options.filter <- paste0(
+            "filters=",
+            URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
+            project,
+            URLencode('"]}},{"op":"in","content":{"field":"files.data_category","value":["'),
+            files.data_category,
+            URLencode('"]}}]}')
+        )
     } else {
-        options.filter <- paste0("filters=",
-                                 URLencode('{"op":"in","content":{"field":"cases.project.project_id","value":["'),
-                                 project,
-                                 URLencode('"]}}'))
+        options.filter <- paste0(
+            "filters=",
+            URLencode('{"op":"in","content":{"field":"cases.project.project_id","value":["'),
+            project,
+            URLencode('"]}}')
+        )
     }
     url <- paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter,"format=json", sep = "&"))
     json  <- tryCatch(
@@ -324,8 +331,6 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
     } else {
         df <- rbindlist(results$samples,fill = TRUE)
     }
-
-
 
     if(save.csv){
         if(grepl("biospecimen",type))  {
@@ -770,7 +775,7 @@ TCGA_MolecularSubtype <- function(barcodes){
     tabSubtypeMergedNew <- cbind(tabSubtypeMergedNew, color = rep(0,
                                                                   nrow(tabSubtypeMergedNew)))
     TabSubtypesCol_merged <- TabSubtypesCol_merged[!duplicated(TabSubtypesCol_merged$samples),
-                                                   ]
+    ]
     commonSamples <- intersect(tabSubtypeMergedNew$samples, TabSubtypesCol_merged$samples)
     rownames(TabSubtypesCol_merged) <- TabSubtypesCol_merged$samples
     tabSubtypeMergedNew[commonSamples, "color"] <- TabSubtypesCol_merged[commonSamples,

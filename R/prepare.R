@@ -1029,8 +1029,6 @@ colDataPrepare <- function(barcode){
   message("Starting to add information to samples")
   ret <- NULL
 
-
-
   if(all(grepl("TARGET",barcode))) ret <- colDataPrepareTARGET(barcode)
   if(all(grepl("TCGA",barcode))) ret <- colDataPrepareTCGA(barcode)
   if(all(grepl("MMRF",barcode))) ret <- colDataPrepareMMRF(barcode)
@@ -1093,11 +1091,15 @@ colDataPrepare <- function(barcode){
     })
   }
 
-  if(any(ret$project_id == "CPTAC-3")) {
+  if(any(ret$project_id == "CPTAC-3",na.rm = T)) {
     idx <- sapply(gsub("-[[:alnum:]]{3}$","",barcode), function(x) {
       if(grepl(";",x = x)) x <- stringr::str_split(barcode[1],";")[[1]][1] # mixed samples
       grep(x,ret$bcr_patient_barcode)
     })
+  }
+
+  if(any(ret$project_id == "CMI-MBC",na.rm = T)) {
+     idx <- match(barcode,ret$bcr_patient_barcode)
   }
 
   ret <- ret[idx,]
