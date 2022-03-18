@@ -145,11 +145,41 @@ NULL
 #' @format A data frame with 7,734 lines and 10 columns
 NULL
 
-#' A numeric vector with Stemness signature trained on PCBC's dataset
+#' A numeric vector with stem cell-like signature trained on PCBC's dataset
 #' @docType data
 #' @keywords internal
-#' @name PCBC_stemSig
-#' @format A numeric vector with 12955 genes
+#' @name SC_PCBC_stemSig
+#' @format A numeric vector with 12956 genes
+NULL
+
+#' A numeric vector with SC-derived mesoderm (MESO) signature trained on PCBC's dataset
+#' @docType data
+#' @keywords internal
+#' @name MESO_PCBC_stemSig
+#' @format A numeric vector with 12956 genes
+NULL
+
+
+#' A numeric vector with SC-derived ectoderm (ECTO) signature trained on PCBC's dataset
+#' @docType data
+#' @keywords internal
+#' @name ECTO_PCBC_stemSig
+#' @format A numeric vector with 12956 genes
+NULL
+
+
+#' A numeric vector with SC-derived definitive endoderm (DE) signature trained on PCBC's dataset
+#' @docType data
+#' @keywords internal
+#' @name DE_PCBC_stemSig
+#' @format A numeric vector with 12956 genes
+NULL
+
+#' A numeric vector with stem cell (SC)-derived embryoid bodies (EB) signature trained on PCBC's dataset
+#' @docType data
+#' @keywords internal
+#' @name DE_PCBC_stemSig
+#' @format A numeric vector with 12956 genes
 NULL
 
 #' Result of gliomaclassifier function
