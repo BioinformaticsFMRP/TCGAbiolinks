@@ -36,15 +36,15 @@ TCGAanalyze_Stemness generate the mRNAsi score
    qnt.cut =  0.25
  )
  Stemness_score <- TCGAanalyze_Stemness(
-  stemSig = SC_PCBC_stemSig,
-  dataGE = dataFilt
+     stemSig = SC_PCBC_stemSig,
+     dataGE = dataFilt
   )
  ECTO_score <- TCGAanalyze_Stemness(
-  stemSig = ECTO_PCBC_stemSig,
-  dataGE = dataFilt
+     stemSig = ECTO_PCBC_stemSig,
+     dataGE = dataFilt
   )
   MESO_score <- TCGAanalyze_Stemness(
-  stemSig = MESO_PCBC_stemSig,
-  dataGE = dataFilt
+     stemSig = MESO_PCBC_stemSig,
+     dataGE = dataFilt
   )
 }
