@@ -1099,7 +1099,7 @@ colDataPrepare <- function(barcode){
   }
 
   if(any(ret$project_id == "CMI-MBC",na.rm = T)) {
-     idx <- match(barcode,ret$bcr_patient_barcode)
+    idx <- match(barcode,ret$bcr_patient_barcode)
   }
 
   ret <- ret[idx,]
@@ -1234,7 +1234,7 @@ makeSEfromTranscriptomeProfilingSTAR <- function(data, cases, assay.list){
   gene.location <- get.GRCh.bioMart("hg38")
   gene.location <- gene.location[!duplicated(gene.location$ensembl_gene_id),]
 
-  data$ensembl_gene_id <-  as.character(gsub("\\.[0-9]*","",data$`#gene`))
+  data$ensembl_gene_id <-  as.character(gsub("\\.[0-9]*","",data$gene_id))
   metrics <- subset(data, !grepl("ENSG", data$ensembl_gene_id))
   data <- subset(data, grepl("ENSG", data$ensembl_gene_id))
   found.genes <- table(data$ensembl_gene_id %in% gene.location$ensembl_gene_id)
@@ -1247,11 +1247,13 @@ makeSEfromTranscriptomeProfilingSTAR <- function(data, cases, assay.list){
   # Prepare data table
   # Remove the version from the ensembl gene id
   assays <- list(
-    data.matrix(data[,grep("unstranded",colnames(data))]),
+    data.matrix(data[,grep("^unstranded",colnames(data))]),
     data.matrix(data[,grep("stranded_first",colnames(data))]),
-    data.matrix(data[,grep("stranded_second",colnames(data))])
+    data.matrix(data[,grep("stranded_second",colnames(data))]),
+    data.matrix(data[,grep("fpkm_unstrand",colnames(data))]),
+    data.matrix(data[,grep("tpm_unstrand",colnames(data))])
   )
-  names(assays) <- c("unstranded","stranded_first","stranded_second")
+  names(assays) <- c("unstranded","stranded_first","stranded_second","fpkm_unstrand","tpm_unstrand")
   assays <- lapply(assays, function(x){
     colnames(x) <- NULL
     rownames(x) <- NULL
@@ -1261,12 +1263,14 @@ makeSEfromTranscriptomeProfilingSTAR <- function(data, cases, assay.list){
   # Prepare rowRanges
   rowRanges <- GRanges(
     seqnames = paste0("chr", data$chromosome_name),
-    ranges = IRanges(start = data$start_position,
-                     end = data$end_position),
+    ranges = IRanges(
+      start = data$start_position,
+      end = data$end_position
+    ),
     strand = data$strand,
     ensembl_gene_id = data$ensembl_gene_id,
     external_gene_name = data$external_gene_name,
-    original_ensembl_gene_id = data$`#gene`
+    original_ensembl_gene_id = data$gene_id
   )
   names(rowRanges) <- as.character(data$ensembl_gene_id)
   rse <- SummarizedExperiment(
@@ -1369,21 +1373,32 @@ readTranscriptomeProfiling <- function(
       if(!missing(cases))  colnames(df)[-1] <- cases
       if(summarizedExperiment) df <- makeSEfromTranscriptomeProfiling(df,cases,workflow.type)
     } else  if(grepl("STAR",workflow.type)){
+
+      # read files that has 4 not necessary rows, and has several columns
+      # gene_id gene_name gene_type
+      # unstranded stranded_first stranded_second tpm_unstranded fpkm_unstranded
       x <- plyr::alply(files,1, function(f) {
         readr::read_tsv(
           file = f,
           col_names = TRUE,
           progress = FALSE,
-          show_col_types = FALSE
+          show_col_types = FALSE,
+          skip = 1
         )
       }, .progress = "time")
 
+      # bind all counts and then add the gene metadata
       suppressMessages({
-        df <- x %>%  map_dfc(.f = function(y) y[,2:4])
-        df <- bind_cols(x[[1]][,1],df)
+        df <- x %>%  map_dfc(.f = function(y) y[,4:8])
+        df <- bind_cols(x[[1]][,1:3],df)
       })
 
-      if(!missing(cases))  colnames(df)[-1] <- sapply(cases, function(x){stringr::str_c(c("unstranded_","stranded_first_", "stranded_second_"),x)}) %>% as.character()
+      # Adding barcodes to columns names, if user wants a dataframe
+      if(!missing(cases))  {
+        colnames(df)[-c(1:3)] <- sapply(cases, function(x){
+          stringr::str_c(c("unstranded_","stranded_first_", "stranded_second_","tpm_unstranded_","fpkm_unstranded_"),x)}
+        ) %>% as.character()
+      }
       if(summarizedExperiment) df <- makeSEfromTranscriptomeProfilingSTAR(df,cases,workflow.type)
     }
   } else if(grepl("miRNA", workflow.type, ignore.case = TRUE) & grepl("miRNA", data.type, ignore.case = TRUE)) {
