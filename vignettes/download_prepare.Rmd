@@ -162,7 +162,7 @@ query <- GDCquery(
   project = "TCGA-GBM",
   data.category = "Transcriptome Profiling",
   data.type = "Gene Expression Quantification", 
-  workflow.type = "HTSeq - FPKM-UQ",
+  workflow.type = "STAR - Counts",
   barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01")
 )
 GDCdownload(query)
@@ -195,9 +195,7 @@ Examples of query, download, prepare can be found in this [gist](https://gist.gi
 
 | Data.category               | Data.type                         | Workflow Type   | Status                                                                      |
 |-----------------------------|-----------------------------------|-----------------|-----------------------------------------------------------------------------|
-| Transcriptome Profiling     | Gene Expression Quantification    | HTSeq - Counts  | Data frame or SE (losing 5% of information when mapping to genomic regions) |
-|                             |                                   | HTSeq - FPKM-UQ | Returning only a (losing 5% of information when mapping to genomic regions) |
-|                             |                                   | HTSeq - FPKM    | Returning only a (losing 5% of information when mapping to genomic regions) |
+| Transcriptome Profiling     | Gene Expression Quantification    | STAR - Counts  | Data frame or SE (losing 5% of information when mapping to genomic regions) |
 |                             | Isoform Expression Quantification | Not needed      |                                                                             |
 |                             | miRNA Expression Quantification   | Not needed      | Returning only a dataframe for  the moment                                  |
 | Copy number variation       | Copy Number Segment               |                 | Returning only a dataframe for  the moment                                  |
@@ -447,7 +445,7 @@ query.exp.hg38 <- GDCquery(
   project = "TCGA-GBM", 
   data.category = "Transcriptome Profiling", 
   data.type = "Gene Expression Quantification", 
-  workflow.type = "HTSeq - FPKM-UQ",
+  workflow.type = "STAR - Counts",
   barcode =  c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01")
 )
 GDCdownload(query.exp.hg38)

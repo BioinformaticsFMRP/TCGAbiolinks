@@ -131,36 +131,48 @@
 #'}
 #' @export
 #' @examples
-#' query <- GDCquery(project = "TCGA-ACC",
-#'                   data.category = "Copy Number Variation",
-#'                   data.type = "Copy Number Segment")
+#' query <- GDCquery(
+#'    project = "TCGA-ACC",
+#'    data.category = "Copy Number Variation",
+#'    data.type = "Copy Number Segment"
+#' )
 #' \dontrun{
-#' query <- GDCquery(project = "TARGET-AML",
-#'                   data.category = "Transcriptome Profiling",
-#'                   data.type = "miRNA Expression Quantification",
-#'                   workflow.type = "BCGSC miRNA Profiling",
-#'                   barcode = c("TARGET-20-PARUDL-03A-01R","TARGET-20-PASRRB-03A-01R"))
-#' query <- GDCquery(project = "TARGET-AML",
-#'                   data.category = "Transcriptome Profiling",
-#'                   data.type = "Gene Expression Quantification",
-#'                   workflow.type = "HTSeq - Counts",
-#'                   barcode = c("TARGET-20-PADZCG-04A-01R","TARGET-20-PARJCR-09A-01R"))
-#' query <- GDCquery(project = "TCGA-ACC",
-#'                   data.category =  "Copy Number Variation",
-#'                   data.type = "Masked Copy Number Segment",
-#'                   sample.type = c("Primary Tumor"))
-#' query.met <- GDCquery(project = c("TCGA-GBM","TCGA-LGG"),
-#'                       legacy = TRUE,
-#'                       data.category = "DNA methylation",
-#'                       platform = "Illumina Human Methylation 450")
-#' query <- GDCquery(project = "TCGA-ACC",
-#'                   data.category =  "Copy number variation",
-#'                   legacy = TRUE,
-#'                   file.type = "hg19.seg",
-#'                   barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
+#' query <- GDCquery(
+#'   project = "TARGET-AML",
+#'   data.category = "Transcriptome Profiling",
+#'   data.type = "miRNA Expression Quantification",
+#'   workflow.type = "BCGSC miRNA Profiling",
+#'   barcode = c("TARGET-20-PARUDL-03A-01R","TARGET-20-PASRRB-03A-01R")
+#' )
+#' query <- GDCquery(
+#'    project = "TARGET-AML",
+#'    data.category = "Transcriptome Profiling",
+#'    data.type = "Gene Expression Quantification",
+#'    workflow.type = "STAR - Counts",
+#'    barcode = c("TARGET-20-PADZCG-04A-01R","TARGET-20-PARJCR-09A-01R")
+#' )
+#' query <- GDCquery(
+#'    project = "TCGA-ACC",
+#'    data.category =  "Copy Number Variation",
+#'    data.type = "Masked Copy Number Segment",
+#'    sample.type = c("Primary Tumor")
+#' )
+#' query.met <- GDCquery(
+#'    project = c("TCGA-GBM","TCGA-LGG"),
+#'    legacy = TRUE,
+#'    data.category = "DNA methylation",
+#'    platform = "Illumina Human Methylation 450"
+#' )
+#' query <- GDCquery(
+#'    project = "TCGA-ACC",
+#'    data.category =  "Copy number variation",
+#'    legacy = TRUE,
+#'    file.type = "hg19.seg",
+#'    barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01")
+#' )
 #' }
 #' @return A data frame with the results and the parameters used
-#' @importFrom  jsonlite fromJSON
+#' @importFrom jsonlite fromJSON
 #' @importFrom knitr kable
 #' @importFrom httr timeout
 #' @importFrom dplyr pull
@@ -1046,8 +1058,10 @@ TCGAquery_recount2<-function(project, tissue=c()){
 #'    GDCdownload(query,method = "client")
 #' }
 #' @return A data frame with the maf file information
-GDCquery_ATAC_seq <- function(tumor = NULL,
-                              file.type = NULL) {
+GDCquery_ATAC_seq <- function(
+    tumor = NULL,
+    file.type = NULL
+) {
     isServeOK()
     results <- readr::read_tsv("https://gdc.cancer.gov/files/public/file/ATACseq-AWG_Open_GDC-Manifest.txt")
 
