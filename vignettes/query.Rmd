@@ -196,7 +196,7 @@ query.exp <- GDCquery(
     project = "TCGA-COAD",
     data.category = "Transcriptome Profiling",
     data.type = "Gene Expression Quantification", 
-    workflow.type = "HTSeq - FPKM-UQ"
+    workflow.type = "STAR - Counts"
 )
 
 # Get all patients that have DNA methylation and gene expression.
@@ -217,7 +217,7 @@ query.exp <- GDCquery(
     project = "TCGA-COAD",
     data.category = "Transcriptome Profiling",
     data.type = "Gene Expression Quantification", 
-    workflow.type = "HTSeq - FPKM-UQ",
+    workflow.type = "STAR - Counts",
     barcode = common.patients[1:5]
 )
 ```
