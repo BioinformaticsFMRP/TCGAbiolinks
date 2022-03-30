@@ -86,6 +86,8 @@ Suggests:
     affy,
     testthat,
     sesame,
+    AnnotationHub,
+    ExperimentHub,
     pathview,
     clusterProfiler,
     ComplexHeatmap,
