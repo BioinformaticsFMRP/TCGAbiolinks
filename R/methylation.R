@@ -1804,36 +1804,30 @@ TCGAvisualize_starburst <- function(
 
 #' @title Get DNA methylation array metadata from SesameData
 #' @noRd
+#' @importFrom stringr str_c
+#' @importFrom ExperimentHub ExperimentHub
+#' @importFrom AnnotationHub query
 getMetPlatInfo <- function(
     genome = c("hg38","hg19"),
     platform = c("450k","EPIC","27k")
 ){
     genome <- match.arg(genome)
-    # arrayType <- match.arg(arrayType)
-
-    platform <-  switch(
-        platform,
-        "450K" = "HM450",
-        "450k" = "HM450",
-        "27k"  = "HM27",
-        "27K"  = "HM27",
-        "EPIC" = "EPIC"
-    )
-    if (is.null(platform)) {
-        stop("platform must one of the following options: 450k, EPIC or 27k")
-    }
+    arrayType <- match.arg(platform)
 
     check_package("sesameData")
     check_package("sesame")
 
-    sesameData::sesameDataCacheAll()
-    sesameData::sesameDataGet(
-        str_c(
-            platform,
-            ".",
-            genome,
-            ".manifest"
-        )
+    message("Accessing DNAm annotation from sesame package for: ", genome, " - ",arrayType)
+    manifest <-  str_c(
+        ifelse(platform == "450k","HM450","EPIC"),
+        ".",
+        genome,
+        ".manifest"
     )
+    ehub <- ExperimentHub()
+    query <- query(ehub, c("sesameData",manifest))
+    query <- query[query$title == manifest,]
+    ah_id <- query$ah_id[query$rdatadateadded == max(as.Date(query$rdatadateadded))]
+    ExperimentHub()[[ah_id]]
 }
 

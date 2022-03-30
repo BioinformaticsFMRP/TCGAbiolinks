@@ -736,8 +736,15 @@ readIDATDNAmethylation <- function(
 # TODO: Improve this function to be more generic as possible
 #' @importFrom GenomicRanges makeGRangesFromDataFrame
 #' @importFrom tibble as_data_frame
-readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platform){
+readDNAmethylation <- function(
+  files,
+  cases,
+  summarizedExperiment = TRUE,
+  platform
+){
   if (missing(cases)) cases <- NULL
+
+
   if (grepl("OMA00",platform)) {
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     for (i in seq_along(files)) {
@@ -765,6 +772,48 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
     setDF(df)
     rownames(df) <- df$Composite.Element.REF
     df$Composite.Element.REF <- NULL
+  } else if (all(grepl("methylation_array.sesame.level3betas", files))){
+    # methylation_array.sesame.level3betas has only two columns with not header
+
+    x <- plyr::alply(files,1, function(f) {
+      data <- fread(
+        f,
+        header = FALSE,
+        sep = "\t",
+        stringsAsFactors = FALSE,
+        skip = 0,
+        colClasses = c(
+          "character", # CpG
+          "numeric" # beta value
+        )
+      )
+      setnames(data,gsub(" ", "\\.", colnames(data)))
+      if (!is.null(cases)) setnames(data,2,cases[which(f == files)])
+    }, .progress = "time")
+
+    print.header(paste0("Merging ", length(files)," files"),"subsection")
+
+    # Just check if the data is in the same order, since we will not merge
+    # the data frames to save memory
+    stopifnot(all(unlist(x %>% map(function(y){all(y[,1] ==  x[[1]][,1])}) )))
+
+    df <- x %>%  map_df(2)
+    colnames(df) <- x %>%  map_chr(.f = function(y) colnames(y)[2])
+    df <- data.matrix(df)
+    rownames(df) <- setDF(x[[1]])[,1,drop = T]
+
+    if (summarizedExperiment) {
+      df <- makeSEFromDNAMethylationMatrix(
+        betas = df,
+        genome = "hg38",
+        met.platform = "EPIC"
+      )
+    } else {
+      setDF(df)
+      rownames(df) <- df$Composite.Element.REF
+      df$Composite.Element.REF <- NULL
+    }
+
   } else {
     skip <- ifelse(all(grepl("hg38",files)), 0,1)
     colClasses <- NULL
@@ -806,7 +855,6 @@ readDNAmethylation <- function(files, cases, summarizedExperiment = TRUE, platfo
     df <- x %>%  map_df(idx.dnam)
     colnames(df) <- x %>%  map_chr(.f = function(y) colnames(y)[idx.dnam])
     df <- bind_cols(x[[1]][,1:(idx.dnam-1)],df)
-
 
     if (summarizedExperiment) {
       if(skip == 0) {
