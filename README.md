@@ -17,6 +17,7 @@ GDC Application Programming Interface (API) to search, download and prepare rele
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
+BiocManager::install("BioinformaticsFMRP/TCGAbiolinksGUI.data")
 BiocManager::install("BioinformaticsFMRP/TCGAbiolinks")
 ```
 
