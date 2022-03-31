@@ -5,7 +5,10 @@
 \title{getTSS to fetch GENCODE gene annotation (transcripts level) from Bioconductor package biomaRt
 If upstream and downstream are specified in TSS list, promoter regions of GENCODE gene will be generated.}
 \usage{
-getTSS(genome = "hg38", TSS = list(upstream = NULL, downstream = NULL))
+getTSS(
+  genome = c("hg38", "hg19"),
+  TSS = list(upstream = NULL, downstream = NULL)
+)
 }
 \arguments{
 \item{genome}{Which genome build will be used: hg38 (default) or hg19.}
