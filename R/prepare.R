@@ -1279,7 +1279,7 @@ makeSEfromTranscriptomeProfilingSTAR <- function(data, cases, assay.list){
   colData <-  colDataPrepare(cases)
 
   # one ensemblID can be mapped to multiple entrezgene ID
-  gene.location <- get.GRCh.bioMart("hg38")
+  gene.location <- get.GRCh.bioMart("hg38",as.granges = TRUE)
 
   metrics <- subset(data, !grepl("ENSG", data$gene_id))
   data <- subset(data, grepl("ENSG", data$gene_id))
