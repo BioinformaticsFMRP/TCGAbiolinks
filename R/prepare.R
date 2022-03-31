@@ -1280,17 +1280,13 @@ makeSEfromTranscriptomeProfilingSTAR <- function(data, cases, assay.list){
 
   # one ensemblID can be mapped to multiple entrezgene ID
   gene.location <- get.GRCh.bioMart("hg38")
-  gene.location <- gene.location[!duplicated(gene.location$ensembl_gene_id),]
 
-  data$ensembl_gene_id <-  as.character(gsub("\\.[0-9]*","",data$gene_id))
-  metrics <- subset(data, !grepl("ENSG", data$ensembl_gene_id))
-  data <- subset(data, grepl("ENSG", data$ensembl_gene_id))
-  found.genes <- table(data$ensembl_gene_id %in% gene.location$ensembl_gene_id)
+  metrics <- subset(data, !grepl("ENSG", data$gene_id))
+  data <- subset(data, grepl("ENSG", data$gene_id))
+  found.genes <- table(data$gene_id %in% gene.location$gene_id)
 
   if("FALSE" %in% names(found.genes))
     message(paste0("From the ", nrow(data), " genes we couldn't map ", found.genes[["FALSE"]]))
-
-  data <- merge(data, gene.location, by = "ensembl_gene_id")
 
   # Prepare data table
   # Remove the version from the ensembl gene id
@@ -1309,18 +1305,9 @@ makeSEfromTranscriptomeProfilingSTAR <- function(data, cases, assay.list){
   })
 
   # Prepare rowRanges
-  rowRanges <- GRanges(
-    seqnames = paste0("chr", data$chromosome_name),
-    ranges = IRanges(
-      start = data$start_position,
-      end = data$end_position
-    ),
-    strand = data$strand,
-    ensembl_gene_id = data$ensembl_gene_id,
-    external_gene_name = data$external_gene_name,
-    original_ensembl_gene_id = data$gene_id
-  )
-  names(rowRanges) <- as.character(data$ensembl_gene_id)
+  rowRanges <- gene.location[match(data$gene_id, gene.location$gene_id),]
+  names(rowRanges) <- as.character(data$gene_id)
+
   rse <- SummarizedExperiment(
     assays = assays,
     rowRanges = rowRanges,

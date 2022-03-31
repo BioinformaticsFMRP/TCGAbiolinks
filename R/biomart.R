@@ -10,7 +10,7 @@ get.GRCh.bioMart <- function(
 ) {
 
     genome <- match.arg(genome)
-    # Since the amout of users complaining about the access we
+    # Since the amount of users complaining about the access we
     # also added the data into a data package
     check_package("TCGAbiolinksGUI.data")
     if (genome == "hg19") {
@@ -22,7 +22,7 @@ get.GRCh.bioMart <- function(
     } else {
         gene.location <- get(
             data(
-                "gene.location.hg38",
+                "gencode.v36.annotation.genes",
                 package = "TCGAbiolinksGUI.data",
                 envir = environment()
             )
