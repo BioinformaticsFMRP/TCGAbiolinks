@@ -2,7 +2,7 @@
 % Please edit documentation in R/biomart.R
 \name{get.GRCh.bioMart}
 \alias{get.GRCh.bioMart}
-\title{Get hg19 or hg38 information from biomaRt}
+\title{Get hg19 gene annotation or hg38 (gencode v36)}
 \usage{
 get.GRCh.bioMart(genome = c("hg19", "hg38"), as.granges = FALSE)
 }
@@ -12,5 +12,5 @@ get.GRCh.bioMart(genome = c("hg19", "hg38"), as.granges = FALSE)
 \item{as.granges}{Output as GRanges or data.frame}
 }
 \description{
-Get hg19 or hg38 information from biomaRt
+Get hg19 (from biomart) or hg38 (gencode v36) gene annotation
 }
