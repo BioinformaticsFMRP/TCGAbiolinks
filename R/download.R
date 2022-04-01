@@ -42,16 +42,23 @@
 #'     GDCdownload(acc.gbm, method = "api", directory = "example", files.per.chunk = 50)
 #' }
 #' @return Shows the output from the GDC transfer tools
-GDCdownload <- function(query,
-                        token.file,
-                        method = "api",
-                        directory = "GDCdata",
-                        files.per.chunk = NULL) {
+GDCdownload <- function(
+    query,
+    token.file,
+    method = "api",
+    directory = "GDCdata",
+    files.per.chunk = NULL
+) {
     isServeOK()
-    if(missing(query)) stop("Please set query argument")
+    if (missing(query)) stop("Please set query argument")
 
-    if(!(method %in% c("api","client"))) stop("method arguments possible values are: 'api' or 'client'")
-    if(length(unique(getResults(query)$data_type)) > 1) stop("We can only download one data type. Please use data.type argument in GDCquery to filter results.")
+    if (!(method %in% c("api","client"))) {
+        stop("method arguments possible values are: 'api' or 'client'")
+    }
+
+    if (length(unique(getResults(query)$data_type)) > 1) {
+        stop("We can only download one data type. Please use data.type argument in GDCquery to filter results.")
+    }
 
     source <- ifelse(query$legacy,"legacy","harmonized")
 
@@ -64,9 +71,12 @@ GDCdownload <- function(query,
 
         manifest <- getManifest(query.aux)
 
-        path <- unique(file.path(proj, source,
-                                 gsub(" ","_", results$data_category),
-                                 gsub(" ","_",results$data_type)))
+        path <- unique(
+            file.path(
+                proj, source,
+                gsub(" ","_", results$data_category),
+                gsub(" ","_",results$data_type))
+        )
         path <- file.path(directory, path)
 
         # Check if the files were already downloaded by this package
@@ -75,8 +85,9 @@ GDCdownload <- function(query,
         # There is a bug in the API, if the files has the same name it will not download correctly
         # so method should be set to client if there are files with duplicated names
         # However for clinical XML recurrent and primary are the same file. So we will ignore that case
-        if(nrow(manifest) > length(unique(manifest$filename))) method <- "client"
-        if(nrow(manifest) != 0 & method == "client") {
+        if (nrow(manifest) > length(unique(manifest$filename))) method <- "client"
+
+        if (nrow(manifest) != 0 & method == "client") {
             # There exists two options to download the data, using the query or using a manifest file
             # The second option was created to let users use legacy data or the API to search
 
@@ -85,7 +96,7 @@ GDCdownload <- function(query,
 
             # Using the query argument we will organize the files to the user
             # Creates a file with the gdc manifest format
-            write_delim(manifest,"gdc_manifest.txt",delim = "\t")
+            readr::write_delim(manifest,"gdc_manifest.txt",delim = "\t")
 
             cmd <- paste0(gdc.client.bin, " download -m gdc_manifest.txt")
 
@@ -108,20 +119,32 @@ GDCdownload <- function(query,
             if(nrow(manifest) > 1) {
                 name <- paste0(gsub(" |:","_",date()),".tar.gz")
                 unlink(name)
-                message(paste0("GDCdownload will download ", nrow(manifest), " files. A total of " ,
-                               humanReadableByteCount(sum(as.numeric(manifest$size)))))
+                message(
+                    paste0(
+                        "GDCdownload will download ", nrow(manifest), " files. A total of " ,
+                        humanReadableByteCount(sum(as.numeric(manifest$size)))
+                    )
+                )
             } else {
                 # case with one file only. This is not at tar.gz
                 name <- manifest$filename
-                message(paste0("GDCdownload will download: ",
-                               humanReadableByteCount(sum(as.numeric(manifest$size)))))
+                message(
+                    paste0(
+                        "GDCdownload will download: ",
+                        humanReadableByteCount(sum(as.numeric(manifest$size)))
+                    )
+                )
             }
 
-            server <- ifelse(query$legacy,"https://api.gdc.cancer.gov/legacy/data/", "https://api.gdc.cancer.gov/data/")
+            server <- ifelse(
+                query$legacy,
+                "https://api.gdc.cancer.gov/legacy/data/",
+                "https://api.gdc.cancer.gov/data/"
+            )
 
-            if(is.null(files.per.chunk) & sum(as.numeric(manifest$size)) > 10^9) {
+            if (is.null(files.per.chunk) & sum(as.numeric(manifest$size)) > 10^9) {
                 message("The total size of files is big. We will download files in chunks")
-                files.per.chunk <- floor(10^9/mean(as.numeric(manifest$size)))
+                files.per.chunk <- floor(10^9 / mean(as.numeric(manifest$size)))
             }
 
             if(is.null(files.per.chunk)) {
@@ -171,7 +194,7 @@ getManifest <- function(query, save = FALSE) {
     colnames(manifest) <- c("id","filename","md5","size","state")
     if(save)  {
         fname <- "gdc_manifest.txt"
-        write_delim(manifest,fname,delim = "\t")
+        readr::write_delim(manifest,fname,delim = "\t")
         file <- file.path(getwd(),fname)
         message("Manifest saved as: ", file)
     }
@@ -184,9 +207,13 @@ GDCdownload.by.chunk <- function(server, manifest, name, path, step){
         manifest.aux <- manifest[((idx * step) + 1):end,]
         size <- humanReadableByteCount(sum(as.numeric(manifest.aux$size)))
         name.aux <- gsub(".tar",paste0("_",idx,".tar"),name)
-        message(paste0("Downloading chunk ", idx + 1, " of ", ceiling(nrow(manifest)/step) ,
-                       " (", nrow(manifest.aux)," files, size = ", size,") ",
-                       "as ", name.aux))
+        message(
+            paste0(
+                "Downloading chunk ", idx + 1, " of ", ceiling(nrow(manifest)/step) ,
+                " (", nrow(manifest.aux)," files, size = ", size,") ",
+                "as ", name.aux
+            )
+        )
         repeat {
             ret <- GDCdownload.aux(server, manifest.aux, name.aux, path)
             if(ret == 1) break
@@ -196,20 +223,23 @@ GDCdownload.by.chunk <- function(server, manifest, name, path, step){
 
 GDCdownload.aux <- function(server, manifest, name, path){
     result = tryCatch({
-        bin <- getURL(server,
-                      POST,
-                      body =  list(ids=list(manifest$id)),
-                      encode = "json",
-                      progress())
+        bin <- getURL(
+            server,
+            POST,
+            body =  list(ids=list(manifest$id)),
+            encode = "json",
+            progress()
+        )
         if(bin[[2]] == "405"){
             message("ERROR accessing GDC. Trying again...")
             bin <- getURL("https://api.gdc.cancer.gov/data/",
                           POST,
                           body =  list(ids=list(manifest$id)),
                           encode = "json",
-                          progress())
+                          progress()
+            )
         }
-        writeBin(getURL(bin,content, as= "raw",encoding = "UTF-8"), name)
+        writeBin(getURL(bin,content, as = "raw",encoding = "UTF-8"), name)
 
         if(nrow(manifest) > 1) {
             success <- untar(name)
@@ -244,9 +274,14 @@ GDCdownload.aux <- function(server, manifest, name, path){
         unlink(name) # remove tar
         return(-1)
     })
-    if(result == -1) stop(paste0("There was an error in the download process (we might had a connection problem with GDC server).",
-                                 "\nPlease run this function it again.",
-                                 "\nTry using method = `client` or setting files.per.chunk to a small number."))
+    if(result == -1) {
+        stop(
+            paste0(
+                "There was an error in the download process (we might had a connection problem with GDC server).",
+                "\nPlease run this function it again.",
+                "\nTry using method = `client` or setting files.per.chunk to a small number.")
+        )
+    }
     message("Download completed")
 }
 
@@ -303,8 +338,10 @@ GDCclientInstall <- function(){
 checkAlreadyDownloaded <- function(path,manifest){
     files2Download <- !(file.exists(file.path(path,manifest$id,manifest$filename)) | file.exists(file.path(path,manifest$filename)))
     if (any(files2Download == FALSE)) {
-        message("Of the ", nrow(manifest), " files for download ",
-                table(files2Download)["FALSE"] , " already exist.")
+        message(
+            "Of the ", nrow(manifest), " files for download ",
+            table(files2Download)["FALSE"] , " already exist."
+        )
         if (any(files2Download == TRUE)) message("We will download only those that are missing ones.")
     }
     return(manifest[files2Download,])

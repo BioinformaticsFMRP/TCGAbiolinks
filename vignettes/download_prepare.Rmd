@@ -500,6 +500,7 @@ isoform <- GDCprepare(
 query_met.hg38 <- GDCquery(
   project= "TCGA-LGG", 
   data.category = "DNA Methylation", 
+  data.type = "Methylation Beta Value",
   platform = "Illumina Human Methylation 450", 
   barcode = c("TCGA-HT-8111-01A-11D-2399-05","TCGA-HT-A5R5-01A-11D-A28N-05")
 )
@@ -512,7 +513,17 @@ data.hg38 <- GDCprepare(query_met.hg38)
 # Using sesame 	http://bioconductor.org/packages/sesame/
 # Please cite 10.1093/nar/gky691 and doi: 10.1093/nar/gkt090.
 library(TCGAbiolinks)
-proj <- "TCGA-ACC"
+query.idat <- GDCquery(
+  project = "TCGA-LGG", 
+  data.category = "DNA Methylation", 
+  data.type = "Masked Intensities",
+  platform = "Illumina Human Methylation 450", 
+  barcode = c("TCGA-HT-8111-01A-11D-2399-05","TCGA-HT-A5R5-01A-11D-A28N-05")
+)
+GDCdownload(query, method = "api", files.per.chunk = 20)
+betas <- GDCprepare(query.idat)
+
+
 query <- GDCquery(
   project = proj,
   data.category = "Raw microarray data",

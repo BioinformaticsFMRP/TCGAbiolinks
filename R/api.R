@@ -250,11 +250,13 @@ getDataCategorySummary <- function(project, legacy = FALSE){
 #' @param project A  GDC project
 #' @param legacy Select between Harmonized or Legacy database
 #' @examples
-#' \dontrun{
 #' getProjectSummary("TCGA-ACC")
+#' \dontrun{
 #' getProjectSummary("CPTAC-2")
 #' }
+#' @export
 getProjectSummary <- function(project, legacy = FALSE){
+    checkProjectInput(project)
     baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/projects/","https://api.gdc.cancer.gov/projects/")
     url <- paste0(baseURL, project,"?expand=summary,summary.data_categories&pretty=true")
     return(fromJSON(url,simplifyDataFrame = TRUE)$data$summary)
