@@ -32,22 +32,28 @@ The code is divided in 4 case study:
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(SummarizedExperiment)
 library(TCGAbiolinks)
-query.exp <- GDCquery(project = "TCGA-BRCA", 
-                      legacy = TRUE,
-                      data.category = "Gene expression",
-                      data.type = "Gene expression quantification",
-                      platform = "Illumina HiSeq", 
-                      file.type = "results",
-                      experimental.strategy = "RNA-Seq",
-                      sample.type = c("Primary Tumor","Solid Tissue Normal"))
+query.exp <- GDCquery(
+  project = "TCGA-BRCA", 
+  legacy = TRUE,
+  data.category = "Gene expression",
+  data.type = "Gene expression quantification",
+  platform = "Illumina HiSeq", 
+  file.type = "results",
+  experimental.strategy = "RNA-Seq",
+  sample.type = c("Primary Tumor","Solid Tissue Normal")
+)
 GDCdownload(query.exp)
-brca.exp <- GDCprepare(query = query.exp, save = TRUE, save.filename = "brcaExp.rda")
+brca.exp <- GDCprepare(
+  query = query.exp, 
+  save = TRUE, 
+  save.filename = "brcaExp.rda"
+)
 
 # get subtype information
 dataSubt <- TCGAquery_subtype(tumor = "BRCA")
 
 # get clinical data
-dataClin <- GDCquery_clinic(project = "TCGA-BRCA","clinical") 
+dataClin <- GDCquery_clinic(project = "TCGA-BRCA",type = "clinical") 
 
 # Which samples are Primary Tumor
 dataSmTP <- TCGAquery_SampleTypes(getResults(query.exp,cols="cases"),"TP") 
@@ -438,8 +444,10 @@ of gene expression and their significance value.
 #-------------------------------------------------
 # 2.3 - DEA - Expression analysis - volcano plot
 # ------------------------------------------------
-acc.exp.aux <- subset(acc.exp, 
-                      select = colData(acc.exp)$subtype_MethyLevel %in% c("CIMP-high","CIMP-low"))
+acc.exp.aux <- subset(
+  acc.exp, 
+  select = colData(acc.exp)$subtype_MethyLevel %in% c("CIMP-high","CIMP-low")
+)
 
 idx <- colData(acc.exp.aux)$subtype_MethyLevel %in% c("CIMP-high")
 idx2 <- colData(acc.exp.aux)$subtype_MethyLevel %in% c("CIMP-low")
@@ -589,7 +597,8 @@ setwd("case4")
 # ----------------------------------
 query.met <- GDCquery(
   project = "TCGA-KIRC", 
-  data.category = "DNA Methylation",
+  data.category = "DNA Methylation", 
+  data.type = "Methylation Beta Value",
   platform = "Illumina Human Methylation 450"
 )
 GDCdownload(query.met)
@@ -612,15 +621,14 @@ query.exp <- GDCquery(
   project = "TCGA-KIRC",
   data.category = "Transcriptome Profiling",
   data.type = "Gene Expression Quantification", 
-  workflow.type = "HTSeq - FPKM-UQ"
+  workflow.type = "STAR - Counts"
 )
-GDCdownload(query.exp)
+GDCdownload(query.exp,files.per.chunk = 20)
 kirc.exp <- GDCprepare(
   query = query.exp, 
   save = TRUE, 
   save.filename = "kircExp.rda"
 )
-kirc.exp <- kirc.exp
 ```
 
 A MultiAssayExperiment object from the r BiocStyle::Biocpkg("MultiAssayExperiment") package is the input for multiple main functions of r BiocStyle::Biocpkg("ELMER").
