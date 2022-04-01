@@ -15,8 +15,8 @@ getProjectSummary(project, legacy = FALSE)
 Get Project Summary from GDC
 }
 \examples{
-\dontrun{
 getProjectSummary("TCGA-ACC")
+\dontrun{
 getProjectSummary("CPTAC-2")
 }
 }

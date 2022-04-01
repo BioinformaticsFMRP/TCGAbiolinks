@@ -55,13 +55,13 @@ checkProjectInput <- function(project){
     projects <- getGDCprojects()
 
     if(missing(project)) {
-        print(knitr::kable(projects[,c(7,9)]))
+        print(knitr::kable(projects[,c("id","name")]))
         stop("Please set a project argument from the column id above")
     }
 
     for(proj in project) {
         if( !(proj %in% projects$project_id)) {
-            print(knitr::kable(projects[,c(7,9)]))
+            print(knitr::kable(projects[,c("id","name")]))
             stop("Please set a valid project argument from the column id above. Project ", proj, " was not found.")
         }
     }
@@ -138,6 +138,7 @@ checkDataTypeInput <- function(legacy, data.type){
             "Raw Simple Somatic Mutation",
             "Masked Somatic Mutation",
             "Copy Number Segment",
+            "Masked Intensities",
             "Allele-specific Copy Number Segment",
             "Masked Copy Number Segment",
             "Isoform Expression Quantification",

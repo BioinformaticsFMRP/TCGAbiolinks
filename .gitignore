@@ -7,3 +7,5 @@
 *.aux
 doc
 Meta
+/doc/
+/Meta/

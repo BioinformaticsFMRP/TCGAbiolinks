@@ -82,13 +82,14 @@ GDCprepare <- function(
           "Clinical data",
           "Protein expression quantification",
           "Raw intensities",
+          "Masked Intensities",
           "Clinical Supplement",
           "Masked Somatic Mutation",
-          "Biospecimen Supplement")
+          "Biospecimen Supplement"
+          )
         )
     )
 
-  "Aliquot Ensemble Somatic Variant Merging and Masking"
 
   if(test.duplicated.cases) {
     dup <- query$results[[1]]$cases[duplicated(query$results[[1]]$cases)]
@@ -128,14 +129,21 @@ GDCprepare <- function(
       )
       files.idat <- file.path(directory, files.idat)
       if (!all(file.exists(files) | file.exists(files.idat))) {
-        stop(paste0("I couldn't find all the files from the query. ",
-                    "Please check if the directory parameter is right or `GDCdownload` downloaded the samples."))
-
+        stop(
+          paste0(
+            "I couldn't find all the files from the query. ",
+            "Please check if the directory parameter is right ",
+            "or `GDCdownload` downloaded the samples."
+          )
+        )
       }
     } else {
       stop(
-        paste0("I couldn't find all the files from the query. ",
-               "Please check if the directory parameter is right or `GDCdownload` downloaded the samples.")
+        paste0(
+          "I couldn't find all the files from the query. ",
+          "Please check if the directory parameter is right ",
+          "or `GDCdownload` downloaded the samples."
+        )
       )
     }
   }
@@ -171,9 +179,9 @@ GDCprepare <- function(
     } else {
       data <- readCopyNumberVariation(files, query$results[[1]]$cases)
     }
-  }  else if (grepl("DNA methylation",query$data.category, ignore.case = TRUE)) {
+  }  else if (grepl("Methylation Beta Value",query$data.type, ignore.case = TRUE)) {
     data <- readDNAmethylation(files, cases = cases, summarizedExperiment, unique(query$platform))
-  }  else if (grepl("Raw intensities",query$data.type, ignore.case = TRUE)) {
+  }  else if (grepl("Raw intensities|Masked Intensities",query$data.type, ignore.case = TRUE)) {
     # preparing IDAT files
     data <- readIDATDNAmethylation(files, barcode = cases, summarizedExperiment, unique(query$platform), query$legacy)
   }  else if (grepl("Proteome Profiling",query$data.category,ignore.case = TRUE)) {
@@ -686,7 +694,7 @@ readIDATDNAmethylation <- function(
 
   # Check if moved files would be moved outside of scope folder, if so, path doesn't change
   moved.files <- sapply(files,USE.NAMES=FALSE,function(x){
-    if (grepl("Raw_intensities",dirname(dirname(x)))) {
+    if (grepl("Raw_intensities|Masked_Intensities",dirname(dirname(x)))) {
       return(file.path(dirname(dirname(x)), basename(x)))
     }
     return(x)
@@ -694,7 +702,7 @@ readIDATDNAmethylation <- function(
 
   # for each file move it to upper parent folder if necessary
   plyr::a_ply(files, 1,function(x){
-    if (grepl("Raw_intensities",dirname(dirname(x)))) {
+    if (grepl("Raw_intensities|Masked_Intensities",dirname(dirname(x)))) {
       tryCatch(
         move(x,
              file.path(dirname(dirname(x)), basename(x)),
