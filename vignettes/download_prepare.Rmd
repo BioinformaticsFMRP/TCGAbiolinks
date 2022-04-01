@@ -541,3 +541,15 @@ tryCatch(
 betas <- GDCprepare(query)
 ```
 
+### Protein
+
+```{r, eval = FALSE}
+query.rppa <- GDCquery(
+    project = "TCGA-ESCA", 
+    data.category = "Proteome Profiling",
+    data.type = "Protein Expression Quantification"
+)
+GDCdownload(query.rppa) 
+rppa <- GDCprepare(query.rppa) 
+```
+
