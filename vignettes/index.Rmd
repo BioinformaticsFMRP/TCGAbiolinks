@@ -19,6 +19,9 @@ to search, download and prepare relevant data for analysis in R.
 
 # News
 <hr>
+- April 2022:
+  - Started to add support for GENCODE v36 pipelines
+  - Add stemness score functions
 - December 2019: 
   - Added support to non TCGA/TARGET projects - https://rpubs.com/tiagochst/TCGAbiolinks_RNA-seq_new_projects
   - Added support to linked Omics data retrieval - https://rpubs.com/tiagochst/linkedOmics
