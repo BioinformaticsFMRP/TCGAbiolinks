@@ -78,16 +78,16 @@ GDCquery_clinic will download all clinical information from the API
 as the one with using the button from each project
 }
 \examples{
-clin <- GDCquery_clinic("TCGA-ACC", type = "clinical", save.csv = TRUE)
-clin <- GDCquery_clinic("TCGA-ACC", type = "biospecimen", save.csv = TRUE)
-clin.cptac2 <- GDCquery_clinic("CPTAC-2", type = "clinical")
-clin.TARGET_ALL_P1 <- GDCquery_clinic("TARGET-ALL-P1", type = "clinical")
-clin.fm_ad <- GDCquery_clinic("FM-AD", type = "clinical")
+clinical <- GDCquery_clinic(project = "TCGA-ACC", type = "clinical", save.csv = TRUE)
+clinical <- GDCquery_clinic(project = "TCGA-ACC", type = "biospecimen", save.csv = TRUE)
+clinical.cptac2 <- GDCquery_clinic(project = "CPTAC-2", type = "clinical")
+clinical.TARGET_ALL_P1 <- GDCquery_clinic(project =  "TARGET-ALL-P1", type = "clinical")
+clinicaln.fm_ad <- GDCquery_clinic(project = "FM-AD", type = "clinical")
 \dontrun{
-clin <- GDCquery_clinic(project = "CPTAC-3", type = "clinical")
-clin <- GDCquery_clinic(project = "CPTAC-2", type = "clinical")
-clin <- GDCquery_clinic(project = "HCMI-CMDC", type = "clinical")
-clin <- GDCquery_clinic(project = "NCICCR-DLBCL", type = "clinical")
-clin <- GDCquery_clinic(project = "ORGANOID-PANCREATIC", type = "clinical")
+clinical.cptac_3 <- GDCquery_clinic(project = "CPTAC-3", type = "clinical")
+clinical.cptac_2 <- GDCquery_clinic(project = "CPTAC-2", type = "clinical")
+clinical.HCMI_CMDC <- GDCquery_clinic(project = "HCMI-CMDC", type = "clinical")
+clinical <- GDCquery_clinic(project = "NCICCR-DLBCL", type = "clinical")
+clinical <- GDCquery_clinic(project = "ORGANOID-PANCREATIC", type = "clinical")
 }
 }
