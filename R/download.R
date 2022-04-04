@@ -190,6 +190,7 @@ GDCdownload <- function(
 #' getManifest(query)
 #' @export
 getManifest <- function(query, save = FALSE) {
+
     manifest <- query$results[[1]][,c("file_id","file_name","md5sum","file_size","state")]
     colnames(manifest) <- c("id","filename","md5","size","state")
     if(save)  {
@@ -201,7 +202,13 @@ getManifest <- function(query, save = FALSE) {
     return(manifest)
 }
 
-GDCdownload.by.chunk <- function(server, manifest, name, path, step){
+GDCdownload.by.chunk <- function(
+    server = "https://api.gdc.cancer.gov/data/",
+    manifest,
+    name = "TCGAbiolinks_download",
+    path = ".",
+    step = 1
+){
     for(idx in 0:ceiling(nrow(manifest)/step - 1)){
         end <- ifelse(((idx + 1) * step) > nrow(manifest), nrow(manifest),((idx + 1) * step))
         manifest.aux <- manifest[((idx * step) + 1):end,]
@@ -221,7 +228,12 @@ GDCdownload.by.chunk <- function(server, manifest, name, path, step){
     }
 }
 
-GDCdownload.aux <- function(server, manifest, name, path){
+GDCdownload.aux <- function(
+    server = "https://api.gdc.cancer.gov/data/",
+    manifest,
+    name = "TCGAbiolinks_download",
+    path = "."
+){
     result = tryCatch({
         bin <- getURL(
             server,
