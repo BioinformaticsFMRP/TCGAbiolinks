@@ -171,27 +171,32 @@ TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
 #' @importFrom data.table rbindlist as.data.table
 #' @importFrom jsonlite fromJSON
 #' @examples
-#' clin <- GDCquery_clinic("TCGA-ACC", type = "clinical", save.csv = TRUE)
-#' clin <- GDCquery_clinic("TCGA-ACC", type = "biospecimen", save.csv = TRUE)
-#' clin.cptac2 <- GDCquery_clinic("CPTAC-2", type = "clinical")
-#' clin.TARGET_ALL_P1 <- GDCquery_clinic("TARGET-ALL-P1", type = "clinical")
-#' clin.fm_ad <- GDCquery_clinic("FM-AD", type = "clinical")
+#' clinical <- GDCquery_clinic(project = "TCGA-ACC", type = "clinical", save.csv = TRUE)
+#' clinical <- GDCquery_clinic(project = "TCGA-ACC", type = "biospecimen", save.csv = TRUE)
+#' clinical.cptac2 <- GDCquery_clinic(project = "CPTAC-2", type = "clinical")
+#' clinical.TARGET_ALL_P1 <- GDCquery_clinic(project =  "TARGET-ALL-P1", type = "clinical")
+#' clinicaln.fm_ad <- GDCquery_clinic(project = "FM-AD", type = "clinical")
 #' \dontrun{
-#' clin <- GDCquery_clinic(project = "CPTAC-3", type = "clinical")
-#' clin <- GDCquery_clinic(project = "CPTAC-2", type = "clinical")
-#' clin <- GDCquery_clinic(project = "HCMI-CMDC", type = "clinical")
-#' clin <- GDCquery_clinic(project = "NCICCR-DLBCL", type = "clinical")
-#' clin <- GDCquery_clinic(project = "ORGANOID-PANCREATIC", type = "clinical")
+#' clinical.cptac_3 <- GDCquery_clinic(project = "CPTAC-3", type = "clinical")
+#' clinical.cptac_2 <- GDCquery_clinic(project = "CPTAC-2", type = "clinical")
+#' clinical.HCMI_CMDC <- GDCquery_clinic(project = "HCMI-CMDC", type = "clinical")
+#' clinical <- GDCquery_clinic(project = "NCICCR-DLBCL", type = "clinical")
+#' clinical <- GDCquery_clinic(project = "ORGANOID-PANCREATIC", type = "clinical")
 #' }
 #' @return A data frame with the clinical information
-GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
+GDCquery_clinic <- function(
+    project,
+    type = "clinical",
+    save.csv = FALSE
+){
     checkProjectInput(project)
 
     if(length(project) > 1) stop("Please, project should be only one valid project")
 
-    if(!grepl("clinical|Biospecimen",type,ignore.case = TRUE)) stop("Type must be clinical or biospecemen")
+    if(!grepl("clinical|Biospecimen",type,ignore.case = TRUE)) stop("Type must be clinical or Biospecimen")
     baseURL <- "https://api.gdc.cancer.gov/cases/?"
     options.pretty <- "pretty=true"
+
     if(grepl("clinical",type,ignore.case = TRUE)) {
         options.expand <- "expand=diagnoses,diagnoses.treatments,annotations,family_histories,demographic,exposures"
         option.size <- paste0("size=",getNbCases(project,"Clinical"))
@@ -202,7 +207,7 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
         files.data_category <- "Biospecimen"
     }
 
-    if(grepl("TCGA|TARGET",project)){
+    if(grepl("TCGA",project)){
         options.filter <- paste0(
             "filters=",
             URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
@@ -272,7 +277,8 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
                 df <- merge(df, as.data.table(treatments.radiation), by = "submitter_id",  all = TRUE, sort = FALSE)
             }
             df$bcr_patient_barcode <- df$submitter_id
-            df$disease <- gsub("TCGA-|TARGET-", "", project)
+            df$project <- project
+            df <- df %>% dplyr::relocate(project)
         } else {
 
             # Although for TCGA and TARGET IDs from diagnosis, treatments, exposures etc are the same
@@ -281,6 +287,15 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
             # https://api.gdc.cancer.gov/cases/?pretty=true&expand=diagnoses,demographic&size=1&filters=%7B%22op%22:%22in%22,%22content%22:%7B%22field%22:%22cases.project.project_id%22,%22value%22:[%22ORGANOID-PANCREATIC%22]%7D%7D&format=json
             # DEMOGRAPHIC 48, while everything else is 42
             df <- data.frame("submitter_id" = results$submitter_id)
+
+            if("disease_type" %in% colnames(results)){
+                disease_type <- data.frame("disease_type" = results$disease_type)
+                df <- cbind(df,disease_type)
+            }
+            if("primary_site" %in% colnames(results)){
+                primary_site <- data.frame("primary_site" = results$primary_site)
+                df <- cbind(df,primary_site)
+            }
 
             if("diagnoses" %in% colnames(results)){
                 diagnoses <- rbindlist(lapply(results$diagnoses, function(x) if(is.null(x)) data.frame(NA) else x),fill = T)
@@ -303,10 +318,12 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
                 df <- cbind(df,treatments)
             }
             if("submitter_sample_ids" %in% colnames(results)){
-                submitter_sample_ids <- lapply(results$submitter_sample_ids,
-                                               function(x) {
-                                                   paste(x,collapse = ",")
-                                               }) %>% unlist
+                submitter_sample_ids <- lapply(
+                    results$submitter_sample_ids,
+                    function(x) {
+                        paste(x,collapse = ",")
+                    }
+                ) %>% unlist
                 df <- cbind(df,submitter_sample_ids)
             }
 
@@ -322,7 +339,8 @@ GDCquery_clinic <- function(project, type = "clinical", save.csv = FALSE){
                 df <- cbind(df,demographic)
             }
 
-            df$disease <- gsub("TCGA-|TARGET-", "", project)
+            df$project <- project
+            df <- df %>% dplyr::relocate(project)
         }
         if(nrow(results) != nrow(df)){
             stop("Error: API returned more information")
