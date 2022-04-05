@@ -14,7 +14,7 @@ test_that("GDCdownload API method is working ", {
         project =  c("TCGA-ACC"),
         data.category = "Transcriptome Profiling",
         data.type = "Gene Expression Quantification",
-        workflow.type = "HTSeq - FPKM-UQ",
+        workflow.type = "STAR - Counts",
         barcode = substr(cases,1,12)
     )
     GDCdownload(acc.gbm, method = "api", directory = "ex")
@@ -100,7 +100,7 @@ test_that("GDCprepare accepts more than one project", {
     acc.gbm <- GDCquery(project =  c("TCGA-ACC","TCGA-GBM"),
                         data.category = "Transcriptome Profiling",
                         data.type = "Gene Expression Quantification",
-                        workflow.type = "HTSeq - FPKM-UQ",
+                        workflow.type = "STAR - Counts",
                         barcode = substr(cases,1,12))
     GDCdownload(acc.gbm, method = "api", directory = "ex")
     obj <- GDCprepare(acc.gbm,  directory = "ex")
@@ -135,8 +135,9 @@ test_that("GISTIC2 data is being correclty prepare", {
     query <- GDCquery(
         project = "TCGA-COAD",
         data.category = "Copy Number Variation",
-        data.type = "Gene Level Copy Number Scores",
-        access = "open"
+        data.type = "Gene Level Copy Number",
+        access = "open",
+        barcode = c("TCGA-AA-3522-10A","TCGA-A6-2672-10A")
     )
     GDCdownload(query,directory = "ex")
     data <- GDCprepare(query,directory = "ex")

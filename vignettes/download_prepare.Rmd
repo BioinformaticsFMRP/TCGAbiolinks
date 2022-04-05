@@ -200,7 +200,7 @@ Examples of query, download, prepare can be found in this [gist](https://gist.gi
 |                             | miRNA Expression Quantification   | Not needed      | Returning only a dataframe for  the moment                                  |
 | Copy number variation       | Copy Number Segment               |                 | Returning only a dataframe for  the moment                                  |
 |                             | Masked Copy Number Segment        |                 | Returning only a dataframe for  the moment                                  |
-|                             | Gene Level Copy Number Scores     |                 | Returning only a dataframe for  the moment                                  |
+|                             | Gene Level Copy Number      |                 | Returning only a dataframe for  the moment                                  |
 | Simple Nucleotide Variation |                                   |                 |                                                                             |
 | Raw Sequencing Data         |                                   |                 |                                                                             |
 | Biospecimen                 | Slide Image                       |                 |                                                                             |
@@ -422,13 +422,13 @@ GDCdownload(query)
 data <- GDCprepare(query)
 ```
 
-### GISTIC2
+### Gene Level Copy Number
 
 ```{r, eval = FALSE}
 query <- GDCquery(
   project = "TCGA-ACC",
   data.category = "Copy Number Variation",
-  data.type = "Gene Level Copy Number Scores",              
+  data.type = "Gene Level Copy Number",              
   access = "open"
 )
 GDCdownload(query)
