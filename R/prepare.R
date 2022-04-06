@@ -86,7 +86,7 @@ GDCprepare <- function(
           "Clinical Supplement",
           "Masked Somatic Mutation",
           "Biospecimen Supplement"
-          )
+        )
         )
     )
 
@@ -1095,9 +1095,17 @@ colDataPrepare <- function(barcode){
   # How to deal with mixed samples "C3N-02003-01;C3N-02003-021" ?
   # Check if this breaks the pacakge
   if(any(grepl("C3N-|C3L-",barcode))) {
-    ret <- data.frame(sample =  sapply(barcode, function(x) stringr:::str_split(x,";") %>% unlist()) %>% unlist %>% unique,stringsAsFactors = FALSE)
+    ret <- data.frame(
+      sample =  sapply(barcode, function(x) stringr::str_split(x,";") %>% unlist()) %>%
+        unlist %>% unique,stringsAsFactors = FALSE
+    )
   }
-  if(is.null(ret)) ret <- data.frame(sample = barcode %>% unique,stringsAsFactors = FALSE)
+  if(is.null(ret)) {
+    ret <- data.frame(
+      sample = barcode %>% unique,
+      stringsAsFactors = FALSE
+    )
+  }
 
   message(" => Add clinical information to samples")
   # There is a limitation on the size of the string, so this step will be splited in cases of 100
