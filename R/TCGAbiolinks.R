@@ -29,12 +29,6 @@ NULL
 #' @format A data frame with 200 rows and 7 variables
 NULL
 
-#' BRCA_rnaseqv2
-#' @docType data
-#' @keywords internal
-#' @name BRCA_rnaseqv2
-#' @format A data frame with 200 rows (genes) and 1172 variables (samples)
-NULL
 
 
 #' TCGA data matrix BRCA
