@@ -6,12 +6,8 @@
 \title{A numeric vector with SC-derived definitive endoderm (DE) signature trained on PCBC's dataset}
 \format{
 A numeric vector with 12956 genes
-
-A numeric vector with 12956 genes
 }
 \description{
 A numeric vector with SC-derived definitive endoderm (DE) signature trained on PCBC's dataset
-
-A numeric vector with stem cell (SC)-derived embryoid bodies (EB) signature trained on PCBC's dataset
 }
 \keyword{internal}

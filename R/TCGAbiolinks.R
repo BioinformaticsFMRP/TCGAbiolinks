@@ -178,7 +178,7 @@ NULL
 #' A numeric vector with stem cell (SC)-derived embryoid bodies (EB) signature trained on PCBC's dataset
 #' @docType data
 #' @keywords internal
-#' @name DE_PCBC_stemSig
+#' @name EB_PCBC_stemSig
 #' @format A numeric vector with 12956 genes
 NULL
 
