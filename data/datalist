@@ -6,11 +6,8 @@ dataDEGsFiltLevel
 dataREAD
 dataREAD_df
 geneInfo
-tabDEGsTFPubmed
-tabPackage1
-tabPackage2
-tabPackageKey
 tabSurvKMcompleteDEGs
+Tumor.purity
 DE_PCBC_stemSig
 EB_PCBC_stemSig
 ECTO_PCBC_stemSig
