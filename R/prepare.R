@@ -400,6 +400,7 @@ readExonQuantification <- function (files, cases, summarizedExperiment = TRUE){
       return(x)
     })
     rowRanges <- makeGRangesFromDataFrame(df)
+    message("Available assays in SummarizedExperiment : \n  => ",paste(names(assays), collapse = "\n  => "))
     rse <- SummarizedExperiment(
       assays = assays,
       rowRanges = rowRanges,
@@ -623,6 +624,7 @@ makeSEfromGeneExpressionQuantification <- function(
     return(x)
   })
 
+  message("Available assays in SummarizedExperiment : \n  => ",paste(names(assays), collapse = "\n  => "))
   rse <- SummarizedExperiment(
     assays = assays,
     rowRanges = rowRanges,
@@ -651,6 +653,7 @@ makeSEFromDNAMethylationMatrix <- function(
   betas <- betas[rownames(betas) %in% names(rowRanges),,drop = FALSE]
   betas <- betas[names(rowRanges),,drop = FALSE]
   assay <- data.matrix(betas)
+
   betas <- SummarizedExperiment(
     assays = assay,
     rowRanges = rowRanges,
@@ -1316,6 +1319,8 @@ makeSEfromTranscriptomeProfilingSTAR <- function(data, cases, assay.list){
   rowRanges <- gene.location[match(data$gene_id, gene.location$gene_id),]
   names(rowRanges) <- as.character(data$gene_id)
 
+
+  message("Available assays in SummarizedExperiment : \n  => ",paste(names(assays), collapse = "\n  => "))
   rse <- SummarizedExperiment(
     assays = assays,
     rowRanges = rowRanges,
@@ -1369,6 +1374,7 @@ makeSEfromTranscriptomeProfiling <- function(data, cases, assay.list){
     original_ensembl_gene_id = data$X1
   )
   names(rowRanges) <- as.character(data$ensembl_gene_id)
+  message("Available assays in SummarizedExperiment : \n  => ",paste(names(assays), collapse = "\n  => "))
   rse <- SummarizedExperiment(
     assays = assays,
     rowRanges = rowRanges,
@@ -1525,8 +1531,9 @@ makeSEfromGeneLevelCopyNumber <- function(df, cases){
       rownames(ret) <- NULL
       ret
     })
-  names(assays) <-   c("copy_number","min_copy_number", "max_copy_number")
+  names(assays) <- c("copy_number","min_copy_number", "max_copy_number")
 
+  message("Available assays in SummarizedExperiment : \n  => ",paste(names(assays), collapse = "\n  => "))
   rse <- SummarizedExperiment(assays = assays, rowRanges = rowRanges, colData = colData)
   return(rse)
 }
