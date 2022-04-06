@@ -1767,8 +1767,6 @@ TCGAvisualize_starburst <- function(
 #' @title Get DNA methylation array metadata from SesameData
 #' @noRd
 #' @importFrom stringr str_c
-#' @importFrom ExperimentHub ExperimentHub
-#' @importFrom AnnotationHub query
 getMetPlatInfo <- function(
     genome = c("hg38","hg19"),
     platform = c("450k","EPIC","27k")
@@ -1792,10 +1790,10 @@ getMetPlatInfo <- function(
         genome,
         ".manifest"
     )
-    ehub <- ExperimentHub()
-    query <- query(ehub, c("sesameData",manifest))
+    ehub <- ExperimentHub::ExperimentHub()
+    query <- AnnotationHub::query(ehub, c("sesameData",manifest))
     query <- query[query$title == manifest,]
     ah_id <- query$ah_id[query$rdatadateadded == max(as.Date(query$rdatadateadded))]
-    ExperimentHub()[[ah_id]]
+    ehub[[ah_id]]
 }
 
