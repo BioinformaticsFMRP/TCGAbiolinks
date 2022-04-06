@@ -104,8 +104,6 @@ Suggests:
     gridExtra,
     survival,
     doParallel,
-    ExperimentHub,
-    AnnotationHub,
     parallel,
     ggrepel (>= 0.6.3),
     scales,
