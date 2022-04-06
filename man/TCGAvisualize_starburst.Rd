@@ -13,15 +13,15 @@ TCGAvisualize_starburst(
   met.p.cut = 0.01,
   diffmean.cut = 0,
   logFC.cut = 0,
-  met.platform,
+  met.platform = c("EPIC", "450k", "27k"),
   genome,
   names = FALSE,
   names.fill = TRUE,
-  filename = "starburst.pdf",
+  filename = "starburst.png",
   return.plot = FALSE,
-  ylab = expression(atop("Gene Expression", paste(Log[10],
+  ylab = expression(atop("Gene Expression", paste(-Log[10],
     " (FDR corrected P values)"))),
-  xlab = expression(atop("DNA Methylation", paste(Log[10],
+  xlab = expression(atop("DNA Methylation", paste(-Log[10],
     " (FDR corrected P values)"))),
   title = "Starburst Plot",
   legend = "DNA Methylation/Expression Relation",
@@ -121,7 +121,7 @@ Input: data with gene expression/methylation expression
 \examples{
 \dontrun{
 library(SummarizedExperiment)
-met <- TCGAbiolinks:::getMetPlatInfo(genome = "hg38", platform = "27K")
+met <- TCGAbiolinks:::getMetPlatInfo(genome = "hg38", platform = "27k")
 values(met) <- NULL
 met$probeID <- names(met)
 nrows <- length(met); ncols <- 20
@@ -134,7 +134,8 @@ colData <- S4Vectors::DataFrame(
 met <- SummarizedExperiment::SummarizedExperiment(
          assays = S4Vectors::SimpleList(counts=counts),
          rowRanges = met,
-         colData = colData)
+         colData = colData
+)
 rowRanges(met)$diffmean.g1.g2 <- c(runif(nrows, -0.1, 0.1))
 rowRanges(met)$diffmean.g2.g1 <- -1*(rowRanges(met)$diffmean.g1.g2)
 rowRanges(met)$p.value.g1.g2 <- c(runif(nrows, 0, 1))
@@ -152,7 +153,7 @@ result <- TCGAvisualize_starburst(
   group1 = "g1",
   group2 = "g2",
   genome = "hg38",
-  met.platform = "27K",
+  met.platform = "27k",
   diffmean.cut = 0.0,
   names  = TRUE
 )

@@ -1778,6 +1778,8 @@ getMetPlatInfo <- function(
 
     check_package("sesameData")
     check_package("sesame")
+    check_package("AnnotationHub")
+    check_package("ExperimentHub")
 
     platform <- ifelse(
         platform == "450k","HM450",
