@@ -6,30 +6,29 @@ test_that("GDCdownload API method is working ", {
     skip_on_bioc()
     skip_if_offline()
 
-    cases <-  c("TCGA-OR-A5JX-01A-11R-A29S-07",
-                "TCGA-OR-A5KY-01A-11R-A29S-07",
-                "TCGA-PK-A5HA-01A-11R-A29S-07"
+    cases <-  c(
+        "TCGA-OR-A5JX-01A-11R-A29S-07",
+        "TCGA-OR-A5KY-01A-11R-A29S-07",
+        "TCGA-PK-A5HA-01A-11R-A29S-07"
     )
-    acc.gbm <- GDCquery(
+    acc <- GDCquery(
         project =  c("TCGA-ACC"),
         data.category = "Transcriptome Profiling",
         data.type = "Gene Expression Quantification",
-        workflow.type = "HTSeq - FPKM-UQ",
+        workflow.type = "STAR - Counts",
         barcode = substr(cases,1,12)
     )
-    GDCdownload(acc.gbm, method = "api", directory = "ex")
-    obj <- GDCprepare(acc.gbm,  directory = "ex",summarizedExperiment = FALSE)
-    expect_true(all(substr(colnames(obj)[-1],1,12) == substr(cases,1,12)))
+    GDCdownload(acc, method = "api", directory = "ex")
 
-    obj <- GDCprepare(acc.gbm,  directory = "ex",summarizedExperiment = TRUE)
-    expect_true(all(substr(colData(obj) %>% rownames(),1,12) == substr(cases,1,12)))
-    expect_true(all(obj$barcode == cases))
+    obj <- GDCprepare(acc,  directory = "ex",summarizedExperiment = TRUE)
+    expect_true(all(substr(colnames(obj),1,12) == substr(cases,1,12)))
+   expect_true(all(obj$barcode == cases))
 
     query <- GDCquery(
         project = "CPTAC-3",
         data.category = "Transcriptome Profiling",
         data.type = "Gene Expression Quantification",
-        workflow.type = "HTSeq - Counts",
+        workflow.type = "STAR - Counts",
         barcode = c("CPT0010260013","CPT0000870008","CPT0105190006","CPT0077490006")
     )
     GDCdownload(query)
@@ -100,7 +99,7 @@ test_that("GDCprepare accepts more than one project", {
     acc.gbm <- GDCquery(project =  c("TCGA-ACC","TCGA-GBM"),
                         data.category = "Transcriptome Profiling",
                         data.type = "Gene Expression Quantification",
-                        workflow.type = "HTSeq - FPKM-UQ",
+                        workflow.type = "STAR - Counts",
                         barcode = substr(cases,1,12))
     GDCdownload(acc.gbm, method = "api", directory = "ex")
     obj <- GDCprepare(acc.gbm,  directory = "ex")
@@ -128,15 +127,16 @@ test_that("Non TCGA data is processed", {
     #data <- GDCprepare(query)
 })
 
-test_that("GISTIC2 data is being correclty prepare", {
+test_that("Gene Level Copy Number is being correclty prepare", {
     skip_on_bioc()
     skip_if_offline()
 
     query <- GDCquery(
-        project = "TCGA-COAD",
+        project = "TCGA-ACC",
         data.category = "Copy Number Variation",
-        data.type = "Gene Level Copy Number Scores",
-        access = "open"
+        data.type = "Gene Level Copy Number",
+        access = "open",
+        barcode = c("TCGA-OR-A5JD","TCGA-OR-A5J7")
     )
     GDCdownload(query,directory = "ex")
     data <- GDCprepare(query,directory = "ex")
