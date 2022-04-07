@@ -120,7 +120,7 @@ GDCprepare <- function(
   # a second run
   if (!all(file.exists(files))) {
     # We have to check we movedthe files
-    if (query$data.category == "Raw microarray data"){
+    if (query$data.type == "Masked Intensities"){
       files.idat <- file.path(
         query$results[[1]]$project, source,
         gsub(" ","_",query$results[[1]]$data_category),
@@ -727,8 +727,8 @@ readIDATDNAmethylation <- function(
 
   if (summarizedExperiment) {
     met.platform <- "EPIC"
-    if (grepl("450",platform)) met.platform <- "450K"
-    if (grepl("27",platform)) met.platform <- "27K"
+    if (grepl("450",platform)) met.platform <- "450k"
+    if (grepl("27",platform)) met.platform <- "27k"
     betas <- makeSEFromDNAMethylationMatrix(
       betas = betas,
       genome = ifelse(legacy,"hg19","hg38"),
