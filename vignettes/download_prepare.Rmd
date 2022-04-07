@@ -508,38 +508,6 @@ GDCdownload(query_met.hg38)
 data.hg38 <- GDCprepare(query_met.hg38)
 ```
 
-### DNA methylation IDAT
-```{r, eval = FALSE}
-# Using sesame 	http://bioconductor.org/packages/sesame/
-# Please cite 10.1093/nar/gky691 and doi: 10.1093/nar/gkt090.
-library(TCGAbiolinks)
-query.idat <- GDCquery(
-  project = "TCGA-LGG", 
-  data.category = "DNA Methylation", 
-  data.type = "Masked Intensities",
-  platform = "Illumina Human Methylation 450", 
-  barcode = c("TCGA-HT-8111-01A-11D-2399-05","TCGA-HT-A5R5-01A-11D-A28N-05")
-)
-GDCdownload(query, method = "api", files.per.chunk = 20)
-betas <- GDCprepare(query.idat)
-
-
-query <- GDCquery(
-  project = proj,
-  data.category = "Raw microarray data",
-  data.type = "Raw intensities", 
-  experimental.strategy = "Methylation array", 
-  legacy = TRUE,
-  barcode = c("TCGA-OR-A5JT","CGA-OR-A5LG","TCGA-OR-A5JX"),
-  file.type = ".idat",
-  platform = "Illumina Human Methylation 450"
-)
-tryCatch(
-  GDCdownload(query, method = "api", files.per.chunk = 20),
-  error = function(e) GDCdownload(query, method = "client")
-)
-betas <- GDCprepare(query)
-```
 
 ### Protein
 
@@ -553,3 +521,50 @@ GDCdownload(query.rppa)
 rppa <- GDCprepare(query.rppa) 
 ```
 
+### DNA methylation IDAT
+
+```{eval = FALSE}
+query <- GDCquery(
+    project = "TCGA-BRCA",
+    data.category = "DNA Methylation",
+    data.type = "Masked Intensities",
+    platform = "Illumina Human Methylation 27",
+    legacy = FALSE
+)
+GDCdownload(query, files.per.chunk=10)
+betas <- GDCprepare(query)
+
+
+query <- GDCquery(
+    project = "HCMI-CMDC",
+    data.category = "DNA Methylation",
+    data.type = "Masked Intensities",
+    platform = "Illumina Methylation Epic",
+    legacy = FALSE
+)
+GDCdownload(query, files.per.chunk=10)
+betas <- GDCprepare(query)
+
+
+query <- GDCquery(
+    project = "CPTAC-3",
+    data.category = "DNA Methylation",
+    data.type = "Masked Intensities",
+    platform = "Illumina Methylation Epic",
+    legacy = FALSE
+)
+GDCdownload(query, files.per.chunk=10)
+betas <- GDCprepare(query)
+
+query <- GDCquery(
+    project = "TCGA-BRCA",
+    data.category = "DNA Methylation",
+    data.type = "Masked Intensities",
+    platform = "Illumina Methylation Epic",
+    legacy = FALSE
+)
+GDCdownload(query, files.per.chunk=10)
+betas <- GDCprepare(query)
+
+
+```
