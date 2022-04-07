@@ -390,11 +390,13 @@ GDCquery_clinic <- function(
 #' clinical.drug <- GDCprepare_clinic(query,"drug")
 #' clinical.radiation <- GDCprepare_clinic(query,"radiation")
 #' clinical.admin <- GDCprepare_clinic(query,"admin")
-#' query <- GDCquery(project = "TCGA-COAD",
-#'                   data.category = "Biospecimen",
-#'                    file.type = "xml",
-#'                   data.type = "Biospecimen Supplement",
-#'                   barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))
+#' query <- GDCquery(
+#'    project = "TCGA-COAD",
+#'    data.category = "Biospecimen",
+#'    file.type = "xml",
+#'    data.type = "Biospecimen Supplement",
+#'    barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")
+#' )
 #' GDCdownload(query)
 #' clinical <- GDCprepare_clinic(query,"admin")
 #' clinical.drug <- GDCprepare_clinic(query,"sample")
