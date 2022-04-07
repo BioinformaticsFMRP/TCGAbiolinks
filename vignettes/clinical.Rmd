@@ -6,15 +6,15 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-  
+
 <style> body {text-align: justify} </style>
-  
-  
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(progress = FALSE)
 ```
-  
+
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 library(TCGAbiolinks)
 library(SummarizedExperiment)
@@ -65,19 +65,23 @@ Other useful clinical information available are:
 In this example we will fetch clinical data from  BCR Biotab files.
 
 ```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
-query <- GDCquery(project = "TCGA-ACC", 
-                  data.category = "Clinical",
-                  data.type = "Clinical Supplement", 
-                  data.format = "BCR Biotab")
+query <- GDCquery(
+    project = "TCGA-ACC", 
+    data.category = "Clinical",
+    data.type = "Clinical Supplement", 
+    data.format = "BCR Biotab"
+)
 GDCdownload(query)
 clinical.BCRtab.all <- GDCprepare(query)
 names(clinical.BCRtab.all)
 
-query <- GDCquery(project = "TCGA-ACC", 
-                  data.category = "Clinical",
-                  data.type = "Clinical Supplement", 
-                  data.format = "BCR Biotab",
-                   file.type = "radiation")
+query <- GDCquery(
+    project = "TCGA-ACC", 
+    data.category = "Clinical",
+    data.type = "Clinical Supplement", 
+    data.format = "BCR Biotab",
+    file.type = "radiation"
+)
 GDCdownload(query)
 clinical.BCRtab.radiation <- GDCprepare(query)
 
@@ -85,8 +89,8 @@ clinical.BCRtab.radiation <- GDCprepare(query)
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 clinical.BCRtab.all$clinical_drug_acc  %>% 
-  head  %>% 
- DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+    head  %>% 
+    DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 
@@ -115,12 +119,12 @@ plyr::count(clinical.BCRtab.all$clinical_patient_brca$er_status_by_ihc)
 # ER content 
 er.cols <- grep("^er",colnames(clinical.BCRtab.all$clinical_patient_brca))
 clinical.BCRtab.all$clinical_patient_brca[,c(2,er.cols)] %>% 
-DT::datatable(options = list(scrollX = TRUE))
+    DT::datatable(options = list(scrollX = TRUE))
 
 # All columns content first rows
 clinical.BCRtab.all$clinical_patient_brca %>% 
-  head  %>% 
-  DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+    head  %>% 
+    DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 ## Biospecimen
@@ -129,9 +133,9 @@ clinical.BCRtab.all$clinical_patient_brca %>%
 ```{r, results = "hide",cache=TRUE, message=FALSE,warning=FALSE}
 # Biospecimen BCR Biotab
 query.biospecimen <- GDCquery(project = "TCGA-BRCA", 
-                  data.category = "Biospecimen",
-                  data.type = "Biospecimen Supplement", 
-                  data.format = "BCR Biotab")
+                              data.category = "Biospecimen",
+                              data.type = "Biospecimen Supplement", 
+                              data.format = "BCR Biotab")
 GDCdownload(query.biospecimen)
 biospecimen.BCRtab.all <- GDCprepare(query.biospecimen)
 ```
@@ -141,8 +145,8 @@ biospecimen.BCRtab.all <- GDCprepare(query.biospecimen)
 names(biospecimen.BCRtab.all)
 
 biospecimen.BCRtab.all$ssf_normal_controls_ov  %>% 
-  head  %>% 
-  DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+    head  %>% 
+    DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 
@@ -157,9 +161,9 @@ clinical <- GDCquery_clinic(project = "TCGA-LUAD", type = "clinical")
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 clinical %>%
     head %>% 
-  DT::datatable(filter = 'top', 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
-          rownames = FALSE)
+    DT::datatable(filter = 'top', 
+                  options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+                  rownames = FALSE)
 ```
 
 
@@ -169,10 +173,10 @@ clinical <- GDCquery_clinic(project = "BEATAML1.0-COHORT", type = "clinical")
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 clinical %>% 
-  head %>% 
-  DT::datatable(filter = 'top', 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
-          rownames = FALSE)
+    head %>% 
+    DT::datatable(filter = 'top', 
+                  options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+                  rownames = FALSE)
 ```
 
 
@@ -182,10 +186,10 @@ clinical <- GDCquery_clinic(project = "CPTAC-2", type = "clinical")
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 clinical %>% 
-  head %>% 
-  DT::datatable(filter = 'top', 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
-          rownames = FALSE)
+    head %>% 
+    DT::datatable(filter = 'top', 
+                  options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+                  rownames = FALSE)
 ```
 
 ```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
@@ -194,10 +198,10 @@ clinical <- GDCquery_clinic(project = "GENIE-MSK", type = "clinical")
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 clinical %>% 
-  head %>% 
-  DT::datatable(filter = 'top', 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
-          rownames = FALSE)
+    head %>% 
+    DT::datatable(filter = 'top', 
+                  options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+                  rownames = FALSE)
 ```
 
 
@@ -247,18 +251,18 @@ clinical <- GDCprepare_clinic(query, clinical.info = "patient")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 clinical %>% 
-datatable(filter = 'top', 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
-          rownames = FALSE)
+    datatable(filter = 'top', 
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+              rownames = FALSE)
 ```
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
 clinical.drug <- GDCprepare_clinic(query, clinical.info = "drug")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 clinical.drug %>% 
-datatable(filter = 'top', 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
-          rownames = FALSE)
+    datatable(filter = 'top', 
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+              rownames = FALSE)
 ```
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
@@ -266,18 +270,18 @@ clinical.radiation <- GDCprepare_clinic(query, clinical.info = "radiation")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 clinical.radiation %>% 
-datatable(filter = 'top', 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
-          rownames = FALSE)
+    datatable(filter = 'top', 
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+              rownames = FALSE)
 ```
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
 clinical.admin <- GDCprepare_clinic(query, clinical.info = "admin")
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 clinical.admin %>% 
-datatable(filter = 'top', 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
-          rownames = FALSE)
+    datatable(filter = 'top', 
+              options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),  
+              rownames = FALSE)
 ```
 
 
@@ -325,13 +329,13 @@ query.harmonized <- GDCquery(project = "TCGA-OV",
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 query.legacy %>% 
-  getResults %>% 
- DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+    getResults %>% 
+    DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 
 query.harmonized  %>% 
-  getResults %>% 
-  head  %>% 
- DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+    getResults %>% 
+    head  %>% 
+    DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 # Diagnostic Slide (SVS format)
@@ -347,9 +351,9 @@ query.harmonized <- GDCquery(project = "TCGA-COAD",
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 query.harmonized  %>% 
-  getResults %>% 
-  head  %>% 
- DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+    getResults %>% 
+    head  %>% 
+    DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 
@@ -375,8 +379,8 @@ query.legacy <- GDCquery(project = "TCGA-COAD",
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 query.legacy %>% 
-  getResults %>% 
- DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+    getResults %>% 
+    DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 ## Tissue slide image (SVS format)
@@ -392,8 +396,8 @@ query <- GDCquery(project = "TCGA-COAD",
 
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 query %>% 
-  getResults %>% 
- DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+    getResults %>% 
+    DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 ## Clinical Supplement (XML format)
@@ -409,8 +413,8 @@ query <- GDCquery(project = "TCGA-COAD",
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 query %>% 
-  getResults %>% 
- DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+    getResults %>% 
+    DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 
@@ -426,9 +430,9 @@ query <- GDCquery(project = "TCGA-COAD",
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 query %>% 
-  getResults %>% 
-  select(-matches("cases"))%>% 
- DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
+    getResults %>% 
+    select(-matches("cases"))%>% 
+    DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE, eval = FALSE}
@@ -515,40 +519,40 @@ library(data.table)
 library(dplyr)
 library(regexPipes)
 clinical <- TCGAbiolinks:::getGDCprojects()$project_id %>% 
-  regexPipes::grep("TCGA",value=T) %>% 
-  sort %>% 
-  plyr::alply(1,GDCquery_clinic, .progress = "text") %>% 
-  rbindlist
+    regexPipes::grep("TCGA",value=T) %>% 
+    sort %>% 
+    plyr::alply(1,GDCquery_clinic, .progress = "text") %>% 
+    rbindlist
 readr::write_csv(clinical,path = paste0("all_clin_indexed.csv"))
 
 # This code will get all clinical XML data from TCGA
 getclinical <- function(proj){
-  message(proj)
-  while(1){
-    result = tryCatch({
-      query <- GDCquery(project = proj, data.category = "Clinical",file.type = "xml")
-      GDCdownload(query)
-      clinical <- GDCprepare_clinic(query, clinical.info = "patient")
-      for(i in c("admin","radiation","follow_up","drug","new_tumor_event")){
-        message(i)
-        aux <- GDCprepare_clinic(query, clinical.info = i)
-        if(is.null(aux) || nrow(aux) == 0) next
-        # add suffix manually if it already exists
-        replicated <- which(grep("bcr_patient_barcode",colnames(aux), value = T,invert = T) %in% colnames(clinical))
-        colnames(aux)[replicated] <- paste0(colnames(aux)[replicated],".",i)
-        if(!is.null(aux)) clinical <- merge(clinical,aux,by = "bcr_patient_barcode", all = TRUE)
-      }
-      readr::write_csv(clinical,path = paste0(proj,"_clinical_from_XML.csv")) # Save the clinical data into a csv file
-      return(clinical)
-    }, error = function(e) {
-      message(paste0("Error clinical: ", proj))
-    })
-  }
+    message(proj)
+    while(1){
+        result = tryCatch({
+            query <- GDCquery(project = proj, data.category = "Clinical",file.type = "xml")
+            GDCdownload(query)
+            clinical <- GDCprepare_clinic(query, clinical.info = "patient")
+            for(i in c("admin","radiation","follow_up","drug","new_tumor_event")){
+                message(i)
+                aux <- GDCprepare_clinic(query, clinical.info = i)
+                if(is.null(aux) || nrow(aux) == 0) next
+                # add suffix manually if it already exists
+                replicated <- which(grep("bcr_patient_barcode",colnames(aux), value = T,invert = T) %in% colnames(clinical))
+                colnames(aux)[replicated] <- paste0(colnames(aux)[replicated],".",i)
+                if(!is.null(aux)) clinical <- merge(clinical,aux,by = "bcr_patient_barcode", all = TRUE)
+            }
+            readr::write_csv(clinical,path = paste0(proj,"_clinical_from_XML.csv")) # Save the clinical data into a csv file
+            return(clinical)
+        }, error = function(e) {
+            message(paste0("Error clinical: ", proj))
+        })
+    }
 }
 clinical <- TCGAbiolinks:::getGDCprojects()$project_id %>% 
-  regexPipes::grep("TCGA",value=T) %>% sort %>% 
-  plyr::alply(1,getclinical, .progress = "text") %>% 
-  rbindlist(fill = TRUE) %>% setDF %>% subset(!duplicated(clinical))
+    regexPipes::grep("TCGA",value=T) %>% sort %>% 
+    plyr::alply(1,getclinical, .progress = "text") %>% 
+    rbindlist(fill = TRUE) %>% setDF %>% subset(!duplicated(clinical))
 
 readr::write_csv(clinical,path = "all_clin_XML.csv")
 # result: https://drive.google.com/open?id=0B0-8N2fjttG-WWxSVE5MSGpva1U

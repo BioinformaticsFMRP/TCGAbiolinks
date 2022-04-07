@@ -590,3 +590,48 @@ betas <- GDCprepare(query)
 
 
 ```
+
+### Clinical
+
+```{R, eval = FALSE}
+
+query <- GDCquery(
+    project = "TCGA-COAD",
+    data.category = "Clinical",
+    data.type = "Clinical Supplement",
+    data.format = "BCR XML",
+    barcode = "TCGA-A6-5664"
+)
+GDCdownload(query)
+drug <- GDCprepare_clinic(query,"drug")
+
+query <- GDCquery(
+    project = "TCGA-COAD",
+    data.category = "Clinical",
+    data.type = "Clinical Supplement",
+    data.format = "BCR OMF XML",
+    barcode = "TCGA-AD-6964"
+)
+GDCdownload(query)
+
+
+query <- GDCquery(
+    project = "TCGA-ACC", 
+    data.category = "Clinical",
+    data.type = "Clinical Supplement", 
+    data.format = "BCR Biotab"
+)
+GDCdownload(query)
+clinical.BCRtab.all <- GDCprepare(query)
+names(clinical.BCRtab.all)
+
+query <- GDCquery(
+    project = "TCGA-ACC", 
+    data.category = "Clinical",
+    data.type = "Clinical Supplement", 
+    data.format = "BCR Biotab",
+    file.type = "radiation"
+)
+GDCdownload(query)
+clinical.BCRtab.radiation <- GDCprepare(query)
+```
