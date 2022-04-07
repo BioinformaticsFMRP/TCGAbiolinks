@@ -497,12 +497,34 @@ isoform <- GDCprepare(
 # DNA methylation data
 #-------------------------------------- 
 # DNA methylation aligned to hg38
+
+query_met.hg38 <- GDCquery(
+  project = "TCGA-BRCA", 
+  data.category = "DNA Methylation", 
+  data.type = "Methylation Beta Value",
+  platform = "Illumina Human Methylation 27", 
+  barcode = c("TCGA-B6-A0IM")
+)
+GDCdownload(query_met.hg38)
+data.hg38 <- GDCprepare(query_met.hg38)
+
 query_met.hg38 <- GDCquery(
   project= "TCGA-LGG", 
   data.category = "DNA Methylation", 
   data.type = "Methylation Beta Value",
   platform = "Illumina Human Methylation 450", 
   barcode = c("TCGA-HT-8111-01A-11D-2399-05","TCGA-HT-A5R5-01A-11D-A28N-05")
+)
+GDCdownload(query_met.hg38)
+data.hg38 <- GDCprepare(query_met.hg38)
+
+
+query_met.hg38 <- GDCquery(
+  project= "HCMI-CMDC", 
+  data.category = "DNA Methylation", 
+  data.type = "Methylation Beta Value",
+  platform = "Illumina Methylation Epic", 
+  barcode = c("HCM-BROD-0045")
 )
 GDCdownload(query_met.hg38)
 data.hg38 <- GDCprepare(query_met.hg38)
