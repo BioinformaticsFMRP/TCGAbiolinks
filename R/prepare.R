@@ -120,7 +120,7 @@ GDCprepare <- function(
   # a second run
   if (!all(file.exists(files))) {
     # We have to check we movedthe files
-    if (query$data.type == "Masked Intensities"){
+    if (query$data.type == "Masked Intensities" | query$data.category == "Raw microarray data"){
       files.idat <- file.path(
         query$results[[1]]$project, source,
         gsub(" ","_",query$results[[1]]$data_category),
