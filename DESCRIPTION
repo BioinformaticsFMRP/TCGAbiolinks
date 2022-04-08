@@ -91,7 +91,6 @@ Suggests:
     pathview,
     clusterProfiler,
     Seurat,
-    SeuratDisk,
     ComplexHeatmap,
     circlize,
     ConsensusClusterPlus,
