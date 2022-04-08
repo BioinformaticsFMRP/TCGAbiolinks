@@ -346,10 +346,10 @@ readSingleCellAnalysis <- function(
   if(data_format == "HDF5"){
 
     stop("We are not preparing loom files")
-    check_package("SeuratDisk")
-    check_package("Seurat")
-    ret <- SeuratDisk::Connect(filename = files, mode = "r")
-    ret <- Seurat::as.Seurat(ret)
+    # check_package("SeuratDisk")
+    # check_package("Seurat")
+    # ret <- SeuratDisk::Connect(filename = files, mode = "r")
+    # ret <- Seurat::as.Seurat(ret)
     print(files)
   }
 
