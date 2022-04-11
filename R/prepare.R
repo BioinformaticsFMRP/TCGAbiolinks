@@ -1448,6 +1448,7 @@ readTranscriptomeProfiling <- function(
       if (!missing(cases)) names(x) <- cases
       df <- data.table::rbindlist(x, use.names = TRUE, idcol = "case_barcode")
       df <- data.table::dcast(df, gene_id + gene_name + gene_type ~ case_barcode, value.var = colnames(df)[-c(1:4)])
+      df <- dplyr::tibble(df)
 
       if(summarizedExperiment) df <- makeSEfromTranscriptomeProfilingSTAR(df,cases,workflow.type)
     }
