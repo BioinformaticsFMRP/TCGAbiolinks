@@ -15,9 +15,9 @@
 #' consensusMatrix (numerical matrix), consensusTree (hclust), consensusClass
 #' (consensus class assignments). ConsensusClusterPlus also produces images.
 TCGAanalyze_Clustering <- function(
-    tabDF,
-    method,
-    methodHC = "ward.D2"
+        tabDF,
+        method,
+        methodHC = "ward.D2"
 ) {
 
     if (!requireNamespace("ConsensusClusterPlus", quietly = TRUE)) {
@@ -65,12 +65,12 @@ TCGAanalyze_Clustering <- function(
 #' @export
 #' @return Plot with array array intensity correlation and boxplot of correlation samples by samples
 TCGAanalyze_Preprocessing <- function(
-    object,
-    cor.cut = 0,
-    filename = NULL,
-    width = 1000,
-    height = 1000,
-    datatype = names(assays(object))[1]
+        object,
+        cor.cut = 0,
+        filename = NULL,
+        width = 1000,
+        height = 1000,
+        datatype = names(assays(object))[1]
 ) {
     # This is a work around for raw_counts and raw_count
     if (grepl("raw_count", datatype) &
@@ -261,15 +261,15 @@ TCGAanalyze_Preprocessing <- function(
 #'                                      ThreshDown = 0.33)
 #' }
 TCGAanalyze_SurvivalKM <- function(
-    clinical_patient,
-    dataGE,
-    Genelist,
-    Survresult = FALSE,
-    ThreshTop = 0.67,
-    ThreshDown = 0.33,
-    p.cut = 0.05,
-    group1,
-    group2
+        clinical_patient,
+        dataGE,
+        Genelist,
+        Survresult = FALSE,
+        ThreshTop = 0.67,
+        ThreshDown = 0.33,
+        p.cut = 0.05,
+        group1,
+        group2
 ) {
 
     check_package("survival")
@@ -535,13 +535,15 @@ TCGAanalyze_SurvivalKM <- function(
 #' geneInfo = geneInfo,
 #' method = "geneLength")
 #' dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm, method = "quantile", qnt.cut = 0.25)
-TCGAanalyze_Filtering <- function(tabDF,
-                                  method,
-                                  qnt.cut = 0.25,
-                                  var.func = IQR,
-                                  var.cutoff = 0.75,
-                                  eta = 0.05,
-                                  foldChange = 1) {
+TCGAanalyze_Filtering <- function(
+        tabDF,
+        method,
+        qnt.cut = 0.25,
+        var.func = IQR,
+        var.cutoff = 0.75,
+        eta = 0.05,
+        foldChange = 1
+) {
     if (method == "quantile") {
         GeneThresh <- as.numeric(quantile(rowMeans(tabDF), qnt.cut))
         geneFiltered <- names(which(rowMeans(tabDF) > GeneThresh))
@@ -613,31 +615,27 @@ TCGAanalyze_Filtering <- function(tabDF,
 #' and one column for each sample.
 #' @examples
 #' dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
-TCGAanalyze_Normalization <-
-    function(tabDF, geneInfo, method = "geneLength") {
+TCGAanalyze_Normalization <- function(
+        tabDF,
+        geneInfo,
+        method = "geneLength"
+) {
 
-        check_package("EDASeq")
+    check_package("EDASeq")
 
-        # Check if we have a SE, we need a gene expression matrix
-        if (is(tabDF, "SummarizedExperiment")) tabDF <- assay(tabDF)
+    # Check if we have a SE, we need a gene expression matrix
+    if (is(tabDF, "SummarizedExperiment")) tabDF <- assay(tabDF)
 
-        geneInfo <- geneInfo[!is.na(geneInfo[, 1]), ]
-        geneInfo <- as.data.frame(geneInfo)
-        geneInfo$geneLength <-
-            as.numeric(as.character(geneInfo$geneLength))
-        geneInfo$gcContent <- as.numeric(as.character(geneInfo$gcContent))
+    geneInfo <- geneInfo[!is.na(geneInfo[, 1]), ]
+    geneInfo <- as.data.frame(geneInfo)
+    geneInfo$geneLength <- as.numeric(as.character(geneInfo$geneLength))
+    geneInfo$gcContent <- as.numeric(as.character(geneInfo$gcContent))
 
+    if (method == "gcContent") {
+        tmp <- as.character(rownames(tabDF))
 
-        if (method == "gcContent") {
-            tmp <- as.character(rownames(tabDF))
-            tmp <- strsplit(tmp, "\\|")
-            geneNames <- matrix("", ncol = 2, nrow = length(tmp))
-            j <- 1
-            while (j <= length(tmp)) {
-                geneNames[j, 1] <- tmp[[j]][1]
-                geneNames[j, 2] <- tmp[[j]][2]
-                j <- j + 1
-            }
+        if(any(grepl("\\|",rownames(tabDF)))){
+            geneNames <- stringr::str_split(tmp, "\\|",simplify = T)
             tmp <- which(geneNames[, 1] == "?")
             geneNames[tmp, 1] <- geneNames[tmp, 2]
             tmp <- table(geneNames[, 1])
@@ -645,111 +643,114 @@ TCGAanalyze_Normalization <-
             geneNames[tmp, 1] <- paste(geneNames[tmp, 1], geneNames[tmp, 2], sep = ".")
             tmp <- table(geneNames[, 1])
             rownames(tabDF) <- geneNames[, 1]
-
-            rawCounts <- tabDF
-            commonGenes <-  intersect(rownames(geneInfo), rownames(rawCounts))
-            geneInfo <- geneInfo[commonGenes, ]
-            rawCounts <- rawCounts[commonGenes, ]
-
-            timeEstimated <- format(ncol(tabDF) * nrow(tabDF) / 80000, digits = 2)
-            message(
-                messageEstimation <- paste(
-                    "I Need about ",
-                    timeEstimated,
-                    "seconds for this Complete Normalization Upper Quantile",
-                    " [Processing 80k elements /s]  "
-                )
-            )
-
-            ffData  <- as.data.frame(geneInfo)
-            rawCounts <- floor(rawCounts)
-
-            message("Step 1 of 4: newSeqExpressionSet ...")
-            tmp <- EDASeq::newSeqExpressionSet(as.matrix(rawCounts), featureData = ffData)
-
-            #fData(tmp)[, "gcContent"] <- as.numeric(geneInfo[, "gcContent"])
-
-            message("Step 2 of 4: withinLaneNormalization ...")
-            tmp <- EDASeq::withinLaneNormalization(
-                tmp, "gcContent",
-                which = "upper",
-                offset = TRUE
-            )
-
-            message("Step 3 of 4: betweenLaneNormalization ...")
-            tmp <- EDASeq::betweenLaneNormalization(
-                tmp,
-                which = "upper",
-                offset = TRUE
-            )
-            normCounts <-  log(rawCounts + .1) + EDASeq::offst(tmp)
-            normCounts <-  floor(exp(normCounts) - .1)
-
-            message("Step 4 of 4: .quantileNormalization ...")
-            tmp <- t(.quantileNormalization(t(normCounts)))
-            tabDF_norm <- floor(tmp)
+        } else if(any(grepl("ENSG",rownames(tabDF)))){
+            rownames(tabDF) <- gsub("\\.[0-9]*","",rownames(tabDF))
         }
 
-        if (method == "geneLength") {
-            tabDF <- tabDF[!(GenesCutID(as.matrix(rownames(tabDF))) == "?"), ]
-            tabDF <- tabDF[!(GenesCutID(as.matrix(rownames(tabDF))) == "SLC35E2"), ]
-            rownames(tabDF) <- GenesCutID(as.matrix(rownames(tabDF)))
-            tabDF <- tabDF[rownames(tabDF) != "?",]
-            tabDF <- tabDF[!duplicated(rownames(tabDF)), !duplicated(colnames(tabDF))]
-            tabDF <- tabDF[rownames(tabDF) %in% rownames(geneInfo), ]
-            tabDF <- as.matrix(tabDF)
+        rawCounts <- tabDF
+        commonGenes <-  intersect(rownames(geneInfo), rownames(rawCounts))
 
-            geneInfo <-
-                geneInfo[rownames(geneInfo) %in% rownames(tabDF),]
-            geneInfo <- geneInfo[!duplicated(rownames(geneInfo)),]
-            toKeep <- which(geneInfo[, "geneLength"] != 0)
-            geneInfo <- geneInfo[toKeep,]
-            tabDF <- tabDF[toKeep,]
-            geneInfo <- as.data.frame(geneInfo)
-            tabDF <- round(tabDF)
-            commonGenes <- intersect(rownames(tabDF), rownames(geneInfo))
+        geneInfo <- geneInfo[commonGenes, ]
+        rawCounts <- rawCounts[commonGenes, ]
 
-            tabDF <- tabDF[commonGenes, ]
-            geneInfo <- geneInfo[commonGenes, ]
-
-            timeEstimated <-
-                format(ncol(tabDF) * nrow(tabDF) / 80000, digits = 2)
-            message(
-                messageEstimation <- paste(
-                    "I Need about ",
-                    timeEstimated,
-                    "seconds for this Complete Normalization Upper Quantile",
-                    " [Processing 80k elements /s]  "
-                )
+        timeEstimated <- format(ncol(tabDF) * nrow(tabDF) / 80000, digits = 2)
+        message(
+            messageEstimation <- paste(
+                "I Need about ",
+                timeEstimated,
+                "seconds for this Complete Normalization Upper Quantile",
+                " [Processing 80k elements /s]  "
             )
+        )
 
-            message("Step 1 of 4: newSeqExpressionSet ...")
-            system.time(tabDF_norm <-
-                            EDASeq::newSeqExpressionSet(tabDF, featureData = geneInfo))
-            message("Step 2 of 4: withinLaneNormalization ...")
-            system.time(
-                tabDF_norm <-
-                    EDASeq::withinLaneNormalization(
-                        tabDF_norm,
-                        "geneLength",
-                        which = "upper",
-                        offset = FALSE
-                    )
-            )
-            message("Step 3 of 4: betweenLaneNormalization ...")
-            system.time(
-                tabDF_norm <-
-                    EDASeq::betweenLaneNormalization(tabDF_norm, which = "upper", offset = FALSE)
-            )
-            message("Step 4 of 4: exprs ...")
+        ffData  <- as.data.frame(geneInfo)
+        rawCounts <- floor(rawCounts)
 
-            #system.time(tabDF_norm <- EDASeq::exprs(tabDF_norm))
-            system.time(tabDF_norm <- EDASeq::counts(tabDF_norm))
-        }
+        message("Step 1 of 4: newSeqExpressionSet ...")
+        tmp <- EDASeq::newSeqExpressionSet(as.matrix(rawCounts), featureData = ffData)
 
+        #fData(tmp)[, "gcContent"] <- as.numeric(geneInfo[, "gcContent"])
 
-        return(tabDF_norm)
+        message("Step 2 of 4: withinLaneNormalization ...")
+        tmp <- EDASeq::withinLaneNormalization(
+            tmp, "gcContent",
+            which = "upper",
+            offset = TRUE
+        )
+
+        message("Step 3 of 4: betweenLaneNormalization ...")
+        tmp <- EDASeq::betweenLaneNormalization(
+            tmp,
+            which = "upper",
+            offset = TRUE
+        )
+        normCounts <-  log(rawCounts + .1) + EDASeq::offst(tmp)
+        normCounts <-  floor(exp(normCounts) - .1)
+
+        message("Step 4 of 4: .quantileNormalization ...")
+        tmp <- t(.quantileNormalization(t(normCounts)))
+        tabDF_norm <- floor(tmp)
     }
+
+    if (method == "geneLength") {
+        tabDF <- tabDF[!(GenesCutID(as.matrix(rownames(tabDF))) == "?"), ]
+        tabDF <- tabDF[!(GenesCutID(as.matrix(rownames(tabDF))) == "SLC35E2"), ]
+        rownames(tabDF) <- GenesCutID(as.matrix(rownames(tabDF)))
+        tabDF <- tabDF[rownames(tabDF) != "?",]
+        tabDF <- tabDF[!duplicated(rownames(tabDF)), !duplicated(colnames(tabDF))]
+        tabDF <- tabDF[rownames(tabDF) %in% rownames(geneInfo), ]
+        tabDF <- as.matrix(tabDF)
+
+        geneInfo <-  geneInfo[rownames(geneInfo) %in% rownames(tabDF),]
+        geneInfo <- geneInfo[!duplicated(rownames(geneInfo)),]
+        toKeep <- which(geneInfo[, "geneLength"] != 0)
+        geneInfo <- geneInfo[toKeep,]
+        tabDF <- tabDF[toKeep,]
+        geneInfo <- as.data.frame(geneInfo)
+        tabDF <- round(tabDF)
+        commonGenes <- intersect(rownames(tabDF), rownames(geneInfo))
+
+        tabDF <- tabDF[commonGenes, ]
+        geneInfo <- geneInfo[commonGenes, ]
+
+        timeEstimated <-
+            format(ncol(tabDF) * nrow(tabDF) / 80000, digits = 2)
+        message(
+            messageEstimation <- paste(
+                "I Need about ",
+                timeEstimated,
+                "seconds for this Complete Normalization Upper Quantile",
+                " [Processing 80k elements /s]  "
+            )
+        )
+
+        message("Step 1 of 4: newSeqExpressionSet ...")
+        system.time(tabDF_norm <-
+                        EDASeq::newSeqExpressionSet(tabDF, featureData = geneInfo))
+        message("Step 2 of 4: withinLaneNormalization ...")
+        system.time(
+            tabDF_norm <-
+                EDASeq::withinLaneNormalization(
+                    tabDF_norm,
+                    "geneLength",
+                    which = "upper",
+                    offset = FALSE
+                )
+        )
+        message("Step 3 of 4: betweenLaneNormalization ...")
+        system.time(
+            tabDF_norm <-
+                EDASeq::betweenLaneNormalization(tabDF_norm, which = "upper", offset = FALSE)
+        )
+        message("Step 4 of 4: exprs ...")
+
+        #system.time(tabDF_norm <- EDASeq::exprs(tabDF_norm))
+        system.time(tabDF_norm <- EDASeq::counts(tabDF_norm))
+    }
+
+
+    return(tabDF_norm)
+}
 
 
 #' @title Differential expression analysis (DEA) using edgeR or limma package.
@@ -814,25 +815,25 @@ TCGAanalyze_Normalization <-
 #'
 #' @return table with DEGs containing for each gene logFC, logCPM, pValue,and FDR, also for each contrast
 TCGAanalyze_DEA <- function (
-    mat1,
-    mat2,
-    metadata = TRUE,
-    Cond1type,
-    Cond2type,
-    pipeline = "edgeR",
-    method = "exactTest",
-    fdr.cut = 1,
-    logFC.cut = 0,
-    elementsRatio = 30000,
-    batch.factors = NULL,
-    ClinicalDF = data.frame(),
-    paired = FALSE,
-    log.trans = FALSE,
-    voom = FALSE,
-    trend = FALSE,
-    MAT = data.frame(),
-    contrast.formula = "",
-    Condtypes = c()
+        mat1,
+        mat2,
+        metadata = TRUE,
+        Cond1type,
+        Cond2type,
+        pipeline = "edgeR",
+        method = "exactTest",
+        fdr.cut = 1,
+        logFC.cut = 0,
+        elementsRatio = 30000,
+        batch.factors = NULL,
+        ClinicalDF = data.frame(),
+        paired = FALSE,
+        log.trans = FALSE,
+        voom = FALSE,
+        trend = FALSE,
+        MAT = data.frame(),
+        contrast.formula = "",
+        Condtypes = c()
 ){
     if (pipeline == "limma") {
         if (!requireNamespace("limma", quietly = TRUE)) {
@@ -1371,12 +1372,12 @@ UseRaw_afterFilter <- function(DataPrep, DataFilt) {
 #'   TableCond2 = dataTN
 #' )
 TCGAanalyze_LevelTab <- function(
-    FC_FDR_table_mRNA,
-    typeCond1,
-    typeCond2,
-    TableCond1,
-    TableCond2,
-    typeOrder = TRUE
+        FC_FDR_table_mRNA,
+        typeCond1,
+        typeCond2,
+        TableCond1,
+        TableCond2,
+        typeOrder = TRUE
 ) {
     TableLevel <- data.frame(
         "mRNA" = rownames(FC_FDR_table_mRNA),
