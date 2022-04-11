@@ -631,22 +631,23 @@ TCGAanalyze_Normalization <- function(
     geneInfo$geneLength <- as.numeric(as.character(geneInfo$geneLength))
     geneInfo$gcContent <- as.numeric(as.character(geneInfo$gcContent))
 
-    if (method == "gcContent") {
+
+    if(any(grepl("\\|",rownames(tabDF)))){
         tmp <- as.character(rownames(tabDF))
+        geneNames <- stringr::str_split(tmp, "\\|",simplify = T)
+        tmp <- which(geneNames[, 1] == "?")
+        geneNames[tmp, 1] <- geneNames[tmp, 2]
+        tmp <- table(geneNames[, 1])
+        tmp <- which(geneNames[, 1] %in% names(tmp[which(tmp > 1)]))
+        geneNames[tmp, 1] <- paste(geneNames[tmp, 1], geneNames[tmp, 2], sep = ".")
+        tmp <- table(geneNames[, 1])
+        rownames(tabDF) <- geneNames[, 1]
+    } else if(any(grepl("ENSG",rownames(tabDF)))){
+        rownames(tabDF) <- gsub("\\.[0-9]*","",rownames(tabDF))
+    }
 
-        if(any(grepl("\\|",rownames(tabDF)))){
-            geneNames <- stringr::str_split(tmp, "\\|",simplify = T)
-            tmp <- which(geneNames[, 1] == "?")
-            geneNames[tmp, 1] <- geneNames[tmp, 2]
-            tmp <- table(geneNames[, 1])
-            tmp <- which(geneNames[, 1] %in% names(tmp[which(tmp > 1)]))
-            geneNames[tmp, 1] <- paste(geneNames[tmp, 1], geneNames[tmp, 2], sep = ".")
-            tmp <- table(geneNames[, 1])
-            rownames(tabDF) <- geneNames[, 1]
-        } else if(any(grepl("ENSG",rownames(tabDF)))){
-            rownames(tabDF) <- gsub("\\.[0-9]*","",rownames(tabDF))
-        }
 
+    if (method == "gcContent") {
         rawCounts <- tabDF
         commonGenes <-  intersect(rownames(geneInfo), rownames(rawCounts))
 
@@ -693,12 +694,9 @@ TCGAanalyze_Normalization <- function(
     }
 
     if (method == "geneLength") {
-        tabDF <- tabDF[!(GenesCutID(as.matrix(rownames(tabDF))) == "?"), ]
-        tabDF <- tabDF[!(GenesCutID(as.matrix(rownames(tabDF))) == "SLC35E2"), ]
-        rownames(tabDF) <- GenesCutID(as.matrix(rownames(tabDF)))
-        tabDF <- tabDF[rownames(tabDF) != "?",]
         tabDF <- tabDF[!duplicated(rownames(tabDF)), !duplicated(colnames(tabDF))]
         tabDF <- tabDF[rownames(tabDF) %in% rownames(geneInfo), ]
+        tabDF <- tabDF[rowMeans(tabDF) > 1,]
         tabDF <- as.matrix(tabDF)
 
         geneInfo <-  geneInfo[rownames(geneInfo) %in% rownames(tabDF),]
@@ -713,8 +711,7 @@ TCGAanalyze_Normalization <- function(
         tabDF <- tabDF[commonGenes, ]
         geneInfo <- geneInfo[commonGenes, ]
 
-        timeEstimated <-
-            format(ncol(tabDF) * nrow(tabDF) / 80000, digits = 2)
+        timeEstimated <-  format(ncol(tabDF) * nrow(tabDF) / 80000, digits = 2)
         message(
             messageEstimation <- paste(
                 "I Need about ",
@@ -725,27 +722,30 @@ TCGAanalyze_Normalization <- function(
         )
 
         message("Step 1 of 4: newSeqExpressionSet ...")
-        system.time(tabDF_norm <-
-                        EDASeq::newSeqExpressionSet(tabDF, featureData = geneInfo))
-        message("Step 2 of 4: withinLaneNormalization ...")
-        system.time(
-            tabDF_norm <-
-                EDASeq::withinLaneNormalization(
-                    tabDF_norm,
-                    "geneLength",
-                    which = "upper",
-                    offset = FALSE
-                )
-        )
-        message("Step 3 of 4: betweenLaneNormalization ...")
-        system.time(
-            tabDF_norm <-
-                EDASeq::betweenLaneNormalization(tabDF_norm, which = "upper", offset = FALSE)
-        )
-        message("Step 4 of 4: exprs ...")
 
-        #system.time(tabDF_norm <- EDASeq::exprs(tabDF_norm))
-        system.time(tabDF_norm <- EDASeq::counts(tabDF_norm))
+        tabDF_norm <- EDASeq::newSeqExpressionSet(
+            tabDF,
+            featureData = geneInfo
+        )
+        message("Step 2 of 4: withinLaneNormalization ...")
+
+        tabDF_norm <-  EDASeq::withinLaneNormalization(
+            tabDF_norm,
+            "geneLength",
+            which = "upper",
+            offset = FALSE
+        )
+
+        message("Step 3 of 4: betweenLaneNormalization ...")
+
+        tabDF_norm <- EDASeq::betweenLaneNormalization(
+            tabDF_norm,
+            which = "upper",
+            offset = FALSE
+        )
+
+        message("Step 4 of 4: exprs ...")
+        tabDF_norm <- EDASeq::counts(tabDF_norm)
     }
 
 
