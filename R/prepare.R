@@ -1445,17 +1445,10 @@ readTranscriptomeProfiling <- function(
       }, .progress = "time")
 
       # bind all counts and then add the gene metadata
-      suppressMessages({
-        df <- x %>%  map_dfc(.f = function(y) y[,4:8])
-        df <- bind_cols(x[[1]][,1:3],df)
-      })
+      if (!missing(cases)) names(x) <- cases
+      df <- data.table::rbindlist(x, use.names = TRUE, idcol = "case_barcode")
+      df <- data.table::dcast(df, gene_id + gene_name + gene_type ~ case_barcode, value.var = colnames(df)[-c(1:4)])
 
-      # Adding barcodes to columns names, if user wants a dataframe
-      if(!missing(cases))  {
-        colnames(df)[-c(1:3)] <- sapply(cases, function(x){
-          stringr::str_c(c("unstranded_","stranded_first_", "stranded_second_","tpm_unstranded_","fpkm_unstranded_"),x)}
-        ) %>% as.character()
-      }
       if(summarizedExperiment) df <- makeSEfromTranscriptomeProfilingSTAR(df,cases,workflow.type)
     }
   } else if(grepl("miRNA", workflow.type, ignore.case = TRUE) & grepl("miRNA", data.type, ignore.case = TRUE)) {
