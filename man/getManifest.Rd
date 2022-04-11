@@ -15,10 +15,12 @@ getManifest(query, save = FALSE)
 Get a Manifest from GDCquery output that can be used with GDC-client
 }
 \examples{
-query <- GDCquery(project = "TARGET-AML",
-                  data.category = "Transcriptome Profiling",
-                  data.type = "Gene Expression Quantification",
-                  workflow.type = "HTSeq - Counts",
-                  barcode = c("TARGET-20-PADZCG-04A-01R","TARGET-20-PARJCR-09A-01R"))
+query <- GDCquery(
+  project = "TARGET-AML",
+  data.category = "Transcriptome Profiling",
+  data.type = "Gene Expression Quantification",
+  workflow.type = "STAR - Counts",
+  barcode = c("TARGET-20-PADZCG-04A-01R","TARGET-20-PARJCR-09A-01R")
+ )
 getManifest(query)
 }

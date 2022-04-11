@@ -27,19 +27,28 @@
 #'     # Download clinical data from XML
 #'     query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical")
 #'     GDCdownload(query, files.per.chunk = 200)
-#'     query <- GDCquery(project = "TARGET-AML",
-#'                   data.category = "Transcriptome Profiling",
-#'                   data.type = "miRNA Expression Quantification",
-#'                   workflow.type = "BCGSC miRNA Profiling",
-#'                   barcode = c("TARGET-20-PARUDL-03A-01R","TARGET-20-PASRRB-03A-01R"))
+#'     query <- GDCquery(
+#'         project = "TARGET-AML",
+#'         data.category = "Transcriptome Profiling",
+#'         data.type = "miRNA Expression Quantification",
+#'         workflow.type = "BCGSC miRNA Profiling",
+#'         barcode = c("TARGET-20-PARUDL-03A-01R","TARGET-20-PASRRB-03A-01R")
+#'     )
 #'     # data will be saved in:
 #'     # example_data_dir/TARGET-AML/harmonized/Transcriptome_Profiling/miRNA_Expression_Quantification
 #'     GDCdownload(query, method = "client", directory = "example_data_dir")
-#'     acc.gbm <- GDCquery(project =  c("TCGA-ACC","TCGA-GBM"),
-#'                         data.category = "Transcriptome Profiling",
-#'                         data.type = "Gene Expression Quantification",
-#'                         workflow.type = "HTSeq - Counts")
-#'     GDCdownload(acc.gbm, method = "api", directory = "example", files.per.chunk = 50)
+#'     acc.gbm <- GDCquery(
+#'         project =  c("TCGA-ACC","TCGA-GBM"),
+#'         data.category = "Transcriptome Profiling",
+#'         data.type = "Gene Expression Quantification",
+#'         workflow.type = "STAR - Counts"
+#'     )
+#'     GDCdownload(
+#'        query = acc.gbm,
+#'        method = "api",
+#'        directory = "example",
+#'        files.per.chunk = 50
+#'    )
 #' }
 #' @return Shows the output from the GDC transfer tools
 GDCdownload <- function(
@@ -182,11 +191,13 @@ GDCdownload <- function(
 #' @param query A query for GDCquery function
 #' @param save Write Manifest to a txt file (tab separated)
 #' @examples
-#' query <- GDCquery(project = "TARGET-AML",
-#'                   data.category = "Transcriptome Profiling",
-#'                   data.type = "Gene Expression Quantification",
-#'                   workflow.type = "HTSeq - Counts",
-#'                   barcode = c("TARGET-20-PADZCG-04A-01R","TARGET-20-PARJCR-09A-01R"))
+#' query <- GDCquery(
+#'   project = "TARGET-AML",
+#'   data.category = "Transcriptome Profiling",
+#'   data.type = "Gene Expression Quantification",
+#'   workflow.type = "STAR - Counts",
+#'   barcode = c("TARGET-20-PADZCG-04A-01R","TARGET-20-PARJCR-09A-01R")
+#'  )
 #' getManifest(query)
 #' @export
 getManifest <- function(query, save = FALSE) {
