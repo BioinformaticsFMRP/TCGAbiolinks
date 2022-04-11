@@ -21,10 +21,12 @@ Get the results table from query, it can select columns with cols argument
 and return a number of rows using rows argument.
 }
 \examples{
-query <- GDCquery(project = "TCGA-GBM",
-                  data.category = "Transcriptome Profiling",
-                  data.type = "Gene Expression Quantification",
-                  workflow.type = "HTSeq - Counts",
-                  barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"))
+query <- GDCquery(
+  project = "TCGA-GBM",
+  data.category = "Transcriptome Profiling",
+  data.type = "Gene Expression Quantification",
+  workflow.type = "STAR - Counts",
+  barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01")
+)
 results <- getResults(query)
 }
