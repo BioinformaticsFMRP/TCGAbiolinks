@@ -159,6 +159,22 @@ test_that("Gene Level Copy Number is being correclty prepare", {
     unlink("ex",recursive = TRUE,force = TRUE)
 })
 
+test_that("DNAm files is processed correctly", {
+    skip_on_bioc()
+    skip_if_offline()
+
+    query_met.hg38 <- GDCquery(
+        project = "TCGA-BRCA",
+        data.category = "DNA Methylation",
+        data.type = "Methylation Beta Value",
+        platform = "Illumina Human Methylation 27",
+        barcode = c("TCGA-B6-A0IM","TCGA-A2-A0CL","TCGA-E2-A158","TCGA-AN-A0AR")
+    )
+    GDCdownload(query_met.hg38)
+    data.hg38 <- GDCprepare(query_met.hg38)
+    expect_lt(abs(assay(data.hg38)["cg16739396","TCGA-E2-A158-01A-11D-A12E-05"] - 0.0688655418909783),10^-10)
+})
+
 test_that("IDAT files is processed", {
     skip_on_bioc()
     skip_if_offline()
