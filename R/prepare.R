@@ -785,6 +785,7 @@ readDNAmethylation <- function(
         df$Composite.Element.REF <- NULL
     } else if (all(grepl("methylation_array.sesame.level3betas", files))){
         # methylation_array.sesame.level3betas has only two columns with not header
+        print.header(paste0("Reading ", length(files)," files"),"subsection")
 
         x <- plyr::alply(files,1, function(f) {
             data <- fread(
