@@ -7,9 +7,10 @@ test_that("GDCdownload API method is working ", {
     skip_if_offline()
 
     cases <-  c(
+        "TCGA-PA-A5YG-01A-11R-A29S-07",
         "TCGA-OR-A5JX-01A-11R-A29S-07",
-        "TCGA-OR-A5KY-01A-11R-A29S-07",
-        "TCGA-PK-A5HA-01A-11R-A29S-07"
+        "TCGA-PK-A5HA-01A-11R-A29S-07",
+        "TCGA-OR-A5KY-01A-11R-A29S-07"
     )
     acc <- GDCquery(
         project =  c("TCGA-ACC"),
@@ -22,7 +23,15 @@ test_that("GDCdownload API method is working ", {
 
     obj <- GDCprepare(acc,  directory = "ex",summarizedExperiment = TRUE)
     expect_true(all(substr(colnames(obj),1,12) == substr(cases,1,12)))
-   expect_true(all(obj$barcode == cases))
+    expect_true(all(obj$barcode == cases))
+
+    # Checking the data matches the file for a random gene
+    expect_equal(assays(obj)$unstranded["ENSG00000003756.17","TCGA-PK-A5HA-01A-11R-A29S-07"], 3584)
+    expect_equal(assays(obj)$stranded_first["ENSG00000003756.17","TCGA-PK-A5HA-01A-11R-A29S-07"], 2628)
+    expect_equal(assays(obj)$stranded_second["ENSG00000003756.17","TCGA-PK-A5HA-01A-11R-A29S-07"], 2612)
+    expect_equal(assays(obj)$tpm_unstrand["ENSG00000003756.17","TCGA-PK-A5HA-01A-11R-A29S-07"], 13.2758)
+    expect_equal(assays(obj)$fpkm_unstrand["ENSG00000003756.17","TCGA-PK-A5HA-01A-11R-A29S-07"], 7.0563)
+    expect_equal(assays(obj)$fpkm_uq_unstrand["ENSG00000003756.17","TCGA-PK-A5HA-01A-11R-A29S-07"], 9.8086)
 
     query <- GDCquery(
         project = "CPTAC-3",
