@@ -180,10 +180,22 @@ GDCprepare <- function(
             data <- readCopyNumberVariation(files, query$results[[1]]$cases)
         }
     }  else if (grepl("Methylation Beta Value",query$data.type, ignore.case = TRUE)) {
-        data <- readDNAmethylation(files, cases = cases, summarizedExperiment, unique(query$platform),query$legacy)
+        data <- readDNAmethylation(
+            files = files,
+            cases = cases,
+            summarizedExperiment = summarizedExperiment,
+            platform =  unique(query$results[[1]]$platform),
+            legacy = query$legacy
+        )
     }  else if (grepl("Raw intensities|Masked Intensities",query$data.type, ignore.case = TRUE)) {
         # preparing IDAT files
-        data <- readIDATDNAmethylation(files, barcode = cases, summarizedExperiment, unique(query$platform), query$legacy)
+        data <- readIDATDNAmethylation(
+            files = files,
+            barcode = cases,
+            summarizedExperiment = summarizedExperiment,
+            platform =  unique(query$results[[1]]$platform),
+            legacy = query$legacy
+        )
     }  else if (grepl("Proteome Profiling",query$data.category,ignore.case = TRUE)) {
         data <- readProteomeProfiling(files, cases = cases)
     }  else if (grepl("Protein expression",query$data.category,ignore.case = TRUE)) {
@@ -639,14 +651,15 @@ makeSEfromGeneExpressionQuantification <- function(
 makeSEFromDNAMethylationMatrix <- function(
         betas,
         genome = "hg38",
-        met.platform = "450K"
+        met.platform = c(
+            "Illumina Human Methylation 450",
+            "Illumina Human Methylation 27",
+            "Illumina Methylation Epic"
+        )
 ) {
     message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
     message("Creating a SummarizedExperiment from DNA methylation input")
 
-    if(met.platform == "Illumina Human Methylation 450") platform <- "450k"
-    if(met.platform == "Illumina Human Methylation 27") platform <- "27k"
-    if(met.platform == "Illumina Methylation Epic") platform <- "EPIC"
     # Instead of looking on the size, it is better to set it as a argument as the annotation is different
     annotation <-   getMetPlatInfo(platform = met.platform, genome = genome)
 
@@ -729,13 +742,11 @@ readIDATDNAmethylation <- function(
     colnames(betas) <- barcode$barcode[match(basename(samples),barcode$file)]
 
     if (summarizedExperiment) {
-        met.platform <- "EPIC"
-        if (grepl("450",platform)) met.platform <- "450k"
-        if (grepl("27",platform)) met.platform <- "27k"
+
         betas <- makeSEFromDNAMethylationMatrix(
             betas = betas,
             genome = ifelse(legacy,"hg19","hg38"),
-            met.platform = met.platform
+            met.platform = platform
         )
         colData(betas) <- DataFrame(colDataPrepare(colnames(betas)))
     }
@@ -820,13 +831,10 @@ readDNAmethylation <- function(
 
         if (summarizedExperiment) {
 
-            met.platform <- "EPIC"
-            if (grepl("450",platform)) met.platform <- "450k"
-            if (grepl("27",platform)) met.platform <- "27k"
             df <- makeSEFromDNAMethylationMatrix(
                 betas = df,
                 genome = ifelse(legacy,"hg19","hg38"),
-                met.platform = met.platform
+                met.platform = platform
             )
         } else {
             setDF(df)

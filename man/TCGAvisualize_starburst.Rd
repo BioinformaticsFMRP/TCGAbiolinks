@@ -13,7 +13,8 @@ TCGAvisualize_starburst(
   met.p.cut = 0.01,
   diffmean.cut = 0,
   logFC.cut = 0,
-  met.platform = c("EPIC", "450k", "27k"),
+  met.platform = c("Illumina Human Methylation 450", "Illumina Human Methylation 27",
+    "Illumina Methylation Epic"),
   genome,
   names = FALSE,
   names.fill = TRUE,
@@ -62,7 +63,8 @@ than methylation cut-off will be
 change higher than methylation cut-off will be
  highlighted in the plot. And the data frame return will be subseted.}
 
-\item{met.platform}{DNA methylation platform ("27K","450K" or "EPIC")}
+\item{met.platform}{DNA methylation platform  "Illumina Human Methylation 450",
+"Illumina Human Methylation 27", "Illumina Methylation Epic"}
 
 \item{genome}{Genome of reference ("hg38" or "hg19") used to identify nearest probes TSS}
 
@@ -121,7 +123,10 @@ Input: data with gene expression/methylation expression
 \examples{
 \dontrun{
 library(SummarizedExperiment)
-met <- TCGAbiolinks:::getMetPlatInfo(genome = "hg38", platform = "27k")
+met <- TCGAbiolinks:::getMetPlatInfo(
+   genome = "hg38",
+   platform = "Illumina Human Methylation 27"
+ )
 values(met) <- NULL
 met$probeID <- names(met)
 nrows <- length(met); ncols <- 20
