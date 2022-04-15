@@ -46,23 +46,23 @@
 #'                      conf.int = FALSE,
 #'                      color = c("Dark2"))
 TCGAanalyze_survival <- function(
-    data,
-    clusterCol = NULL,
-    legend = "Legend",
-    labels = NULL,
-    risk.table = TRUE,
-    xlim = NULL,
-    main = "Kaplan-Meier Overall Survival Curves",
-    ylab = "Probability of survival",
-    xlab = "Time since diagnosis (days)",
-    filename = "survival.pdf",
-    color = NULL,
-    height = 8,
-    width = 12,
-    dpi = 300,
-    pvalue = TRUE,
-    conf.int = TRUE,
-    ...) {
+        data,
+        clusterCol = NULL,
+        legend = "Legend",
+        labels = NULL,
+        risk.table = TRUE,
+        xlim = NULL,
+        main = "Kaplan-Meier Overall Survival Curves",
+        ylab = "Probability of survival",
+        xlab = "Time since diagnosis (days)",
+        filename = "survival.pdf",
+        color = NULL,
+        height = 8,
+        width = 12,
+        dpi = 300,
+        pvalue = TRUE,
+        conf.int = TRUE,
+        ...) {
     .e <- environment()
 
     check_package("survminer")
@@ -272,33 +272,33 @@ TCGAanalyze_survival <- function(
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="median.asc",filename="medianasc.pdf")
 #' TCGAvisualize_meanMethylation(data,groupCol  = "group",sort="median.desc",filename="mediandesc.pdf")
 TCGAvisualize_meanMethylation <- function(
-    data,
-    groupCol = NULL,
-    subgroupCol = NULL,
-    shapes = NULL,
-    print.pvalue = FALSE,
-    plot.jitter = TRUE,
-    jitter.size = 3,
-    filename = "groupMeanMet.pdf",
-    ylab = expression(paste("Mean DNA methylation (",
-                            beta, "-values)")),
-    xlab = NULL,
-    title = "Mean DNA methylation",
-    labels = NULL,
-    group.legend = NULL,
-    subgroup.legend = NULL,
-    color = NULL,
-    y.limits = NULL,
-    sort,
-    order,
-    legend.position = "top",
-    legend.title.position = "top",
-    legend.ncols = 3,
-    add.axis.x.text = TRUE,
-    width = 10,
-    height = 10,
-    dpi = 600,
-    axis.text.x.angle = 90) {
+        data,
+        groupCol = NULL,
+        subgroupCol = NULL,
+        shapes = NULL,
+        print.pvalue = FALSE,
+        plot.jitter = TRUE,
+        jitter.size = 3,
+        filename = "groupMeanMet.pdf",
+        ylab = expression(paste("Mean DNA methylation (",
+                                beta, "-values)")),
+        xlab = NULL,
+        title = "Mean DNA methylation",
+        labels = NULL,
+        group.legend = NULL,
+        subgroup.legend = NULL,
+        color = NULL,
+        y.limits = NULL,
+        sort,
+        order,
+        legend.position = "top",
+        legend.title.position = "top",
+        legend.ncols = 3,
+        add.axis.x.text = TRUE,
+        width = 10,
+        height = 10,
+        dpi = 600,
+        axis.text.x.angle = 90) {
     .e <- environment()
     mean <- colMeans(assay(data), na.rm = TRUE)
 
@@ -553,14 +553,14 @@ TCGAvisualize_meanMethylation <- function(
 #' @importFrom stats wilcox.test
 #' @keywords internal
 dmc.non.parametric.se <- function(
-    data,
-    groupCol = NULL,
-    group1 = NULL,
-    group2 = NULL,
-    paired = FALSE,
-    adj.method = "BH",
-    alternative = "two.sided",
-    cores = 1
+        data,
+        groupCol = NULL,
+        group1 = NULL,
+        group2 = NULL,
+        paired = FALSE,
+        adj.method = "BH",
+        alternative = "two.sided",
+        cores = 1
 ) {
 
     if (is.null(groupCol)) {
@@ -630,13 +630,13 @@ dmc.non.parametric.se <- function(
 #'  )
 #'  TCGAbiolinks:::dmc.non.parametric(counts,1:10,11:20)
 dmc.non.parametric <-  function(
-    matrix,
-    idx1 = NULL,
-    idx2 = NULL,
-    paired = FALSE,
-    adj.method = "BH",
-    alternative = "two.sided",
-    cores = 1)
+        matrix,
+        idx1 = NULL,
+        idx2 = NULL,
+        paired = FALSE,
+        adj.method = "BH",
+        alternative = "two.sided",
+        cores = 1)
 {
     parallel <- set_cores(cores)
 
@@ -748,28 +748,28 @@ dmc.non.parametric <-  function(
 #' }
 #' while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
 TCGAVisualize_volcano <- function(
-    x,
-    y,
-    filename = "volcano.pdf",
-    ylab =  expression(paste(-Log[10]," (FDR corrected -P values)")),
-    xlab = NULL,
-    title = "Volcano plot",
-    legend = NULL,
-    label = NULL,
-    xlim = NULL,
-    ylim = NULL,
-    color = c("black", "red", "green"),
-    names = NULL,
-    names.fill = TRUE,
-    show.names = "significant",
-    x.cut = 0,
-    y.cut = 0.01,
-    height = 5,
-    width = 10,
-    highlight = NULL,
-    highlight.color = "orange",
-    names.size = 4,
-    dpi = 300)
+        x,
+        y,
+        filename = "volcano.pdf",
+        ylab =  expression(paste(-Log[10]," (FDR corrected -P values)")),
+        xlab = NULL,
+        title = "Volcano plot",
+        legend = NULL,
+        label = NULL,
+        xlim = NULL,
+        ylim = NULL,
+        color = c("black", "red", "green"),
+        names = NULL,
+        names.fill = TRUE,
+        show.names = "significant",
+        x.cut = 0,
+        y.cut = 0.01,
+        height = 5,
+        width = 10,
+        highlight = NULL,
+        highlight.color = "orange",
+        names.size = 4,
+        dpi = 300)
 {
     if (!is.null(names)) {
         if (all(grepl("\\|", names))) {
@@ -1053,29 +1053,29 @@ TCGAVisualize_volcano <- function(
 #'   group2 = "group_2"
 #' )
 TCGAanalyze_DMC <- function(
-    data,
-    groupCol = NULL,
-    group1 = NULL,
-    group2 = NULL,
-    alternative = "two.sided",
-    diffmean.cut = 0.2,
-    paired = FALSE,
-    adj.method = "BH",
-    plot.filename = "methylation_volcano.pdf",
-    ylab =  expression(paste(-Log[10], " (FDR corrected -P values)")),
-    xlab =  expression(paste("DNA Methylation difference (", beta, "-values)")),
-    title = NULL,
-    legend = "Legend",
-    color = c("black",  "red", "darkgreen"),
-    label = NULL,
-    xlim = NULL,
-    ylim = NULL,
-    p.cut = 0.01,
-    probe.names = FALSE,
-    cores = 1,
-    save = TRUE,
-    save.directory = ".",
-    filename = NULL)
+        data,
+        groupCol = NULL,
+        group1 = NULL,
+        group2 = NULL,
+        alternative = "two.sided",
+        diffmean.cut = 0.2,
+        paired = FALSE,
+        adj.method = "BH",
+        plot.filename = "methylation_volcano.pdf",
+        ylab =  expression(paste(-Log[10], " (FDR corrected -P values)")),
+        xlab =  expression(paste("DNA Methylation difference (", beta, "-values)")),
+        title = NULL,
+        legend = "Legend",
+        color = c("black",  "red", "darkgreen"),
+        label = NULL,
+        xlim = NULL,
+        ylim = NULL,
+        p.cut = 0.01,
+        probe.names = FALSE,
+        cores = 1,
+        save = TRUE,
+        save.directory = ".",
+        filename = NULL)
 {
     names(color) <- as.character(1:3)
     # Check if object is a summarized Experiment
@@ -1246,7 +1246,8 @@ TCGAanalyze_DMC <- function(
 #' Execute volcanoPlot function in order to obtain these values for the object.
 #' @param exp Object obtained by DEArnaSEQ function
 #' @param filename The filename of the file (it can be pdf, svg, png, etc)
-#' @param met.platform DNA methylation platform ("27K","450K" or "EPIC")
+#' @param met.platform DNA methylation platform  "Illumina Human Methylation 450",
+#' "Illumina Human Methylation 27", "Illumina Methylation Epic"
 #' @param genome Genome of reference ("hg38" or "hg19") used to identify nearest probes TSS
 #' @param legend legend title
 #' @param color vector of colors to be used in graph
@@ -1283,7 +1284,10 @@ TCGAanalyze_DMC <- function(
 #' @examples
 #' \dontrun{
 #' library(SummarizedExperiment)
-#' met <- TCGAbiolinks:::getMetPlatInfo(genome = "hg38", platform = "27k")
+#' met <- TCGAbiolinks:::getMetPlatInfo(
+#'    genome = "hg38",
+#'    platform = "Illumina Human Methylation 27"
+#'  )
 #' values(met) <- NULL
 #' met$probeID <- names(met)
 #' nrows <- length(met); ncols <- 20
@@ -1321,45 +1325,49 @@ TCGAanalyze_DMC <- function(
 #' )
 #' }
 TCGAvisualize_starburst <- function(
-    met,
-    exp,
-    group1 = NULL,
-    group2 = NULL,
-    exp.p.cut = 0.01,
-    met.p.cut = 0.01,
-    diffmean.cut = 0,
-    logFC.cut = 0,
-    met.platform = c("EPIC","450k","27k"),
-    genome,
-    names = FALSE,
-    names.fill = TRUE,
-    filename = "starburst.png",
-    return.plot = FALSE,
-    ylab = expression(atop("Gene Expression",
-                           paste(-Log[10],
-                                 " (FDR corrected P values)"))),
-    xlab = expression(atop("DNA Methylation",
-                           paste(-Log[10],
-                                 " (FDR corrected P values)"))),
-    title = "Starburst Plot",
-    legend = "DNA Methylation/Expression Relation",
-    color = NULL,
-    label = c(
-        "Not Significant",
-        "Up regulated & Hypo methylated",
-        "Down regulated & Hypo methylated",
-        "hypo methylated",
-        "hyper methylated",
-        "Up regulated",
-        "Down regulated",
-        "Up regulated & Hyper methylated",
-        "Down regulated & Hyper methylated"
-    ),
-    xlim = NULL,
-    ylim = NULL,
-    height = 10,
-    width = 20,
-    dpi = 600
+        met,
+        exp,
+        group1 = NULL,
+        group2 = NULL,
+        exp.p.cut = 0.01,
+        met.p.cut = 0.01,
+        diffmean.cut = 0,
+        logFC.cut = 0,
+        met.platform = c(
+            "Illumina Human Methylation 450",
+            "Illumina Human Methylation 27",
+            "Illumina Methylation Epic"
+        ),
+        genome,
+        names = FALSE,
+        names.fill = TRUE,
+        filename = "starburst.png",
+        return.plot = FALSE,
+        ylab = expression(atop("Gene Expression",
+                               paste(-Log[10],
+                                     " (FDR corrected P values)"))),
+        xlab = expression(atop("DNA Methylation",
+                               paste(-Log[10],
+                                     " (FDR corrected P values)"))),
+        title = "Starburst Plot",
+        legend = "DNA Methylation/Expression Relation",
+        color = NULL,
+        label = c(
+            "Not Significant",
+            "Up regulated & Hypo methylated",
+            "Down regulated & Hypo methylated",
+            "hypo methylated",
+            "hyper methylated",
+            "Up regulated",
+            "Down regulated",
+            "Up regulated & Hyper methylated",
+            "Down regulated & Hyper methylated"
+        ),
+        xlim = NULL,
+        ylim = NULL,
+        height = 10,
+        width = 20,
+        dpi = 600
 ) {
     if (missing(genome)) stop("Please set genome (hg19 or hg38)")
     if (missing(met.platform)) stop("Please set met.platform (EPIC, 450k or 27k)")
@@ -1768,8 +1776,12 @@ TCGAvisualize_starburst <- function(
 #' @noRd
 #' @importFrom stringr str_c
 getMetPlatInfo <- function(
-    genome = c("hg38","hg19"),
-    platform = c("450k","EPIC","27k")
+        genome = c("hg38","hg19"),
+        platform = c(
+            "Illumina Human Methylation 450",
+            "Illumina Human Methylation 27",
+            "Illumina Methylation Epic"
+        )
 ){
     genome <- match.arg(genome)
     arrayType <- match.arg(platform)
@@ -1779,13 +1791,13 @@ getMetPlatInfo <- function(
     check_package("AnnotationHub")
     check_package("ExperimentHub")
 
-    platform <- ifelse(
-        platform == "450k","HM450",
-        ifelse(platform == "27k","HM27","EPIC")
-    )
+    if(arrayType == "Illumina Human Methylation 450") arrayType <- "HM450"
+    if(arrayType == "Illumina Human Methylation 27") arrayType <- "HM27"
+    if(arrayType == "Illumina Methylation Epic") arrayType <- "EPIC"
+
     message("Accessing DNAm annotation from sesame package for: ", genome, " - ",arrayType)
     manifest <-  str_c(
-        platform,
+        arrayType,
         ".",
         genome,
         ".manifest"
