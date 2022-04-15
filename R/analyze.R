@@ -53,7 +53,7 @@ TCGAanalyze_Clustering <- function(
 #' It defines a square symmetric matrix of spearman correlation among samples.
 #' According this matrix and boxplot of correlation samples by samples it is possible
 #' to find samples with low correlation that can be identified as possible outliers.
-#' @param object of gene expression of class RangedSummarizedExperiment from TCGAprepare
+#' @param object gene expression of class RangedSummarizedExperiment from TCGAprepare
 #' @param cor.cut is a threshold to filter samples according their spearman correlation in
 #' samples by samples. default cor.cut is 0
 #' @param filename Filename of the image file
@@ -67,15 +67,20 @@ TCGAanalyze_Clustering <- function(
 TCGAanalyze_Preprocessing <- function(
         object,
         cor.cut = 0,
+        datatype = names(assays(object))[1],
         filename = NULL,
         width = 1000,
-        height = 1000,
-        datatype = names(assays(object))[1]
+        height = 1000
 ) {
     # This is a work around for raw_counts and raw_count
-    if (grepl("raw_count", datatype) &
-        any(grepl("raw_count", names(assays(object)))))
-        datatype <- names(assays(object))[grepl("raw_count", names(assays(object)))]
+    if(missing(object))
+        stop("Please set object argument")
+
+    if(!is(object,"RangedSummarizedExperiment"))
+        stop("Input object should be a RangedSummarizedExperiment")
+
+    if (grepl("raw_counts", datatype) & any(grepl("raw_counts", names(assays(object)))))
+        datatype <- names(assays(object))[grepl("raw_counts", names(assays(object)))]
 
     if (!any(grepl(datatype, names(assays(object)))))
         stop(
@@ -86,6 +91,7 @@ TCGAanalyze_Preprocessing <- function(
                 "\n  Please set the correct datatype argument."
             )
         )
+
 
     if (!(is.null(dev.list()["RStudioGD"]))) {
         dev.off()
@@ -111,8 +117,6 @@ TCGAanalyze_Preprocessing <- function(
         tabGroupCol[which(tabGroupCol$Disease == tabGroupCol$Disease[i]), "Color"] <-
             rainbow(length(unique(tabGroupCol$Disease)))[i]
     }
-
-    #    pmat <- as.matrix(pData(phenoData(object)))
     pmat <- pmat_new
     phenodepth <- min(ncol(pmat), 3)
     order <- switch(
@@ -143,8 +147,7 @@ TCGAanalyze_Preprocessing <- function(
     for (i in 1:length(names(table(tabGroupCol$Color)))) {
         currentCol <- names(table(tabGroupCol$Color))[i]
         pos.col <- arraypos[which(tabGroupCol$Color == currentCol)]
-        lab.col <-
-            colnames(c)[which(tabGroupCol$Color == currentCol)]
+        lab.col <- colnames(c)[which(tabGroupCol$Color == currentCol)]
         #axis(1, labels = lab.col , at = pos.col, col = currentCol,lwd = 6,las = 2)
         axis(
             2,
@@ -191,6 +194,8 @@ TCGAanalyze_Preprocessing <- function(
     dev.off()
 
     samplesCor <- rowMeans(c)
+
+    message("Number of outliers: ", sum(samplesCor < cor.cut))
     objectWO <-  assay(object, datatype)[, names(samplesCor)[samplesCor > cor.cut]]
 
     return(objectWO)
