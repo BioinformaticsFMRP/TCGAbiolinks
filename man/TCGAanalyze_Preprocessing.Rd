@@ -7,25 +7,25 @@
 TCGAanalyze_Preprocessing(
   object,
   cor.cut = 0,
+  datatype = names(assays(object))[1],
   filename = NULL,
   width = 1000,
-  height = 1000,
-  datatype = names(assays(object))[1]
+  height = 1000
 )
 }
 \arguments{
-\item{object}{of gene expression of class RangedSummarizedExperiment from TCGAprepare}
+\item{object}{gene expression of class RangedSummarizedExperiment from TCGAprepare}
 
 \item{cor.cut}{is a threshold to filter samples according their spearman correlation in
 samples by samples. default cor.cut is 0}
+
+\item{datatype}{is a string from RangedSummarizedExperiment assay}
 
 \item{filename}{Filename of the image file}
 
 \item{width}{Image width}
 
 \item{height}{Image height}
-
-\item{datatype}{is a string from RangedSummarizedExperiment assay}
 }
 \value{
 Plot with array array intensity correlation and boxplot of correlation samples by samples
