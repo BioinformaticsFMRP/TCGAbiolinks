@@ -66,6 +66,7 @@ GDCdownload <- function(
     }
 
     if (length(unique(getResults(query)$data_type)) > 1) {
+        print(knitr::kable(sort(unique(getResults(query)$data_type)),col.names = "data_type in query"))
         stop("We can only download one data type. Please use data.type argument in GDCquery to filter results.")
     }
 

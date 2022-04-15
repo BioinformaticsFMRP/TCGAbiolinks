@@ -797,7 +797,7 @@ TCGAVisualize_volcano <- function(
 
     # If x.cut
     if (length(x.cut) == 1) {
-        x.cut.min <- -x.cut
+        x.cut.min <- -1 * x.cut
         x.cut.max <- x.cut
     }
     if (length(x.cut) == 2) {
