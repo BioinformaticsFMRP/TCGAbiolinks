@@ -180,7 +180,7 @@ GDCprepare <- function(
             data <- readCopyNumberVariation(files, query$results[[1]]$cases)
         }
     }  else if (grepl("Methylation Beta Value",query$data.type, ignore.case = TRUE)) {
-        data <- readDNAmethylation(files, cases = cases, summarizedExperiment, unique(query$platform))
+        data <- readDNAmethylation(files, cases = cases, summarizedExperiment, unique(query$platform),query$legacy)
     }  else if (grepl("Raw intensities|Masked Intensities",query$data.type, ignore.case = TRUE)) {
         # preparing IDAT files
         data <- readIDATDNAmethylation(files, barcode = cases, summarizedExperiment, unique(query$platform), query$legacy)
@@ -644,6 +644,9 @@ makeSEFromDNAMethylationMatrix <- function(
     message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
     message("Creating a SummarizedExperiment from DNA methylation input")
 
+    if(met.platform == "Illumina Human Methylation 450") platform <- "450k"
+    if(met.platform == "Illumina Human Methylation 27") platform <- "27k"
+    if(met.platform == "Illumina Methylation Epic") platform <- "EPIC"
     # Instead of looking on the size, it is better to set it as a argument as the annotation is different
     annotation <-   getMetPlatInfo(platform = met.platform, genome = genome)
 
@@ -751,7 +754,8 @@ readDNAmethylation <- function(
         files,
         cases,
         summarizedExperiment = TRUE,
-        platform
+        platform,
+        legacy
 ){
     if (missing(cases)) cases <- NULL
 
@@ -815,10 +819,14 @@ readDNAmethylation <- function(
         rownames(df) <- setDF(x[[1]])[,1,drop = T]
 
         if (summarizedExperiment) {
+
+            met.platform <- "EPIC"
+            if (grepl("450",platform)) met.platform <- "450k"
+            if (grepl("27",platform)) met.platform <- "27k"
             df <- makeSEFromDNAMethylationMatrix(
                 betas = df,
-                genome = "hg38",
-                met.platform = "EPIC"
+                genome = ifelse(legacy,"hg19","hg38"),
+                met.platform = met.platform
             )
         } else {
             setDF(df)
