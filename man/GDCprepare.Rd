@@ -12,7 +12,6 @@ GDCprepare(
   summarizedExperiment = TRUE,
   remove.files.prepared = FALSE,
   add.gistic2.mut = NULL,
-  mut.pipeline = "mutect2",
   mutant_variant_classification = c("Frame_Shift_Del", "Frame_Shift_Ins",
     "Missense_Mutation", "Nonsense_Mutation", "Splice_Site", "In_Frame_Del",
     "In_Frame_Ins", "Translation_Start_Site", "Nonstop_Mutation")
@@ -36,11 +35,6 @@ This argument will be considered only if save argument is set to true}
 and a column indicating if there is or not mutation in that gene (hg38)
 (TRUE or FALSE - use the MAF file for more information)
 will be added to the sample matrix in the summarized Experiment object.}
-
-\item{mut.pipeline}{If add.gistic2.mut is not NULL this field will be taken in consideration.
-Four separate variant calling pipelines are implemented for GDC data harmonization.
-Options: muse, varscan2, somaticsniper, MuTect2. For more information:
-https://gdc-docs.nci.nih.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/}
 
 \item{mutant_variant_classification}{List of mutant_variant_classification that will be
 consider a sample mutant or not. Default: "Frame_Shift_Del", "Frame_Shift_Ins",
