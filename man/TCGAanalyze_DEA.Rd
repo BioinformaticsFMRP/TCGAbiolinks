@@ -14,7 +14,6 @@ TCGAanalyze_DEA(
   method = "exactTest",
   fdr.cut = 1,
   logFC.cut = 0,
-  elementsRatio = 30000,
   batch.factors = NULL,
   ClinicalDF = data.frame(),
   paired = FALSE,
@@ -52,8 +51,6 @@ two groups of negative-binomially distributed counts.}
 \item{fdr.cut}{is a threshold to filter DEGs according their p-value corrected}
 
 \item{logFC.cut}{is a threshold to filter DEGs according their logFC}
-
-\item{elementsRatio}{is number of elements processed for second for time consumation estimation}
 
 \item{batch.factors}{a vector containing strings to specify options for batch correction. Options are "Plate", "TSS", "Year", "Portion", "Center", and "Patients"}
 
@@ -103,9 +100,11 @@ dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 dataFilt <- TCGAanalyze_Filtering(tabDF = dataBRCA, method = "quantile", qnt.cut =  0.25)
 samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
 samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
-dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,samplesNT],
-                            mat2 = dataFilt[,samplesTP],
-                            Cond1type = "Normal",
-                            Cond2type = "Tumor")
+dataDEGs <- TCGAanalyze_DEA(
+   mat1 = dataFilt[,samplesNT],
+   mat2 = dataFilt[,samplesTP],
+   Cond1type = "Normal",
+   Cond2type = "Tumor"
+)
 
 }

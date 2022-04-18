@@ -51,12 +51,12 @@
 #' @return net IGRAPH with related Cox survival genes in community (same pval and color) and with
 #' interactions from STRING database.
 TCGAvisualize_SurvivalCoxNET <- function(
-    clinical_patient,
-    dataGE,
-    Genelist,
-    org.Hs.string,
-    scoreConfidence = 700,
-    titlePlot = "TCGAvisualize_SurvivalCoxNET Example"
+        clinical_patient,
+        dataGE,
+        Genelist,
+        org.Hs.string,
+        scoreConfidence = 700,
+        titlePlot = "TCGAvisualize_SurvivalCoxNET Example"
 ){
 
     check_package("survival")
@@ -275,6 +275,8 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes,group1, grou
 #' @param text.size Text size
 #' @param xlim Upper limit of the x-axis.
 #' @param mfrow Vector with number of rows/columns of the plot. Default  2 rows/2 columns "c(2,2)"
+#' @param fig.width Default 30
+#' @param fig.height Default 15
 #' @export
 #' @import graphics
 #' @return Complete barPlot from Enrichment Analysis showing significant (default FDR < 0.01)
@@ -303,16 +305,28 @@ TCGAvisualize_PCA <- function(dataFilt,dataDEGsFiltLevel ,ntopgenes,group1, grou
 #'          nRGTab = Genelist,
 #'          nBar = 10)
 #'}
-TCGAvisualize_EAbarplot <- function(tf, GOMFTab, GOBPTab, GOCCTab, PathTab, nBar, nRGTab,
-                                    filename = "TCGAvisualize_EAbarplot_Output.pdf",
-                                    text.size = 1.0, mfrow = c(2, 2), xlim = NULL,
-                                    color = c("orange", "cyan","green","yellow") ){
+TCGAvisualize_EAbarplot <- function(
+        tf,
+        GOMFTab,
+        GOBPTab,
+        GOCCTab,
+        PathTab,
+        nBar,
+        nRGTab,
+        filename = "TCGAvisualize_EAbarplot_Output.pdf",
+        text.size = 1.0,
+        mfrow = c(2, 2),
+        xlim = NULL,
+        fig.width = 30,
+        fig.height = 15,
+        color = c("orange", "cyan","green","yellow")
+){
 
-    if (!requireNamespace("EDASeq", quietly = TRUE)) {
-        stop("EDASeq is needed. Please install it.",
-             call. = FALSE)
+    check_package("EDASeq")
+
+    if(!is.null(filename)) {
+        pdf(filename, width = fig.width, height = fig.height)
     }
-    if(!is.null(filename)) pdf(filename, width = 30, height = 15)
 
     splitFun <- function(tf, Tab, nBar){
         tmp <- lapply(Tab[tf, ], function(x) strsplit(x, ";"))
@@ -587,27 +601,27 @@ TCGAvisualize_BarPlot <- function(DFfilt,
 #' @export
 #' @return Heatmap plotted in the device
 TCGAvisualize_Heatmap <- function(
-    data,
-    col.metadata,
-    row.metadata,
-    col.colors = NULL,
-    row.colors = NULL,
-    show_column_names = FALSE,
-    show_row_names = FALSE,
-    cluster_rows = FALSE,
-    cluster_columns = FALSE,
-    sortCol,
-    extremes = NULL,
-    rownames.size = 12,
-    title = NULL,
-    color.levels = NULL,
-    values.label = NULL,
-    filename = "heatmap.pdf",
-    width = 10,
-    height = 10,
-    type = "expression",
-    scale = "none",
-    heatmap.legend.color.bar = "continuous"){
+        data,
+        col.metadata,
+        row.metadata,
+        col.colors = NULL,
+        row.colors = NULL,
+        show_column_names = FALSE,
+        show_row_names = FALSE,
+        cluster_rows = FALSE,
+        cluster_columns = FALSE,
+        sortCol,
+        extremes = NULL,
+        rownames.size = 12,
+        title = NULL,
+        color.levels = NULL,
+        values.label = NULL,
+        filename = "heatmap.pdf",
+        width = 10,
+        height = 10,
+        type = "expression",
+        scale = "none",
+        heatmap.legend.color.bar = "continuous"){
 
     check_package("ComplexHeatmap")
     check_package("circlize")
@@ -887,28 +901,28 @@ unlistlabels <- function(lab) {
 #' @export
 #' @return A oncoprint plot
 TCGAvisualize_oncoprint <- function(
-    mut,
-    genes,
-    filename,
-    color,
-    annotation.position = "bottom",
-    annotation,
-    height,
-    width = 10,
-    rm.empty.columns = FALSE,
-    show.column.names = FALSE,
-    show.row.barplot = TRUE,
-    label.title = "Mutation",
-    column.names.size = 8,
-    label.font.size = 16,
-    rows.font.size = 16,
-    dist.col = 0.5,
-    dist.row = 0.5,
-    information = "Variant_Type",
-    row.order = TRUE,
-    col.order = TRUE,
-    heatmap.legend.side = "bottom",
-    annotation.legend.side = "bottom"
+        mut,
+        genes,
+        filename,
+        color,
+        annotation.position = "bottom",
+        annotation,
+        height,
+        width = 10,
+        rm.empty.columns = FALSE,
+        show.column.names = FALSE,
+        show.row.barplot = TRUE,
+        label.title = "Mutation",
+        column.names.size = 8,
+        label.font.size = 16,
+        rows.font.size = 16,
+        dist.col = 0.5,
+        dist.row = 0.5,
+        information = "Variant_Type",
+        row.order = TRUE,
+        col.order = TRUE,
+        heatmap.legend.side = "bottom",
+        annotation.legend.side = "bottom"
 ){
 
 

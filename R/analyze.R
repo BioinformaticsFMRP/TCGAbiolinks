@@ -286,56 +286,35 @@ TCGAanalyze_SurvivalKM <- function(
     dataNormal <- dataGE[Genelist, group1, drop = FALSE]
     colnames(dataCancer)  <- substr(colnames(dataCancer), 1, 12)
 
-    cfu <-
-        clinical_patient[clinical_patient[, "bcr_patient_barcode"] %in% substr(colnames(dataCancer), 1, 12), ]
+    cfu <- clinical_patient[clinical_patient[, "bcr_patient_barcode"] %in% substr(colnames(dataCancer), 1, 12), ]
     if ("days_to_last_followup" %in% colnames(cfu))
         colnames(cfu)[grep("days_to_last_followup", colnames(cfu))] <-
         "days_to_last_follow_up"
-    cfu <-
-        as.data.frame(subset(
-            cfu,
-            select = c(
-                "bcr_patient_barcode",
-                "days_to_death",
-                "days_to_last_follow_up",
-                "vital_status"
-            )
-        ))
+    cfu <-  as.data.frame(subset(
+        cfu,
+        select = c(
+            "bcr_patient_barcode",
+            "days_to_death",
+            "days_to_last_follow_up",
+            "vital_status"
+        )
+    ))
 
     # Set alive death to inf
     if (length(grep("alive", cfu$vital_status, ignore.case = TRUE)) > 0)
-        cfu[grep("alive", cfu$vital_status, ignore.case = TRUE), "days_to_death"] <-
-        "-Inf"
+        cfu[grep("alive", cfu$vital_status, ignore.case = TRUE), "days_to_death"] <- "-Inf"
 
     # Set dead follow up to inf
     if (length(grep("dead", cfu$vital_status, ignore.case = TRUE)) > 0)
-        cfu[grep("dead", cfu$vital_status, ignore.case = TRUE), "days_to_last_follow_up"] <-
-        "-Inf"
+        cfu[grep("dead", cfu$vital_status, ignore.case = TRUE), "days_to_last_follow_up"] <- "-Inf"
 
     cfu <- cfu[!(is.na(cfu[, "days_to_last_follow_up"])), ]
     cfu <- cfu[!(is.na(cfu[, "days_to_death"])), ]
 
     followUpLevel <- FALSE
 
-    #FC_FDR_table_mRNA
-    tabSurv_Matrix <-
-        matrix(0, nrow(as.matrix(rownames(dataNormal))), 8)
-    colnames(tabSurv_Matrix) <- c(
-        "mRNA",
-        "pvalue",
-        "Cancer Deaths",
-        "Cancer Deaths with Top",
-        "Cancer Deaths with Down",
-        "Mean Tumor Top",
-        "Mean Tumor Down",
-        "Mean Normal"
-    )
-
-    tabSurv_Matrix <- as.data.frame(tabSurv_Matrix)
-
     cfu$days_to_death <- as.numeric(as.character(cfu$days_to_death))
-    cfu$days_to_last_follow_up <-
-        as.numeric(as.character(cfu$days_to_last_follow_up))
+    cfu$days_to_last_follow_up <- as.numeric(as.character(cfu$days_to_last_follow_up))
     rownames(cfu) <- cfu[, "bcr_patient_barcode"] #mod1
 
     cfu <- cfu[!(is.na(cfu[, "days_to_last_follow_up"])), ]
@@ -345,64 +324,48 @@ TCGAanalyze_SurvivalKM <- function(
     ngenes <- nrow(as.matrix(rownames(dataNormal)))
 
     # Evaluate each gene
-    for (i in 1:nrow(as.matrix(rownames(dataNormal))))  {
-        cat(paste0((ngenes - i), "."))
-        mRNAselected <- as.matrix(rownames(dataNormal))[i]
-        mRNAselected_values <-
-            dataCancer[rownames(dataCancer) == mRNAselected, ]
-        mRNAselected_values_normal <-
-            dataNormal[rownames(dataNormal) == mRNAselected, ]
-        if (all(mRNAselected_values == 0))
-            next # All genes are 0
-        tabSurv_Matrix[i, "mRNA"] <- mRNAselected
+    tabSurv_Matrix <- plyr::adply(.data =1:length(rownames(dataNormal)),.margins = 1,.fun = function(i){
 
+        mRNAselected <- as.matrix(rownames(dataNormal))[i]
+        mRNAselected_values <-  dataCancer[rownames(dataCancer) == mRNAselected, ]
+        mRNAselected_values_normal <- dataNormal[rownames(dataNormal) == mRNAselected, ]
+        if (all(mRNAselected_values == 0))  next # All genes are 0
+        tabSurv_Matrix <- data.frame("mRNA" = mRNAselected)
 
         # Get Thresh values for cancer expression
-        mRNAselected_values_ordered <-
-            sort(mRNAselected_values, decreasing = TRUE)
-        mRNAselected_values_ordered_top <-
-            as.numeric(quantile(as.numeric(mRNAselected_values_ordered), ThreshTop)[1])
-        mRNAselected_values_ordered_down <-
-            as.numeric(quantile(as.numeric(mRNAselected_values_ordered), ThreshDown)[1])
+        mRNAselected_values_ordered <- sort(mRNAselected_values, decreasing = TRUE)
+        mRNAselected_values_ordered_top <- as.numeric(quantile(as.numeric(mRNAselected_values_ordered), ThreshTop)[1])
+        mRNAselected_values_ordered_down <- as.numeric(quantile(as.numeric(mRNAselected_values_ordered), ThreshDown)[1])
 
         mRNAselected_values_newvector <- mRNAselected_values
-
 
         if (!is.na(mRNAselected_values_ordered_top)) {
             # How many samples do we have
             numberOfSamples <- length(mRNAselected_values_ordered)
 
             # High group (above ThreshTop)
-            lastelementTOP <-
-                max(which(
-                    mRNAselected_values_ordered > mRNAselected_values_ordered_top
-                ))
+            lastelementTOP <- max(which(
+                mRNAselected_values_ordered > mRNAselected_values_ordered_top
+            ))
 
             # Low group (below ThreshDown)
-            firstelementDOWN <-
-                min(
-                    which(
-                        mRNAselected_values_ordered <= mRNAselected_values_ordered_down
-                    )
+            firstelementDOWN <-  min(
+                which(
+                    mRNAselected_values_ordered <= mRNAselected_values_ordered_down
                 )
+            )
 
-            samples_top_mRNA_selected <-
-                names(mRNAselected_values_ordered[1:lastelementTOP])
-            samples_down_mRNA_selected <-
-                names(mRNAselected_values_ordered[firstelementDOWN:numberOfSamples])
+            samples_top_mRNA_selected <- names(mRNAselected_values_ordered[1:lastelementTOP])
+            samples_down_mRNA_selected <- names(mRNAselected_values_ordered[firstelementDOWN:numberOfSamples])
 
             # Which samples are in the intermediate group (above ThreshLow and below ThreshTop)
-            samples_UNCHANGED_mRNA_selected <-
-                names(mRNAselected_values_newvector[which((mRNAselected_values_newvector) > mRNAselected_values_ordered_down &
-                                                              mRNAselected_values_newvector < mRNAselected_values_ordered_top
-                )])
+            samples_UNCHANGED_mRNA_selected <- names(mRNAselected_values_newvector[which((mRNAselected_values_newvector) > mRNAselected_values_ordered_down &
+                                                                                             mRNAselected_values_newvector < mRNAselected_values_ordered_top
+            )])
 
-            cfu_onlyTOP <-
-                cfu_complete[cfu_complete[, "bcr_patient_barcode"] %in% samples_top_mRNA_selected, ]
-            cfu_onlyDOWN <-
-                cfu_complete[cfu_complete[, "bcr_patient_barcode"] %in% samples_down_mRNA_selected, ]
-            cfu_onlyUNCHANGED <-
-                cfu_complete[cfu_complete[, "bcr_patient_barcode"] %in% samples_UNCHANGED_mRNA_selected, ]
+            cfu_onlyTOP <- cfu_complete[cfu_complete[, "bcr_patient_barcode"] %in% samples_top_mRNA_selected, ]
+            cfu_onlyDOWN <- cfu_complete[cfu_complete[, "bcr_patient_barcode"] %in% samples_down_mRNA_selected, ]
+            cfu_onlyUNCHANGED <- cfu_complete[cfu_complete[, "bcr_patient_barcode"] %in% samples_UNCHANGED_mRNA_selected, ]
 
             cfu_ordered <- NULL
             cfu_ordered <- rbind(cfu_onlyTOP, cfu_onlyDOWN)
@@ -423,27 +386,18 @@ TCGAanalyze_SurvivalKM <- function(
                 deads_down <- 0
             }
 
-            tabSurv_Matrix[i, "Cancer Deaths"] <- deads_complete
-            tabSurv_Matrix[i, "Cancer Deaths with Top"] <- deads_top
-            tabSurv_Matrix[i, "Cancer Deaths with Down"] <-
-                deads_down
-            tabSurv_Matrix[i, "Mean Normal"] <-
-                mean(as.numeric(mRNAselected_values_normal))
-            dataCancer_onlyTop_sample <-
-                dataCancer[, samples_top_mRNA_selected, drop = FALSE]
-            dataCancer_onlyTop_sample_mRNASelected <-
-                dataCancer_onlyTop_sample[rownames(dataCancer_onlyTop_sample) == mRNAselected, ]
-            dataCancer_onlyDown_sample <-
-                dataCancer[, samples_down_mRNA_selected, drop = FALSE]
-            dataCancer_onlyDown_sample_mRNASelected <-
-                dataCancer_onlyDown_sample[rownames(dataCancer_onlyDown_sample) == mRNAselected, ]
-            tabSurv_Matrix[i, "Mean Tumor Top"] <-
-                mean(as.numeric(dataCancer_onlyTop_sample_mRNASelected))
-            tabSurv_Matrix[i, "Mean Tumor Down"] <-
-                mean(as.numeric(dataCancer_onlyDown_sample_mRNASelected))
+            tabSurv_Matrix[1, "Cancer Deaths"] <- deads_complete
+            tabSurv_Matrix[1, "Cancer Deaths with Top"] <- deads_top
+            tabSurv_Matrix[1, "Cancer Deaths with Down"] <- deads_down
+            tabSurv_Matrix[1, "Mean Normal"] <- mean(as.numeric(mRNAselected_values_normal))
+            dataCancer_onlyTop_sample <- dataCancer[, samples_top_mRNA_selected, drop = FALSE]
+            dataCancer_onlyTop_sample_mRNASelected <- dataCancer_onlyTop_sample[rownames(dataCancer_onlyTop_sample) == mRNAselected, ]
+            dataCancer_onlyDown_sample <- dataCancer[, samples_down_mRNA_selected, drop = FALSE]
+            dataCancer_onlyDown_sample_mRNASelected <- dataCancer_onlyDown_sample[rownames(dataCancer_onlyDown_sample) == mRNAselected, ]
+            tabSurv_Matrix[1, "Mean Tumor Top"] <- mean(as.numeric(dataCancer_onlyTop_sample_mRNASelected))
+            tabSurv_Matrix[1, "Mean Tumor Down"] <- mean(as.numeric(dataCancer_onlyDown_sample_mRNASelected))
 
-            ttime[!status] <-
-                as.numeric(cfu[!status, "days_to_last_follow_up"])
+            ttime[!status] <- as.numeric(cfu[!status, "days_to_last_follow_up"])
             ttime[which(ttime == -Inf)] <- 0
 
             ttime <- survival::Surv(ttime, status)
@@ -452,24 +406,21 @@ TCGAanalyze_SurvivalKM <- function(
             legendLow  <- paste(mRNAselected, "Low")
 
             tabSurv_pvalue <- tryCatch({
-                tabSurv <-
-                    survival::survdiff(ttime  ~ c(rep(
-                        "top", nrow(cfu_onlyTOP)
-                    ), rep(
-                        "down", nrow(cfu_onlyDOWN)
-                    )))
+                tabSurv <- survival::survdiff(ttime  ~ c(rep(
+                    "top", nrow(cfu_onlyTOP)
+                ), rep(
+                    "down", nrow(cfu_onlyDOWN)
+                )))
                 tabSurv_chis <- unlist(tabSurv)$chisq
                 tabSurv_pvalue <-
                     as.numeric(1 - pchisq(abs(tabSurv$chisq), df = 1))
             }, error = function(e) {
                 return(Inf)
             })
-            tabSurv_Matrix[i, "pvalue"] <- tabSurv_pvalue
+            tabSurv_Matrix[1, "pvalue"] <- tabSurv_pvalue
 
             if (Survresult == TRUE) {
-                titlePlot <-
-                    paste("Kaplan-Meier Survival analysis, pvalue=",
-                          tabSurv_pvalue)
+                titlePlot <- paste("Kaplan-Meier Survival analysis, pvalue = ",tabSurv_pvalue)
                 plot(
                     survival::survfit(ttime ~ c(
                         rep("low", nrow(cfu_onlyTOP)), rep("high", nrow(cfu_onlyDOWN))
@@ -490,8 +441,8 @@ TCGAanalyze_SurvivalKM <- function(
                 print(tabSurv)
             }
         } #end if
-
-    } #end for
+        tabSurv_Matrix
+    },.progress = "time") #end for
 
     tabSurv_Matrix[tabSurv_Matrix == "-Inf"] <- 0
 
@@ -503,16 +454,11 @@ TCGAanalyze_SurvivalKM <- function(
     tabSurvKM <- tabSurvKM[!duplicated(tabSurvKM$mRNA), ]
     rownames(tabSurvKM) <- tabSurvKM$mRNA
     tabSurvKM <- tabSurvKM[, -1]
-    tabSurvKM <-
-        tabSurvKM[order(tabSurvKM$pvalue, decreasing = FALSE), ]
+    tabSurvKM <- tabSurvKM[order(tabSurvKM$pvalue, decreasing = FALSE), ]
 
-    colnames(tabSurvKM) <-
-        gsub("Cancer", "Group2", colnames(tabSurvKM))
-    colnames(tabSurvKM) <-
-        gsub("Tumor", "Group2", colnames(tabSurvKM))
-    colnames(tabSurvKM) <-
-        gsub("Normal", "Group1", colnames(tabSurvKM))
-
+    colnames(tabSurvKM) <- gsub("Cancer", "Group2", colnames(tabSurvKM))
+    colnames(tabSurvKM) <- gsub("Tumor", "Group2", colnames(tabSurvKM))
+    colnames(tabSurvKM) <- gsub("Normal", "Group1", colnames(tabSurvKM))
 
     return(tabSurvKM)
 }
@@ -797,7 +743,6 @@ TCGAanalyze_Normalization <- function(
 #' two groups of negative-binomially distributed counts.
 #' @param fdr.cut is a threshold to filter DEGs according their p-value corrected
 #' @param logFC.cut is a threshold to filter DEGs according their logFC
-#' @param elementsRatio is number of elements processed for second for time consumation estimation
 #' @param batch.factors a vector containing strings to specify options for batch correction. Options are "Plate", "TSS", "Year", "Portion", "Center", and "Patients"
 #' @param ClinicalDF a dataframe returned by GDCquery_clinic() to be used to extract year data
 #' @param paired boolean to account for paired or non-paired samples. Set to TRUE for paired case
@@ -813,10 +758,12 @@ TCGAanalyze_Normalization <- function(
 #' dataFilt <- TCGAanalyze_Filtering(tabDF = dataBRCA, method = "quantile", qnt.cut =  0.25)
 #' samplesNT <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
 #' samplesTP <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
-#' dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,samplesNT],
-#'                             mat2 = dataFilt[,samplesTP],
-#'                             Cond1type = "Normal",
-#'                             Cond2type = "Tumor")
+#' dataDEGs <- TCGAanalyze_DEA(
+#'    mat1 = dataFilt[,samplesNT],
+#'    mat2 = dataFilt[,samplesTP],
+#'    Cond1type = "Normal",
+#'    Cond2type = "Tumor"
+#' )
 #'
 #' @return table with DEGs containing for each gene logFC, logCPM, pValue,and FDR, also for each contrast
 TCGAanalyze_DEA <- function (
@@ -829,7 +776,6 @@ TCGAanalyze_DEA <- function (
         method = "exactTest",
         fdr.cut = 1,
         logFC.cut = 0,
-        elementsRatio = 30000,
         batch.factors = NULL,
         ClinicalDF = data.frame(),
         paired = FALSE,
@@ -840,17 +786,9 @@ TCGAanalyze_DEA <- function (
         contrast.formula = "",
         Condtypes = c()
 ){
-    if (pipeline == "limma") {
-        if (!requireNamespace("limma", quietly = TRUE)) {
-            stop("limma is needed. Please install it.",
-                 call. = FALSE)
-        }
-    }
 
-    if (!requireNamespace("edgeR", quietly = TRUE)) {
-        stop("edgeR is needed. Please install it.",
-             call. = FALSE)
-    }
+    if(pipeline == "limma")  check_package("limma")
+    if(pipeline == "edgeR")  check_package("edgeR")
 
     table.code <- c(
         "TP",
@@ -898,10 +836,10 @@ TCGAanalyze_DEA <- function (
         TOC <- cbind(mat1, mat2)
         Cond1num <- ncol(mat1)
         Cond2num <- ncol(mat2)
-    }
-    else {
+    }  else {
         TOC <- MAT
     }
+
     if (metadata == TRUE) {
         my_IDs <- get_IDs(TOC)
         Plate <- factor(my_IDs$plate)
@@ -911,6 +849,9 @@ TCGAanalyze_DEA <- function (
         Center <- factor(my_IDs$center)
         Patients <- factor(my_IDs$patient)
     }
+
+
+    # this makes non-sense for non-TCGA data
     if (paired == TRUE) {
         matched.query <- TCGAquery_MatchedCoupledSampleTypes(
             my_IDs$barcode,
@@ -919,15 +860,16 @@ TCGAanalyze_DEA <- function (
         my_IDs <- subset(my_IDs, barcode == matched.query)
         TOC <- TOC[, (names(TOC) %in% matched.query)]
     }
+
     if (nrow(ClinicalDF) > 0) {
-        names(ClinicalDF)[names(ClinicalDF) == "bcr_patient_barcode"] <-
-            "patient"
+        names(ClinicalDF)[names(ClinicalDF) == "bcr_patient_barcode"] <- "patient"
         ClinicalDF$age_at_diag_year <-  floor(clinical$age_at_diagnosis / 365)
         ClinicalDF$diag_year <- ClinicalDF$age_at_diag_year + clinical$year_of_birth
         diag_yearDF <- ClinicalDF[, c("patient", "diag_year")]
         my_IDs <- merge(my_IDs, ClinicalDF, by = "patient")
         Year <- as.factor(my_IDs$diag_year)
     }
+
     options <- c("Plate", "TSS", "Year", "Portion", "Center",  "Patients")
     if (length(batch.factors) == 0) {
         message("Batch correction skipped since no factors provided")
@@ -942,52 +884,34 @@ TCGAanalyze_DEA <- function (
                 )
         }
     additiveformula <- paste(batch.factors, collapse = "+")
+
     message("----------------------- DEA -------------------------------")
     if (nrow(MAT) == 0) {
-        message(message1 <- paste(
-            "there are Cond1 type",
-            Cond1type,
-            "in ",
-            Cond1num,
-            "samples"
-        ))
-        message(message2 <- paste(
-            "there are Cond2 type",
-            Cond2type,
-            "in ",
-            Cond2num,
-            "samples"
-        ))
-        message(message3 <- paste("there are ", nrow(TOC), "features as miRNA or genes "))
+        message("o ",Cond1num," samples in Cond1type ",Cond1type)
+        message("o ",Cond2num," samples in Cond2type ",Cond2type)
+        message("o ", nrow(TOC), " features as miRNA or genes ")
+    } else {
+        message("o ", nrow(TOC), " features as miRNA or genes ")
     }
-    else {
-        message(message3 <- paste("there are ", nrow(TOC), "features as miRNA or genes "))
-    }
-    timeEstimated <- format(ncol(TOC) * nrow(TOC) / elementsRatio,
-                            digits = 2)
-    message(
-        messageEstimation <- paste(
-            "I Need about ",
-            timeEstimated,
-            "seconds for this DEA. [Processing 30k elements /s]  "
-        )
-    )
+    message("This may take some minutes...")
+
     colnames(TOC) <- paste0("s", 1:ncol(TOC))
+
     if (length(Condtypes) > 0) {
         tumorType <- factor(x = Condtypes, levels = unique(Condtypes))
+    } else {
+        tumorType <- factor(
+            x = rep(c(Cond1type, Cond2type), c(Cond1num, Cond2num)),
+            levels = c(Cond1type, Cond2type)
+        )
     }
-    else {
-        tumorType <- factor(x = rep(c(Cond1type, Cond2type),
-                                    c(Cond1num, Cond2num)),
-                            levels = c(Cond1type, Cond2type))
-    }
+
     if (length(batch.factors) == 0 & length(Condtypes) > 0) {
         if (pipeline == "edgeR")
             design <- model.matrix( ~ tumorType)
         else
             design <- model.matrix( ~ 0 + tumorType)
-    } else if (length(batch.factors) == 0 &
-               length(Condtypes) == 0) {
+    } else if (length(batch.factors) == 0 & length(Condtypes) == 0) {
         if (pipeline == "edgeR")
             design <- model.matrix( ~ tumorType)
         else
@@ -1003,160 +927,135 @@ TCGAanalyze_DEA <- function (
             formula <- paste0("~tumorType+", additiveformula)
             if (length(Condtypes) > 2)
                 formula <- paste0("~0+tumorType+", additiveformula)
-        }
-        else
+        } else {
             formula <- paste0("~0+tumorType+", additiveformula)
+        }
         design <- model.matrix(eval(parse(text = formula)))
     }
 
     if (pipeline == "edgeR") {
         if (method == "exactTest") {
-            DGE <- edgeR::DGEList(TOC, group = rep(c(Cond1type,
-                                                     Cond2type), c(Cond1num, Cond2num)))
+            DGE <- edgeR::DGEList(TOC, group = rep(c(Cond1type, Cond2type), c(Cond1num, Cond2num)))
             disp <- edgeR::estimateCommonDisp(DGE)
-            tested <- edgeR::exactTest(disp, pair = c(Cond1type,
-                                                      Cond2type))
+            tested <- edgeR::exactTest(disp, pair = c(Cond1type,  Cond2type))
             logFC_table <- tested$table
-            tableDEA <-
-                edgeR::topTags(tested, n = nrow(tested$table))$table
+            tableDEA <- edgeR::topTags(tested, n = nrow(tested$table))$table
             tableDEA <- tableDEA[tableDEA$FDR <= fdr.cut,]
             tableDEA <- tableDEA[abs(tableDEA$logFC) >= logFC.cut,]
         }
         else if (method == "glmLRT") {
             if (length(unique(tumorType)) == 2) {
                 aDGEList <- edgeR::DGEList(counts = TOC, group = tumorType)
-                aDGEList <-
-                    edgeR::estimateGLMCommonDisp(aDGEList, design)
-                aDGEList <-
-                    edgeR::estimateGLMTagwiseDisp(aDGEList, design)
-                aGlmFit <-
-                    edgeR::glmFit(
-                        aDGEList,
-                        design,
-                        dispersion = aDGEList$tagwise.dispersion,
-                        prior.count.total = 0
-                    )
-
+                aDGEList <- edgeR::estimateGLMCommonDisp(aDGEList, design)
+                aDGEList <- edgeR::estimateGLMTagwiseDisp(aDGEList, design)
+                aGlmFit <- edgeR::glmFit(
+                    aDGEList,
+                    design,
+                    dispersion = aDGEList$tagwise.dispersion,
+                    prior.count.total = 0
+                )
 
                 aGlmLRT <- edgeR::glmLRT(aGlmFit, coef = 2)
-                tableDEA <-
-                    cbind(aGlmLRT$table,
-                          FDR = p.adjust(aGlmLRT$table$PValue, "fdr"))
+                tableDEA <-  cbind(aGlmLRT$table, FDR = p.adjust(aGlmLRT$table$PValue, "fdr"))
                 tableDEA <- tableDEA[tableDEA$FDR < fdr.cut, ]
-                tableDEA <-
-                    tableDEA[abs(tableDEA$logFC) > logFC.cut, ]
-                if (all(grepl("ENSG", rownames(tableDEA))))
-                    tableDEA <-
-                    cbind(tableDEA, map.ensg(genes = rownames(tableDEA))[, 2:3])
-            }
-            else if (length(unique(tumorType)) > 2) {
+                tableDEA <- tableDEA[abs(tableDEA$logFC) > logFC.cut, ]
+
+                if (all(grepl("ENSG", rownames(tableDEA)))){
+                    tableDEA <- cbind(tableDEA, map.ensg(genes = rownames(tableDEA))[, c("gene_name","gene_type")])
+                }
+            } else if (length(unique(tumorType)) > 2) {
                 aDGEList <- edgeR::DGEList(counts = TOC, group = tumorType)
-                colnames(design)[1:length(levels(tumorType))] <-
-                    levels(tumorType)
+                colnames(design)[1:length(levels(tumorType))] <- levels(tumorType)
                 prestr = "makeContrasts("
                 poststr = ",levels=design)"
-                commandstr = paste(prestr, contrast.formula,
-                                   poststr, sep = "")
+                commandstr = paste(prestr, contrast.formula,  poststr, sep = "")
                 commandstr = paste0("limma::", commandstr)
                 cont.matrix <- eval(parse(text = commandstr))
-                aDGEList <- edgeR::estimateGLMCommonDisp(aDGEList,
-                                                         design)
-                aDGEList <- edgeR::estimateGLMTagwiseDisp(aDGEList,
-                                                          design)
+                aDGEList <- edgeR::estimateGLMCommonDisp(aDGEList, design)
+                aDGEList <- edgeR::estimateGLMTagwiseDisp(aDGEList,  design)
 
-                aGlmFit <-
-                    edgeR::glmFit(
-                        aDGEList,
-                        design,
-                        dispersion = aDGEList$tagwise.dispersion,
-                        prior.count.total = 0
-                    )
+                aGlmFit <- edgeR::glmFit(
+                    aDGEList,
+                    design,
+                    dispersion = aDGEList$tagwise.dispersion,
+                    prior.count.total = 0
+                )
 
                 tableDEA <- list()
                 for (mycoef in colnames(cont.matrix)) {
                     message(paste0("DEA for", " :", mycoef))
-                    aGlmLRT <-
-                        edgeR::glmLRT(aGlmFit, contrast = cont.matrix[, mycoef])
-                    #print("---toptags---")
-                    #print(topTags(aGlmLRT, adjust.method = "fdr",
-                    #  sort.by = "PValue"))
+                    aGlmLRT <- edgeR::glmLRT(aGlmFit, contrast = cont.matrix[, mycoef])
                     tt <- aGlmLRT$table
-                    tt <-
-                        cbind(tt, FDR = p.adjust(aGlmLRT$table$PValue,
-                                                 "fdr"))
-                    tt <-
-                        tt[(tt$FDR < fdr.cut & abs(as.numeric(tt$logFC)) >
-                                logFC.cut),]
+                    tt <-  cbind(tt, FDR = p.adjust(aGlmLRT$table$PValue,"fdr"))
+                    tt <- tt[(tt$FDR < fdr.cut & abs(as.numeric(tt$logFC)) > logFC.cut),]
                     tableDEA[[as.character(mycoef)]] <- tt
                     if (all(grepl("ENSG", rownames(tableDEA[[as.character(mycoef)]]))))
                         tableDEA[[as.character(mycoef)]] <-
                         cbind(tableDEA[[as.character(mycoef)]],
-                              map.ensg(genes = rownames(tableDEA[[as.character(mycoef)]]))[,
-                                                                                           2:3])
+                              map.ensg(genes = rownames(tableDEA[[as.character(mycoef)]]))[,2:3])
                 }
             }
-        }
-        else
+        } else {
             stop(
                 paste0(
                     method,
                     " is not a valid DEA method option. Choose 'exactTest' or 'glmLRT' "
                 )
             )
-    }
-    else if (pipeline == "limma") {
-        if (log.trans == TRUE)
+        }
+    } else if (pipeline == "limma") {
+        if (log.trans == TRUE){
             logCPM <- edgeR::cpm(TOC, log = TRUE, prior.count = 3)
-        else
+        } else {
             logCPM <- TOC
+        }
+
         if (voom == TRUE) {
             message("Voom Transformation...")
             logCPM <- limma::voom(logCPM, design)
         }
+
         if (length(unique(tumorType)) == 2) {
             colnames(design)[1:2] <- c(Cond1type, Cond2type)
             contr <- paste0(Cond2type, "-", Cond1type)
-            cont.matrix <- limma::makeContrasts(contrasts = contr,
-                                                levels = design)
+            cont.matrix <- limma::makeContrasts(contrasts = contr, levels = design)
             fit <- limma::lmFit(logCPM, design)
             fit <- limma::contrasts.fit(fit, cont.matrix)
+
             if (trend == TRUE) {
                 fit <- limma::eBayes(fit, trend = TRUE)
-            }
-            else {
+            } else {
                 fit <- limma::eBayes(fit, trend = FALSE)
             }
-            tableDEA <-
-                limma::topTable(
-                    fit,
-                    coef = 1,
-                    adjust.method = "fdr",
-                    number = nrow(TOC)
-                )
+            tableDEA <- limma::topTable(
+                fit,
+                coef = 1,
+                adjust.method = "fdr",
+                number = nrow(TOC)
+            )
             limma::volcanoplot(fit, highlight = 10)
             index <- which(tableDEA[, 4] < fdr.cut)
             tableDEA <- tableDEA[index,]
             neg_logFC.cut <- -1 * logFC.cut
-            index <- which(abs(as.numeric(tableDEA$logFC)) >
-                               logFC.cut)
+            index <- which(abs(as.numeric(tableDEA$logFC)) > logFC.cut)
             tableDEA <- tableDEA[index,]
         }
         else if (length(unique(tumorType)) > 2) {
             DGE <- edgeR::DGEList(TOC, group = tumorType)
-            colnames(design)[1:length(levels(tumorType))] <-
-                levels(tumorType)
+            colnames(design)[1:length(levels(tumorType))] <- levels(tumorType)
             prestr = "makeContrasts("
             poststr = ",levels=colnames(design))"
-            commandstr = paste(prestr, contrast.formula, poststr,
-                               sep = "")
+            commandstr = paste(prestr, contrast.formula, poststr, sep = "")
             commandstr = paste0("limma::", commandstr)
             cont.matrix <- eval(parse(text = commandstr))
             fit <- limma::lmFit(logCPM, design)
             fit <- limma::contrasts.fit(fit, cont.matrix)
-            if (trend == TRUE)
+            if (trend == TRUE){
                 fit <- limma::eBayes(fit, trend = TRUE)
-            else
+            } else {
                 fit <- limma::eBayes(fit, trend = FALSE)
+            }
+
             tableDEA <- list()
             for (mycoef in colnames(cont.matrix)) {
                 tableDEA[[as.character(mycoef)]] <- limma::topTable(
@@ -1167,23 +1066,20 @@ TCGAanalyze_DEA <- function (
                 )
                 message(paste0("DEA for", " :", mycoef))
                 tempDEA <- tableDEA[[as.character(mycoef)]]
-                index.up <- which(tempDEA$adj.P.Val < fdr.cut &
-                                      abs(as.numeric(tempDEA$logFC)) > logFC.cut)
-                tableDEA[[as.character(mycoef)]] <-
-                    tempDEA[index.up,]
+                index.up <- which(tempDEA$adj.P.Val < fdr.cut & abs(as.numeric(tempDEA$logFC)) > logFC.cut)
+                tableDEA[[as.character(mycoef)]] <- tempDEA[index.up,]
                 if (all(grepl("ENSG", rownames(tableDEA[[as.character(mycoef)]]))))
                     tableDEA[[as.character(mycoef)]] <-
                     cbind(tableDEA[[as.character(mycoef)]],
-                          map.ensg(genes = rownames(tableDEA[[as.character(mycoef)]]))[,
-                                                                                       2:3])
+                          map.ensg(genes = rownames(tableDEA[[as.character(mycoef)]]))[,  2:3])
             }
         }
-    }
-    else
+    }  else {
         stop(paste0(
             pipeline,
             " is not a valid pipeline option. Choose 'edgeR' or 'limma'"
         ))
+    }
     message("----------------------- END DEA -------------------------------")
     return(tableDEA)
 }
