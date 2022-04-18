@@ -48,7 +48,7 @@ get.GRCh.bioMart <- function(
 #' @noRd
 map.ensg <- function(genome = "hg38", genes) {
     gene.location <- get.GRCh.bioMart(genome)
-    gene.location <- gene.location[match(genes, gene.location$ensembl_gene_id), ]
+    gene.location <- gene.location[match(genes, gsub("\\.[0-9]*","",gene.location$gene_id)), ]
     return(gene.location)
 }
 

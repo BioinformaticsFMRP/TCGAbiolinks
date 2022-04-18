@@ -16,6 +16,8 @@ TCGAvisualize_EAbarplot(
   text.size = 1,
   mfrow = c(2, 2),
   xlim = NULL,
+  fig.width = 30,
+  fig.height = 15,
   color = c("orange", "cyan", "green", "yellow")
 )
 }
@@ -41,6 +43,10 @@ TCGAvisualize_EAbarplot(
 \item{mfrow}{Vector with number of rows/columns of the plot. Default  2 rows/2 columns "c(2,2)"}
 
 \item{xlim}{Upper limit of the x-axis.}
+
+\item{fig.width}{Default 30}
+
+\item{fig.height}{Default 15}
 
 \item{color}{A vector of colors for each barplot. Deafult:  c("orange", "cyan","green","yellow")}
 }

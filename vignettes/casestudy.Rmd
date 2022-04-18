@@ -32,17 +32,19 @@ The code is divided in 4 case study:
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(SummarizedExperiment)
 library(TCGAbiolinks)
+
 query.exp <- GDCquery(
   project = "TCGA-BRCA", 
-  legacy = TRUE,
-  data.category = "Gene expression",
-  data.type = "Gene expression quantification",
-  platform = "Illumina HiSeq", 
-  file.type = "results",
-  experimental.strategy = "RNA-Seq",
+  data.category = "Transcriptome Profiling",
+  data.type = "Gene Expression Quantification", 
+  workflow.type = "STAR - Counts",
   sample.type = c("Primary Tumor","Solid Tissue Normal")
 )
-GDCdownload(query.exp)
+GDCdownload(
+    query = query.exp,
+    files.per.chunk = 100
+)
+
 brca.exp <- GDCprepare(
   query = query.exp, 
   save = TRUE, 
@@ -50,19 +52,20 @@ brca.exp <- GDCprepare(
 )
 
 # get subtype information
-dataSubt <- TCGAquery_subtype(tumor = "BRCA")
+infomation.subtype <- TCGAquery_subtype(tumor = "BRCA")
 
 # get clinical data
-dataClin <- GDCquery_clinic(project = "TCGA-BRCA",type = "clinical") 
+information.clinical <- GDCquery_clinic(project = "TCGA-BRCA",type = "clinical") 
 
 # Which samples are Primary Tumor
-dataSmTP <- TCGAquery_SampleTypes(getResults(query.exp,cols="cases"),"TP") 
+samples.primary.tumour <- brca.exp$barcode[brca.exp$shortLetterCode == "TP"]
+
 # which samples are solid tissue normal
-dataSmNT <- TCGAquery_SampleTypes(getResults(query.exp,cols="cases"),"NT")
+samples.solid.tissue.normal <- brca.exp$barcode[brca.exp$shortLetterCode == "NT"]
 ```
 
-Using `TCGAnalyze_DEA`, we identified 3,390 differentially expression genes (DEG) (log 
-fold change >=1 and FDR < 1%) between 114 normal and 1097 BRCA samples. In 
+Using `TCGAnalyze_DEA`, we identified 4,815 differentially expression genes (DEG) (log 
+fold change >=1 and FDR < 1%) between 113 normal and 1106 BRCA samples. In 
 order to understand the underlying biological process from DEGs we performed an 
 enrichment analysis using `TCGAnalyze_EA_complete` function.  
 
@@ -74,7 +77,7 @@ dataPrep <- TCGAanalyze_Preprocessing(
 
 dataNorm <- TCGAanalyze_Normalization(
   tabDF = dataPrep,
-  geneInfo = geneInfo,
+  geneInfo = geneInfoHT,
   method = "gcContent"
 )                
 
@@ -85,13 +88,14 @@ dataFilt <- TCGAanalyze_Filtering(
 )   
 
 dataDEGs <- TCGAanalyze_DEA(
-  mat1 = dataFilt[,dataSmNT],
-  mat2 = dataFilt[,dataSmTP],
+  mat1 = dataFilt[,samples.solid.tissue.normal],
+  mat2 = dataFilt[,samples.primary.tumour],
   Cond1type = "Normal",
   Cond2type = "Tumor",
   fdr.cut = 0.01 ,
-  logFC.cut = 1,
-  method = "glmLRT"
+  logFC.cut = 2,
+  method = "glmLRT",
+  pipeline = "edgeR"
 )  
 ```
 
@@ -102,7 +106,7 @@ function, respectively).
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 ansEA <- TCGAanalyze_EAcomplete(
   TFname = "DEA genes Normal Vs Tumor",
-  RegulonList = rownames(dataDEGs)
+  RegulonList = dataDEGs$gene_name
 )  
 
 TCGAvisualize_EAbarplot(
@@ -111,8 +115,8 @@ TCGAvisualize_EAbarplot(
   GOCCTab = ansEA$ResCC,
   GOMFTab = ansEA$ResMF,
   PathTab = ansEA$ResPat,
-  nRGTab = rownames(dataDEGs),
-  nBar = 20
+  nRGTab = dataDEGs$gene_name,
+  nBar = 10
 )
 ```
 
@@ -143,8 +147,8 @@ dataSurv <- TCGAanalyze_SurvivalKM(
   ThreshTop = 0.67,
   ThreshDown = 0.33,
   p.cut = 0.05, 
-  group1, 
-  group2
+  group1 = group1, 
+  group2 = group2
 )
 ```
 
@@ -195,13 +199,10 @@ library(SummarizedExperiment)
 
 query.exp <- GDCquery(
   project = "TCGA-LGG", 
-  legacy = TRUE,
-  data.category = "Gene expression",
-  data.type = "Gene expression quantification",
-  platform = "Illumina HiSeq", 
-  file.type = "results",
-  experimental.strategy = "RNA-Seq",
-  sample.type = "Primary Tumor"
+  data.category = "Transcriptome Profiling",
+  data.type = "Gene Expression Quantification", 
+  workflow.type = "STAR - Counts",
+  sample.type = c("Primary Tumor")
 )
 
 GDCdownload(query.exp)
@@ -246,10 +247,13 @@ After the two clustering analysis, with cut.tree = 4 we obtained n= 4 expression
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(dplyr)
 
-dataPrep <- TCGAanalyze_Preprocessing(object = lgg.exp, cor.cut = 0.6)
+dataPrep <- TCGAanalyze_Preprocessing(
+    object = lgg.exp, 
+    cor.cut = 0.6
+)
 dataNorm <- TCGAanalyze_Normalization(
   tabDF = dataPrep,
-  geneInfo = geneInfo,
+  geneInfo = geneInfoHT,
   method = "gcContent"
 )
 
@@ -265,7 +269,6 @@ data_Hc2 <- TCGAanalyze_Clustering(
 ) 
 # Add  cluster information to Summarized Experiment
 colData(lgg.exp)$groupsHC <- paste0("EC",data_Hc2[[4]]$consensusClass)
-
 ```
 
 The next steps will be to visualize the data. First, we created the survival plot.

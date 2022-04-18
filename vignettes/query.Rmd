@@ -140,19 +140,23 @@ Please, note that these tables are still incomplete.
 
 ## Harmonized data options (`legacy = FALSE`)
 
-```{r}
-datatable(readr::read_csv("https://docs.google.com/spreadsheets/d/1f98kFdj9mxVDc1dv4xTZdx8iWgUiDYO-qiFJINvmTZs/export?format=csv&gid=2046985454",col_types = readr::cols()),
-          filter = 'top',
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 40), 
-          rownames = FALSE)
+```{r, echo=FALSE}
+datatable(
+    readr::read_csv("https://docs.google.com/spreadsheets/d/1f98kFdj9mxVDc1dv4xTZdx8iWgUiDYO-qiFJINvmTZs/export?format=csv&gid=2046985454",col_types = readr::cols()),
+    filter = 'top',
+    options = list(scrollX = TRUE, keys = TRUE, pageLength = 40), 
+    rownames = FALSE
+)
 ```
 
 ## Legacy archive data  options (`legacy = TRUE`)
-```{r}
-datatable(readr::read_csv("https://docs.google.com/spreadsheets/d/1f98kFdj9mxVDc1dv4xTZdx8iWgUiDYO-qiFJINvmTZs/export?format=csv&gid=1817673686",col_types = readr::cols()),
-          filter = 'top',
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 40), 
-          rownames = FALSE)
+```{r, echo=FALSE}
+datatable(
+    readr::read_csv("https://docs.google.com/spreadsheets/d/1f98kFdj9mxVDc1dv4xTZdx8iWgUiDYO-qiFJINvmTZs/export?format=csv&gid=1817673686",col_types = readr::cols()),
+    filter = 'top',
+    options = list(scrollX = TRUE, keys = TRUE, pageLength = 40), 
+    rownames = FALSE
+)
 ```
 
 # Harmonized database examples
@@ -172,10 +176,12 @@ query <- GDCquery(
     platform = c("Illumina Human Methylation 450"),
     sample.type = "Recurrent Tumor"
 )
-datatable(getResults(query), 
-          filter = 'top',
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = FALSE)
+datatable(
+    getResults(query), 
+    filter = 'top',
+    options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+    rownames = FALSE
+)
 ```
 
 ## Samples with DNA methylation and gene expression data
@@ -213,6 +219,7 @@ query.met <- GDCquery(
     platform = c("Illumina Human Methylation 450"),
     barcode = common.patients[1:5]
 )
+
 query.exp <- GDCquery(
     project = "TCGA-COAD",
     data.category = "Transcriptome Profiling",
@@ -321,6 +328,7 @@ query <- GDCquery(
 This exmaple shows how the user can search for  glioblastoma multiform (GBM) 
 gene expression data with the normalized results for expression of a gene. 
 For more information about file.types check [GDC TCGA file types](https://gdc.cancer.gov/resources-tcga-users/legacy-archive-tcga-tag-descriptions)
+
 ```{r message=FALSE, warning=FALSE}
 # Gene expression aligned against hg19.
 query.exp.hg19 <- GDCquery(
