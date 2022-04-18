@@ -178,18 +178,18 @@
 #' @importFrom dplyr pull
 #' @importFrom tidyr contains
 GDCquery <- function(
-    project,
-    data.category,
-    data.type,
-    workflow.type,
-    legacy = FALSE,
-    access,
-    platform,
-    file.type,
-    barcode,
-    data.format,
-    experimental.strategy,
-    sample.type
+        project,
+        data.category,
+        data.type,
+        workflow.type,
+        legacy = FALSE,
+        access,
+        platform,
+        file.type,
+        barcode,
+        data.format,
+        experimental.strategy,
+        sample.type
 ){
 
     isServeOK()
@@ -527,31 +527,42 @@ GDCquery <- function(
         # Auxiliary test files does not have information linked toit.
         # get frm file names
         results$cases <- str_extract_all(results$file_name,"TCGA-[:alnum:]{2}-[:alnum:]{4}") %>% unlist
-    } else if(data.category %in% c( "Copy Number Variation","Simple nucleotide variation")){
-        cases <- plyr::laply(results$cases,
-                             function(x) {
-                                 lapply(x$samples,FUN = function(y)  unlist(y,recursive = T)[c("portions.analytes.aliquots.submitter_id")]) %>%
-                                     unlist %>%
-                                     na.omit %>%
-                                     paste(collapse = ",")
-                             }) %>% as.data.frame %>% dplyr::pull(1) %>% as.character()
+    } else if(data.category %in% c(
+        "Copy Number Variation",
+        "Simple nucleotide variation",
+        "Simple Nucleotide Variation")
+    ){
+        cases <- plyr::laply(
+            .data = results$cases,
+            .fun =  function(x) {
+                lapply(x$samples,FUN = function(y)  unlist(y,recursive = T)[c("portions.analytes.aliquots.submitter_id")]) %>%
+                    unlist %>%
+                    na.omit %>%
+                    paste(collapse = ",")
+            }) %>% as.data.frame %>% dplyr::pull(1) %>% as.character()
 
-        sample_type <- plyr::laply(results$cases,
-                                   function(x) {
-                                       lapply(x$samples,FUN = function(y)  unlist(y,recursive = T)[c("sample_type")]) %>%
-                                           unlist %>%
-                                           na.omit %>%
-                                           paste(collapse = ",")
-                                   }) %>% as.data.frame %>% dplyr::pull(1) %>% as.character()
+        sample_type <- plyr::laply(
+            .data = results$cases,
+            .fun =  function(x) {
+                lapply(x$samples,FUN = function(y)  {
+                    sample <- unlist(y,recursive = T)
+                    sample[grep("sample_type1",names(sample))]
+                    }
+                    ) %>%
+                    unlist %>%
+                    na.omit %>%
+                    paste(collapse = ",")
+            }) %>% as.data.frame %>% dplyr::pull(1) %>% as.character()
         results$sample_type <- sample_type
         results$cases <- cases
-    } else  if(data.category %in% c("Protein expression")){
-        aux <- plyr::laply(results$cases,
-                           function(x) {
-                               summarize(x$samples[[1]]$portions[[1]],
-                                         submitter_id = paste(submitter_id,collapse = ";"),
-                                         is_ffpe = any(is_ffpe))
-                           }) %>% as.data.frame
+    } else  if(data.category %in% c("Protein expression")) {
+        aux <- plyr::laply(
+            .data = results$cases,
+            .fun = function(x) {
+                summarize(x$samples[[1]]$portions[[1]],
+                          submitter_id = paste(submitter_id,collapse = ";"),
+                          is_ffpe = any(is_ffpe))
+            }) %>% as.data.frame
 
         results$is_ffpe <- aux$is_ffpe %>% unlist() %>% as.logical
         results$cases <- aux$submitter_id %>% unlist
@@ -559,18 +570,19 @@ GDCquery <- function(
 
         if(data.type %in% "Masked Somatic Mutation"){
             # MAF files are one single file for all samples
-            aux <- plyr::laply(results$cases[[1]]$samples,
-                               function(x) {
-                                   unlist(x,recursive = T)[c("portions.analytes.aliquots.submitter_id","sample_type1","sample_type2","is_ffpe1","is_ffpe2")]
-                               }) %>% as.data.frame
+            aux <- plyr::laply(
+                .data = results$cases[[1]]$samples,
+                .fun =  function(x) {
+                    unlist(x,recursive = T)[c("portions.analytes.aliquots.submitter_id","sample_type1","sample_type2","is_ffpe1","is_ffpe2")]
+                }) %>% as.data.frame
 
             results$cases <- aux$portions.analytes.aliquots.submitter_id  %>% as.character() %>% paste(collapse = ",")
             if(!is.na(sample.type)) sample.type <- NA # ensure no filtering will be applied
 
         } else {
             # TODO: Add comnetary with case
-            aux <- plyr::laply(results$cases,
-                               function(x) {
+            aux <- plyr::laply(.data = results$cases,
+                               .fun = function(x) {
                                    unlist(x$samples[[1]],recursive = T)[c("portions.analytes.aliquots.submitter_id","sample_type1","sample_type2","is_ffpe1","is_ffpe2")]
                                }) %>% as.data.frame
             results$sample_type1 <- aux$sample_type1 %>% as.character()
@@ -1059,8 +1071,8 @@ TCGAquery_recount2<-function(project, tissue=c()){
 #' }
 #' @return A data frame with the maf file information
 GDCquery_ATAC_seq <- function(
-    tumor = NULL,
-    file.type = NULL
+        tumor = NULL,
+        file.type = NULL
 ) {
     isServeOK()
     results <- readr::read_tsv("https://gdc.cancer.gov/files/public/file/ATACseq-AWG_Open_GDC-Manifest.txt")
