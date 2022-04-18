@@ -19,13 +19,17 @@ library(dplyr)
 library(DT)
 ```
 
+# GDC pipeline information
+
+- https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/
+- https://github.com/NCI-GDC/gdc-maf-tool
 
 # Search and Download
 
 **TCGAbiolinks** has provided a few functions to download mutation data from GDC.
 There are two options to download the data:
 
-1. Use `GDCquery_Maf` which will download MAF aligned against hg38
+1. Use `GDCquery`, `GDCdownload` and `GDCpreprare` to download MAF aligned against hg38
 2. Use `GDCquery`, `GDCdownload` and `GDCpreprare` to download MAF aligned against hg19
 3. Use `getMC3MAF()`, to download MC3 MAF from  https://gdc.cancer.gov/about-data/publications/mc3-2017
 
@@ -36,7 +40,16 @@ Pipelines options are: `muse`, `varscan2`, `somaticsniper`, `mutect`. For more i
 [GDC docs](https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/).
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval=F}
-maf <- GDCquery_Maf("CHOL", pipelines = "muse")
+query <- GDCquery(
+     project = "TCGA-CHOL", 
+     data.category = "Simple Nucleotide Variation", 
+     access = "open", 
+     legacy = FALSE, 
+     data.type = "Masked Somatic Mutation", 
+     workflow.type = "Aliquot Ensemble Somatic Variant Merging and Masking"
+)
+GDCdownload(query)
+maf <- GDCprepare(query)
 ```
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval=T,include=F}
 maf <- chol_maf@data
@@ -56,11 +69,13 @@ This example will download MAF (mutation annotation files) aligned against hg19 
 
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
-query.maf.hg19 <- GDCquery(project = "TCGA-CHOL", 
-                           data.category = "Simple nucleotide variation", 
-                           data.type = "Simple somatic mutation",
-                           access = "open", 
-                           legacy = TRUE)
+query.maf.hg19 <- GDCquery(
+    project = "TCGA-CHOL", 
+    data.category = "Simple nucleotide variation", 
+    data.type = "Simple somatic mutation",
+    access = "open", 
+    legacy = TRUE
+)
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 # Check maf availables
@@ -109,7 +124,18 @@ To visualize the data you can use the Bioconductor package [maftools](https://bi
 ```{r  results = "hide",echo = TRUE, message = FALSE, warning = FALSE, eval=FALSE}
 library(maftools)
 library(dplyr)
-maf <- GDCquery_Maf("CHOL", pipelines = "muse") %>% read.maf
+query <- GDCquery(
+     project = "TCGA-CHOL", 
+     data.category = "Simple Nucleotide Variation", 
+     access = "open", 
+     legacy = FALSE, 
+     data.type = "Masked Somatic Mutation", 
+     workflow.type = "Aliquot Ensemble Somatic Variant Merging and Masking"
+)
+GDCdownload(query)
+maf <- GDCprepare(query)
+    
+maf <- maf %>% maftools::read.maf
 ```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
