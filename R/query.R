@@ -535,7 +535,10 @@ GDCquery <- function(
         cases <- plyr::laply(
             .data = results$cases,
             .fun =  function(x) {
-                lapply(x$samples,FUN = function(y)  unlist(y,recursive = T)[c("portions.analytes.aliquots.submitter_id")]) %>%
+                lapply(x$samples,FUN = function(y)  {
+                    aux <- unlist(y$portions)
+                    sort(aux[grep("analytes.aliquots.submitter_id",names(aux))])
+                }) %>%
                     unlist %>%
                     na.omit %>%
                     paste(collapse = ",")
@@ -546,9 +549,8 @@ GDCquery <- function(
             .fun =  function(x) {
                 lapply(x$samples,FUN = function(y)  {
                     sample <- unlist(y,recursive = T)
-                    sample[grep("sample_type1",names(sample))]
-                    }
-                    ) %>%
+                    sort(sample[grep("sample_type[0-9]",names(sample))],decreasing = T)
+                }) %>%
                     unlist %>%
                     na.omit %>%
                     paste(collapse = ",")
