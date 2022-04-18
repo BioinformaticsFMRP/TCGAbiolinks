@@ -1,0 +1,86 @@
+---
+title: "Stemness score"
+bibliography: bibliography.bib    
+vignette: >
+    %\VignetteIndexEntry{11. Stemness score}
+    %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dpi = 300)
+knitr::opts_chunk$set(cache = FALSE)
+```
+
+
+```{r, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
+library(TCGAbiolinks)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(SummarizedExperiment)
+library(dplyr)
+library(DT)
+```
+
+<br>
+
+## Calculate stemness score with `TCGAanalyze_Stemness`
+<hr>
+
+If you use this function please also cite: 
+
+**Malta TM, Sokolov A, Gentles AJ, et al. Machine Learning Identifies Stemness Features Associated with Oncogenic Dedifferentiation. Cell. 2018;173(2):338-354.e15.** (doi:10.1016/j.cell.2018.03.034)
+
+
+## Data
+<hr>
+
+The input data are:
+- a matrix (samples as columns, Gene names as rows) 
+- the signature to calculate the correlation score.
+
+Possible scores are: 
+
+- SC_PCBC_stemSig - Stemness Score
+- DE_PCBC_stemSig - endoderm score
+- EB_PCBC_stemSig -  embryoid bodies score
+- ECTO_PCBC_stemSig - ectoderm score
+-  MESO_PCBC_stemSig - mesoderm score
+
+# Function 
+```{r, eval = TRUE, message = FALSE, results = "hide"}
+# Selecting TCGA breast cancer (10 samples) for example stored in dataBRCA
+dataNorm <- TCGAanalyze_Normalization(tabDF = dataBRCA, geneInfo =  geneInfo)
+
+# quantile filter of genes
+dataFilt <- TCGAanalyze_Filtering(
+  tabDF = dataNorm,
+  method = "quantile",
+  qnt.cut =  0.25
+)
+
+data(SC_PCBC_stemSig)
+Stemness_score <- TCGAanalyze_Stemness(
+  stemSig = SC_PCBC_stemSig,
+  dataGE = dataFilt
+)
+data(ECTO_PCBC_stemSig)
+ECTO_score <- TCGAanalyze_Stemness(
+  stemSig = ECTO_PCBC_stemSig,
+  dataGE = dataFilt
+)
+
+data(MESO_PCBC_stemSig)
+MESO_score <- TCGAanalyze_Stemness(
+  stemSig = MESO_PCBC_stemSig,
+  dataGE = dataFilt
+)
+```
+
+# Output
+```{r, eval = T}
+head(Stemness_score)
+head(ECTO_score)
+head(MESO_score)
+```
+
