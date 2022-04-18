@@ -19,10 +19,7 @@ library(dplyr)
 library(DT)
 ```
 
-# GDC pipeline information
 
-- https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/
-- https://github.com/NCI-GDC/gdc-maf-tool
 
 # Search and Download
 
@@ -35,8 +32,8 @@ There are two options to download the data:
 
 ## Mutation data (hg38)
 
-This example will download MAF (mutation annotation files) for variant calling pipeline muse.
-Pipelines options are: `muse`, `varscan2`, `somaticsniper`, `mutect`. For more information please access
+This example will download Aggregate GDC MAFs.
+ For more information please access https://github.com/NCI-GDC/gdc-maf-tool and 
 [GDC docs](https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/).
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval=F}
