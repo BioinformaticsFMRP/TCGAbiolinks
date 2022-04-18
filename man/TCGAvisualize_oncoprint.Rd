@@ -87,7 +87,18 @@ Creating a oncoprint
 }
 \examples{
 \dontrun{
-mut <- GDCquery_Maf(tumor = "ACC", pipelines = "mutect")
+library(maftools)
+library(dplyr)
+query <- GDCquery(
+   project = "TCGA-CHOL",
+   data.category = "Simple Nucleotide Variation",
+   access = "open",
+   legacy = FALSE,
+   data.type = "Masked Somatic Mutation",
+   workflow.type = "Aliquot Ensemble Somatic Variant Merging and Masking"
+)
+GDCdownload(query)
+mut <- GDCprepare(query)
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:10], rm.empty.columns = TRUE)
 TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:10],
                  filename = "onco.pdf",

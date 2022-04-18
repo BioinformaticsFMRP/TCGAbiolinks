@@ -330,20 +330,29 @@ grid.raster(img)
 ```
 
 Finally, we will take a look in the mutation genes. We will first download the MAF file
-with `GDCquery_Maf`. In this example we will investigate the gene "ATRX".
+with `GDCquery`,`GDCdownload` and `GDCprepare`. In this example we will investigate the gene "ATRX".
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
-LGGmut <- GDCquery_Maf(tumor = "LGG", pipelines = "muse")
+library(maftools)
+library(dplyr)
+query <- GDCquery(
+     project = "TCGA-LGG", 
+     data.category = "Simple Nucleotide Variation", 
+     access = "open", 
+     legacy = FALSE, 
+     data.type = "Masked Somatic Mutation", 
+     workflow.type = "Aliquot Ensemble Somatic Variant Merging and Masking"
+)
+GDCdownload(query)
+LGGmut <- GDCprepare(query)
 # Selecting gene
-mRNAsel <- "ATRX"
-LGGselected <- LGGmut[LGGmut$Hugo_Symbol == mRNAsel,]
+LGGmut.atr <- LGGmut %>% dplyr::filter(Hugo_Symbol == "ATR")
 
-dataMut <- LGGselected[!duplicated(LGGselected$Tumor_Sample_Barcode),]
+dataMut <- LGGmut.atr[!duplicated(LGGmut.atr$Tumor_Sample_Barcode),]
 dataMut$Tumor_Sample_Barcode <- substr(dataMut$Tumor_Sample_Barcode,1,12)
 
 # Adding the Expression Cluster classification found before
-dataMut <- merge(dataMut, cluster, by.y="patient", by.x="Tumor_Sample_Barcode")
-dataMut <- dataMut[dataMut$Variant_Classification!=0,]
+dataMut <- merge(dataMut, cluster, by.y = "patient", by.x = "Tumor_Sample_Barcode")
 ```
 
 # Case study n. 3: Integration of methylation and expression for ACC
