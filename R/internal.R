@@ -599,23 +599,36 @@ get.cnv <- function(project, genes){
     return(cnv.annotation)
 }
 
-get.mutation <- function(project,
-                         genes,
-                         pipeline = pipeline,
-                         mutant_variant_classification = c("Frame_Shift_Del",
-                                                           "Frame_Shift_Ins",
-                                                           "Missense_Mutation",
-                                                           "Nonsense_Mutation",
-                                                           "Splice_Site",
-                                                           "In_Frame_Del",
-                                                           "In_Frame_Ins",
-                                                           "Translation_Start_Site",
-                                                           "Nonstop_Mutation")){
+get.mutation <- function(
+        project,
+        genes,
+        mutant_variant_classification = c(
+            "Frame_Shift_Del",
+            "Frame_Shift_Ins",
+            "Missense_Mutation",
+            "Nonsense_Mutation",
+            "Splice_Site",
+            "In_Frame_Del",
+            "In_Frame_Ins",
+            "Translation_Start_Site",
+            "Nonstop_Mutation"
+        )){
     if(missing(project)) stop("Argument project is missing")
     if(missing(genes)) stop("Argument genes is missing")
 
     # Get mutation annotation file
-    maf <- GDCquery_Maf(gsub("TCGA-","",project),pipelines = pipeline)
+    library(maftools)
+    library(dplyr)
+    query <- GDCquery(
+        project = project,
+        data.category = "Simple Nucleotide Variation",
+        access = "open",
+        legacy = FALSE,
+        data.type = "Masked Somatic Mutation",
+        workflow.type = "Aliquot Ensemble Somatic Variant Merging and Masking"
+    )
+    GDCdownload(query)
+    maf <- GDCprepare(query)
 
     message(paste0("Consindering only the mutant_variant_classification mutations: \n o ",
                    paste(mutant_variant_classification, collapse = "\n o ")))
@@ -654,17 +667,19 @@ get.mutation <- function(project,
 
     return(mut)
 }
-get.mut.gistc <- function(project,
-                          genes,
-                          mut.pipeline,
-                          mutant_variant_classification) {
+get.mut.gistc <- function(
+        project,
+        genes,
+        mutant_variant_classification
+) {
 
     if(missing(project)) stop("Argument project is missing")
     if(missing(genes)) stop("Argument genes is missing")
-    mut <- get.mutation(project,
-                        genes,
-                        pipeline = mut.pipeline,
-                        mutant_variant_classification =  mutant_variant_classification )
+    mut <- get.mutation(
+        project,
+        genes,
+        mutant_variant_classification =  mutant_variant_classification
+    )
     cnv <- get.cnv(project, genes)
     if(!is.null(mut) & !is.null(cnv)) {
         annotation <- merge(mut, cnv, by = 0 , sort = FALSE,all=TRUE)
@@ -680,25 +695,31 @@ get.mut.gistc <- function(project,
     }
     return(NULL)
 }
-get.mut.gistc.information <- function(df,
-                                      project,
-                                      genes,
-                                      mut.pipeline = "mutect2",
-                                      mutant_variant_classification = c("Frame_Shift_Del",
-                                                                        "Frame_Shift_Ins",
-                                                                        "Missense_Mutation",
-                                                                        "Nonsense_Mutation",
-                                                                        "Splice_Site",
-                                                                        "In_Frame_Del",
-                                                                        "In_Frame_Ins",
-                                                                        "Translation_Start_Site",
-                                                                        "Nonstop_Mutation")) {
+get.mut.gistc.information <- function(
+        df,
+        project,
+        genes,
+        mutant_variant_classification = c(
+            "Frame_Shift_Del",
+            "Frame_Shift_Ins",
+            "Missense_Mutation",
+            "Nonsense_Mutation",
+            "Splice_Site",
+            "In_Frame_Del",
+            "In_Frame_Ins",
+            "Translation_Start_Site",
+            "Nonstop_Mutation"
+        )
+) {
     order <- rownames(df)
     for(i in genes) if(!tolower(i) %in% tolower(EAGenes$Gene)) message(paste("Gene not found:", i))
-    info <- as.data.frame(get.mut.gistc(project,
-                                        genes,
-                                        mut.pipeline = mut.pipeline,
-                                        mutant_variant_classification = mutant_variant_classification))
+    info <- as.data.frame(
+        get.mut.gistc(
+            project,
+            genes,
+            mutant_variant_classification = mutant_variant_classification
+        )
+    )
     if(is.null(info)) return(df)
     info$aux <- rownames(info)
     df$aux <- substr(df$barcode,1,15)
