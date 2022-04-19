@@ -755,6 +755,7 @@ readIDATDNAmethylation <- function(
 # TODO: Improve this function to be more generic as possible
 #' @importFrom GenomicRanges makeGRangesFromDataFrame
 #' @importFrom tibble as_data_frame
+#' @importFrom data.table fread
 readDNAmethylation <- function(
         files,
         cases,
