@@ -88,6 +88,25 @@ here: [http://zwdzwd.github.io/InfiniumAnnotation](http://zwdzwd.github.io/Infin
 </div>
 </div>
 
+
+<div class="panel panel-danger">
+<div class="panel-heading">simpleWarning in file.create(to[okay]) error </div>
+<div class="panel-body">
+
+If you received the warning/error `simpleWarning in file.create(to[okay])` 
+try setting `directory`
+as described by some users:
+https://github.com/BioinformaticsFMRP/TCGAbiolinks/issues/153#issuecomment-856385673
+
+in `GDCprepare` and `GDCdownload`
+```
+<simpleWarning in file.create(to[okay]): cannot create file ... reason 'No such file or directory'>
+```
+
+</div>
+</div>
+
+
 ## Arguments 
 
 ### `GDCdownload`
