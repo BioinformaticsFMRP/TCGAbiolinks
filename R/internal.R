@@ -130,6 +130,7 @@ checkDataTypeInput <- function(legacy, data.type){
     } else {
         harmonized.data.type <- c(
             "Aggregated Somatic Mutation",
+            "Aligned Reads",
             "Gene Expression Quantification",
             "Raw CGI Variant",
             "Methylation Beta Value",
