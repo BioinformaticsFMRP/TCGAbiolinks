@@ -174,7 +174,7 @@ GDCprepare <- function(
         } else {
             data <- readCopyNumberVariation(files, query$results[[1]]$cases)
         }
-    }  else if (grepl("Methylation Beta Value",query$data.type, ignore.case = TRUE)) {
+    }  else if (grepl("Methylation Beta Value",unique(query$results[[1]]$data_type), ignore.case = TRUE)) {
         data <- readDNAmethylation(
             files = files,
             cases = cases,
