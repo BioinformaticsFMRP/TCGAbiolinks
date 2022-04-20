@@ -329,7 +329,7 @@ TCGAanalyze_SurvivalKM <- function(
         mRNAselected <- as.matrix(rownames(dataNormal))[i]
         mRNAselected_values <-  dataCancer[rownames(dataCancer) == mRNAselected, ]
         mRNAselected_values_normal <- dataNormal[rownames(dataNormal) == mRNAselected, ]
-        if (all(mRNAselected_values == 0))  next # All genes are 0
+        if (all(mRNAselected_values == 0))  return(NULL) # All genes are 0
         tabSurv_Matrix <- data.frame("mRNA" = mRNAselected)
 
         # Get Thresh values for cancer expression
