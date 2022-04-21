@@ -22,21 +22,11 @@
 #' query <- GDCquery(
 #'   project = "TCGA-KIRP",
 #'   data.category = "Simple Nucleotide Variation",
-#'   data.type = "Masked Somatic Mutation",
-#'   workflow.type = "MuSE Variant Aggregation and Masking"
+#'   data.type = "Masked Somatic Mutation"
 #' )
 #' GDCdownload(query, method = "api", directory = "maf")
 #' maf <- GDCprepare(query, directory = "maf")
 #'
-#' # Get GISTIC values
-#' gistic.query <- GDCquery(
-#'   project = "TCGA-ACC",
-#'   data.category = "Copy Number Variation",
-#'   data.type = "Gene Level Copy Number Scores",
-#'   access = "open"
-#' )
-#' GDCdownload(gistic.query)
-#' gistic <- GDCprepare(gistic.query)
 #' }
 #' @return A summarizedExperiment or a data.frame
 #' @importFrom  S4Vectors DataFrame
@@ -143,7 +133,11 @@ GDCprepare <- function(
         }
     }
 
-    cases <- ifelse(grepl("TCGA|TARGET",query$results[[1]]$project %>% unlist()),query$results[[1]]$cases,query$results[[1]]$sample.submitter_id)
+    cases <- ifelse(
+        grepl("TCGA|TARGET|CGCI-HTMCP-CC",query$results[[1]]$project %>% unlist()),
+        query$results[[1]]$cases,
+        query$results[[1]]$sample.submitter_id
+    )
 
     if (grepl("Transcriptome Profiling", query$data.category, ignore.case = TRUE)){
 
@@ -192,13 +186,22 @@ GDCprepare <- function(
             legacy = query$legacy
         )
     }  else if (grepl("Proteome Profiling",query$data.category,ignore.case = TRUE)) {
+
         data <- readProteomeProfiling(files, cases = cases)
+
     }  else if (grepl("Protein expression",query$data.category,ignore.case = TRUE)) {
+
         data <- readProteinExpression(files, cases = cases)
-        if(summarizedExperiment) message("SummarizedExperiment not implemented, if you need samples metadata use the function TCGAbiolinks:::colDataPrepare")
+        if(summarizedExperiment) {
+            message("SummarizedExperiment not implemented, if you need samples metadata use the function TCGAbiolinks:::colDataPrepare")
+        }
+
     }  else if (grepl("Simple Nucleotide Variation",query$data.category,ignore.case = TRUE)) {
-        if(grepl("Masked Somatic Mutation",query$results[[1]]$data_type[1],ignore.case = TRUE) | source == "legacy")
-            suppressWarnings(data <- readSimpleNucleotideVariationMaf(files))
+
+        if(grepl("Masked Somatic Mutation",query$results[[1]]$data_type[1],ignore.case = TRUE) | source == "legacy"){
+            data <- readSimpleNucleotideVariationMaf(files)
+        }
+
     }  else if (grepl("Clinical|Biospecimen", query$data.category, ignore.case = TRUE)){
         data <- readClinical(files, query$data.type, cases = cases)
         summarizedExperiment <- FALSE

@@ -449,7 +449,7 @@ betas <- GDCprepare(query)
 ```
 
 
-### Protein
+### Proteome Profiling - Protein Expression Quantification
 
 ```{r, eval = FALSE}
 query.rppa <- GDCquery(
