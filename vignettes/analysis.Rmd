@@ -5,12 +5,12 @@ vignette: >
     %\VignetteIndexEntry{7. Analyzing and visualizing TCGA data}
     %\VignetteEngine{knitr::rmarkdown}
 ---
-  
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(dpi = 300)
 knitr::opts_chunk$set(cache=FALSE)
 ```
-  
+
 ```{r, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
 devtools::load_all(".")
 ```
@@ -19,7 +19,7 @@ library(SummarizedExperiment)
 library(dplyr)
 library(DT)
 ```
-  
+
 
 # `TCGAanalyze`: Analyze data from TCGA. 
 You can easily analyze data using following functions:
@@ -29,21 +29,25 @@ You can easily analyze data using following functions:
 You can easily search TCGA samples, download and prepare a matrix of gene expression.
 ```{r, eval = FALSE}
 # You can define a list of samples to query and download providing relative TCGA barcodes.
-listSamples <- c("TCGA-E9-A1NG-11A-52R-A14M-07","TCGA-BH-A1FC-11A-32R-A13Q-07",
-                 "TCGA-A7-A13G-11A-51R-A13Q-07","TCGA-BH-A0DK-11A-13R-A089-07",
-                 "TCGA-E9-A1RH-11A-34R-A169-07","TCGA-BH-A0AU-01A-11R-A12P-07",
-                 "TCGA-C8-A1HJ-01A-11R-A13Q-07","TCGA-A7-A13D-01A-13R-A12P-07",
-                 "TCGA-A2-A0CV-01A-31R-A115-07","TCGA-AQ-A0Y5-01A-11R-A14M-07")
+listSamples <- c(
+    "TCGA-E9-A1NG-11A-52R-A14M-07","TCGA-BH-A1FC-11A-32R-A13Q-07",
+    "TCGA-A7-A13G-11A-51R-A13Q-07","TCGA-BH-A0DK-11A-13R-A089-07",
+    "TCGA-E9-A1RH-11A-34R-A169-07","TCGA-BH-A0AU-01A-11R-A12P-07",
+    "TCGA-C8-A1HJ-01A-11R-A13Q-07","TCGA-A7-A13D-01A-13R-A12P-07",
+    "TCGA-A2-A0CV-01A-31R-A115-07","TCGA-AQ-A0Y5-01A-11R-A14M-07"
+)
 
 # Query platform Illumina HiSeq with a list of barcode 
-query <- GDCquery(project = "TCGA-BRCA", 
-                  data.category = "Gene expression",
-                  data.type = "Gene expression quantification",
-                  experimental.strategy = "RNA-Seq",
-                  platform = "Illumina HiSeq",
-                  file.type = "results",
-                  barcode = listSamples, 
-                  legacy = TRUE)
+query <- GDCquery(
+    project = "TCGA-BRCA", 
+    data.category = "Gene expression",
+    data.type = "Gene expression quantification",
+    experimental.strategy = "RNA-Seq",
+    platform = "Illumina HiSeq",
+    file.type = "results",
+    barcode = listSamples, 
+    legacy = TRUE
+)
 
 # Download a list of barcodes with platform IlluminaHiSeq_RNASeqV2
 GDCdownload(query)
@@ -64,9 +68,11 @@ The result is shown below:
 library(TCGAbiolinks)
 dataGE <- dataBRCA[sample(rownames(dataBRCA),10),sample(colnames(dataBRCA),7)]
 
-knitr::kable(dataGE[1:10,2:3], digits = 2, 
-             caption = "Example of a matrix of gene expression (10 genes in rows and 2 samples in columns)",
-             row.names = TRUE)
+knitr::kable(
+    dataGE[1:10,2:3], digits = 2, 
+    caption = "Example of a matrix of gene expression (10 genes in rows and 2 samples in columns)",
+    row.names = TRUE
+)
 ```
 
 The result from TCGAanalyze_Preprocessing is shown below:
@@ -105,33 +111,49 @@ Next, we filter the output of dataDEGs by abs(LogFC) >=1, and uses the
 library(TCGAbiolinks)
 
 # normalization of genes
-dataNorm <- TCGAanalyze_Normalization(tabDF = dataBRCA, geneInfo =  geneInfo)
+dataNorm <- TCGAanalyze_Normalization(
+    tabDF = dataBRCA, 
+    geneInfo =  geneInfo
+)
 
 # quantile filter of genes
-dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
-                                  method = "quantile", 
-                                  qnt.cut =  0.25)
+dataFilt <- TCGAanalyze_Filtering(
+    tabDF = dataNorm,
+    method = "quantile", 
+    qnt.cut =  0.25
+)
 
 # selection of normal samples "NT"
-samplesNT <- TCGAquery_SampleTypes(barcode = colnames(dataFilt),
-                                   typesample = c("NT"))
+samplesNT <- TCGAquery_SampleTypes(
+    barcode = colnames(dataFilt),
+    typesample = c("NT")
+)
 
 # selection of tumor samples "TP"
-samplesTP <- TCGAquery_SampleTypes(barcode = colnames(dataFilt), 
-                                   typesample = c("TP"))
+samplesTP <- TCGAquery_SampleTypes(
+    barcode = colnames(dataFilt), 
+    typesample = c("TP")
+)
 
 # Diff.expr.analysis (DEA)
-dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,samplesNT],
-                            mat2 = dataFilt[,samplesTP],
-                            Cond1type = "Normal",
-                            Cond2type = "Tumor",
-                            fdr.cut = 0.01 ,
-                            logFC.cut = 1,
-                            method = "glmLRT")
+dataDEGs <- TCGAanalyze_DEA(
+    mat1 = dataFilt[,samplesNT],
+    mat2 = dataFilt[,samplesTP],
+    Cond1type = "Normal",
+    Cond2type = "Tumor",
+    fdr.cut = 0.01 ,
+    logFC.cut = 1,
+    method = "glmLRT"
+)
 
 # DEGs table with expression values in normal and tumor samples
-dataDEGsFiltLevel <- TCGAanalyze_LevelTab(dataDEGs,"Tumor","Normal",
-                                          dataFilt[,samplesTP],dataFilt[,samplesNT])
+dataDEGsFiltLevel <- TCGAanalyze_LevelTab(
+    FC_FDR_table_mRNA = dataDEGs,
+    typeCond1 = "Tumor",
+    typeCond2 = "Normal",
+    TableCond1 = dataFilt[,samplesTP],
+    TableCond2 = dataFilt[,samplesNT]
+)
 
 ```
 The result is shown below:
@@ -139,8 +161,10 @@ The result is shown below:
 ```{r, eval = TRUE, echo = FALSE}
 library(TCGAbiolinks)
 dataDEGsFiltLevel$FDR <- format(dataDEGsFiltLevel$FDR, scientific = TRUE)
-knitr::kable(dataDEGsFiltLevel[1:10,], digits = 2,
-             caption = "Table of DEGs after DEA", row.names = FALSE)
+knitr::kable(
+    dataDEGsFiltLevel[1:10,], digits = 2,
+    caption = "Table of DEGs after DEA", row.names = FALSE
+)
 ```
 
 
@@ -154,58 +178,78 @@ CancerProject <- "TCGA-BRCA"
 DataDirectory <- paste0("../GDC/",gsub("-","_",CancerProject))
 FileNameData <- paste0(DataDirectory, "_","HTSeq_Counts",".rda")
 
-query <- GDCquery(project = CancerProject,
-                  data.category = "Transcriptome Profiling",
-                  data.type = "Gene Expression Quantification", 
-                  workflow.type = "HTSeq - Counts")
+query <- GDCquery(
+    project = CancerProject,
+    data.category = "Transcriptome Profiling",
+    data.type = "Gene Expression Quantification", 
+    workflow.type = "HTSeq - Counts"
+)
 
 samplesDown <- getResults(query,cols=c("cases"))
 
-dataSmTP <- TCGAquery_SampleTypes(barcode = samplesDown,
-                                  typesample = "TP")
+dataSmTP <- TCGAquery_SampleTypes(
+    barcode = samplesDown,
+    typesample = "TP"
+)
 
-dataSmNT <- TCGAquery_SampleTypes(barcode = samplesDown,
-                                  typesample = "NT")
+dataSmNT <- TCGAquery_SampleTypes(
+    barcode = samplesDown,
+    typesample = "NT"
+)
 dataSmTP_short <- dataSmTP[1:10]
 dataSmNT_short <- dataSmNT[1:10]
 
-queryDown <- GDCquery(project = CancerProject, 
-                      data.category = "Transcriptome Profiling",
-                      data.type = "Gene Expression Quantification", 
-                      workflow.type = "HTSeq - Counts", 
-                      barcode = c(dataSmTP_short, dataSmNT_short))
-                    
-GDCdownload(query = queryDown,
-            directory = DataDirectory)
+queryDown <- GDCquery(
+    project = CancerProject, 
+    data.category = "Transcriptome Profiling",
+    data.type = "Gene Expression Quantification", 
+    workflow.type = "HTSeq - Counts", 
+    barcode = c(dataSmTP_short, dataSmNT_short)
+)
 
-dataPrep <- GDCprepare(query = queryDown, 
-                       save = TRUE, 
-                       directory =  DataDirectory,
-                       save.filename = FileNameData)
+GDCdownload(
+    query = queryDown,
+    directory = DataDirectory
+)
 
-dataPrep <- TCGAanalyze_Preprocessing(object = dataPrep, 
-                                      cor.cut = 0.6,
-                                      datatype = "HTSeq - Counts")                      
+dataPrep <- GDCprepare(
+    query = queryDown, 
+    save = TRUE, 
+    directory =  DataDirectory,
+    save.filename = FileNameData
+)
 
-dataNorm <- TCGAanalyze_Normalization(tabDF = dataPrep,
-                                      geneInfo = geneInfoHT,
-                                      method = "gcContent") 
+dataPrep <- TCGAanalyze_Preprocessing(
+    object = dataPrep, 
+    cor.cut = 0.6,
+    datatype = "HTSeq - Counts"
+)                      
+
+dataNorm <- TCGAanalyze_Normalization(
+    tabDF = dataPrep,
+    geneInfo = geneInfoHT,
+    method = "gcContent"
+) 
 
 boxplot(dataPrep, outline = FALSE)
 
 boxplot(dataNorm, outline = FALSE)
 
-dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
-                                  method = "quantile", 
-                                  qnt.cut =  0.25)   
+dataFilt <- TCGAanalyze_Filtering(
+    tabDF = dataNorm,
+    method = "quantile", 
+    qnt.cut =  0.25
+)   
 
-dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmTP_short],
-                            mat2 = dataFilt[,dataSmNT_short],
-                            Cond1type = "Normal",
-                            Cond2type = "Tumor",
-                            fdr.cut = 0.01 ,
-                            logFC.cut = 1,
-                            method = "glmLRT")  
+dataDEGs <- TCGAanalyze_DEA(
+    mat1 = dataFilt[,dataSmTP_short],
+    mat2 = dataFilt[,dataSmNT_short],
+    Cond1type = "Normal",
+    Cond2type = "Tumor",
+    fdr.cut = 0.01 ,
+    logFC.cut = 1,
+    method = "glmLRT"
+)  
 
 ```
 
@@ -218,37 +262,49 @@ CancerProject <- "TCGA-BRCA"
 DataDirectory <- paste0("../GDC/",gsub("-","_",CancerProject))
 FileNameData <- paste0(DataDirectory, "_","miRNA_gene_quantification",".rda")
 
-query.miR <- GDCquery(project = CancerProject, 
-                  data.category = "Gene expression",
-                  data.type = "miRNA gene quantification",
-                  file.type = "hg19.mirna",
-                  legacy = TRUE)
+query.miR <- GDCquery(
+    project = CancerProject, 
+    data.category = "Gene expression",
+    data.type = "miRNA gene quantification",
+    file.type = "hg19.mirna",
+    legacy = TRUE
+)
 
 samplesDown.miR <- getResults(query.miR,cols=c("cases"))
 
-dataSmTP.miR <- TCGAquery_SampleTypes(barcode = samplesDown.miR,
-                                  typesample = "TP")
+dataSmTP.miR <- TCGAquery_SampleTypes(
+    barcode = samplesDown.miR,
+    typesample = "TP"
+)
 
-dataSmNT.miR <- TCGAquery_SampleTypes(barcode = samplesDown.miR,
-                                  typesample = "NT")
+dataSmNT.miR <- TCGAquery_SampleTypes(
+    barcode = samplesDown.miR,
+    typesample = "NT"
+)
 dataSmTP_short.miR <- dataSmTP.miR[1:10]
 dataSmNT_short.miR <- dataSmNT.miR[1:10]
 
-queryDown.miR <- GDCquery(project = CancerProject, 
-                      data.category = "Gene expression",
-                      data.type = "miRNA gene quantification",
-                      file.type = "hg19.mirna",
-                      legacy = TRUE,
-                      barcode = c(dataSmTP_short.miR, dataSmNT_short.miR))
+queryDown.miR <- GDCquery(
+    project = CancerProject, 
+    data.category = "Gene expression",
+    data.type = "miRNA gene quantification",
+    file.type = "hg19.mirna",
+    legacy = TRUE,
+    barcode = c(dataSmTP_short.miR, dataSmNT_short.miR)
+)
 
-GDCdownload(query = queryDown.miR,
-            directory = DataDirectory)
+GDCdownload(
+    query = queryDown.miR,
+    directory = DataDirectory
+)
 
-dataAssy.miR <- GDCprepare(query = queryDown.miR, 
-                           save = TRUE, 
-                           save.filename = FileNameData, 
-                           summarizedExperiment = TRUE,
-                           directory =DataDirectory )
+dataAssy.miR <- GDCprepare(
+    query = queryDown.miR, 
+    save = TRUE, 
+    save.filename = FileNameData, 
+    summarizedExperiment = TRUE,
+    directory = DataDirectory
+)
 rownames(dataAssy.miR) <- dataAssy.miR$miRNA_ID
 
 # using read_count's data 
@@ -256,17 +312,21 @@ read_countData <-  colnames(dataAssy.miR)[grep("count", colnames(dataAssy.miR))]
 dataAssy.miR <- dataAssy.miR[,read_countData]
 colnames(dataAssy.miR) <- gsub("read_count_","", colnames(dataAssy.miR))
 
-dataFilt <- TCGAanalyze_Filtering(tabDF = dataAssy.miR,
-                                  method = "quantile", 
-                                  qnt.cut =  0.25)   
+dataFilt <- TCGAanalyze_Filtering(
+    tabDF = dataAssy.miR,
+    method = "quantile", 
+    qnt.cut =  0.25
+)   
 
-dataDEGs <- TCGAanalyze_DEA(mat1 = dataFilt[,dataSmNT_short.miR],
-                            mat2 = dataFilt[,dataSmTP_short.miR],
-                            Cond1type = "Normal",
-                            Cond2type = "Tumor",
-                            fdr.cut = 0.01 ,
-                            logFC.cut = 1,
-                            method = "glmLRT")  
+dataDEGs <- TCGAanalyze_DEA(
+    mat1 = dataFilt[,dataSmNT_short.miR],
+    mat2 = dataFilt[,dataSmTP_short.miR],
+    Cond1type = "Normal",
+    Cond2type = "Tumor",
+    fdr.cut = 0.01 ,
+    logFC.cut = 1,
+    method = "glmLRT"
+)  
 
 ```
 ## `TCGAanalyze_EAcomplete & TCGAvisualize_EAbarplot`: Enrichment Analysis
@@ -295,13 +355,15 @@ system.time(ansEA <- TCGAanalyze_EAcomplete(TFname="DEA genes Normal Vs Tumor",G
 # Enrichment Analysis EA (TCGAVisualize)
 # Gene Ontology (GO) and Pathway enrichment barPlot
 
-TCGAvisualize_EAbarplot(tf = rownames(ansEA$ResBP), 
-                        GOBPTab = ansEA$ResBP,
-                        GOCCTab = ansEA$ResCC,
-                        GOMFTab = ansEA$ResMF,
-                        PathTab = ansEA$ResPat,
-                        nRGTab = Genelist, 
-                        nBar = 10)
+TCGAvisualize_EAbarplot(
+    tf = rownames(ansEA$ResBP), 
+    GOBPTab = ansEA$ResBP,
+    GOCCTab = ansEA$ResCC,
+    GOMFTab = ansEA$ResMF,
+    PathTab = ansEA$ResPat,
+    nRGTab = Genelist, 
+    nBar = 10
+)
 
 ```
 The result is shown below:
@@ -334,9 +396,13 @@ function `TCGAanalyze_survival` as follows:
 
 ```{r, eval = FALSE}
 clin.gbm <- GDCquery_clinic("TCGA-GBM", "clinical")
-TCGAanalyze_survival(clin.gbm,
-                     "gender",
-                     main = "TCGA Set\n GBM",height = 10, width=10)
+TCGAanalyze_survival(
+    data = clin.gbm,
+    clusterCol = "gender",
+    main = "TCGA Set\n GBM",
+    height = 10,
+    width=10
+)
 ```
 
 The arguments of `TCGAanalyze_survival` are:
@@ -372,7 +438,7 @@ library(TCGAbiolinks)
 clinical_patient_Cancer <- GDCquery_clinic("TCGA-BRCA","clinical")
 dataBRCAcomplete <- log2(BRCA_rnaseqv2)
 
-tokenStop<- 1
+tokenStop <- 1
 
 tabSurvKMcomplete <- NULL
 
@@ -380,12 +446,14 @@ for( i in 1: round(nrow(dataBRCAcomplete)/100)){
     message( paste( i, "of ", round(nrow(dataBRCAcomplete)/100)))
     tokenStart <- tokenStop
     tokenStop <-100*i
-    tabSurvKM<-TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
-                                      dataBRCAcomplete,
-                                      Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
-                                      Survresult = F,
-                                      ThreshTop=0.67,
-                                      ThreshDown=0.33)
+    tabSurvKM<-TCGAanalyze_SurvivalKM(
+        clinical_patient_Cancer,
+        dataBRCAcomplete,
+        Genelist = rownames(dataBRCAcomplete)[tokenStart:tokenStop],
+        Survresult = F,
+        ThreshTop = 0.67,
+        ThreshDown = 0.33
+    )
     
     tabSurvKMcomplete <- rbind(tabSurvKMcomplete,tabSurvKM)
 }
@@ -395,9 +463,10 @@ tabSurvKMcomplete <- tabSurvKMcomplete[order(tabSurvKMcomplete$pvalue, decreasin
 
 tabSurvKMcompleteDEGs <- tabSurvKMcomplete[
     rownames(tabSurvKMcomplete) %in% dataDEGsFiltLevel$mRNA,
-    ]
+]
 ```
 The result is shown below:
+
 ```{r, fig.width=6, fig.height=4, echo=FALSE, fig.align="center"}
 tabSurvKMcompleteDEGs$pvalue <- format(tabSurvKMcompleteDEGs$pvalue, scientific = TRUE)
 knitr::kable(tabSurvKMcompleteDEGs[1:5,1:4], 
@@ -456,13 +525,15 @@ The arguments of TCGAanalyze_DMR are:
 
 
 ```{r, eval = FALSE}
-data <- TCGAanalyze_DMR(data, groupCol = "methylation_subtype",
-                        group1 = "CIMP.H",
-                        group2="CIMP.L",
-                        p.cut = 10^-5,
-                        diffmean.cut = 0.25,
-                        legend = "State",
-                        plot.filename = "coad_CIMPHvsCIMPL_metvolcano.png")
+data <- TCGAanalyze_DMR(
+    data, groupCol = "methylation_subtype",
+    group1 = "CIMP.H",
+    group2="CIMP.L",
+    p.cut = 10^-5,
+    diffmean.cut = 0.25,
+    legend = "State",
+    plot.filename = "coad_CIMPHvsCIMPL_metvolcano.png"
+)
 ```
 
 The output will be a plot such as the figure below. The green dots are the 
@@ -594,9 +665,11 @@ The arguments of this function are:
 dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataBRCA, geneInfo)
 
 # quantile filter of genes
-dataFilt <- TCGAanalyze_Filtering(tabDF = dataNorm,
-                                  method = "quantile", 
-                                  qnt.cut =  0.25)
+dataFilt <- TCGAanalyze_Filtering(
+    tabDF = dataNorm,
+    method = "quantile", 
+    qnt.cut =  0.25
+)
 
 # selection of normal samples "NT" 
 group1 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
@@ -604,7 +677,7 @@ group1 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("NT"))
 group2 <- TCGAquery_SampleTypes(colnames(dataFilt), typesample = c("TP"))
 
 # Principal Component Analysis plot for ntop selected DEGs
- pca <- TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200, group1, group2)
+pca <- TCGAvisualize_PCA(dataFilt,dataDEGsFiltLevel, ntopgenes = 200, group1, group2)
 ```
 
 The result is shown below:
@@ -622,48 +695,58 @@ to create a mean DNA methylation boxplot with the function
 
 ```{r,include=FALSE,echo=FALSE, fig.height=5, message=FALSE, warning=FALSE}
 data <- tryCatch({
-    query <- GDCquery(project = "TCGA-GBM",
-                  data.category = "DNA methylation",
-                  platform = "Illumina Human Methylation 27",
-                  legacy = TRUE, 
-                  barcode = c("TCGA-02-0058-01A-01D-0186-05", "TCGA-12-1597-01B-01D-0915-05",
-                              "TCGA-12-0829-01A-01D-0392-05", "TCGA-06-0155-01B-01D-0521-05",
-                              "TCGA-02-0099-01A-01D-0199-05", "TCGA-19-4068-01A-01D-1228-05",
-                              "TCGA-19-1788-01A-01D-0595-05", "TCGA-16-0848-01A-01D-0392-05"))
-            GDCdownload(query, method = "api", chunks.per.download = 2)
-            GDCdownload(query, method = "api")
-            data <- GDCprepare(query)
-            data
-    }, error = function(e) {
-         nrows <- 200; ncols <- 21
-         counts <- matrix(runif(nrows * ncols, 0, 1), nrows)
-         rowRanges <- GenomicRanges::GRanges(rep(c("chr1", "chr2"), c(50, 150)),
-                            IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
-                            strand=sample(c("+", "-"), 200, TRUE),
-                            feature_id=sprintf("ID%03d", 1:200))
-        colData <- S4Vectors::DataFrame(shortLetterCode=rep(c("NT", "TP","TR"), 7),
-                         row.names=LETTERS[1:21],
-                         subtype_Pan.Glioma.DNA.Methylation.Cluster=rep(c("group1","group2","group3"),c(7,7,7)),
-                         vital_status=rep(c("DEAD","ALIVE","DEAD"),7))
-        data <- SummarizedExperiment::SummarizedExperiment(
-                    assays=S4Vectors::SimpleList(counts=counts),
-                    rowRanges=rowRanges,
-                    colData=colData)
-        data
-
-        }
+    query <- GDCquery(
+        project = "TCGA-GBM",
+        data.category = "DNA methylation",
+        platform = "Illumina Human Methylation 27",
+        legacy = TRUE, 
+        barcode = c("TCGA-02-0058-01A-01D-0186-05", "TCGA-12-1597-01B-01D-0915-05",
+                    "TCGA-12-0829-01A-01D-0392-05", "TCGA-06-0155-01B-01D-0521-05",
+                    "TCGA-02-0099-01A-01D-0199-05", "TCGA-19-4068-01A-01D-1228-05",
+                    "TCGA-19-1788-01A-01D-0595-05", "TCGA-16-0848-01A-01D-0392-05"
+        )
     )
+    GDCdownload(query, method = "api", chunks.per.download = 2)
+    GDCdownload(query, method = "api")
+    data <- GDCprepare(query)
+    data
+}, error = function(e) {
+    nrows <- 200; ncols <- 21
+    counts <- matrix(runif(nrows * ncols, 0, 1), nrows)
+    rowRanges <- GenomicRanges::GRanges(
+        rep(c("chr1", "chr2"), c(50, 150)),
+        IRanges::IRanges(floor(runif(200, 1e5, 1e6)), width=100),
+        strand=sample(c("+", "-"), 200, TRUE),
+        feature_id=sprintf("ID%03d", 1:200)
+    )
+    colData <- S4Vectors::DataFrame(
+        shortLetterCode = rep(c("NT", "TP","TR"), 7),
+        row.names = LETTERS[1:21],
+        subtype_Pan.Glioma.DNA.Methylation.Cluster = rep(c("group1","group2","group3"),c(7,7,7)),
+        vital_status = rep(c("DEAD","ALIVE","DEAD"),7)
+    )
+    data <- SummarizedExperiment::SummarizedExperiment(
+        assays = S4Vectors::SimpleList(counts=counts),
+        rowRanges = rowRanges,
+        colData = colData
+    )
+    data
+    
+})
 ```
 
 ```{r, eval=FALSE, echo=TRUE, fig.height=5, message=FALSE, warning=FALSE}
-query <- GDCquery(project = "TCGA-GBM",
-                  data.category = "DNA methylation",
-                  platform = "Illumina Human Methylation 27",
-                  legacy = TRUE, 
-                  barcode = c("TCGA-02-0058-01A-01D-0186-05", "TCGA-12-1597-01B-01D-0915-05",
-                              "TCGA-12-0829-01A-01D-0392-05", "TCGA-06-0155-01B-01D-0521-05",
-                              "TCGA-02-0099-01A-01D-0199-05", "TCGA-19-4068-01A-01D-1228-05",
-                              "TCGA-19-1788-01A-01D-0595-05", "TCGA-16-0848-01A-01D-0392-05"))
+query <- GDCquery(
+    project = "TCGA-GBM",
+    data.category = "DNA methylation",
+    platform = "Illumina Human Methylation 27",
+    legacy = TRUE, 
+    barcode = c("TCGA-02-0058-01A-01D-0186-05", "TCGA-12-1597-01B-01D-0915-05",
+                "TCGA-12-0829-01A-01D-0392-05", "TCGA-06-0155-01B-01D-0521-05",
+                "TCGA-02-0099-01A-01D-0199-05", "TCGA-19-4068-01A-01D-1228-05",
+                "TCGA-19-1788-01A-01D-0595-05", "TCGA-16-0848-01A-01D-0392-05"
+    )
+)
 GDCdownload(query, method = "api")
 data <- GDCprepare(query)
 ```
@@ -709,15 +792,17 @@ The arguments of this function are:
 | dpi | Figure dpi |
 
 ```{r, eval = FALSE}
-starburst <- TCGAvisualize_starburst(coad.SummarizeExperiment, 
-                                     different.experssion.analysis.data,
-                                     group1 = "CIMP.H",
-                                     group2 = "CIMP.L",
-                                     met.platform = "450K",
-                                     genome = "hg19",
-                                     met.p.cut = 10^-5, 
-                                     exp.p.cut = 10^-5,
-                                     names = TRUE)
+starburst <- TCGAvisualize_starburst(
+    met = coad.SummarizeExperiment, 
+    exp = different.experssion.analysis.data,
+    group1 = "CIMP.H",
+    group2 = "CIMP.L",
+    met.platform = "450K",
+    genome = "hg19",
+    met.p.cut = 10^-5, 
+    exp.p.cut = 10^-5,
+    names = TRUE
+)
 ```
 
 As a result, the function will a plot the figure below and return a matrix with 
