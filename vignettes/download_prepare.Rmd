@@ -282,8 +282,9 @@ Examples of query, download, prepare can be found in this [gist](https://gist.gi
 ## Harmonized database: data aligned against hg38
 
 
-### Copy Number
+### Copy Number Variation
 
+#### Copy Number Segment
 ```{r, eval = FALSE}
 query <- GDCquery(
     project = "TCGA-ACC", 
@@ -295,7 +296,8 @@ GDCdownload(query)
 data <- GDCprepare(query)
 ```
 
-### Gene Level Copy Number
+
+#### Gene Level Copy Number
 
 ```{r, eval = FALSE}
 query <- GDCquery(
@@ -308,7 +310,36 @@ GDCdownload(query)
 data <- GDCprepare(query)
 ```
 
-### Transcriptome Profiling - Gene Expression Quantification
+
+#### Allele-specific Copy Number Segment
+
+```{r, eval = FALSE}
+query <- GDCquery(
+    project = "TCGA-ACC",
+    data.category = "Copy Number Variation",
+    data.type = "Allele-specific Copy Number Segment",              
+    access = "open"
+)
+GDCdownload(query)
+data <- GDCprepare(query)
+```
+
+#### Masked Copy Number Segment
+
+```{r, eval = FALSE}
+query <- GDCquery(
+    project = "TCGA-ACC",
+    data.category = "Copy Number Variation",
+    data.type = "Masked Copy Number Segment",              
+    access = "open"
+)
+GDCdownload(query)
+data <- GDCprepare(query)
+```
+
+### Transcriptome Profiling 
+
+#### Gene Expression Quantification
 
 For more examples, please check: http://rpubs.com/tiagochst/TCGAbiolinks_RNA-seq_new_projects
 
@@ -330,7 +361,7 @@ expdat <- GDCprepare(
 ```
 
 
-### Transcriptome Profiling - miRNA Expression Quantification
+#### miRNA Expression Quantification
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 query.mirna <- GDCquery(
@@ -350,7 +381,7 @@ mirna <- GDCprepare(
 ```
 
 
-### Transcriptome Profiling - Isoform Expression Quantification
+#### Isoform Expression Quantification
 ```{r, eval = FALSE}
 
 query.isoform <- GDCquery(
@@ -454,7 +485,9 @@ betas <- GDCprepare(query)
 ```
 
 
-### Proteome Profiling - Protein Expression Quantification
+### Proteome Profiling 
+
+#### Protein Expression Quantification
 
 ```{r, eval = FALSE}
 query.rppa <- GDCquery(
@@ -511,7 +544,9 @@ GDCdownload(query)
 clinical.BCRtab.radiation <- GDCprepare(query)
 ```
 
-### Simple Nucleotide Variation - Masked Somatic Mutation
+### Simple Nucleotide Variation 
+
+#### Masked Somatic Mutation
 
 For more information please check:
 https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/
