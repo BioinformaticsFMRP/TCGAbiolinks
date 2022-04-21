@@ -308,7 +308,7 @@ GDCdownload(query)
 data <- GDCprepare(query)
 ```
 
-### Gene expression
+### Transcriptome Profiling - Gene Expression Quantification
 
 For more examples, please check: http://rpubs.com/tiagochst/TCGAbiolinks_RNA-seq_new_projects
 
@@ -330,7 +330,7 @@ expdat <- GDCprepare(
 ```
 
 
-### miRNA
+### Transcriptome Profiling - miRNA Expression Quantification
 ```{r, eval = FALSE}
 library(TCGAbiolinks)
 query.mirna <- GDCquery(
@@ -347,6 +347,11 @@ mirna <- GDCprepare(
     save.filename = "mirna.rda"
 )
 
+```
+
+
+### Transcriptome Profiling - Isoform Expression Quantification
+```{r, eval = FALSE}
 
 query.isoform <- GDCquery(
     project = "TARGET-AML", 
