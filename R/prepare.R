@@ -772,6 +772,11 @@ readDNAmethylation <- function(
     platform,
     legacy
 ){
+  if(length(platform) > 1){
+    
+    message(platform)
+    stop("More than one DNA methylation platform found. Only one is accepted")
+  }
   if (missing(cases)) cases <- NULL
   
   
