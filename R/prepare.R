@@ -826,7 +826,7 @@ readDNAmethylation <- function(
     
     # Just check if the data is in the same order, since we will not merge
     # the data frames to save memory
-    stopifnot(all(unlist(x %>% map(function(y){all(y[,1] ==  x[[1]][,1])}) )))
+    stopifnot(all(unlist(x %>% map(function(y){all(y[,1]$V1 ==  x[[1]][,1]$V1)}) )))
     
     df <- x %>%  map_df(2)
     colnames(df) <- x %>%  map_chr(.f = function(y) colnames(y)[2])
@@ -840,11 +840,7 @@ readDNAmethylation <- function(
         genome = ifelse(legacy,"hg19","hg38"),
         met.platform = platform
       )
-    } else {
-      setDF(df)
-      rownames(df) <- df$Composite.Element.REF
-      df$Composite.Element.REF <- NULL
-    }
+    } 
     
   } else {
     skip <- ifelse(all(grepl("hg38",files)), 0,1)
