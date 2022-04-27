@@ -774,7 +774,7 @@ readDNAmethylation <- function(
 ){
   if(length(platform) > 1){
     
-    message(platform)
+    print(knitr::kable(platform))
     stop("More than one DNA methylation platform found. Only one is accepted")
   }
   if (missing(cases)) cases <- NULL
