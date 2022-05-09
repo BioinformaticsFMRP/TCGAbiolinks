@@ -842,7 +842,7 @@ getMC3MAF <- function(){
     if(!file.exists(gsub("\\.gz", "", fout))){
         download(fpath, fout, mode = mode)
         message("o Uncompressing file")
-        gunzip(fout, remove = FALSE)
+        R.utils::gunzip(fout, remove = FALSE)
     }
     message("o Reading MAF")
     maf <- readr::read_tsv(gsub("\\.gz", "", fout),progress = TRUE, col_types = readr::cols())
