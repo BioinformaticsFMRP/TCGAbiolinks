@@ -33,17 +33,17 @@ There are two options to download the data:
 ## Mutation data (hg38)
 
 This example will download Aggregate GDC MAFs.
- For more information please access https://github.com/NCI-GDC/gdc-maf-tool and 
+For more information please access https://github.com/NCI-GDC/gdc-maf-tool and 
 [GDC docs](https://docs.gdc.cancer.gov/Data/Bioinformatics_Pipelines/DNA_Seq_Variant_Calling_Pipeline/).
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval=F}
 query <- GDCquery(
-     project = "TCGA-CHOL", 
-     data.category = "Simple Nucleotide Variation", 
-     access = "open", 
-     legacy = FALSE, 
-     data.type = "Masked Somatic Mutation", 
-     workflow.type = "Aliquot Ensemble Somatic Variant Merging and Masking"
+    project = "TCGA-CHOL", 
+    data.category = "Simple Nucleotide Variation", 
+    access = "open", 
+    legacy = FALSE, 
+    data.type = "Masked Somatic Mutation", 
+    workflow.type = "Aliquot Ensemble Somatic Variant Merging and Masking"
 )
 GDCdownload(query)
 maf <- GDCprepare(query)
@@ -76,10 +76,14 @@ query.maf.hg19 <- GDCquery(
 ```
 ```{r  echo = TRUE, message = FALSE, warning = FALSE}
 # Check maf availables
-datatable(dplyr::select(getResults(query.maf.hg19),-contains("cases")),
-          filter = 'top',
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 10), 
-          rownames = FALSE)
+getResults(query.maf.hg19) %>% 
+    dplyr::select(-contains("sample_type")) %>% 
+    dplyr::select(-contains("cases")) %>%
+    DT::datatable(
+        filter = 'top',
+        options = list(scrollX = TRUE, keys = TRUE, pageLength = 10), 
+        rownames = FALSE
+    )
 ```
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval=FALSE}
 query.maf.hg19 <- GDCquery(project = "TCGA-CHOL", 
@@ -122,16 +126,16 @@ To visualize the data you can use the Bioconductor package [maftools](https://bi
 library(maftools)
 library(dplyr)
 query <- GDCquery(
-     project = "TCGA-CHOL", 
-     data.category = "Simple Nucleotide Variation", 
-     access = "open", 
-     legacy = FALSE, 
-     data.type = "Masked Somatic Mutation", 
-     workflow.type = "Aliquot Ensemble Somatic Variant Merging and Masking"
+    project = "TCGA-CHOL", 
+    data.category = "Simple Nucleotide Variation", 
+    access = "open", 
+    legacy = FALSE, 
+    data.type = "Masked Somatic Mutation", 
+    workflow.type = "Aliquot Ensemble Somatic Variant Merging and Masking"
 )
 GDCdownload(query)
 maf <- GDCprepare(query)
-    
+
 maf <- maf %>% maftools::read.maf
 ```
 
