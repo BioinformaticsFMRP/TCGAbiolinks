@@ -10,6 +10,7 @@
 #' \item \link[TCGAbiolinks]{MESO_PCBC_stemSig} - mesoderm score
 #' }
 #' @param dataGE is a matrix of Gene expression (genes in rows, samples in cols) from TCGAprepare
+#' @param colname.score Column name of the output. Default "stemness_score"
 #' @export
 #' @return table with samples and selected score
 #' @examples
@@ -24,19 +25,23 @@
 #'  )
 #'  Stemness_score <- TCGAanalyze_Stemness(
 #'      stemSig = SC_PCBC_stemSig,
-#'      dataGE = dataFilt
+#'      dataGE = dataFilt,
+#'      colname.score = "SC_PCBC_stem_score"
 #'   )
 #'  ECTO_score <- TCGAanalyze_Stemness(
 #'      stemSig = ECTO_PCBC_stemSig,
-#'      dataGE = dataFilt
+#'      dataGE = dataFilt,
+#'      colname.score = "ECTO_PCBC_stem_score"
 #'   )
 #'   MESO_score <- TCGAanalyze_Stemness(
 #'      stemSig = MESO_PCBC_stemSig,
-#'      dataGE = dataFilt
+#'      dataGE = dataFilt,
+#'      colname.score = "MESO_PCBC_stem_score"
 #'   )
 TCGAanalyze_Stemness <- function(
     stemSig,
-    dataGE
+    dataGE,
+    col.score = "stemness_score"
 ) {
     reads <- dataGE
     X <- reads
@@ -61,8 +66,8 @@ TCGAanalyze_Stemness <- function(
     score <- data.frame("Sample" = colnames(reads))
     rownames(score) <- colnames(reads)
 
-    score$StemnessScore <- 0
-    score[rownames(dataSce_stemness), "Score"] <- as.numeric(dataSce_stemness)
+    score[[col.score]] <- 0
+    score[rownames(dataSce_stemness), col.score] <- as.numeric(dataSce_stemness)
 
     return(score)
 }
