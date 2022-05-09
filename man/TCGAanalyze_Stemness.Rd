@@ -4,7 +4,7 @@
 \alias{TCGAanalyze_Stemness}
 \title{Generate Stemness Score based on RNASeq (mRNAsi stemness index) Malta et al., Cell, 2018}
 \usage{
-TCGAanalyze_Stemness(stemSig, dataGE)
+TCGAanalyze_Stemness(stemSig, dataGE, col.score = "stemness_score")
 }
 \arguments{
 \item{stemSig}{is a vector of the stemness Signature generated using gelnet package.
@@ -18,6 +18,8 @@ Please check the data from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5902191/
 }}
 
 \item{dataGE}{is a matrix of Gene expression (genes in rows, samples in cols) from TCGAprepare}
+
+\item{colname.score}{Column name of the output. Default "stemness_score"}
 }
 \value{
 table with samples and selected score
@@ -37,14 +39,17 @@ TCGAanalyze_Stemness generate the mRNAsi score
  )
  Stemness_score <- TCGAanalyze_Stemness(
      stemSig = SC_PCBC_stemSig,
-     dataGE = dataFilt
+     dataGE = dataFilt,
+     colname.score = "SC_PCBC_stem_score"
   )
  ECTO_score <- TCGAanalyze_Stemness(
      stemSig = ECTO_PCBC_stemSig,
-     dataGE = dataFilt
+     dataGE = dataFilt,
+     colname.score = "ECTO_PCBC_stem_score"
   )
   MESO_score <- TCGAanalyze_Stemness(
      stemSig = MESO_PCBC_stemSig,
-     dataGE = dataFilt
+     dataGE = dataFilt,
+     colname.score = "MESO_PCBC_stem_score"
   )
 }
