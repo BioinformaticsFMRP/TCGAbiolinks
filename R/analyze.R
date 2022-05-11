@@ -647,7 +647,8 @@ TCGAanalyze_Normalization <- function(
     if (method == "geneLength") {
         tabDF <- tabDF[!duplicated(rownames(tabDF)), !duplicated(colnames(tabDF))]
         tabDF <- tabDF[rownames(tabDF) %in% rownames(geneInfo), ]
-        tabDF <- tabDF[rowMeans(tabDF) > 1,]
+        #tabDF <- tabDF[rowMeans(tabDF) > 1,]
+        tabDF <- tabDF[which(rowSums(tabDF == 0) < ncol(tabDF)),]
         tabDF <- as.matrix(tabDF)
 
         geneInfo <-  geneInfo[rownames(geneInfo) %in% rownames(tabDF),]
@@ -688,6 +689,9 @@ TCGAanalyze_Normalization <- function(
         )
 
         message("Step 3 of 4: betweenLaneNormalization ...")
+        if(any(is.na(normCounts(tabDF_norm)))) {
+            tabDF_norm <- tabDF_norm[rowSums(is.na(normCounts(tabDF_norm))) == 0,]
+        }
 
         tabDF_norm <- EDASeq::betweenLaneNormalization(
             tabDF_norm,
