@@ -41,7 +41,7 @@
 TCGAanalyze_Stemness <- function(
     stemSig,
     dataGE,
-    col.score = "stemness_score"
+    colname.score = "stemness_score"
 ) {
     reads <- dataGE
     X <- reads
@@ -66,8 +66,8 @@ TCGAanalyze_Stemness <- function(
     score <- data.frame("Sample" = colnames(reads))
     rownames(score) <- colnames(reads)
 
-    score[[col.score]] <- 0
-    score[rownames(dataSce_stemness), col.score] <- as.numeric(dataSce_stemness)
+    score[[colname.score]] <- 0
+    score[rownames(dataSce_stemness), colname.score] <- as.numeric(dataSce_stemness)
 
     return(score)
 }

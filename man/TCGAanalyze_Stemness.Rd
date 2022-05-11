@@ -4,7 +4,7 @@
 \alias{TCGAanalyze_Stemness}
 \title{Generate Stemness Score based on RNASeq (mRNAsi stemness index) Malta et al., Cell, 2018}
 \usage{
-TCGAanalyze_Stemness(stemSig, dataGE, col.score = "stemness_score")
+TCGAanalyze_Stemness(stemSig, dataGE, colname.score = "stemness_score")
 }
 \arguments{
 \item{stemSig}{is a vector of the stemness Signature generated using gelnet package.
