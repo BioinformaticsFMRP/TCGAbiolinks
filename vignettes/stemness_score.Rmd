@@ -71,14 +71,14 @@ data(ECTO_PCBC_stemSig)
 ECTO_score <- TCGAanalyze_Stemness(
   stemSig = ECTO_PCBC_stemSig,
   dataGE = dataFilt,
-  col.score = "ECTO_PCBC_stem_score"
+  colname.score = "ECTO_PCBC_stem_score"
 )
 
 data(MESO_PCBC_stemSig)
 MESO_score <- TCGAanalyze_Stemness(
   stemSig = MESO_PCBC_stemSig,
   dataGE = dataFilt,
-   col.score = "MESO_PCBC_stem_score"
+  colname.score = "MESO_PCBC_stem_score"
 )
 ```
 

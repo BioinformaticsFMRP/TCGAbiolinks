@@ -15,7 +15,10 @@
 #' @return table with samples and selected score
 #' @examples
 #'  # Selecting TCGA breast cancer (10 samples) for example stored in dataBRCA
-#'  dataNorm <- TCGAanalyze_Normalization(tabDF = dataBRCA, geneInfo =  geneInfo)
+#'  dataNorm <- TCGAanalyze_Normalization(
+#'      tabDF = dataBRCA,
+#'      geneInfo =  geneInfo
+#'  )
 #'
 #'  # quantile filter of genes
 #'  dataFilt <- TCGAanalyze_Filtering(

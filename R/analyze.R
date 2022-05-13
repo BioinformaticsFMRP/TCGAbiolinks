@@ -689,8 +689,8 @@ TCGAanalyze_Normalization <- function(
         )
 
         message("Step 3 of 4: betweenLaneNormalization ...")
-        if(any(is.na(normCounts(tabDF_norm)))) {
-            tabDF_norm <- tabDF_norm[rowSums(is.na(normCounts(tabDF_norm))) == 0,]
+        if(any(is.na(EDASeq::normCounts(tabDF_norm)))) {
+            tabDF_norm <- tabDF_norm[rowSums(is.na(EDASeq::normCounts(tabDF_norm))) == 0,]
         }
 
         tabDF_norm <- EDASeq::betweenLaneNormalization(
@@ -1405,164 +1405,162 @@ TCGAanalyze_EAcomplete <- function(TFname, RegulonList) {
 #'                            RegulonList,DAVID_BP_matrix,
 #'                            EAGenes,GOtype = "DavidBP")
 #'}
-TCGAanalyze_EA <-
-    function (GeneName,
-              RegulonList,
-              TableEnrichment,
-              EAGenes,
-              GOtype,
-              FDRThresh = 0.01,
-              GeneSymbolsTable = FALSE)
-    {
-        topPathways <- nrow(TableEnrichment)
-        topPathways_tab <- matrix(0, 1, topPathways)
-        topPathways_tab <- as.matrix(topPathways_tab)
-        rownames(topPathways_tab) <- GeneName
-        rownames(EAGenes) <- toupper(rownames(EAGenes))
-        EAGenes <- EAGenes[!duplicated(EAGenes[, "ID"]),]
-        rownames(EAGenes) <- EAGenes[, "ID"]
-        allgene <- EAGenes[, "ID"]
-        current_pathway_from_EA <- as.matrix(TableEnrichment[, GOtype])
-        TableNames <- gsub("David",
-                           "",
-                           paste("Top ", GOtype, " n. ",
-                                 1:topPathways, " of ", topPathways, sep = ""))
-        colnames(topPathways_tab) <- TableNames
-        topPathways_tab <- as.data.frame(topPathways_tab)
-        table_pathway_enriched <-
-            matrix(1, nrow(current_pathway_from_EA),
-                   8)
-        colnames(table_pathway_enriched) <-
-            c(
-                "Pathway",
-                "GenesInPathway",
-                "Pvalue",
-                "FDR",
-                "CommonGenesPathway",
-                "PercentPathway",
-                "PercentRegulon",
-                "CommonGeneSymbols"
-            )
-        table_pathway_enriched <- as.data.frame(table_pathway_enriched)
-        for (i in 1:nrow(current_pathway_from_EA)) {
-            table_pathway_enriched[i, "Pathway"] <-
-                as.character(current_pathway_from_EA[i,])
-            if (nrow(TableEnrichment) == 589) {
-                genes_from_current_pathway_from_EA <-
-                    GeneSplitRegulon(TableEnrichment[TableEnrichment[GOtype] ==
-                                                         as.character(current_pathway_from_EA[i,]),][,
-                                                                                                     "Molecules"], ",")
-            }
-            else {
-                genes_from_current_pathway_from_EA <-
-                    GeneSplitRegulon(TableEnrichment[TableEnrichment[GOtype] ==
-                                                         as.character(current_pathway_from_EA[i,]),][,
-                                                                                                     "Molecules"], ", ")
-            }
-            genes_common_pathway_TFregulon <-
-                as.matrix(intersect(
-                    toupper(RegulonList),
-                    toupper(genes_from_current_pathway_from_EA)
-                ))
-            if (length(genes_common_pathway_TFregulon) != 0) {
-                current_pathway_commongenes_num <-
-                    length(genes_common_pathway_TFregulon)
-                seta <- allgene %in% RegulonList
-                setb <- allgene %in% genes_from_current_pathway_from_EA
-                ft <- fisher.test(seta, setb)
-                FisherpvalueTF <- ft$p.value
-                table_pathway_enriched[i, "Pvalue"] <-
-                    as.numeric(FisherpvalueTF)
-                if (FisherpvalueTF < 0.01) {
-                    current_pathway_commongenes_percent <- paste("(",
-                                                                 format((
-                                                                     current_pathway_commongenes_num / length(genes_from_current_pathway_from_EA)
-                                                                 ) *
-                                                                     100,
-                                                                 digits = 2
-                                                                 ), "%)")
-                    current_pathway_commongenes_num_with_percent <-
-                        gsub(
-                            " ",
-                            "",
-                            paste(
-                                current_pathway_commongenes_num,
-                                current_pathway_commongenes_percent,
-                                "pv=",
-                                format(FisherpvalueTF, digits = 2)
-                            )
-                        )
-                    table_pathway_enriched[i, "CommonGenesPathway"] <-
-                        length(genes_common_pathway_TFregulon)
-                    table_pathway_enriched[i, "CommonGeneSymbols"] <-
-                        paste0(genes_common_pathway_TFregulon, collapse = ";")
-                    table_pathway_enriched[i, "GenesInPathway"] <-
-                        length(genes_from_current_pathway_from_EA)
-                    table_pathway_enriched[i, "PercentPathway"] <-
-                        as.numeric(table_pathway_enriched[i,
-                                                          "CommonGenesPathway"]) /
-                        as.numeric(table_pathway_enriched[i,
-                                                          "GenesInPathway"]) * 100
-                    table_pathway_enriched[i, "PercentRegulon"] <-
-                        as.numeric(table_pathway_enriched[i,
-                                                          "CommonGenesPathway"]) /
-                        length(RegulonList) *
-                        100
-                }
-            }
-        }
-        table_pathway_enriched <-
-            table_pathway_enriched[order(table_pathway_enriched[,
-                                                                "Pvalue"], decreasing = FALSE),]
-        table_pathway_enriched <-
-            table_pathway_enriched[table_pathway_enriched[,
-                                                          "Pvalue"] < 0.01,]
-        table_pathway_enriched[, "FDR"] <-
-            p.adjust(table_pathway_enriched[,
-                                            "Pvalue"], method = "fdr")
-        table_pathway_enriched <-
-            table_pathway_enriched[table_pathway_enriched[,
-                                                          "FDR"] < FDRThresh,]
-        table_pathway_enriched <-
-            table_pathway_enriched[order(table_pathway_enriched[,
-                                                                "FDR"], decreasing = FALSE),]
-
-        table_pathway_enriched_filt <-
-            table_pathway_enriched[table_pathway_enriched$FDR < FDRThresh, ]
-
-        if (nrow(table_pathway_enriched) > 0) {
-            tmp <- table_pathway_enriched
-            tmp <- paste(
-                tmp[, "Pathway"],
-                "; FDR= ",
-                format(tmp[,
-                           "FDR"], digits = 3),
-                "; (ng=",
-                round(tmp[, "GenesInPathway"]),
-                "); (ncommon=",
-                format(tmp[, "CommonGenesPathway"],
-                       digits = 2),
-                ")",
-                sep = ""
-            )
-            tmp <- as.matrix(tmp)
-            topPathways_tab <-
-                topPathways_tab[, 1:nrow(table_pathway_enriched),
-                                drop = FALSE]
-            topPathways_tab[1,] <- tmp
+TCGAanalyze_EA <- function (
+        GeneName,
+        RegulonList,
+        TableEnrichment,
+        EAGenes,
+        GOtype,
+        FDRThresh = 0.01,
+        GeneSymbolsTable = FALSE
+) {
+    topPathways <- nrow(TableEnrichment)
+    topPathways_tab <- matrix(0, 1, topPathways)
+    topPathways_tab <- as.matrix(topPathways_tab)
+    rownames(topPathways_tab) <- GeneName
+    rownames(EAGenes) <- toupper(rownames(EAGenes))
+    EAGenes <- EAGenes[!duplicated(EAGenes[, "ID"]),]
+    rownames(EAGenes) <- EAGenes[, "ID"]
+    allgene <- EAGenes[, "ID"]
+    current_pathway_from_EA <- as.matrix(TableEnrichment[, GOtype])
+    TableNames <- gsub("David",
+                       "",
+                       paste("Top ", GOtype, " n. ",
+                             1:topPathways, " of ", topPathways, sep = ""))
+    colnames(topPathways_tab) <- TableNames
+    topPathways_tab <- as.data.frame(topPathways_tab)
+    table_pathway_enriched <-  matrix(1, nrow(current_pathway_from_EA),  8)
+    colnames(table_pathway_enriched) <- c(
+        "Pathway",
+        "GenesInPathway",
+        "Pvalue",
+        "FDR",
+        "CommonGenesPathway",
+        "PercentPathway",
+        "PercentRegulon",
+        "CommonGeneSymbols"
+    )
+    table_pathway_enriched <- as.data.frame(table_pathway_enriched)
+    for (i in 1:nrow(current_pathway_from_EA)) {
+        table_pathway_enriched[i, "Pathway"] <-
+            as.character(current_pathway_from_EA[i,])
+        if (nrow(TableEnrichment) == 589) {
+            genes_from_current_pathway_from_EA <-
+                GeneSplitRegulon(TableEnrichment[TableEnrichment[GOtype] ==
+                                                     as.character(current_pathway_from_EA[i,]),][,
+                                                                                                 "Molecules"], ",")
         }
         else {
-            topPathways_tab <- NA
+            genes_from_current_pathway_from_EA <-
+                GeneSplitRegulon(TableEnrichment[TableEnrichment[GOtype] ==
+                                                     as.character(current_pathway_from_EA[i,]),][,
+                                                                                                 "Molecules"], ", ")
         }
-
-        if (GeneSymbolsTable == FALSE) {
-            return(topPathways_tab)
-        }
-
-        if (GeneSymbolsTable == TRUE) {
-            return(table_pathway_enriched_filt)
+        genes_common_pathway_TFregulon <-  as.matrix(intersect(
+            toupper(RegulonList),
+            toupper(genes_from_current_pathway_from_EA)
+        ))
+        if (length(genes_common_pathway_TFregulon) != 0) {
+            current_pathway_commongenes_num <-
+                length(genes_common_pathway_TFregulon)
+            seta <- allgene %in% RegulonList
+            setb <- allgene %in% genes_from_current_pathway_from_EA
+            ft <- fisher.test(seta, setb)
+            FisherpvalueTF <- ft$p.value
+            table_pathway_enriched[i, "Pvalue"] <-
+                as.numeric(FisherpvalueTF)
+            if (FisherpvalueTF < 0.01) {
+                current_pathway_commongenes_percent <- paste(
+                    "(",
+                    format((
+                        current_pathway_commongenes_num / length(genes_from_current_pathway_from_EA)
+                    ) *
+                        100,
+                    digits = 2
+                    ), "%)"
+                )
+                current_pathway_commongenes_num_with_percent <-
+                    gsub(
+                        " ",
+                        "",
+                        paste(
+                            current_pathway_commongenes_num,
+                            current_pathway_commongenes_percent,
+                            "pv=",
+                            format(FisherpvalueTF, digits = 2)
+                        )
+                    )
+                table_pathway_enriched[i, "CommonGenesPathway"] <-
+                    length(genes_common_pathway_TFregulon)
+                table_pathway_enriched[i, "CommonGeneSymbols"] <-
+                    paste0(genes_common_pathway_TFregulon, collapse = ";")
+                table_pathway_enriched[i, "GenesInPathway"] <-
+                    length(genes_from_current_pathway_from_EA)
+                table_pathway_enriched[i, "PercentPathway"] <-
+                    as.numeric(table_pathway_enriched[i,
+                                                      "CommonGenesPathway"]) /
+                    as.numeric(table_pathway_enriched[i,
+                                                      "GenesInPathway"]) * 100
+                table_pathway_enriched[i, "PercentRegulon"] <-
+                    as.numeric(table_pathway_enriched[i,
+                                                      "CommonGenesPathway"]) /
+                    length(RegulonList) *
+                    100
+            }
         }
     }
+    table_pathway_enriched <-
+        table_pathway_enriched[order(table_pathway_enriched[,
+                                                            "Pvalue"], decreasing = FALSE),]
+    table_pathway_enriched <-
+        table_pathway_enriched[table_pathway_enriched[,
+                                                      "Pvalue"] < 0.01,]
+    table_pathway_enriched[, "FDR"] <-
+        p.adjust(table_pathway_enriched[,
+                                        "Pvalue"], method = "fdr")
+    table_pathway_enriched <-
+        table_pathway_enriched[table_pathway_enriched[,
+                                                      "FDR"] < FDRThresh,]
+    table_pathway_enriched <-
+        table_pathway_enriched[order(table_pathway_enriched[,
+                                                            "FDR"], decreasing = FALSE),]
+
+    table_pathway_enriched_filt <-
+        table_pathway_enriched[table_pathway_enriched$FDR < FDRThresh, ]
+
+    if (nrow(table_pathway_enriched) > 0) {
+        tmp <- table_pathway_enriched
+        tmp <- paste(
+            tmp[, "Pathway"],
+            "; FDR= ",
+            format(tmp[,
+                       "FDR"], digits = 3),
+            "; (ng=",
+            round(tmp[, "GenesInPathway"]),
+            "); (ncommon=",
+            format(tmp[, "CommonGenesPathway"],
+                   digits = 2),
+            ")",
+            sep = ""
+        )
+        tmp <- as.matrix(tmp)
+        topPathways_tab <-
+            topPathways_tab[, 1:nrow(table_pathway_enriched),
+                            drop = FALSE]
+        topPathways_tab[1,] <- tmp
+    }
+    else {
+        topPathways_tab <- NA
+    }
+
+    if (GeneSymbolsTable == FALSE) {
+        return(topPathways_tab)
+    }
+
+    if (GeneSymbolsTable == TRUE) {
+        return(table_pathway_enriched_filt)
+    }
+}
 
 #' @title Differentially expression analysis (DEA) using limma package.
 #' @description Differentially expression analysis (DEA) using limma package.
@@ -1600,8 +1598,7 @@ TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01) {
     f <- factor(Pdatatable$Disease)
     design <- model.matrix( ~ 0 + f)
     colnames(design) <- levels(f)
-    fit <-
-        limma::lmFit(AffySet, design) ## fit is an object of class MArrayLM.
+    fit <- limma::lmFit(AffySet, design) ## fit is an object of class MArrayLM.
 
     groupColors <- names(table(Pdatatable$Disease))
 
@@ -1629,27 +1626,24 @@ TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01) {
 
                     print(paste(i, j, Comparison, "to do..."))
 
-                    cont.matrix <-
-                        limma::makeContrasts(I = Comparison, levels = design)
+                    cont.matrix <- limma::makeContrasts(I = Comparison, levels = design)
 
                     fit2 <- limma::contrasts.fit(fit, cont.matrix)
                     fit2 <- limma::eBayes(fit2)
 
 
 
-                    sigI <-
-                        limma::topTable(
-                            fit2,
-                            coef = 1,
-                            adjust.method = "BH",
-                            sort.by = "B",
-                            p.value = 0.05,
-                            lfc = FC.cut,
-                            number = 50000
-                        )
+                    sigI <-  limma::topTable(
+                        fit2,
+                        coef = 1,
+                        adjust.method = "BH",
+                        sort.by = "B",
+                        p.value = 0.05,
+                        lfc = FC.cut,
+                        number = 50000
+                    )
 
-                    sigIbis <-
-                        sigI[order(abs(as.numeric(sigI$logFC)), decreasing = TRUE), ]
+                    sigIbis <-   sigI[order(abs(as.numeric(sigI$logFC)), decreasing = TRUE), ]
                     names(CompleteList)[k] <- gsub("-", "_", Comparison)
                     CompleteList[[k]] <- sigIbis
                     k <- k + 1
@@ -1672,6 +1666,7 @@ TCGAanalyze_DEA_Affy <- function(AffySet, FC.cut = 0.01) {
 #' @export
 #' @return an adjacent matrix
 TCGAanalyze_analyseGRN <- function(TFs, normCounts, kNum) {
+
     if (!requireNamespace("parmigene", quietly = TRUE)) {
         stop(
             "parmigene package is needed for this function to work. Please install it.",
@@ -1684,31 +1679,25 @@ TCGAanalyze_analyseGRN <- function(TFs, normCounts, kNum) {
     sampleNames <- colnames(normCounts)
     geneNames <- rownames(normCounts)
 
-    messageMI_TFgenes <-
+    messageMI_TFgenes <-  paste(
+        "Estimation of MI among [",
+        length(MRcandidates),
+        " TRs and ",
+        nrow(normCounts),
+        " genes].....",
+        sep = ""
+    )
+    timeEstimatedMI_TFgenes1 <- length(MRcandidates) * nrow(normCounts) / 1000
+    timeEstimatedMI_TFgenes <-  format(timeEstimatedMI_TFgenes1 * ncol(normCounts) / 17000, digits = 2)
+    messageEstimation <- print(
         paste(
-            "Estimation of MI among [",
-            length(MRcandidates),
-            " TRs and ",
-            nrow(normCounts),
-            " genes].....",
-            sep = ""
+            "I Need about ",
+            timeEstimatedMI_TFgenes,
+            "seconds for this MI estimation. [Processing 17000k elements /s]  "
         )
-    timeEstimatedMI_TFgenes1 <-
-        length(MRcandidates) * nrow(normCounts) / 1000
-    timeEstimatedMI_TFgenes <-
-        format(timeEstimatedMI_TFgenes1 * ncol(normCounts) / 17000,
-               digits = 2)
-    messageEstimation <-
-        print(
-            paste(
-                "I Need about ",
-                timeEstimatedMI_TFgenes,
-                "seconds for this MI estimation. [Processing 17000k elements /s]  "
-            )
-        )
+    )
 
-    system.time(miTFGenes <-
-                    parmigene::knnmi.cross(normCounts[MRcandidates,], normCounts, k = kNum))
+    miTFGenes <- parmigene::knnmi.cross(normCounts[MRcandidates,], normCounts, k = kNum)
 
     return(miTFGenes)
 
@@ -1823,17 +1812,13 @@ TCGAanalyze_networkInference <-
 #'                     "score" = rep(c(1,2,3,4),25))
 #'  gaiaCNVplot(call,threshold = 0.01)
 gaiaCNVplot <- function (calls,  threshold = 0.01) {
-    Calls <-
-        calls[order(calls[, grep("start", colnames(calls), ignore.case = TRUE)]), ]
-    Calls <-
-        Calls[order(Calls[, grep("chr", colnames(calls), ignore.case = TRUE)]), ]
+    Calls <-  calls[order(calls[, grep("start", colnames(calls), ignore.case = TRUE)]), ]
+    Calls <- Calls[order(Calls[, grep("chr", colnames(calls), ignore.case = TRUE)]), ]
     rownames(Calls) <- NULL
     Chromo <- Calls[, grep("chr", colnames(calls), ignore.case = TRUE)]
-    Gains <-
-        apply(Calls, 1, function(x)
+    Gains <- apply(Calls, 1, function(x)
             ifelse(x[grep("aberration", colnames(calls), ignore.case = TRUE)] == 1, x["score"], 0))
-    Losses <-
-        apply(Calls, 1, function(x)
+    Losses <- apply(Calls, 1, function(x)
             ifelse(x[grep("aberration", colnames(calls), ignore.case = TRUE)] == 0, x["score"], 0))
     plot(
         Gains,
