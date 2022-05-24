@@ -24,6 +24,7 @@
 #' dplyr::filter(patient %in% c("TCGA-06-0122","TCGA-14-1456")) %>%
 #' dplyr::select("patient","Supervised.DNA.Methylation.Cluster")
 #' }
+#' @author Tiago Chedraoui Silva, Tathiane Malta, Houtan Noushmehr
 gliomaClassifier <- function(data){
 
     if (!requireNamespace("TCGAbiolinksGUI.data", quietly = TRUE)) {

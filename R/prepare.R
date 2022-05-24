@@ -35,6 +35,7 @@
 #' @importFrom GenomicRanges GRanges
 #' @importFrom IRanges IRanges
 #' @importFrom purrr map_chr
+#' @author Tiago Chedraoui Silva
 GDCprepare <- function(
         query,
         save = FALSE,

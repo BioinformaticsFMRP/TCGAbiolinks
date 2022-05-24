@@ -184,6 +184,7 @@ TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
 #' clinical <- GDCquery_clinic(project = "ORGANOID-PANCREATIC", type = "clinical")
 #' }
 #' @return A data frame with the clinical information
+#' @author Tiago Chedraoui Silva
 GDCquery_clinic <- function(
     project,
     type = "clinical",

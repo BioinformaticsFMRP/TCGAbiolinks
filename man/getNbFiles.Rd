@@ -22,3 +22,6 @@ getNbFiles("TCGA-ACC","Clinical")
 getNbFiles("CPTAC-2","Clinical")
 }
 }
+\author{
+Tiago Chedraoui Silva
+}

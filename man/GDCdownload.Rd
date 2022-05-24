@@ -69,3 +69,6 @@ GDCdownload(query, method = "api")
    )
 }
 }
+\author{
+Tiago Chedraoui Silva
+}

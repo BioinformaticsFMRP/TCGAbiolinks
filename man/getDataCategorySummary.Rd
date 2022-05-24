@@ -22,3 +22,6 @@ or not files for a certain data category
 \examples{
 summary <- getDataCategorySummary("TCGA-ACC", legacy = TRUE)
 }
+\author{
+Tiago Chedraoui Silva
+}

@@ -59,3 +59,6 @@ maf <- GDCprepare(query, directory = "maf")
 
 }
 }
+\author{
+Tiago Chedraoui Silva
+}
