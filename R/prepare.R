@@ -465,10 +465,10 @@ readmiRNAIsoformQuantification <- function (files, cases){
 readSimpleNucleotideVariationMaf <- function(files){
 
     ret <- plyr::adply(.data = files,.margins = 1,.fun = function(f){
-        read_tsv(
+        readr::read_tsv(
             f,
             comment = "#",
-            col_types = cols(
+            col_types = readr::cols(
                 Entrez_Gene_Id = col_integer(),
                 Start_Position = col_integer(),
                 End_Position = col_integer(),
@@ -476,12 +476,12 @@ readSimpleNucleotideVariationMaf <- function(files){
                 t_ref_count = col_integer(),
                 t_alt_count = col_integer(),
                 n_depth = col_integer(),
-                ALLELE_NUM = col_integer(),
                 TRANSCRIPT_STRAND = col_integer(),
                 PICK = col_integer(),
+                miRNA = col_character(),
                 TSL = col_integer(),
-                HGVS_OFFSET = col_integer(),
-                MINIMISED = col_integer()),
+                HGVS_OFFSET = col_integer()
+                ),
             progress = TRUE
         )
     })
