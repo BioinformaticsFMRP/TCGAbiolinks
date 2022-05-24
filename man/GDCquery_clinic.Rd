@@ -91,3 +91,6 @@ clinical <- GDCquery_clinic(project = "NCICCR-DLBCL", type = "clinical")
 clinical <- GDCquery_clinic(project = "ORGANOID-PANCREATIC", type = "clinical")
 }
 }
+\author{
+Tiago Chedraoui Silva
+}

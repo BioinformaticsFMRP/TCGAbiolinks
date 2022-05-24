@@ -19,3 +19,6 @@ splitAPICall(FUN, step = 20, items)
 internal function to break a huge API call into smaller ones
 so it repects the max character limit of a string
 }
+\author{
+Tiago Chedraoui Silva
+}

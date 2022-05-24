@@ -20,3 +20,6 @@ getProjectSummary("TCGA-ACC")
 getProjectSummary("CPTAC-2")
 }
 }
+\author{
+Tiago Chedraoui Silva
+}

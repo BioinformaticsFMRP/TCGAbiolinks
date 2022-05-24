@@ -208,3 +208,6 @@ query <- GDCquery(
 )
 }
 }
+\author{
+Tiago Chedraoui Silva
+}

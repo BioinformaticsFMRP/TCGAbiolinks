@@ -17,6 +17,7 @@
 #' @return A data frame with the maf file information
 #' @importFrom tidyr spread unite
 #' @importFrom plyr ldply count
+#' @author Tiago Chedraoui Silva
 getSampleFilesSummary <- function(project, legacy = FALSE, files.access = NA) {
     out <- NULL
 
@@ -183,6 +184,7 @@ getBarcodefromAliquot <- function(aliquot){
 #' (list of barcodes, aliquot ids, etc)
 #' @param step How many items to be evaluated per API call
 #' @param FUN function that calls the API
+#' @author Tiago Chedraoui Silva
 splitAPICall <- function(FUN, step = 20, items){
    info <- NULL
    info <- tryCatch({
@@ -224,6 +226,7 @@ splitAPICall <- function(FUN, step = 20, items){
 #' @importFrom stats xtabs
 #' @examples
 #' summary <- getDataCategorySummary("TCGA-ACC", legacy = TRUE)
+#' @author Tiago Chedraoui Silva
 getDataCategorySummary <- function(project, legacy = FALSE){
     baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/files/?","https://api.gdc.cancer.gov/files/?")
     url <- paste0(baseURL,"&expand=cases&size=100000&fields=cases.submitter_id,data_category&filters=",
@@ -255,6 +258,7 @@ getDataCategorySummary <- function(project, legacy = FALSE){
 #' getProjectSummary("CPTAC-2")
 #' }
 #' @export
+#' @author Tiago Chedraoui Silva
 getProjectSummary <- function(project, legacy = FALSE){
     checkProjectInput(project)
     baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/projects/","https://api.gdc.cancer.gov/projects/")
@@ -271,6 +275,7 @@ getProjectSummary <- function(project, legacy = FALSE){
 #' getNbCases("TCGA-ACC","Clinical")
 #' getNbCases("CPTAC-2","Clinical")
 #' }
+#' @author Tiago Chedraoui Silva
 getNbCases <- function(project, data.category, legacy = FALSE){
     summary <- getProjectSummary(project, legacy)
     if(data.category %in% summary$data_categories$data_category){
@@ -291,6 +296,7 @@ getNbCases <- function(project, data.category, legacy = FALSE){
 #' getNbFiles("TCGA-ACC","Clinical")
 #' getNbFiles("CPTAC-2","Clinical")
 #' }
+#' @author Tiago Chedraoui Silva
 getNbFiles <- function(project, data.category, legacy = FALSE){
     summary <- getProjectSummary(project, legacy)
     if(data.category %in% summary$data_categories$data_category){

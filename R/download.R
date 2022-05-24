@@ -51,6 +51,7 @@
 #'    )
 #' }
 #' @return Shows the output from the GDC transfer tools
+#' @author Tiago Chedraoui Silva
 GDCdownload <- function(
     query,
     token.file,

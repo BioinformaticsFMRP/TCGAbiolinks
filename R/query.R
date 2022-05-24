@@ -177,6 +177,7 @@
 #' @importFrom httr timeout
 #' @importFrom dplyr pull
 #' @importFrom tidyr contains
+#' @author Tiago Chedraoui Silva
 GDCquery <- function(
         project,
         data.category,

@@ -28,3 +28,6 @@ Retrieve the numner of files under each
    summary <- getSampleFilesSummary(c("TCGA-OV","TCGA-ACC"))
 }
 }
+\author{
+Tiago Chedraoui Silva
+}
