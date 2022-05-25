@@ -109,8 +109,14 @@ GDCdownload <- function(
             # Creates a file with the gdc manifest format
             readr::write_delim(manifest,"gdc_manifest.txt",delim = "\t")
 
-            cmd <- paste0(gdc.client.bin, " download -m gdc_manifest.txt")
+            readr::write_delim(manifest,"gdc_client_configuration.dtt",delim = "\t")
+            readr::write_lines(
+                c("[download]","retry_amount = 6",paste0("dir =",path)),
+                file = "gdc_client_configuration.dtt"
+            )
+            cmd <- paste0(gdc.client.bin, " download -m gdc_manifest.txt --config gdc_client_configuration.dtt")
 
+            dir.create(path,recursive = TRUE,showWarnings = FALSE)
             if(!missing(token.file)) cmd <- paste0(cmd," -t ", token.file)
 
             # Download all the files in the manifest using gdc client
@@ -121,9 +127,6 @@ GDCdownload <- function(
                 system(cmd)
             }, warning = function(w) {
             }, error = function(e) {
-            }, finally = {
-                # moving the file to make it more organized
-                for(i in manifest$id) move(i,file.path(path,i))
             })
 
         } else if (nrow(manifest) != 0 & method =="api"){
