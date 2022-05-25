@@ -631,12 +631,15 @@ TCGAanalyze_Normalization <- function(
         )
 
         message("Step 3 of 4: betweenLaneNormalization ...")
+        if(any(is.na(EDASeq::normCounts(tmp)))) {
+            tmp <- tmp[rowSums(is.na(EDASeq::normCounts(tmp))) == 0,]
+        }
         tmp <- EDASeq::betweenLaneNormalization(
             tmp,
             which = "upper",
             offset = TRUE
         )
-        normCounts <-  log(rawCounts + .1) + EDASeq::offst(tmp)
+        normCounts <-  log(rawCounts[rownames(tmp),] + .1) + EDASeq::offst(tmp)
         normCounts <-  floor(exp(normCounts) - .1)
 
         message("Step 4 of 4: .quantileNormalization ...")
