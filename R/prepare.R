@@ -1647,6 +1647,7 @@ readCopyNumberVariation <- function(files, cases){
 }
 
 # getBarcodeInfo(c("TCGA-A6-6650-01B"))
+#  getBarcodeInfo(c("DLBCL10508-sample"))
 addFFPE <- function(df) {
     message("Add FFPE information. More information at: \n=> https://cancergenome.nih.gov/cancersselected/biospeccriteria \n=> http://gdac.broadinstitute.org/runs/sampleReports/latest/FPPP_FFPE_Cases.html")
     barcode <- df$barcode
@@ -1768,14 +1769,17 @@ getBarcodeInfo <- function(barcode) {
     if(!is.null(results$samples)) {
         samples <- rbindlist(results$samples, fill = TRUE)
         samples <- samples[match(barcode,samples$submitter_id),]
-        samples$sample_submitter_id <- str_extract_all(samples$submitter_id,paste(barcode,collapse = "|")) %>%
+        samples$sample_submitter_id <- str_extract_all(
+            samples$submitter_id,paste(barcode,collapse = "|")) %>%
             unlist %>% as.character
 
         tryCatch({
             samples$submitter_id <-
-                str_extract_all(samples$submitter_id,
-                                paste(c(submitter_id,barcode), collapse = "|"),
-                                simplify = TRUE) %>% as.character
+                str_extract_all(
+                    samples$submitter_id,
+                    paste(c(submitter_id,barcode), collapse = "|"),
+                    simplify = TRUE
+                ) %>% as.character
         }, error = function(e){
             samples$submitter_id <- submitter_id
         })
@@ -1791,7 +1795,7 @@ getBarcodeInfo <- function(barcode) {
         diagnoses <- rbindlist(lapply(results$diagnoses, function(x) if(is.null(x)) data.frame(NA) else x),fill = TRUE)
         diagnoses[,c("updated_datetime","created_datetime","state")] <- NULL
         if(any(grepl("submitter_id", colnames(diagnoses)))) {
-            diagnoses$submitter_id <- gsub("_diagnosis.*|-DIAG|diag-","", diagnoses$submitter_id)
+            diagnoses$submitter_id <- gsub("-diagnosis|_diagnosis.*|-DIAG|diag-","", diagnoses$submitter_id)
         }  else {
             diagnoses$submitter_id <- submitter_id
         }
@@ -1822,7 +1826,7 @@ getBarcodeInfo <- function(barcode) {
         exposures <- rbindlist(lapply(results$exposures, function(x) if(is.null(x)) data.frame(NA) else x),fill = TRUE)
         exposures[,c("updated_datetime","created_datetime","state")] <- NULL
         if(any(grepl("submitter_id", colnames(exposures)))) {
-            exposures$submitter_id <- gsub("_exposure.*|-EXP","", exposures$submitter_id)
+            exposures$submitter_id <- gsub("-exposure|_exposure.*|-EXP","", exposures$submitter_id)
         }  else {
             exposures$submitter_id <- submitter_id
         }
@@ -1839,7 +1843,7 @@ getBarcodeInfo <- function(barcode) {
         demographic <- results$demographic
         demographic[,c("updated_datetime","created_datetime","state")] <- NULL
         if(any(grepl("submitter_id", colnames(demographic)))) {
-            demographic$submitter_id <- gsub("_demographic.*|-DEMO|demo-","", results$demographic$submitter_id)
+            demographic$submitter_id <- gsub("-demographic|_demographic.*|-DEMO|demo-","", results$demographic$submitter_id)
         } else {
             demographic$submitter_id <- submitter_id
         }
