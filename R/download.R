@@ -229,7 +229,7 @@ GDCdownload.by.chunk <- function(
         end <- ifelse(((idx + 1) * step) > nrow(manifest), nrow(manifest),((idx + 1) * step))
         manifest.aux <- manifest[((idx * step) + 1):end,]
         size <- humanReadableByteCount(sum(as.numeric(manifest.aux$size)))
-        name.aux <- gsub(".tar",paste0("_",idx,".tar"),name)
+        name.aux <- gsub("\\.tar",paste0("_",idx,".tar"),name)
         message(
             paste0(
                 "Downloading chunk ", idx + 1, " of ", ceiling(nrow(manifest)/step) ,
@@ -293,7 +293,9 @@ GDCdownload.aux <- function(
             if(nrow(manifest) > 1) {
                 move(file,file.path(path,file))
             }
-            if(nrow(manifest) == 1) move(file,file.path(path,id,file))
+            if(nrow(manifest) == 1) {
+                move(file,file.path(path,id,file))
+            }
         }
         return(1)
     }, warning = function(w) {
