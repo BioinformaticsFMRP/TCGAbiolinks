@@ -1184,10 +1184,18 @@ colDataPrepare <- function(barcode){
     }
 
     if(any(ret$project_id == "CPTAC-3",na.rm = T)) {
-        idx <- sapply(gsub("-[[:alnum:]]{3}$","",barcode), function(x) {
-            if(grepl(";",x = x)) x <- stringr::str_split(x[1],";")[[1]][1] # mixed samples
-            grep(x,ret$bcr_patient_barcode)
-        })
+
+        ret <- ret %>%
+            dplyr::group_by(submitter_id) %>%
+            dplyr::summarise_all(~trimws(paste(unique(.), collapse = ';'))) %>%
+            as.data.frame()
+        idx <- match(barcode,ret$bcr_patient_barcode)
+
+        #idx <- sapply(gsub("-[[:alnum:]]{3}$","",barcode), function(x) {
+        #    if(grepl(";",x = x)) x <- stringr::str_split(x[1],";")[[1]][1] # mixed samples
+        #    grep(x,ret$bcr_patient_barcode)
+        #})
+
     }
 
     if(any(ret$project_id == "CMI-MBC",na.rm = T)) {
