@@ -552,7 +552,7 @@ GDCquery <- function(
             .fun =  function(x) {
                 lapply(x$samples,FUN = function(y)  {
                     sample <- unlist(y,recursive = T)
-                    sort(sample[grep("sample_type[0-9]",names(sample))],decreasing = T)
+                    sort(sample[grep("sample_type[0-9]{0}$",names(sample))],decreasing = T)
                 }) %>%
                     unlist %>%
                     na.omit %>%

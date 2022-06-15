@@ -42,10 +42,12 @@ test_that("GDCquery can filter by sample.type", {
     skip_if_offline()
 
     sample.type <- "Primary Tumor"
-    query <- GDCquery(project = "TCGA-ACC",
-                      data.category =  "Copy Number Variation",
-                      data.type = "Masked Copy Number Segment",
-                      sample.type = sample.type)
+    query <- GDCquery(
+        project = "TCGA-ACC",
+        data.category =  "Copy Number Variation",
+        data.type = "Masked Copy Number Segment",
+        sample.type = sample.type
+    )
     expect_equal(as.character(unique(query$results[[1]]$sample_type)),sample.type)
 
     sample.type <- "Solid Tissue Normal"

@@ -256,7 +256,7 @@ test_that("Preparing RRPA files with number of proteins works", {
 
     expect_message(object = {
         data_rppa <- GDCprepare(query_rppa)
-    },regexp = "Some files differ in the number of proteins, we will introduce NA for the missing values")
+    },regexp = "Some files have a  different number of proteins, we will introduce NA for the missing values")
 
     expect_true(is(data_rppa,"data.frame"))
 })
