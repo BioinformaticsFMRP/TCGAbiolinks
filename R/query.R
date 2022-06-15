@@ -466,18 +466,19 @@ GDCquery <- function(
         if("portions" %in% (results$cases[[1]]$samples[[1]] %>% names)) {
             aux <- plyr::laply(results$cases,
                                function(x) {
-                                   summarize(
-                                       x$samples[[1]],
+                                   plyr::summarize(
+                                       rbindlist(x$samples),
                                        submitter_id = paste(submitter_id,collapse = ";"),
                                        is_ffpe = ifelse("is_ffpe" %in% colnames(x),any(is_ffpe),NA),
                                        sample_type =  paste(sample_type,collapse = ";"),
-                                       aliquot.submiter.id = x$samples[[1]]$portions[[1]]$analytes[[1]]$aliquots[[1]]$submitter_id)
+                                       aliquot.submiter.id = paste(unlist(rbindlist(x$samples))[grep("portions.analytes.aliquots.submitter_id",names(unlist(rbindlist(x$samples))))],collapse = ";")
+                                       )
                                }) %>% as.data.frame
         } else {
             aux <- plyr::laply(results$cases,
                                function(x) {
-                                   summarize(
-                                       x$samples[[1]],
+                                   plyr::summarize(
+                                       rbindlist(x$samples),
                                        submitter_id = paste(submitter_id,collapse = ";"),
                                        is_ffpe = ifelse("is_ffpe" %in% colnames(x),any(is_ffpe),NA),
                                        sample_type =  paste(sample_type,collapse = ";"))
@@ -495,6 +496,7 @@ GDCquery <- function(
                 }
             )  %>% as.character()
         }
+
         # ORGANOID-PANCREATIC does not have aliquots
         if("aliquot.submiter.id" %in% colnames(aux)){
             results$cases <- aux$aliquot.submiter.id  %>% as.character()
@@ -583,7 +585,7 @@ GDCquery <- function(
             if(!is.na(sample.type)) sample.type <- NA # ensure no filtering will be applied
 
         } else {
-            # TODO: Add comnetary with case
+            # TODO: Add commentary with case
             aux <- plyr::laply(.data = results$cases,
                                .fun = function(x) {
                                    unlist(x$samples[[1]],recursive = T)[c("portions.analytes.aliquots.submitter_id","sample_type1","sample_type2","is_ffpe1","is_ffpe2")]
@@ -632,12 +634,12 @@ GDCquery <- function(
     #
     print.header("Checking data","subsection")
 
-    message("ooo Check if there are duplicated cases")
+    message("ooo Checking if there are duplicated cases")
     if(any(duplicated(results$cases))) {
         message("Warning: There are more than one file for the same case. Please verify query results. You can use the command View(getResults(query)) in rstudio")
     }
 
-    message("ooo Check if there results for the query")
+    message("ooo Checking if there are results for the query")
     if(nrow(results) == 0) stop("Sorry, no results were found for this query")
 
     # Try ordering (needs dplyr 1.0 - still not published)
@@ -658,18 +660,20 @@ GDCquery <- function(
 
 
     print.header("Preparing output","section")
-    ret <- data.frame(results = I(list(results)),
-                      project = I(list(project)),
-                      data.category = data.category,
-                      data.type = data.type,
-                      legacy = legacy,
-                      access = I(list(access)),
-                      experimental.strategy =  I(list(experimental.strategy)),
-                      file.type = file.type,
-                      platform = I(list(platform)),
-                      sample.type = I(list(sample.type)),
-                      barcode = I(list(barcode)),
-                      workflow.type = workflow.type)
+    ret <- data.frame(
+        results = I(list(results)),
+        project = I(list(project)),
+        data.category = data.category,
+        data.type = data.type,
+        legacy = legacy,
+        access = I(list(access)),
+        experimental.strategy =  I(list(experimental.strategy)),
+        file.type = file.type,
+        platform = I(list(platform)),
+        sample.type = I(list(sample.type)),
+        barcode = I(list(barcode)),
+        workflow.type = workflow.type
+    )
     return(ret)
 }
 
