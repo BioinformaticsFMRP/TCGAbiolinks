@@ -481,7 +481,7 @@ readSimpleNucleotideVariationMaf <- function(files){
                 miRNA = col_character(),
                 TSL = col_integer(),
                 HGVS_OFFSET = col_integer()
-                ),
+            ),
             progress = TRUE
         )
     })
@@ -1185,10 +1185,17 @@ colDataPrepare <- function(barcode){
 
     if(any(ret$project_id == "CPTAC-3",na.rm = T)) {
 
-        ret <- ret %>%
-            dplyr::group_by(submitter_id) %>%
-            dplyr::summarise_all(~trimws(paste(unique(.), collapse = ';'))) %>%
-            as.data.frame()
+        # only merge mixed samples
+        mixed.samples <- grep(";",barcode,value = T)
+        if(length(mixed.samples) > 0){
+            mixed.samples <- unique(unlist(str_split(mixed.samples,";")))
+
+            ret.mixed.samples <- ret %>% dplyr::filter(sample_submitter_id %in% mixed.samples) %>%
+                dplyr::group_by(submitter_id,sample_type) %>%
+                dplyr::summarise_all(~trimws(paste(unique(.), collapse = ';'))) %>%
+                as.data.frame()
+            ret <- rbind(ret.mixed.samples,ret)
+        }
         idx <- match(barcode,ret$bcr_patient_barcode)
 
         #idx <- sapply(gsub("-[[:alnum:]]{3}$","",barcode), function(x) {
