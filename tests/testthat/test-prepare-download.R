@@ -150,12 +150,7 @@ test_that("Gene Level Copy Number is being correctly prepare", {
     GDCdownload(query,directory = "ex")
     data <- GDCprepare(query,directory = "ex")
 
-    files <- dir("ex",pattern = "gene_level_copy_number",recursive = TRUE,full.names = TRUE)
-    raw.data <- readr::read_tsv(files)
-    idx <- match(c( "79a12e57-0154-4de3-a6a4-80b6323b7cb3",
-                    "cfd4127e-cd08-4f8c-b5b2-e440b452e044"),
-                 colnames(raw.data))
-    expect_true(all(substr(colnames(data)[idx],1,12) == c("TCGA-A6-5664","TCGA-AY-A71X")))
+    expect_true(all(substr(colnames(data),1,12) == c("TCGA-OR-A5JD","TCGA-OR-A5J7")))
     unlink("ex",recursive = TRUE,force = TRUE)
 })
 
