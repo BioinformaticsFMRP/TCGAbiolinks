@@ -1116,7 +1116,7 @@ colDataPrepare <- function(barcode){
     if(all(grepl("MMRF",barcode))) ret <- colDataPrepareMMRF(barcode)
 
     # How to deal with mixed samples "C3N-02003-01;C3N-02003-021" ?
-    # Check if this breaks the pacakge
+    # Check if this breaks the package
     if(any(grepl("C3N-|C3L-",barcode))) {
         ret <- data.frame(
             sample =  sapply(barcode, function(x) stringr::str_split(x,";") %>% unlist()) %>%
@@ -1185,7 +1185,7 @@ colDataPrepare <- function(barcode){
 
     if(any(ret$project_id == "CPTAC-3",na.rm = T)) {
         idx <- sapply(gsub("-[[:alnum:]]{3}$","",barcode), function(x) {
-            if(grepl(";",x = x)) x <- stringr::str_split(barcode[1],";")[[1]][1] # mixed samples
+            if(grepl(";",x = x)) x <- stringr::str_split(x[1],";")[[1]][1] # mixed samples
             grep(x,ret$bcr_patient_barcode)
         })
     }
