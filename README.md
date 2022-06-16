@@ -61,7 +61,7 @@ Please cite both TCGAbiolinks package:
 * Silva TC, Colaprico A, Olsen C et al.TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages [version 2; peer review: 1 approved, 2 approved with reservations]. F1000Research 2016, 5:1542
 (https://doi.org/10.12688/f1000research.8923.2)
 
-[![doi](https://img.shields.io/badge/doi-10.1093/nar/gkv1507-green.svg?style=flat)](http://dx.doi.org/10.1093/nar/gkv1507) [![citation](https://img.shields.io/badge/cited%20by-191-green.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=6029790855238928406) [![Altmetric](https://img.shields.io/badge/Altmetric-25-green.svg?style=flat)](https://www.altmetric.com/details/4919535)
+[![doi](https://img.shields.io/badge/doi-10.1093/nar/gkv1507-green.svg?style=flat)](http://dx.doi.org/10.1093/nar/gkv1507) [![citation](https://img.shields.io/badge/cited%20by-191-green.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=15937881581405647591) [![Altmetric](https://img.shields.io/badge/Altmetric-25-green.svg?style=flat)](https://www.altmetric.com/details/4919535)
 
 Also, if you have used ELMER analysis please cite:
 
