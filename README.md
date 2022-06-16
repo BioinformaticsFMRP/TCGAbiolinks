@@ -1,7 +1,6 @@
 [![Build Status](https://travis-ci.org/BioinformaticsFMRP/TCGAbiolinks.svg?branch=master)](https://travis-ci.org/BioinformaticsFMRP/TCGAbiolinks)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/BioinformaticsFMRP/TCGAbiolinks?branch=master&svg=true)](https://ci.appveyor.com/project/BioinformaticsFMRP/TCGAbiolinks)
 [![codecov.io](https://codecov.io/github/BioinformaticsFMRP/TCGAbiolinks/coverage.svg?branch=master)](https://codecov.io/github/BioinformaticsFMRP/TCGAbiolinks?branch=master)
-[![bioc](http://www.bioconductor.org/shields/downloads/TCGAbiolinks.svg)](http://bioconductor.org/packages/stats/bioc/TCGAbiolinks.html)
 [![bioc](http://www.bioconductor.org/shields/years-in-bioc/TCGAbiolinks.svg)](http://bioconductor.org/packages/TCGAbiolinks/)
 [![bioc](http://bioconductor.org/shields/availability/devel/TCGAbiolinks.svg)](http://bioconductor.org/packages/TCGAbiolinks/)
 
@@ -61,7 +60,7 @@ Please cite both TCGAbiolinks package:
 * Silva TC, Colaprico A, Olsen C et al.TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages [version 2; peer review: 1 approved, 2 approved with reservations]. F1000Research 2016, 5:1542
 (https://doi.org/10.12688/f1000research.8923.2)
 
-[![doi](https://img.shields.io/badge/doi-10.1093/nar/gkv1507-green.svg?style=flat)](http://dx.doi.org/10.1093/nar/gkv1507) [![citation](https://img.shields.io/badge/cited%20by-191-green.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=15937881581405647591) [![Altmetric](https://img.shields.io/badge/Altmetric-25-green.svg?style=flat)](https://www.altmetric.com/details/4919535)
+[![doi](https://img.shields.io/badge/doi-10.1093/nar/gkv1507-green.svg?style=flat)](http://dx.doi.org/10.1093/nar/gkv1507) [![citation](https://img.shields.io/badge/cited%20by-1151-green.svg?style=flat)](https://scholar.google.com.hk/scholar?oi=bibs&hl=en&cites=15937881581405647591) [![Altmetric](https://img.shields.io/badge/Altmetric-44-green.svg?style=flat)](https://www.altmetric.com/details/4919535)
 
 Also, if you have used ELMER analysis please cite:
 
