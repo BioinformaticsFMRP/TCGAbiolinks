@@ -379,8 +379,7 @@ So, selected the groups CIMP-low and CIMP-high to do RNA expression and DNA meth
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(TCGAbiolinks)
 library(SummarizedExperiment)
-dir.create("case3")
-setwd("case3")
+
 #-----------------------------------
 # STEP 1: Search, download, prepare |
 #-----------------------------------
@@ -392,11 +391,17 @@ query.met <- GDCquery(
     data.type = "Methylation Beta Value",
     platform = "Illumina Human Methylation 450"
 )
-GDCdownload(query.met)
+
+GDCdownload(
+    query = query.met, 
+    files.per.chunk = 20,
+    directory = "case3/GDCdata"
+)
 
 acc.met <- GDCprepare(
     query = query.met,
-    save = FALSE
+    save = FALSE,
+     directory = "case3/GDCdata"
 )
 
 #-----------------------------------
@@ -408,10 +413,17 @@ query.exp <- GDCquery(
     data.type = "Gene Expression Quantification", 
     workflow.type = "STAR - Counts"
 )
-GDCdownload(query.exp)
+
+GDCdownload( 
+    query = query.exp,
+    files.per.chunk = 20,
+    directory = "case3/GDCdata"
+)
+
 acc.exp <- GDCprepare(
     query = query.exp, 
-    save = FALSE
+    save = FALSE,
+    directory = "case3/GDCdata"
 )
 ```
 
@@ -422,7 +434,7 @@ due to the wilcoxon test, taking from hours to days.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 # na.omit
-acc.met <- acc.met[rowSums(is.na(assay(acc.met))) == 0),]
+acc.met <- acc.met[rowSums(is.na(assay(acc.met))) == 0,]
 
 # Volcano plot
 acc.met <- TCGAanalyze_DMC(
@@ -433,7 +445,7 @@ acc.met <- TCGAanalyze_DMC(
     p.cut = 10^-5,
     diffmean.cut = 0.25,
     legend = "State",
-    plot.filename = "CIMP-highvsCIMP-low_metvolcano.png"
+    plot.filename = "case3/CIMP-highvsCIMP-low_metvolcano.png"
 )
 ```
 
@@ -460,7 +472,10 @@ acc.exp.aux <- subset(
 idx <- colData(acc.exp.aux)$subtype_MethyLevel %in% c("CIMP-high")
 idx2 <- colData(acc.exp.aux)$subtype_MethyLevel %in% c("CIMP-low")
 
-dataPrep <- TCGAanalyze_Preprocessing(object = acc.exp.aux, cor.cut = 0.6)
+dataPrep <- TCGAanalyze_Preprocessing(
+    object = acc.exp.aux, 
+    cor.cut = 0.6
+)
 
 dataNorm <- TCGAanalyze_Normalization(
     tabDF = dataPrep,
@@ -485,7 +500,7 @@ dataDEGs <- TCGAanalyze_DEA(
 TCGAVisualize_volcano(
     x = dataDEGs$logFC,
     y = dataDEGs$FDR,
-    filename = "Case3_volcanoexp.png",
+    filename = "case3/Case3_volcanoexp.png",
     x.cut = 3,
     y.cut = 10^-5,
     names = rownames(dataDEGs),
@@ -526,7 +541,7 @@ starburst <- TCGAvisualize_starburst(
     genome = "hg19"
     group1 = "CIMP-high",
     group2 = "CIMP-low",
-    filename = "starburst.png",
+    filename = "case3/starburst.png",
     met.platform = "450K",
     met.p.cut = 10^-5,
     exp.p.cut = 10^-5,
