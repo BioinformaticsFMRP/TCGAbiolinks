@@ -669,7 +669,11 @@ makeSEFromDNAMethylationMatrix <- function(
 
     rowRanges <- annotation[names(annotation) %in% rownames(betas),,drop = FALSE]
 
-    colData <-  DataFrame(samples = colnames(betas))
+    colData <- tryCatch({
+        colDataPrepare(colnames(betas))
+    }, error = function(e){
+        DataFrame(samples = colnames(betas))
+    })
     betas <- betas[rownames(betas) %in% names(rowRanges),,drop = FALSE]
     betas <- betas[names(rowRanges),,drop = FALSE]
     assay <- data.matrix(betas)
