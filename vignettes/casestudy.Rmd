@@ -391,6 +391,7 @@ query.met <- GDCquery(
     data.type = "Methylation Beta Value",
     platform = "Illumina Human Methylation 450"
 )
+<<<<<<< HEAD
 
 GDCdownload(
     query = query.met, 
@@ -401,7 +402,7 @@ GDCdownload(
 acc.met <- GDCprepare(
     query = query.met,
     save = FALSE,
-     directory = "case3/GDCdata"
+    directory = "case3/GDCdata"
 )
 
 #-----------------------------------
@@ -413,6 +414,7 @@ query.exp <- GDCquery(
     data.type = "Gene Expression Quantification", 
     workflow.type = "STAR - Counts"
 )
+<<<<<<< HEAD
 
 GDCdownload( 
     query = query.exp,
@@ -424,6 +426,12 @@ acc.exp <- GDCprepare(
     query = query.exp, 
     save = FALSE,
     directory = "case3/GDCdata"
+=======
+GDCdownload(query.exp)
+acc.exp <- GDCprepare(
+    query = query.exp, 
+    save = FALSE
+>>>>>>> upstream/master
 )
 ```
 
@@ -434,7 +442,11 @@ due to the wilcoxon test, taking from hours to days.
 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 # na.omit
+<<<<<<< HEAD
 acc.met <- acc.met[rowSums(is.na(assay(acc.met))) == 0,]
+=======
+acc.met <- acc.met[rowSums(is.na(assay(acc.met))) == 0),]
+>>>>>>> upstream/master
 
 # Volcano plot
 acc.met <- TCGAanalyze_DMC(
@@ -445,7 +457,11 @@ acc.met <- TCGAanalyze_DMC(
     p.cut = 10^-5,
     diffmean.cut = 0.25,
     legend = "State",
+<<<<<<< HEAD
     plot.filename = "case3/CIMP-highvsCIMP-low_metvolcano.png"
+=======
+    plot.filename = "CIMP-highvsCIMP-low_metvolcano.png"
+>>>>>>> upstream/master
 )
 ```
 
@@ -500,7 +516,11 @@ dataDEGs <- TCGAanalyze_DEA(
 TCGAVisualize_volcano(
     x = dataDEGs$logFC,
     y = dataDEGs$FDR,
+<<<<<<< HEAD
     filename = "case3/Case3_volcanoexp.png",
+=======
+    filename = "Case3_volcanoexp.png",
+>>>>>>> upstream/master
     x.cut = 3,
     y.cut = 10^-5,
     names = rownames(dataDEGs),
@@ -541,7 +561,11 @@ starburst <- TCGAvisualize_starburst(
     genome = "hg19"
     group1 = "CIMP-high",
     group2 = "CIMP-low",
+<<<<<<< HEAD
     filename = "case3/starburst.png",
+=======
+    filename = "starburst.png",
+>>>>>>> upstream/master
     met.platform = "450K",
     met.p.cut = 10^-5,
     exp.p.cut = 10^-5,
