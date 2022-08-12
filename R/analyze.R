@@ -2026,5 +2026,3 @@ matchedMetExp <- function(project, legacy = FALSE, n = NULL) {
         patients <- patients[1:n] # get only n samples
     return(patients)
 }
-
-
