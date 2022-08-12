@@ -426,12 +426,6 @@ acc.exp <- GDCprepare(
     query = query.exp, 
     save = FALSE,
     directory = "case3/GDCdata"
-=======
-GDCdownload(query.exp)
-acc.exp <- GDCprepare(
-    query = query.exp, 
-    save = FALSE
->>>>>>> upstream/master
 )
 ```
 
