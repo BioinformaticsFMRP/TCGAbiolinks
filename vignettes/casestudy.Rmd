@@ -391,7 +391,6 @@ query.met <- GDCquery(
     data.type = "Methylation Beta Value",
     platform = "Illumina Human Methylation 450"
 )
-<<<<<<< HEAD
 
 GDCdownload(
     query = query.met, 
@@ -414,7 +413,6 @@ query.exp <- GDCquery(
     data.type = "Gene Expression Quantification", 
     workflow.type = "STAR - Counts"
 )
-<<<<<<< HEAD
 
 GDCdownload( 
     query = query.exp,
