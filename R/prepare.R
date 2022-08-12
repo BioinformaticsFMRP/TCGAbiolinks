@@ -1507,10 +1507,16 @@ readTranscriptomeProfiling <- function(
             df <- data.table::rbindlist(
                 x, use.names = TRUE, idcol = "case_barcode"
             )
+
+            # Exception to the code below: CPTAC-3
+            # Sample barcode in CPTAC-3 does not handle duplicates
+            # we will need to work with aliquots for it or remove duplicated
+            # files. Example: C3N-02765-02
+
             if(!missing(cases))  {
                 df$case_barcode <- factor(
                     cases[df$case_barcode %>% as.numeric()],
-                    levels = cases
+                    levels = unique(cases)
                 )
             }
 

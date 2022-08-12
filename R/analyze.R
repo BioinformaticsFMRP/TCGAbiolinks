@@ -496,7 +496,7 @@ TCGAanalyze_Filtering <- function(
         foldChange = 1
 ) {
     if (method == "quantile") {
-        GeneThresh <- as.numeric(quantile(rowMeans(tabDF), qnt.cut))
+        GeneThresh <- as.numeric(quantile(rowMeans(tabDF,na.rm = TRUE), qnt.cut))
         geneFiltered <- names(which(rowMeans(tabDF) > GeneThresh))
         tabDF_Filt <- tabDF[geneFiltered,]
     }
@@ -527,6 +527,7 @@ TCGAanalyze_Filtering <- function(
                 prod(quantile(x, probs =  c(1 - eta, eta)) - 10) < 0)
         tabDF_Filt <- geData[, which(filter)]
     }
+
 
     return(tabDF_Filt)
 }
@@ -706,6 +707,10 @@ TCGAanalyze_Normalization <- function(
         tabDF_norm <- EDASeq::counts(tabDF_norm)
     }
 
+    # In case NA's were produced to all rows
+    if(any(rowSums(is.na(tabDF_norm)) == ncol(tabDF_norm))){
+        tabDF_norm <- tabDF_norm[rowSums(is.na(tabDF_norm)) != ncol(tabDF_norm),]
+    }
 
     return(tabDF_norm)
 }
