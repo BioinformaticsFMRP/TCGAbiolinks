@@ -14,7 +14,7 @@ TCGAanalyze_DMC(
   paired = FALSE,
   adj.method = "BH",
   plot.filename = "methylation_volcano.pdf",
-  ylab = expression(paste(-Log[10], " (FDR corrected -P values)")),
+  ylab = expression(paste(-Log[10], " (FDR corrected P-values)")),
   xlab = expression(paste("DNA Methylation difference (", beta, "-values)")),
   title = NULL,
   legend = "Legend",

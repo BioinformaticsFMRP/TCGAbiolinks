@@ -1382,3 +1382,311 @@ TCGAvisualize_oncoprint <- function(
     }
 
 }
+
+#' @title Creates a volcano plot for DNA methylation or gene expression
+#' @description Creates a volcano plot from the
+#' gene expression and DNA methylation analysis.
+#' @details
+#'    Creates a volcano plot from the gene expression and DNA methylation analysis.
+#'    Please see the vignette for more information
+#' @param x x-axis data (i.e. Diff mean beta-values or Log2FC).
+#' @param y FDR adjusted p-value (q-value). This data will be transformed to -log10 values.
+#' @param y.cut q-values threshold (i.e. 0.01, 10^-10)
+#' @param x.cut  x-axis threshold. Default: 0.0 If you give only one number (e.g. 0.2) the cut-offs will be
+#'  -0.2 and 0.2. Or you can give different cut-offs as a vector (e.g. c(-0.3,0.4))
+#' @param filename File name: volcano.pdf, volcano.svg, volcano.png. If NULL returns
+#' the ggplot object.
+#' @param legend Legend title
+#' @param color vector of colors to be used in graph
+#' @param title main title. If not specified it will be
+#' "Volcano plot (group1 vs group2)
+#' @param ylab y axis text. Default: -Log10 FDR corrected P-values
+#' @param xlab x axis text. Default: No text. Examples of input:
+#' expression(paste(Log[2], "FoldChange"))
+#' @param xlim x limits to cut image (i.e. c(-4,4))
+#' @param ylim y limits to cut image (i.e. c(-1,10))
+#' @param height Figure height
+#' @param width Figure width
+#' @param names Names to be plotted if significant.
+#' Should be the same size of x and y
+#' @param names.fill Names should be filled in a color box?  Default: TRUE
+#' @param names.size Size of the names text
+#' @param dpi Figure dpi
+#' @param label vector of labels to be used in the figure.
+#' Example: c("Not Significant","Hypermethylated in group1",
+#' "Hypomethylated in group1"))#'
+#' @param highlight List of genes/probes to be highlighted. It should be in the names argument.
+#' @param highlight.color Color of the points highlighted
+#' @param show.names What names will be showed? Possibilities: "both", "significant", "highlighted"
+#' @export
+#' @return Saves the volcano plot in the current folder
+#' @examples
+#' log2_foldchange <- runif(200, -2, 2)
+#' fdr <- runif(200, 0.01, 1)
+#' TCGAVisualize_volcano(
+#'     x = log2_foldchange,
+#'     y = fdr,
+#'     x.cut = 1.5,
+#'     y.cut = 0.01,
+#'     title = "Title example",
+#'     xlab = expression(paste(Log[2], "FoldChange"))
+#' )
+#' beta_diff <- runif(200, -1, 1)
+#' fdr <- runif(200, 0.01, 1)
+#' TCGAVisualize_volcano(
+#'     x = beta_diff,
+#'     y = fdr,
+#'     x.cut = 1.5,
+#'     y.cut = 0.01,
+#'     title = "Title example",
+#'     xlab = expression(paste("DNA Methylation difference (", beta, "-values)"))
+#' )
+#' \dontrun{
+#' TCGAVisualize_volcano(
+#'   x,
+#'   y,
+#'   filename = NULL,
+#'   y.cut = 10000000,
+#'   x.cut=0.8,
+#'    names = rep("AAAA",length(x)),
+#'    legend = "Status",
+#'    names.fill = FALSE
+#' )
+#'
+#' TCGAVisualize_volcano(
+#'   x,
+#'   y,
+#'   filename = NULL,
+#'   y.cut = 10000000,
+#'   x.cut = 0.8,
+#'    names = as.character(1:length(x)),
+#'    legend = "Status",
+#'    names.fill = TRUE, highlight = c("1","2"),
+#'    show = "both"
+#' )
+#' TCGAVisualize_volcano(
+#'   x,
+#'   y,
+#'   filename = NULL,
+#'   y.cut = 10000000,
+#'   x.cut = c(-0.3,0.8),
+#'   names = as.character(1:length(x)),
+#'   legend = "Status",
+#'   names.fill = TRUE,
+#'   highlight = c("1","2"),
+#'   show = "both"
+#' )
+#' }
+#' while (!(is.null(dev.list()["RStudioGD"]))){dev.off()}
+TCGAVisualize_volcano <- function(
+        x,
+        y,
+        filename = "volcano.pdf",
+        ylab =  expression(paste(-Log[10]," (FDR corrected P-values)")),
+        xlab = NULL,
+        title = "Volcano plot",
+        legend = NULL,
+        label = NULL,
+        xlim = NULL,
+        ylim = NULL,
+        color = c("black", "red", "green"),
+        names = NULL,
+        names.fill = TRUE,
+        show.names = "significant",
+        x.cut = 0,
+        y.cut = 0.01,
+        height = 5,
+        width = 10,
+        highlight = NULL,
+        highlight.color = "orange",
+        names.size = 4,
+        dpi = 300)
+{
+    if (!is.null(names)) {
+        if (all(grepl("\\|", names))) {
+            names <- strsplit(names, "\\|")
+            names <- unlist(lapply(names, function(x)
+                x[1]))
+        }
+    }
+    .e <- environment()
+    threshold <- rep("1", length(x))
+    names(color) <- as.character(1:3)
+
+    if (is.null(label)) {
+        label = c(
+            "1" = "Not Significant",
+            "2" = "Up regulated",
+            "3" = "Down regulated"
+        )
+    } else  {
+        names(label) <- as.character(1:3)
+    }
+    # get significant data
+    sig <-  y < y.cut
+    sig[is.na(sig)] <- FALSE
+
+    # If x.cut
+    if (length(x.cut) == 1) {
+        x.cut.min <- -1 * x.cut
+        x.cut.max <- x.cut
+    }
+    if (length(x.cut) == 2) {
+        x.cut.min <- x.cut[1]
+        x.cut.max <- x.cut[2]
+    }
+
+    # hypermethylated/up regulated samples compared to old state
+    up <- x  > x.cut.max
+    up[is.na(up)] <- FALSE
+    if (any(up & sig)) threshold[up & sig] <- "2"
+
+    # hypomethylated/ down regulated samples compared to old state
+    down <-  x < x.cut.min
+    down[is.na(down)] <- FALSE
+    if (any(down & sig)) threshold[down & sig] <- "3"
+
+    if (!is.null(highlight)) {
+        idx <- which(names %in% highlight)
+        if (length(idx) > 0) {
+            threshold[which(names %in% highlight)]  <- "4"
+            color <- c(color, highlight.color)
+            names(color) <- as.character(1:4)
+        }
+    }
+
+    df <- data.frame(
+        x = x,
+        y = y,
+        threshold = threshold
+    )
+
+    # As last color should be the highlighthed, we need to order all the vectors
+    if (!is.null(highlight)) {
+        order.idx <-  order(df$threshold)
+        down <- down[order.idx]
+        sig <- sig[order.idx]
+        up <- up[order.idx]
+        df <- df[order.idx,]
+        names <- names[order.idx]
+    }
+
+    # Plot a volcano plot
+    p <- ggplot(
+        data = df,
+        aes(
+            x = x ,
+            y = -1 * log10(y),
+            colour = threshold
+        ),
+        environment = .e
+    ) +
+        geom_point() +
+        ggtitle(title) + ylab(ylab) + xlab(xlab) +
+        geom_vline(aes(xintercept = x.cut.min),
+                   colour = "black",
+                   linetype = "dashed") +
+        geom_vline(aes(xintercept = x.cut.max),
+                   colour = "black",
+                   linetype = "dashed") +
+        geom_hline(aes(yintercept = -1 * log10(y.cut)),
+                   colour = "black",
+                   linetype = "dashed") +
+        scale_color_manual(
+            breaks = as.numeric(names(label)),
+            values = color,
+            labels = label,
+            name = legend
+        ) +
+        theme_bw() + theme(
+            panel.border = element_blank(),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            legend.text = element_text(size = 10),
+            plot.title = element_text(hjust = 0.5),
+            axis.line.x = element_line(colour = "black"),
+            axis.line.y = element_line(colour = "black"),
+            legend.position = "top",
+            legend.key = element_rect(colour = 'white')
+        )
+
+    # Label points with the textxy function from the calibrate plot
+    if (!is.null(names)) {
+        # With the names the user can highlight the significant genes, up and down
+        # or the ones highlighted
+        if (show.names == "significant") {
+            idx <- (up & sig) | (down & sig)
+            important <- c("2", "3")
+        } else if (show.names == "highlighted") {
+            if (!is.null(highlight)) {
+                idx <- (names %in% highlight)
+                important <- c("4")
+            } else {
+                message("Missing highlight argument")
+                return(NULL)
+            }
+        } else if (show.names == "both") {
+            if (!is.null(highlight)) {
+                idx <- (up & sig) | (down & sig) |  (names %in% highlight)
+                important <- c("2", "3", "4")
+            } else {
+                message("Missing highlight argument")
+                return(NULL)
+            }
+        } else {
+            message("Wrong highlight argument")
+            return(NULL)
+        }
+
+        if (any(threshold %in% important)) {
+            check_package("ggrepel")
+            if (names.fill) {
+                p <- p + ggrepel::geom_label_repel(
+                    data = subset(df, threshold %in% important),
+                    aes(label = names[idx], fill = threshold),
+                    size = names.size,
+                    show.legend = FALSE,
+                    fontface = 'bold',
+                    color = 'white',
+                    box.padding = unit(0.35, "lines"),
+                    segment.colour = "grey",
+                    point.padding = unit(0.3, "lines")
+                ) +   scale_fill_manual(values = color[as.numeric(important)])
+            }  else {
+                p <- p + ggrepel::geom_text_repel(
+                    data = subset(df, threshold %in% important),
+                    aes(label = names[idx]),
+                    size = names.size,
+                    show.legend = FALSE,
+                    segment.colour = "grey",
+                    fontface = 'bold',
+                    color = 'black',
+                    point.padding = unit(0.3, "lines"),
+                    box.padding = unit(0.5, 'lines')
+                )
+            }
+        }
+    }
+
+    if(!is.null(xlim)) {
+        p <- p + xlim(xlim)
+    }
+
+    if(!is.null(ylim)) {
+        p <- p + ylim(ylim)
+    }
+
+    if (!is.null(filename)) {
+        message("Saving file as: ", filename)
+        ggsave(
+            p,
+            filename = filename,
+            width = width,
+            height = height,
+            dpi = dpi
+        )
+    } else {
+        return(p)
+    }
+}
+

@@ -2,7 +2,7 @@ Package: TCGAbiolinks
 Type: Package
 Title: TCGAbiolinks: An R/Bioconductor package for integrative analysis with GDC data
 Version: 2.25.2
-Date: 2022-21-04
+Date: 2022-17-08
 Author: Antonio Colaprico,
     Tiago Chedraoui Silva,
     Catharina Olsen,
@@ -113,4 +113,5 @@ VignetteBuilder: knitr
 LazyData: true
 URL: https://github.com/BioinformaticsFMRP/TCGAbiolinks
 BugReports: https://github.com/BioinformaticsFMRP/TCGAbiolinks/issues
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
+Encoding: UTF-8
