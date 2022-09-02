@@ -87,6 +87,7 @@ clinicaln.fm_ad <- GDCquery_clinic(project = "FM-AD", type = "clinical")
 clinical.cptac_3 <- GDCquery_clinic(project = "CPTAC-3", type = "clinical")
 clinical.cptac_2 <- GDCquery_clinic(project = "CPTAC-2", type = "clinical")
 clinical.HCMI_CMDC <- GDCquery_clinic(project = "HCMI-CMDC", type = "clinical")
+clinical.CGCI-HTMCP-CC <- GDCquery_clinic(project = "CGCI-HTMCP-CC", type = "clinical")
 clinical <- GDCquery_clinic(project = "NCICCR-DLBCL", type = "clinical")
 clinical <- GDCquery_clinic(project = "ORGANOID-PANCREATIC", type = "clinical")
 }
