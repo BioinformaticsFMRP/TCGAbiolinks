@@ -180,6 +180,7 @@ TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
 #' clinical.cptac_3 <- GDCquery_clinic(project = "CPTAC-3", type = "clinical")
 #' clinical.cptac_2 <- GDCquery_clinic(project = "CPTAC-2", type = "clinical")
 #' clinical.HCMI_CMDC <- GDCquery_clinic(project = "HCMI-CMDC", type = "clinical")
+#' clinical.CGCI-HTMCP-CC <- GDCquery_clinic(project = "CGCI-HTMCP-CC", type = "clinical")
 #' clinical <- GDCquery_clinic(project = "NCICCR-DLBCL", type = "clinical")
 #' clinical <- GDCquery_clinic(project = "ORGANOID-PANCREATIC", type = "clinical")
 #' }
@@ -299,7 +300,23 @@ GDCquery_clinic <- function(
             }
 
             if("diagnoses" %in% colnames(results)){
-                diagnoses <- rbindlist(lapply(results$diagnoses, function(x) if(is.null(x)) data.frame(NA) else x),fill = T)
+                diagnoses <- rbindlist(
+                    lapply(
+                        results$diagnoses,
+                        function(x) {
+                            if(is.null(x)) {
+                                data.frame(NA)
+                            } else {
+                                # HTMCP-03-06-02061 has two diagnosis
+                                x$submitter_id <- gsub("_diagnosis.*","",x$submitter_id)
+                                aux <- x %>% dplyr::group_by(submitter_id) %>%
+                                    dplyr::summarise_each(funs(paste(unique(.), collapse = ";")))
+                                aux$treatments <- list(dplyr::bind_rows(x$treatments))
+                                aux
+                            }
+                            }
+                    ),fill = T
+                )
                 #df$submitter_id <- gsub("^d|_diagnosis|diag-|-DX|-DIAG|-diagnosis","", df$submitter_id)
                 # ^d ORGANOID-PANCREATIC
                 # -DX CPTAC-2
