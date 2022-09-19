@@ -17,9 +17,11 @@ TCGAbatch_Correction(
 \item{tabDF}{numeric matrix, each row represents a gene,
 each column represents a sample}
 
-\item{batch.factor}{a string containing the batch factor to use for correction. Options are "Plate", "TSS", "Year", "Portion", "Center"}
+\item{batch.factor}{a string containing the batch factor to use for correction.
+Options are "Plate", "TSS", "Year", "Portion", "Center"}
 
-\item{adjustment}{vector containing strings for factors to adjust for using ComBat. Options are "Plate", "TSS", "Year", "Portion", "Center"}
+\item{adjustment}{vector containing strings for factors to adjust for using ComBat.
+Options are "Plate", "TSS", "Year", "Portion", "Center"}
 
 \item{ClinicalDF}{a dataframe returned by GDCquery_clinic() to be used to extract year data}
 
