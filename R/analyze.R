@@ -1110,8 +1110,10 @@ TCGAanalyze_DEA <- function (
 #'     }
 #' @param tabDF numeric matrix, each row represents a gene,
 #' each column represents a sample
-#' @param batch.factor a string containing the batch factor to use for correction. Options are "Plate", "TSS", "Year", "Portion", "Center"
-#' @param adjustment vector containing strings for factors to adjust for using ComBat. Options are "Plate", "TSS", "Year", "Portion", "Center"
+#' @param batch.factor a string containing the batch factor to use for correction.
+#'  Options are "Plate", "TSS", "Year", "Portion", "Center"
+#' @param adjustment vector containing strings for factors to adjust for using ComBat.
+#' Options are "Plate", "TSS", "Year", "Portion", "Center"
 #' @param UnpublishedData if TRUE perform a batch correction after adding new data
 #' @param ClinicalDF a dataframe returned by GDCquery_clinic() to be used to extract year data
 #' @param AnnotationDF a dataframe with column Batch indicating different batches of the samples in the tabDF
@@ -1126,11 +1128,25 @@ TCGAbatch_Correction <- function (
         AnnotationDF = data.frame()
 ){
     check_package("sva")
+
+    # code for non-TCGA samples
     if (UnpublishedData == TRUE) {
-        batch.factor <- as.factor(AnnotationDF$Batch)
+        if(!"Batch" %in% colnames(AnnotationDF)) {
+            stop("AnnotationDF should have a Batch column")
+        } else {
+            batch.factor <- as.factor(AnnotationDF$Batch)
+        }
+
+        if(!"Condition" %in% colnames(AnnotationDF)) {
+            mod <- model.matrix(~as.factor(Condition),data = AnnotationDF)
+        } else {
+            mod <- NULL
+        }
+
         batch_corr <- sva::ComBat(
             dat = tabDF,
             batch = batch.factor,
+            mod = mod,
             par.prior = TRUE,
             prior.plots = TRUE
         )
@@ -1154,8 +1170,7 @@ TCGAbatch_Correction <- function (
                 ClinicalDF$diag_year <-
                     ClinicalDF$age_at_diag_year +
                     ClinicalDF$year_of_birth
-                diag_yearDF <-
-                    ClinicalDF[, c("patient", "diag_year")]
+                diag_yearDF <- ClinicalDF[, c("patient", "diag_year")]
                 Year <- merge(my_IDs, diag_yearDF, by = "patient")
                 Year <- Year$diag_year
                 Year <- as.factor(Year)
@@ -1168,7 +1183,6 @@ TCGAbatch_Correction <- function (
         TSS <- as.factor(my_IDs$tss)
         Portion <- as.factor(my_IDs$portion)
         Sequencing.Center <- as.factor(my_IDs$center)
-        design.matrix <- model.matrix( ~ Condition)
         design.mod.combat <- model.matrix( ~ Condition)
         options <- c("Plate", "TSS", "Year", "Portion", "Sequencing Center")
 
@@ -1195,14 +1209,13 @@ TCGAbatch_Correction <- function (
         if (length(adjustment) > 0) {
             adjustment.formula <- paste(adjustment, collapse = "+")
             adjustment.formula <- paste0("+", adjustment.formula)
-            adjustment.formula <-
-                paste0("~Condition", adjustment.formula)
+            adjustment.formula <- paste0("~Condition", adjustment.formula)
             print(adjustment.formula)
-            model <-
-                data.frame(batchCombat, row.names = colnames(tabDF))
-            design.mod.combat <-
-                model.matrix(eval(parse(text = adjustment.formula)),
-                             data = model)
+            model <- data.frame(batchCombat, row.names = colnames(tabDF))
+            design.mod.combat <-  model.matrix(
+                eval(parse(text = adjustment.formula)),
+                data = model
+            )
         }
         print(unique(batchCombat))
         batch_corr <- sva::ComBat(
