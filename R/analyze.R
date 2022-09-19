@@ -852,7 +852,7 @@ TCGAanalyze_DEA <- function (
         TOC <- MAT
     }
 
-    if (metadata == TRUE) {
+    if (metadata == TRUE & all(grepl("TCGA",colnames(TOC)))){
         my_IDs <- get_IDs(TOC)
         Plate <- factor(my_IDs$plate)
         Condition <- factor(my_IDs$condition)
@@ -885,8 +885,7 @@ TCGAanalyze_DEA <- function (
     options <- c("Plate", "TSS", "Year", "Portion", "Center",  "Patients")
     if (length(batch.factors) == 0) {
         message("Batch correction skipped since no factors provided")
-    }
-    else
+    } else {
         for (o in batch.factors) {
             if (o %in% options == FALSE)
                 stop(paste0(o, " is not a valid batch correction factor"))
@@ -895,6 +894,7 @@ TCGAanalyze_DEA <- function (
                     "batch correction using diagnosis year needs clinical info. Provide Clinical Data in arguments"
                 )
         }
+    }
     additiveformula <- paste(batch.factors, collapse = "+")
 
     message("----------------------- DEA -------------------------------")
