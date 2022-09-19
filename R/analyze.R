@@ -1117,27 +1117,23 @@ TCGAanalyze_DEA <- function (
 #' @param AnnotationDF a dataframe with column Batch indicating different batches of the samples in the tabDF
 #' @export
 #' @return data frame with ComBat batch correction applied
-TCGAbatch_Correction <- function (tabDF,
-                                  batch.factor = NULL,
-                                  adjustment = NULL,
-                                  ClinicalDF = data.frame(),
-                                  UnpublishedData = FALSE,
-                                  AnnotationDF = data.frame())
-
-{
-    if (!requireNamespace("sva", quietly = TRUE)) {
-        stop("sva is needed. Please install it.",
-             call. = FALSE)
-    }
+TCGAbatch_Correction <- function (
+        tabDF,
+        batch.factor = NULL,
+        adjustment = NULL,
+        ClinicalDF = data.frame(),
+        UnpublishedData = FALSE,
+        AnnotationDF = data.frame()
+){
+    check_package("sva")
     if (UnpublishedData == TRUE) {
         batch.factor <- as.factor(AnnotationDF$Batch)
-        batch_corr <-
-            sva::ComBat(
-                dat = tabDF,
-                batch = batch.factor,
-                par.prior = TRUE,
-                prior.plots = TRUE
-            )
+        batch_corr <- sva::ComBat(
+            dat = tabDF,
+            batch = batch.factor,
+            par.prior = TRUE,
+            prior.plots = TRUE
+        )
     }
 
     if (UnpublishedData == FALSE) {
@@ -1174,8 +1170,7 @@ TCGAbatch_Correction <- function (tabDF,
         Sequencing.Center <- as.factor(my_IDs$center)
         design.matrix <- model.matrix( ~ Condition)
         design.mod.combat <- model.matrix( ~ Condition)
-        options <-
-            c("Plate", "TSS", "Year", "Portion", "Sequencing Center")
+        options <- c("Plate", "TSS", "Year", "Portion", "Sequencing Center")
 
         if (length(batch.factor) > 1)
             stop("Combat can only correct for one batch variable. Provide one batch factor")
