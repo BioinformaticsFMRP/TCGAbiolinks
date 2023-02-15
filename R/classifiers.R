@@ -10,11 +10,13 @@
 #' 3) Each class probability of classification
 #' @examples
 #' \dontrun{
-#' query <- GDCquery(project= "TCGA-GBM",
-#'                   data.category = "DNA methylation",
-#'                   barcode = c("TCGA-06-0122","TCGA-14-1456"),
-#'                   platform = "Illumina Human Methylation 27",
-#'                   legacy = TRUE)
+#' query <- GDCquery(
+#'    project= "TCGA-GBM",
+#'    data.category = "DNA methylation",
+#'    barcode = c("TCGA-06-0122","TCGA-14-1456"),
+#'    platform = "Illumina Human Methylation 27",
+#'    legacy = TRUE
+#' )
 #' GDCdownload(query)
 #' data.hg19 <- GDCprepare(query)
 #' classification <- gliomaClassifier(data.hg19)
@@ -47,6 +49,7 @@ gliomaClassifier <- function(data){
     models <- c("idh","gcimp","idhwt","idhmut")
     models <- paste("glioma",models,"model",sep = ".")
     data(list = models, package = "TCGAbiolinksGUI.data",envir = env)
+
     for(i in models){
         model <- get(i,envir = env)
         # If it is a Summarized Experiment object
@@ -59,6 +62,7 @@ gliomaClassifier <- function(data){
             print("NA columns")
             aux[,apply(aux,2,function(x) all(is.na(x)))] <- 0.5
         }
+
         if(any(apply(aux,2,function(x) any(is.na(x))))) {
             print("NA values")
             colMedians <- colMedians(aux,na.rm = TRUE)
@@ -76,6 +80,7 @@ gliomaClassifier <- function(data){
                          groups.classified = pred,
                          stringsAsFactors = FALSE)
         colnames(df)[2] <- paste0(i,"_groups.classified")
+
         if(is.null(df.all)) {
             df.all <- df
             df.prob <- pred.prob
@@ -99,7 +104,15 @@ gliomaClassifier <- function(data){
     df.all$glioma.DNAmethylation.subtype <- df.all$glioma.idhwt.model
     idx <- which(is.na(df.all$glioma.DNAmethylation.subtype))
     df.all$glioma.DNAmethylation.subtype[idx] <- df.all$glioma.gcimp.model[idx]
-    return(list(final.classification = data.frame(Sample = df.all$samples,Final_classification = df.all$glioma.DNAmethylation.subtype),
-                model.classifications = df.all,
-                model.probabilities = df.prob))
+
+    return(
+        list(
+            final.classification = data.frame(
+                Sample = df.all$samples,
+                Final_classification = df.all$glioma.DNAmethylation.subtype
+            ),
+            model.classifications = df.all,
+            model.probabilities = df.prob
+        )
+    )
 }
