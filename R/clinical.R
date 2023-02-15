@@ -173,33 +173,30 @@ TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
 #' @examples
 #' clinical <- GDCquery_clinic(project = "TCGA-ACC", type = "clinical", save.csv = TRUE)
 #' clinical <- GDCquery_clinic(project = "TCGA-ACC", type = "biospecimen", save.csv = TRUE)
-#' clinical.cptac2 <- GDCquery_clinic(project = "CPTAC-2", type = "clinical")
-#' clinical.TARGET_ALL_P1 <- GDCquery_clinic(project =  "TARGET-ALL-P1", type = "clinical")
-#' clinicaln.fm_ad <- GDCquery_clinic(project = "FM-AD", type = "clinical")
 #' \dontrun{
-#' clinical.cptac_3 <- GDCquery_clinic(project = "CPTAC-3", type = "clinical")
-#' clinical.cptac_2 <- GDCquery_clinic(project = "CPTAC-2", type = "clinical")
-#' clinical.HCMI_CMDC <- GDCquery_clinic(project = "HCMI-CMDC", type = "clinical")
-#' clinical.CGCI-HTMCP-CC <- GDCquery_clinic(project = "CGCI-HTMCP-CC", type = "clinical")
+#' clinical_cptac_3 <- GDCquery_clinic(project = "CPTAC-3", type = "clinical")
+#' clinical_cptac_2 <- GDCquery_clinic(project = "CPTAC-2", type = "clinical")
+#' clinical_HCMI_CMDC <- GDCquery_clinic(project = "HCMI-CMDC", type = "clinical")
+#' clinical_GCI_HTMCP_CC <- GDCquery_clinic(project = "CGCI-HTMCP-CC", type = "clinical")
 #' clinical <- GDCquery_clinic(project = "NCICCR-DLBCL", type = "clinical")
 #' clinical <- GDCquery_clinic(project = "ORGANOID-PANCREATIC", type = "clinical")
 #' }
 #' @return A data frame with the clinical information
 #' @author Tiago Chedraoui Silva
 GDCquery_clinic <- function(
-    project,
-    type = "clinical",
-    save.csv = FALSE
+        project,
+        type = "clinical",
+        save.csv = FALSE
 ){
     checkProjectInput(project)
 
-    if(length(project) > 1) stop("Please, project should be only one valid project")
+    if (length(project) > 1) stop("Please, project should be only one valid project")
 
-    if(!grepl("clinical|Biospecimen",type,ignore.case = TRUE)) stop("Type must be clinical or Biospecimen")
+    if (!grepl("clinical|Biospecimen",type,ignore.case = TRUE)) stop("Type must be clinical or Biospecimen")
     baseURL <- "https://api.gdc.cancer.gov/cases/?"
     options.pretty <- "pretty=true"
 
-    if(grepl("clinical",type,ignore.case = TRUE)) {
+    if (grepl("clinical",type,ignore.case = TRUE)) {
         options.expand <- "expand=diagnoses,diagnoses.treatments,annotations,family_histories,demographic,exposures"
         option.size <- paste0("size=",getNbCases(project,"Clinical"))
         files.data_category <- "Clinical"
@@ -209,7 +206,7 @@ GDCquery_clinic <- function(
         files.data_category <- "Biospecimen"
     }
 
-    if(grepl("TCGA",project)){
+    if (grepl("TCGA",project)){
         options.filter <- paste0(
             "filters=",
             URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
@@ -238,27 +235,32 @@ GDCquery_clinic <- function(
     #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
     results <- json$data$hits
 
-    if(grepl("clinical",type,ignore.case = TRUE)) {
-        if(grepl("TCGA",project)) {
+    if (grepl("clinical",type,ignore.case = TRUE)) {
+        if (grepl("TCGA",project)) {
             df <- data.frame("submitter_id" = results$submitter_id)
-            if("diagnoses" %in% colnames(results)){
+            if ("diagnoses" %in% colnames(results)){
                 diagnoses <- rbindlist(lapply(results$diagnoses, function(x) if(is.null(x)) data.frame(NA) else x),fill = T)
                 diagnoses$submitter_id <- gsub("_diagnosis","", df$submitter_id)
                 df <- merge(df,diagnoses, by="submitter_id", all = TRUE, sort = FALSE)
             }
-            if("exposures" %in% colnames(results)){
+            if ("exposures" %in% colnames(results)){
                 exposures <- rbindlist(results$exposures, fill = TRUE)
                 exposures <- exposures[,-c("updated_datetime","state","created_datetime")]
                 exposures$submitter_id <- gsub("_exposure","", exposures$submitter_id)
                 df <- merge(df,exposures, by="submitter_id", all = TRUE, sort = FALSE)
             }
-            if("demographic" %in% colnames(results)){
+            if ("demographic" %in% colnames(results)){
                 results$demographic$submitter_id <- gsub("_demographic","", results$demographic$submitter_id)
                 demographic <- results$demographic[!is.na(results$demographic$submitter_id),]
-                df <- merge(df,
-                            as.data.table(demographic)[,-c("updated_datetime","state","created_datetime")],
-                            by = "submitter_id", all = TRUE, sort = FALSE)
+                df <- merge(
+                    df,
+                    as.data.table(demographic)[,-c("updated_datetime","state","created_datetime")],
+                    by = "submitter_id",
+                    all = TRUE,
+                    sort = FALSE
+                )
             }
+
             if("treatments" %in% colnames(df)){
                 treatments <- rbindlist(df$treatments,fill = TRUE)
                 df$treatments <- NULL
@@ -278,9 +280,11 @@ GDCquery_clinic <- function(
                 df <- merge(df, as.data.table(treatments.pharmaceutical), by = "submitter_id",  all = TRUE, sort = FALSE)
                 df <- merge(df, as.data.table(treatments.radiation), by = "submitter_id",  all = TRUE, sort = FALSE)
             }
+
             df$bcr_patient_barcode <- df$submitter_id
             df$project <- project
             df <- df %>% dplyr::relocate(project)
+
         } else {
 
             # Although for TCGA and TARGET IDs from diagnosis, treatments, exposures etc are the same
@@ -314,7 +318,7 @@ GDCquery_clinic <- function(
                                 aux$treatments <- list(dplyr::bind_rows(x$treatments))
                                 aux
                             }
-                            }
+                        }
                     ),fill = T
                 )
                 #df$submitter_id <- gsub("^d|_diagnosis|diag-|-DX|-DIAG|-diagnosis","", df$submitter_id)
@@ -368,12 +372,12 @@ GDCquery_clinic <- function(
         df <- rbindlist(results$samples,fill = TRUE)
     }
 
-    if(save.csv){
+    if (save.csv) {
         if(grepl("biospecimen",type))  {
             df$portions <- NULL
             message("Portion column is a list, it will be removed. Please check object with save.csv argument as FALSE")
         }
-        if(grepl("clinical",type))  {
+        if (grepl("clinical",type))  {
             df$treatments <- NULL
             message("Treatments column is a list, it will be removed. Please check object with save.csv argument as FALSE")
         }
@@ -399,10 +403,12 @@ GDCquery_clinic <- function(
 #' @return A data frame with the parsed values from the XML
 #' @export
 #' @examples
-#' query <- GDCquery(project = "TCGA-COAD",
-#'                   data.category = "Clinical",
-#'                   file.type = "xml",
-#'                   barcode = c("TCGA-RU-A8FL","TCGA-AA-3972"))
+#' query <- GDCquery(
+#'   project = "TCGA-COAD",
+#'   data.category = "Clinical",
+#'   file.type = "xml",
+#'   barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")
+#' )
 #' GDCdownload(query)
 #' clinical <- GDCprepare_clinic(query,"patient")
 #' clinical.drug <- GDCprepare_clinic(query,"drug")
@@ -421,9 +427,9 @@ GDCquery_clinic <- function(
 #' clinical.radiation <- GDCprepare_clinic(query,"portion")
 #' clinical.admin <- GDCprepare_clinic(query,"slide")
 GDCprepare_clinic <- function(
-    query,
-    clinical.info,
-    directory = "GDCdata"
+        query,
+        clinical.info,
+        directory = "GDCdata"
 ){
 
     if (unique(query$results[[1]]$data_category) == "Clinical") {
@@ -580,17 +586,16 @@ GDCprepare_clinic <- function(
         message("No information found")
         return(NULL)
     }
+
     # Converting factor to numeric and double
     out <- clin %>%
         dplyr::mutate_all(
-            funs(
-                type.convert(as.character(.), as.is = TRUE, numerals = "warn.loss")
-            )
+            .funs = ~ type.convert(as.character(.), as.is = TRUE, numerals = "warn.loss")
         )
 
     # Change columns back to factor
     for (i in colnames(out)[!grepl("has_",colnames(out))]) {
-        if (class(out[,i]) == "character" &  length(unique(out[,i])) < nrow(out)/2)
+        if (is(out[,i],"character") &  length(unique(out[,i])) < nrow(out)/2)
             out[,i] <-  as.factor(out[,i])
     }
     return(out)

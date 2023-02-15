@@ -5,3 +5,4 @@
 ^appveyor\.yml$
 ^doc$
 ^Meta$
+^\.gitlab-ci\.yml$

@@ -645,13 +645,15 @@ dmc.non.parametric <-  function(
         .margins =  1,
         .fun = function(x) {
             suppressMessages({
+                suppressWarnings({
                 wilcox.test(
                     x[idx1],
                     x[idx2],
                     paired = paired,
                     alternative = alternative)$p.value
             })
-        }, .progress = "time", .parallel = parallel)
+            })
+    }, .progress = "time", .parallel = parallel)
 
     p.value <- p.value[, 2]
     p.value.adj <- p.adjust(p.value, method = adj.method)

@@ -50,9 +50,6 @@ navbar:
           href: classifiers.html
     - text: "Case Study"
       href: casestudy.html
-    - text: "GUI"
-      icon: fa-hand-pointer-o
-      href: gui.html
   right:
     - text: "Workshops"
       icon: fa-book fa-lg
