@@ -22,11 +22,13 @@ https://doi.org/10.1016/j.cell.2015.12.028
 }
 \examples{
 \dontrun{
-query <- GDCquery(project= "TCGA-GBM",
-                  data.category = "DNA methylation",
-                  barcode = c("TCGA-06-0122","TCGA-14-1456"),
-                  platform = "Illumina Human Methylation 27",
-                  legacy = TRUE)
+query <- GDCquery(
+   project= "TCGA-GBM",
+   data.category = "DNA methylation",
+   barcode = c("TCGA-06-0122","TCGA-14-1456"),
+   platform = "Illumina Human Methylation 27",
+   legacy = TRUE
+)
 GDCdownload(query)
 data.hg19 <- GDCprepare(query)
 classification <- gliomaClassifier(data.hg19)
