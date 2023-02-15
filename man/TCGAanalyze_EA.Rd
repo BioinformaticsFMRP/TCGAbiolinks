@@ -57,8 +57,12 @@ is significant. ie the confidence that overlap between the list is not due to ch
 \dontrun{
 EAGenes <- get("EAGenes")
 RegulonList <- rownames(dataDEGsFiltLevel)
-ResBP <- TCGAanalyze_EA(GeneName="DEA genes Normal Vs Tumor",
-                           RegulonList,DAVID_BP_matrix,
-                           EAGenes,GOtype = "DavidBP")
+ResBP <- TCGAanalyze_EA(
+  GeneName="DEA genes Normal Vs Tumor",
+  RegulonList = RegulonList,
+  TableEnrichment = DAVID_BP_matrix,
+   EAGenes = EAGenes,
+   GOtype = "DavidBP"
+ )
 }
 }

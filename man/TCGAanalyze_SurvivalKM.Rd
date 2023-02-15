@@ -84,12 +84,14 @@ from survival package
 
  # If the groups are not specified group1 == group2 and all samples are used
  \dontrun{
- tabSurvKM <- TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
-                                     dataBRCAcomplete,
-                                     Genelist = rownames(dataBRCAcomplete),
-                                     Survresult = TRUE,
-                                     p.cut = 0.2,
-                                     ThreshTop = 0.67,
-                                     ThreshDown = 0.33)
+ tabSurvKM <- TCGAanalyze_SurvivalKM(
+   clinical_patient_Cancer,
+   dataBRCAcomplete,
+   Genelist = rownames(dataBRCAcomplete),
+   Survresult = TRUE,
+   p.cut = 0.2,
+    ThreshTop = 0.67,
+    ThreshDown = 0.33
+  )
 }
 }
