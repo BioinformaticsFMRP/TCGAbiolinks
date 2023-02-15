@@ -472,7 +472,7 @@ GDCquery <- function(
                                        is_ffpe = ifelse("is_ffpe" %in% colnames(x),any(is_ffpe),NA),
                                        sample_type =  paste(sample_type,collapse = ";"),
                                        aliquot.submiter.id = paste(unlist(rbindlist(x$samples))[grep("portions.analytes.aliquots.submitter_id",names(unlist(rbindlist(x$samples))))],collapse = ";")
-                                       )
+                                   )
                                }) %>% as.data.frame
         } else {
             aux <- plyr::laply(results$cases,
@@ -719,12 +719,17 @@ getGDCquery <- function(project, data.category, data.type, legacy, workflow.type
 
     # Close json request
     options.filter <- paste0(options.filter, URLencode(']}'))
-    url <- paste0(baseURL,paste(options.pretty,
-                                options.expand,
-                                option.size,
-                                options.filter,
-                                option.format,
-                                sep = "&"))
+    url <- paste0(
+        baseURL,
+        paste(
+            options.pretty,
+            options.expand,
+            option.size,
+            options.filter,
+            option.format,
+            sep = "&"
+        )
+    )
     return(url)
 }
 
@@ -741,11 +746,13 @@ addFilter <- function(field, values){
 
 expandBarcodeInfo <- function(barcode){
     if(any(grepl("TARGET",barcode))) {
-        ret <- DataFrame(barcode = barcode,
-                         code = substr(barcode, 8, 9),
-                         case.unique.id = substr(barcode, 11, 16),
-                         tissue.code = substr(barcode, 18, 19),
-                         nucleic.acid.code = substr(barcode, 24, 24))
+        ret <- DataFrame(
+            barcode = barcode,
+            code = substr(barcode, 8, 9),
+            case.unique.id = substr(barcode, 11, 16),
+            tissue.code = substr(barcode, 18, 19),
+            nucleic.acid.code = substr(barcode, 24, 24)
+        )
         ret <- merge(ret,getBarcodeDefinition(), by = "tissue.code", sort = FALSE, all.x = TRUE)
         ret <- ret[match(barcode,ret$barcode),]
     }
@@ -763,62 +770,72 @@ expandBarcodeInfo <- function(barcode){
 
 getBarcodeDefinition <- function(type = "TCGA"){
     if(type == "TCGA"){
-        tissue.code <- c('01','02','03','04','05','06','07','08','09','10','11',
-                         '12','13','14','20','40','50','60','61')
-        shortLetterCode <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
-                             "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
-                             "CELL","XP","XCL")
+        tissue.code <- c(
+            '01','02','03','04','05','06','07','08','09','10','11',
+            '12','13','14','20','40','50','60','61'
+        )
+        shortLetterCode <- c(
+            "TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
+            "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
+            "CELL","XP","XCL"
+        )
 
-        tissue.definition <- c("Primary Tumor",
-                               "Recurrent Tumor",
-                               "Primary Blood Derived Cancer - Peripheral Blood",
-                               "Recurrent Blood Derived Cancer - Bone Marrow",
-                               "Additional - New Primary",
-                               "Metastatic",
-                               "Additional Metastatic",
-                               "Human Tumor Original Cells",
-                               "Primary Blood Derived Cancer - Bone Marrow",
-                               "Blood Derived Normal",
-                               "Solid Tissue Normal",
-                               "Buccal Cell Normal",
-                               "EBV Immortalized Normal",
-                               "Bone Marrow Normal",
-                               "Control Analyte",
-                               "Recurrent Blood Derived Cancer - Peripheral Blood",
-                               "Cell Lines",
-                               "Primary Xenograft Tissue",
-                               "Cell Line Derived Xenograft Tissue")
+        tissue.definition <- c(
+            "Primary Tumor",
+            "Recurrent Tumor",
+            "Primary Blood Derived Cancer - Peripheral Blood",
+            "Recurrent Blood Derived Cancer - Bone Marrow",
+            "Additional - New Primary",
+            "Metastatic",
+            "Additional Metastatic",
+            "Human Tumor Original Cells",
+            "Primary Blood Derived Cancer - Bone Marrow",
+            "Blood Derived Normal",
+            "Solid Tissue Normal",
+            "Buccal Cell Normal",
+            "EBV Immortalized Normal",
+            "Bone Marrow Normal",
+            "Control Analyte",
+            "Recurrent Blood Derived Cancer - Peripheral Blood",
+            "Cell Lines",
+            "Primary Xenograft Tissue",
+            "Cell Line Derived Xenograft Tissue")
         aux <- data.frame(tissue.code = tissue.code,shortLetterCode,tissue.definition)
     } else {
-        tissue.code <- c('01','02','03','04','05','06','07','08','09','10','11',
-                         '12','13','14','15','16','17','20','40','41','42','50','60','61','99')
 
-        tissue.definition <- c("Primary Tumor", # 01
-                               "Recurrent Tumor", # 02
-                               "Primary Blood Derived Cancer - Peripheral Blood", # 03
-                               "Recurrent Blood Derived Cancer - Bone Marrow", # 04
-                               "Additional - New Primary", # 05
-                               "Metastatic", # 06
-                               "Additional Metastatic", # 07
-                               "Tissue disease-specific post-adjuvant therapy", # 08
-                               "Primary Blood Derived Cancer - Bone Marrow", # 09
-                               "Blood Derived Normal", # 10
-                               "Solid Tissue Normal",  # 11
-                               "Buccal Cell Normal",   # 12
-                               "EBV Immortalized Normal", # 13
-                               "Bone Marrow Normal", # 14
-                               "Fibroblasts from Bone Marrow Normal", # 15
-                               "Mononuclear Cells from Bone Marrow Normal", # 16
-                               "Lymphatic Tissue Normal (including centroblasts)", # 17
-                               "Control Analyte", # 20
-                               "Recurrent Blood Derived Cancer - Peripheral Blood", # 40
-                               "Blood Derived Cancer- Bone Marrow, Post-treatment", # 41
-                               "Blood Derived Cancer- Peripheral Blood, Post-treatment", # 42
-                               "Cell line from patient tumor", # 50
-                               "Xenograft from patient not grown as intermediate on plastic tissue culture dish", # 60
-                               "Xenograft grown in mice from established cell lines", #61
-                               "Granulocytes after a Ficoll separation") # 99
-        aux <- DataFrame(tissue.code = tissue.code,tissue.definition)
+        tissue.code <- c(
+            '01','02','03','04','05','06','07','08','09','10','11',
+            '12','13','14','15','16','17','20','40','41','42','50','60','61','99'
+        )
+
+        tissue.definition <- c(
+            "Primary Tumor", # 01
+            "Recurrent Tumor", # 02
+            "Primary Blood Derived Cancer - Peripheral Blood", # 03
+            "Recurrent Blood Derived Cancer - Bone Marrow", # 04
+            "Additional - New Primary", # 05
+            "Metastatic", # 06
+            "Additional Metastatic", # 07
+            "Tissue disease-specific post-adjuvant therapy", # 08
+            "Primary Blood Derived Cancer - Bone Marrow", # 09
+            "Blood Derived Normal", # 10
+            "Solid Tissue Normal",  # 11
+            "Buccal Cell Normal",   # 12
+            "EBV Immortalized Normal", # 13
+            "Bone Marrow Normal", # 14
+            "Fibroblasts from Bone Marrow Normal", # 15
+            "Mononuclear Cells from Bone Marrow Normal", # 16
+            "Lymphatic Tissue Normal (including centroblasts)", # 17
+            "Control Analyte", # 20
+            "Recurrent Blood Derived Cancer - Peripheral Blood", # 40
+            "Blood Derived Cancer- Bone Marrow, Post-treatment", # 41
+            "Blood Derived Cancer- Peripheral Blood, Post-treatment", # 42
+            "Cell line from patient tumor", # 50
+            "Xenograft from patient not grown as intermediate on plastic tissue culture dish", # 60
+            "Xenograft grown in mice from established cell lines", #61
+            "Granulocytes after a Ficoll separation"
+        ) # 99
+        aux <- DataFrame(tissue.code = tissue.code, tissue.definition)
 
     }
     return(aux)
@@ -945,8 +962,8 @@ TCGAquery_recount2<-function(project, tissue=c()){
     tissue<-unlist(lapply(strsplit(tissue, " "), function(x) paste(x, collapse = "_")))
     Res<-list()
 
-    if(tolower(project)=="gtex"){
-        for(t_i in tissue){
+    if (tolower(project) == "gtex"){
+        for (t_i in tissue){
             if(t_i%in%tissuesGTEx){
                 con<-"http://duffel.rail.bio/recount/v2/SRP012682/rse_gene_"
                 con<-paste0(con,t_i,".Rdata")
@@ -1010,12 +1027,14 @@ GDCquery_ATAC_seq <- function(
     results$data_type <- "ATAC-seq"
     results$data_category <- "ATAC-seq"
     results$project <- "ATAC-seq"
-    ret <- data.frame(results=I(list(results)),
-                      tumor = I(list(tumor)),
-                      project = I(list("ATAC-seq")),
-                      data.type = I(list("ATAC-seq")),
-                      data.category = I(list("ATAC-seq")),
-                      legacy = I(list(FALSE)))
+    ret <- data.frame(
+        results=I(list(results)),
+        tumor = I(list(tumor)),
+        project = I(list("ATAC-seq")),
+        data.type = I(list("ATAC-seq")),
+        data.category = I(list("ATAC-seq")),
+        legacy = I(list(FALSE))
+    )
 
     return(ret)
 }

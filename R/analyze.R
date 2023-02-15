@@ -257,13 +257,15 @@ TCGAanalyze_Preprocessing <- function(
 #'
 #'  # If the groups are not specified group1 == group2 and all samples are used
 #'  \dontrun{
-#'  tabSurvKM <- TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
-#'                                      dataBRCAcomplete,
-#'                                      Genelist = rownames(dataBRCAcomplete),
-#'                                      Survresult = TRUE,
-#'                                      p.cut = 0.2,
-#'                                      ThreshTop = 0.67,
-#'                                      ThreshDown = 0.33)
+#'  tabSurvKM <- TCGAanalyze_SurvivalKM(
+#'    clinical_patient_Cancer,
+#'    dataBRCAcomplete,
+#'    Genelist = rownames(dataBRCAcomplete),
+#'    Survresult = TRUE,
+#'    p.cut = 0.2,
+#'     ThreshTop = 0.67,
+#'     ThreshDown = 0.33
+#'   )
 #' }
 TCGAanalyze_SurvivalKM <- function(
         clinical_patient,
@@ -359,9 +361,9 @@ TCGAanalyze_SurvivalKM <- function(
             samples_down_mRNA_selected <- names(mRNAselected_values_ordered[firstelementDOWN:numberOfSamples])
 
             # Which samples are in the intermediate group (above ThreshLow and below ThreshTop)
-            samples_UNCHANGED_mRNA_selected <- names(mRNAselected_values_newvector[which((mRNAselected_values_newvector) > mRNAselected_values_ordered_down &
-                                                                                             mRNAselected_values_newvector < mRNAselected_values_ordered_top
-            )])
+            samples_UNCHANGED_mRNA_selected <- names(mRNAselected_values_newvector[
+                which((mRNAselected_values_newvector) > mRNAselected_values_ordered_down &  mRNAselected_values_newvector < mRNAselected_values_ordered_top
+                )])
 
             cfu_onlyTOP <- cfu_complete[cfu_complete[, "bcr_patient_barcode"] %in% samples_top_mRNA_selected, ]
             cfu_onlyDOWN <- cfu_complete[cfu_complete[, "bcr_patient_barcode"] %in% samples_down_mRNA_selected, ]
@@ -1417,9 +1419,13 @@ TCGAanalyze_EAcomplete <- function(TFname, RegulonList) {
 #' \dontrun{
 #' EAGenes <- get("EAGenes")
 #' RegulonList <- rownames(dataDEGsFiltLevel)
-#' ResBP <- TCGAanalyze_EA(GeneName="DEA genes Normal Vs Tumor",
-#'                            RegulonList,DAVID_BP_matrix,
-#'                            EAGenes,GOtype = "DavidBP")
+#' ResBP <- TCGAanalyze_EA(
+#'   GeneName="DEA genes Normal Vs Tumor",
+#'   RegulonList = RegulonList,
+#'   TableEnrichment = DAVID_BP_matrix,
+#'    EAGenes = EAGenes,
+#'    GOtype = "DavidBP"
+#'  )
 #'}
 TCGAanalyze_EA <- function (
         GeneName,
@@ -1833,9 +1839,9 @@ gaiaCNVplot <- function (calls,  threshold = 0.01) {
     rownames(Calls) <- NULL
     Chromo <- Calls[, grep("chr", colnames(calls), ignore.case = TRUE)]
     Gains <- apply(Calls, 1, function(x)
-            ifelse(x[grep("aberration", colnames(calls), ignore.case = TRUE)] == 1, x["score"], 0))
+        ifelse(x[grep("aberration", colnames(calls), ignore.case = TRUE)] == 1, x["score"], 0))
     Losses <- apply(Calls, 1, function(x)
-            ifelse(x[grep("aberration", colnames(calls), ignore.case = TRUE)] == 0, x["score"], 0))
+        ifelse(x[grep("aberration", colnames(calls), ignore.case = TRUE)] == 0, x["score"], 0))
     plot(
         Gains,
         ylim = c(-max(Calls[, "score"] + 2), max(Calls[, "score"] + 2)),

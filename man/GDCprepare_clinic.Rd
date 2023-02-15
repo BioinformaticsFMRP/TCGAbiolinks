@@ -34,6 +34,7 @@ clinical <- GDCprepare_clinic(query,"patient")
 clinical.drug <- GDCprepare_clinic(query,"drug")
 clinical.radiation <- GDCprepare_clinic(query,"radiation")
 clinical.admin <- GDCprepare_clinic(query,"admin")
+\dontrun{
 query <- GDCquery(
    project = "TCGA-COAD",
    data.category = "Biospecimen",
@@ -46,4 +47,5 @@ clinical <- GDCprepare_clinic(query,"admin")
 clinical.drug <- GDCprepare_clinic(query,"sample")
 clinical.radiation <- GDCprepare_clinic(query,"portion")
 clinical.admin <- GDCprepare_clinic(query,"slide")
+}
 }

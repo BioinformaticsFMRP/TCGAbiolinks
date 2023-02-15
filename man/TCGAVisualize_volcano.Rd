@@ -103,6 +103,7 @@ TCGAVisualize_volcano(
     title = "Title example",
     xlab = expression(paste(Log[2], "FoldChange"))
 )
+\dontrun{
 beta_diff <- runif(200, -1, 1)
 fdr <- runif(200, 0.01, 1)
 TCGAVisualize_volcano(
@@ -113,7 +114,6 @@ TCGAVisualize_volcano(
     title = "Title example",
     xlab = expression(paste("DNA Methylation difference (", beta, "-values)"))
 )
-\dontrun{
 TCGAVisualize_volcano(
   x,
   y,

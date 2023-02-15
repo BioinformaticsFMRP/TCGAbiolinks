@@ -884,19 +884,23 @@ unlistlabels <- function(lab) {
 #' GDCdownload(query)
 #' mut <- GDCprepare(query)
 #' TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:10], rm.empty.columns = TRUE)
-#' TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:10],
-#'                  filename = "onco.pdf",
-#'                  color=c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown"))
+#' TCGAvisualize_oncoprint(
+#'   mut = mut, genes = mut$Hugo_Symbol[1:10],
+#'   filename = "onco.pdf",
+#'   color = c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown")
+#' )
 #' clin <- GDCquery_clinic("TCGA-ACC","clinical")
 #' clin <- clin[,c("bcr_patient_barcode","disease","gender","tumor_stage","race","vital_status")]
-#' TCGAvisualize_oncoprint(mut = mut, genes = mut$Hugo_Symbol[1:20],
-#'                 filename = "onco.pdf",
-#'                 annotation = clin,
-#'                 color=c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown"),
-#'                 rows.font.size=10,
-#'                 heatmap.legend.side = "right",
-#'                 dist.col = 0,
-#'                 label.font.size = 10)
+#' TCGAvisualize_oncoprint(
+#'    mut = mut, genes = mut$Hugo_Symbol[1:20],
+#'    filename = "onco.pdf",
+#'    annotation = clin,
+#'    color=c("background"="#CCCCCC","DEL"="purple","INS"="yellow","SNP"="brown"),
+#'    rows.font.size=10,
+#'    heatmap.legend.side = "right",
+#'    dist.col = 0,
+#'    label.font.size = 10
+#' )
 #' }
 #' @export
 #' @return A oncoprint plot
@@ -1431,6 +1435,7 @@ TCGAvisualize_oncoprint <- function(
 #'     title = "Title example",
 #'     xlab = expression(paste(Log[2], "FoldChange"))
 #' )
+#' \dontrun{
 #' beta_diff <- runif(200, -1, 1)
 #' fdr <- runif(200, 0.01, 1)
 #' TCGAVisualize_volcano(
@@ -1441,7 +1446,6 @@ TCGAvisualize_oncoprint <- function(
 #'     title = "Title example",
 #'     xlab = expression(paste("DNA Methylation difference (", beta, "-values)"))
 #' )
-#' \dontrun{
 #' TCGAVisualize_volcano(
 #'   x,
 #'   y,
