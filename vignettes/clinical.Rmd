@@ -278,7 +278,7 @@ Reference: [TCGA wiki](https://wiki.nci.nih.gov/display/TCGA/Microsatellite+data
 
 Level 3 data is included in BCR clinical-based submissions and can be downloaded as follows:
 
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval = F}
+```{r msi, results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval = F}
 query <- GDCquery(
     project = "TCGA-COAD", 
     data.category = "Other",
@@ -290,6 +290,7 @@ query <- GDCquery(
 GDCdownload(query)
 msi_results <- GDCprepare_clinic(query, "msi")
 ```
+
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
 msi_results %>% DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
@@ -308,19 +309,19 @@ query_legacy <- GDCquery(
 ) 
 
 # Tissue slide image files from harmonized database
-query.harmonized <- GDCquery(
+query_harmonized <- GDCquery(
     project = "TCGA-OV",
     data.category = "Biospecimen",
     data.type = 'Slide Image'
 )
 ```
 
-```{r  echo=TRUE, message=FALSE, warning=FALSE}
+```{r echo=TRUE, message=FALSE, warning=FALSE}
 query_legacy %>% 
     getResults %>% 
     DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 
-query.harmonized  %>% 
+query_harmonized  %>% 
     getResults %>% 
     head  %>% 
     DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
@@ -330,7 +331,7 @@ query.harmonized  %>%
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
 # Pathology report from harmonized portal 
-query.harmonized <- GDCquery(
+query_harmonized <- GDCquery(
     project = "TCGA-COAD", 
     data.category = "Biospecimen", 
     data.type = "Slide Image",
@@ -339,8 +340,8 @@ query.harmonized <- GDCquery(
 )  
 ```
 
-```{r  echo=TRUE, message=FALSE, warning=FALSE}
-query.harmonized  %>% 
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+query_harmonized  %>% 
     getResults %>% 
     head  %>% 
     DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
@@ -415,7 +416,7 @@ query %>%
 
 
 ## Clinical data (Biotab format)
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
+```{r biotab_legacy,results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
 # Clinical data
 query <- GDCquery(
     project = "TCGA-COAD", 
@@ -435,12 +436,12 @@ query %>%
 
 ```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE, eval = FALSE}
 GDCdownload(query)
-clinical.biotab <- GDCprepare(query)
+clinical_biotab <- GDCprepare(query)
 ```
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
-names(clinical.biotab)
-datatable(clinical.biotab$clinical_radiation_coad, options = list(scrollX = TRUE, keys = TRUE))
+names(clinical_biotab)
+datatable(clinical_biotab$clinical_radiation_coad, options = list(scrollX = TRUE, keys = TRUE))
 ```
 
 # Filter functions 
