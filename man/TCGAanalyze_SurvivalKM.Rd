@@ -72,15 +72,17 @@ from survival package
  group1 <- TCGAquery_SampleTypes(colnames(dataBRCAcomplete), typesample = c("NT"))
  group2 <- TCGAquery_SampleTypes(colnames(dataBRCAcomplete), typesample = c("TP"))
 
- tabSurvKM <- TCGAanalyze_SurvivalKM(clinical_patient_Cancer,
-                                     dataBRCAcomplete,
-                                     Genelist = rownames(dataBRCAcomplete),
-                                     Survresult = FALSE,
-                                     p.cut = 0.4,
-                                     ThreshTop = 0.67,
-                                     ThreshDown = 0.33,
-                                     group1 = group1, # Control group
-                                     group2 = group2) # Disease group
+ tabSurvKM <- TCGAanalyze_SurvivalKM(
+    clinical_patient = clinical_patient_Cancer,
+    dataGE = dataBRCAcomplete,
+    Genelist = rownames(dataBRCAcomplete),
+    Survresult = FALSE,
+    p.cut = 0.4,
+    ThreshTop = 0.67,
+    ThreshDown = 0.33,
+    group1 = group1, # Control group
+    group2 = group2
+  ) # Disease group
 
  # If the groups are not specified group1 == group2 and all samples are used
  \dontrun{
