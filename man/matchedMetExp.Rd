@@ -2,8 +2,7 @@
 % Please edit documentation in R/analyze.R
 \name{matchedMetExp}
 \alias{matchedMetExp}
-\title{Get GDC samples with both DNA methylation (HM450K) and Gene expression data from
-GDC databse}
+\title{Get GDC primary tumors samples with both DNA methylation (HM450K) and Gene expression data}
 \usage{
 matchedMetExp(project, legacy = FALSE, n = NULL)
 }
@@ -18,8 +17,8 @@ matchedMetExp(project, legacy = FALSE, n = NULL)
 A vector of barcodes
 }
 \description{
-For a given TCGA project it gets the  samples (barcode) with both DNA methylation and Gene expression data
-from GDC database
+For a given TCGA project it gets the  primary tumors samples (barcode) with both
+DNA methylation and Gene expression data from GDC database
 }
 \examples{
 # Get ACC samples with both  DNA methylation (HM450K) and gene expression aligned to hg19

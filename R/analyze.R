@@ -1981,11 +1981,10 @@ getAdjacencyBiogrid <- function(tmp.biogrid, names.genes = NULL) {
     return(mat.biogrid)
 }
 
-#' Get GDC samples with both DNA methylation (HM450K) and Gene expression data from
-#' GDC databse
+#' @title Get GDC primary tumors samples with both DNA methylation (HM450K) and Gene expression data
 #' @description
-#' For a given TCGA project it gets the  samples (barcode) with both DNA methylation and Gene expression data
-#' from GDC database
+#' For a given TCGA project it gets the  primary tumors samples (barcode) with both
+#' DNA methylation and Gene expression data from GDC database
 #' @param project A GDC project
 #' @param n Number of samples to return. If NULL return all (default)
 #' @param legacy Access legacy (hg19) or harmonized database (hg38).
@@ -1994,7 +1993,11 @@ getAdjacencyBiogrid <- function(tmp.biogrid, names.genes = NULL) {
 #' @examples
 #' # Get ACC samples with both  DNA methylation (HM450K) and gene expression aligned to hg19
 #' samples <- matchedMetExp("TCGA-UCS", legacy = TRUE)
-matchedMetExp <- function(project, legacy = FALSE, n = NULL) {
+matchedMetExp <- function(
+        project,
+        legacy = FALSE,
+        n = NULL
+) {
     if (legacy) {
         # get primary solid tumor samples: DNA methylation
         message("Download DNA methylation information")
@@ -2033,18 +2036,24 @@ matchedMetExp <- function(project, legacy = FALSE, n = NULL) {
             project = project,
             data.category = "Transcriptome Profiling",
             data.type = "Gene Expression Quantification",
-            workflow.type = "HTSeq - Counts"
+            workflow.type = "STAR - Counts"
         )
 
-
     }
-    met450k.tp <-  met450k$results[[1]]$cases
+
     # Get patients with samples in both platforms
-    exp.tp <-  exp$results[[1]]$cases
+    met450k_tp <- met450k$results[[1]]$cases
+    exp_tp <- exp$results[[1]]$cases
+
     patients <-
-        unique(substr(exp.tp, 1, 15)[substr(exp.tp, 1, 12) %in% substr(met450k.tp, 1, 12)])
-    if (!is.null(n))
+        substr(exp_tp, 1, 15)[
+            substr(exp_tp, 1, 15) %in% substr(met450k_tp, 1, 15)
+        ] |> unique()
+
+    if (!is.null(n)) {
         patients <- patients[1:n] # get only n samples
+    }
+
     return(patients)
 }
 
