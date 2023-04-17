@@ -171,15 +171,41 @@ TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
 #' @importFrom data.table rbindlist as.data.table
 #' @importFrom jsonlite fromJSON
 #' @examples
-#' clinical <- GDCquery_clinic(project = "TCGA-ACC", type = "clinical", save.csv = TRUE)
-#' clinical <- GDCquery_clinic(project = "TCGA-ACC", type = "biospecimen", save.csv = TRUE)
+#' clinical <- GDCquery_clinic(
+#'    project = "TCGA-ACC",
+#'    type = "clinical",
+#'    save.csv = FALSE
+#'  )
+#' clinical <- GDCquery_clinic(
+#'    project = "TCGA-ACC",
+#'    type = "biospecimen",
+#'    save.csv = FALSE
+#' )
 #' \dontrun{
-#' clinical_cptac_3 <- GDCquery_clinic(project = "CPTAC-3", type = "clinical")
-#' clinical_cptac_2 <- GDCquery_clinic(project = "CPTAC-2", type = "clinical")
-#' clinical_HCMI_CMDC <- GDCquery_clinic(project = "HCMI-CMDC", type = "clinical")
-#' clinical_GCI_HTMCP_CC <- GDCquery_clinic(project = "CGCI-HTMCP-CC", type = "clinical")
-#' clinical <- GDCquery_clinic(project = "NCICCR-DLBCL", type = "clinical")
-#' clinical <- GDCquery_clinic(project = "ORGANOID-PANCREATIC", type = "clinical")
+#' clinical_cptac_3 <- GDCquery_clinic(
+#'    project = "CPTAC-3",
+#'    type = "clinical"
+#' )
+#' clinical_cptac_2 <- GDCquery_clinic(
+#'    project = "CPTAC-2",
+#'    type = "clinical"
+#' )
+#' clinical_HCMI_CMDC <- GDCquery_clinic(
+#'    project = "HCMI-CMDC",
+#'    type = "clinical"
+#' )
+#' clinical_GCI_HTMCP_CC <- GDCquery_clinic(
+#'    project = "CGCI-HTMCP-CC",
+#'    type = "clinical"
+#' )
+#' clinical <- GDCquery_clinic(
+#'    project = "NCICCR-DLBCL",
+#'    type = "clinical"
+#' )
+#' clinical <- GDCquery_clinic(
+#'    project = "ORGANOID-PANCREATIC",
+#'    type = "clinical"
+#' )
 #' }
 #' @return A data frame with the clinical information
 #' @author Tiago Chedraoui Silva
@@ -190,9 +216,14 @@ GDCquery_clinic <- function(
 ){
     checkProjectInput(project)
 
-    if (length(project) > 1) stop("Please, project should be only one valid project")
+    if (length(project) > 1) {
+        stop("Please, project should be only one valid project")
+    }
 
-    if (!grepl("clinical|Biospecimen",type,ignore.case = TRUE)) stop("Type must be clinical or Biospecimen")
+    if (!grepl("clinical|Biospecimen",type,ignore.case = TRUE)) {
+        stop("Type must be clinical or Biospecimen")
+    }
+
     baseURL <- "https://api.gdc.cancer.gov/cases/?"
     options.pretty <- "pretty=true"
 
@@ -590,10 +621,7 @@ GDCprepare_clinic <- function(
     }
 
     # Converting factor to numeric and double
-    out <- clin %>%
-        dplyr::mutate_all(
-            .funs = ~ type.convert(as.character(.), as.is = TRUE, numerals = "warn.loss")
-        )
+    out <- clin |> type.convert(as.is = TRUE, numerals = "warn.loss")
 
     # Change columns back to factor
     for (i in colnames(out)[!grepl("has_",colnames(out))]) {
