@@ -6,19 +6,19 @@ vignette: >
     %\VignetteEngine{knitr::rmarkdown}
     \usepackage[utf8]{inputenc}
 ---
-  
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(dpi = 300)
 knitr::opts_chunk$set(cache=FALSE)
 ```
-  
+
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 library(TCGAbiolinks)
 library(SummarizedExperiment)
 library(dplyr)
 library(DT)
 ```
-  
+
 
 TCGAbiolinks retrieved molecular subtypes information from TCGA samples.
 The functions `PanCancerAtlas_subtypes` and `TCGAquery_subtype` can be used to get the information tables.
@@ -34,10 +34,12 @@ Synapse has published a single file with all available molecular subtypes that h
 
 ```{r message=FALSE, warning=FALSE}
 subtypes <- PanCancerAtlas_subtypes()
-DT::datatable(subtypes,
-             filter = 'top',
-             options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),
-             rownames = FALSE)
+DT::datatable(
+    data = subtypes,
+    filter = 'top',
+    options = list(scrollX = TRUE, keys = TRUE, pageLength = 5),
+    rownames = FALSE
+)
 ```
 
 The columns "Subtype_Selected" was selected as most prominent subtype classification (from the other columns)
@@ -105,18 +107,18 @@ These subtypes will be automatically added in the summarizedExperiment
 object through GDCprepare. But you can also use the `TCGAquery_subtype` function
 to retrieve this information.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 lgg.gbm.subtype <- TCGAquery_subtype(tumor = "lgg")
 ```
 
 A subset of the LGG subytpe is shown below:
 ```{r, eval = TRUE, echo = FALSE}
 datatable(
-  lgg.gbm.subtype[1:10,],
-  caption = "Table with LGG molecular subtypes from TCGAquery_subtype",
-  filter = 'top',
-  options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-  rownames = FALSE
+    lgg.gbm.subtype[1:10,],
+    caption = "Table with LGG molecular subtypes from TCGAquery_subtype",
+    filter = 'top',
+    options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
+    rownames = FALSE
 )
 ```
 
