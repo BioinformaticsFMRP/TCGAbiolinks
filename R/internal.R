@@ -67,107 +67,52 @@ checkProjectInput <- function(project){
     }
 }
 
-checkLegacyPlatform <- function(project,data.category, legacy = FALSE){
-    project.summary <- getProjectSummary(project, legacy)
-    if(missing(data.category)) {
-        print(knitr::kable(project.summary$data_categories))
-        stop("Please set a data.category argument from the column data_category above")
-    }
-    if(!(data.category %in% project.summary$data_categories$data_category)) {
-        print(knitr::kable(project.summary$data_categories))
-        stop("Please set a valid data.category argument from the column data_category above")
+checkDataTypeInput <- function(data.type){
+
+    harmonized.data.type <- c(
+        "Aggregated Somatic Mutation",
+        "Aligned Reads",
+        "Gene Expression Quantification",
+        "Raw CGI Variant",
+        "Methylation Beta Value",
+        "Differential Gene Expression",
+        "Splice Junction Quantification",
+        "Protein Expression Quantification",
+        "Annotated Somatic Mutation",
+        "Raw Simple Somatic Mutation",
+        "Masked Somatic Mutation",
+        "Copy Number Segment",
+        "Masked Intensities",
+        "Allele-specific Copy Number Segment",
+        "Masked Copy Number Segment",
+        "Isoform Expression Quantification",
+        "miRNA Expression Quantification",
+        "Gene Level Copy Number",
+        "Biospecimen Supplement",
+        "Gene Level Copy Number Scores",
+        "Protein Expression Quantification",
+        "Clinical Supplement",
+        "Single Cell Analysis",
+        "Masked Somatic Mutation",
+        "Slide Image"
+    )
+
+    if (!data.type %in% harmonized.data.type) {
+        print(knitr::kable(as.data.frame(sort(harmonized.data.type))))
+        stop("Please set a data.type argument from the column harmonized.data.type above")
     }
 }
 
-checkDataTypeInput <- function(legacy, data.type){
-    if(legacy){
-        legacy.data.type <- c("Copy number segmentation",
-                              "Raw intensities",
-                              "Aligned reads",
-                              "Copy number estimate",
-                              "Simple nucleotide variation",
-                              "Gene expression quantification",
-                              "Coverage WIG",
-                              "miRNA gene quantification",
-                              "Genotypes",
-                              "miRNA isoform quantification",
-                              "Normalized copy numbers",
-                              "Isoform expression quantification",
-                              "Normalized intensities",
-                              "Tissue slide image",
-                              "Exon quantification",
-                              "Exon junction quantification",
-                              "Methylation beta value",
-                              "Unaligned reads",
-                              "Diagnostic image",
-                              "CGH array QC",
-                              "Biospecimen Supplement",
-                              "Pathology report",
-                              "Clinical Supplement",
-                              "Intensities",
-                              "Protein expression quantification",
-                              "Microsatellite instability",
-                              "Structural variation",
-                              "Auxiliary test",
-                              "Copy number QC metrics",
-                              "Intensities Log2Ratio",
-                              "Methylation array QC metrics",
-                              "Clinical data",
-                              "Copy number variation",
-                              "ABI sequence trace",
-                              "Protein Expression Quantification",
-                              "Biospecimen data",
-                              "Simple somatic mutation",
-                              "Bisulfite sequence alignment",
-                              "Methylation percentage",
-                              "Sequencing tag",
-                              "Sequencing tag counts",
-                              "LOH")
-        if(!data.type %in% legacy.data.type) {
-            print(knitr::kable(as.data.frame(sort(legacy.data.type))))
-            stop("Please set a data.type argument from the column legacy.data.type above")
-        }
-    } else {
-        harmonized.data.type <- c(
-            "Aggregated Somatic Mutation",
-            "Aligned Reads",
-            "Gene Expression Quantification",
-            "Raw CGI Variant",
-            "Methylation Beta Value",
-            "Differential Gene Expression",
-            "Splice Junction Quantification",
-            "Protein Expression Quantification",
-            "Annotated Somatic Mutation",
-            "Raw Simple Somatic Mutation",
-            "Masked Somatic Mutation",
-            "Copy Number Segment",
-            "Masked Intensities",
-            "Allele-specific Copy Number Segment",
-            "Masked Copy Number Segment",
-            "Isoform Expression Quantification",
-            "miRNA Expression Quantification",
-            "Gene Level Copy Number",
-            "Biospecimen Supplement",
-            "Gene Level Copy Number Scores",
-            "Protein Expression Quantification",
-            "Clinical Supplement",
-            "Single Cell Analysis",
-            "Masked Somatic Mutation",
-            "Slide Image")
-        if(!data.type %in% harmonized.data.type) {
-            print(knitr::kable(as.data.frame(sort(harmonized.data.type))))
-            stop("Please set a data.type argument from the column harmonized.data.type above")
-        }
-    }
-}
+checkDataCategoriesInput <- function(project,data.category){
 
-checkDataCategoriesInput <- function(project,data.category, legacy = FALSE){
     for(proj in project){
-        project.summary <- getProjectSummary(proj, legacy)
+
+        project.summary <- getProjectSummary(proj)
         if(missing(data.category)) {
             print(knitr::kable(project.summary$data_categories))
             stop("Please set a data.category argument from the column data_category above")
         }
+
         if(!(data.category %in% project.summary$data_categories$data_category)) {
             print(knitr::kable(project.summary$data_categories))
             stop("Please set a valid data.category argument from the column data_category above. We could not validade the data.category for project ", proj)
@@ -618,13 +563,10 @@ get.mutation <- function(
     if(missing(genes)) stop("Argument genes is missing")
 
     # Get mutation annotation file
-    library(maftools)
-    library(dplyr)
     query <- GDCquery(
         project = project,
         data.category = "Simple Nucleotide Variation",
         access = "open",
-        legacy = FALSE,
         data.type = "Masked Somatic Mutation",
         workflow.type = "Aliquot Ensemble Somatic Variant Merging and Masking"
     )
@@ -638,8 +580,9 @@ get.mutation <- function(
         unlist(
             sapply(
                 mutant_variant_classification,
-                function(x) grep(x,maf$Variant_Classification,
-                                 ignore.case = TRUE)
+                function(x) {
+                    grep(x,maf$Variant_Classification,ignore.case = TRUE)
+                }
             )
         )
     )
@@ -648,8 +591,10 @@ get.mutation <- function(
     mut <- NULL
     for(i in genes) {
         if(!i %in% maf$Hugo_Symbol) next
-        aux <- data.frame(patient = substr(unique(maf[i == maf$Hugo_Symbol,]$Tumor_Sample_Barcode),1,15),
-                          mut = TRUE)
+        aux <- data.frame(
+            patient = substr(unique(maf[i == maf$Hugo_Symbol,]$Tumor_Sample_Barcode),1,15),
+            mut = TRUE
+        )
         colnames(aux)[2] <- paste0("mut_hg38_",i)
         if(is.null(mut)) {
             mut <- aux
@@ -668,6 +613,7 @@ get.mutation <- function(
 
     return(mut)
 }
+
 get.mut.gistc <- function(
         project,
         genes,
@@ -694,6 +640,7 @@ get.mut.gistc <- function(
     } else if(is.null(mut) & !is.null(cnv)) {
         return(cnv)
     }
+
     return(NULL)
 }
 get.mut.gistc.information <- function(

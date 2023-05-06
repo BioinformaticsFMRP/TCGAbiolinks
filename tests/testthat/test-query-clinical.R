@@ -11,7 +11,7 @@ test_that("TCGAquery_SampleTypes returns the correct barcodes", {
 
 test_that("GDCquery_clinic populates correctly the data", {
     skip_on_bioc()
-    results <- GDCquery_clinic( "BEATAML1.0-COHORT")
+    results <- GDCquery_clinic(project = "BEATAML1.0-COHORT")
     results.2028 <- results[results$submitter_id == "2028",]
     expect_equal(results.2028$vital_status,"Alive")
     expect_true(
@@ -27,7 +27,7 @@ test_that("GDCquery_clinic populates correctly the data", {
     expect_equal(results.42$ethnicity,"not hispanic or latino")
     expect_equal(as.integer(results.2028$age_at_diagnosis %>% as.numeric() / 365.25),56)
 
-    results <- GDCquery_clinic( "TCGA-LUAD")
+    results <- GDCquery_clinic(project = "TCGA-LUAD")
     results.sample <- results[results$submitter_id == "TCGA-80-5608",]
     expect_equal(results.sample$vital_status,"Alive")
     expect_equal(results.sample$gender,"female")

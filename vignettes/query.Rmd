@@ -18,8 +18,6 @@ knitr::opts_knit$set(progress = FALSE)
 
 
 **TCGAbiolinks** has provided a few functions to search GDC database.
-This section starts by explaining the different GDC sources (Harmonized and Legacy Archive), followed by some examples
-how to access them.
 
 
 ---
@@ -32,23 +30,6 @@ library(DT)
 
 
 #  Useful information
-
-<div class="panel panel-info">
-<div class="panel-heading">Different sources: Legacy vs Harmonized</div>
-<div class="panel-body">
-
-
-There are two available sources to download GDC data using TCGAbiolinks:
-
-- GDC Legacy Archive : provides access to an unmodified copy of data that was previously stored in
-[CGHub](https://cghub.ucsc.edu/) and in the TCGA Data Portal hosted by the TCGA Data Coordinating Center (DCC), in which uses
-as references GRCh37 (hg19) and GRCh36 (hg18).
-- GDC harmonized database: data available was harmonized against GRCh38 (hg38) using GDC Bioinformatics Pipelines
-which provides methods to the standardization of biospecimen and
-clinical data.
-
-</div>
-</div>
 
 
 <div class="panel panel-info">
@@ -79,7 +60,6 @@ with the following arguments:
 | data.category 	| A valid project (see list with TCGAbiolinks:::getProjectSummary(project)) 	|  	|
 | data.type 	| A data type to filter the files to download 	|  	|
 | workflow.type 	| GDC workflow type 	|  	|
-| legacy 	| Search in the legacy repository 	|  	|
 | access 	| Filter by access type. Possible values: controlled, open 	|  	|
 | platform 	| Example: 	|  	|
 |  	| CGH- 1x1M_G4447A 	| IlluminaGA_RNASeqV2 	|
@@ -107,7 +87,7 @@ with the following arguments:
 |  	| IlluminaHiSeq_RNASeqV2 	| Mixed_DNASeq_Cont 	|
 | file.type 	| To be used in the legacy database for some platforms, to define which file types to be used. 	|  	|
 | barcode 	| A list of barcodes to filter the files to download 	|  	|
-| experimental.strategy 	| Filter to experimental strategy. Harmonized: WXS, RNA-Seq, miRNA-Seq, Genotyping Array. Legacy: WXS, RNA-Seq, miRNA-Seq, Genotyping Array, DNA-Seq, Methylation array, Protein expression array, WXS,CGH array, VALIDATION, Gene expression array,WGS, MSI-Mono-Dinucleotide Assay, miRNA expression array, Mixed strategies, AMPLICON, Exon array, Total RNA-Seq, Capillary sequencing, Bisulfite-Seq 	|  	|
+| experimental.strategy 	| Filter to experimental strategy. Harmonized: WXS, RNA-Seq, miRNA-Seq, Genotyping Array. |  	|
 | sample.type 	| A sample type to filter the files to download 	|  	|
 
 
@@ -138,7 +118,7 @@ datatable(
 The other fields (data.category, data.type, workflow.type, platform, file.type) can be found below. 
 Please, note that these tables are still incomplete.
 
-## Harmonized data options (`legacy = FALSE`)
+## Harmonized data options 
 
 ```{r, echo=FALSE}
 datatable(
@@ -149,21 +129,12 @@ datatable(
 )
 ```
 
-## Legacy archive data  options (`legacy = TRUE`)
-```{r, echo=FALSE}
-datatable(
-    readr::read_csv("https://docs.google.com/spreadsheets/d/1f98kFdj9mxVDc1dv4xTZdx8iWgUiDYO-qiFJINvmTZs/export?format=csv&gid=1817673686",col_types = readr::cols()),
-    filter = 'top',
-    options = list(scrollX = TRUE, keys = TRUE, pageLength = 40), 
-    rownames = FALSE
-)
-```
 
 # Harmonized database examples
 
 ## DNA methylation data: Recurrent tumor samples
 
-In this example we will access the harmonized database (`legacy = FALSE`) 
+In this example we will access the harmonized database
 and search for all DNA methylation data for recurrent glioblastoma multiform (GBM) 
 and low grade gliomas (LGG) samples.
 
@@ -172,7 +143,6 @@ and low grade gliomas (LGG) samples.
 query <- GDCquery(
     project = c("TCGA-GBM", "TCGA-LGG"),
     data.category = "DNA Methylation",
-    legacy = FALSE,
     platform = c("Illumina Human Methylation 450"),
     sample.type = "Recurrent Tumor"
 )
@@ -186,19 +156,18 @@ datatable(
 
 ## Samples with DNA methylation and gene expression data
 
-In this example we will access the harmonized database (`legacy = FALSE`) 
+In this example we will access the harmonized database 
 and search for all patients with DNA methylation (platform HumanMethylation450k) and gene expression data
 for Colon Adenocarcinoma tumor (TCGA-COAD).
 
 
 ```{r message=FALSE, warning = FALSE, eval = FALSE}
-query.met <- GDCquery(
+query_met <- GDCquery(
     project = "TCGA-COAD",
     data.category = "DNA Methylation",
-    legacy = FALSE,
     platform = c("Illumina Human Methylation 450")
 )
-query.exp <- GDCquery(
+query_exp <- GDCquery(
     project = "TCGA-COAD",
     data.category = "Transcriptome Profiling",
     data.type = "Gene Expression Quantification", 
@@ -207,20 +176,19 @@ query.exp <- GDCquery(
 
 # Get all patients that have DNA methylation and gene expression.
 common.patients <- intersect(
-    substr(getResults(query.met, cols = "cases"), 1, 12),
-    substr(getResults(query.exp, cols = "cases"), 1, 12)
+    substr(getResults(query_met, cols = "cases"), 1, 12),
+    substr(getResults(query_exp, cols = "cases"), 1, 12)
 )
 
 # Only seelct the first 5 patients
-query.met <- GDCquery(
+query_met <- GDCquery(
     project = "TCGA-COAD",
     data.category = "DNA Methylation",
-    legacy = FALSE,
     platform = c("Illumina Human Methylation 450"),
     barcode = common.patients[1:5]
 )
 
-query.exp <- GDCquery(
+query_exp <- GDCquery(
     project = "TCGA-COAD",
     data.category = "Transcriptome Profiling",
     data.type = "Gene Expression Quantification", 
@@ -231,13 +199,13 @@ query.exp <- GDCquery(
 
 ```{r results_matched, message=FALSE, warning=FALSE, eval = FALSE}
 datatable(
-    getResults(query.met, cols = c("data_type","cases")),
+    getResults(query_met, cols = c("data_type","cases")),
     filter = 'top',
     options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
     rownames = FALSE
 )
 datatable(
-    getResults(query.exp, cols = c("data_type","cases")), 
+    getResults(query_exp, cols = c("data_type","cases")), 
     filter = 'top',
     options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
     rownames = FALSE
@@ -327,98 +295,13 @@ datatable(
 ```
 
 
-# Legacy archive examples
-
-## DNA methylation
-
-### Array-based assays
-
-This example shows how the user can search for  glioblastoma multiform (GBM) 
-and DNA methylation data 
-for platform Illumina Human Methylation 450 and Illumina Human Methylation 27.
-
-```{r message=FALSE, warning=FALSE}
-query <- GDCquery(
-    project = c("TCGA-GBM"),
-    legacy = TRUE,
-    data.category = "DNA methylation",
-    platform = c("Illumina Human Methylation 450", "Illumina Human Methylation 27")
-)
-datatable(
-    getResults(query, rows = 1:100), 
-    filter = 'top',
-    options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-    rownames = FALSE
-)
-```
-
-### whole-genome bisulfite sequencing (WGBS) 
-
-```{r message = FALSE, warning = FALSE, eval = FALSE}
-
-query <- GDCquery(
-    project = c("TCGA-LUAD"),
-    legacy = TRUE,
-    data.category = "DNA methylation",
-    data.type = "Methylation percentage",
-    experimental.strategy = "Bisulfite-Seq"
-)
-
-# VCF - controlled data
-query <- GDCquery(
-    project = c("TCGA-LUAD"),
-    legacy = TRUE,
-    data.category = "DNA methylation",
-    data.type = "Bisulfite sequence alignment",
-    experimental.strategy = "Bisulfite-Seq"
-)
-
-
-# WGBS BAM files - controlled data
-query <- GDCquery(
-    project = c("TCGA-LUAD"),
-    legacy = TRUE,
-    data.type = "Aligned reads",
-    data.category = "Raw sequencing data",
-    experimental.strategy = "Bisulfite-Seq"
-)
-```
-
-
-## Gene expression
-
-This exmaple shows how the user can search for  glioblastoma multiform (GBM) 
-gene expression data with the normalized results for expression of a gene. 
-For more information about file.types check [GDC TCGA file types](https://gdc.cancer.gov/resources-tcga-users/legacy-archive-tcga-tag-descriptions)
-
-```{r message=FALSE, warning=FALSE}
-# Gene expression aligned against hg19.
-query.exp.hg19 <- GDCquery(
-    project = "TCGA-GBM",
-    data.category = "Gene expression",
-    data.type = "Gene expression quantification",
-    platform = "Illumina HiSeq", 
-    file.type  = "normalized_results",
-    experimental.strategy = "RNA-Seq",
-    barcode = c("TCGA-14-0736-02A-01R-2005-01", "TCGA-06-0211-02A-02R-2005-01"),
-    legacy = TRUE
-)
-
-datatable(
-    getResults(query.exp.hg19), 
-    filter = 'top',
-    options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-    rownames = FALSE
-)
-```
-
 # Get Manifest file
 
 If you want to get the manifest file from the query object you can use the function *getManifest*. If you 
-set save to TRUEm a txt file that can be used with GDC-client Data transfer tool (DTT) or with its GUI version [ddt-ui](https://github.com/NCI-GDC/dtt-ui) will be created.
+set save to `TRUE` a txt file that can be used with GDC-client Data transfer tool (DTT) or with its GUI version [ddt-ui](https://github.com/NCI-GDC/dtt-ui) will be created.
 
 ```{r message=FALSE, warning=FALSE}
-getManifest(query.exp.hg19,save = FALSE) 
+getManifest(query,save = FALSE) 
 ```
 
 # ATAC-seq data
@@ -440,10 +323,10 @@ datatable(
 You can use the function `GDCquery_ATAC_seq` filter the manifest table and use `GDCdownload` to save the data locally.
 ```{r message=FALSE, warning=FALSE,eval = FALSE}
 query <- TCGAbiolinks:::GDCquery_ATAC_seq(file.type = "rds") 
-GDCdownload(query,method = "client")
+GDCdownload(query, method = "client")
 
 query <- TCGAbiolinks:::GDCquery_ATAC_seq(file.type = "bigWigs") 
-GDCdownload(query,method = "client")
+GDCdownload(query, method = "client")
 
 ```
 

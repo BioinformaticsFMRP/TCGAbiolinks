@@ -34,15 +34,6 @@ Uses GDC API or GDC transfer tool to download gdc data
   The data from query will be save in a folder: project/data.category
 }
 \examples{
-query <- GDCquery(
-  project = "TCGA-ACC",
-  data.category =  "Copy number variation",
-  legacy = TRUE,
-  file.type = "hg19.seg",
-  barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01", "TCGA-OR-A5LJ-10A-01D-A29K-01")
- )
-# data will be saved in  GDCdata/TCGA-ACC/legacy/Copy_number_variation/Copy_number_segmentation
-GDCdownload(query, method = "api")
 \dontrun{
     # Download clinical data from XML
     query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical")
@@ -57,14 +48,14 @@ GDCdownload(query, method = "api")
     # data will be saved in:
     # example_data_dir/TARGET-AML/harmonized/Transcriptome_Profiling/miRNA_Expression_Quantification
     GDCdownload(query, method = "client", directory = "example_data_dir")
-    acc.gbm <- GDCquery(
+    query_acc_gbm <- GDCquery(
         project =  c("TCGA-ACC","TCGA-GBM"),
         data.category = "Transcriptome Profiling",
         data.type = "Gene Expression Quantification",
         workflow.type = "STAR - Counts"
     )
     GDCdownload(
-       query = acc.gbm,
+       query = query_acc_gbm,
        method = "api",
        directory = "example",
        files.per.chunk = 50

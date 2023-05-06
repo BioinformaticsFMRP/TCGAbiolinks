@@ -91,7 +91,7 @@ GDCprepare <- function(
         stop("To remove the files, please set save to TRUE. Otherwise, the data will be lost")
     }
     # We save the files in project/source/data.category/data.type/file_id/file_name
-    source <- ifelse(query$legacy,"legacy","harmonized")
+    source <- "harmonized"
     files <- file.path(
         query$results[[1]]$project, source,
         gsub(" ","_",query$results[[1]]$data_category),
@@ -174,8 +174,7 @@ GDCprepare <- function(
             files = files,
             cases = cases,
             summarizedExperiment = summarizedExperiment,
-            platform =  unique(query$results[[1]]$platform),
-            legacy = query$legacy
+            platform =  unique(query$results[[1]]$platform)
         )
     }  else if (grepl("Raw intensities|Masked Intensities",query$data.type, ignore.case = TRUE)) {
         # preparing IDAT files
@@ -183,8 +182,7 @@ GDCprepare <- function(
             files = files,
             barcode = cases,
             summarizedExperiment = summarizedExperiment,
-            platform =  unique(query$results[[1]]$platform),
-            legacy = query$legacy
+            platform =  unique(query$results[[1]]$platform)
         )
     }  else if (grepl("Proteome Profiling",query$data.category,ignore.case = TRUE)) {
 
@@ -199,7 +197,7 @@ GDCprepare <- function(
 
     }  else if (grepl("Simple Nucleotide Variation",query$data.category,ignore.case = TRUE)) {
 
-        if(grepl("Masked Somatic Mutation",query$results[[1]]$data_type[1],ignore.case = TRUE) | source == "legacy"){
+        if(grepl("Masked Somatic Mutation",query$results[[1]]$data_type[1],ignore.case = TRUE)){
             data <- readSimpleNucleotideVariationMaf(files)
         }
 
@@ -212,7 +210,7 @@ GDCprepare <- function(
                 files = files,
                 cases = cases,
                 summarizedExperiment = summarizedExperiment,
-                genome = ifelse(query$legacy,"hg19","hg38"),
+                genome = "hg38",
                 experimental.strategy = unique(query$results[[1]]$experimental_strategy)
             )
 
@@ -221,7 +219,7 @@ GDCprepare <- function(
                 files = files,
                 cases = cases,
                 summarizedExperiment = FALSE,
-                genome = ifelse(query$legacy,"hg19","hg38"),
+                genome = "hg38",
                 experimental.strategy = unique(query$results[[1]]$experimental_strategy)
             )
 
@@ -713,14 +711,13 @@ readIDATDNAmethylation <- function(
         files,
         barcode,
         summarizedExperiment,
-        platform,
-        legacy
+        platform
 ) {
 
     check_package("sesame")
 
     # Check if moved files would be moved outside of scope folder, if so, path doesn't change
-    moved.files <- sapply(files,USE.NAMES=FALSE,function(x){
+    moved.files <- sapply(files,USE.NAMES = FALSE,function(x){
         if (grepl("Raw_intensities|Masked_Intensities",dirname(dirname(x)))) {
             return(file.path(dirname(dirname(x)), basename(x)))
         }
@@ -753,7 +750,7 @@ readIDATDNAmethylation <- function(
 
         betas <- makeSEFromDNAMethylationMatrix(
             betas = betas,
-            genome = ifelse(legacy,"hg19","hg38"),
+            genome ="hg38",
             met.platform = platform
         )
         colData(betas) <- DataFrame(colDataPrepare(colnames(betas)))
@@ -774,8 +771,7 @@ readDNAmethylation <- function(
         files,
         cases,
         summarizedExperiment = TRUE,
-        platform,
-        legacy
+        platform
 ){
     if(length(platform) > 1){
 
@@ -847,7 +843,7 @@ readDNAmethylation <- function(
 
             df <- makeSEFromDNAMethylationMatrix(
                 betas = df,
-                genome = ifelse(legacy,"hg19","hg38"),
+                genome = "hg38",
                 met.platform = platform
             )
         }
@@ -1056,31 +1052,37 @@ colDataPrepareTCGA <- function(barcode){
     # For the moment this will work only for TCGA Data
     # We should search what TARGET data means
 
-    code <- c('01','02','03','04','05','06','07','08','09','10','11',
-              '12','13','14','20','40','50','60','61')
-    shortLetterCode <- c("TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
-                         "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
-                         "CELL","XP","XCL")
+    code <- c(
+        '01','02','03','04','05','06','07','08','09','10','11',
+        '12','13','14','20','40','50','60','61'
+    )
+    shortLetterCode <- c(
+        "TP","TR","TB","TRBM","TAP","TM","TAM","THOC",
+        "TBM","NB","NT","NBC","NEBV","NBM","CELLC","TRB",
+        "CELL","XP","XCL"
+    )
 
-    definition <- c("Primary solid Tumor", # 01
-                    "Recurrent Solid Tumor", # 02
-                    "Primary Blood Derived Cancer - Peripheral Blood", # 03
-                    "Recurrent Blood Derived Cancer - Bone Marrow", # 04
-                    "Additional - New Primary", # 05
-                    "Metastatic", # 06
-                    "Additional Metastatic", # 07
-                    "Human Tumor Original Cells", # 08
-                    "Primary Blood Derived Cancer - Bone Marrow", # 09
-                    "Blood Derived Normal", # 10
-                    "Solid Tissue Normal",  # 11
-                    "Buccal Cell Normal",   # 12
-                    "EBV Immortalized Normal", # 13
-                    "Bone Marrow Normal", # 14
-                    "Control Analyte", # 20
-                    "Recurrent Blood Derived Cancer - Peripheral Blood", # 40
-                    "Cell Lines", # 50
-                    "Primary Xenograft Tissue", # 60
-                    "Cell Line Derived Xenograft Tissue") # 61
+    definition <- c(
+        "Primary solid Tumor", # 01
+        "Recurrent Solid Tumor", # 02
+        "Primary Blood Derived Cancer - Peripheral Blood", # 03
+        "Recurrent Blood Derived Cancer - Bone Marrow", # 04
+        "Additional - New Primary", # 05
+        "Metastatic", # 06
+        "Additional Metastatic", # 07
+        "Human Tumor Original Cells", # 08
+        "Primary Blood Derived Cancer - Bone Marrow", # 09
+        "Blood Derived Normal", # 10
+        "Solid Tissue Normal",  # 11
+        "Buccal Cell Normal",   # 12
+        "EBV Immortalized Normal", # 13
+        "Bone Marrow Normal", # 14
+        "Control Analyte", # 20
+        "Recurrent Blood Derived Cancer - Peripheral Blood", # 40
+        "Cell Lines", # 50
+        "Primary Xenograft Tissue", # 60
+        "Cell Line Derived Xenograft Tissue"
+    ) # 61
     aux <- DataFrame(code = code,shortLetterCode,definition)
 
     # in case multiple equal barcode
@@ -1088,10 +1090,12 @@ colDataPrepareTCGA <- function(barcode){
                     "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
     samples <- str_match(barcode,regex)[,1]
 
-    ret <- DataFrame(barcode = barcode,
-                     patient = substr(barcode, 1, 12),
-                     sample = substr(barcode, 1, 16),
-                     code = substr(barcode, 14, 15))
+    ret <- DataFrame(
+        barcode = barcode,
+        patient = substr(barcode, 1, 12),
+        sample = substr(barcode, 1, 16),
+        code = substr(barcode, 14, 15)
+    )
     ret <- merge(ret,aux, by = "code", sort = FALSE)
     ret <- ret[match(barcode,ret$barcode),]
     rownames(ret) <- gsub("\\.","-",make.names(ret$barcode,unique=TRUE))

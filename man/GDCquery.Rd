@@ -9,7 +9,6 @@ GDCquery(
   data.category,
   data.type,
   workflow.type,
-  legacy = FALSE,
   access,
   platform,
   file.type,
@@ -90,26 +89,12 @@ List for harmonized database:
 \item{ Sequencing Reads }
 \item{ Simple Nucleotide Variation }
 \item{ Transcriptome Profiling }
-}
-List for legacy archive
-\itemize{
-\item{ Biospecimen }
-\item{ Clinical }
-\item{ Copy number variation }
-\item{ DNA methylation }
-\item{ Gene expression }
-\item{ Protein expression }
-\item{ Raw microarray data }
-\item{ Raw sequencing data }
-\item{ Simple nucleotide variation }
 }}
 
 \item{data.type}{A data type to filter the files to download
 For the complete list please check the vignette.}
 
 \item{workflow.type}{GDC workflow type}
-
-\item{legacy}{Search in the legacy repository}
 
 \item{access}{Filter by access type. Possible values: controlled, open}
 
@@ -140,19 +125,13 @@ HumanMethylation27                \tab Mixed_DNASeq_Cont_curated      \cr
 IlluminaHiSeq_RNASeqV2            \tab Mixed_DNASeq_Cont
 }}
 
-\item{file.type}{To be used in the legacy database for some platforms,
-to define which file types to be used.}
-
 \item{barcode}{A list of barcodes to filter the files to download}
 
 \item{data.format}{Data format filter ("VCF", "TXT", "BAM","SVS","BCR XML","BCR SSF XML",
 "TSV", "BCR Auxiliary XML", "BCR OMF XML", "BCR Biotab", "MAF", "BCR PPS XML", "XLSX")}
 
-\item{experimental.strategy}{Filter to experimental strategy. Harmonized: WXS, RNA-Seq, miRNA-Seq, Genotyping Array.
-Legacy:  WXS, RNA-Seq, miRNA-Seq, Genotyping Array,
-DNA-Seq, Methylation array, Protein expression array, WXS,CGH array, VALIDATION, Gene expression array,WGS,
-MSI-Mono-Dinucleotide Assay, miRNA expression array, Mixed strategies, AMPLICON, Exon array,
-Total RNA-Seq, Capillary sequencing, Bisulfite-Seq}
+\item{experimental.strategy}{Filter to experimental strategy.
+Harmonized: WXS, RNA-Seq, miRNA-Seq, Genotyping Array.}
 
 \item{sample.type}{A sample type to filter the files to download}
 }
@@ -163,7 +142,6 @@ A data frame with the results and the parameters used
 Uses GDC API to search for search, it searches for both controlled and
   open-access data.
   For GDC data arguments project, data.category, data.type and workflow.type should be used
-  For the legacy data arguments project, data.category, platform and/or file.extension should be used.
   Please, see the vignette for a table with the possibilities.
 }
 \examples{
@@ -192,19 +170,6 @@ query <- GDCquery(
    data.category =  "Copy Number Variation",
    data.type = "Masked Copy Number Segment",
    sample.type = c("Primary Tumor")
-)
-query.met <- GDCquery(
-   project = c("TCGA-GBM","TCGA-LGG"),
-   legacy = TRUE,
-   data.category = "DNA methylation",
-   platform = "Illumina Human Methylation 450"
-)
-query <- GDCquery(
-   project = "TCGA-ACC",
-   data.category =  "Copy number variation",
-   legacy = TRUE,
-   file.type = "hg19.seg",
-   barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01")
 )
 }
 }

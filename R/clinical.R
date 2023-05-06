@@ -344,13 +344,16 @@ GDCquery_clinic <- function(
                             } else {
                                 # HTMCP-03-06-02061 has two diagnosis
                                 x$submitter_id <- gsub("_diagnosis.*","",x$submitter_id)
+                                # If there are two rows for the same submitter_id
+                                # we will collapse them into one single row
+                                # concatanating all columns using ;
                                 aux <- x %>% dplyr::group_by(submitter_id) %>%
-                                    dplyr::summarise_each(funs(paste(unique(.), collapse = ";")))
+                                    summarise(across(everything(),~ paste(unique(.), collapse = ";")))
                                 aux$treatments <- list(dplyr::bind_rows(x$treatments))
                                 aux
                             }
                         }
-                    ),fill = T
+                    ), fill = TRUE
                 )
                 #df$submitter_id <- gsub("^d|_diagnosis|diag-|-DX|-DIAG|-diagnosis","", df$submitter_id)
                 # ^d ORGANOID-PANCREATIC
@@ -500,7 +503,7 @@ GDCprepare_clinic <- function(
     }
 
     # Get all the clincal xml files
-    source <- ifelse(query$legacy,"legacy","harmonized")
+    source <- "harmonized"
     files <- file.path(
         query$results[[1]]$project, source,
         gsub(" ","_",query$results[[1]]$data_category),

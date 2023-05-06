@@ -20,16 +20,19 @@ test_that("GDCquery accepts more than one project", {
         data.category = "Copy Number Variation",
         data.type = "Copy Number Segment"
     )
+
     gbm <- GDCquery(
         project = "TCGA-GBM",
         data.category = "Copy Number Variation",
         data.type = "Copy Number Segment"
     )
+
     acc.gbm <- GDCquery(
         project =  c("TCGA-ACC","TCGA-GBM"),
         data.category = "Copy Number Variation",
         data.type = "Copy Number Segment"
     )
+
     expect_equal(unique(acc.gbm$results[[1]]$data_type),"Copy Number Segment")
     expect_equal(nrow(acc.gbm$results[[1]]), sum(nrow(acc$results[[1]]),nrow(gbm$results[[1]])))
     expect_true(nrow(dplyr::anti_join(acc$results[[1]],acc.gbm$results[[1]], by = "file_id")) == 0)
@@ -51,33 +54,23 @@ test_that("GDCquery can filter by sample.type", {
     expect_equal(as.character(unique(query$results[[1]]$sample_type)),sample.type)
 
     sample.type <- "Solid Tissue Normal"
-    query <- GDCquery(project = "TCGA-ACC",
-                      data.category =  "Copy Number Variation",
-                      data.type = "Masked Copy Number Segment",
-                      sample.type = sample.type)
+    query <- GDCquery(
+        project = "TCGA-ACC",
+        data.category =  "Copy Number Variation",
+        data.type = "Masked Copy Number Segment",
+        sample.type = sample.type
+    )
     expect_equal(as.character(unique(query$results[[1]]$sample_type)),sample.type)
 
     sample.type <- "Solid Tissue Normal"
-    query <- GDCquery(project =  c("TCGA-COAD"),
-                      data.category = "Transcriptome Profiling",
-                      data.type = "Gene Expression Quantification",
-                      workflow.type = "STAR - Counts",
-                      sample.type = sample.type)
+    query <- GDCquery(
+        project =  c("TCGA-COAD"),
+        data.category = "Transcriptome Profiling",
+        data.type = "Gene Expression Quantification",
+        workflow.type = "STAR - Counts",
+        sample.type = sample.type
+    )
     expect_equal(as.character(unique(query$results[[1]]$sample_type)),sample.type)
-
-
-    sample.type <- "Solid Tissue Normal"
-    query <- GDCquery(project = "TCGA-BRCA",
-                      legacy = TRUE,
-                      data.category = "Gene expression",
-                      data.type = "Gene expression quantification",
-                      platform = "Illumina HiSeq",
-                      file.type = "results",
-                      experimental.strategy = "RNA-Seq",
-                      sample.type = sample.type)
-    expect_equal(as.character(unique(query$results[[1]]$sample_type)),sample.type)
-
-
 
     sample.type <- c("Solid Tissue Normal", "Primary Tumor")
     query <- GDCquery(
@@ -121,56 +114,6 @@ test_that("GDCquery can filter by barcode", {
     expect_true(!all(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q") %in% query$results[[1]]$cases))
 })
 
-test_that("GDCquery can filter copy number from legacy data by file type. Case: nocnv_hg18", {
-    skip_on_bioc()
-    skip_if_offline()
-
-    query <- GDCquery(project = "TCGA-ACC",
-                      data.category =  "Copy number variation",
-                      legacy = TRUE,
-                      file.type = "nocnv_hg18.seg",
-                      barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
-    expect_equal(query$results[[1]]$file_name,"AQUAE_p_TCGA_112_304_b2_N_GenomeWideSNP_6_D10_1348300.nocnv_hg18.seg.txt")
-})
-
-test_that("GDCquery can filter copy number from legacy data by file type. Case: hg18", {
-    skip_on_bioc()
-    skip_if_offline()
-
-    query <- GDCquery(project = "TCGA-ACC",
-                      data.category =  "Copy number variation",
-                      legacy = TRUE,
-                      file.type = "hg18.seg",
-                      barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
-    expect_equal(query$results[[1]]$file_name,"AQUAE_p_TCGA_112_304_b2_N_GenomeWideSNP_6_D10_1348300.hg18.seg.txt")
-})
-
-test_that("GDCquery can filter copy number from legacy data by file type. Case: hg19", {
-    skip_on_bioc()
-    skip_if_offline()
-
-    query <- GDCquery(project = "TCGA-ACC",
-                      data.category =  "Copy number variation",
-                      legacy = TRUE,
-                      file.type = "hg19.seg",
-                      barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
-    expect_equal(query$results[[1]]$file_name,"AQUAE_p_TCGA_112_304_b2_N_GenomeWideSNP_6_D10_1348300.hg19.seg.txt")
-})
-
-
-test_that("GDCquery can filter copy number from legacy data by file type. Case: nocnv_hg19", {
-    skip_on_bioc()
-    skip_if_offline()
-
-    query <- GDCquery(project = "TCGA-ACC",
-                      data.category =  "Copy number variation",
-                      legacy = TRUE,
-                      file.type = "nocnv_hg19.seg",
-                      barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01"))
-    expect_equal(query$results[[1]]$file_name,"AQUAE_p_TCGA_112_304_b2_N_GenomeWideSNP_6_D10_1348300.nocnv_hg19.seg.txt")
-
-})
-
 
 test_that("GDCquery can filter by access level", {
     skip_on_bioc()
@@ -186,15 +129,12 @@ test_that("GDCquery can filter by access level", {
     expect_equal(unique(query$results[[1]]$access),"controlled")
 })
 
-
-
-
 test_that("getNbFiles and getNbCases works", {
     skip_on_bioc()
     skip_if_offline()
 
     aux <- getProjectSummary("TCGA-LUAD",TRUE)
-    files <- getNbFiles("TCGA-LUAD","Raw microarray data",legacy = T)
+    files <- getNbFiles("TCGA-LUAD","Raw microarray data")
     cases <- getNbCases("TCGA-LUAD","Raw microarray data")
     expect_true(cases < files)
 })

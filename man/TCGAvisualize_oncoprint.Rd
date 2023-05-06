@@ -87,7 +87,6 @@ Creating a oncoprint
 }
 \examples{
 \dontrun{
-library(maftools)
 library(dplyr)
 query <- GDCquery(
    project = "TCGA-CHOL",
