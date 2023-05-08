@@ -656,13 +656,13 @@ to create a mean DNA methylation boxplot with the function
 ```{r,include=FALSE,echo=FALSE, fig.height=5, message=FALSE, warning=FALSE,eval=FALSE}
 query <- GDCquery(
     project = "TCGA-GBM",
-    data.category = "DNA methylation",
+    data.category = "DNA Methylation",
     platform = "Illumina Human Methylation 27",
-    legacy = TRUE, 
-    barcode = c("TCGA-02-0058-01A-01D-0186-05", "TCGA-12-1597-01B-01D-0915-05",
-                "TCGA-12-0829-01A-01D-0392-05", "TCGA-06-0155-01B-01D-0521-05",
-                "TCGA-02-0099-01A-01D-0199-05", "TCGA-19-4068-01A-01D-1228-05",
-                "TCGA-19-1788-01A-01D-0595-05", "TCGA-16-0848-01A-01D-0392-05"
+    barcode = c(
+        "TCGA-02-0058-01A-01D-0186-05", "TCGA-12-1597-01B-01D-0915-05",
+        "TCGA-12-0829-01A-01D-0392-05", "TCGA-06-0155-01B-01D-0521-05",
+        "TCGA-02-0099-01A-01D-0199-05", "TCGA-19-4068-01A-01D-1228-05",
+        "TCGA-19-1788-01A-01D-0595-05", "TCGA-16-0848-01A-01D-0392-05"
     )
 )
 GDCdownload(query, method = "api")
@@ -676,7 +676,6 @@ query <- GDCquery(
     project = "TCGA-GBM",
     data.category = "DNA methylation",
     platform = "Illumina Human Methylation 27",
-    legacy = TRUE, 
     barcode = c(
         "TCGA-02-0058-01A-01D-0186-05", "TCGA-12-1597-01B-01D-0915-05",
         "TCGA-12-0829-01A-01D-0392-05", "TCGA-06-0155-01B-01D-0521-05",
