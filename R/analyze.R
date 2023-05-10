@@ -1987,59 +1987,33 @@ getAdjacencyBiogrid <- function(tmp.biogrid, names.genes = NULL) {
 #' DNA methylation and Gene expression data from GDC database
 #' @param project A GDC project
 #' @param n Number of samples to return. If NULL return all (default)
-#' @param legacy Access legacy (hg19) or harmonized database (hg38).
 #' @return A vector of barcodes
 #' @export
 #' @examples
 #' # Get ACC samples with both  DNA methylation (HM450K) and gene expression aligned to hg19
-#' samples <- matchedMetExp("TCGA-UCS", legacy = TRUE)
+#' samples <- matchedMetExp("TCGA-UCS")
 matchedMetExp <- function(
         project,
-        legacy = FALSE,
         n = NULL
 ) {
-    if (legacy) {
-        # get primary solid tumor samples: DNA methylation
-        message("Download DNA methylation information")
-        met450k <- GDCquery(
-            project = project,
-            data.category = "DNA methylation",
-            platform = "Illumina Human Methylation 450",
-            legacy = TRUE,
-            sample.type = c("Primary Tumor")
-        )
 
-        # get primary solid tumor samples: RNAseq
-        message("Download gene expression information")
-        exp <- GDCquery(
-            project = project,
-            data.category = "Gene expression",
-            data.type = "Gene expression quantification",
-            platform = "Illumina HiSeq",
-            file.type  = "results",
-            sample.type = c("Primary Tumor"),
-            legacy = TRUE
-        )
-    } else {
-        # get primary solid tumor samples: DNA methylation
-        message("Download DNA methylation information")
-        met450k <- GDCquery(
-            project = project,
-            data.category = "DNA Methylation",
-            platform = "Illumina Human Methylation 450",
-            sample.type = c("Primary Tumor")
-        )
+    # get primary solid tumor samples: DNA methylation
+    message("Download DNA methylation information")
+    met450k <- GDCquery(
+        project = project,
+        data.category = "DNA Methylation",
+        platform = "Illumina Human Methylation 450",
+        sample.type = c("Primary Tumor")
+    )
 
-        # get primary solid tumor samples: RNAseq
-        message("Download gene expression information")
-        exp <- GDCquery(
-            project = project,
-            data.category = "Transcriptome Profiling",
-            data.type = "Gene Expression Quantification",
-            workflow.type = "STAR - Counts"
-        )
-
-    }
+    # get primary solid tumor samples: RNAseq
+    message("Download gene expression information")
+    exp <- GDCquery(
+        project = project,
+        data.category = "Transcriptome Profiling",
+        data.type = "Gene Expression Quantification",
+        workflow.type = "STAR - Counts"
+    )
 
     # Get patients with samples in both platforms
     met450k_tp <- met450k$results[[1]]$cases

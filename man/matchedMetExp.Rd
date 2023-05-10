@@ -4,12 +4,10 @@
 \alias{matchedMetExp}
 \title{Get GDC primary tumors samples with both DNA methylation (HM450K) and Gene expression data}
 \usage{
-matchedMetExp(project, legacy = FALSE, n = NULL)
+matchedMetExp(project, n = NULL)
 }
 \arguments{
 \item{project}{A GDC project}
-
-\item{legacy}{Access legacy (hg19) or harmonized database (hg38).}
 
 \item{n}{Number of samples to return. If NULL return all (default)}
 }
@@ -22,5 +20,5 @@ DNA methylation and Gene expression data from GDC database
 }
 \examples{
 # Get ACC samples with both  DNA methylation (HM450K) and gene expression aligned to hg19
-samples <- matchedMetExp("TCGA-UCS", legacy = TRUE)
+samples <- matchedMetExp("TCGA-UCS")
 }
