@@ -32,16 +32,16 @@ CHANGES IN VERSION 2.7.13
 CHANGES IN VERSION 2.5.0
 -------------------------
 
-Changing chunks.per.download to files.per.chunk
+* Changing chunks.per.download to files.per.chunk
 
 CHANGES IN VERSION 2.2.0
 -------------------------
 
 NEW FEATURES
-    o Add GISTIC2 information and Mutation information in the summarizedExperiment while preparing GDC data
+* Add GISTIC2 information and Mutation information in the summarizedExperiment while preparing GDC data
 
 SIGNIFICANT USER-LEVEL CHANGES
-    o Speed up GDCquery
+* Speed up GDCquery
 
 TCGAbiolinks 2.0
 ---------------------------------------------------------------
