@@ -4,12 +4,10 @@
 \alias{getProjectSummary}
 \title{Get Project Summary from GDC}
 \usage{
-getProjectSummary(project, legacy = FALSE)
+getProjectSummary(project)
 }
 \arguments{
 \item{project}{A  GDC project}
-
-\item{legacy}{Select between Harmonized or Legacy database}
 }
 \description{
 Get Project Summary from GDC

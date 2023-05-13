@@ -5,12 +5,10 @@
 \title{Create a Summary table for each sample in a project saying if it contains
 or not files for a certain data category}
 \usage{
-getDataCategorySummary(project, legacy = FALSE)
+getDataCategorySummary(project)
 }
 \arguments{
 \item{project}{A GDC project}
-
-\item{legacy}{Access legacy (hg19) or harmonized database (hg38).}
 }
 \value{
 A data frame
@@ -20,7 +18,7 @@ Create a Summary table for each sample in a project saying if it contains
 or not files for a certain data category
 }
 \examples{
-summary <- getDataCategorySummary("TCGA-ACC", legacy = TRUE)
+summary <- getDataCategorySummary("TCGA-ACC")
 }
 \author{
 Tiago Chedraoui Silva

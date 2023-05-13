@@ -5,7 +5,6 @@
 #'   data_category + data_type + experimental_strategy + platform
 #'   Almost like https://portal.gdc.cancer.gov/exploration
 #' @param project A GDC project
-#' @param legacy Access legacy database ? Deafult: FALSE
 #' @param files.access Filter by file access ("open" or "controlled").
 #' Default: no filter
 #' @export
@@ -18,13 +17,16 @@
 #' @importFrom tidyr spread unite
 #' @importFrom plyr ldply count
 #' @author Tiago Chedraoui Silva
-getSampleFilesSummary <- function(project, legacy = FALSE, files.access = NA) {
+getSampleFilesSummary <- function(
+        project,
+        files.access = NA
+) {
     out <- NULL
 
     for(proj in project){
         checkProjectInput(proj)
         message("Accessing information for project: ", proj)
-        url <- getSampleSummaryUrl(proj,legacy)
+        url <- getSampleSummaryUrl(proj)
         x <- getURL(url,fromJSON,simplifyDataFrame = TRUE)
         y <- x$data$hits$files
         names(y) <- x$data$hits$submitter_id
@@ -46,75 +48,95 @@ getSampleFilesSummary <- function(project, legacy = FALSE, files.access = NA) {
     return(out)
 }
 
-getSampleSummaryUrl <- function(project,legacy = FALSE, files.access = NA){
+getSampleSummaryUrl <- function(
+        project,
+        files.access = NA
+){
     # Get manifest using the API
-    baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/cases/?","https://api.gdc.cancer.gov/cases/?")
+    baseURL <- "https://api.gdc.cancer.gov/cases/?"
 
     options.pretty <- "pretty=true"
     options.expand <- "expand=summary,summary.data_categories,files"
-    #option.size <- paste0("size=",getNbFiles(project,data.category,legacy))
     option.size <- paste0("size=",1000)
     option.format <- paste0("format=JSON")
 
-    options.filter <- paste0("filters=",
-                             URLencode('{"op":"and","content":['),  # Start json request
-                             URLencode('{"op":"in","content":{"field":"cases.project.project_id","value":["'),
-                             project,
-                             URLencode('"]}}'))
+    options.filter <- paste0(
+        "filters=",
+        URLencode('{"op":"and","content":['),  # Start json request
+        URLencode('{"op":"in","content":{"field":"cases.project.project_id","value":["'),
+        project,
+        URLencode('"]}}')
+    )
 
     if(!any(is.na(files.access))) {
         options.filter <- paste0(options.filter,addFilter("files.access", files.access))
     }
     # Close json request
     options.filter <- paste0(options.filter, URLencode(']}'))
-    url <- paste0(baseURL,paste(options.pretty,
-                                options.expand,
-                                option.size,
-                                options.filter,
-                                option.format,
-                                sep = "&"))
+    url <- paste0(
+        baseURL,
+        paste(options.pretty,
+              options.expand,
+              option.size,
+              options.filter,
+              option.format,
+              sep = "&"
+        )
+    )
     return(url)
 }
 
 
 
-getSubmitterIDUrl <- function(project,legacy = FALSE, files.access = NA){
+getSubmitterIDUrl <- function(
+        project,
+        files.access = NA
+){
     # Get manifest using the API
-    baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/cases/?","https://api.gdc.cancer.gov/cases/?")
+    baseURL <- "https://api.gdc.cancer.gov/cases/?"
 
     options.pretty <- "pretty=true"
     options.expand <- "expand=files.access"
-    #option.size <- paste0("size=",getNbFiles(project,data.category,legacy))
     option.fields = "fields=submitter_id"
     option.size <- paste0("size=",1000)
     option.format <- paste0("format=JSON")
 
-    options.filter <- paste0("filters=",
-                             URLencode('{"op":"and","content":['),  # Start json request
-                             URLencode('{"op":"in","content":{"field":"cases.project.project_id","value":["'),
-                             project,
-                             URLencode('"]}}'))
+    options.filter <- paste0(
+        "filters=",
+        URLencode('{"op":"and","content":['),  # Start json request
+        URLencode('{"op":"in","content":{"field":"cases.project.project_id","value":["'),
+        project,
+        URLencode('"]}}')
+    )
 
     if(!any(is.na(files.access))) {
         options.filter <- paste0(options.filter,addFilter("files.access", files.access))
     }
     # Close json request
     options.filter <- paste0(options.filter, URLencode(']}'))
-    url <- paste0(baseURL,paste(options.pretty,
-                                options.expand,
-                                option.fields,
-                                option.size,
-                                options.filter,
-                                option.format,
-                                sep = "&"))
+    url <- paste0(
+        baseURL,
+        paste(
+            options.pretty,
+            options.expand,
+            option.fields,
+            option.size,
+            options.filter,
+            option.format,
+            sep = "&"
+        )
+    )
     return(url)
 }
 
 # getSubmitterID("TCGA-BRCA")
 # getSubmitterID("MMRF-COMPASS")
-getSubmitterID <- function(project,legacy = FALSE, files.access = NA){
+getSubmitterID <- function(
+        project,
+        files.access = NA
+){
 
-    url <- getSubmitterIDUrl(project,legacy,files.access)
+    url <- getSubmitterIDUrl(project,files.access)
 
     json  <- tryCatch(
         getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
@@ -186,8 +208,8 @@ getBarcodefromAliquot <- function(aliquot){
 #' @param FUN function that calls the API
 #' @author Tiago Chedraoui Silva
 splitAPICall <- function(FUN, step = 20, items){
-   info <- NULL
-   info <- tryCatch({
+    info <- NULL
+    info <- tryCatch({
         for(i in 0:(ceiling(length(items)/step) - 1)){
             start <- 1 + step * i
             end <- ifelse(((i + 1) * step) > length(items), length(items),((i + 1) * step))
@@ -197,7 +219,7 @@ splitAPICall <- function(FUN, step = 20, items){
                 info <- plyr::rbind.fill(info, FUN(items[start:end]))
             }
         }
-       info
+        info
     }, error = function(e) {
         step <- 2
         for(i in 0:(ceiling(length(items)/step) - 1)){
@@ -210,7 +232,7 @@ splitAPICall <- function(FUN, step = 20, items){
             }
         }
     })
-   info
+    info
 }
 
 
@@ -220,24 +242,28 @@ splitAPICall <- function(FUN, step = 20, items){
 #' Create a Summary table for each sample in a project saying if it contains
 #' or not files for a certain data category
 #' @param project A GDC project
-#' @param legacy Access legacy (hg19) or harmonized database (hg38).
 #' @return A data frame
 #' @export
 #' @importFrom stats xtabs
 #' @examples
-#' summary <- getDataCategorySummary("TCGA-ACC", legacy = TRUE)
+#' summary <- getDataCategorySummary("TCGA-ACC")
 #' @author Tiago Chedraoui Silva
-getDataCategorySummary <- function(project, legacy = FALSE){
-    baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/files/?","https://api.gdc.cancer.gov/files/?")
-    url <- paste0(baseURL,"&expand=cases&size=100000&fields=cases.submitter_id,data_category&filters=",
-                  URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
-                  URLencode(project),
-                  URLencode('"]}}]}'))
+getDataCategorySummary <- function(project){
+    baseURL <- "https://api.gdc.cancer.gov/files/?"
+    url <- paste0(
+        baseURL,"&expand=cases&size=100000&fields=cases.submitter_id,data_category&filters=",
+        URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'),
+        URLencode(project),
+        URLencode('"]}}]}')
+    )
 
     json  <- tryCatch(
         getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
         error = function(e) {
-            fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+            fromJSON(
+                content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"),
+                simplifyDataFrame = TRUE
+            )
         }
     )
     json <- json$data$hits
@@ -251,7 +277,6 @@ getDataCategorySummary <- function(project, legacy = FALSE){
 
 #' @title Get Project Summary from GDC
 #' @param project A  GDC project
-#' @param legacy Select between Harmonized or Legacy database
 #' @examples
 #' getProjectSummary("TCGA-ACC")
 #' \dontrun{
@@ -259,9 +284,9 @@ getDataCategorySummary <- function(project, legacy = FALSE){
 #' }
 #' @export
 #' @author Tiago Chedraoui Silva
-getProjectSummary <- function(project, legacy = FALSE){
+getProjectSummary <- function(project){
     checkProjectInput(project)
-    baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/projects/","https://api.gdc.cancer.gov/projects/")
+    baseURL <- "https://api.gdc.cancer.gov/projects/"
     url <- paste0(baseURL, project,"?expand=summary,summary.data_categories&pretty=true")
     return(fromJSON(url,simplifyDataFrame = TRUE)$data$summary)
 }
@@ -269,17 +294,19 @@ getProjectSummary <- function(project, legacy = FALSE){
 #' @title Get Number of cases in GDC for a project
 #' @param project A  GDC project
 #' @param data.category A  GDC project data category
-#' @param legacy Select between Harmonized or Legacy database
 #' @examples
 #' \dontrun{
 #' getNbCases("TCGA-ACC","Clinical")
 #' getNbCases("CPTAC-2","Clinical")
 #' }
 #' @author Tiago Chedraoui Silva
-getNbCases <- function(project, data.category, legacy = FALSE){
-    summary <- getProjectSummary(project, legacy)
+getNbCases <- function(
+        project,
+        data.category
+){
+    summary <- getProjectSummary(project)
     if(data.category %in% summary$data_categories$data_category){
-        summary <- getProjectSummary(project, legacy)$data_categories
+        summary <- getProjectSummary(project)$data_categories
         nb <- summary[summary$data_category == data.category,"case_count"]
     } else {
         nb <- summary$case_count
@@ -290,17 +317,16 @@ getNbCases <- function(project, data.category, legacy = FALSE){
 #' @title Get Number of files in GDC for a project
 #' @param project A  GDC project
 #' @param data.category A  GDC project data category
-#' @param legacy Select between Harmonized or Legacy database
 #' @examples
 #' \dontrun{
 #' getNbFiles("TCGA-ACC","Clinical")
 #' getNbFiles("CPTAC-2","Clinical")
 #' }
 #' @author Tiago Chedraoui Silva
-getNbFiles <- function(project, data.category, legacy = FALSE){
-    summary <- getProjectSummary(project, legacy)
+getNbFiles <- function(project, data.category){
+    summary <- getProjectSummary(project)
     if(data.category %in% summary$data_categories$data_category){
-        summary <- getProjectSummary(project, legacy)$data_categories
+        summary <- getProjectSummary(project)$data_categories
         nb <- summary[summary$data_category == data.category,"file_count"]
     } else {
         nb <- summary$file_count
