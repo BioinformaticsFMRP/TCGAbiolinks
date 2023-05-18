@@ -231,12 +231,20 @@ GDCquery <- function(
             sample.type = sample.type
         )
         message("ooo Project: ", proj)
+        original_timeout <- getOption('timeout')
+        options(timeout=600)
         json  <- tryCatch(
             getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
             error = function(e) {
                 message(paste("Error: ", e, sep = " "))
                 message("We will retry to access GDC!")
-                fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+                fromJSON(
+                    content(
+                        getURL(url,GET,timeout(600)),
+                        as = "text",
+                        encoding = "UTF-8"
+                    ), simplifyDataFrame = TRUE
+                )
             }
         )
         if(json$data$pagination$count == 0) {
@@ -259,6 +267,7 @@ GDCquery <- function(
                 }
             )
         }
+        options(timeout=original_timeout)
 
 
         json$data$hits$acl <- NULL
@@ -551,12 +560,12 @@ GDCquery <- function(
     print.header("Checking data","subsection")
 
     message("ooo Checking if there are duplicated cases")
-    if(any(duplicated(results$cases))) {
+    if (any(duplicated(results$cases))) {
         message("Warning: There are more than one file for the same case. Please verify query results. You can use the command View(getResults(query)) in rstudio")
     }
 
     message("ooo Checking if there are results for the query")
-    if(nrow(results) == 0) stop("Sorry, no results were found for this query")
+    if (nrow(results) == 0) stop("Sorry, no results were found for this query")
 
     # Try ordering (needs dplyr 1.0 - still not published)
     results <- tryCatch({
@@ -674,11 +683,19 @@ expandBarcodeInfo <- function(barcode){
         ret <- ret[match(barcode,ret$barcode),]
     }
     if(any(grepl("TCGA",barcode))) {
-        ret <- data.frame(barcode = barcode,
-                          patient = substr(barcode, 1, 12),
-                          sample = substr(barcode, 1, 16),
-                          tissue.code = substr(barcode, 14, 15))
-        ret <- merge(ret,getBarcodeDefinition(), by = "tissue.code", sort = FALSE, all.x = TRUE)
+        ret <- data.frame(
+            barcode = barcode,
+            patient = substr(barcode, 1, 12),
+            sample = substr(barcode, 1, 16),
+            tissue.code = substr(barcode, 14, 15)
+        )
+        ret <- merge(
+            ret,
+            getBarcodeDefinition(),
+            by = "tissue.code",
+            sort = FALSE,
+            all.x = TRUE
+        )
         ret <- ret[match(barcode,ret$barcode),]
     }
     return(ret)
@@ -717,7 +734,11 @@ getBarcodeDefinition <- function(type = "TCGA"){
             "Cell Lines",
             "Primary Xenograft Tissue",
             "Cell Line Derived Xenograft Tissue")
-        aux <- data.frame(tissue.code = tissue.code,shortLetterCode,tissue.definition)
+        aux <- data.frame(
+            tissue.code = tissue.code,
+            shortLetterCode,
+            tissue.definition
+        )
     } else {
 
         tissue.code <- c(

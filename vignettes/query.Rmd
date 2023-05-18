@@ -31,7 +31,6 @@ library(DT)
 
 #  Useful information
 
-
 <div class="panel panel-info">
 <div class="panel-heading">Understanding the barcode</div>
 <div class="panel-body">

@@ -1217,8 +1217,6 @@ colDataPrepare <- function(barcode){
 
     if(any(ret$project_id == "CPTAC-3",na.rm = T)) {
 
-        print(ret)
-        save(ret,file = "test.rda")
         # only merge mixed samples
         mixed_samples <- grep(";",barcode,value = T)
         if(length(mixed_samples) > 0){
