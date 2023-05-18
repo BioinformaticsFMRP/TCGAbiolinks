@@ -60,21 +60,20 @@ GDCprepare <- function(
     isServeOK()
     if(missing(query)) stop("Please set query parameter")
 
-    test.duplicated.cases <-
-        (
-            any(
-                duplicated(query$results[[1]]$cases)) & # any duplicated
-                !(query$data.type %in% c(
-                    "Clinical data",
-                    "Protein expression quantification",
-                    "Raw intensities",
-                    "Masked Intensities",
-                    "Clinical Supplement",
-                    "Masked Somatic Mutation",
-                    "Biospecimen Supplement"
-                )
-                )
-        )
+    test.duplicated.cases <- (
+        any(
+            duplicated(query$results[[1]]$cases)) & # any duplicated
+            !(query$data.type %in% c(
+                "Clinical data",
+                "Protein expression quantification",
+                "Raw intensities",
+                "Masked Intensities",
+                "Clinical Supplement",
+                "Masked Somatic Mutation",
+                "Biospecimen Supplement"
+            )
+            )
+    )
 
 
     if(test.duplicated.cases) {
@@ -90,10 +89,10 @@ GDCprepare <- function(
     if (!save & remove.files.prepared) {
         stop("To remove the files, please set save to TRUE. Otherwise, the data will be lost")
     }
-    # We save the files in project/source/data.category/data.type/file_id/file_name
-    source <- "harmonized"
+
+    # We save the files in project/data.category/data.type/file_id/file_name
     files <- file.path(
-        query$results[[1]]$project, source,
+        query$results[[1]]$project,
         gsub(" ","_",query$results[[1]]$data_category),
         gsub(" ","_",query$results[[1]]$data_type),
         gsub(" ","_",query$results[[1]]$file_id),
@@ -105,14 +104,19 @@ GDCprepare <- function(
     # For IDAT prepare since we need to put all IDATs in the same folder the code below will not work
     # a second run
     if (!all(file.exists(files))) {
-        # We have to check we movedthe files
-        if (query$data.type == "Masked Intensities" | query$data.category == "Raw microarray data"){
+        # We have to check we moved the files
+        if (
+            unique(query$results[[1]]$data_type) == "Masked Intensities" |
+            unique(query$results[[1]]$data_category) == "Raw microarray data"
+        ){
+
             files.idat <- file.path(
-                query$results[[1]]$project, source,
+                query$results[[1]]$project,
                 gsub(" ","_",query$results[[1]]$data_category),
                 gsub(" ","_",query$results[[1]]$data_type),
                 gsub(" ","_",query$results[[1]]$file_name)
             )
+
             files.idat <- file.path(directory, files.idat)
             if (!all(file.exists(files) | file.exists(files.idat))) {
                 stop(
@@ -135,7 +139,7 @@ GDCprepare <- function(
     }
 
     cases <- ifelse(
-        grepl("TCGA|TARGET|CGCI-HTMCP-CC",query$results[[1]]$project %>% unlist()),
+        grepl("TCGA|TARGET|CGCI-HTMCP-CC|CPTAC-3",query$results[[1]]$project %>% unlist()),
         query$results[[1]]$cases,
         query$results[[1]]$sample.submitter_id
     )
@@ -165,9 +169,15 @@ GDCprepare <- function(
         if (unique(query$results[[1]]$data_type) == "Gene Level Copy Number Scores") {
             data <- readGISTIC(files, query$results[[1]]$cases)
         } else if (unique(query$results[[1]]$data_type) == "Gene Level Copy Number") {
-            data <- readGeneLevelCopyNumber(files, query$results[[1]]$cases,summarizedExperiment = summarizedExperiment)
+            data <- read_gene_level_copy_number(
+                files = files,
+                cases = query$results[[1]]$sample.submitter_id,
+                summarizedExperiment = summarizedExperiment
+            )
         } else {
-            data <- readCopyNumberVariation(files, query$results[[1]]$cases)
+            data <- read_copy_number_variation(
+                files = files, cases = query$results[[1]]$cases
+            )
         }
     }  else if (grepl("Methylation Beta Value",unique(query$results[[1]]$data_type), ignore.case = TRUE)) {
         data <- readDNAmethylation(
@@ -184,29 +194,30 @@ GDCprepare <- function(
             summarizedExperiment = summarizedExperiment,
             platform =  unique(query$results[[1]]$platform)
         )
-    }  else if (grepl("Proteome Profiling",query$data.category,ignore.case = TRUE)) {
+    } else if (grepl("Proteome Profiling",query$data.category,ignore.case = TRUE)) {
 
         data <- readProteomeProfiling(files, cases = cases)
 
-    }  else if (grepl("Protein expression",query$data.category,ignore.case = TRUE)) {
+    } else if (grepl("Protein expression",query$data.category,ignore.case = TRUE)) {
 
         data <- readProteinExpression(files, cases = cases)
-        if(summarizedExperiment) {
+
+        if (summarizedExperiment) {
             message("SummarizedExperiment not implemented, if you need samples metadata use the function TCGAbiolinks:::colDataPrepare")
         }
 
     }  else if (grepl("Simple Nucleotide Variation",query$data.category,ignore.case = TRUE)) {
 
-        if(grepl("Masked Somatic Mutation",query$results[[1]]$data_type[1],ignore.case = TRUE)){
+        if (grepl("Masked Somatic Mutation",query$results[[1]]$data_type[1],ignore.case = TRUE)){
             data <- readSimpleNucleotideVariationMaf(files)
         }
 
     }  else if (grepl("Clinical|Biospecimen", query$data.category, ignore.case = TRUE)){
-        data <- readClinical(files, query$data.type, cases = cases)
+        data <- read_clinical(files, query$data.type, cases = cases)
         summarizedExperiment <- FALSE
     } else if (grepl("Gene expression",query$data.category,ignore.case = TRUE)) {
         if (query$data.type == "Gene expression quantification")
-            data <- readGeneExpressionQuantification(
+            data <- read_gene_expression_quantification(
                 files = files,
                 cases = cases,
                 summarizedExperiment = summarizedExperiment,
@@ -215,7 +226,7 @@ GDCprepare <- function(
             )
 
         if (query$data.type == "miRNA gene quantification")
-            data <- readGeneExpressionQuantification(
+            data <- read_gene_expression_quantification(
                 files = files,
                 cases = cases,
                 summarizedExperiment = FALSE,
@@ -288,22 +299,22 @@ GDCprepare <- function(
         # save is true, due to the check in the beggining of the code
         if(remove.files.prepared){
             # removes files and empty directories
-            remove.files.recursively(files)
+            remove_files_recursively(files)
         }
     }
 
     return(data)
 }
 
-remove.files.recursively <- function(files){
+remove_files_recursively <- function(files){
     files2rm <- dirname(files)
     unlink(files2rm,recursive = TRUE)
     files2rm <- dirname(files2rm) # data category
-    if(length(list.files(files2rm)) == 0) remove.files.recursively(files2rm)
+    if(length(list.files(files2rm)) == 0) remove_files_recursively(files2rm)
 }
 
 
-readClinical <- function(files, data.type, cases){
+read_clinical <- function(files, data.type, cases){
     if(data.type == "Clinical data"){
         suppressMessages({
             ret <- plyr::alply(files,.margins = 1,readr::read_tsv, .progress = "text")
@@ -366,13 +377,16 @@ readSingleCellAnalysis <- function(
 }
 
 #' @importFrom tidyr separate
-readExonQuantification <- function (files, cases, summarizedExperiment = TRUE){
+readExonQuantification <- function (
+        files,
+        cases,
+        summarizedExperiment = TRUE
+){
     pb <- txtProgressBar(min = 0, max = length(files), style = 3)
     assay.list <- NULL
 
     for (i in seq_along(files)) {
         data <- fread(files[i], header = TRUE, sep = "\t", stringsAsFactors = FALSE)
-
 
         if(!missing(cases)) {
             assay.list <- gsub(" |\\(|\\)|\\/","_",colnames(data)[2:ncol(data)])
@@ -385,12 +399,14 @@ readExonQuantification <- function (files, cases, summarizedExperiment = TRUE){
         } else {
             df <- merge(df, data, by=colnames(data)[1], all = TRUE)
         }
+
         setTxtProgressBar(pb, i)
     }
     setDF(df)
     rownames(df) <- df[,1]
     df <- df %>% separate(exon,into = c("seqnames","coordinates","strand"),sep = ":") %>%
         separate(coordinates,into = c("start","end"),sep = "-")
+
     if(summarizedExperiment) {
         suppressWarnings({
             assays <- lapply(assay.list, function (x) {
@@ -398,8 +414,10 @@ readExonQuantification <- function (files, cases, summarizedExperiment = TRUE){
             })
         })
         names(assays) <- assay.list
-        regex <- paste0("[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
-                        "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}")
+        regex <- paste0(
+            "[:alnum:]{4}-[:alnum:]{2}-[:alnum:]{4}",
+            "-[:alnum:]{3}-[:alnum:]{3}-[:alnum:]{4}-[:alnum:]{2}"
+        )
         samples <- na.omit(unique(str_match(colnames(df),regex)[,1]))
         colData <-  colDataPrepare(samples)
         assays <- lapply(assays, function(x){
@@ -509,7 +527,7 @@ readSimpleNucleotideVariationMaf <- function(files){
     return(ret)
 }
 
-readGeneExpressionQuantification <- function(
+read_gene_expression_quantification <- function(
         files,
         cases,
         genome = "hg19",
@@ -558,7 +576,7 @@ readGeneExpressionQuantification <- function(
     df <- bind_cols(ret[[1]][,1],df)
 
     if (summarizedExperiment) {
-        df <- makeSEfromGeneExpressionQuantification(df, assay.list, genome = genome)
+        df <- make_se_from_gene_exoression_quantification(df, assay.list, genome = genome)
     } else {
         rownames(df) <- df$gene_id
         df$gene_id <- NULL
@@ -567,7 +585,7 @@ readGeneExpressionQuantification <- function(
 }
 
 
-makeSEfromGeneExpressionQuantification <- function(
+make_se_from_gene_exoression_quantification <- function(
         df,
         assay.list,
         genome = "hg19"
@@ -1127,10 +1145,10 @@ colDataPrepare <- function(barcode){
     # Check if this breaks the package
     if(any(grepl("C3N-|C3L-",barcode))) {
         ret <- data.frame(
-            sample =  sapply(barcode, function(x) stringr::str_split(x,";") %>% unlist()) %>%
-                unlist %>% unique,stringsAsFactors = FALSE
+            sample = map(barcode,.f = function(x) stringr::str_split(x,";") %>% unlist) %>% unlist()
         )
     }
+
     if(is.null(ret)) {
         ret <- data.frame(
             sample = barcode %>% unique,
@@ -1147,14 +1165,12 @@ colDataPrepare <- function(barcode){
         step = 10,
         items = ret$sample
     )
-
     if(!is.null(patient.info)) {
         ret$sample_submitter_id <- ret$sample %>% as.character()
         ret <- left_join(ret %>% as.data.frame, patient.info %>% unique, by = "sample_submitter_id")
     }
     ret$bcr_patient_barcode <- ret$sample %>% as.character()
     ret$sample_submitter_id <- ret$sample %>% as.character()
-
     if(!"project_id" %in% colnames(ret)) {
         if("disease_type" %in% colnames(ret)){
             aux <- getGDCprojects()[,c(5,7)]
@@ -1168,7 +1184,15 @@ colDataPrepare <- function(barcode){
     }
 
     # na.omit should not be here, exceptional case
-    if(is.null(ret)) return(data.frame(row.names = barcode, barcode,stringsAsFactors = FALSE))
+    if(is.null(ret)) {
+        return(
+            data.frame(
+                row.names = barcode,
+                barcode,
+                stringsAsFactors = FALSE
+            )
+        )
+    }
 
     # Add purity information from http://www.nature.com/articles/ncomms9971
     # purity  <- getPurityinfo()
@@ -1193,16 +1217,18 @@ colDataPrepare <- function(barcode){
 
     if(any(ret$project_id == "CPTAC-3",na.rm = T)) {
 
+        print(ret)
+        save(ret,file = "test.rda")
         # only merge mixed samples
-        mixed.samples <- grep(";",barcode,value = T)
-        if(length(mixed.samples) > 0){
-            mixed.samples <- unique(unlist(str_split(mixed.samples,";")))
+        mixed_samples <- grep(";",barcode,value = T)
+        if(length(mixed_samples) > 0){
+            mixed_samples <- mixed_samples %>% str_split(";") %>% unlist %>% unique
 
-            ret.mixed.samples <- ret %>% dplyr::filter(sample_submitter_id %in% mixed.samples) %>%
-                dplyr::group_by(submitter_id,sample_type) %>%
+            ret_mixed_samples <- ret %>% dplyr::filter(sample_submitter_id %in% mixed_samples) %>%
+                dplyr::group_by(submitter_id) %>%
                 dplyr::summarise_all(~trimws(paste(unique(.), collapse = ';'))) %>%
                 as.data.frame()
-            ret <- rbind(ret.mixed.samples,ret)
+            ret <- rbind(ret_mixed_samples,ret)
         }
         idx <- match(barcode,ret$bcr_patient_barcode)
 
@@ -1567,7 +1593,11 @@ readTranscriptomeProfiling <- function(
     return(df)
 }
 
-readGeneLevelCopyNumber <- function(files, cases, summarizedExperiment = FALSE){
+read_gene_level_copy_number <- function(
+        files,
+        cases,
+        summarizedExperiment = FALSE
+){
     message("Reading Gene Level Copy Number files")
     gistic.df <- NULL
     gistic.list <- plyr::alply(files,1,.fun = function(file) {
@@ -1594,13 +1624,13 @@ readGeneLevelCopyNumber <- function(files, cases, summarizedExperiment = FALSE){
     )
 
     if(summarizedExperiment) {
-        se <- makeSEfromGeneLevelCopyNumber(df, cases)
+        se <- make_se_from_gene_level_copy_number(df, cases)
         return(se)
     }
     return(df)
 }
 
-makeSEfromGeneLevelCopyNumber <- function(df, cases){
+make_se_from_gene_level_copy_number <- function(df, cases){
     message("Creating a SummarizedExperiment object")
     rowRanges <- GRanges(
         seqnames = df$chromosome,
@@ -1660,7 +1690,7 @@ readGISTIC <- function(files, cases){
 
 # Reads Copy Number Variation files to a data frame, basically it will rbind it
 #' @importFrom purrr map2_dfr
-readCopyNumberVariation <- function(files, cases){
+read_copy_number_variation <- function(files, cases){
     message("Reading copy number variation files")
 
     col_types <- ifelse(any(grepl('ascat2', files)),"ccnnnnn","ccnnnd")
@@ -1700,10 +1730,12 @@ getFFPE <- function(patient){
     options.pretty <- "pretty=true"
     options.expand <- "expand=samples"
     option.size <- paste0("size=",length(patient))
-    options.filter <- paste0("filters=",
-                             URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.submitter_id","value":['),
-                             paste0('"',paste(patient,collapse = '","')),
-                             URLencode('"]}}]}'))
+    options.filter <- paste0(
+        "filters=",
+        URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.submitter_id","value":['),
+        paste0('"',paste(patient,collapse = '","')),
+        URLencode('"]}}]}')
+    )
     url <- paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&"))
     json  <- tryCatch(
         getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
@@ -1727,10 +1759,12 @@ getAliquot_ids <- function(barcode){
     option.size <- paste0("size=",length(barcode))
     #message(paste(barcode,collapse = '","'))
     #message(paste0('"',paste(barcode,collapse = '","')))
-    options.filter <- paste0("filters=",
-                             URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.submitter_id","value":['),
-                             paste0('"',paste(barcode,collapse = '","')),
-                             URLencode('"]}}]}'))
+    options.filter <- paste0(
+        "filters=",
+        URLencode('{"op":"and","content":[{"op":"in","content":{"field":"cases.submitter_id","value":['),
+        paste0('"',paste(barcode,collapse = '","')),
+        URLencode('"]}}]}')
+    )
     #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
     url <- paste0(baseURL,paste(options.pretty,options.fields, option.size, options.filter, sep = "&"))
     json  <- tryCatch(
@@ -1852,7 +1886,10 @@ getBarcodeInfo <- function(barcode) {
         }
     }
     if(!is.null(results$exposures)) {
-        exposures <- rbindlist(lapply(results$exposures, function(x) if(is.null(x)) data.frame(NA) else x),fill = TRUE)
+        exposures <- rbindlist(
+            lapply(results$exposures, function(x) if(is.null(x)) data.frame(NA) else x),
+            fill = TRUE
+        )
         exposures[,c("updated_datetime","created_datetime","state")] <- NULL
         if(any(grepl("submitter_id", colnames(exposures)))) {
             exposures$submitter_id <- gsub("-exposure|_exposure.*|-EXP","", exposures$submitter_id)
@@ -1872,7 +1909,11 @@ getBarcodeInfo <- function(barcode) {
         demographic <- results$demographic
         demographic[,c("updated_datetime","created_datetime","state")] <- NULL
         if(any(grepl("submitter_id", colnames(demographic)))) {
-            demographic$submitter_id <- gsub("-demographic|_demographic.*|-DEMO|demo-","", results$demographic$submitter_id)
+            demographic$submitter_id <- gsub(
+                "-demographic|_demographic.*|-DEMO|demo-",
+                "",
+                results$demographic$submitter_id
+            )
         } else {
             demographic$submitter_id <- submitter_id
         }
@@ -1893,7 +1934,9 @@ getBarcodeInfo <- function(barcode) {
                     .fun = function(x){
                         demographic[x,] %>% # replicate diagnoses the number of samples
                             as.data.frame() %>%
-                            dplyr::slice(rep(dplyr::row_number(), sum(results$submitter_sample_ids[[x]] %in% barcode)))})
+                            dplyr::slice(
+                                rep(dplyr::row_number(), sum(results$submitter_sample_ids[[x]] %in% barcode)))
+                    })
             }
 
             df <- dplyr::bind_cols(df  %>% as.data.frame,demographic)
@@ -1910,9 +1953,11 @@ getBarcodeInfo <- function(barcode) {
         projects.info <-  cbind("submitter_id" = submitter_id, projects.info)
 
         suppressWarnings({
-            df <- left_join(df,
-                            projects.info,
-                            by = "submitter_id")
+            df <- left_join(
+                df,
+                projects.info,
+                by = "submitter_id"
+            )
         })
     } else {
 
@@ -1922,7 +1967,9 @@ getBarcodeInfo <- function(barcode) {
                 .fun = function(x){
                     projects.info[x,] %>% # replicate diagnoses the number of samples
                         as.data.frame() %>%
-                        dplyr::slice(rep(dplyr::row_number(), sum(results$submitter_sample_ids[[x]] %in% barcode)))})
+                        dplyr::slice(
+                            rep(dplyr::row_number(), sum(results$submitter_sample_ids[[x]] %in% barcode)))
+                })
         }
 
         df <- dplyr::bind_cols(df,projects.info)

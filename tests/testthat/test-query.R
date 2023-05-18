@@ -96,21 +96,29 @@ test_that("GDCquery can filter by barcode", {
     )
     expect_true(all(sort(barcode) == sort(unique(query$results[[1]]$cases))))
     barcode <- c( "TCGA-OR-A5KU-01A-11D-A29H-01", "TCGA-OR-A5JK-01A-11D-A29H-01")
-    query <- GDCquery(project = "TCGA-ACC",
-                      data.category = "Copy Number Variation",
-                      data.type = "Copy Number Segment",
-                      barcode = barcode)
+    query <- GDCquery(
+        project = "TCGA-ACC",
+        data.category = "Copy Number Variation",
+        data.type = "Copy Number Segment",
+        barcode = barcode
+    )
     expect_true(all(sort(barcode) == sort(unique(query$results[[1]]$cases))))
     barcode <- c("TCGA-OR-A5KU", "TCGA-OR-A5JK")
-    query <- GDCquery(project = "TCGA-ACC",
-                      data.category = "Clinical",
-                      file.type = "xml",
-                      barcode = barcode)
+    query <- GDCquery(
+        project = "TCGA-ACC",
+        data.category = "Clinical",
+        data.format = "bcr xml",
+        barcode = barcode
+    )
     expect_true(all(sort(barcode) == sort(unique(query$results[[1]]$cases))))
 
     # Will work if barcode was not found
-    query <- GDCquery(project = "TCGA-BRCA", data.category = "Clinical",file.type = "xml",
-                      barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q"))
+    query <- GDCquery(
+        project = "TCGA-BRCA",
+        data.category = "Clinical",
+        data.format = "bcr xml",
+        barcode = c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q")
+    )
     expect_true(!all(c("TCGA-3C-AALK","TCGA-A2-A04Q","TCGA-A4-A04Q") %in% query$results[[1]]$cases))
 })
 
@@ -119,13 +127,19 @@ test_that("GDCquery can filter by access level", {
     skip_on_bioc()
     skip_if_offline()
 
-    query <- GDCquery(project = "TCGA-KIRP",
-                      data.category = "Simple Nucleotide Variation",
-                      access = "open")
+    query <- GDCquery(
+        project = "TCGA-KIRP",
+        data.category = "Simple Nucleotide Variation",
+        access = "open"
+    )
     expect_equal(unique(query$results[[1]]$access),"open")
-    query <- GDCquery(project = "TCGA-KIRP",
-                      data.category = "Simple Nucleotide Variation",
-                      access = "controlled")
+
+    query <- GDCquery(
+        project = "TCGA-KIRP",
+        data.category = "Simple Nucleotide Variation",
+        data.type = "Raw Simple Somatic Mutation",
+        access = "controlled"
+    )
     expect_equal(unique(query$results[[1]]$access),"controlled")
 })
 
@@ -133,7 +147,7 @@ test_that("getNbFiles and getNbCases works", {
     skip_on_bioc()
     skip_if_offline()
 
-    aux <- getProjectSummary("TCGA-LUAD",TRUE)
+    aux <- getProjectSummary(project = "TCGA-LUAD")
     files <- getNbFiles("TCGA-LUAD","Raw microarray data")
     cases <- getNbCases("TCGA-LUAD","Raw microarray data")
     expect_true(cases < files)

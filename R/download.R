@@ -64,8 +64,6 @@ GDCdownload <- function(
         stop("We can only download one data type. Please use data.type argument in GDCquery to filter results.")
     }
 
-    source <- "harmonized"
-
     dir.create(directory, showWarnings = FALSE, recursive = TRUE)
     for(proj in unique(unlist(query$project))){
         message("Downloading data for project ", proj)
@@ -77,7 +75,7 @@ GDCdownload <- function(
 
         path <- unique(
             file.path(
-                proj, source,
+                proj,
                 gsub(" ","_", results$data_category),
                 gsub(" ","_",results$data_type))
         )

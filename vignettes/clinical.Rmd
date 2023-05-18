@@ -74,17 +74,6 @@ query <- GDCquery(
 GDCdownload(query)
 clinical.BCRtab.all <- GDCprepare(query)
 names(clinical.BCRtab.all)
-
-query <- GDCquery(
-    project = "TCGA-ACC", 
-    data.category = "Clinical",
-    data.type = "Clinical Supplement", 
-    data.format = "BCR Biotab",
-    file.type = "radiation"
-)
-GDCdownload(query)
-clinical.BCRtab.radiation <- GDCprepare(query)
-
 ```
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
@@ -219,7 +208,7 @@ Below are several examples fetching clinical data directly from the clinical XML
 query <- GDCquery(
     project = "TCGA-COAD", 
     data.category = "Clinical", 
-    file.type = "xml", 
+    data.format = "bcr xml",
     barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")
 )
 GDCdownload(query)
@@ -376,7 +365,7 @@ getclinical <- function(proj){
     message(proj)
     while(1){
         result = tryCatch({
-            query <- GDCquery(project = proj, data.category = "Clinical",file.type = "xml")
+            query <- GDCquery(project = proj, data.category = "Clinical",data.format = "bcr xml")
             GDCdownload(query)
             clinical <- GDCprepare_clinic(query, clinical.info = "patient")
             for(i in c("admin","radiation","follow_up","drug","new_tumor_event")){

@@ -170,6 +170,7 @@ TCGAquery_MatchedCoupledSampleTypes <- function(barcode,typesample){
 #' @export
 #' @importFrom data.table rbindlist as.data.table
 #' @importFrom jsonlite fromJSON
+#' @importFrom dplyr summarise
 #' @examples
 #' clinical <- GDCquery_clinic(
 #'    project = "TCGA-ACC",
@@ -348,7 +349,10 @@ GDCquery_clinic <- function(
                                 # we will collapse them into one single row
                                 # concatanating all columns using ;
                                 aux <- x %>% dplyr::group_by(submitter_id) %>%
-                                    summarise(across(everything(),~ paste(unique(.), collapse = ";")))
+                                    dplyr::summarise(
+                                        across(everything(),~ paste(unique(.), collapse = ";"))
+                                    )
+
                                 aux$treatments <- list(dplyr::bind_rows(x$treatments))
                                 aux
                             }
@@ -440,7 +444,7 @@ GDCquery_clinic <- function(
 #' query <- GDCquery(
 #'   project = "TCGA-COAD",
 #'   data.category = "Clinical",
-#'   file.type = "xml",
+#'   data.format = "bcr xml",
 #'   barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")
 #' )
 #' GDCdownload(query)
@@ -452,7 +456,7 @@ GDCquery_clinic <- function(
 #' query <- GDCquery(
 #'    project = "TCGA-COAD",
 #'    data.category = "Biospecimen",
-#'    file.type = "xml",
+#'    data.format = "bcr xml",
 #'    data.type = "Biospecimen Supplement",
 #'    barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")
 #' )
@@ -503,9 +507,9 @@ GDCprepare_clinic <- function(
     }
 
     # Get all the clincal xml files
-    source <- "harmonized"
+
     files <- file.path(
-        query$results[[1]]$project, source,
+        query$results[[1]]$project,
         gsub(" ","_",query$results[[1]]$data_category),
         gsub(" ","_",query$results[[1]]$data_type),
         gsub(" ","_",query$results[[1]]$file_id),
@@ -586,16 +590,18 @@ GDCprepare_clinic <- function(
         message("Updating days_to_last_followup and vital_status from follow_up information using last entry")
         followup <- parseFollowup(files,xpath,clinical.info)
 
-        followup_last <- followup %>% dplyr::group_by(bcr_patient_barcode) %>% dplyr::summarise(
-            days_to_last_followup = max(as.numeric(days_to_last_followup),na.rm = TRUE),
-            vital_status = vital_status[
-                ifelse(
-                    any(followup$days_to_last_followup %in% ""),
-                    which(followup$days_to_last_followup %in% ""),
-                    which.max(days_to_last_followup)
-                )
-            ]
-        )
+        followup_last <- followup %>%
+            dplyr::group_by(bcr_patient_barcode) %>%
+            dplyr::summarise(
+                days_to_last_followup = max(as.numeric(days_to_last_followup),na.rm = TRUE),
+                vital_status = vital_status[
+                    ifelse(
+                        any(followup$days_to_last_followup %in% ""),
+                        which(followup$days_to_last_followup %in% ""),
+                        which.max(days_to_last_followup)
+                    )
+                ]
+            )
         clin$days_to_last_followup <- followup_last$days_to_last_followup[match(clin$bcr_patient_barcode,followup_last$bcr_patient_barcode)]
         clin$vital_status <- followup_last$vital_status[match(clin$bcr_patient_barcode,followup_last$bcr_patient_barcode)]
     }

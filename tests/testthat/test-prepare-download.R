@@ -124,20 +124,21 @@ test_that("Non TCGA data is processed", {
     skip_on_bioc()
     skip_if_offline()
 
-    proj <- "MMRF-COMMPASS"
     query <- GDCquery(
-        project = proj,
-        data.category = "Transcriptome Profiling",
-        data.type = "Gene Expression Quantification",
-        workflow.type = "STAR - Counts"
-    )
-    query <- GDCquery(
-        project = proj,
+        project = "MMRF-COMMPASS",
         data.category = "Transcriptome Profiling",
         data.type = "Gene Expression Quantification",
         workflow.type = "STAR - Counts",
-        barcode = getResults(query)$cases[1:4]
+        barcode = c(
+            "MMRF_2737_1_BM_CD138pos_T2_TSMRU_L14993",
+            "MMRF_2739_1_BM_CD138pos_T2_TSMRU_L15000",
+            "MMRF_1865_1_BM_CD138pos_T2_TSMRU_L05342"
+        )
     )
+    GDCdownload(query,directory = "ex")
+    data <- GDCprepare(query,directory = "ex")
+    expect_true(ncol(data) == 3)
+    unlink("ex", recursive = TRUE, force = TRUE)
 })
 
 test_that("Gene Level Copy Number is being correctly prepare", {
@@ -155,6 +156,26 @@ test_that("Gene Level Copy Number is being correctly prepare", {
     data <- GDCprepare(query,directory = "ex")
 
     expect_true(all(substr(colnames(data),1,12) == c("TCGA-OR-A5JD","TCGA-OR-A5J7")))
+    expect_true(data$days_to_last_follow_up == c(3038,NA))
+    unlink("ex", recursive = TRUE, force = TRUE)
+})
+
+test_that("Gene Level Copy Number is being correctly prepare for CPTAC-3", {
+    skip_on_bioc()
+    skip_if_offline()
+
+    query_CPTAC = GDCquery(
+        project = "CPTAC-3",
+        data.category = "Copy Number Variation",
+        data.type = "Gene Level Copy Number",
+        barcode = c("CPT0115240002","CPT0088960002")
+    )
+
+    GDCdownload(query_CPTAC,directory = "ex")
+    data <- GDCprepare(query_CPTAC,directory = "ex")
+    expect_true(ncol(data) == 2)
+    expect_true(data$submitter_id == c("C3L-02544","C3N-01179"))
+    expect_true(data$days_to_last_follow_up == c("889","1816"))
     unlink("ex", recursive = TRUE, force = TRUE)
 })
 

@@ -11,7 +11,6 @@ GDCquery(
   workflow.type,
   access,
   platform,
-  file.type,
   barcode,
   data.format,
   experimental.strategy,
