@@ -74,17 +74,6 @@ query <- GDCquery(
 GDCdownload(query)
 clinical.BCRtab.all <- GDCprepare(query)
 names(clinical.BCRtab.all)
-
-query <- GDCquery(
-    project = "TCGA-ACC", 
-    data.category = "Clinical",
-    data.type = "Clinical Supplement", 
-    data.format = "BCR Biotab",
-    file.type = "radiation"
-)
-GDCdownload(query)
-clinical.BCRtab.radiation <- GDCprepare(query)
-
 ```
 
 ```{r  echo=TRUE, message=FALSE, warning=FALSE}
@@ -219,7 +208,7 @@ Below are several examples fetching clinical data directly from the clinical XML
 query <- GDCquery(
     project = "TCGA-COAD", 
     data.category = "Clinical", 
-    file.type = "xml", 
+    data.format = "bcr xml",
     barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")
 )
 GDCdownload(query)
@@ -267,65 +256,6 @@ clinical.admin %>%
 ```
 
 
-# Microsatellite data
-
-
-MSI-Mono-Dinucleotide Assay is performed to test a panel of four mononucleotide repeat loci (polyadenine tracts BAT25, BAT26, BAT40, and transforming growth factor receptor type II) and three dinucleotide repeat loci (CA repeats in D2S123, D5S346, and D17S250). Two additional pentanucleotide loci (Penta D and Penta E) are included in this assay to evaluate sample identity. Multiplex fluorescent-labeled PCR and capillary electrophoresis were used to identify MSI if a variation in the number of microsatellite repeats was detected between tumor and matched non-neoplastic tissue or mononuclear blood cells. Equivocal or failed markers were re-evaluated by singleplex PCR.
-
-classifications: microsatellite-stable (MSS), low level MSI (MSI-L) if less than 40% of markers were altered and high level MSI (MSI-H) if greater than 40% of markers were altered.
-
-Reference: [TCGA wiki](https://wiki.nci.nih.gov/display/TCGA/Microsatellite+data)
-
-Level 3 data is included in BCR clinical-based submissions and can be downloaded as follows:
-
-```{r msi, results = 'hide', echo=TRUE, message=FALSE, warning=FALSE,eval = F}
-query <- GDCquery(
-    project = "TCGA-COAD", 
-    data.category = "Other",
-    legacy = TRUE,
-    access = "open",
-    data.type = "Auxiliary test",
-    barcode = c("TCGA-AD-A5EJ","TCGA-DM-A0X9")
-)  
-GDCdownload(query)
-msi_results <- GDCprepare_clinic(query, "msi")
-```
-
-```{r  echo=TRUE, message=FALSE, warning=FALSE}
-msi_results %>% DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
-```
-
-
-# Tissue slide image (SVS format)
-
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
-# Tissue slide image files from legacy database
-query_legacy <- GDCquery(
-    project = "TCGA-COAD", 
-    data.category = "Clinical", 
-    data.type = "Tissue slide image",
-    legacy = TRUE,
-    barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")
-) 
-
-# Tissue slide image files from harmonized database
-query_harmonized <- GDCquery(
-    project = "TCGA-OV",
-    data.category = "Biospecimen",
-    data.type = 'Slide Image'
-)
-```
-
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-query_legacy %>% 
-    getResults %>% 
-    DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
-
-query_harmonized  %>% 
-    getResults %>% 
-    head  %>% 
-    DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
-```
 
 # Diagnostic Slide (SVS format)
 
@@ -347,102 +277,6 @@ query_harmonized  %>%
     DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
 ```
 
-
-
-# Legacy archive files
-The clinical data types available in legacy database are:
-
-* Biospecimen data (Biotab format)
-* Tissue slide image (SVS format)
-* Clinical Supplement (XML format)
-* Pathology report (PDF)
-* Clinical data (Biotab format)
-
-## Pathology report (PDF)
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
-# Pathology report from legacy portal 
-query_legacy <- GDCquery(
-    project = "TCGA-COAD", 
-    data.category = "Clinical", 
-    data.type = "Pathology report",
-    legacy = TRUE,
-    barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")
-)  
-```
-
-```{r  echo=TRUE, message=FALSE, warning=FALSE}
-query_legacy %>% 
-    getResults %>% 
-    DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
-```
-
-## Tissue slide image (SVS format)
-
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
-# Tissue slide image
-query <- GDCquery(
-    project = "TCGA-COAD", 
-    data.category = "Clinical", 
-    data.type = "Tissue slide image",
-    legacy = TRUE,
-    barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")
-) 
-```
-
-```{r  echo = TRUE, message = FALSE, warning = FALSE}
-query %>% 
-    getResults %>% 
-    DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
-```
-
-## Clinical Supplement (XML format)
-
-```{r results = 'hide', echo = TRUE, message = FALSE, warning = FALSE}
-# Clinical Supplement
-query <- GDCquery(
-    project = "TCGA-COAD", 
-    data.category = "Clinical", 
-    data.type = "Clinical Supplement",
-    legacy = TRUE,
-    barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")
-) 
-```
-
-```{r  echo=TRUE, message=FALSE, warning=FALSE}
-query %>% 
-    getResults %>% 
-    DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
-```
-
-
-## Clinical data (Biotab format)
-```{r biotab_legacy,results = 'hide', echo=TRUE, message=FALSE, warning=FALSE}
-# Clinical data
-query <- GDCquery(
-    project = "TCGA-COAD", 
-    data.category = "Clinical", 
-    data.type = "Clinical data",
-    legacy = TRUE,
-    file.type = "txt"
-)  
-```
-
-```{r  echo=TRUE, message=FALSE, warning=FALSE}
-query %>% 
-    getResults %>% 
-    select(-matches("cases"))%>% 
-    DT::datatable(options = list(scrollX = TRUE, keys = TRUE))
-```
-
-```{r results = 'hide', echo=TRUE, message=FALSE, warning=FALSE, eval = FALSE}
-GDCdownload(query)
-clinical_biotab <- GDCprepare(query)
-```
-
-```{r  echo=TRUE, message=FALSE, warning=FALSE, eval = FALSE}
-names(clinical_biotab)
-datatable(clinical_biotab$clinical_radiation_coad, options = list(scrollX = TRUE, keys = TRUE))
-```
 
 # Filter functions 
 
@@ -531,7 +365,7 @@ getclinical <- function(proj){
     message(proj)
     while(1){
         result = tryCatch({
-            query <- GDCquery(project = proj, data.category = "Clinical",file.type = "xml")
+            query <- GDCquery(project = proj, data.category = "Clinical",data.format = "bcr xml")
             GDCdownload(query)
             clinical <- GDCprepare_clinic(query, clinical.info = "patient")
             for(i in c("admin","radiation","follow_up","drug","new_tumor_event")){

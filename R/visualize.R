@@ -871,7 +871,6 @@ unlistlabels <- function(lab) {
 #' @importFrom data.table dcast setDT setDF :=
 #' @examples
 #' \dontrun{
-#' library(maftools)
 #' library(dplyr)
 #' query <- GDCquery(
 #'    project = "TCGA-CHOL",
@@ -928,7 +927,6 @@ TCGAvisualize_oncoprint <- function(
         heatmap.legend.side = "bottom",
         annotation.legend.side = "bottom"
 ){
-
 
     check_package("ComplexHeatmap")
     check_package("circlize")

@@ -4,14 +4,12 @@
 \alias{getNbCases}
 \title{Get Number of cases in GDC for a project}
 \usage{
-getNbCases(project, data.category, legacy = FALSE)
+getNbCases(project, data.category)
 }
 \arguments{
 \item{project}{A  GDC project}
 
 \item{data.category}{A  GDC project data category}
-
-\item{legacy}{Select between Harmonized or Legacy database}
 }
 \description{
 Get Number of cases in GDC for a project

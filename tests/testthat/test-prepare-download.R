@@ -1,17 +1,16 @@
-context("Download AND PREPARE")
-
-
+context("Download and prepare")
 
 test_that("GDCdownload API method is working ", {
     skip_on_bioc()
     skip_if_offline()
 
-    cases <-  c(
+    cases <- c(
         "TCGA-PA-A5YG-01A-11R-A29S-07",
         "TCGA-OR-A5JX-01A-11R-A29S-07",
         "TCGA-PK-A5HA-01A-11R-A29S-07",
         "TCGA-OR-A5KY-01A-11R-A29S-07"
     )
+
     acc <- GDCquery(
         project =  c("TCGA-ACC"),
         data.category = "Transcriptome Profiling",
@@ -20,8 +19,8 @@ test_that("GDCdownload API method is working ", {
         barcode = substr(cases,1,12)
     )
     GDCdownload(acc, method = "api", directory = "ex")
-
     obj <- GDCprepare(acc,  directory = "ex",summarizedExperiment = TRUE)
+
     expect_true(all(substr(colnames(obj),1,12) == substr(cases,1,12)))
     expect_true(all(obj$barcode == cases))
 
@@ -46,9 +45,6 @@ test_that("GDCdownload API method is working ", {
     expect_true(all(query$results[[1]]$sample.submitter_id == data$sample_submitter_id))
 })
 
-
-
-
 test_that("getBarcodeInfo works", {
     skip_on_bioc()
     skip_if_offline()
@@ -61,11 +57,14 @@ test_that("getBarcodeInfo works", {
     x <- getBarcodeInfo(c("TARGET-20-PARUDL-03A"))
     expect_true(all(cols %in% colnames(x)))
 
-    samples <- c("HCM-CSHL-0063-C18-85A",
-                 "HCM-CSHL-0065-C20-06A",
-                 "HCM-CSHL-0065-C20-85A",
-                 "HCM-CSHL-0063-C18-01A")
+    samples <- c(
+        "HCM-CSHL-0063-C18-85A",
+        "HCM-CSHL-0065-C20-06A",
+        "HCM-CSHL-0065-C20-85A",
+        "HCM-CSHL-0063-C18-01A"
+    )
     x <- colDataPrepare(samples)
+
     expect_true(all(rownames(x) == samples))
     expect_true(x[x$sample_submitter_id == "HCM-CSHL-0065-C20-06A","gender"] == "male")
     expect_true(x[x$sample_submitter_id == "HCM-CSHL-0065-C20-06A","tumor_grade"] == "G2")
@@ -102,38 +101,44 @@ test_that("colDataPrepare handle replicates", {
 test_that("GDCprepare accepts more than one project", {
     skip_on_bioc()
     skip_if_offline()
-    cases <-  c("TCGA-OR-A5JX-01A", "TCGA-OR-A5J3-01A",
-                "TCGA-06-0680-11A","TCGA-14-0871-01A")
+    cases <-  c(
+        "TCGA-OR-A5JX-01A",
+        "TCGA-OR-A5J3-01A",
+        "TCGA-06-0680-11A",
+        "TCGA-14-0871-01A"
+    )
     expect_true(all(c("TCGA-ACC","TCGA-GBM") %in% colDataPrepare(cases)$project_id))
-    acc.gbm <- GDCquery(project =  c("TCGA-ACC","TCGA-GBM"),
-                        data.category = "Transcriptome Profiling",
-                        data.type = "Gene Expression Quantification",
-                        workflow.type = "STAR - Counts",
-                        barcode = substr(cases,1,12))
-    GDCdownload(acc.gbm, method = "api", directory = "ex")
-    obj <- GDCprepare(acc.gbm,  directory = "ex")
+    query_acc_gbm <- GDCquery(
+        project =  c("TCGA-ACC","TCGA-GBM"),
+        data.category = "Transcriptome Profiling",
+        data.type = "Gene Expression Quantification",
+        workflow.type = "STAR - Counts",
+        barcode = substr(cases, 1, 12)
+    )
+    GDCdownload(query_acc_gbm, method = "api", directory = "ex")
+    obj <- GDCprepare(query_acc_gbm,  directory = "ex")
     expect_true(all(c("TCGA-ACC","TCGA-GBM") %in% SummarizedExperiment::colData(obj)$project_id))
 })
 
 test_that("Non TCGA data is processed", {
     skip_on_bioc()
     skip_if_offline()
-    proj <- "MMRF-COMMPASS"
+
     query <- GDCquery(
-        project = proj,
-        data.category = "Transcriptome Profiling",
-        data.type = "Gene Expression Quantification",
-        workflow.type = "STAR - Counts"
-    )
-    query <- GDCquery(
-        project = proj,
+        project = "MMRF-COMMPASS",
         data.category = "Transcriptome Profiling",
         data.type = "Gene Expression Quantification",
         workflow.type = "STAR - Counts",
-        barcode = getResults(query)$cases[1:4]
+        barcode = c(
+            "MMRF_2737_1_BM_CD138pos_T2_TSMRU_L14993",
+            "MMRF_2739_1_BM_CD138pos_T2_TSMRU_L15000",
+            "MMRF_1865_1_BM_CD138pos_T2_TSMRU_L05342"
+        )
     )
-    #GDCdownload(query)
-    #data <- GDCprepare(query)
+    GDCdownload(query,directory = "ex")
+    data <- GDCprepare(query,directory = "ex")
+    expect_true(ncol(data) == 3)
+    unlink("ex", recursive = TRUE, force = TRUE)
 })
 
 test_that("Gene Level Copy Number is being correctly prepare", {
@@ -151,7 +156,27 @@ test_that("Gene Level Copy Number is being correctly prepare", {
     data <- GDCprepare(query,directory = "ex")
 
     expect_true(all(substr(colnames(data),1,12) == c("TCGA-OR-A5JD","TCGA-OR-A5J7")))
-    unlink("ex",recursive = TRUE,force = TRUE)
+    expect_equal(data$days_to_last_follow_up,c(3038,NA))
+    unlink("ex", recursive = TRUE, force = TRUE)
+})
+
+test_that("Gene Level Copy Number is being correctly prepare for CPTAC-3", {
+    skip_on_bioc()
+    skip_if_offline()
+
+    query_CPTAC = GDCquery(
+        project = "CPTAC-3",
+        data.category = "Copy Number Variation",
+        data.type = "Gene Level Copy Number",
+        barcode = c("CPT0115240002","CPT0088960002")
+    )
+
+    GDCdownload(query_CPTAC,directory = "ex")
+    data <- GDCprepare(query_CPTAC,directory = "ex")
+    expect_true(ncol(data) == 2)
+    expect_equal(data$submitter_id, c("C3L-02544","C3N-01179"))
+    expect_equal(data$days_to_last_follow_up, c("889","1816"))
+    unlink("ex", recursive = TRUE, force = TRUE)
 })
 
 test_that("DNAm files is processed correctly", {
@@ -168,28 +193,6 @@ test_that("DNAm files is processed correctly", {
     GDCdownload(query_met.hg38)
     data.hg38 <- GDCprepare(query_met.hg38)
     expect_lt(abs(assay(data.hg38)["cg16739396","TCGA-E2-A158-01A-11D-A12E-05"] - 0.0688655418909783),10^-10)
-})
-
-test_that("IDAT files is processed", {
-    skip_on_bioc()
-    skip_if_offline()
-
-    proj <- "TCGA-LUAD"
-    query <- GDCquery(
-        project = proj,
-        data.category = "Raw microarray data",
-        data.type = "Raw intensities",
-        experimental.strategy = "Methylation array",
-        legacy = TRUE,
-        file.type = ".idat",
-        barcode = "TCGA-55-7724",
-        platform = "Illumina Human Methylation 450"
-    )
-    #tryCatch(GDCdownload(query, method = "api", files.per.chunk = 20),
-    #         error = function(e) GDCdownload(query, method = "client"))
-    #betas <- GDCprepare(query)
-    #expect_true(nrow(betas) == 485577)
-    #expect_true(ncol(betas) == 1)
 })
 
 test_that("Prepare samples without clinical data", {
@@ -214,29 +217,9 @@ test_that("Prepare multiple samples from the same patient", {
     expect_true("age_at_diagnosis" %in% colnames(x))
 })
 
-test_that("Preparing HT_HG-U133A as SE works", {
-    skip_on_bioc()
-    skip_if_offline()
-
-    query <- GDCquery(
-        project = "TCGA-GBM",
-        legacy = TRUE,
-        data.category = "Gene expression",
-        data.type = "Gene expression quantification",
-        platform = c("HT_HG-U133A")
-    )
-    query$results[[1]] <- query$results[[1]][1:2,]
-    GDCdownload(query, method = "api", files.per.chunk = 100)
-    se <- GDCprepare(query, summarizedExperiment = TRUE)
-
-    expect_true(is(se,"SummarizedExperiment"))
-})
-
-
 test_that("Preparing RRPA files with number of proteins works", {
     skip_on_bioc()
     skip_if_offline()
-
 
     query_rppa <- GDCquery(
         project = c("TCGA-COAD"),
@@ -249,9 +232,12 @@ test_that("Preparing RRPA files with number of proteins works", {
 
     GDCdownload(query_rppa)
 
-    expect_message(object = {
-        data_rppa <- GDCprepare(query_rppa)
-    },regexp = "Some files have a  different number of proteins, we will introduce NA for the missing values")
+    expect_message(
+        object = {
+            data_rppa <- GDCprepare(query_rppa)
+        },
+        regexp = "Some files have a  different number of proteins, we will introduce NA for the missing values"
+    )
 
     expect_true(is(data_rppa,"data.frame"))
 })

@@ -3,7 +3,6 @@
 #'   Uses GDC API to search for search, it searches for both controlled and
 #'   open-access data.
 #'   For GDC data arguments project, data.category, data.type and workflow.type should be used
-#'   For the legacy data arguments project, data.category, platform and/or file.extension should be used.
 #'   Please, see the vignette for a table with the possibilities.
 #' @param project A list of valid project (see list with TCGAbiolinks:::getGDCprojects()$project_id)]
 #' \itemize{
@@ -75,33 +74,15 @@
 #' \item{ Simple Nucleotide Variation }
 #' \item{ Transcriptome Profiling }
 #' }
-#' List for legacy archive
-#' \itemize{
-#' \item{ Biospecimen }
-#' \item{ Clinical }
-#' \item{ Copy number variation }
-#' \item{ DNA methylation }
-#' \item{ Gene expression }
-#' \item{ Protein expression }
-#' \item{ Raw microarray data }
-#' \item{ Raw sequencing data }
-#' \item{ Simple nucleotide variation }
-#' }
 #' @param data.type A data type to filter the files to download
 #' For the complete list please check the vignette.
 #' @param sample.type A sample type to filter the files to download
 #' @param barcode A list of barcodes to filter the files to download
-#' @param legacy Search in the legacy repository
 #' @param data.format Data format filter ("VCF", "TXT", "BAM","SVS","BCR XML","BCR SSF XML",
 #' "TSV", "BCR Auxiliary XML", "BCR OMF XML", "BCR Biotab", "MAF", "BCR PPS XML", "XLSX")
-#' @param file.type To be used in the legacy database for some platforms,
-#' to define which file types to be used.
 #' @param workflow.type GDC workflow type
-#' @param experimental.strategy Filter to experimental strategy. Harmonized: WXS, RNA-Seq, miRNA-Seq, Genotyping Array.
-#' Legacy:  WXS, RNA-Seq, miRNA-Seq, Genotyping Array,
-#' DNA-Seq, Methylation array, Protein expression array, WXS,CGH array, VALIDATION, Gene expression array,WGS,
-#' MSI-Mono-Dinucleotide Assay, miRNA expression array, Mixed strategies, AMPLICON, Exon array,
-#' Total RNA-Seq, Capillary sequencing, Bisulfite-Seq
+#' @param experimental.strategy Filter to experimental strategy.
+#' Harmonized: WXS, RNA-Seq, miRNA-Seq, Genotyping Array.
 #' @param access Filter by access type. Possible values: controlled, open
 #' @param platform Example:
 #' \tabular{ll}{
@@ -157,19 +138,6 @@
 #'    data.type = "Masked Copy Number Segment",
 #'    sample.type = c("Primary Tumor")
 #' )
-#' query.met <- GDCquery(
-#'    project = c("TCGA-GBM","TCGA-LGG"),
-#'    legacy = TRUE,
-#'    data.category = "DNA methylation",
-#'    platform = "Illumina Human Methylation 450"
-#' )
-#' query <- GDCquery(
-#'    project = "TCGA-ACC",
-#'    data.category =  "Copy number variation",
-#'    legacy = TRUE,
-#'    file.type = "hg19.seg",
-#'    barcode = c("TCGA-OR-A5LR-01A-11D-A29H-01")
-#' )
 #' }
 #' @return A data frame with the results and the parameters used
 #' @importFrom jsonlite fromJSON
@@ -183,10 +151,8 @@ GDCquery <- function(
         data.category,
         data.type,
         workflow.type,
-        legacy = FALSE,
         access,
         platform,
-        file.type,
         barcode,
         data.format,
         experimental.strategy,
@@ -201,31 +167,31 @@ GDCquery <- function(
         } else if(all(sample.type == FALSE)) {
             sample.type <- NA
         }
+
         if(missing(data.type)) {
             data.type <- NA
         } else if(data.type == FALSE) {
             data.type <- NA
         }
+
         if(missing(barcode)) {
             barcode <- NA
         } else if(length(barcode) == 1) {
             if(barcode == FALSE) barcode <- NA
         }
+
         if(missing(platform)) {
             platform <- NA
         } else if(any(platform == FALSE)) {
             platform <- NA
         }
-        if(missing(file.type)) {
-            file.type <- NA
-        } else if(file.type == FALSE) {
-            file.type <- NA
-        }
+
         if(missing(workflow.type)) {
             workflow.type <- NA
         } else if(workflow.type == FALSE) {
             workflow.type <- NA
         }
+
         if(missing(experimental.strategy)) {
             experimental.strategy <- NA
         } else if(experimental.strategy == FALSE) {
@@ -236,6 +202,7 @@ GDCquery <- function(
         } else if(access == FALSE) {
             access <- NA
         }
+
         if(missing(data.format)) {
             data.format <- NA
         } else if(data.format == FALSE) {
@@ -243,11 +210,11 @@ GDCquery <- function(
         }
     })
     print.header("GDCquery: Searching in GDC database","section")
-    message("Genome of reference: ",ifelse(legacy,"hg19","hg38"))
+    message("Genome of reference: hg38")
     # Check arguments
     checkProjectInput(project)
-    checkDataCategoriesInput(project, data.category, legacy)
-    if(!is.na(data.type)) checkDataTypeInput(legacy = legacy, data.type = data.type)
+    checkDataCategoriesInput(project, data.category)
+    if(!is.na(data.type)) checkDataTypeInput(data.type = data.type)
     if(!any(is.na(sample.type))) checkBarcodeDefinition(sample.type)
 
     results <- NULL
@@ -257,21 +224,27 @@ GDCquery <- function(
             project = proj,
             data.category = data.category,
             data.type = data.type,
-            legacy = legacy,
             workflow.type = workflow.type,
             platform = platform,
-            file.type = file.type,
             files.access = access,
             experimental.strategy = experimental.strategy,
             sample.type = sample.type
         )
         message("ooo Project: ", proj)
+        original_timeout <- getOption('timeout')
+        options(timeout=600)
         json  <- tryCatch(
             getURL(url,fromJSON,timeout(600),simplifyDataFrame = TRUE),
             error = function(e) {
                 message(paste("Error: ", e, sep = " "))
                 message("We will retry to access GDC!")
-                fromJSON(content(getURL(url,GET,timeout(600)), as = "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+                fromJSON(
+                    content(
+                        getURL(url,GET,timeout(600)),
+                        as = "text",
+                        encoding = "UTF-8"
+                    ), simplifyDataFrame = TRUE
+                )
             }
         )
         if(json$data$pagination$count == 0) {
@@ -279,10 +252,8 @@ GDCquery <- function(
                 project = proj,
                 data.category = data.category,
                 data.type = data.type,
-                legacy = legacy,
                 workflow.type = NA,
                 platform = NA,
-                file.type = file.type,
                 experimental.strategy = experimental.strategy,
                 files.access = access,
                 sample.type = sample.type
@@ -296,6 +267,7 @@ GDCquery <- function(
                 }
             )
         }
+        options(timeout=original_timeout)
 
 
         json$data$hits$acl <- NULL
@@ -367,8 +339,12 @@ GDCquery <- function(
             message("ooo By experimental.strategy")
             results <- results[tolower(results$experimental_strategy) %in% tolower(experimental.strategy),]
         } else {
-            message(paste0("The argument experimental_strategy does not match any of the results.\nPossible values:",
-                           paste(unique(results$experimental_strategy),collapse = "\n=>")))
+            message(
+                paste0(
+                    "The argument experimental_strategy does not match any of the results.\nPossible values:",
+                    paste(unique(results$experimental_strategy),collapse = "\n=>")
+                )
+            )
         }
     }
 
@@ -377,8 +353,12 @@ GDCquery <- function(
             message("ooo By data.format")
             results <- results[tolower(results$data_format) %in% tolower(data.format),]
         } else {
-            message(paste0("The argument experimental_strategy does not match any of the results.\nPossible values:",
-                           paste(unique(results$data_format),collapse = "\n=>")))
+            message(
+                paste0(
+                    "The argument experimental_strategy does not match any of the results.\nPossible values:",
+                    paste(unique(results$data_format),collapse = "\n=>")
+                )
+            )
         }
     }
 
@@ -402,57 +382,12 @@ GDCquery <- function(
         results <- results[results$analysis_workflow_type %in% workflow.type,]
     }
 
-
-    # Filter by file.type
-    if(!is.na(file.type)){
-        message("ooo By file.type")
-        pat <- file.type
-        invert <- FALSE
-
-        # RNA-seq
-        if(file.type == "normalized_results") pat <- "normalized_results"
-        if(file.type == "results") pat <- "[^normalized_]results"
-
-
-        if(file.type == "nocnv_hg18" | file.type == "nocnv_hg18.seg") pat <- "nocnv_hg18"
-        if(file.type == "cnv_hg18" | file.type == "hg18.seg") pat <- "[^nocnv_]hg18.seg"
-        if(file.type == "nocnv_hg19" | file.type == "nocnv_hg19.seg") pat <- "nocnv_hg19"
-        if(file.type == "cnv_hg19" | file.type == "hg19.seg") pat <- "[^nocnv_]hg19.seg"
-
-        # miRNA-seq
-        # examples:
-        # TCGA-E9-A1R5-01A-11R-A14L-13.mirna.quantification.txt
-        if(file.type == "mirna") {
-            pat <-  "hg19.*mirna"
-            invert <- TRUE
-        }
-        # TCGA-F5-6464-01A-11H-1735-13.hg19.mirna.quantification.txt
-        if(file.type == "hg19.mirna") pat <- "hg19.mirna"
-
-        # TCGA-AC-A4ZE-01A-11R-A41G-13.hg19.mirbase20.mirna.quantification.txt
-        if(file.type == "hg19.mirbase20.mirna") pat <- "hg19.mirbase20.mirna"
-
-        # TCGA-CJ-4878-01A-01R-1304-13.isoform.quantification.txt
-        if(file.type == "hg19.isoform") pat <- "hg19.*isoform"
-        if(file.type == "isoform") {
-            pat <-  "hg19.*isoform"
-            invert <- TRUE
-        }
-        idx <- grep(pat,results$file_name,invert = invert)
-        if(length(idx) == 0) {
-            print(knitr::kable(sort(results$file_name)[1:10],col.names = "Files"))
-            stop("We were not able to filter using this file type. Examples of available files are above. Please check the vignette for possible entries")
-        }
-        results <- results[idx,]
-    }
-
     # get barcode of the samples
     # 1) Normally for each sample we will have only single information
     # however the mutation call uses both normal and tumor which are both
     # reported by the API
     if(!data.category %in% c(
         "Clinical",
-        "Copy Number Variation",
         "Biospecimen",
         "Other",
         "Simple Nucleotide Variation",
@@ -530,11 +465,12 @@ GDCquery <- function(
         # Auxiliary test files does not have information linked toit.
         # get frm file names
         results$cases <- str_extract_all(results$file_name,"TCGA-[:alnum:]{2}-[:alnum:]{4}") %>% unlist
-    } else if(data.category %in% c(
-        "Copy Number Variation",
-        "Simple nucleotide variation",
-        "Simple Nucleotide Variation")
-    ){
+    } else if(
+        data.category %in% c(
+            "Simple nucleotide variation",
+            "Simple Nucleotide Variation"
+        )
+    ) {
         cases <- plyr::laply(
             .data = results$cases,
             .fun =  function(x) {
@@ -621,26 +557,15 @@ GDCquery <- function(
         message("ooo By sample.type")
         results <- results[tolower(results$sample_type) %in% tolower(sample.type),]
     }
-    # some how there are duplicated files in GDC we should remove them
-    # Example of problematic query
-    # query.exp <- GDCquery(project = "TCGA-BRCA",
-    #                  legacy = TRUE,
-    #                  data.category = "Gene expression",
-    #                  data.type = "Gene expression quantification",
-    #                  platform = "Illumina HiSeq",
-    #                  file.type = "results",
-    #                  experimental_strategy = "RNA-Seq",
-    #                  sample.type = c("Primary solid Tumor","Solid Tissue Normal"))
-    #
     print.header("Checking data","subsection")
 
     message("ooo Checking if there are duplicated cases")
-    if(any(duplicated(results$cases))) {
+    if (any(duplicated(results$cases))) {
         message("Warning: There are more than one file for the same case. Please verify query results. You can use the command View(getResults(query)) in rstudio")
     }
 
     message("ooo Checking if there are results for the query")
-    if(nrow(results) == 0) stop("Sorry, no results were found for this query")
+    if (nrow(results) == 0) stop("Sorry, no results were found for this query")
 
     # Try ordering (needs dplyr 1.0 - still not published)
     results <- tryCatch({
@@ -665,10 +590,8 @@ GDCquery <- function(
         project = I(list(project)),
         data.category = data.category,
         data.type = data.type,
-        legacy = legacy,
         access = I(list(access)),
         experimental.strategy =  I(list(experimental.strategy)),
-        file.type = file.type,
         platform = I(list(platform)),
         sample.type = I(list(sample.type)),
         barcode = I(list(barcode)),
@@ -677,37 +600,40 @@ GDCquery <- function(
     return(ret)
 }
 
-getGDCquery <- function(project, data.category, data.type, legacy, workflow.type,platform,file.type,files.access,sample.type,experimental.strategy){
+getGDCquery <- function(
+        project,
+        data.category,
+        data.type,
+        workflow.type,
+        platform,
+        files.access,
+        sample.type,
+        experimental.strategy
+){
     # Get manifest using the API
-    baseURL <- ifelse(legacy,"https://api.gdc.cancer.gov/legacy/files/?","https://api.gdc.cancer.gov/files/?")
+    baseURL <- "https://api.gdc.cancer.gov/files/?"
     options.pretty <- "pretty=true"
-    if(data.category == "Protein expression" & legacy) {
-        options.expand <- "fields=archive.revision,archive.file_name,md5sum,state,data_category,file_id,platform,file_name,file_size,md5sum,submitter_id,data_type&expand=cases.samples.portions,cases.project,center,analysis"
-    } else if(data.category %in% c("Clinical","Biospecimen")) {
+    if(data.category %in% c("Clinical","Biospecimen")) {
         options.expand <- "expand=cases,cases.project,center,analysis"
     } else {
         options.expand <- "expand=cases,cases.samples.portions.analytes.aliquots,cases.project,center,analysis,cases.samples"
     }
-    option.size <- paste0("size=",getNbFiles(project,data.category,legacy))
+    option.size <- paste0("size=",getNbFiles(project,data.category))
     option.format <- paste0("format=JSON")
 
-    options.filter <- paste0("filters=",
-                             URLencode('{"op":"and","content":['),  # Start json request
-                             URLencode('{"op":"in","content":{"field":"cases.project.project_id","value":["'),
-                             project,
-                             URLencode('"]}}'))
+    options.filter <- paste0(
+        "filters=",
+        URLencode('{"op":"and","content":['),  # Start json request
+        URLencode('{"op":"in","content":{"field":"cases.project.project_id","value":["'),
+        project,
+        URLencode('"]}}')
+    )
 
-    if(!is.na(experimental.strategy))  options.filter <- paste0(options.filter,addFilter("files.experimental_strategy", experimental.strategy))
+    if(!is.na(experimental.strategy)) options.filter <- paste0(options.filter,addFilter("files.experimental_strategy", experimental.strategy))
     if(!is.na(data.category))  options.filter <- paste0(options.filter,addFilter("files.data_category", data.category))
     if(!is.na(data.type))  options.filter <- paste0(options.filter,addFilter("files.data_type", data.type))
     if(!is.na(workflow.type))  options.filter <- paste0(options.filter,addFilter("files.analysis.workflow_type", workflow.type))
     if(!any(is.na(platform))) options.filter <- paste0(options.filter,addFilter("files.platform", platform))
-    if(!any(is.na(file.type))) {
-        if(file.type == "results" & legacy) options.filter <- paste0(options.filter,addFilter("files.tags", "unnormalized"))
-        if(file.type == "normalized_results" & legacy) options.filter <- paste0(options.filter,addFilter("files.tags", "normalized"))
-        if(file.type == "nocnv_hg19.seg" & legacy) options.filter <- paste0(options.filter,addFilter("files.tags", "nocnv"))
-        if(file.type == "hg19.isoform" & legacy) options.filter <- paste0(options.filter,addFilter("files.tags", "hg19"))
-    }
     if(!any(is.na(files.access))) {
         options.filter <- paste0(options.filter,addFilter("files.access", files.access))
     }
@@ -757,11 +683,19 @@ expandBarcodeInfo <- function(barcode){
         ret <- ret[match(barcode,ret$barcode),]
     }
     if(any(grepl("TCGA",barcode))) {
-        ret <- data.frame(barcode = barcode,
-                          patient = substr(barcode, 1, 12),
-                          sample = substr(barcode, 1, 16),
-                          tissue.code = substr(barcode, 14, 15))
-        ret <- merge(ret,getBarcodeDefinition(), by = "tissue.code", sort = FALSE, all.x = TRUE)
+        ret <- data.frame(
+            barcode = barcode,
+            patient = substr(barcode, 1, 12),
+            sample = substr(barcode, 1, 16),
+            tissue.code = substr(barcode, 14, 15)
+        )
+        ret <- merge(
+            ret,
+            getBarcodeDefinition(),
+            by = "tissue.code",
+            sort = FALSE,
+            all.x = TRUE
+        )
         ret <- ret[match(barcode,ret$barcode),]
     }
     return(ret)
@@ -800,7 +734,11 @@ getBarcodeDefinition <- function(type = "TCGA"){
             "Cell Lines",
             "Primary Xenograft Tissue",
             "Cell Line Derived Xenograft Tissue")
-        aux <- data.frame(tissue.code = tissue.code,shortLetterCode,tissue.definition)
+        aux <- data.frame(
+            tissue.code = tissue.code,
+            shortLetterCode,
+            tissue.definition
+        )
     } else {
 
         tissue.code <- c(
@@ -1028,12 +966,11 @@ GDCquery_ATAC_seq <- function(
     results$data_category <- "ATAC-seq"
     results$project <- "ATAC-seq"
     ret <- data.frame(
-        results=I(list(results)),
+        results = I(list(results)),
         tumor = I(list(tumor)),
         project = I(list("ATAC-seq")),
         data.type = I(list("ATAC-seq")),
-        data.category = I(list("ATAC-seq")),
-        legacy = I(list(FALSE))
+        data.category = I(list("ATAC-seq"))
     )
 
     return(ret)

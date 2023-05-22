@@ -26,7 +26,7 @@ based on the desired information
 query <- GDCquery(
   project = "TCGA-COAD",
   data.category = "Clinical",
-  file.type = "xml",
+  data.format = "bcr xml",
   barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")
 )
 GDCdownload(query)
@@ -38,7 +38,7 @@ clinical.admin <- GDCprepare_clinic(query,"admin")
 query <- GDCquery(
    project = "TCGA-COAD",
    data.category = "Biospecimen",
-   file.type = "xml",
+   data.format = "bcr xml",
    data.type = "Biospecimen Supplement",
    barcode = c("TCGA-RU-A8FL","TCGA-AA-3972")
 )
