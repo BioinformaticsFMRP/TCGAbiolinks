@@ -156,7 +156,7 @@ test_that("Gene Level Copy Number is being correctly prepare", {
     data <- GDCprepare(query,directory = "ex")
 
     expect_true(all(substr(colnames(data),1,12) == c("TCGA-OR-A5JD","TCGA-OR-A5J7")))
-    expect_true(data$days_to_last_follow_up == c(3038,NA))
+    expect_equal(data$days_to_last_follow_up,c(3038,NA))
     unlink("ex", recursive = TRUE, force = TRUE)
 })
 
@@ -174,8 +174,8 @@ test_that("Gene Level Copy Number is being correctly prepare for CPTAC-3", {
     GDCdownload(query_CPTAC,directory = "ex")
     data <- GDCprepare(query_CPTAC,directory = "ex")
     expect_true(ncol(data) == 2)
-    expect_true(data$submitter_id == c("C3L-02544","C3N-01179"))
-    expect_true(data$days_to_last_follow_up == c("889","1816"))
+    expect_equal(data$submitter_id, c("C3L-02544","C3N-01179"))
+    expect_equal(data$days_to_last_follow_up, c("889","1816"))
     unlink("ex", recursive = TRUE, force = TRUE)
 })
 
