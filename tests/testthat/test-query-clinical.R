@@ -64,3 +64,25 @@ test_that("TCGAquery_subtype returns the a data frame if exists data", {
 })
 
 
+test_that("GDCprepare_clinic works if no follow up data is available", {
+
+    skip_on_bioc()
+    skip_if_offline()
+    query <- GDCquery(
+        project = "TCGA-LAML",
+        data.category = "Clinical",
+        data.format = "bcr xml"
+    )
+
+    GDCdownload(
+        query = query,
+        directory = "."
+    )
+
+    clinical <- GDCprepare_clinic(
+        query = query,
+        directory = ".",
+        clinical.info = "patient"
+    )
+
+})
