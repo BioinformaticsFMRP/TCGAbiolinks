@@ -152,20 +152,3 @@ test_that("getNbFiles and getNbCases works", {
     cases <- getNbCases("TCGA-LUAD","Raw microarray data")
     expect_true(cases < files)
 })
-
-test_that("getNbFiles and getNbCases works", {
-    skip_on_bioc()
-    skip_if_offline()
-
-    # This test was added for further study  of the TARGET-AML data
-    # There are multiple files for the same patient and the query
-    # gives a warning although the cases are different
-    # should we change to verification and warning output ?
-    query_target <- GDCquery(
-        project = "TARGET-AML",
-        data.category = "Transcriptome Profiling",
-        data.type = "Gene Expression Quantification",
-        workflow.type = "STAR - Counts",
-        barcode = c("TARGET-20-PANLXK","TARGET-20-PATIAK")
-    )
-})

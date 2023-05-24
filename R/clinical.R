@@ -590,20 +590,26 @@ GDCprepare_clinic <- function(
         message("Updating days_to_last_followup and vital_status from follow_up information using last entry")
         followup <- parseFollowup(files,xpath,clinical.info)
 
-        followup_last <- followup %>%
-            dplyr::group_by(bcr_patient_barcode) %>%
-            dplyr::summarise(
-                days_to_last_followup = max(as.numeric(days_to_last_followup),na.rm = TRUE),
-                vital_status = vital_status[
-                    ifelse(
-                        any(followup$days_to_last_followup %in% ""),
-                        which(followup$days_to_last_followup %in% ""),
-                        which.max(days_to_last_followup)
-                    )
-                ]
-            )
-        clin$days_to_last_followup <- followup_last$days_to_last_followup[match(clin$bcr_patient_barcode,followup_last$bcr_patient_barcode)]
-        clin$vital_status <- followup_last$vital_status[match(clin$bcr_patient_barcode,followup_last$bcr_patient_barcode)]
+        if(nrow(followup) > 0){
+            followup_last <- followup %>%
+                dplyr::group_by(bcr_patient_barcode) %>%
+                dplyr::summarise(
+                    days_to_last_followup = ifelse(
+                        all(is.na(as.numeric(days_to_last_followup))),
+                        NA,
+                        max(as.numeric(days_to_last_followup),na.rm = TRUE)
+                    ),
+                    vital_status = vital_status[
+                        ifelse(
+                            any(followup$days_to_last_followup %in% ""),
+                            which(followup$days_to_last_followup %in% ""),
+                            which.max(days_to_last_followup)
+                        )
+                    ]
+                )
+            clin$days_to_last_followup <- followup_last$days_to_last_followup[match(clin$bcr_patient_barcode,followup_last$bcr_patient_barcode)]
+            clin$vital_status <- followup_last$vital_status[match(clin$bcr_patient_barcode,followup_last$bcr_patient_barcode)]
+        }
     }
 
     if (tolower(clinical.info) == "sample") {
