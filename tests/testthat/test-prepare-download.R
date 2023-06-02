@@ -242,3 +242,44 @@ test_that("Preparing RRPA files with number of proteins works", {
     expect_true(is(data_rppa,"data.frame"))
 })
 
+test_that("GDCdownload works for files.per.chunk = 1", {
+    skip_on_bioc()
+    skip_if_offline()
+
+    query <- GDCquery(
+        project = "TCGA-ACC",
+        data.category = "Copy Number Variation",
+        data.type = "Copy Number Segment",
+        barcode = c("TCGA-OR-A5L1")
+    )
+    expect_no_error({GDCdownload(query, files.per.chunk = 1)})
+
+    expect_true(
+        all(
+            file.exists(
+                file.path("GDCdata/TCGA-ACC/Copy_Number_Variation/Copy_Number_Segment",
+                          query$results[[1]]$id,
+                          query$results[[1]]$file_name))
+        )
+    )
+
+    query2 <- GDCquery(
+        project = "TCGA-ACC",
+        data.category = "Copy Number Variation",
+        data.type = "Copy Number Segment",
+        barcode = c("TCGA-OR-A5JO")
+    )
+    expect_no_error({GDCdownload(query2, files.per.chunk = 2)})
+    expect_true(
+        all(
+            file.exists(
+                file.path("GDCdata/TCGA-ACC/Copy_Number_Variation/Copy_Number_Segment",
+                          query2$results[[1]]$id,
+                          query2$results[[1]]$file_name))
+        )
+    )
+
+})
+
+
+

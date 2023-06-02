@@ -35,31 +35,31 @@ Uses GDC API or GDC transfer tool to download gdc data
 }
 \examples{
 \dontrun{
-    # Download clinical data from XML
-    query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical")
-    GDCdownload(query, files.per.chunk = 200)
-    query <- GDCquery(
-        project = "TARGET-AML",
-        data.category = "Transcriptome Profiling",
-        data.type = "miRNA Expression Quantification",
-        workflow.type = "BCGSC miRNA Profiling",
-        barcode = c("TARGET-20-PARUDL-03A-01R","TARGET-20-PASRRB-03A-01R")
-    )
-    # data will be saved in:
-    # example_data_dir/TARGET-AML/harmonized/Transcriptome_Profiling/miRNA_Expression_Quantification
-    GDCdownload(query, method = "client", directory = "example_data_dir")
-    query_acc_gbm <- GDCquery(
-        project =  c("TCGA-ACC","TCGA-GBM"),
-        data.category = "Transcriptome Profiling",
-        data.type = "Gene Expression Quantification",
-        workflow.type = "STAR - Counts"
-    )
-    GDCdownload(
-       query = query_acc_gbm,
-       method = "api",
-       directory = "example",
-       files.per.chunk = 50
-   )
+# Download clinical data from XML
+query <- GDCquery(project = "TCGA-COAD", data.category = "Clinical")
+GDCdownload(query, files.per.chunk = 200)
+query <- GDCquery(
+  project = "TARGET-AML",
+  data.category = "Transcriptome Profiling",
+  data.type = "miRNA Expression Quantification",
+  workflow.type = "BCGSC miRNA Profiling",
+  barcode = c("TARGET-20-PARUDL-03A-01R", "TARGET-20-PASRRB-03A-01R")
+)
+# data will be saved in:
+# example_data_dir/TARGET-AML/harmonized/Transcriptome_Profiling/miRNA_Expression_Quantification
+GDCdownload(query, method = "client", directory = "example_data_dir")
+query_acc_gbm <- GDCquery(
+  project = c("TCGA-ACC", "TCGA-GBM"),
+  data.category = "Transcriptome Profiling",
+  data.type = "Gene Expression Quantification",
+  workflow.type = "STAR - Counts"
+)
+GDCdownload(
+  query = query_acc_gbm,
+  method = "api",
+  directory = "example",
+  files.per.chunk = 50
+)
 }
 }
 \author{
