@@ -936,6 +936,8 @@ colDataPrepareMMRF <- function(barcode){
 }
 
 colDataPrepareTARGET <- function(barcode){
+
+
     message("Adding description to TARGET samples")
     tissue.code <- c(
         '01',
@@ -962,6 +964,7 @@ colDataPrepareTARGET <- function(barcode){
         '50',
         '60',
         '61',
+        '85',
         '99'
     )
 
@@ -990,28 +993,49 @@ colDataPrepareTARGET <- function(barcode){
         "Cell line from patient tumor", # 50
         "Xenograft from patient not grown as intermediate on plastic tissue culture dish", # 60
         "Xenograft grown in mice from established cell lines", #61
+        "Next Generation Cancer Model", # 85
         "Granulocytes after a Ficoll separation"
     ) # 99
-    aux <- DataFrame(tissue.code = tissue.code,definition)
+    aux <- data.frame(tissue.code = tissue.code,definition)
 
+    # Exceptions: TARGET-AML
+    # "TARGET-20-PAYKXV-Sorted-CD34neg-Lymphoid-09A" 727f5e27-09e9-425f-9757-81da66c054bd
+    # "TARGET-20-PAWUEX-EOI2-14A"  11fb7cce-06ad-445b-b09f-9dc1050e4cd4
+    # "TARGET-20-PAUSTZ-EOI1-14A" 3ad6dfa7-734d-41b0-ad66-15f0cff630d0
+    # "TARGET-20-PAYHMK-Sorted-leukemic-09A" f5bd72ae-919f-481c-8203-f878ee1c651a
+    # "TARGET-20-D7-Myeloid-mock3-85" 88712125-67e5-4e47-a413-e55b522a641c
+    # Normal case: TARGET-20-PANLXK-09A-03R
     # in case multiple equal barcode
-    regex <- paste0("[:alnum:]{6}-[:alnum:]{2}-[:alnum:]{6}",
-                    "-[:alnum:]{3}-[:alnum:]{3}")
-    samples <- str_match(barcode,regex)[,1]
+    #regex <- paste0("[:alnum:]{6}-[:alnum:]{2}-[:alnum:]{6}",
+    #                "-[:alnum:]{3}-[:alnum:]{3}")
+    #samples <- str_match(barcode,regex)[,1]
 
-    samples.df <- barcode %>% as.data.frame %>%  tidyr::separate(".",1:5 %>% as.character)
-
-    ret <- DataFrame(
-        barcode = barcode,
-        tumor.code = samples.df[,2],
-        sample = paste0(samples.df[,1],"-",samples.df[,2],"-",samples.df[,3],"-",samples.df[,4]),
-        patient = paste0(samples.df[,1],"-",samples.df[,2],"-",samples.df[,3]),
-        case.unique.id = paste0(samples.df[,3]),
-        tissue.code = substr(samples.df[,4], 1, 2),
-        nucleic.acid.code = substr(samples.df[,5], 3, 3)
-    )
-
-    ret <- merge(ret,aux, by = "tissue.code", sort = FALSE)
+    # this breaks for the exceptions
+    if(!any(grepl(";",barcode))){
+        ret <- data.frame(
+            barcode = barcode,
+            tumor.code = stringr::str_extract(pattern = "TARGET-[[:alnum:]]{2}",barcode) %>% gsub(pattern = "TARGET-","",.),
+            sample = gsub(pattern = "-[[:alnum:]]{3}$","",barcode),
+            patient = gsub(pattern = "-[[:alnum:]]{2,3}-[[:alnum:]]{3}$","",barcode),
+            case.unique.id = gsub(pattern = "-[[:alnum:]]{2,3}-[[:alnum:]]{3}$","",barcode) %>%  gsub(pattern = "TARGET-[[:alnum:]]{2}-","",.),
+            tissue.code = barcode %>% stringr::str_extract("[[:alnum:]]{2,3}-[[:alnum:]]{3}$") %>% stringr::str_extract("[[:alnum:]]{2,3}") %>% stringr::str_sub(1,2),
+            nucleic.acid.code = barcode %>% stringr::str_extract("[[:alnum:]]{3}$")  %>% stringr::str_sub(3,3)
+        )
+    } else {
+        # mixed samples case
+        ret <- purrr::map_dfr(.x = barcode,.f = function(b){
+            data.frame(
+                barcode = b,
+                tumor.code = stringr::str_extract(pattern = "TARGET-[[:alnum:]]{2}",b) %>% gsub(pattern = "TARGET-","",.),
+                sample = b %>% stringr::str_split(";") %>% unlist %>% sapply(FUN = function(y) gsub(pattern = "-[[:alnum:]]{3}$","",y)) %>% paste0(collapse = ";"),
+                patient = b %>% stringr::str_split(";") %>% unlist %>% sapply(FUN = function(y)  gsub(pattern = "-[[:alnum:]]{2,3}-[[:alnum:]]{3}$","",y)) %>% paste0(collapse = ";"),
+                case.unique.id = b %>% stringr::str_split(";") %>% unlist %>% sapply(FUN = function(y)  gsub(pattern = "-[[:alnum:]]{2,3}-[[:alnum:]]{3}$","",y)  %>%  gsub(pattern = "TARGET-[[:alnum:]]{2}-","",.) %>% paste0(collapse = ";")),
+                tissue.code = b %>% stringr::str_extract("[[:alnum:]]{2,3}-[[:alnum:]]{3}$") %>% stringr::str_extract("[[:alnum:]]{2,3}") %>% stringr::str_sub(1,2),
+                nucleic.acid.code = b %>% stringr::str_extract("[[:alnum:]]{3}$")  %>% stringr::str_sub(3,3)
+            )
+        })
+    }
+    ret <-  ret %>% dplyr::left_join(aux, by = "tissue.code")
 
     tumor.code <- c('00','01','02','03','04','10','15','20','21','30','40',
                     '41','50','51','52','60','61','62','63','64','65','70','71','80','81')
@@ -1043,8 +1067,8 @@ colDataPrepareTARGET <- function(barcode){
         "Rhabdomyosarcoma", #80
         "Soft tissue sarcoma, non-rhabdomyosarcoma"
     ) # 81
-    aux <- DataFrame(tumor.code = tumor.code,tumor.definition)
-    ret <- merge(ret,aux, by = "tumor.code", sort = FALSE)
+    aux <- data.frame(tumor.code = tumor.code,tumor.definition)
+    ret <- ret %>% dplyr::left_join(aux, by = "tumor.code")
 
     nucleic.acid.code <- c('D','E','W','X','Y','R','S')
     nucleic.acid.description <-  c(
@@ -1056,9 +1080,8 @@ colDataPrepareTARGET <- function(barcode){
         "RNA, from the first isolation of a tissue",
         "RNA, from the first isolation of a tissue embedded in FFPE"
     )
-    aux <- DataFrame(nucleic.acid.code = nucleic.acid.code,nucleic.acid.description)
-    ret <- merge(ret,aux, by = "nucleic.acid.code", sort = FALSE)
-
+    aux <- data.frame(nucleic.acid.code = nucleic.acid.code,nucleic.acid.description)
+    ret <- ret %>% dplyr::left_join(aux, by = "nucleic.acid.code")
 
     ret <- ret[match(barcode,ret$barcode),]
     rownames(ret) <- gsub("\\.","-",make.names(ret$barcode,unique=TRUE))
@@ -1165,6 +1188,7 @@ colDataPrepare <- function(barcode){
         step = 10,
         items = ret$sample
     )
+
     if(!is.null(patient.info)) {
         ret$sample_submitter_id <- ret$sample %>% as.character()
         ret <- left_join(ret %>% as.data.frame, patient.info %>% unique, by = "sample_submitter_id")
@@ -1209,7 +1233,7 @@ colDataPrepare <- function(barcode){
         }
     )
     # the code above does not work, since the projects have different string lengths
-    if(all(ret$project_id == "TARGET-ALL-P3")) {
+    if(all(ret$project_id %in% c("TARGET-ALL-P3","TARGET-AML"))) {
         idx <- sapply(gsub("-[[:alnum:]]{3}$","",barcode), function(x) {
             grep(x,ret$bcr_patient_barcode)
         })
@@ -1237,7 +1261,7 @@ colDataPrepare <- function(barcode){
 
     }
 
-    if(any(ret$project_id == "CMI-MBC",na.rm = T)) {
+    if(any(ret$project_id %in% c("CMI-MBC","TARGET-NBL"),na.rm = T)) {
         idx <- match(barcode,ret$bcr_patient_barcode)
     }
 

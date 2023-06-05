@@ -282,4 +282,165 @@ test_that("GDCdownload works for files.per.chunk = 1", {
 })
 
 
+test_that("Works for TARGET-AML data", {
+    skip_on_bioc()
+    skip_if_offline()
+
+
+    query <- GDCquery(
+        project = "TARGET-AML",
+        data.category = "Transcriptome Profiling",
+        experimental.strategy = "RNA-Seq",
+        workflow.type = "STAR - Counts",
+        data.type = "Gene Expression Quantification",
+        access = "open",
+        barcode = c(
+            "TARGET-20-PAYHMK-Sorted-leukemic",
+            "TARGET-20-D7-Myeloid-mock3",
+            "TARGET-20-TF1-50A",
+            "TARGET-20-PAWUEX-EOI2-14A",
+            "TARGET-20-PAWMII-14A"
+        )
+    )
+
+    GDCdownload(query)
+    expect_equal(nrow(query$results[[1]]),5)
+    expect_no_error({
+        data <- GDCprepare(query, summarizedExperiment = TRUE)
+    })
+    expect_equal(ncol(data),5)
+})
+
+
+test_that("Works for TARGET-AML data", {
+    skip_on_bioc()
+    skip_if_offline()
+
+
+    query <- GDCquery(
+        project = "TARGET-AML",
+        data.category = "Transcriptome Profiling",
+        experimental.strategy = "RNA-Seq",
+        workflow.type = "STAR - Counts",
+        data.type = "Gene Expression Quantification",
+        access = "open",
+        barcode = c(
+            "TARGET-20-PAYHMK-Sorted-leukemic",
+            "TARGET-20-D7-Myeloid-mock3",
+            "TARGET-20-TF1-50A",
+            "TARGET-20-PAWUEX-EOI2-14A",
+            "TARGET-20-PAWMII-14A"
+        )
+    )
+
+    GDCdownload(query)
+    expect_equal(nrow(query$results[[1]]),5)
+    expect_no_error({
+        data <- GDCprepare(query, summarizedExperiment = TRUE)
+    })
+    expect_equal(ncol(data),5)
+})
+
+
+
+test_that("Works for TARGET-NBL data", {
+    skip_on_bioc()
+    skip_if_offline()
+
+
+    query <- GDCquery(
+        project = "TARGET-NBL",
+        data.category = "Transcriptome Profiling",
+        experimental.strategy = "RNA-Seq",
+        workflow.type = "STAR - Counts",
+        data.type = "Gene Expression Quantification",
+        access = "open",
+        barcode = c(
+            "TARGET-30-PASYPX-01A-01R",
+            "TARGET-30-PANKFE-01A-01R",
+            "TARGET-30-PAIXIF-01A-01R",
+            "TARGET-20-PAWUEX-EOI2-14A",
+            "TARGET-30-PAPUAR-01A-01R",
+            "TARGET-30-PASCFC-01A",
+            "TARGET-30-PAPTFZ-01A"
+        )
+    )
+
+    GDCdownload(query)
+    expect_equal(nrow(query$results[[1]]),7)
+    expect_no_error({
+        data <- GDCprepare(query, summarizedExperiment = TRUE)
+    })
+    expect_equal(ncol(data),7)
+})
+
+
+
+test_that("Works for TARGET-NBL data", {
+    skip_on_bioc()
+    skip_if_offline()
+
+
+    query <- GDCquery(
+        project = "TARGET-WT",
+        data.category = "Transcriptome Profiling",
+        experimental.strategy = "RNA-Seq",
+        workflow.type = "STAR - Counts",
+        data.type = "Gene Expression Quantification",
+        access = "open",
+        barcode = c(
+            "TARGET-30-PASYPX-01A-01R",
+            "TARGET-30-PANKFE-01A-01R",
+            "TARGET-30-PAIXIF-01A-01R",
+            "TARGET-20-PAWUEX-EOI2-14A",
+            "TARGET-30-PAPUAR-01A-01R",
+            "TARGET-30-PASCFC-01A",
+            "TARGET-30-PAPTFZ-01A"
+        )
+    )
+
+    GDCdownload(query)
+    expect_equal(nrow(query$results[[1]]),7)
+    expect_no_error({
+        data <- GDCprepare(query, summarizedExperiment = TRUE)
+    })
+    expect_equal(ncol(data),7)
+})
+
+
+test_that("Works for TARGET-ALL-P3 data", {
+    skip_on_bioc()
+    skip_if_offline()
+
+
+    #"TARGET-ALL-P2",  no exceptions - working
+    # "TARGET-WT", no exceptions - working
+    # "TARGET-OS", , no exceptions - working
+    # "TARGET-RT",  no exceptions - working
+    # "TARGET-CCSK", no exceptions - working
+    #"TARGET-ALL-P1" , no exceptions - working
+
+    query <- GDCquery(
+        project =  "TARGET-ALL-P3",
+        data.category = "Transcriptome Profiling",
+        experimental.strategy = "RNA-Seq",
+        workflow.type = "STAR - Counts",
+        data.type = "Gene Expression Quantification",
+        access = "open",
+        barcode = c(
+            "TARGET-20-SJAML045737",
+            "TARGET-15-PAVFTF-09B-01R",
+            "TARGET-20-SJAML045741-09A-01R",
+            "TARGET-15-SJMPAL017975-03B-01R",
+            "TARGET-15-PASZVW-09B-01R"
+        )
+    )
+    expect_equal(nrow(query$results[[1]]),5)
+    GDCdownload(query)
+    expect_no_error({
+        data <- GDCprepare(query, summarizedExperiment = TRUE)
+    })
+})
+
+
 
