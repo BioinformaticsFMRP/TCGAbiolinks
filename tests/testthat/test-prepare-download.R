@@ -376,37 +376,6 @@ test_that("Works for TARGET-NBL data", {
 
 
 
-test_that("Works for TARGET-NBL data", {
-    skip_on_bioc()
-    skip_if_offline()
-
-
-    query <- GDCquery(
-        project = "TARGET-WT",
-        data.category = "Transcriptome Profiling",
-        experimental.strategy = "RNA-Seq",
-        workflow.type = "STAR - Counts",
-        data.type = "Gene Expression Quantification",
-        access = "open",
-        barcode = c(
-            "TARGET-30-PASYPX-01A-01R",
-            "TARGET-30-PANKFE-01A-01R",
-            "TARGET-30-PAIXIF-01A-01R",
-            "TARGET-20-PAWUEX-EOI2-14A",
-            "TARGET-30-PAPUAR-01A-01R",
-            "TARGET-30-PASCFC-01A",
-            "TARGET-30-PAPTFZ-01A"
-        )
-    )
-
-    GDCdownload(query)
-    expect_equal(nrow(query$results[[1]]),7)
-    expect_no_error({
-        data <- GDCprepare(query, summarizedExperiment = TRUE)
-    })
-    expect_equal(ncol(data),7)
-})
-
 
 test_that("Works for TARGET-ALL-P3 data", {
     skip_on_bioc()
