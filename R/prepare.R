@@ -478,35 +478,21 @@ readmiRNAIsoformQuantification <- function (files, cases){
     setDF(df)
 
 }
+
 readSimpleNucleotideVariationMaf <- function(files){
 
-    ret <- plyr::adply(.data = files,.margins = 1,.fun = function(f){
-        readr::read_tsv(
-            f,
-            comment = "#",
-            col_types = readr::cols(
-                Entrez_Gene_Id = col_integer(),
-                Start_Position = col_integer(),
-                End_Position = col_integer(),
-                t_depth = col_integer(),
-                t_ref_count = col_integer(),
-                t_alt_count = col_integer(),
-                n_depth = col_integer(),
-                TRANSCRIPT_STRAND = col_integer(),
-                PICK = col_integer(),
-                miRNA = col_character(),
-                TSL = col_integer(),
-                HGVS_OFFSET = col_integer()
-            ),
-            progress = TRUE
-        )
-    })
-    if(ncol(ret) == 1) {
-        ret <- plyr::adply(.data = files,.margins = 1,.fun = function(f){
-            read_tsv(
-                f,
+    ret <- files |>
+        purrr::map_dfr(.f = function(x) {
+            tab <- readr::read_tsv(
+                x,
+                show_col_types = FALSE,
                 comment = "#",
-                col_types = cols(
+                col_types = readr::cols(
+                    SOMATIC =  col_character(),
+                    PUBMED = col_character(),
+                    miRNA = col_character(),
+                    HGVS_OFFSET = col_integer(),
+                    PHENO = col_character(),
                     Entrez_Gene_Id = col_integer(),
                     Start_Position = col_integer(),
                     End_Position = col_integer(),
@@ -514,16 +500,18 @@ readSimpleNucleotideVariationMaf <- function(files){
                     t_ref_count = col_integer(),
                     t_alt_count = col_integer(),
                     n_depth = col_integer(),
-                    ALLELE_NUM = col_integer(),
                     TRANSCRIPT_STRAND = col_integer(),
                     PICK = col_integer(),
                     TSL = col_integer(),
-                    HGVS_OFFSET = col_integer(),
-                    MINIMISED = col_integer()),
-                progress = TRUE
-            )
+                    DISTANCE = col_integer()
+                ))
+
+            # empty MAF file
+            # https://portal.gdc.cancer.gov/files/7917fcbe-cb66-447d-8ea8-3a324feee3fa
+            if(nrow(tab) == 0) {return (NULL)}
+            tab
         })
-    }
+
     return(ret)
 }
 
