@@ -296,7 +296,7 @@ GDCquery_clinic <- function(
             if("treatments" %in% colnames(df)){
                 treatments <- rbindlist(df$treatments,fill = TRUE)
                 df$treatments <- NULL
-                treatments$submitter_id <- gsub("_treatment(_[0-9])?","", treatments$submitter_id)
+                treatments$submitter_id <- gsub("_treatment(_[0-9])?|_treatment([0-9])?","", treatments$submitter_id)
                 treatments <- treatments[,-c("updated_datetime", "state", "created_datetime")]
 
                 # we have now two types of treatment
@@ -402,7 +402,8 @@ GDCquery_clinic <- function(
             df$project <- project
             df <- df %>% dplyr::relocate(project)
         }
-        if(nrow(results) != nrow(df)){
+
+        if (nrow(results) != nrow(df)) {
             stop("Error: API returned more information")
         }
 
