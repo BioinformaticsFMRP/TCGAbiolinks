@@ -55,25 +55,25 @@ the same result as the paper.
 
 ```{r, eval = FALSE, message = FALSE, results = "hide"}
 query <- GDCquery(
-  project = "TCGA-GBM",
-  data.category = "DNA methylation",
-  barcode = c("TCGA-06-0122","TCGA-14-1456"),
-  platform = "Illumina Human Methylation 27",
-  legacy = TRUE
+    project = "TCGA-GBM",
+    data.category = "DNA Methylation",
+    barcode = c("TCGA-06-0122","TCGA-14-1456"),
+    platform = "Illumina Human Methylation 27",
+    data.type = "Methylation Beta Value"
 )
 GDCdownload(query)
-data.hg19 <- GDCprepare(query)
+dnam <- GDCprepare(query)
 ```
 
 ```{r, eval = FALSE}
-assay(data.hg19)[1:5,1:2]
+assay(dnam)[1:5,1:2]
 ```
 
 ## Function
 <hr>
 
 ```{r, eval = FALSE}
-classification <- gliomaClassifier(data.hg19)
+classification <- gliomaClassifier(dnam)
 ```
 
 ## Results

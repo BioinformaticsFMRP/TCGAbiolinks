@@ -72,6 +72,12 @@ gliomaClassifier <- function(data){
             }
         }
 
+        # For missing probes add values to 0.5
+        missing_probes <- setdiff(colnames(model$trainingData), colnames(met))
+        missing_probes_matrix <- matrix(rep(0.5, nrow(met) * length(missing_probes)),nrow = nrow(met))
+        colnames(missing_probes_matrix) <- missing_probes
+        aux <- bind_cols(aux,missing_probes_matrix)
+
         pred <- predict(model, aux)
         pred.prob <- predict(model, aux, type = "prob")
         colnames(pred.prob) <- paste0(i,"_", colnames(pred.prob))
