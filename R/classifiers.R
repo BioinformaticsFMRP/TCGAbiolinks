@@ -56,15 +56,14 @@ gliomaClassifier <- function(data){
 
         # keep only probes used in the model
         aux <- met[,colnames(met) %in% colnames(model$trainingData),drop = FALSE]
-
         # This should not happen!
         if(any(apply(aux,2,function(x) all(is.na(x))))) {
-            print("NA columns")
+            print("Probes has NA for all samples. Setting to 0.5 since model does not accept NA")
             aux[,apply(aux,2,function(x) all(is.na(x)))] <- 0.5
         }
 
         if(any(apply(aux,2,function(x) any(is.na(x))))) {
-            print("NA values")
+            print("Probes has NA values for some samples. Setting values a the median of the sample since model does not accept NA ")
             colMedians <- colMedians(aux,na.rm = TRUE)
             x <- which(is.na(aux),arr.ind = TRUE)
             for(l in 1:nrow(x)){
@@ -74,9 +73,12 @@ gliomaClassifier <- function(data){
 
         # For missing probes add values to 0.5
         missing_probes <- setdiff(colnames(model$trainingData), colnames(met))
-        missing_probes_matrix <- matrix(rep(0.5, nrow(met) * length(missing_probes)),nrow = nrow(met))
-        colnames(missing_probes_matrix) <- missing_probes
-        aux <- bind_cols(aux,missing_probes_matrix)
+        if(length(missing_probes) > 0) {
+            print("Probes are missing. Setting dummy probes to matrix with 0.5 value to all samples.")
+            missing_probes_matrix <- matrix(rep(0.5, nrow(met) * length(missing_probes)),nrow = nrow(met))
+            colnames(missing_probes_matrix) <- missing_probes
+            aux <- bind_cols(aux,missing_probes_matrix)
+        }
 
         pred <- predict(model, aux)
         pred.prob <- predict(model, aux, type = "prob")
