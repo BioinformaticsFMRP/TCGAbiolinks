@@ -504,6 +504,8 @@ readSimpleNucleotideVariationMaf <- function(files){
                     PICK = col_integer(),
                     TSL = col_integer(),
                     Allele =  col_character(),
+                    Tumor_Seq_Allele1 =  col_character(),
+                    Reference_Allele = col_character(),
                     Tumor_Seq_Allele2 = col_character(),
                     DISTANCE = col_integer()
                 ))
