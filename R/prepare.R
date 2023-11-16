@@ -842,12 +842,32 @@ readDNAmethylation <- function(
 
         # Just check if the data is in the same order, since we will not merge
         # the data frames to save memory
-        stopifnot(all(unlist(x %>% map(function(y){all(y[,1]$V1 ==  x[[1]][,1]$V1)}) )))
+        # C3N-01362-01 has less probes than C3L-00913-03 due to version of the array
+        # CPTAC cohort: 55 samples with EPIC v1 and 1808  with EPIC V2
+        # EPIC v1 has less probes than EPIC V2
 
-        df <- x %>%  map_df(2)
-        colnames(df) <- x %>%  map_chr(.f = function(y) colnames(y)[2])
+        # In case we have multiple versions of the array we will
+        # 1. Check the names of all of the same nrow
+        # 2. Bind the ones with same nrow
+        # 3. Full join the two objects
+        nrow_vec <- purrr::map_int(x,nrow) # number of rows each file
+        nrow_vec_numbers <- nrow_vec %>% unique # unique number of rows
+
+        for(nb_rows in nrow_vec_numbers){
+            aux <- x[which(nrow_vec == nb_rows)]
+            stopifnot(all(unlist(aux %>% map(function(y){all(y[,1]$V1 ==  aux[[1]][,1]$V1)}) )))
+        }
+
+        df <- map(nrow_vec_numbers,.f = function(nb_rows){
+            file_equal_probes <- x[which(nrow_vec == nb_rows)]
+            df <- file_equal_probes %>% map_df(2)
+            colnames(df) <- file_equal_probes %>% map_chr(.f = function(y) colnames(y)[2])
+            df$V1 <- file_equal_probes[[1]]$V1
+            df
+        }) %>% purrr::reduce(dplyr::full_join,by = "V1") %>% as.data.frame()
+        rownames(df) <- df$V1
+        df$V1 <- NULL
         df <- data.matrix(df)
-        rownames(df) <- setDF(x[[1]])[,1,drop = T]
 
         if (summarizedExperiment) {
 
