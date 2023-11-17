@@ -863,6 +863,12 @@ readDNAmethylation <- function(
             df <- file_equal_probes %>% map_df(2)
             colnames(df) <- file_equal_probes %>% map_chr(.f = function(y) colnames(y)[2])
             df$V1 <- file_equal_probes[[1]]$V1
+            if (any(duplicated(colnames(df)))){
+                message("oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
+                message("Duplicated samples names were found. Adding _rep suffix to name")
+                message("oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
+            }
+            colnames(df)[duplicated(colnames(df))] <- paste0(colnames(df)[duplicated(colnames(df))],"_rep")
             df
         }) %>% purrr::reduce(dplyr::full_join,by = "V1") %>% as.data.frame()
         rownames(df) <- df$V1
