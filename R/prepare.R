@@ -945,7 +945,9 @@ readDNAmethylation <- function(
 }
 
 # Barcode example MMRF_1358_1_BM_CD138pos_T1_TSMRU_L02337
-colDataPrepareMMRF <- function(barcode){
+colDataPrepareMMRF <- function(
+        barcode
+){
     DataFrame(
         barcode = barcode,
         sample = barcode,
@@ -953,8 +955,9 @@ colDataPrepareMMRF <- function(barcode){
     )
 }
 
-colDataPrepareTARGET <- function(barcode){
-
+colDataPrepareTARGET <- function(
+        barcode
+){
 
     message("Adding description to TARGET samples")
     tissue.code <- c(
@@ -1281,6 +1284,14 @@ colDataPrepare <- function(barcode){
 
     if(any(ret$project_id %in% c("CMI-MBC","TARGET-NBL"),na.rm = T)) {
         idx <- match(barcode,ret$bcr_patient_barcode)
+        # Workaround for the moment, still need to understand the barcode (cases)
+        # is TARGET-30-PAPKXS-01A-01D and not TARGET-30-PAPKXS-01A
+        if(all(is.na(idx))){
+            idx <- match(
+                stringr::str_sub(barcode,1,unique(stringr::str_length(ret$bcr_patient_barcode))),
+                ret$bcr_patient_barcode
+            )
+        }
     }
 
 
