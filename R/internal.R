@@ -691,7 +691,7 @@ get.mut.gistc.information <- function(
     return(df)
 }
 
-
+#' @export
 print.header <- function(text, type ="section"){
     message(paste(rep("-",nchar(text) + 3),collapse = ""))
     message(paste(ifelse(type=="section","o","oo"),text))

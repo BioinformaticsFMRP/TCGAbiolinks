@@ -1288,7 +1288,7 @@ colDataPrepare <- function(barcode){
         # is TARGET-30-PAPKXS-01A-01D and not TARGET-30-PAPKXS-01A
         if(all(is.na(idx))){
             idx <- match(
-                stringr::str_sub(barcode,1,unique(stringr::str_length(ret$bcr_patient_barcode))),
+                stringr::str_sub(barcode,1,min(stringr::str_length(ret$bcr_patient_barcode))),
                 ret$bcr_patient_barcode
             )
         }
