@@ -47,7 +47,6 @@
 #' in human. The network is extracted from the STRING database (version 10).
 #' @param scoreConfidence restrict to those edges with high confidence (eg. score>=700)
 #' @param titlePlot is the title to show in the final plot.
-#' @export
 #' @return net IGRAPH with related Cox survival genes in community (same pval and color) and with
 #' interactions from STRING database.
 TCGAvisualize_SurvivalCoxNET <- function(
