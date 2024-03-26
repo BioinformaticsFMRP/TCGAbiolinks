@@ -141,13 +141,22 @@ TCGAvisualize_SurvivalCoxNET <- function(
     ind <- match(igraph::V(network)$symbol, names(pvals))
     ## for extracted graph
     nodes_mapped <- igraph::V(network)$name[!is.na(ind)]
-    network <- dnet::dNetInduce(g=network, nodes_query=nodes_mapped, knn=0,
-                                remove.loops=FALSE, largest.comp=TRUE)
+    network <- dnet::dNetInduce(
+        g = network,
+        nodes_query = nodes_mapped,
+        knn = 0,
+        remove.loops = FALSE,
+        largest.comp = TRUE
+    )
     igraph::V(network)$name <- igraph::V(network)$symbol
 
     # Identification of gene-active network
-    net <- dnet::dNetPipeline(g=network, pval=pvals, method="customised",
-                              significance.threshold=5e-02)
+    net <- dnet::dNetPipeline(
+        g = network,
+        pval = pvals,
+        method = "customised",
+        significance.threshold = 5e-02
+    )
     # visualisation of the gene-active network itself
     ## the layout of the network visualisation (fixed in different visuals)
     glayout <- igraph::layout.fruchterman.reingold(net)
@@ -169,12 +178,25 @@ TCGAvisualize_SurvivalCoxNET <- function(
     edge.color <- c("#C0C0C0", "#000000")[igraph::crossing(com,net)+1]
     edge.color <- supraHex::visColoralpha(edge.color, alpha=0.5)
     ## visualise the subnetwrok
-    dnet::visNet(g=net, glayout=glayout, vertex.label=igraph::V(net)$geneSymbol,
-                 vertex.color=vcolors, vertex.frame.color=vcolors,
-                 vertex.shape="sphere", mark.groups=mark.groups, mark.col=mark.col,
-                 mark.border=mark.border, mark.shape=1, mark.expand=10,
-                 edge.color=edge.color, newpage=FALSE, vertex.label.color="blue",
-                 vertex.label.dist=0.4, vertex.label.font=2, main = titlePlot)
+    dnet::visNet(
+        g = net,
+        glayout = glayout,
+        vertex.label = igraph::V(net)$geneSymbol,
+        vertex.color = vcolors,
+        vertex.frame.color = vcolors,
+        vertex.shape = "sphere",
+        mark.groups = mark.groups,
+        mark.col = mark.col,
+        mark.border = mark.border,
+        mark.shape = 1,
+        mark.expand = 10,
+        edge.color = edge.color,
+        newpage = FALSE,
+        vertex.label.color = "blue",
+        vertex.label.dist = 0.4,
+        vertex.label.font = 2,
+        main = titlePlot
+    )
     legend_name <- paste("C",1:length(mcolors)," (n=",com$csize,", pval=",signif(com$significance,digits=2),")",sep='')
     legend("topleft", legend=legend_name, fill=mcolors, bty="n", cex=1.4)
 
