@@ -179,7 +179,7 @@ common.patients <- intersect(
     substr(getResults(query_exp, cols = "cases"), 1, 12)
 )
 
-# Only seelct the first 5 patients
+# Only select the first 5 patients
 query_met <- GDCquery(
     project = "TCGA-COAD",
     data.category = "DNA Methylation",
