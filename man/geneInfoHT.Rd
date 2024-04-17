@@ -8,8 +8,10 @@
 A data frame with 23486 rows and 2 variables
 }
 \description{
-Code to generate the data
-```{R, eval = F}
+Code to generate the data in examples
+}
+\examples{
+\dontrun{
 library(EDASeq)
 library(biomaRt)
 #get ensembl gene IDs for hg38
@@ -40,6 +42,6 @@ geneInfoHT <- data.frame(
 )
 #Save final table
 save(geneInfoHT, file = "data/geneInfoHT.rda")
-```
+}
 }
 \keyword{internal}
