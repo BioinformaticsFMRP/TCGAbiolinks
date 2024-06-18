@@ -1204,15 +1204,26 @@ colDataPrepare <- function(barcode){
     # There is a limitation on the size of the string, so this step will be splited in cases of 100
     patient.info <- NULL
 
-    patient.info <- splitAPICall(
+    patient.info <- tryCatch(splitAPICall(
         FUN = getBarcodeInfo,
         step = 10,
         items = ret$sample
-    )
+        ), error = function(e) {
+        message(" => failed")
+        NULL
+    })
 
     if(!is.null(patient.info)) {
         ret$sample_submitter_id <- ret$sample %>% as.character()
         ret <- left_join(ret %>% as.data.frame, patient.info %>% unique, by = "sample_submitter_id")
+    } else {
+        return(
+            data.frame(
+                row.names = barcode,
+                barcode,
+                stringsAsFactors = FALSE
+            )
+        )
     }
     ret$bcr_patient_barcode <- ret$sample %>% as.character()
     ret$sample_submitter_id <- ret$sample %>% as.character()
