@@ -51,8 +51,9 @@ NULL
 
 #' geneInfoHT for normalization of HTseq data
 #' @description
-#' Code to generate the data
-#' ```{R, eval = F}
+#' Code to generate the data in examples
+#' @examples
+#' \dontrun{
 #' library(EDASeq)
 #' library(biomaRt)
 #' #get ensembl gene IDs for hg38
@@ -83,7 +84,7 @@ NULL
 #' )
 #' #Save final table
 #' save(geneInfoHT, file = "data/geneInfoHT.rda")
-#' ```
+#' }
 #' @docType data
 #' @keywords internal
 #' @name geneInfoHT
