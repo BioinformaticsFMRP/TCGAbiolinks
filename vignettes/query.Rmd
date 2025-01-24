@@ -21,7 +21,7 @@ knitr::opts_knit$set(progress = FALSE)
 
 
 ---
-```{r message=FALSE, warning=FALSE, include=FALSE}
+```{r libs, message=FALSE, warning=FALSE, include=FALSE}
 library(TCGAbiolinks)
 library(SummarizedExperiment)
 library(dplyr)
@@ -119,7 +119,7 @@ Please, note that these tables are still incomplete.
 
 ## Harmonized data options 
 
-```{r, echo=FALSE}
+```{r Harmonized_data_options, echo=FALSE}
 datatable(
     readr::read_csv("https://docs.google.com/spreadsheets/d/1f98kFdj9mxVDc1dv4xTZdx8iWgUiDYO-qiFJINvmTZs/export?format=csv&gid=2046985454",col_types = readr::cols()),
     filter = 'top',
@@ -216,7 +216,7 @@ datatable(
 This example shows how the user can search for breast cancer Raw Sequencing Data ("Controlled") 
 and verify the name of the files and the barcodes associated with it.
 
-```{r message=FALSE, warning=FALSE}
+```{r queries,message=FALSE, warning=FALSE}
 query <- GDCquery(
     project = "TCGA-ACC", 
     data.category = "Sequencing Reads",
@@ -299,8 +299,8 @@ datatable(
 If you want to get the manifest file from the query object you can use the function *getManifest*. If you 
 set save to `TRUE` a txt file that can be used with GDC-client Data transfer tool (DTT) or with its GUI version [ddt-ui](https://github.com/NCI-GDC/dtt-ui) will be created.
 
-```{r message=FALSE, warning=FALSE}
-getManifest(query,save = FALSE) 
+```{r get_manifest, message = FALSE, warning = FALSE}
+getManifest(query, save = FALSE) 
 ```
 
 # ATAC-seq data
@@ -310,7 +310,6 @@ Also, for more details, you can check an ATAC-seq workshop at http://rpubs.com/t
 
 The list of file available is below:
 ```{r message=FALSE, warning=FALSE}
-
 datatable(
     getResults(TCGAbiolinks:::GDCquery_ATAC_seq())[,c("file_name","file_size")], 
     filter = 'top',
@@ -320,13 +319,12 @@ datatable(
 ```
 
 You can use the function `GDCquery_ATAC_seq` filter the manifest table and use `GDCdownload` to save the data locally.
-```{r message=FALSE, warning=FALSE,eval = FALSE}
+```{r GDCquery_ATAC_seq, message=FALSE, warning=FALSE,eval = FALSE}
 query <- TCGAbiolinks:::GDCquery_ATAC_seq(file.type = "rds") 
 GDCdownload(query, method = "client")
 
 query <- TCGAbiolinks:::GDCquery_ATAC_seq(file.type = "bigWigs") 
 GDCdownload(query, method = "client")
-
 ```
 
 # Summary of available files per patient
@@ -334,7 +332,7 @@ GDCdownload(query, method = "client")
 Retrieve the numner of files under each data_category + data_type + experimental_strategy + platform.
 Almost like https://portal.gdc.cancer.gov/exploration
 
-```{r message=FALSE, warning=FALSE,eval = TRUE}
+```{r getSampleFilesSummary, message=FALSE, warning=FALSE,eval = TRUE}
 tab <-  getSampleFilesSummary(project = "TCGA-ACC")
 datatable(
     head(tab),

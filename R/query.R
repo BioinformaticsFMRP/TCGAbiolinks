@@ -936,7 +936,7 @@ TCGAquery_recount2<-function(project, tissue=c()){
 #' @description
 #'   Retrieve open access ATAC-seq files from GDC server
 #'  https://gdc.cancer.gov/about-data/publications/ATACseq-AWG
-#'  Manifest available at: https://gdc.cancer.gov/files/public/file/ATACseq-AWG_Open_GDC-Manifest.txt
+#'  Manifest available at: https://gdc.cancer.gov/system/files/public/file/ATACseq-AWG_Open_GDC-Manifest.txt
 #' @param tumor a valid tumor
 #' @param file.type Write maf file into a csv document
 #' @export
@@ -955,7 +955,7 @@ GDCquery_ATAC_seq <- function(
         file.type = NULL
 ) {
     isServeOK()
-    results <- readr::read_tsv("https://gdc.cancer.gov/files/public/file/ATACseq-AWG_Open_GDC-Manifest.txt")
+    results <- readr::read_tsv("https://gdc.cancer.gov/system/files/public/file/ATACseq-AWG_Open_GDC-Manifest.txt")
 
     if(!is.null(tumor)) results <- results[grep(tumor,results$filename,ignore.case = TRUE),]
     if(!is.null(file.type))  results <- results[grep(file.type,results$filename,ignore.case = TRUE),]
