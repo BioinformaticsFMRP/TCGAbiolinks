@@ -300,7 +300,8 @@ GDCquery_clinic <- function(
                 )
             }
 
-            if("treatments" %in% colnames(df)){
+            if( "treatments" %in% colnames(df)) {
+
                 treatments <- purrr::map_dfr(
                     df$treatments,
                     .f = function(row) {
@@ -312,40 +313,45 @@ GDCquery_clinic <- function(
                     })
 
                 df$treatments <- NULL
-                treatments$submitter_id <- gsub("_treatment(_[0-9])?|_treatment([0-9])?","", treatments$submitter_id)
-                treatments <- treatments %>% dplyr::select(
-                    !c("updated_datetime", "state", "created_datetime")
-                )
-                treatments <- treatments[treatments$submitter_id %in% df$submitter_id,]
 
+                # case where all treatments are NULL
+                if (!nrow(treatments) == 0) {
 
-                # we have now two types of treatment
-                treatments.pharmaceutical <- treatments[grep("Pharmaceutical",treatments$treatment_type,ignore.case = TRUE),]
-                treatments.radiation <- treatments[grep("radiation",treatments$treatment_type,ignore.case = TRUE),]
-
-                # Adding a prefix
-                colnames(treatments.pharmaceutical) <- paste0("treatments_pharmaceutical_",colnames(treatments.pharmaceutical))
-                colnames(treatments.radiation) <- paste0("treatments_radiation_",colnames(treatments.radiation))
-                colnames(treatments.radiation)[grep("submitter",colnames(treatments.radiation))] <- "submitter_id"
-                colnames(treatments.pharmaceutical)[grep("submitter",colnames(treatments.pharmaceutical))] <- "submitter_id"
-
-                # If there are two rows for the same submitter_id
-                # we will collapse them into one single row
-                # concatenating all columns using ;
-                aux <- treatments.pharmaceutical %>% dplyr::group_by(submitter_id) %>%
-                    dplyr::summarise(
-                        across(everything(),~ paste(unique(.), collapse = ";"))
+                    treatments$submitter_id <- gsub("_treatment(_[0-9])?|_treatment([0-9])?","", treatments$submitter_id)
+                    treatments <- treatments %>% dplyr::select(
+                        !c("updated_datetime", "state", "created_datetime")
                     )
-                df <- merge(df, as.data.table(aux), by = "submitter_id",  all = TRUE, sort = FALSE)
+                    treatments <- treatments[treatments$submitter_id %in% df$submitter_id,]
 
-                # If there are two rows for the same submitter_id
-                # we will collapse them into one single row
-                # concatenating all columns using ;
-                aux <- treatments.radiation %>% dplyr::group_by(submitter_id) %>%
-                    dplyr::summarise(
-                        across(everything(),~ paste(unique(.), collapse = ";"))
-                    )
-                df <- merge(df, as.data.table(aux), by = "submitter_id",  all = TRUE, sort = FALSE)
+
+                    # we have now two types of treatment
+                    treatments.pharmaceutical <- treatments[grep("Pharmaceutical",treatments$treatment_type,ignore.case = TRUE),]
+                    treatments.radiation <- treatments[grep("radiation",treatments$treatment_type,ignore.case = TRUE),]
+
+                    # Adding a prefix
+                    colnames(treatments.pharmaceutical) <- paste0("treatments_pharmaceutical_",colnames(treatments.pharmaceutical))
+                    colnames(treatments.radiation) <- paste0("treatments_radiation_",colnames(treatments.radiation))
+                    colnames(treatments.radiation)[grep("submitter",colnames(treatments.radiation))] <- "submitter_id"
+                    colnames(treatments.pharmaceutical)[grep("submitter",colnames(treatments.pharmaceutical))] <- "submitter_id"
+
+                    # If there are two rows for the same submitter_id
+                    # we will collapse them into one single row
+                    # concatenating all columns using ;
+                    aux <- treatments.pharmaceutical %>% dplyr::group_by(submitter_id) %>%
+                        dplyr::summarise(
+                            across(everything(),~ paste(unique(.), collapse = ";"))
+                        )
+                    df <- merge(df, as.data.table(aux), by = "submitter_id",  all = TRUE, sort = FALSE)
+
+                    # If there are two rows for the same submitter_id
+                    # we will collapse them into one single row
+                    # concatenating all columns using ;
+                    aux <- treatments.radiation %>% dplyr::group_by(submitter_id) %>%
+                        dplyr::summarise(
+                            across(everything(),~ paste(unique(.), collapse = ";"))
+                        )
+                    df <- merge(df, as.data.table(aux), by = "submitter_id",  all = TRUE, sort = FALSE)
+                }
             }
 
             df$bcr_patient_barcode <- df$submitter_id
@@ -370,7 +376,7 @@ GDCquery_clinic <- function(
                 df <- cbind(df,primary_site)
             }
 
-            if("diagnoses" %in% colnames(results)){
+            if ("diagnoses" %in% colnames(results)) {
                 diagnoses <- rbindlist(
                     lapply(
                         results$diagnoses,
@@ -379,7 +385,7 @@ GDCquery_clinic <- function(
                                 data.frame(NA)
                             } else {
                                 # HTMCP-03-06-02061 has two diagnosis
-                                x$submitter_id <- gsub("_diagnosis.*","",x$submitter_id)
+                                x$submitter_id <- gsub("_diagnosis.*|-diagnosis.*","",x$submitter_id)
                                 # If there are two rows for the same submitter_id
                                 # we will collapse them into one single row
                                 # concatenating all columns using ;
