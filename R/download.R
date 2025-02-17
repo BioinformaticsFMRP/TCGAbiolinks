@@ -367,15 +367,21 @@ GDCclientInstall <- function() {
         },
         error = function(e) {
             c(
-                "https://gdc.cancer.gov/files/public/file/gdc-client_v1.6.1_Ubuntu_x64.zip",
-                "https://gdc.cancer.gov/files/public/file/gdc-client_v1.6.1_Windows_x64.zip",
-                "https://gdc.cancer.gov/files/public/file/gdc-client_v1.6.1_OSX_x64.zip"
+                "https://gdc.cancer.gov/system/files/public/file/gdc-client_2.3_Ubuntu_x64-py3.8-ubuntu-20.04.zip",
+                "https://gdc.cancer.gov/system/files/public/file/gdc-client_2.3_Windows_x64-py3.8-windows-2019.zip",
+                "https://gdc.cancer.gov/system/files/public/file/gdc-client_2.3_OSX_x64-py3.8-macos-14.zip"
             )
         }
     )
     bin <- links[grep("public.*zip", links)]
     if (is.windows()) bin <- bin[grep("client*.*windows", bin, ignore.case = TRUE)]
-    if (is.mac()) bin <- bin[grep("client*.*OSX", bin)]
+    if (is.mac()) {
+        if(Sys.info()["machine"] == "arm64"){
+            bin <- bin[grep("client*.*OSX.*14", bin)]
+        } else {
+            bin <- bin[grep("client*.*OSX.*12", bin)]
+        }
+    }
     if (is.linux()) {
         if (grepl("ubuntu", Sys.info()["version"], ignore.case = TRUE)) {
             bin <- bin[grep("client*.*Ubuntu", bin)]
@@ -386,6 +392,9 @@ GDCclientInstall <- function() {
     if (is.windows()) mode <- "wb" else mode <- "w"
     download(bin, basename(bin), mode = mode)
     unzip(basename(bin))
+    if(is.mac()){
+        unzip(gsub("-py3.8-macos-14|-py3.8-macos-12","",basename(bin)))
+    }
     Sys.chmod("gdc-client")
     return(GDCclientPath())
 }
