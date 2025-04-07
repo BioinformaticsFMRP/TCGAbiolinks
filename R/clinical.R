@@ -266,7 +266,7 @@ GDCquery_clinic <- function(
 
     #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
     results <- json$data$hits
-    saveRDS(results,"tcgabiolinks_debug.rda")
+
     if (grepl("clinical",type,ignore.case = TRUE)) {
         if (grepl("TCGA",project)) {
             df <- data.frame("submitter_id" = results$submitter_id)
@@ -308,13 +308,6 @@ GDCquery_clinic <- function(
                 # we are getting more results than what we should
                 follow_ups <- follow_ups[follow_ups$submitter_id %in% df$submitter_id,]
 
-                # Get the max value of days to follow up
-                follow_ups_last <- follow_ups %>%
-                    dplyr::group_by(submitter_id) %>%
-                    dplyr::summarise(
-                        days_to_last_follow_up = ifelse(any(!is.na(days_to_follow_up)),max(days_to_follow_up,na.rm = TRUE),NA)
-                    )
-
                 follow_ups_last <- follow_ups %>%
                     dplyr::select(
                         c(
@@ -329,7 +322,8 @@ GDCquery_clinic <- function(
                     dplyr::group_by(submitter_id) %>%
                     dplyr::filter(dplyr::row_number() == which.max(days_to_follow_up)) %>%
                     dplyr::ungroup()  %>%
-                    dplyr::rename_at(disease_response,.funs = function(x) paste0("follow_ups_",x))
+                    dplyr::rename_at(dplyr::vars(disease_response),.funs = function(x) paste0("follow_ups_",x)) %>%
+                    dplyr::rename(days_to_last_follow_up = days_to_follow_up)
 
                 df <- dplyr::full_join(df, follow_ups_last, by = "submitter_id")
 

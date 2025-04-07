@@ -1764,9 +1764,11 @@ addFFPE <- function(df) {
     patient <- df$patient
 
     ffpe.info <- NULL
-    ffpe.info <- splitAPICall(FUN = getFFPE,
-                              step = 20,
-                              items = df$patient)
+    ffpe.info <- splitAPICall(
+        FUN = getFFPE,
+        step = 20,
+        items = df$patient
+    )
 
     df <- merge(df, ffpe.info,by.x = "sample", by.y = "submitter_id")
     df <- df[match(barcode,df$barcode),]
@@ -1844,7 +1846,7 @@ getAliquot_ids <- function(barcode){
 getBarcodeInfo <- function(barcode) {
     baseURL <- "https://api.gdc.cancer.gov/cases/?"
     options.pretty <- "pretty=true"
-    options.expand <- "expand=samples,project,diagnoses,diagnoses.treatments,annotations,family_histories,demographic,exposures"
+    options.expand <- "expand=samples,follow_ups,project,diagnoses,diagnoses.treatments,annotations,family_histories,demographic,exposures"
     option.size <- paste0("size=",length(barcode))
     options.filter <- paste0("filters=",
                              URLencode('{"op":"or","content":[{"op":"in","content":{"field":"cases.submitter_id","value":['),
@@ -1871,7 +1873,7 @@ getBarcodeInfo <- function(barcode) {
     )
 
     results <- json$data$hits
-
+    saveRDS(results, file = "results.rds")
     # no results
     if(length(results) == 0){
         return(data.frame(barcode,stringsAsFactors = FALSE))
@@ -1907,12 +1909,13 @@ getBarcodeInfo <- function(barcode) {
     # We dont have the same cols for TCGA and TARGET so we need to check them
     if(!is.null(results$diagnoses)) {
         diagnoses <- rbindlist(lapply(results$diagnoses, function(x) if(is.null(x)) data.frame(NA) else x),fill = TRUE)
-        diagnoses[,c("updated_datetime","created_datetime","state")] <- NULL
+        diagnoses[,c("updated_datetime","created_datetime","state","days_to_last_follow_up")] <- NULL
         if(any(grepl("submitter_id", colnames(diagnoses)))) {
             diagnoses$submitter_id <- gsub("-diagnosis|_diagnosis.*|-DIAG|diag-","", diagnoses$submitter_id)
         }  else {
             diagnoses$submitter_id <- submitter_id
         }
+
         # this is required since the sample might not have a diagnosis
         if(!any(df$submitter_id %in% diagnoses$submitter_id)){
             diagnoses$submitter_id <- NULL
@@ -1936,18 +1939,19 @@ getBarcodeInfo <- function(barcode) {
             df <- left_join(df, diagnoses, by = "submitter_id")
         }
     }
-    if(!is.null(results$exposures)) {
+
+    if (!is.null(results$exposures)) {
         exposures <- rbindlist(
             lapply(results$exposures, function(x) if(is.null(x)) data.frame(NA) else x),
             fill = TRUE
         )
         exposures[,c("updated_datetime","created_datetime","state")] <- NULL
-        if(any(grepl("submitter_id", colnames(exposures)))) {
+        if (any(grepl("submitter_id", colnames(exposures)))) {
             exposures$submitter_id <- gsub("-exposure|_exposure.*|-EXP","", exposures$submitter_id)
         }  else {
             exposures$submitter_id <- submitter_id
         }
-        if(!any(df$submitter_id %in% exposures$submitter_id)){
+        if (!any(df$submitter_id %in% exposures$submitter_id)) {
             exposures$submitter_id <- NULL
             df <- dplyr::bind_cols(df,exposures)
         } else {
@@ -1955,8 +1959,35 @@ getBarcodeInfo <- function(barcode) {
         }
     }
 
+    if (!is.null(results$follow_ups)) {
+        follow_ups <- rbindlist(
+            lapply(results$follow_ups, function(x) if(is.null(x)) data.frame(NA) else x),
+            fill = TRUE
+        )
+        follow_ups[,c("updated_datetime","created_datetime","state")] <- NULL
+        if (any(grepl("submitter_id", colnames(follow_ups)))) {
+            follow_ups$submitter_id <- gsub("_follow_up.*","", follow_ups$submitter_id)
+            follow_ups_last <- follow_ups %>%
+                dplyr::select(
+                    c(
+                        submitter_id,
+                        days_to_follow_up,
+                        disease_response
+                    )
+                ) %>%
+                dplyr::filter(!is.na(submitter_id), !is.na(days_to_follow_up)) %>%
+                dplyr::group_by(submitter_id) %>%
+                dplyr::filter(dplyr::row_number() == which.max(days_to_follow_up)) %>%
+                dplyr::ungroup()  %>%
+                dplyr::rename_at(dplyr::vars(disease_response),.funs = function(x) paste0("follow_ups_",x)) %>%
+                dplyr::rename(days_to_last_follow_up = days_to_follow_up)
 
-    if(!is.null(results$demographic)) {
+            df <- dplyr::left_join(df, follow_ups_last, by = "submitter_id")
+        }
+    }
+
+
+    if (!is.null(results$demographic)) {
         demographic <- results$demographic
         demographic[,c("updated_datetime","created_datetime","state")] <- NULL
         if(any(grepl("submitter_id", colnames(demographic)))) {
@@ -1995,7 +2026,7 @@ getBarcodeInfo <- function(barcode) {
             df <- left_join(df,demographic, by = "submitter_id")
         }
     }
-
+    saveRDS(df, file = "df.rds")
     df$bcr_patient_barcode <- df$submitter_id %>% as.character()
     projects.info <- results$project
     projects.info <- results$project[,grep("state",colnames(projects.info),invert = TRUE)]
