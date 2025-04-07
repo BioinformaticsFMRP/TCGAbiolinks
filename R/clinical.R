@@ -303,7 +303,7 @@ GDCquery_clinic <- function(
 
             if ("follow_ups" %in% colnames(results)){
                 follow_ups <- rbindlist(lapply(results$follow_ups, function(x) if(is.null(x)) data.frame(NA) else x),fill = T)
-                follow_ups$submitter_id <- gsub("_follow_up*","", follow_ups$submitter_id)
+                follow_ups$submitter_id <- gsub("_follow_up.*","", follow_ups$submitter_id)
 
                 # we are getting more results than what we should
                 follow_ups <- follow_ups[follow_ups$submitter_id %in% df$submitter_id,]
@@ -315,7 +315,42 @@ GDCquery_clinic <- function(
                         days_to_last_follow_up = ifelse(any(!is.na(days_to_follow_up)),max(days_to_follow_up,na.rm = TRUE),NA)
                     )
 
-                df <- dplyr::full_join(df,follow_ups_last, by = "submitter_id")
+                follow_ups_last <- follow_ups %>%
+                    dplyr::select(
+                        c(
+                            submitter_id,
+                            days_to_follow_up,
+                            #days_to_recurrence,
+                            #progression_or_recurrence_type,
+                            disease_response
+                        )
+                    ) %>%
+                    dplyr::filter(!is.na(submitter_id), !is.na(days_to_follow_up)) %>%
+                    dplyr::group_by(submitter_id) %>%
+                    dplyr::filter(dplyr::row_number() == which.max(days_to_follow_up)) %>%
+                    dplyr::ungroup()  %>%
+                    dplyr::rename_at(disease_response,.funs = function(x) paste0("follow_ups_",x))
+
+                df <- dplyr::full_join(df, follow_ups_last, by = "submitter_id")
+
+                # Keep all follow ups
+                # follow_ups <- follow_ups %>%
+                #    dplyr::select(
+                #        c(
+                #            submitter_id,
+                #            days_to_follow_up,
+                #            days_to_recurrence,
+                #            progression_or_recurrence_type,
+                #            disease_response
+                #        )
+                #    ) %>%
+                #    dplyr::group_by(submitter_id) %>%
+                #    dplyr::summarise(
+                #        across(everything(),~ paste(., collapse = ";"))
+                #    ) %>% dplyr::rename_at(-1,.funs = function(x) paste0("follow_ups_",x))
+                #
+                # df <- dplyr::full_join(df, follow_ups, by = "submitter_id")
+
             }
 
             if( "treatments" %in% colnames(df)) {
