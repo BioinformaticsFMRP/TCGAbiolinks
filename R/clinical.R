@@ -229,7 +229,7 @@ GDCquery_clinic <- function(
     options.pretty <- "pretty=true"
 
     if (grepl("clinical",type,ignore.case = TRUE)) {
-        options.expand <- "expand=diagnoses,diagnoses.treatments,annotations,family_histories,demographic,exposures"
+        options.expand <- "expand=diagnoses,follow_ups,diagnoses.treatments,annotations,family_histories,demographic,exposures"
         option.size <- paste0("size=",getNbCases(project,"Clinical"))
         files.data_category <- "Clinical"
     } else {
@@ -266,7 +266,7 @@ GDCquery_clinic <- function(
 
     #message(paste0(baseURL,paste(options.pretty,options.expand, option.size, options.filter, sep = "&")))
     results <- json$data$hits
-
+    saveRDS(results,"tcgabiolinks_debug.rda")
     if (grepl("clinical",type,ignore.case = TRUE)) {
         if (grepl("TCGA",project)) {
             df <- data.frame("submitter_id" = results$submitter_id)
@@ -276,6 +276,7 @@ GDCquery_clinic <- function(
 
                 # we are getting more results than what we should
                 diagnoses <- diagnoses[diagnoses$submitter_id %in% df$submitter_id,]
+                diagnoses$days_to_last_follow_up <- NULL
                 df <- merge(df,diagnoses, by="submitter_id", all = TRUE, sort = FALSE)
             }
 
@@ -298,6 +299,23 @@ GDCquery_clinic <- function(
                     all = TRUE,
                     sort = FALSE
                 )
+            }
+
+            if ("follow_ups" %in% colnames(results)){
+                follow_ups <- rbindlist(lapply(results$follow_ups, function(x) if(is.null(x)) data.frame(NA) else x),fill = T)
+                follow_ups$submitter_id <- gsub("_follow_up*","", follow_ups$submitter_id)
+
+                # we are getting more results than what we should
+                follow_ups <- follow_ups[follow_ups$submitter_id %in% df$submitter_id,]
+
+                # Get the max value of days to follow up
+                follow_ups_last <- follow_ups %>%
+                    dplyr::group_by(submitter_id) %>%
+                    dplyr::summarise(
+                        days_to_last_follow_up = ifelse(any(!is.na(days_to_follow_up)),max(days_to_follow_up,na.rm = TRUE),NA)
+                    )
+
+                df <- dplyr::full_join(df,follow_ups_last, by = "submitter_id")
             }
 
             if( "treatments" %in% colnames(df)) {
