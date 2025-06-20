@@ -164,8 +164,9 @@ TCGAvisualize_SurvivalCoxNET <- function(
     com <- igraph::spinglass.community(net, spins=25)
     com$csize <- sapply(1:length(com),function(x) sum(com$membership==x))
     vgroups <- com$membership
-    colormap <- "yellow-darkorange"
-    palette.name <- supraHex::visColormap(colormap=colormap)
+    # Suppose colormap is a list of colors, e.g.
+    colormap <- c("yellow", "darkorange")
+    palette.name <- colorRampPalette(colormap)
     mcolors <- palette.name(length(com))
     vcolors <- mcolors[vgroups]
     com$significance <- dnet::dCommSignif(net, com)
@@ -173,10 +174,10 @@ TCGAvisualize_SurvivalCoxNET <- function(
     vdegrees <- igraph::degree(net)
     ## highlight different communities
     mark.groups <- igraph::communities(com)
-    mark.col <- supraHex::visColoralpha(mcolors, alpha=0.2)
-    mark.border <- supraHex::visColoralpha(mcolors, alpha=0.2)
+    mark.col <- adjustcolor(mcolors, alpha.f = 0.2)
+    mark.border <- adjustcolor(mcolors, alpha.f = 0.2)
     edge.color <- c("#C0C0C0", "#000000")[igraph::crossing(com,net)+1]
-    edge.color <- supraHex::visColoralpha(edge.color, alpha=0.5)
+    edge.color <- adjustcolor(edge.color, alpha.f = 0.5)
     ## visualise the subnetwrok
     dnet::visNet(
         g = net,

@@ -94,7 +94,6 @@ Suggests:
     circlize,
     ConsensusClusterPlus,
     igraph,
-    supraHex,
     limma,
     edgeR,
     sva,
@@ -113,5 +112,5 @@ VignetteBuilder: knitr
 LazyData: true
 URL: https://github.com/BioinformaticsFMRP/TCGAbiolinks
 BugReports: https://github.com/BioinformaticsFMRP/TCGAbiolinks/issues
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Encoding: UTF-8

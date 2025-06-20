@@ -57,7 +57,6 @@ bioc_packages:
   - EDASeq
   - edgeR
   - biomaRt
-  - supraHex
   - ComplexHeatmap
   - SummarizedExperiment
   - TxDb.Hsapiens.UCSC.hg19.knownGene

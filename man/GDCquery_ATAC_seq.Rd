@@ -17,7 +17,7 @@ A data frame with the maf file information
 \description{
 Retrieve open access ATAC-seq files from GDC server
  https://gdc.cancer.gov/about-data/publications/ATACseq-AWG
- Manifest available at: https://gdc.cancer.gov/files/public/file/ATACseq-AWG_Open_GDC-Manifest.txt
+ Manifest available at: https://gdc.cancer.gov/system/files/public/file/ATACseq-AWG_Open_GDC-Manifest.txt
 }
 \examples{
  query <- GDCquery_ATAC_seq(file.type = "txt")

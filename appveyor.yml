@@ -27,7 +27,6 @@ build_script:
   - travis-tool.sh install_bioc edgeR
   - travis-tool.sh install_bioc biomaRt
   - travis-tool.sh install_bioc IRanges
-  - travis-tool.sh install_bioc supraHex
   - travis-tool.sh install_bioc S4Vectors
   - travis-tool.sh install_bioc ComplexHeatmap
   - travis-tool.sh install_bioc SummarizedExperiment
