@@ -1911,6 +1911,7 @@ getBarcodeInfo <- function(barcode) {
         diagnoses <- rbindlist(lapply(results$diagnoses, function(x) if(is.null(x)) data.frame(NA) else x),fill = TRUE)
         diagnoses[,c("updated_datetime","created_datetime","state","days_to_last_follow_up")] <- NULL
         if(any(grepl("submitter_id", colnames(diagnoses)))) {
+            diagnoses$diagnosis_id <- diagnoses$submitter_id 
             diagnoses$submitter_id <- gsub("-diagnosis|_diagnosis.*|-DIAG|diag-","", diagnoses$submitter_id)
         }  else {
             diagnoses$submitter_id <- submitter_id
@@ -2061,7 +2062,9 @@ getBarcodeInfo <- function(barcode) {
 
 
     if(any(substr(barcode,1,str_length(df$submitter_id)) %in% df$submitter_id)){
+        df <- df[order(df$sample_submitter_id,df$diagnosis_id),]
         df <- df[match(substr(barcode,1,str_length(df$sample_submitter_id)),df$sample_submitter_id),]
+        df$diagnosis_id <- NULL
         # This line should not exists, but some patients does not have clinical data
         # case: TCGA-R8-A6YH"
         # this has been reported to GDC, waiting answers
