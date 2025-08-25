@@ -2062,9 +2062,12 @@ getBarcodeInfo <- function(barcode) {
 
 
     if(any(substr(barcode,1,str_length(df$submitter_id)) %in% df$submitter_id)){
-        df <- df[order(df$sample_submitter_id,df$diagnosis_id),]
+        #Multiple diagnoses result in multiple rows. This sorting retains the primary diagnosis. 
+        if(is.data.frame(df)&&!is.null(df$diagnosis_id)){
+            df <- df[order(df$sample_submitter_id,df$diagnosis_id),]
+            df$diagnosis_id <- NULL
+        }
         df <- df[match(substr(barcode,1,str_length(df$sample_submitter_id)),df$sample_submitter_id),]
-        df$diagnosis_id <- NULL
         # This line should not exists, but some patients does not have clinical data
         # case: TCGA-R8-A6YH"
         # this has been reported to GDC, waiting answers
