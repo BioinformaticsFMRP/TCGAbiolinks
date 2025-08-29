@@ -1184,7 +1184,7 @@ colDataPrepare <- function(barcode){
     if(all(grepl("TARGET",barcode))) ret <- colDataPrepareTARGET(barcode)
     if(all(grepl("TCGA",barcode))) ret <- colDataPrepareTCGA(barcode)
     if(all(grepl("MMRF",barcode))) ret <- colDataPrepareMMRF(barcode)
-
+        
     # How to deal with mixed samples "C3N-02003-01;C3N-02003-021" ?
     # Check if this breaks the package
     if(any(grepl("C3N-|C3L-",barcode))) {
@@ -1193,6 +1193,9 @@ colDataPrepare <- function(barcode){
         )
     }
 
+    # Deal with BEATAML samples beginning with "aq-"
+    barcode <- ifelse(substr(barcode, 1, 3) == "aq-", substr(barcode, 4, 10), barcode) 
+                
     if(is.null(ret)) {
         ret <- data.frame(
             sample = barcode %>% unique,
