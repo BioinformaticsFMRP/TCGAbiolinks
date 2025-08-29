@@ -60,34 +60,53 @@ GDCprepare <- function(
     isServeOK()
     if(missing(query)) stop("Please set query parameter")
 
-    test.duplicated.cases <- (
-        any(
-            duplicated(query$results[[1]]$cases)) & # any duplicated
-            !(query$data.type %in% c(
-                "Clinical data",
-                "Protein expression quantification",
-                "Raw intensities",
-                "Masked Intensities",
-                "Clinical Supplement",
-                "Masked Somatic Mutation",
-                "Biospecimen Supplement"
-            )
-            )
-    )
-
-
-    if(test.duplicated.cases) {
-        dup <- query$results[[1]]$cases[duplicated(query$results[[1]]$cases)]
-        cols <- c("tags","cases","experimental_strategy","analysis_workflow_type")
-        cols <- cols[cols %in% colnames(query$results[[1]])]
-        dup <- query$results[[1]][query$results[[1]]$cases %in% dup,cols]
-        dup <- dup[order(dup$cases),]
-        print(knitr::kable(dup))
-        stop("There are samples duplicated. We will not be able to prepare it")
-    }
+    # test.duplicated.cases <- (
+    #     any(
+    #         duplicated(query$results[[1]]$cases)) & # any duplicated
+    #         !(query$data.type %in% c(
+    #             "Clinical data",
+    #             "Protein expression quantification",
+    #             "Raw intensities",
+    #             "Masked Intensities",
+    #             "Clinical Supplement",
+    #             "Masked Somatic Mutation",
+    #             "Biospecimen Supplement"
+    #         )
+    #         )
+    # )
+    #
+    #
+    # if(test.duplicated.cases) {
+    #     dup <- query$results[[1]]$cases[duplicated(query$results[[1]]$cases)]
+    #     cols <- c("tags","cases","experimental_strategy","analysis_workflow_type")
+    #     cols <- cols[cols %in% colnames(query$results[[1]])]
+    #     dup <- query$results[[1]][query$results[[1]]$cases %in% dup,cols]
+    #     dup <- dup[order(dup$cases),]
+    #     print(knitr::kable(dup))
+    #     stop("There are samples duplicated. We will not be able to prepare it")
+    # }
 
     if (!save & remove.files.prepared) {
         stop("To remove the files, please set save to TRUE. Otherwise, the data will be lost")
+    }
+
+    cases_col <- ifelse(
+        any(grepl("TCGA|TARGET|CGCI-HTMCP-CC|CPTAC-2|BEATAML1.0-COHORT",query$results[[1]]$project %>% unlist())),
+        "cases",
+        "sample.submitter_id"
+    )
+
+    tbl = query$results[[1]]
+    cases = tbl[[cases_col]]
+
+    if (any(duplicated(cases))) {
+        message("Removing duplicated cases (with older updated time)")
+        tbl2 = tbl |> dplyr::arrange(dplyr::desc(tbl$updated_datetime))
+        tbl2 = tbl2[!duplicated(tbl2[[cases_col]]), ]
+        n_dup = nrow(tbl) - nrow(tbl2)
+        query$results[[1]] = tbl2
+        cases = tbl2[[cases_col]]
+        message(" => ", n_dup, " records removed")
     }
 
     # We save the files in project/data.category/data.type/file_id/file_name
@@ -138,11 +157,6 @@ GDCprepare <- function(
         }
     }
 
-    cases <- ifelse(
-        grepl("TCGA|TARGET|CGCI-HTMCP-CC|CPTAC-2|BEATAML1.0-COHORT",query$results[[1]]$project %>% unlist()),
-        query$results[[1]]$cases,
-        query$results[[1]]$sample.submitter_id
-    )
 
     if (grepl("Transcriptome Profiling", query$data.category, ignore.case = TRUE)){
 
@@ -1187,7 +1201,7 @@ colDataPrepare <- function(barcode){
         
     # How to deal with mixed samples "C3N-02003-01;C3N-02003-021" ?
     # Check if this breaks the package
-    if(any(grepl("C3N-|C3L-",barcode))) {
+    if(any(grepl("C3N-|C3L-|CPT",barcode))) {
         ret <- data.frame(
             sample = map(barcode,.f = function(x) stringr::str_split(x,";") %>% unlist) %>% unlist()
         )
@@ -1207,15 +1221,26 @@ colDataPrepare <- function(barcode){
     # There is a limitation on the size of the string, so this step will be splited in cases of 100
     patient.info <- NULL
 
-    patient.info <- splitAPICall(
+    patient.info <- tryCatch(splitAPICall(
         FUN = getBarcodeInfo,
         step = 10,
         items = ret$sample
-    )
+        ), error = function(e) {
+        message(" => failed")
+        NULL
+    })
 
     if(!is.null(patient.info)) {
         ret$sample_submitter_id <- ret$sample %>% as.character()
         ret <- left_join(ret %>% as.data.frame, patient.info %>% unique, by = "sample_submitter_id")
+    } else {
+        return(
+            data.frame(
+                row.names = barcode,
+                barcode,
+                stringsAsFactors = FALSE
+            )
+        )
     }
     ret$bcr_patient_barcode <- ret$sample %>% as.character()
     ret$sample_submitter_id <- ret$sample %>% as.character()
