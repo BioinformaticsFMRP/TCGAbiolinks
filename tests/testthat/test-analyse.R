@@ -178,6 +178,35 @@ test_that(
     }
 )
 
+test_that("TCGAanalyze_DEA runs when column names are not full TCGA barcodes", {
+    set.seed(1)
+    mat <- matrix(
+        rnbinom(20 * 6, mu = 100, size = 10),
+        nrow = 20,
+        dimnames = list(paste0("gene", 1:20), NULL)
+    )
+    # names containing "TCGA" without barcode fields, and patient-level barcodes
+    ids <- list(
+        paste0("TCGA_sample", 1:6),
+        c("TCGA-A1-0001", "TCGA-A1-0002", "TCGA-A1-0003",
+          "TCGA-B1-0001", "TCGA-B1-0002", "TCGA-B1-0003")
+    )
+    for (i in ids) {
+        colnames(mat) <- i
+        suppressMessages({
+            dataDEGs <- TCGAanalyze_DEA(
+                mat1 = mat[, 1:3],
+                mat2 = mat[, 4:6],
+                Cond1type = "A",
+                Cond2type = "B"
+            )
+        })
+        expect_s3_class(dataDEGs, "data.frame")
+        expect_equal(nrow(dataDEGs), 20)
+        expect_error(get_IDs(mat), "full TCGA barcodes")
+    }
+})
+
 test_that("Results from TCGAanalyze_DMC are correct", {
     nrows <- 2
     ncols <- 20

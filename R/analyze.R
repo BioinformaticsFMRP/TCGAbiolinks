@@ -861,14 +861,18 @@ TCGAanalyze_DEA <- function (
         TOC <- MAT
     }
 
-    if (metadata == TRUE & all(grepl("TCGA",colnames(TOC)))){
-        my_IDs <- get_IDs(TOC)
-        Plate <- factor(my_IDs$plate)
-        Condition <- factor(my_IDs$condition)
-        TSS <- factor(my_IDs$tss)
-        Portion <- factor(my_IDs$portion)
-        Center <- factor(my_IDs$center)
-        Patients <- factor(my_IDs$patient)
+    if (metadata == TRUE) {
+        if (all(is_full_barcode(colnames(TOC)))) {
+            my_IDs <- get_IDs(TOC)
+            Plate <- factor(my_IDs$plate)
+            Condition <- factor(my_IDs$condition)
+            TSS <- factor(my_IDs$tss)
+            Portion <- factor(my_IDs$portion)
+            Center <- factor(my_IDs$center)
+            Patients <- factor(my_IDs$patient)
+        } else {
+            message("Metadata extraction skipped: column names are not full TCGA barcodes")
+        }
     }
 
 

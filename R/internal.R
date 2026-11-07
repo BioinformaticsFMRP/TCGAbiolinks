@@ -744,6 +744,19 @@ getURL <- function(URL, FUN, ..., N.TRIES=3L) {
     result
 }
 
+#' @title Check if sample names are full TCGA barcodes
+#' @description
+#'    A full TCGA barcode has 7 fields separated by '-'
+#'    (project, tss, participant, sample, portion, plate, center),
+#'    e.g. TCGA-A7-A13D-01A-13R-A12P-07. Shorter barcodes (patient or sample
+#'    level) or names that only contain the string "TCGA" do not qualify.
+#' @param x character vector of sample names
+#' @return logical vector
+#' @noRd
+is_full_barcode <- function(x) {
+    grepl("^TCGA(-[[:alnum:]]+){6}$", x)
+}
+
 #' @title Extract information from TCGA barcodes.
 #' @description
 #'    get_IDs allows user to extract metadata from barcodes. The dataframe returned has columns for
@@ -752,6 +765,15 @@ getURL <- function(URL, FUN, ..., N.TRIES=3L) {
 #' @export
 #' @return data frame with columns 'project', 'tss','participant', 'sample', "portion", "plate", "center", "condition"
 get_IDs <- function(data) {
+    barcode <- colnames(data)
+    if (is.null(barcode) || !all(is_full_barcode(barcode))) {
+        stop(
+            "get_IDs requires full TCGA barcodes as column names ",
+            "(7 fields separated by '-', e.g. TCGA-A7-A13D-01A-13R-A12P-07). ",
+            "Invalid names: ",
+            paste(head(barcode[!is_full_barcode(barcode)], 3), collapse = ", ")
+        )
+    }
     IDs <- strsplit(c(colnames(data)), "-")
     IDs <- plyr::ldply(IDs, rbind)
     colnames(IDs) <- c('project', 'tss','participant', 'sample', "portion", "plate", "center")
